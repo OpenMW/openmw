@@ -3,7 +3,12 @@
 #include <iomanip>
 
 #include <boost/lexical_cast.hpp>
+
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/records.hpp>
+#include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -15,7 +20,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "itemselection.hpp"
-#include "container.hpp"
 #include "itemwidget.hpp"
 
 #include "sortfilteritemmodel.hpp"
@@ -106,33 +110,33 @@ namespace MWGui
     {
         std::stringstream enchantCost;
         enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
-        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + boost::lexical_cast<std::string>(mEnchanting.getMaxEnchantValue()));
+        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + MyGUI::utility::toString(mEnchanting.getMaxEnchantValue()));
 
-        mCharge->setCaption(boost::lexical_cast<std::string>(mEnchanting.getGemCharge()));
+        mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
 
         std::stringstream castCost;
-        castCost << mEnchanting.getCastCost();
+        castCost << mEnchanting.getEffectiveCastCost();
         mCastCost->setCaption(castCost.str());
 
-        mPrice->setCaption(boost::lexical_cast<std::string>(mEnchanting.getEnchantPrice()));
+        mPrice->setCaption(MyGUI::utility::toString(mEnchanting.getEnchantPrice()));
 
         switch(mEnchanting.getCastStyle())
         {
             case ESM::Enchantment::CastOnce:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastOnce","Cast Once"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenStrikes:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenStrikes", "When Strikes"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::WhenUsed:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastWhenUsed", "When Used"));
-                mAddEffectDialog.constantEffect=false;
+                setConstantEffect(false);
                 break;
             case ESM::Enchantment::ConstantEffect:
                 mTypeButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sItemCastConstant", "Cast Constant"));
-                mAddEffectDialog.constantEffect=true;
+                setConstantEffect(true);
                 break;
         }
     }
@@ -283,6 +287,7 @@ namespace MWGui
     {
         mEnchanting.nextCastStyle();
         updateLabels();
+        updateEffectsView();
     }
 
     void EnchantingDialog::onBuyButtonClicked(MyGUI::Widget* sender)
@@ -334,7 +339,8 @@ namespace MWGui
             for (int i=0; i<2; ++i)
             {
                 MWWorld::Ptr item = (i == 0) ? mEnchanting.getOldItem() : mEnchanting.getGem();
-                if (Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), mPtr.getCellRef().getRefId()))
+                if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(item.getCellRef().getRefId(),
+                                                                                       mPtr.getCellRef().getRefId()))
                 {
                     std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->getString();
                     if (msg.find("%s") != std::string::npos)

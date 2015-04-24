@@ -1,6 +1,8 @@
 #include "store.hpp"
 #include "esmstore.hpp"
 
+#include <components/esm/esmreader.hpp>
+
 namespace MWWorld {
 
 void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
@@ -11,8 +13,7 @@ void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
         ESM::MovedCellRef cMRef;
         cell->getNextMVRF(esm, cMRef);
 
-        MWWorld::Store<ESM::Cell> &cStore = const_cast<MWWorld::Store<ESM::Cell>&>(mEsmStore->get<ESM::Cell>());
-        ESM::Cell *cellAlt = const_cast<ESM::Cell*>(cStore.searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
+        ESM::Cell *cellAlt = const_cast<ESM::Cell*>(searchOrCreate(cMRef.mTarget[0], cMRef.mTarget[1]));
 
         // Get regular moved reference data. Adapted from CellStore::loadRefs. Maybe we can optimize the following
         //  implementation when the oher implementation works as well.
@@ -116,6 +117,11 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
             mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
         }
     }
+}
+
+void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, const std::string &id)
+{
+    load(esm, id, esm.getIndex());
 }
 
 }

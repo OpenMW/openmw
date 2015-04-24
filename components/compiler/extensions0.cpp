@@ -192,6 +192,7 @@ namespace Compiler
             extensions.registerFunction("samefaction", 'l', "", opcodeSameFaction,
                 opcodeSameFactionExplicit);
             extensions.registerInstruction("modfactionreaction", "ccl", opcodeModFactionReaction);
+            extensions.registerInstruction("setfactionreaction", "ccl", opcodeSetFactionReaction);
             extensions.registerFunction("getfactionreaction", 'l', "ccX", opcodeGetFactionReaction);
             extensions.registerInstruction("clearinfoactor", "", opcodeClearInfoActor, opcodeClearInfoActorExplicit);
         }
@@ -214,7 +215,7 @@ namespace Compiler
             extensions.registerInstruction ("enablestatsmenu", "", opcodeEnableStatsMenu);
 
             extensions.registerInstruction ("enablerest", "", opcodeEnableRest);
-            extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableRest);
+            extensions.registerInstruction ("enablelevelupmenu", "", opcodeEnableLevelupMenu);
 
             extensions.registerInstruction ("showrestmenu", "", opcodeShowRestMenu, opcodeShowRestMenuExplicit);
 
@@ -302,6 +303,7 @@ namespace Compiler
             extensions.registerInstruction ("sv", "", opcodeShowVars, opcodeShowVarsExplicit);
             extensions.registerInstruction("tgm", "", opcodeToggleGodMode);
             extensions.registerInstruction("togglegodmode", "", opcodeToggleGodMode);
+            extensions.registerInstruction("togglescripts", "", opcodeToggleScripts);
             extensions.registerInstruction ("disablelevitation", "", opcodeDisableLevitation);
             extensions.registerInstruction ("enablelevitation", "", opcodeEnableLevitation);
             extensions.registerFunction ("getpcinjail", 'l', "", opcodeGetPcInJail);

@@ -1,0 +1,26 @@
+particle_system openmw/Ripples
+{
+    material openmw/Ripple
+    particle_width 30
+    particle_height 30
+    // To make the particles move with the scene node when the waterlevel changes
+    local_space true
+    quota 300
+    billboard_type perpendicular_common
+    common_up_vector 0 1 0
+    common_direction 0 0 1
+
+    affector ColourFader
+    {
+	alpha -0.33
+    }
+
+    affector Scaler
+    {
+        rate 120
+    }
+
+    affector Rotator
+    {
+    }
+}

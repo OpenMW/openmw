@@ -17,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -34,24 +35,24 @@
 namespace
 {
 
-    void addToLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (it->mLevel == level && itemId == it->mId)
                 return;
         }
 
-        ESM::LeveledListBase::LevelItem item;
+        ESM::LevelledListBase::LevelItem item;
         item.mId = itemId;
         item.mLevel = level;
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LeveledListBase* list, const std::string& itemId, int level)
+    void removeFromLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
         // level of -1 removes all items with that itemId
-        for (std::vector<ESM::LeveledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
         {
             if (level != -1 && it->mLevel != level)
             {
@@ -80,7 +81,7 @@ namespace MWScript
                 std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
 
-                bool allowSkipping = runtime[0].mInteger;
+                bool allowSkipping = runtime[0].mInteger != 0;
                 runtime.pop();
 
                 MWBase::Environment::get().getWindowManager()->playVideo (name, allowSkipping);
@@ -211,13 +212,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
                 }
         };
@@ -229,13 +227,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_BoundingBoxes);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
                 }
         };
@@ -246,13 +241,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context =
-                        static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled =
                         MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
 
-                    context.report (enabled ?
+                    runtime.getContext().report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
                 }
         };
@@ -262,13 +254,10 @@ namespace MWScript
         public:
             virtual void execute (Interpreter::Runtime& runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 bool enabled =
                     MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
 
-                context.report (enabled ?
+                runtime.getContext().report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
             }
         };
@@ -311,7 +300,7 @@ namespace MWScript
                     Interpreter::Type_Float time = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(alpha, time, false);
+                    MWBase::Environment::get().getWindowManager()->fadeScreenTo(static_cast<int>(alpha), time, false);
                 }
         };
 
@@ -385,17 +374,14 @@ namespace MWScript
 
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 MWBase::World *world =
                     MWBase::Environment::get().getWorld();
 
                 if (world->toggleVanityMode(sActivate)) {
-                    context.report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
+                    runtime.getContext().report(sActivate ? "Vanity Mode -> On" : "Vanity Mode -> Off");
                     sActivate = !sActivate;
                 } else {
-                    context.report("Vanity Mode -> No");
+                    runtime.getContext().report("Vanity Mode -> No");
                 }
             }
         };
@@ -861,14 +847,11 @@ namespace MWScript
 
             void printGlobalVars(Interpreter::Runtime &runtime)
             {
-                InterpreterContext& context =
-                    static_cast<InterpreterContext&> (runtime.getContext());
-
                 std::stringstream str;
                 str<< "Global variables:";
 
                 MWBase::World *world = MWBase::Environment::get().getWorld();
-                std::vector<std::string> names = context.getGlobals();
+                std::vector<std::string> names = runtime.getContext().getGlobals();
                 for(size_t i = 0;i < names.size();++i)
                 {
                     char type = world->getGlobalVariableType (names[i]);
@@ -878,17 +861,17 @@ namespace MWScript
                     {
                         case 's':
 
-                            str << context.getGlobalShort (names[i]) << " (short)";
+                            str << runtime.getContext().getGlobalShort (names[i]) << " (short)";
                             break;
 
                         case 'l':
 
-                            str << context.getGlobalLong (names[i]) << " (long)";
+                            str << runtime.getContext().getGlobalLong (names[i]) << " (long)";
                             break;
 
                         case 'f':
 
-                            str << context.getGlobalFloat (names[i]) << " (float)";
+                            str << runtime.getContext().getGlobalFloat (names[i]) << " (float)";
                             break;
 
                         default:
@@ -897,7 +880,7 @@ namespace MWScript
                     }
                 }
 
-                context.report (str.str());
+                runtime.getContext().report (str.str());
             }
 
         public:
@@ -914,16 +897,25 @@ namespace MWScript
             }
         };
 
+        class OpToggleScripts : public Interpreter::Opcode0
+        {
+        public:
+            virtual void execute (Interpreter::Runtime& runtime)
+            {
+                bool enabled = MWBase::Environment::get().getWorld()->toggleScripts();
+
+                runtime.getContext().report(enabled ? "Scripts -> On" : "Scripts -> Off");
+            }
+        };
+
         class OpToggleGodMode : public Interpreter::Opcode0
         {
             public:
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    InterpreterContext& context = static_cast<InterpreterContext&> (runtime.getContext());
-
                     bool enabled = MWBase::Environment::get().getWorld()->toggleGodMode();
 
-                    context.report (enabled ? "God Mode -> On" : "God Mode -> Off");
+                    runtime.getContext().report (enabled ? "God Mode -> On" : "God Mode -> Off");
                 }
         };
 
@@ -1007,8 +999,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    /// \todo implement jail check
-                    runtime.push (0);
+                    runtime.push (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail));
                 }
         };
 
@@ -1035,13 +1026,14 @@ namespace MWScript
 
                 msg << "Content file: ";
 
-                if (ptr.getCellRef().getRefNum().mContentFile == -1)
+                if (!ptr.getCellRef().hasContentFile())
                     msg << "[None]" << std::endl;
                 else
                 {
                     std::vector<std::string> contentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
 
                     msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
+                    msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
                 }
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
@@ -1219,6 +1211,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVars, new OpShowVars<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeShowVarsExplicit, new OpShowVars<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeToggleGodMode, new OpToggleGodMode);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleScripts, new OpToggleScripts);
             interpreter.installSegment5 (Compiler::Misc::opcodeDisableLevitation, new OpEnableLevitation<false>);
             interpreter.installSegment5 (Compiler::Misc::opcodeEnableLevitation, new OpEnableLevitation<true>);
             interpreter.installSegment5 (Compiler::Misc::opcodeCast, new OpCast<ImplicitRef>);

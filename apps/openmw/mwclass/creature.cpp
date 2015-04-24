@@ -1,6 +1,8 @@
 
 #include "creature.hpp"
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
 
@@ -103,9 +105,9 @@ namespace MWClass
             data->mCreatureStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mData.mEndurance);
             data->mCreatureStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mData.mPersonality);
             data->mCreatureStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mData.mLuck);
-            data->mCreatureStats.setHealth (ref->mBase->mData.mHealth);
-            data->mCreatureStats.setMagicka (ref->mBase->mData.mMana);
-            data->mCreatureStats.setFatigue (ref->mBase->mData.mFatigue);
+            data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
+            data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
+            data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));
 
             data->mCreatureStats.setLevel(ref->mBase->mData.mLevel);
 
@@ -139,8 +141,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr), "", -1,
-                                       MWBase::Environment::get().getWorld()->getStore());
+            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr));
 
             if (ref->mBase->mFlags & ESM::Creature::Weapon)
                 getInventoryStore(ptr).autoEquip(ptr);   
@@ -160,20 +161,19 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr, ref->mBase->mFlags & ESM::Creature::Weapon);
+        actors.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
     }
 
-    void Creature::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
         {
-            physics.addActor(ptr);
+            physics.addActor(ptr, model);
             if (getCreatureStats(ptr).isDead())
                 MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
         }
@@ -229,18 +229,7 @@ namespace MWClass
                 weapon = *weaponslot;
         }
 
-        // Reduce fatigue
-        // somewhat of a guess, but using the weapon weight makes sense
-        const float fFatigueAttackBase = gmst.find("fFatigueAttackBase")->getFloat();
-        const float fFatigueAttackMult = gmst.find("fFatigueAttackMult")->getFloat();
-        const float fWeaponFatigueMult = gmst.find("fWeaponFatigueMult")->getFloat();
-        MWMechanics::DynamicStat<float> fatigue = stats.getFatigue();
-        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
-        float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
-        if (!weapon.isEmpty())
-            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
-        fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
-        stats.setFatigue(fatigue);
+        MWMechanics::applyFatigueLoss(ptr, weapon);
 
         // TODO: where is the distance defined?
         float dist = 200.f;
@@ -262,7 +251,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
-        if((::rand()/(RAND_MAX+1.0)) > hitchance/100.0f)
+        if(OEngine::Misc::Rng::rollProbability() >= hitchance/100.0f)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -301,9 +290,7 @@ namespace MWClass
             if(attack)
             {
                 damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
-                damage *= gmst.find("fDamageStrengthBase")->getFloat() +
-                        (stats.getAttribute(ESM::Attribute::Strength).getModified() * gmst.find("fDamageStrengthMult")->getFloat() * 0.1);
-                MWMechanics::adjustWeaponDamage(damage, weapon);
+                MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
 
@@ -348,9 +335,9 @@ namespace MWClass
 
         // Self defense
         bool setOnPcHitMe = true; // Note OnPcHitMe is not set for friendly hits.
-        if ((canWalk(ptr) || canFly(ptr) || canSwim(ptr)) // No retaliation for totally static creatures
-                                                              // (they have no movement or attacks anyway)
-            && !attacker.isEmpty())
+        
+        // No retaliation for totally static creatures (they have no movement or attacks anyway)
+        if (isMobile(ptr) && !attacker.isEmpty())
         {
             setOnPcHitMe = MWBase::Environment::get().getMechanicsManager()->actorAttacked(ptr, attacker);
         }
@@ -368,7 +355,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker.getRefData().getHandle() == "player")
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -389,9 +376,8 @@ namespace MWClass
                 // Check for knockdown
                 float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
                 float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
-                        * getGmst().iKnockDownOddsMult->getInt() * 0.01 + getGmst().iKnockDownOddsBase->getInt();
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                if (ishealth && agilityTerm <= damage && knockdownTerm <= roll)
+                        * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= OEngine::Misc::Rng::roll0to99())
                 {
                     getCreatureStats(ptr).setKnockedDown(true);
 
@@ -506,7 +492,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
-        return (ref->mBase->mFlags & ESM::Creature::Weapon);
+        return (ref->mBase->mFlags & ESM::Creature::Weapon) != 0;
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
@@ -521,7 +507,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->mBase->mFlags & ESM::Creature::Essential;
+        return (ref->mBase->mFlags & ESM::Creature::Essential) != 0;
     }
 
     void Creature::registerSelf()
@@ -541,7 +527,7 @@ namespace MWClass
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         const GMST& gmst = getGmst();
 
-        float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01 * stats.getAttribute(ESM::Attribute::Speed).getModified()
+        float walkSpeed = gmst.fMinWalkSpeedCreature->getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
                 * (gmst.fMaxWalkSpeedCreature->getFloat() - gmst.fMinWalkSpeedCreature->getFloat());
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -639,7 +625,7 @@ namespace MWClass
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return stats.getAttribute(0).getModified()*5;
+        return static_cast<float>(stats.getAttribute(0).getModified() * 5);
     }
 
     float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
@@ -695,7 +681,7 @@ namespace MWClass
                 ++sound;
             }
             if(!sounds.empty())
-                return sounds[(int)(rand()/(RAND_MAX+1.0)*sounds.size())]->mSound;
+                return sounds[OEngine::Misc::Rng::rollDice(sounds.size())]->mSound;
         }
 
         if (type == ESM::SoundGenerator::Land)
@@ -726,7 +712,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
 
-        return ref->mBase->mFlags & ESM::Creature::Flies;
+        return (ref->mBase->mFlags & ESM::Creature::Flies) != 0;
     }
 
     bool Creature::canSwim(const MWWorld::Ptr &ptr) const
@@ -817,6 +803,9 @@ namespace MWClass
     void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
 
         ensureCustomData(ptr);
@@ -845,13 +834,18 @@ namespace MWClass
 
         customData.mContainerStore->readState (state2.mInventory);
         customData.mCreatureStats.readState (state2.mCreatureStats);
-
     }
 
     void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
+
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
         ensureCustomData (ptr);
 
@@ -872,7 +866,7 @@ namespace MWClass
         {
             // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
             // This also means we cannot respawn dynamically placed references with no content file connection.
-            if (ptr.getCellRef().getRefNum().mContentFile != -1)
+            if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
@@ -890,7 +884,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         const ESM::InventoryList& list = ref->mBase->mInventory;
         MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId(), "", -1);
+        store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
     int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const

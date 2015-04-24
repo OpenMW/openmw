@@ -82,6 +82,7 @@ namespace MWWorld
             boost::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
+            bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
 
             // not implemented
@@ -114,10 +115,6 @@ namespace MWWorld
             void performUpdateSceneQueries ();
             void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
 
-            float getMaxActivationDistance ();
-            float getNpcActivationDistance ();
-            float getObjectActivationDistance ();
-
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
@@ -139,12 +136,19 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
+            float mSwimHeightScale;
+            bool isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const;
+            ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
+
             bool mTeleportEnabled;
             bool mLevitationEnabled;
             bool mGoToJail;
             int mDaysInPrison;
 
             float feetToGameUnits(float feet);
+
+            MWWorld::Ptr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
+            MWWorld::Ptr getClosestMarkerFromExteriorPosition( const Ogre::Vector3 worldPos, const std::string &id );
 
         public:
 
@@ -163,10 +167,11 @@ namespace MWWorld
             virtual void clear();
 
             virtual int countSavedGameRecords() const;
+            virtual int countSavedGameCells() const;
 
             virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            virtual void readRecord (ESM::ESMReader& reader, int32_t type,
+            virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap);
 
             virtual CellStore *getExterior (int x, int y);
@@ -357,6 +362,8 @@ namespace MWWorld
             virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 
+            virtual float getMaxActivationDistance();
+
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
                 const;
             ///< Convert cell numbers to position.
@@ -454,6 +461,7 @@ namespace MWWorld
             virtual bool isSubmerged(const MWWorld::Ptr &object) const;
             virtual bool isSwimming(const MWWorld::Ptr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const;
+            virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual void togglePOV() {
@@ -532,6 +540,7 @@ namespace MWWorld
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
+            virtual void reattachPlayerCamera();
 
             /// \todo this does not belong here
             virtual void frameStarted (float dt, bool paused);
@@ -564,6 +573,9 @@ namespace MWWorld
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();
+
+            virtual bool toggleScripts();
+            virtual bool getScriptsEnabled() const;
 
             /**
              * @brief startSpellCast attempt to start casting a spell. Might fail immediately if conditions are not met.
@@ -622,7 +634,7 @@ namespace MWWorld
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos);
 
             virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, int rangeType, const std::string& id, const std::string& sourceName);
+                                       const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName);
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor);
 

@@ -28,7 +28,7 @@ namespace MWWorld
         {
             for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
                 if (!iter->mData.isDeletedByContentFile()
-                        && (iter->mRef.getRefNum().mContentFile != -1 || iter->mData.getCount() > 0)
+                        && (iter->mRef.hasContentFile() || iter->mData.getCount() > 0)
                         && iter->mRef.getRefId() == name)
                     return &*iter;
 

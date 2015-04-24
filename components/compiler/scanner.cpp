@@ -387,10 +387,9 @@ namespace Compiler
             if (get (c))
             {
                 /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c==' ')
-                    get (c);
-
-                if (c=='=')
+                if (c==' ' && !get (c))
+                    special = S_cmpEQ;
+                else if (c=='=')
                     special = S_cmpEQ;
                 else
                 {
@@ -471,10 +470,9 @@ namespace Compiler
             if (get (c))
             {
                 /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c==' ')
-                    get (c);
-
-                if (c=='=')
+                if (c==' ' && !get (c))
+                    special = S_cmpLT;
+                else if (c=='=')
                 {
                     special = S_cmpLE;
 
@@ -495,10 +493,9 @@ namespace Compiler
             if (get (c))
             {
                 /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c==' ')
-                    get (c);
-
-                if (c=='=')
+                if (c==' ' && !get (c))
+                    special = S_cmpGT;
+                else if (c=='=')
                 {
                     special = S_cmpGE;
 

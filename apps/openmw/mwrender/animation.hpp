@@ -206,6 +206,9 @@ public:
                                     Ogre::uint8 transqueue, Ogre::Real dist=0.0f,
                                     bool enchantedGlow=false, Ogre::Vector3* glowColor=NULL);
 
+    /// Returns the name of the .nif file that makes up this animation's base skeleton.
+    /// If there is no skeleton, returns "".
+    std::string getObjectRootName() const;
 
     Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node);
     virtual ~Animation();
@@ -334,6 +337,7 @@ public:
     Ogre::AxisAlignedBox getWorldBounds();
 
     Ogre::Node *getNode(const std::string &name);
+    Ogre::Node *getNode(int handle);
 
     // Attaches the given object to a bone on this object's base skeleton. If the bone doesn't
     // exist, the object isn't attached and NULL is returned. The returned TagPoint is only

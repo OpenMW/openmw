@@ -3,7 +3,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "dragrecordtable.hpp"
 
-void CSVWorld::DragRecordTable::startDrag (const CSVWorld::DragRecordTable& table)
+void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTable& table)
 {
     CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (table.getDraggedRecords(), mDocument);
 

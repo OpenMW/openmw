@@ -13,14 +13,13 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/aipackage.hpp>
 
-#include <iostream>
 #include <boost/format.hpp>
 
 std::string bodyPartLabel(int idx)
 {
     if (idx >= 0 && idx <= 26)
     {
-        const char *bodyPartLabels[] =  {
+        static const char *bodyPartLabels[] =  {
             "Head",
             "Hair",
             "Neck",
@@ -59,7 +58,7 @@ std::string meshPartLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MP_Tail)
     {
-        const char *meshPartLabels[] =  {
+        static const char *meshPartLabels[] =  {
             "Head",
             "Hair",
             "Neck",
@@ -86,7 +85,7 @@ std::string meshTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= ESM::BodyPart::MT_Armor)
     {
-        const char *meshTypeLabels[] =  {
+        static const char *meshTypeLabels[] =  {
             "Skin",
             "Clothing",
             "Armor"
@@ -101,7 +100,7 @@ std::string clothingTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 9)
     {
-        const char *clothingTypeLabels[] = {
+        static const char *clothingTypeLabels[] = {
             "Pants",
             "Shoes",
             "Shirt",
@@ -123,7 +122,7 @@ std::string armorTypeLabel(int idx)
 {    
     if (idx >= 0 && idx <= 10)
     {
-        const char *armorTypeLabels[] = {
+        static const char *armorTypeLabels[] = {
             "Helmet",
             "Cuirass",
             "Left Pauldron",
@@ -146,7 +145,7 @@ std::string dialogTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 4)
     {
-        const char *dialogTypeLabels[] = {
+        static const char *dialogTypeLabels[] = {
             "Topic",
             "Voice",
             "Greeting",
@@ -165,7 +164,7 @@ std::string questStatusLabel(int idx)
 {
     if (idx >= 0 && idx <= 4)
     {
-        const char *questStatusLabels[] = {
+        static const char *questStatusLabels[] = {
             "None",
             "Name",
             "Finished",
@@ -182,7 +181,7 @@ std::string creatureTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 3)
     {
-        const char *creatureTypeLabels[] = {
+        static const char *creatureTypeLabels[] = {
             "Creature",
             "Daedra",
             "Undead",
@@ -198,7 +197,7 @@ std::string soundTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 7)
     {
-        const char *soundTypeLabels[] = {
+        static const char *soundTypeLabels[] = {
             "Left Foot",
             "Right Foot",
             "Swim Left",
@@ -218,7 +217,7 @@ std::string weaponTypeLabel(int idx)
 {
     if (idx >= 0 && idx <= 13)
     {
-        const char *weaponTypeLabels[] = {
+        static const char *weaponTypeLabels[] = {
             "Short Blade One Hand",
             "Long Blade One Hand",
             "Long Blade Two Hand",

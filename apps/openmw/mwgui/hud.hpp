@@ -4,7 +4,11 @@
 #include "mapwindow.hpp"
 
 #include "../mwmechanics/stat.hpp"
-#include "../mwworld/ptr.hpp"
+
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWGui
 {
@@ -114,6 +118,10 @@ namespace MWGui
         void onWeaponClicked(MyGUI::Widget* _sender);
         void onMagicClicked(MyGUI::Widget* _sender);
         void onMapClicked(MyGUI::Widget* _sender);
+
+        // LocalMapBase
+        virtual void customMarkerCreated(MyGUI::Widget* marker);
+        virtual void doorMarkerCreated(MyGUI::Widget* marker);
 
         void updateEnemyHealthBar();
 

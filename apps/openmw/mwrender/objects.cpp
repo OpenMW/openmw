@@ -111,7 +111,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
                     sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
                     mStaticGeometrySmall[ptr.getCell()] = sg;
 
-                    sg->setRenderingDistance(Settings::Manager::getInt("small object distance", "Viewing distance"));
+                    sg->setRenderingDistance(static_cast<Ogre::Real>(Settings::Manager::getInt("small object distance", "Viewing distance")));
                 }
                 else
                     sg = mStaticGeometrySmall[ptr.getCell()];

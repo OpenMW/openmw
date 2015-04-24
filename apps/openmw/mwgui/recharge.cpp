@@ -1,7 +1,11 @@
 #include "recharge.hpp"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
+
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
+#include <openengine/misc/rng.hpp>
 
 #include <components/esm/records.hpp>
 
@@ -63,7 +67,7 @@ void Recharge::updateView()
     std::string soul = gem.getCellRef().getSoul();
     const ESM::Creature *creature = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
 
-    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + boost::lexical_cast<std::string>(creature->mData.mSoul));
+    mChargeLabel->setCaptionWithReplacing("#{sCharges} " + MyGUI::utility::toString(creature->mData.mSoul));
 
     bool toolBoxVisible = (gem.getRefData().getCount() != 0);
     mGemBox->setVisible(toolBoxVisible);
@@ -117,7 +121,7 @@ void Recharge::updateView()
 
         Widgets::MWDynamicStatPtr chargeWidget = mView->createWidget<Widgets::MWDynamicStat>
                 ("MW_ChargeBar", MyGUI::IntCoord(72, currentY+2, 199, 20), MyGUI::Align::Default);
-        chargeWidget->setValue(iter->getCellRef().getEnchantmentCharge(), enchantment->mData.mCharge);
+        chargeWidget->setValue(static_cast<int>(iter->getCellRef().getEnchantmentCharge()), enchantment->mData.mCharge);
         chargeWidget->setNeedMouseFocus(false);
 
         currentY += 32 + 4;
@@ -147,11 +151,11 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 
-    float luckTerm = 0.1 * stats.getAttribute(ESM::Attribute::Luck).getModified();
+    float luckTerm = 0.1f * stats.getAttribute(ESM::Attribute::Luck).getModified();
     if (luckTerm < 1|| luckTerm > 10)
         luckTerm = 1;
 
-    float intelligenceTerm = 0.2 * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
+    float intelligenceTerm = 0.2f * stats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
     if (intelligenceTerm > 20)
         intelligenceTerm = 20;
@@ -159,7 +163,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         intelligenceTerm = 1;
 
     float x = (npcStats.getSkill(ESM::Skill::Enchant).getModified() + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
-    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
+    int roll = OEngine::Misc::Rng::roll0to99();
     if (roll < x)
     {
         std::string soul = gem.getCellRef().getSoul();
@@ -195,10 +199,10 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
 
 void Recharge::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mView->getViewOffset().top + _rel*0.3 > 0)
+    if (mView->getViewOffset().top + _rel*0.3f > 0)
         mView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mView->setViewOffset(MyGUI::IntPoint(0, mView->getViewOffset().top + _rel*0.3));
+        mView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mView->getViewOffset().top + _rel*0.3f)));
 }
 
 }

@@ -379,7 +379,7 @@ public:
             return mData.back().isSet;
         }
 
-        static void setVisible(Ogre::Node *node, int vis)
+        static void setVisible(Ogre::Node *node, bool vis)
         {
             // Skinned meshes are attached to the scene node, not the bone.
             // We use the Node's user data to connect it with the mesh.
@@ -689,6 +689,14 @@ public:
  */
 class NIFObjectLoader
 {
+    static bool sShowMarkers;
+public:
+    static void setShowMarkers(bool show)
+    {
+        sShowMarkers = show;
+    }
+private:
+
     static void warn(const std::string &msg)
     {
         std::cerr << "NIFObjectLoader: Warn: " << msg << std::endl;
@@ -738,16 +746,17 @@ class NIFObjectLoader
         {
             if (ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
+                bool isAnimationAutoPlay = (animflags & Nif::NiNode::AnimFlag_AutoPlay) != 0;
                 if(ctrl->recType == Nif::RC_NiUVController)
                 {
                     const Nif::NiUVController *uv = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
 
-                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                    Ogre::ControllerValueRealPtr srcval(isAnimationAutoPlay ?
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW UVController::Value(entity, uv->data.getPtr(), &scene->mMaterialControllerMgr));
 
-                    UVController::Function* function = OGRE_NEW UVController::Function(uv, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    UVController::Function* function = OGRE_NEW UVController::Function(uv, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
 
@@ -757,13 +766,13 @@ class NIFObjectLoader
                 {
                     const Nif::NiGeomMorpherController *geom = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
 
-                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                    Ogre::ControllerValueRealPtr srcval(isAnimationAutoPlay ?
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW GeomMorpherController::Value(
                         entity, geom->data.getPtr(), geom->recIndex));
 
-                    GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    GeomMorpherController::Function* function = OGRE_NEW GeomMorpherController::Function(geom, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
 
@@ -788,7 +797,8 @@ class NIFObjectLoader
         const Nif::NiStencilProperty *stencilprop = NULL;
         node->getProperties(texprop, matprop, alphaprop, vertprop, zprop, specprop, wireprop, stencilprop);
 
-        Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+        bool isAnimationAutoPlay = (animflags & Nif::NiNode::AnimFlag_AutoPlay) != 0;
+        Ogre::ControllerValueRealPtr srcval(isAnimationAutoPlay ?
                                             Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                             Ogre::ControllerValueRealPtr());
 
@@ -799,18 +809,18 @@ class NIFObjectLoader
             {
                 if (ctrls->recType == Nif::RC_NiAlphaController)
                 {
-                    const Nif::NiAlphaController *alphaCtrl = dynamic_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
+                    const Nif::NiAlphaController *alphaCtrl = static_cast<const Nif::NiAlphaController*>(ctrls.getPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW AlphaController::Value(movable, alphaCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
-                    AlphaController::Function* function = OGRE_NEW AlphaController::Function(alphaCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    AlphaController::Function* function = OGRE_NEW AlphaController::Function(alphaCtrl, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
                     scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
                 }
                 else if (ctrls->recType == Nif::RC_NiMaterialColorController)
                 {
-                    const Nif::NiMaterialColorController *matCtrl = dynamic_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
+                    const Nif::NiMaterialColorController *matCtrl = static_cast<const Nif::NiMaterialColorController*>(ctrls.getPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW MaterialColorController::Value(movable, matCtrl->data.getPtr(), &scene->mMaterialControllerMgr));
-                    MaterialColorController::Function* function = OGRE_NEW MaterialColorController::Function(matCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    MaterialColorController::Function* function = OGRE_NEW MaterialColorController::Function(matCtrl, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
                     scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
@@ -826,12 +836,12 @@ class NIFObjectLoader
             {
                 if (ctrls->recType == Nif::RC_NiFlipController)
                 {
-                    const Nif::NiFlipController *flipCtrl = dynamic_cast<const Nif::NiFlipController*>(ctrls.getPtr());
+                    const Nif::NiFlipController *flipCtrl = static_cast<const Nif::NiFlipController*>(ctrls.getPtr());
 
 
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW FlipController::Value(
                         movable, flipCtrl, &scene->mMaterialControllerMgr));
-                    FlipController::Function* function = OGRE_NEW FlipController::Function(flipCtrl, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    FlipController::Function* function = OGRE_NEW FlipController::Function(flipCtrl, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
                     scene->mControllers.push_back(Ogre::Controller<Ogre::Real>(srcval, dstval, func));
@@ -959,7 +969,7 @@ class NIFObjectLoader
 
         partsys->setCullIndividually(false);
         partsys->setParticleQuota(particledata->numParticles);
-        partsys->setKeepParticlesInLocalSpace(partflags & (Nif::NiNode::ParticleFlag_LocalSpace));
+        partsys->setKeepParticlesInLocalSpace((partflags & Nif::NiNode::ParticleFlag_LocalSpace) != 0);
 
         int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, partnode->recIndex);
         Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
@@ -973,7 +983,10 @@ class NIFObjectLoader
             {
                 const Nif::NiParticleSystemController *partctrl = static_cast<const Nif::NiParticleSystemController*>(ctrl.getPtr());
 
-                partsys->setDefaultDimensions(partctrl->size*2, partctrl->size*2);
+                float size = partctrl->size*2;
+                // HACK: don't allow zero-sized particles which can rarely cause an AABB assertion in Ogre to fail
+                size = std::max(size, 0.00001f);
+                partsys->setDefaultDimensions(size, size);
 
                 if(!partctrl->emitter.empty())
                 {
@@ -1006,13 +1019,14 @@ class NIFObjectLoader
 
                 createParticleInitialState(partsys, particledata, partctrl);
 
-                Ogre::ControllerValueRealPtr srcval((partflags&Nif::NiNode::ParticleFlag_AutoPlay) ?
+                bool isParticleAutoPlay = (partflags&Nif::NiNode::ParticleFlag_AutoPlay) != 0;
+                Ogre::ControllerValueRealPtr srcval(isParticleAutoPlay ?
                                                     Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                     Ogre::ControllerValueRealPtr());
                 Ogre::ControllerValueRealPtr dstval(OGRE_NEW ParticleSystemController::Value(partsys, partctrl));
 
                 ParticleSystemController::Function* function =
-                        OGRE_NEW ParticleSystemController::Function(partctrl, (partflags&Nif::NiNode::ParticleFlag_AutoPlay));
+                        OGRE_NEW ParticleSystemController::Function(partctrl, isParticleAutoPlay);
                 scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                 Ogre::ControllerFunctionRealPtr func(function);
 
@@ -1021,7 +1035,7 @@ class NIFObjectLoader
                 // Emitting state will be overwritten on frame update by the ParticleSystemController,
                 // but set up an initial value anyway so the user can fast-forward particle systems
                 // immediately after creation if desired.
-                partsys->setEmitting(partflags&Nif::NiNode::ParticleFlag_AutoPlay);
+                partsys->setEmitting(isParticleAutoPlay);
             }
             ctrl = ctrl->next;
         }
@@ -1083,18 +1097,19 @@ class NIFObjectLoader
         do {
             if (ctrl->flags & Nif::NiNode::ControllerFlag_Active)
             {
+                bool isAnimationAutoPlay = (animflags & Nif::NiNode::AnimFlag_AutoPlay) != 0;
                 if(ctrl->recType == Nif::RC_NiVisController)
                 {
                     const Nif::NiVisController *vis = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
 
                     int trgtid = NIFSkeletonLoader::lookupOgreBoneHandle(name, ctrl->target->recIndex);
                     Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
-                    Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                    Ogre::ControllerValueRealPtr srcval(isAnimationAutoPlay ?
                                                         Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                         Ogre::ControllerValueRealPtr());
                     Ogre::ControllerValueRealPtr dstval(OGRE_NEW VisController::Value(trgtbone, vis->data.getPtr()));
 
-                    VisController::Function* function = OGRE_NEW VisController::Function(vis, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                    VisController::Function* function = OGRE_NEW VisController::Function(vis, isAnimationAutoPlay);
                     scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                     Ogre::ControllerFunctionRealPtr func(function);
 
@@ -1109,11 +1124,11 @@ class NIFObjectLoader
                         Ogre::Bone *trgtbone = scene->mSkelBase->getSkeleton()->getBone(trgtid);
                         // The keyframe controller will control this bone manually
                         trgtbone->setManuallyControlled(true);
-                        Ogre::ControllerValueRealPtr srcval((animflags&Nif::NiNode::AnimFlag_AutoPlay) ?
+                        Ogre::ControllerValueRealPtr srcval(isAnimationAutoPlay ?
                                                             Ogre::ControllerManager::getSingleton().getFrameTimeSource() :
                                                             Ogre::ControllerValueRealPtr());
                         Ogre::ControllerValueRealPtr dstval(OGRE_NEW KeyframeController::Value(trgtbone, nif, key->data.getPtr()));
-                        KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, (animflags&Nif::NiNode::AnimFlag_AutoPlay));
+                        KeyframeController::Function* function = OGRE_NEW KeyframeController::Function(key, isAnimationAutoPlay);
                         scene->mMaxControllerLength = std::max(function->mStopTime, scene->mMaxControllerLength);
                         Ogre::ControllerFunctionRealPtr func(function);
 
@@ -1173,11 +1188,6 @@ class NIFObjectLoader
         if(node->recType == Nif::RC_RootCollisionNode)
             isRootCollisionNode = true;
 
-        // Marker objects: just skip the entire node branch
-        /// \todo don't do this in the editor
-        if (node->name.find("marker") != std::string::npos)
-            return;
-
         if(node->recType == Nif::RC_NiBSAnimationNode)
             animflags |= node->flags;
         else if(node->recType == Nif::RC_NiBSParticleNode)
@@ -1210,7 +1220,7 @@ class NIFObjectLoader
                 const Nif::NiStringExtraData *sd = static_cast<const Nif::NiStringExtraData*>(e.getPtr());
                 // String markers may contain important information
                 // affecting the entire subtree of this obj
-                if(sd->string == "MRK")
+                if(sd->string == "MRK" && !sShowMarkers)
                 {
                     // Marker objects. These meshes are only visible in the
                     // editor.
@@ -1471,6 +1481,15 @@ void Loader::createKfControllers(Ogre::Entity *skelBase,
                                  std::vector<Ogre::Controller<Ogre::Real> > &ctrls)
 {
     NIFObjectLoader::loadKf(skelBase->getSkeleton(), name, textKeys, ctrls);
+}
+
+bool Loader::sShowMarkers = false;
+bool NIFObjectLoader::sShowMarkers = false;
+
+void Loader::setShowMarkers(bool show)
+{
+    sShowMarkers = show;
+    NIFObjectLoader::setShowMarkers(show);
 }
 
 

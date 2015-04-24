@@ -8,7 +8,7 @@ namespace MWSound
     void analyzeLoudness(const std::vector<char> &data, int sampleRate, ChannelConfig chans,
                          SampleType type, std::vector<float> &out, float valuesPerSecond)
     {
-        int samplesPerSegment = sampleRate / valuesPerSecond;
+        int samplesPerSegment = static_cast<int>(sampleRate / valuesPerSecond);
         int numSamples = bytesToFrames(data.size(), chans, type);
         int advance = framesToBytes(1, chans, type);
 

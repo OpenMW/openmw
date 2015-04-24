@@ -1,15 +1,20 @@
 #include "dialogue.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
+
+#include <MyGUI_LanguageManager.h>
+#include <MyGUI_Window.h>
+#include <MyGUI_ProgressBar.h>
 
 #include <components/widgets/list.hpp>
+#include <components/translation/translation.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 
@@ -17,12 +22,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwdialogue/dialoguemanagerimp.hpp"
-
 #include "widgets.hpp"
-#include "tradewindow.hpp"
-#include "spellbuyingwindow.hpp"
-#include "travelwindow.hpp"
 #include "bookpage.hpp"
 
 #include "journalbooks.hpp" // to_utf8_span
@@ -96,7 +96,7 @@ namespace MWGui
         mBribe100Button->setEnabled (playerGold >= 100);
         mBribe1000Button->setEnabled (playerGold >= 1000);
 
-        mGoldLabel->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+        mGoldLabel->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
     }
 
     void PersuasionDialog::exit()
@@ -177,11 +177,13 @@ namespace MWGui
         }
         else
         {
-            std::string::const_iterator i = text.begin ();
-            KeywordSearchT::Match match;
+            std::vector<KeywordSearchT::Match> matches;
+            keywordSearch->highlightKeywords(text.begin(), text.end(), matches);
 
-            while (i != text.end () && keywordSearch->search (i, text.end (), match, text.begin ()))
+            std::string::const_iterator i = text.begin ();
+            for (std::vector<KeywordSearchT::Match>::iterator it = matches.begin(); it != matches.end(); ++it)
             {
+                KeywordSearchT::Match match = *it;
                 if (i != match.mBeg)
                     addTopicLink (typesetter, 0, i - text.begin (), match.mBeg - text.begin ());
 
@@ -189,7 +191,6 @@ namespace MWGui
 
                 i = match.mEnd;
             }
-
             if (i != text.end ())
                 addTopicLink (typesetter, 0, i - text.begin (), text.size ());
         }
@@ -333,51 +334,25 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
             if (topic == gmst.find("sPersuasion")->getString())
-            {
                 mPersuasionDialog.setVisible(true);
-            }
             else if (topic == gmst.find("sCompanionShare")->getString())
-            {
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Companion);
                 MWBase::Environment::get().getWindowManager()->showCompanionWindow(mPtr);
-            }
             else if (!MWBase::Environment::get().getDialogueManager()->checkServiceRefused())
             {
                 if (topic == gmst.find("sBarter")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Barter);
-                    MWBase::Environment::get().getWindowManager()->getTradeWindow()->startTrade(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startTrade(mPtr);
                 else if (topic == gmst.find("sSpells")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellBuying);
-                    MWBase::Environment::get().getWindowManager()->getSpellBuyingWindow()->startSpellBuying(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startSpellBuying(mPtr);
                 else if (topic == gmst.find("sTravel")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Travel);
-                    MWBase::Environment::get().getWindowManager()->getTravelWindow()->startTravel(mPtr);
-                }
+                    MWBase::Environment::get().getWindowManager()->startTravel(mPtr);
                 else if (topic == gmst.find("sSpellMakingMenuTitle")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_SpellCreation);
                     MWBase::Environment::get().getWindowManager()->startSpellMaking (mPtr);
-                }
                 else if (topic == gmst.find("sEnchanting")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Enchanting);
                     MWBase::Environment::get().getWindowManager()->startEnchanting (mPtr);
-                }
                 else if (topic == gmst.find("sServiceTrainingTitle")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Training);
                     MWBase::Environment::get().getWindowManager()->startTraining (mPtr);
-                }
                 else if (topic == gmst.find("sRepair")->getString())
-                {
-                    MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_MerchantRepair);
                     MWBase::Environment::get().getWindowManager()->startRepair (mPtr);
-                }
             }
         }
     }
@@ -436,8 +411,6 @@ namespace MWGui
         bool isCompanion = !mPtr.getClass().getScript(mPtr).empty()
                 && mPtr.getRefData().getLocals().getIntVar(mPtr.getClass().getScript(mPtr), "companion");
 
-        bool anyService = mServices > 0 || isCompanion || mPtr.getTypeName() == typeid(ESM::NPC).name();
-
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
@@ -468,7 +441,7 @@ namespace MWGui
         if (isCompanion)
             mTopicsList->addItem(gmst.find("sCompanionShare")->getString());
 
-        if (anyService)
+        if (mTopicsList->getItemCount() > 0)
             mTopicsList->addSeparator();
 
 
@@ -545,7 +518,7 @@ namespace MWGui
             size_t range = book->getSize().second - viewHeight;
             mScrollBar->setScrollRange(range);
             mScrollBar->setScrollPosition(range-1);
-            mScrollBar->setTrackSize(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize());
+            mScrollBar->setTrackSize(static_cast<int>(viewHeight / static_cast<float>(book->getSize().second) * mScrollBar->getLineSize()));
             onScrollbarMoved(mScrollBar, range-1);
         }
         else
@@ -625,7 +598,7 @@ namespace MWGui
             dispositionVisible = true;
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr));
-            mDispositionText->setCaption(boost::lexical_cast<std::string>(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
+            mDispositionText->setCaption(MyGUI::utility::toString(MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(mPtr))+std::string("/100"));
         }
 
         bool dispositionWasVisible = mDispositionBar->getVisible();
@@ -633,14 +606,14 @@ namespace MWGui
         if (dispositionVisible && !dispositionWasVisible)
         {
             mDispositionBar->setVisible(true);
-            float offset = mDispositionBar->getHeight()+5;
+            int offset = mDispositionBar->getHeight()+5;
             mTopicsList->setCoord(mTopicsList->getCoord() + MyGUI::IntCoord(0,offset,0,-offset));
             mTopicsList->adjustSize();
         }
         else if (!dispositionVisible && dispositionWasVisible)
         {
             mDispositionBar->setVisible(false);
-            float offset = mDispositionBar->getHeight()+5;
+            int offset = mDispositionBar->getHeight()+5;
             mTopicsList->setCoord(mTopicsList->getCoord() - MyGUI::IntCoord(0,offset,0,-offset));
             mTopicsList->adjustSize();
         }
@@ -667,7 +640,7 @@ namespace MWGui
                     + MWBase::Environment::get().getDialogueManager()->getTemporaryDispositionChange()));
             mDispositionBar->setProgressRange(100);
             mDispositionBar->setProgressPosition(disp);
-            mDispositionText->setCaption(boost::lexical_cast<std::string>(disp)+std::string("/100"));
+            mDispositionText->setCaption(MyGUI::utility::toString(disp)+std::string("/100"));
         }
     }
 }

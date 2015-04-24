@@ -26,6 +26,11 @@ public:
         /// Data from script-precompling in the editor.
         /// \warning Do not use them. OpenCS currently does not precompile scripts.
         int mNumShorts, mNumLongs, mNumFloats, mScriptDataSize, mStringTableSize;
+    };
+    struct SCHD
+    {
+        NAME32              mName;
+        Script::SCHDstruct  mData;
     }; // 52 bytes
 
     std::string mId;
@@ -48,6 +53,9 @@ public:
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).
+
+private:
+    void loadSCVR(ESMReader &esm);
 };
 }
 #endif

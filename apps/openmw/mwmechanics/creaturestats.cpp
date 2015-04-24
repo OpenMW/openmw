@@ -42,10 +42,10 @@ namespace MWMechanics
 
     float CreatureStats::getFatigueTerm() const
     {
-        int max = getFatigue().getModified();
-        int current = getFatigue().getCurrent();
+        float max = getFatigue().getModified();
+        float current = getFatigue().getCurrent();
 
-        float normalised = max==0 ? 1 : std::max (0.0f, static_cast<float> (current)/max);
+        float normalised = floor(max) == 0 ? 1 : std::max (0.0f, current / max);
 
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -196,6 +196,8 @@ namespace MWMechanics
         if (index==0 && mDynamic[index].getCurrent()<1)
         {
             mDead = true;
+
+            mDynamic[index].setModifier(0);
             mDynamic[index].setCurrent(0);
 
             if (MWBase::Environment::get().getWorld()->getGodModeState())
@@ -334,7 +336,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude();
+        evasion += std::min(100.f, mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude());
 
         return evasion;
     }
@@ -437,7 +439,7 @@ namespace MWMechanics
 
     bool CreatureStats::getMovementFlag (Flag flag) const
     {
-        return mMovementFlags & flag;
+        return (mMovementFlags & flag) != 0;
     }
 
     void CreatureStats::setMovementFlag (Flag flag, bool state)
@@ -495,7 +497,10 @@ namespace MWMechanics
         state.mDead = mDead;
         state.mDied = mDied;
         state.mMurdered = mMurdered;
-        state.mFriendlyHits = mFriendlyHits;
+        // The vanilla engine does not store friendly hits in the save file. Since there's no other mechanism
+        // that ever resets the friendly hits (at least not to my knowledge) this should be regarded a feature
+        // rather than a bug.
+        //state.mFriendlyHits = mFriendlyHits;
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
@@ -544,7 +549,6 @@ namespace MWMechanics
         mDead = state.mDead;
         mDied = state.mDied;
         mMurdered = state.mMurdered;
-        mFriendlyHits = state.mFriendlyHits;
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;
@@ -638,7 +642,7 @@ namespace MWMechanics
         mDeathAnimation = index;
     }
 
-    std::map<int, int>& CreatureStats::getSummonedCreatureMap()
+    std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

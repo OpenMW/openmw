@@ -17,10 +17,10 @@ namespace MWClass
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const;
 
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
@@ -86,6 +86,9 @@ namespace MWClass
             virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+
+            /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
+            virtual int getEffectiveArmorRating(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const;
     };
 }
 

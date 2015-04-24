@@ -27,6 +27,10 @@
 #include "creaturestats.hpp"
 #include "security.hpp"
 
+#include <openengine/misc/rng.hpp>
+
+#include <components/settings/settings.hpp>
+
 #include "../mwrender/animation.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -110,7 +114,7 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
 
     if (fallHeight >= fallDistanceMin)
     {
-        const float acrobaticsSkill = ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics);
+        const float acrobaticsSkill = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics));
         const float jumpSpellBonus = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
         const float fallAcroBase = store.find("fFallAcroBase")->getFloat();
         const float fallAcroMult = store.find("fFallAcroMult")->getFloat();
@@ -118,7 +122,7 @@ float getFallDamage(const MWWorld::Ptr& ptr, float fallHeight)
         const float fallDistanceMult = store.find("fFallDistanceMult")->getFloat();
 
         float x = fallHeight - fallDistanceMin;
-        x -= (1.5 * acrobaticsSkill) + jumpSpellBonus;
+        x -= (1.5f * acrobaticsSkill) + jumpSpellBonus;
         x = std::max(0.0f, x);
 
         float a = fallAcroBase + fallAcroMult * (100 - acrobaticsSkill);
@@ -218,7 +222,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
         ++numAnims;
 
-    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * numAnims + 1; // [1, numAnims]
+    int roll = OEngine::Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
     return prefix + Ogre::StringConverter::toString(roll);
@@ -441,6 +445,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     }
 
     // idle handled last as it can depend on the other states
+    // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
+    // the idle animation should be displayed
     if ((mUpperBodyState != UpperCharState_Nothing
             || mMovementState != CharState_None
             || mHitState != CharState_None)
@@ -825,7 +831,7 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 3; // [0, 2]
+                int roll = OEngine::Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
                     mCurrentWeapon = "attack1";
                 else if (roll == 1)
@@ -898,7 +904,8 @@ bool CharacterController::updateWeaponState()
     }
 
     bool forcestateupdate = false;
-    if(weaptype != mWeaponType && mHitState != CharState_KnockDown)
+    if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
+                                && mHitState != CharState_Hit)
     {
         forcestateupdate = true;
 
@@ -1005,7 +1012,7 @@ bool CharacterController::updateWeaponState()
                 // For the player, set the spell we want to cast
                 // This has to be done at the start of the casting animation,
                 // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                if (mPtr.getRefData().getHandle() == "player")
+                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 {
                     std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
@@ -1089,7 +1096,7 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if(isWeapon && mPtr.getRefData().getHandle() == "player" &&
+                    if(isWeapon && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
                             Settings::Manager::getBool("best attack", "Game"))
                     {
                         MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -1120,10 +1127,10 @@ bool CharacterController::updateWeaponState()
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + std::rand() / float(RAND_MAX));
+                attackStrength = std::min(1.f, 0.1f + OEngine::Misc::Rng::rollClosedProbability());
             }
 
-            if(mAttackType != "shoot")
+            if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
@@ -1369,7 +1376,7 @@ void CharacterController::update(float duration)
 
         //Force Jump Logic
 
-        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
+        bool isMoving = (std::abs(cls.getMovementSettings(mPtr).mPosition[0]) > .5 || std::abs(cls.getMovementSettings(mPtr).mPosition[1]) > .5);
         if(!inwater && !flying)
         {
             //Force Jump
@@ -1416,7 +1423,7 @@ void CharacterController::update(float duration)
 
 
         // advance athletics
-        if(mHasMovedInXY && mPtr.getRefData().getHandle() == "player")
+        if(mHasMovedInXY && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
             if(inwater)
             {
@@ -1493,12 +1500,12 @@ void CharacterController::update(float duration)
             forcestateupdate = (mJumpState != JumpState_InAir);
             mJumpState = JumpState_InAir;
 
-            // This is a guess. All that seems to be known is that "While the player is in the
-            // air, fJumpMoveBase and fJumpMoveMult governs air control". What does fJumpMoveMult do?
             static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
-
-            vec.x *= fJumpMoveBase;
-            vec.y *= fJumpMoveBase;
+            static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
+            float factor = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics)/100.f;
+            factor = std::min(1.f, factor);
+            vec.x *= factor;
+            vec.y *= factor;
             vec.z  = 0.0f;
         }
         else if(vec.z > 0.0f && mJumpState == JumpState_None)
@@ -1516,7 +1523,7 @@ void CharacterController::update(float duration)
                 }
 
                 // advance acrobatics
-                if (mPtr.getRefData().getHandle() == "player")
+                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
                 // decrease fatigue
@@ -1526,7 +1533,7 @@ void CharacterController::update(float duration)
                 float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
                 if (normalizedEncumbrance > 1)
                     normalizedEncumbrance = 1;
-                const int fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
+                const float fatigueDecrease = fatigueJumpBase + (1 - normalizedEncumbrance) * fatigueJumpMult;
                 DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
                 fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
                 cls.getCreatureStats(mPtr).setFatigue(fatigue);
@@ -1546,12 +1553,12 @@ void CharacterController::update(float duration)
 
                 // inflict fall damages
                 DynamicStat<float> health = cls.getCreatureStats(mPtr).getHealth();
-                int realHealthLost = healthLost * (1.0f - 0.25 * fatigueTerm);
+                float realHealthLost = static_cast<float>(healthLost * (1.0f - 0.25f * fatigueTerm));
                 health.setCurrent(health.getCurrent() - realHealthLost);
                 cls.getCreatureStats(mPtr).setHealth(health);
                 cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), true);
 
-                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
+                const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
                     cls.getCreatureStats(mPtr).setKnockedDown(true);
@@ -1559,7 +1566,7 @@ void CharacterController::update(float duration)
                 else
                 {
                     // report acrobatics progression
-                    if (mPtr.getRefData().getHandle() == "player")
+                    if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
                 }
             }
@@ -1607,7 +1614,7 @@ void CharacterController::update(float duration)
 
         mTurnAnimationThreshold -= duration;
         if (movestate == CharState_TurnRight || movestate == CharState_TurnLeft)
-            mTurnAnimationThreshold = 0.05;
+            mTurnAnimationThreshold = 0.05f;
         else if (movestate == CharState_None && (mMovementState == CharState_TurnRight || mMovementState == CharState_TurnLeft)
                  && mTurnAnimationThreshold > 0)
         {
@@ -1792,7 +1799,7 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        if( mPtr.getRefData().getHandle()=="player" && !isAnimPlaying(mCurrentDeath) )
+        if( mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr() && !isAnimPlaying(mCurrentDeath) )
         {
             //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
@@ -1808,7 +1815,7 @@ bool CharacterController::kill()
     mCurrentIdle.clear();
 
     // Play Death Music if it was the player dying
-    if(mPtr.getRefData().getHandle()=="player")
+    if(mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
 
     return true;
@@ -1849,7 +1856,7 @@ void CharacterController::updateMagicEffects()
     float alpha = 1.f;
     if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude())
     {
-        if (mPtr.getRefData().getHandle() == "player")
+        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
             alpha = 0.4f;
         else
             alpha = 0.f;

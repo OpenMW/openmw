@@ -67,8 +67,8 @@ namespace MWGui
         /// returns true if their are no journal entries to display
         virtual bool isEmpty () const = 0;
 
-        /// walks the active and optionally completed, quests providing the name
-        virtual void visitQuestNames (bool active_only, boost::function <void (const std::string&)> visitor) const = 0;
+        /// walks the active and optionally completed, quests providing the name and completed status
+        virtual void visitQuestNames (bool active_only, boost::function <void (const std::string&, bool)> visitor) const = 0;
 
         /// walks over the journal entries related to all quests with the given name
         /// If \a questName is empty, simply visits all journal entries

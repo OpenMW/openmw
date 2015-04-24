@@ -17,10 +17,12 @@ namespace ESM
 
 namespace MWMechanics
 {
-    class EffectKey;
+    struct EffectKey;
     class MagicEffects;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
+
+    bool isSummoningEffect(int effectId);
 
     /**
      * @param spell spell to cast
@@ -57,6 +59,8 @@ namespace MWMechanics
     ///                being applied (but not applied yet) that should also be considered.
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
+
+    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
     class CastSpell
     {

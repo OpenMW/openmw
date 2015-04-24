@@ -1,8 +1,11 @@
 #include "waitdialog.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ProgressBar.h>
+
+#include <openengine/misc/rng.hpp>
 
 #include <components/widgets/box.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -18,6 +21,8 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwstate/charactermanager.hpp"
+
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -38,7 +43,7 @@ namespace MWGui
     {
         mProgressBar->setProgressRange (total);
         mProgressBar->setProgressPosition (cur);
-        mProgressText->setCaption(boost::lexical_cast<std::string>(cur) + "/" + boost::lexical_cast<std::string>(total));
+        mProgressText->setCaption(MyGUI::utility::toString(cur) + "/" + MyGUI::utility::toString(total));
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -46,12 +51,11 @@ namespace MWGui
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
         , mProgressBar()
-        , mWaiting(false)
+        , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
-        , mRemainingTime(0.05)
-        , mCurHour(0)
         , mManualHours(1)
+        , mFadeTimeRemaining(0)
         , mInterruptAt(-1)
     {
         getWidget(mDateTimeText, "DateTimeText");
@@ -66,6 +70,10 @@ namespace MWGui
         mUntilHealedButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onUntilHealedButtonClicked);
         mWaitButton->eventMouseButtonClick += MyGUI::newDelegate(this, &WaitDialog::onWaitButtonClicked);
         mHourSlider->eventScrollChangePosition += MyGUI::newDelegate(this, &WaitDialog::onHourSliderChangedPosition);
+
+        mTimeAdvancer.eventProgressChanged += MyGUI::newDelegate(this, &WaitDialog::onWaitingProgressChanged);
+        mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
+        mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
 
         mProgressBar.setVisible (false);
     }
@@ -98,15 +106,15 @@ namespace MWGui
         mHourSlider->setScrollPosition (0);
 
         std::string month = MWBase::Environment::get().getWorld ()->getMonthName();
-        int hour = MWBase::Environment::get().getWorld ()->getTimeStamp ().getHour ();
+        int hour = static_cast<int>(MWBase::Environment::get().getWorld()->getTimeStamp().getHour());
         bool pm = hour >= 12;
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
 
         std::string dateTimeText =
-                boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getDay ()) + " "
-                + month + " (#{sDay} " + boost::lexical_cast<std::string>(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
-                + ") " + boost::lexical_cast<std::string>(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+                MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getDay ()) + " "
+                + month + " (#{sDay} " + MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
+                + ") " + MyGUI::utility::toString(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
     }
@@ -129,12 +137,10 @@ namespace MWGui
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2f);
+        mFadeTimeRemaining = 0.4f;
         setVisible(false);
-        mProgressBar.setVisible (true);
 
-        mWaiting = true;
-        mCurHour = 0;
         mHours = hoursToWait;
 
         // FIXME: move this somewhere else?
@@ -148,10 +154,9 @@ namespace MWGui
                 const ESM::Region *region = world->getStore().get<ESM::Region>().find (regionstr);
                 if (!region->mSleepList.empty())
                 {
+                    // figure out if player will be woken while sleeping
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    int x = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * hoursToWait; // [0, hoursRested]
-                    float y = fSleepRandMod * hoursToWait;
-                    if (x > y)
+                    if (OEngine::Misc::Rng::rollProbability() > fSleepRandMod)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
                         mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);
@@ -161,8 +166,7 @@ namespace MWGui
             }
         }
 
-        mRemainingTime = 0.05;
-        mProgressBar.setProgress (0, mHours);
+        mProgressBar.setProgress (0, hoursToWait);
     }
 
     void WaitDialog::onCancelButtonClicked(MyGUI::Widget* sender)
@@ -172,8 +176,38 @@ namespace MWGui
 
     void WaitDialog::onHourSliderChangedPosition(MyGUI::ScrollBar* sender, size_t position)
     {
-        mHourText->setCaptionWithReplacing (boost::lexical_cast<std::string>(position+1) + " #{sRestMenu2}");
+        mHourText->setCaptionWithReplacing (MyGUI::utility::toString(position+1) + " #{sRestMenu2}");
         mManualHours = position+1;
+    }
+
+    void WaitDialog::onWaitingProgressChanged(int cur, int total)
+    {
+        mProgressBar.setProgress(cur, total);
+        MWBase::Environment::get().getWorld()->advanceTime(1);
+        MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
+    }
+
+    void WaitDialog::onWaitingInterrupted()
+    {
+        MWBase::Environment::get().getWindowManager()->messageBox("#{sSleepInterrupt}");
+        MWBase::Environment::get().getWorld()->spawnRandomCreature(mInterruptCreatureList);
+        stopWaiting();
+    }
+
+    void WaitDialog::onWaitingFinished()
+    {
+        stopWaiting();
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
+
+        // trigger levelup if possible
+        const MWWorld::Store<ESM::GameSetting> &gmst =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
+        {
+            MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
+        }
     }
 
     void WaitDialog::setCanRest (bool canRest)
@@ -202,62 +236,34 @@ namespace MWGui
 
     void WaitDialog::onFrame(float dt)
     {
-        if (!mWaiting)
+        mTimeAdvancer.onFrame(dt);
+
+        if (mFadeTimeRemaining <= 0)
             return;
 
-        if (mCurHour == mInterruptAt)
+        mFadeTimeRemaining -= dt;
+
+        if (mFadeTimeRemaining <= 0)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sSleepInterrupt}");
-            MWBase::Environment::get().getWorld()->spawnRandomCreature(mInterruptCreatureList);
-            stopWaiting();
-        }
-
-        mRemainingTime -= dt;
-
-        while (mRemainingTime < 0)
-        {
-            mRemainingTime += 0.05;
-            ++mCurHour;
-            mProgressBar.setProgress (mCurHour, mHours);
-
-            if (mCurHour <= mHours)
-            {
-                MWBase::Environment::get().getWorld ()->advanceTime (1);
-                MWBase::Environment::get().getMechanicsManager ()->rest (mSleeping);
-            }
-        }
-
-        if (mCurHour > mHours)
-        {
-            stopWaiting();
-
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
-
-            // trigger levelup if possible
-            const MWWorld::Store<ESM::GameSetting> &gmst =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-            if (mSleeping && pcstats.getLevelProgress () >= gmst.find("iLevelUpTotal")->getInt())
-            {
-                MWBase::Environment::get().getWindowManager()->pushGuiMode (GM_Levelup);
-            }
+            mProgressBar.setVisible(true);
+            mTimeAdvancer.run(mHours, mInterruptAt);
         }
     }
 
     void WaitDialog::stopWaiting ()
     {
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2f);
         mProgressBar.setVisible (false);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Rest);
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_RestBed);
-        mWaiting = false;
+        mTimeAdvancer.stop();
     }
 
 
     void WaitDialog::wakeUp ()
     {
         mSleeping = false;
-        mWaiting = false;
+        mTimeAdvancer.stop();
         stopWaiting();
     }
 

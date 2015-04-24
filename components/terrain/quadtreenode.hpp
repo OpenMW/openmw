@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #ifndef COMPONENTS_TERRAIN_QUADTREENODE_H
 #define COMPONENTS_TERRAIN_QUADTREENODE_H
 
@@ -74,7 +95,7 @@ namespace Terrain
 
         Ogre::SceneNode* getSceneNode() { return mSceneNode; }
 
-        int getSize() { return mSize; }
+        int getSize() { return static_cast<int>(mSize); }
         Ogre::Vector2 getCenter() { return mCenter; }
 
         bool hasChildren() { return mChildren[0] != 0; }
@@ -98,7 +119,6 @@ namespace Terrain
         DefaultWorld* getTerrain() { return mTerrain; }
 
         /// Adjust LODs for the given camera position, possibly splitting up chunks or merging them.
-        /// @param force Always choose to render this node, even if not the perfect LOD.
         /// @return Did we (or all of our children) choose to render?
         bool update (const Ogre::Vector3& cameraPos);
 
@@ -124,7 +144,6 @@ namespace Terrain
         /// call this method on their children.
         /// @note Do not call this before World::areLayersLoaded() == true
         /// @param area area in image space to put the quad
-        /// @param quads collect quads here so they can be deleted later
         void prepareForCompositeMap(Ogre::TRect<float> area);
 
         /// Create a chunk for this node from the given data.

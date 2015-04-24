@@ -2254,7 +2254,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mTools (*this), mResDir(resDir),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
-  mSaving (*this, mProjectPath, encoding),
+  mSavingOperation (*this, mProjectPath, encoding),
+  mSaving (&mSavingOperation),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
 {
     if (mContentFiles.empty())
@@ -2371,6 +2372,18 @@ CSMWorld::UniversalId CSMDoc::Document::verify()
     CSMWorld::UniversalId id = mTools.runVerifier();
     emit stateChanged (getState(), this);
     return id;
+}
+
+
+CSMWorld::UniversalId CSMDoc::Document::newSearch()
+{
+    return mTools.newSearch();
+}
+
+void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search)
+{
+    mTools.runSearch (searchId, search);
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::abortOperation (int type)

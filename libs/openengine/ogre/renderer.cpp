@@ -184,7 +184,7 @@ void OgreRenderer::setWindowGammaContrast(float gamma, float contrast)
         if (value > 65535)  value = 65535;
         else if (value < 0) value = 0;
 
-        red[i] = green[i] = blue[i] = value;
+        red[i] = green[i] = blue[i] = static_cast<Uint16>(value);
     }
     if (SDL_SetWindowGammaRamp(mSDLWindow, red, green, blue) < 0)
         std::cout << "Couldn't set gamma: " << SDL_GetError() << std::endl;

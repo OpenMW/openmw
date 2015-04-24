@@ -8,6 +8,7 @@ CSMWorld::CellRef::CellRef()
     mRefNum.mIndex = 0;
     mRefNum.mContentFile = 0;
 }
+<<<<<<< HEAD
 
 std::pair<int, int> CSMWorld::CellRef::getCellIndex() const
 {
@@ -16,3 +17,5 @@ std::pair<int, int> CSMWorld::CellRef::getCellIndex() const
     return std::make_pair (
         std::floor (mPos.pos[0]/cellSize), std::floor (mPos.pos[1]/cellSize));
 }
+=======
+>>>>>>> master

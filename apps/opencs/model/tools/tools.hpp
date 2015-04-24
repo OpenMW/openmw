@@ -5,6 +5,8 @@
 
 #include <map>
 
+#include "../doc/operationholder.hpp"
+
 namespace CSMWorld
 {
     class Data;
@@ -20,6 +22,8 @@ namespace CSMDoc
 namespace CSMTools
 {
     class ReportModel;
+    class Search;
+    class SearchOperation;
 
     class Tools : public QObject
     {
@@ -27,7 +31,10 @@ namespace CSMTools
 
             CSMDoc::Document& mDocument;
             CSMWorld::Data& mData;
-            CSMDoc::Operation *mVerifier;
+            CSMDoc::Operation *mVerifierOperation;
+            CSMDoc::OperationHolder mVerifier;
+            SearchOperation *mSearchOperation;
+            CSMDoc::OperationHolder mSearch;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -36,12 +43,12 @@ namespace CSMTools
             Tools (const Tools&);
             Tools& operator= (const Tools&);
 
-            CSMDoc::Operation *getVerifier();
+            CSMDoc::OperationHolder *getVerifier();
 
-            CSMDoc::Operation *get (int type);
+            CSMDoc::OperationHolder *get (int type);
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
-            const CSMDoc::Operation *get (int type) const;
+            const CSMDoc::OperationHolder *get (int type) const;
             ///< Returns a 0-pointer, if operation hasn't been used yet.
 
         public:
@@ -53,6 +60,11 @@ namespace CSMTools
             CSMWorld::UniversalId runVerifier();
             ///< \return ID of the report for this verification run
 
+            /// Return ID of the report for this search.
+            CSMWorld::UniversalId newSearch();
+
+            void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
+            
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 

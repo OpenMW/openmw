@@ -2,7 +2,8 @@
 
 #include <iomanip>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -65,7 +66,7 @@ void Repair::updateRepairView()
     std::stringstream qualityStr;
     qualityStr << std::setprecision(3) << quality;
 
-    mUsesLabel->setCaptionWithReplacing("#{sUses} " + boost::lexical_cast<std::string>(uses));
+    mUsesLabel->setCaptionWithReplacing("#{sUses} " + MyGUI::utility::toString(uses));
     mQualityLabel->setCaptionWithReplacing("#{sQuality} " + qualityStr.str());
 
     bool toolBoxVisible = (mRepair.getTool().getRefData().getCount() != 0);
@@ -149,10 +150,10 @@ void Repair::onRepairItem(MyGUI::Widget *sender)
 
 void Repair::onMouseWheel(MyGUI::Widget* _sender, int _rel)
 {
-    if (mRepairView->getViewOffset().top + _rel*0.3 > 0)
+    if (mRepairView->getViewOffset().top + _rel*0.3f > 0)
         mRepairView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mRepairView->setViewOffset(MyGUI::IntPoint(0, mRepairView->getViewOffset().top + _rel*0.3));
+        mRepairView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mRepairView->getViewOffset().top + _rel*0.3f)));
 }
 
 }

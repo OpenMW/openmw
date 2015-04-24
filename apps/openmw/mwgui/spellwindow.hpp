@@ -19,7 +19,7 @@ namespace MWGui
 
         void updateSpells();
 
-        void onFrame(float dt) { NoDrop::onFrame(dt); }
+        void onFrame(float dt);
 
         /// Cycle to next/previous spell
         void cycle(bool next);
@@ -33,6 +33,7 @@ namespace MWGui
         void onSpellSelected(const std::string& spellId);
         void onModelIndexSelected(SpellModel::ModelIndex index);
         void onDeleteSpellAccept();
+        void askDeleteSpell(const std::string& spellId);
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
@@ -40,6 +41,9 @@ namespace MWGui
 
         SpellView* mSpellView;
         SpellIcons* mSpellIcons;
+
+    private:
+        float mUpdateTimer;
     };
 }
 

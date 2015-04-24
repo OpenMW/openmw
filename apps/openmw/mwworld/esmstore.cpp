@@ -7,6 +7,8 @@
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <components/esm/esmreader.hpp>
+
 namespace MWWorld
 {
 
@@ -82,7 +84,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             } else if (n.val == ESM::REC_SKIL) {
                 mSkills.load (esm);
             }
-            else if (n.val==ESM::REC_FILT || ESM::REC_DBGP)
+            else if (n.val==ESM::REC_FILT || n.val == ESM::REC_DBGP)
             {
                 // ignore project file only records
                 esm.skipRecord();
@@ -122,7 +124,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 mIds[Misc::StringUtils::lowerCase (id)] = n.val;
             }
         }
-        listener->setProgress(esm.getFileOffset() / (float)esm.getFileSize() * 1000);
+        listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
     }
 }
 
@@ -161,7 +163,6 @@ void ESMStore::setUp()
         writer.writeT(mDynamicCount);
         writer.endRecord("COUN");
         writer.endRecord(ESM::REC_DYNA);
-        progress.increaseProgress();
 
         mPotions.write (writer, progress);
         mArmors.write (writer, progress);
@@ -176,7 +177,7 @@ void ESMStore::setUp()
         mCreatureLists.write (writer, progress);
     }
 
-    bool ESMStore::readRecord (ESM::ESMReader& reader, int32_t type)
+    bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
     {
         switch (type)
         {
@@ -192,7 +193,15 @@ void ESMStore::setUp()
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
 
-                mStores[type]->read (reader);
+                {
+                    std::string id = reader.getHNString ("NAME");
+                    mStores[type]->read (reader, id);
+
+                    // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
+                    // that really should be cleared instead of just overwritten
+
+                    mIds[id] = type;
+                }
 
                 if (type==ESM::REC_NPC_)
                 {

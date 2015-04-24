@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #include "terraingrid.hpp"
 
 #include <OgreSceneManager.h>
@@ -35,16 +56,16 @@ void TerrainGrid::loadCell(int x, int y)
     if (mGrid.find(std::make_pair(x, y)) != mGrid.end())
         return; // already loaded
 
-    Ogre::Vector2 center(x+0.5, y+0.5);
+    Ogre::Vector2 center(x+0.5f, y+0.5f);
     float minH, maxH;
     if (!mStorage->getMinMaxHeights(1, center, minH, maxH))
         return; // no terrain defined
 
-    Ogre::Vector3 min (-0.5*mStorage->getCellWorldSize(),
-                       -0.5*mStorage->getCellWorldSize(),
+    Ogre::Vector3 min (-0.5f*mStorage->getCellWorldSize(),
+                       -0.5f*mStorage->getCellWorldSize(),
                        minH);
-    Ogre::Vector3 max (0.5*mStorage->getCellWorldSize(),
-                       0.5*mStorage->getCellWorldSize(),
+    Ogre::Vector3 max (0.5f*mStorage->getCellWorldSize(),
+                       0.5f*mStorage->getCellWorldSize(),
                        maxH);
 
     Ogre::AxisAlignedBox bounds(min, max);
@@ -142,8 +163,8 @@ void TerrainGrid::setVisible(bool visible)
 
 Ogre::AxisAlignedBox TerrainGrid::getWorldBoundingBox (const Ogre::Vector2& center)
 {
-    int cellX = std::floor(center.x);
-    int cellY = std::floor(center.y);
+    int cellX = static_cast<int>(std::floor(center.x));
+    int cellY = static_cast<int>(std::floor(center.y));
 
     Grid::iterator it = mGrid.find(std::make_pair(cellX, cellY));
     if (it == mGrid.end())

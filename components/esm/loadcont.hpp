@@ -22,11 +22,14 @@ struct ContItem
     NAME32 mItem;
 };
 
+/// InventoryList, NPCO subrecord
 struct InventoryList
 {
     std::vector<ContItem> mList;
 
-    void load(ESMReader &esm);
+    /// Load one item, assumes subrecord name is already read
+    void add(ESMReader &esm);
+
     void save(ESMWriter &esm) const;
 };
 

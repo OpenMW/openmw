@@ -6,7 +6,7 @@
 CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : CSVDoc::SubView (id)
 {
-    setWidget (mTable = new ReportTable (document, id, this));
+    setWidget (mTable = new ReportTable (document, id, false, this));
 
     connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
         SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));

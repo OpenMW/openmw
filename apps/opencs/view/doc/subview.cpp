@@ -26,7 +26,7 @@ void CSVDoc::SubView::updateUserSetting (const QString &, const QStringList &)
 void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 {
     mUniversalId = id;
-    setWindowTitle (mUniversalId.toString().c_str());
+    setWindowTitle (QString::fromUtf8(mUniversalId.toString().c_str()));
 }
 
 void CSVDoc::SubView::closeEvent (QCloseEvent *event)

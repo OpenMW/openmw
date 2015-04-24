@@ -5,12 +5,14 @@
    This class owns and controls all the MW specific windows in the
    GUI. It can enable/disable Gui mode, and is responsible for sending
    and retrieving information from the Gui.
-
-   MyGUI should be initialized separately before creating instances of
-   this class.
 **/
 
+#include <stack>
+
 #include "../mwbase/windowmanager.hpp"
+
+#include <components/settings/settings.hpp>
+#include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
 
@@ -63,7 +65,7 @@ namespace MWGui
   class MainMenu;
   class StatsWindow;
   class InventoryWindow;
-  class JournalWindow;
+  struct JournalWindow;
   class CharacterCreation;
   class DragAndDrop;
   class ToolTips;
@@ -89,6 +91,7 @@ namespace MWGui
   class WindowModal;
   class ScreenFader;
   class DebugWindow;
+  class JailScreen;
 
   class WindowManager : public MWBase::WindowManager
   {
@@ -96,7 +99,7 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions, int fpsLevel,
+    WindowManager(const Compiler::Extensions& extensions,
                   OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
                   const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
@@ -127,6 +130,8 @@ namespace MWGui
     virtual void popGuiMode();
     virtual void removeGuiMode(GuiMode mode); ///< can be anywhere in the stack
 
+    virtual void goToJail(int days);
+
     virtual GuiMode getMode() const;
     virtual bool containsMode(GuiMode mode) const;
 
@@ -149,17 +154,14 @@ namespace MWGui
 
     /// \todo investigate, if we really need to expose every single lousy UI element to the outside world
     virtual MWGui::DialogueWindow* getDialogueWindow();
-    virtual MWGui::ContainerWindow* getContainerWindow();
     virtual MWGui::InventoryWindow* getInventoryWindow();
-    virtual MWGui::BookWindow* getBookWindow();
-    virtual MWGui::ScrollWindow* getScrollWindow();
     virtual MWGui::CountDialog* getCountDialog();
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
-    virtual MWGui::SpellBuyingWindow* getSpellBuyingWindow();
-    virtual MWGui::TravelWindow* getTravelWindow();
-    virtual MWGui::SpellWindow* getSpellWindow();
-    virtual MWGui::Console* getConsole();
+
+    virtual void updateSpellWindow();
+
+    virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
     virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
 
@@ -177,8 +179,6 @@ namespace MWGui
 
     virtual void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
     virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    virtual void setReputation (int reputation);                                   ///< set the current reputation value
-    virtual void setBounty (int bounty);                                           ///< set the current bounty value
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
@@ -238,9 +238,12 @@ namespace MWGui
     ///Gracefully attempts to exit the topmost GUI mode
     virtual void exitCurrentGuiMode();
 
-    virtual void messageBox (const std::string& message, const std::vector<std::string>& buttons = std::vector<std::string>(), enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
+    virtual void messageBox (const std::string& message, enum MWGui::ShowInDialogueMode showInDialogueMode = MWGui::ShowInDialogueMode_IfPossible);
     virtual void staticMessageBox(const std::string& message);
     virtual void removeStaticMessageBox();
+    virtual void interactiveMessageBox (const std::string& message,
+                                        const std::vector<std::string>& buttons = std::vector<std::string>(), bool block=false);
+
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
     virtual void onFrame (float frameDuration);
@@ -269,7 +272,7 @@ namespace MWGui
     virtual void enableRest() { mRestAllowed = true; }
     virtual bool getRestEnabled();
 
-    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic); }
+    virtual bool getJournalAllowed() { return (mAllowed & GW_Magic) != 0; }
 
     virtual bool getPlayerSleeping();
     virtual void wakeUpPlayer();
@@ -284,6 +287,12 @@ namespace MWGui
     virtual void startRepair(MWWorld::Ptr actor);
     virtual void startRepairItem(MWWorld::Ptr item);
     virtual void startRecharge(MWWorld::Ptr soulgem);
+    virtual void startTravel(const MWWorld::Ptr& actor);
+    virtual void startSpellBuying(const MWWorld::Ptr &actor);
+    virtual void startTrade(const MWWorld::Ptr &actor);
+    virtual void openContainer(const MWWorld::Ptr &container, bool loot);
+    virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
+    virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
     virtual void frameStarted(float dt);
 
@@ -303,15 +312,14 @@ namespace MWGui
     virtual void clear();
 
     virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress);
-    virtual void readRecord (ESM::ESMReader& reader, int32_t type);
+    virtual void readRecord (ESM::ESMReader& reader, uint32_t type);
     virtual int countSavedGameRecords() const;
 
     /// Does the current stack of GUI-windows permit saving?
     virtual bool isSavingAllowed() const;
 
-    /// Returns the current Modal
-    /** Used to send exit command to active Modal when Esc is pressed **/
-    virtual WindowModal* getCurrentModal() const;
+    /// Send exit command to active Modal window **/
+    virtual void exitCurrentModal();
 
     /// Sets the current Modal
     /** Used to send exit command to active Modal when Esc is pressed **/
@@ -400,6 +408,7 @@ namespace MWGui
     ScreenFader* mHitFader;
     ScreenFader* mScreenFader;
     DebugWindow* mDebugWindow;
+    JailScreen* mJailScreen;
 
     Translation::Storage& mTranslationDataStorage;
 
@@ -447,7 +456,6 @@ namespace MWGui
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
-    int mShowFPSLevel;
     float mFPS;
     unsigned int mTriangleCount;
     unsigned int mBatchCount;

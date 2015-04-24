@@ -8,6 +8,7 @@
 #include <OgreSceneManager.h>
 #include <OgreHardwareVertexBuffer.h>
 #include <OgreHighLevelGpuProgramManager.h>
+#include <OgreParticle.h>
 #include <OgreParticleSystem.h>
 #include <OgreEntity.h>
 #include <OgreSubEntity.h>
@@ -17,6 +18,8 @@
 #include <OgreMeshManager.h>
 
 #include <boost/lexical_cast.hpp>
+
+#include <openengine/misc/rng.hpp>
 
 #include <components/nifogre/ogrenifloader.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -104,11 +107,6 @@ BillboardObject::BillboardObject( const String& textureName,
     bodyCount++;
 }
 
-BillboardObject::BillboardObject()
-: mNode(NULL), mMaterial(NULL), mEntity(NULL), mVisibility(1.f)
-{
-}
-
 void BillboardObject::requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration)
 {
 }
@@ -191,6 +189,8 @@ Moon::Moon( const String& textureName,
 {
     setVisibility(1.0);
 
+    mMaterial->setProperty("alphatexture", sh::makeProperty(new sh::StringValue(textureName + "_alpha")));
+
     mPhase = Moon::Phase_Full;
 }
 
@@ -219,9 +219,15 @@ void Moon::setPhase(const Moon::Phase& phase)
     textureName += ".dds";
 
     if (mType == Moon::Type_Secunda)
+    {
         sh::Factory::getInstance ().setTextureAlias ("secunda_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("secunda_texture_alpha", "textures\\tx_mooncircle_full_s.dds");
+    }
     else
+    {
         sh::Factory::getInstance ().setTextureAlias ("masser_texture", textureName);
+        sh::Factory::getInstance ().setTextureAlias ("masser_texture_alpha", "textures\\tx_mooncircle_full_m.dds");
+    }
 
     mPhase = phase;
 }
@@ -306,22 +312,22 @@ void SkyManager::create()
     // Create light used for thunderstorm
     mLightning = mSceneMgr->createLight();
     mLightning->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLightning->setDirection (Ogre::Vector3(0.3, -0.7, 0.3));
+    mLightning->setDirection (Ogre::Vector3(0.3f, -0.7f, 0.3f));
     mLightning->setVisible (false);
     mLightning->setDiffuseColour (ColourValue(3,3,3));
 
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mSecunda = new Moon("secunda_texture", fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mSecunda = new Moon("secunda_texture", fallback->getFallbackFloat("Moons_Secunda_Size")/100, Vector3(-0.4f, 0.4f, 0.5f), mRootNode, "openmw_moon");
     mSecunda->setType(Moon::Type_Secunda);
     mSecunda->setRenderQueue(RQG_SkiesEarly+4);
 
-    mMasser = new Moon("masser_texture", fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4, 0.4, 0.5), mRootNode, "openmw_moon");
+    mMasser = new Moon("masser_texture", fallback->getFallbackFloat("Moons_Masser_Size")/100, Vector3(-0.4f, 0.4f, 0.5f), mRootNode, "openmw_moon");
     mMasser->setRenderQueue(RQG_SkiesEarly+3);
     mMasser->setType(Moon::Type_Masser);
 
-    mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4, 0.4, 0.4), mRootNode, "openmw_sun");
+    mSun = new BillboardObject("textures\\tx_sun_05.dds", 1, Vector3(0.4f, 0.4f, 0.4f), mRootNode, "openmw_sun");
     mSun->setRenderQueue(RQG_SkiesEarly+4);
-    mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4, 0.4, 0.4), mRootNode, "openmw_sun");
+    mSunGlare = new BillboardObject("textures\\tx_sun_flash_grey_05.dds", 3, Vector3(0.4f, 0.4f, 0.4f), mRootNode, "openmw_sun");
     mSunGlare->setRenderQueue(RQG_SkiesLate);
     mSunGlare->setVisibilityFlags(RV_NoReflection);
 
@@ -436,7 +442,10 @@ void SkyManager::updateRain(float dt)
         Ogre::Vector3 pos = it->first->getPosition();
         pos.z -= mRainSpeed * dt;
         it->first->setPosition(pos);
-        if (pos.z < -minHeight)
+        if (pos.z < -minHeight
+                // Here we might want to add a "splash" effect later
+                || MWBase::Environment::get().getWorld()->isUnderwater(
+                    MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), it->first->_getDerivedPosition()))
         {
             it->second.setNull();
             mSceneMgr->destroySceneNode(it->first);
@@ -457,12 +466,18 @@ void SkyManager::updateRain(float dt)
 
             // TODO: handle rain settings from Morrowind.ini
             const float rangeRandom = 100;
-            float xOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
-            float yOffs = (std::rand()/(RAND_MAX+1.0)) * rangeRandom - (rangeRandom/2);
+            float xOffs = OEngine::Misc::Rng::rollProbability() * rangeRandom - (rangeRandom / 2);
+            float yOffs = OEngine::Misc::Rng::rollProbability() * rangeRandom - (rangeRandom / 2);
 
             // Create a separate node to control the offset, since a node with setInheritOrientation(false) will still
             // consider the orientation of the parent node for its position, just not for its orientation
             float startHeight = 700;
+            Ogre::Vector3 worldPos = mParticleNode->_getDerivedPosition();
+            worldPos += Ogre::Vector3(xOffs, yOffs, startHeight);
+            if (MWBase::Environment::get().getWorld()->isUnderwater(
+                                        MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), worldPos))
+                return;
+
             Ogre::SceneNode* offsetNode = mParticleNode->createChildSceneNode(Ogre::Vector3(xOffs,yOffs,startHeight));
 
             // Spawn a new rain object for each instance.
@@ -494,6 +509,30 @@ void SkyManager::update(float duration)
     {
         for (unsigned int i=0; i<mParticle->mControllers.size(); ++i)
             mParticle->mControllers[i].update();
+
+        for (unsigned int i=0; i<mParticle->mParticles.size(); ++i)
+        {
+            Ogre::ParticleSystem* psys = mParticle->mParticles[i];
+            Ogre::ParticleIterator pi = psys->_getIterator();
+            while (!pi.end())
+            {
+                Ogre::Particle *p = pi.getNext();
+                #if OGRE_VERSION >= (1 << 16 | 10 << 8 | 0)
+                Ogre::Vector3 pos = p->mPosition;
+                Ogre::Real& timeToLive = p->mTimeToLive;
+                #else
+                Ogre::Vector3 pos = p->position;
+                Ogre::Real& timeToLive = p->timeToLive;
+                #endif
+
+                if (psys->getKeepParticlesInLocalSpace() && psys->getParentNode())
+                    pos = psys->getParentNode()->convertLocalToWorldPosition(pos);
+
+                if (MWBase::Environment::get().getWorld()->isUnderwater(
+                            MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), pos))
+                    timeToLive = 0;
+            }
+        }
 
         if (mIsStorm)
             mParticleNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
@@ -643,9 +682,9 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (mCloudColour != weather.mSunColor)
     {
-        ColourValue clr( weather.mSunColor.r*0.7 + weather.mAmbientColor.r*0.7,
-                        weather.mSunColor.g*0.7 + weather.mAmbientColor.g*0.7,
-                        weather.mSunColor.b*0.7 + weather.mAmbientColor.b*0.7);
+        ColourValue clr( weather.mSunColor.r*0.7f + weather.mAmbientColor.r*0.7f,
+                        weather.mSunColor.g*0.7f + weather.mAmbientColor.g*0.7f,
+                        weather.mSunColor.b*0.7f + weather.mAmbientColor.b*0.7f);
 
         sh::Factory::getInstance().setSharedParameter ("cloudColour",
             sh::makeProperty<sh::Vector3>(new sh::Vector3(clr.r, clr.g, clr.b)));
@@ -730,14 +769,14 @@ void SkyManager::setStormDirection(const Vector3 &direction)
     mStormDirection = direction;
 }
 
-void SkyManager::setSunDirection(const Vector3& direction, bool is_moon)
+void SkyManager::setSunDirection(const Vector3& direction, bool is_night)
 {
     if (!mCreated) return;
     mSun->setPosition(direction);
     mSunGlare->setPosition(direction);
 
     float height = direction.z;
-    float fade = is_moon ? 0.0 : (( height > 0.5) ? 1.0 : height * 2);
+    float fade = is_night ? 0.0f : (( height > 0.5) ? 1.0f : height * 2);
     sh::Factory::getInstance ().setSharedParameter ("waterSunFade_sunHeight", sh::makeProperty<sh::Vector2>(new sh::Vector2(fade, height)));
 }
 
@@ -799,7 +838,7 @@ void SkyManager::setSecundaFade(const float fade)
 
 void SkyManager::setHour(double hour)
 {
-    mHour = hour;
+    mHour = static_cast<float>(hour);
 }
 
 void SkyManager::setDate(int day, int month)

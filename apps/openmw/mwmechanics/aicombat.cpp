@@ -2,6 +2,8 @@
 
 #include <OgreMath.h>
 
+#include <openengine/misc/rng.hpp>
+
 #include <components/esm/aisequence.hpp>
 
 #include "../mwworld/class.hpp"
@@ -23,6 +25,7 @@
 #include "character.hpp" // fixme: for getActiveWeapon
 
 #include "aicombataction.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -57,7 +60,7 @@ namespace
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
     bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
     {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || abs(from.z - to.z) <= PATHFIND_Z_REACH)
+        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
         {
             Ogre::Vector3 dir = to - from;
             dir.z = 0;
@@ -68,7 +71,7 @@ namespace
             // cast up-down ray and find height in world space of hit
             float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
 
-            if(abs(from.z - h) <= PATHFIND_Z_REACH)
+            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
                 return true;
         }
 
@@ -206,20 +209,6 @@ namespace MWMechanics
         const MWWorld::Class& actorClass = actor.getClass();
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        if (!actorClass.isNpc() &&
-            // 1. pure water creature and Player moved out of water
-            ((target == world->getPlayerPtr() &&
-            actorClass.canSwim(actor) && !actor.getClass().canWalk(actor) && !world->isSwimming(target))
-            // 2. creature can't swim to target
-            || (!actorClass.canSwim(actor) && world->isSwimming(target))))
-        {
-            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
-            return true;
-        }
-        
-
-      
-        
 
         //Update every frame
         bool& combatMove = storage.mCombatMove;
@@ -406,7 +395,7 @@ namespace MWMechanics
                 if (!distantCombat) attackType = chooseBestAttack(weapon, movement);
                 else attackType = ESM::Weapon::AT_Chop; // cause it's =0
 
-                strength = static_cast<float>(rand()) / RAND_MAX;
+                strength = OEngine::Misc::Rng::rollClosedProbability();
 
                 // Note: may be 0 for some animations
                 timerAttack = minMaxAttackDuration[attackType][0] + 
@@ -417,8 +406,7 @@ namespace MWMechanics
                 {
                     const MWWorld::ESMStore &store = world->getStore();
                     int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
-                    int roll = std::rand()/ (static_cast<double> (RAND_MAX) + 1) * 100; // [0, 99]
-                    if (roll < chance)
+                    if (OEngine::Misc::Rng::roll0to99() < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
                     }
@@ -479,6 +467,19 @@ namespace MWMechanics
         // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
         bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
 
+        // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
+        if (distToTarget >= rangeAttack
+                && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
+        {
+            // TODO: start fleeing?
+            movement.mPosition[0] = 0;
+            movement.mPosition[1] = 0;
+            movement.mPosition[2] = 0;
+            readyToAttack = false;
+            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
+            return false;
+        }
+
         // (within attack dist) || (not quite attack dist while following)
         if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))
         {
@@ -512,17 +513,17 @@ namespace MWMechanics
             {
                 if(movement.mPosition[0] || movement.mPosition[1])
                 {
-                    timerCombatMove = 0.1f + 0.1f * static_cast<float>(rand())/RAND_MAX;
+                    timerCombatMove = 0.1f + 0.1f * OEngine::Misc::Rng::rollClosedProbability();
                     combatMove = true;
                 }
                 // only NPCs are smart enough to use dodge movements
                 else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
                 {
                     //apply sideway movement (kind of dodging) with some probability
-                    if(static_cast<float>(rand())/RAND_MAX < 0.25)
+                    if (OEngine::Misc::Rng::rollClosedProbability() < 0.25)
                     {
-                        movement.mPosition[0] = static_cast<float>(rand())/RAND_MAX < 0.5? 1: -1;
-                        timerCombatMove = 0.05f + 0.15f * static_cast<float>(rand())/RAND_MAX;
+                        movement.mPosition[0] = OEngine::Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
+                        timerCombatMove = 0.05f + 0.15f * OEngine::Misc::Rng::rollClosedProbability();
                         combatMove = true;
                     }
                 }
@@ -580,7 +581,7 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkWaypoint(pos.pos[0],pos.pos[1],pos.pos[2]);
+                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1]);
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)
@@ -588,7 +589,7 @@ namespace MWMechanics
                     // get point just before target
                     std::list<ESM::Pathgrid::Point>::const_iterator pntIter = --mPathFinder.getPath().end();
                     --pntIter;
-                    Ogre::Vector3 vBeforeTarget = Ogre::Vector3(pntIter->mX, pntIter->mY, pntIter->mZ);
+                    Ogre::Vector3 vBeforeTarget(PathFinder::MakeOgreVector3(*pntIter));
 
                     // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
@@ -637,7 +638,7 @@ namespace MWMechanics
                 float s2 = speed2 * t;
                 float t_swing = 
                     minMaxAttackDuration[ESM::Weapon::AT_Thrust][0] + 
-                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * static_cast<float>(rand()) / RAND_MAX;
+                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * OEngine::Misc::Rng::rollClosedProbability();
 
                 if (t + s2/speed1 <= t_swing)
                 {
@@ -685,27 +686,21 @@ namespace MWMechanics
         if(!mPathFinder.getPath().empty())
         {
             ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-            Ogre::Vector3 currPathTarget(lastPt.mX, lastPt.mY, lastPt.mZ);
+            Ogre::Vector3 currPathTarget(PathFinder::MakeOgreVector3(lastPt));
             dist = (newPathTarget - currPathTarget).length();
         }
         else dist = 1e+38F; // necessarily construct a new path
 
-        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300 : 100;
+        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300.0f : 100.0f;
 
         //construct new path only if target has moved away more than on [targetPosThreshold]
         if(dist > targetPosThreshold)
         {
             ESM::Position pos = actor.getRefData().getPosition();
 
-            ESM::Pathgrid::Point start;
-            start.mX = pos.pos[0];
-            start.mY = pos.pos[1];
-            start.mZ = pos.pos[2];
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
-            ESM::Pathgrid::Point dest;
-            dest.mX = newPathTarget.x;
-            dest.mY = newPathTarget.y;
-            dest.mZ = newPathTarget.z;
+            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(newPathTarget));
 
             if(!mPathFinder.isPathConstructed())
                 mPathFinder.buildPath(start, dest, actor.getCell(), false);
@@ -767,10 +762,10 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
     if (weapon == NULL)
     {
         //hand-to-hand deal equal damage for each type
-        float roll = static_cast<float>(rand())/RAND_MAX;
+        float roll = OEngine::Misc::Rng::rollClosedProbability();
         if(roll <= 0.333f)  //side punch
         {
-            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+            movement.mPosition[0] = OEngine::Misc::Rng::rollClosedProbability() ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
@@ -792,16 +787,16 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
         int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
 
-        float total = slash + chop + thrust;
+        float total = static_cast<float>(slash + chop + thrust);
 
-        float roll = static_cast<float>(rand())/RAND_MAX;
-        if(roll <= static_cast<float>(slash)/total)
+        float roll = OEngine::Misc::Rng::rollClosedProbability();
+        if(roll <= (slash/total))
         {
-            movement.mPosition[0] = (static_cast<float>(rand())/RAND_MAX < 0.5f)? 1: -1;
+            movement.mPosition[0] = (OEngine::Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
-        else if(roll <= (static_cast<float>(slash) + static_cast<float>(thrust))/total)
+        else if(roll <= (slash + (thrust/total)))
         {
             movement.mPosition[1] = 1;
             attackType = ESM::Weapon::AT_Thrust;

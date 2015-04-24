@@ -44,16 +44,16 @@ public:
         int verts = nif->getUShort();
 
         if(nif->getInt())
-            vertices = nif->getItems<Ogre::Vector3>(verts);
+            nif->getVector3s(vertices, verts);
 
         if(nif->getInt())
-            normals = nif->getItems<Ogre::Vector3>(verts);
+            nif->getVector3s(normals, verts);
 
         center = nif->getVector3();
         radius = nif->getFloat();
 
         if(nif->getInt())
-            colors = nif->getItems<Ogre::Vector4>(verts);
+            nif->getVector4s(colors, verts);
 
         // Only the first 6 bits are used as a count. I think the rest are
         // flags of some sort.
@@ -64,7 +64,7 @@ public:
         {
             uvlist.resize(uvs);
             for(int i = 0;i < uvs;i++)
-                uvlist[i] = nif->getItems<Ogre::Vector2>(verts);
+                nif->getVector2s(uvlist[i], verts);
         }
     }
 };
@@ -84,7 +84,7 @@ public:
         // We have three times as many vertices as triangles, so this
         // is always equal to tris*3.
         int cnt = nif->getInt();
-        triangles = nif->getItems<short>(cnt);
+        nif->getShorts(triangles, cnt);
 
         // Read the match list, which lists the vertices that are equal to
         // vertices. We don't actually need need this for anything, so
@@ -123,7 +123,7 @@ public:
         if(nif->getInt())
         {
             // Particle sizes
-            sizes = nif->getItems<float>(vertices.size());
+            nif->getFloats(sizes, vertices.size());
         }
     }
 };
@@ -140,7 +140,7 @@ public:
         if(nif->getInt())
         {
             // Rotation quaternions.
-            rotations = nif->getItems<Ogre::Quaternion>(vertices.size());
+            nif->getQuaternions(rotations, vertices.size());
         }
     }
 };
@@ -234,7 +234,7 @@ class NiVisData : public Record
 public:
     struct VisData {
         float time;
-        char isSet;
+        bool isSet;
     };
     std::vector<VisData> mVis;
 
@@ -245,7 +245,7 @@ public:
         for(size_t i = 0;i < mVis.size();i++)
         {
             mVis[i].time = nif->getFloat();
-            mVis[i].isSet = nif->getChar();
+            mVis[i].isSet = nif->getChar() != 0;
         }
     }
 };
@@ -341,7 +341,7 @@ struct NiMorphData : public Record
         for(int i = 0;i < morphCount;i++)
         {
             mMorphs[i].mData.read(nif, true);
-            mMorphs[i].mVertices = nif->getItems<Ogre::Vector3>(vertCount);
+            nif->getVector3s(mMorphs[i].mVertices, vertCount);
         }
     }
 };

@@ -72,8 +72,10 @@ namespace MWMechanics
     // Used by effect management classes (ActiveSpells, InventoryStore, Spells) to list active effect sources for GUI display
     struct EffectSourceVisitor
     {
+        virtual ~EffectSourceVisitor() { }
+
         virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, int casterActorId,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1) = 0;
     };
 

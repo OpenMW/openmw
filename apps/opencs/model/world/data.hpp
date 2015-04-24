@@ -25,6 +25,7 @@
 #include <components/esm/loadbody.hpp>
 #include <components/esm/loadsndg.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/esm/loadsscr.hpp>
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
@@ -33,6 +34,7 @@
 #include "../doc/stage.hpp"
 
 #include "idcollection.hpp"
+#include "nestedidcollection.hpp"
 #include "universalid.hpp"
 #include "cell.hpp"
 #include "land.hpp"
@@ -40,8 +42,11 @@
 #include "refidcollection.hpp"
 #include "refcollection.hpp"
 #include "infocollection.hpp"
+#include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
+#ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
+#endif
 
 class QAbstractItemModel;
 
@@ -65,22 +70,23 @@ namespace CSMWorld
             IdCollection<ESM::GameSetting> mGmsts;
             IdCollection<ESM::Skill> mSkills;
             IdCollection<ESM::Class> mClasses;
-            IdCollection<ESM::Faction> mFactions;
-            IdCollection<ESM::Race> mRaces;
+            NestedIdCollection<ESM::Faction> mFactions;
+            NestedIdCollection<ESM::Race> mRaces;
             IdCollection<ESM::Sound> mSounds;
             IdCollection<ESM::Script> mScripts;
-            IdCollection<ESM::Region> mRegions;
-            IdCollection<ESM::BirthSign> mBirthsigns;
-            IdCollection<ESM::Spell> mSpells;
+            NestedIdCollection<ESM::Region> mRegions;
+            NestedIdCollection<ESM::BirthSign> mBirthsigns;
+            NestedIdCollection<ESM::Spell> mSpells;
             IdCollection<ESM::Dialogue> mTopics;
             IdCollection<ESM::Dialogue> mJournals;
-            IdCollection<ESM::Enchantment> mEnchantments;
+            NestedIdCollection<ESM::Enchantment> mEnchantments;
             IdCollection<ESM::BodyPart> mBodyParts;
             IdCollection<ESM::MagicEffect> mMagicEffects;
             SubCellCollection<Pathgrid> mPathgrids;
             IdCollection<ESM::DebugProfile> mDebugProfiles;
             IdCollection<ESM::SoundGenerator> mSoundGens;
-            InfoCollection mTopicInfos;
+            IdCollection<ESM::StartScript> mStartScripts;
+            NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
             IdCollection<Cell> mCells;
             IdCollection<LandTexture> mLandTextures;
@@ -224,6 +230,10 @@ namespace CSMWorld
             const SubCellCollection<Pathgrid>& getPathgrids() const;
 
             SubCellCollection<Pathgrid>& getPathgrids();
+
+            const IdCollection<ESM::StartScript>& getStartScripts() const;
+
+            IdCollection<ESM::StartScript>& getStartScripts();
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;

@@ -2,10 +2,8 @@
 #define GAME_MWBASE_SOUNDMANAGER_H
 
 #include <string>
-
+#include <set>
 #include <boost/shared_ptr.hpp>
-
-#include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -22,7 +20,7 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
-    class Sound_Decoder;
+    struct Sound_Decoder;
     typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
@@ -74,7 +72,7 @@ namespace MWBase
 
             virtual ~SoundManager() {}
 
-            virtual void processChangedSettings(const Settings::CategorySettingVector& settings) = 0;
+            virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual void stopMusic() = 0;
             ///< Stops music if it's playing

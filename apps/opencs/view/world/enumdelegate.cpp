@@ -21,7 +21,9 @@ void CSVWorld::EnumDelegate::setModelDataImp (QWidget *editor, QAbstractItemMode
             iter!=mValues.end(); ++iter)
             if (iter->second==value)
             {
-                addCommands (model, index, iter->first);
+                // do nothing if the value has not changed
+                if (model->data(index).toInt() != iter->first)
+                    addCommands (model, index, iter->first);
                 break;
             }
     }
@@ -46,7 +48,6 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent,
                                               const QModelIndex& index) const
 {
     return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_None);
-    //overloading virtual functions is HARD
 }
 
 QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem& option,

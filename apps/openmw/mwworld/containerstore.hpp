@@ -18,6 +18,7 @@
 #include <components/esm/loadweap.hpp>
 
 #include "ptr.hpp"
+#include "cellreflist.hpp"
 
 namespace ESM
 {
@@ -74,7 +75,7 @@ namespace MWWorld
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank, int count, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -84,16 +85,13 @@ namespace MWWorld
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
             template<typename T>
-            void storeStates (const CellRefList<T>& collection,
-                std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states,
+            void storeStates (CellRefList<T>& collection,
+                ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
-            virtual int getSlot (const MWWorld::LiveCellRefBase& ref) const;
-            ///< Return inventory slot that \a ref is in or -1 (if \a ref is not in a slot).
+            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
-            virtual void setSlot (const MWWorld::ContainerStoreIterator& iter, int slot);
-            ///< Set slot for \a iter. Ignored if \a iter is an end iterator or if slot==-1.
-
+            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
         public:
 
             ContainerStore();
@@ -114,7 +112,7 @@ namespace MWWorld
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
             ///
-            /// @param setOwner Set the owner of the added item to \a actorPtr?
+            /// @param setOwner Set the owner of the added item to \a actorPtr? If false, the owner is reset to "".
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -153,10 +151,10 @@ namespace MWWorld
             virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store);
+            void fill (const ESM::InventoryList& items, const std::string& owner);
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank);
+            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);
 
             virtual void clear();
             ///< Empty container.
@@ -170,7 +168,8 @@ namespace MWWorld
 
             Ptr search (const std::string& id);
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            /// \todo make this method const once const-correct ContainerStoreIterators are available
+            virtual void writeState (ESM::InventoryState& state);
 
             virtual void readState (const ESM::InventoryState& state);
 

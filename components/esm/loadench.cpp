@@ -10,8 +10,28 @@ namespace ESM
 
 void Enchantment::load(ESMReader &esm)
 {
-    esm.getHNT(mData, "ENDT", 16);
-    mEffects.load(esm);
+    mEffects.mList.clear();
+    bool hasData = false;
+    while (esm.hasMoreSubs())
+    {
+        esm.getSubName();
+        uint32_t name = esm.retSubName().val;
+        switch (name)
+        {
+            case ESM::FourCC<'E','N','D','T'>::value:
+                esm.getHT(mData, 16);
+                hasData = true;
+                break;
+            case ESM::FourCC<'E','N','A','M'>::value:
+                mEffects.add(esm);
+                break;
+            default:
+                esm.fail("Unknown subrecord");
+                break;
+        }
+    }
+    if (!hasData)
+        esm.fail("Missing ENDT subrecord");
 }
 
 void Enchantment::save(ESMWriter &esm) const

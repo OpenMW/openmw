@@ -7,8 +7,6 @@
 
 namespace CSMWorld
 {
-    class Cell;
-
     /// \brief Wrapper for CellRef sub record
     struct CellRef : public ESM::CellRef
     {

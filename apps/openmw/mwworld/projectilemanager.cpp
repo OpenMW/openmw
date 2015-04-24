@@ -9,6 +9,7 @@
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwbase/soundmanager.hpp"
@@ -44,7 +45,7 @@ namespace MWWorld
                 state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
         }
 
-        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Misc,
+        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Effects,
                             MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
     }
 
@@ -67,7 +68,7 @@ namespace MWWorld
     {
         float height = 0;
         if (OEngine::Physic::PhysicActor* actor = mPhysEngine.getCharacter(caster.getRefData().getHandle()))
-            height = actor->getHalfExtents().z * 2 * 0.75;         // Spawn at 0.75 * ActorHeight
+            height = actor->getHalfExtents().z * 2 * 0.75f;         // Spawn at 0.75 * ActorHeight
 
         Ogre::Vector3 pos(caster.getRefData().getPosition().pos);
         pos.z += height;
@@ -318,8 +319,6 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_PROJ);
-
-            progress.increaseProgress();
         }
 
         for (std::vector<MagicBoltState>::const_iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
@@ -342,12 +341,10 @@ namespace MWWorld
             state.save(writer);
 
             writer.endRecord(ESM::REC_MPRJ);
-
-            progress.increaseProgress();
         }
     }
 
-    bool ProjectileManager::readRecord(ESM::ESMReader &reader, int32_t type)
+    bool ProjectileManager::readRecord(ESM::ESMReader &reader, uint32_t type)
     {
         if (type == ESM::REC_PROJ)
         {

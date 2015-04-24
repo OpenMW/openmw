@@ -3,7 +3,10 @@
 
 #include "windowbase.hpp"
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWGui
 {

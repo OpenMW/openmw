@@ -7,6 +7,7 @@ set(GAME
 )
 
 if (ANDROID)
+    set(GAME ${GAME} android_commandLine.cpp)
     set(GAME ${GAME} android_main.c)
 endif()
 
@@ -41,6 +42,7 @@ add_openmw_dir (mwgui
     itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
+    draganddrop timeadvancer jailscreen
     )
 
 add_openmw_dir (mwdialogue
@@ -76,7 +78,7 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
-    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor
+    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
     )
 
 add_openmw_dir (mwstate
@@ -103,7 +105,6 @@ find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 if (NOT ANDROID)
     add_executable(openmw
-        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}
@@ -111,7 +112,6 @@ if (NOT ANDROID)
 else ()
     add_library(openmw
         SHARED
-        ${OPENMW_LIBS} ${OPENMW_LIBS_HEADER}
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
     )
@@ -119,9 +119,10 @@ endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES} ${BULLET_INCLUDE_DIRS})
+include_directories(${SOUND_INPUT_INCLUDES})
 
 target_link_libraries(openmw
+    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}

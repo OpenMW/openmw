@@ -12,7 +12,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-
+#include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "interpretercontext.hpp"
@@ -231,6 +231,8 @@ namespace MWScript
                 new OpShowDialogue (MWGui::GM_Race));
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableStatsReviewMenu,
                 new OpShowDialogue (MWGui::GM_Review));
+            interpreter.installSegment5 (Compiler::Gui::opcodeEnableLevelupMenu,
+                new OpShowDialogue (MWGui::GM_Levelup));
 
             interpreter.installSegment5 (Compiler::Gui::opcodeEnableInventoryMenu,
                 new OpEnableWindow (MWGui::GW_Inventory));

@@ -1,9 +1,9 @@
 #include "spellicons.hpp"
 
-#include <boost/lexical_cast.hpp>
-
 #include <sstream>
 #include <iomanip>
+
+#include <MyGUI_ImageBox.h>
 
 #include <components/esm/loadmgef.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -25,12 +25,12 @@ namespace MWGui
 {
 
     void EffectSourceVisitor::visit (MWMechanics::EffectKey key,
-                                           const std::string& sourceName, int casterActorId,
+                                           const std::string& sourceName, const std::string& sourceId, int casterActorId,
                                      float magnitude, float remainingTime, float totalTime)
     {
         MagicEffectInfo newEffectSource;
         newEffectSource.mKey = key;
-        newEffectSource.mMagnitude = magnitude;
+        newEffectSource.mMagnitude = static_cast<int>(magnitude);
         newEffectSource.mPermanent = mIsPermanent;
         newEffectSource.mRemainingTime = remainingTime;
         newEffectSource.mSource = sourceName;
@@ -115,7 +115,7 @@ namespace MWGui
                 }
                 else if ( displayType != ESM::MagicEffect::MDT_None )
                 {
-                    sourcesDescription += ": " + boost::lexical_cast<std::string>(effectIt->mMagnitude);
+                    sourcesDescription += ": " + MyGUI::utility::toString(effectIt->mMagnitude);
 
                     if ( displayType == ESM::MagicEffect::MDT_Percentage )
                         sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString("spercent", "");

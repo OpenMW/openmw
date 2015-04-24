@@ -21,7 +21,7 @@ namespace Loading
 
 namespace MWWorld
 {
-    struct ESMStore;
+    class ESMStore;
 }
 
 namespace MWScript
@@ -62,7 +62,7 @@ namespace MWScript
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, int32_t type);
+            bool readRecord (ESM::ESMReader& reader, uint32_t type);
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?

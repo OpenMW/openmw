@@ -6,9 +6,10 @@
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
 QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
                                               <b>Version:</b> %2<br/> \
-                                              <b>Path:</b><br/>%3<br/> \
-                                              <br/><b>Description:</b><br/>%4<br/> \
-                                              <br/><b>Dependencies: </b>%5<br/>");
+                                              <b>Modified:</b> %3<br/> \
+                                              <b>Path:</b><br/>%4<br/> \
+                                              <br/><b>Description:</b><br/>%5<br/> \
+                                              <br/><b>Dependencies: </b>%6<br/>");
 
 
 ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
@@ -60,6 +61,13 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
            << mGameFiles;
 
     return encodedData;
+}
+
+bool ContentSelectorModel::EsmFile::isGameFile() const
+{ 
+    return (mGameFiles.size() == 0) &&
+        (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive) || 
+        mFileName.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive));
 }
 
 QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) const

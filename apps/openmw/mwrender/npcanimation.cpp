@@ -12,6 +12,10 @@
 
 #include <extern/shiny/Main/Factory.hpp>
 
+#include <openengine/misc/rng.hpp>
+
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -99,7 +103,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2 + (std::rand() / double(RAND_MAX*1.0)) * 6);
+    mBlinkTimer = -(2.0f + OEngine::Misc::Rng::rollDice(6));
 }
 
 void HeadAnimationTime::update(float dt)
@@ -261,17 +265,27 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        if (isVampire)
+        mHeadModel = "";
+        if (isVampire) // FIXME: fall back to regular head when getVampireHead fails?
             mHeadModel = getVampireHead(mNpc->mRace, mNpc->mFlags & ESM::NPC::Female);
         else if (!mNpc->mHead.empty())
-            mHeadModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHead)->mModel;
-        else
-            mHeadModel = "";
+        {
+            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHead);
+            if (bp)
+                mHeadModel = "meshes\\" + bp->mModel;
+            else
+                std::cerr << "Failed to load body part '" << mNpc->mHead << "'" << std::endl;
+        }
 
+        mHairModel = "";
         if (!mNpc->mHair.empty())
-            mHairModel = "meshes\\" + store.get<ESM::BodyPart>().find(mNpc->mHair)->mModel;
-        else
-            mHairModel = "";
+        {
+            const ESM::BodyPart* bp = store.get<ESM::BodyPart>().search(mNpc->mHair);
+            if (bp)
+                mHairModel = "meshes\\" + bp->mModel;
+            else
+                std::cerr << "Failed to load body part '" << mNpc->mHair << "'" << std::endl;
+        }
     }
 
     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
@@ -282,6 +296,7 @@ void NpcAnimation::updateNpcBase()
                          (!isWerewolf ? !isBeast ? "meshes\\base_anim.1st.nif"
                                                  : "meshes\\base_animkna.1st.nif"
                                       : "meshes\\wolf\\skin.1st.nif");
+    smodel = Misc::ResourceHelpers::correctActorModelPath(smodel);
     setObjectRoot(smodel, true);
 
     if(mViewMode != VM_FirstPerson)
@@ -290,11 +305,11 @@ void NpcAnimation::updateNpcBase()
         if(!isWerewolf)
         {
             if(Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
-                addAnimSource("meshes\\argonian_swimkna.nif");
+                addAnimSource("meshes\\xargonian_swimkna.nif");
             else if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\base_anim_female.nif");
+                addAnimSource("meshes\\xbase_anim_female.nif");
             if(mNpc->mModel.length() > 0)
-                addAnimSource("meshes\\"+mNpc->mModel);
+                addAnimSource("meshes\\x"+mNpc->mModel);
         }
     }
     else
@@ -306,11 +321,11 @@ void NpcAnimation::updateNpcBase()
             /* A bit counter-intuitive, but unlike third-person anims, it seems
              * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
              */
-            addAnimSource("meshes\\base_anim.1st.nif");
+            addAnimSource("meshes\\xbase_anim.1st.nif");
             if(isBeast)
-                addAnimSource("meshes\\base_animkna.1st.nif");
+                addAnimSource("meshes\\xbase_animkna.1st.nif");
             if(!mNpc->isMale() && !isBeast)
-                addAnimSource("meshes\\base_anim_female.1st.nif");
+                addAnimSource("meshes\\xbase_anim_female.1st.nif");
         }
     }
 
@@ -322,7 +337,10 @@ void NpcAnimation::updateNpcBase()
 }
 
 void NpcAnimation::updateParts()
-{    
+{
+    if (!mSkelBase)
+        return;
+
     mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
 
@@ -361,7 +379,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get());
+    bool wasArrowAttached = (mAmmunition.get() != NULL);
 
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
@@ -608,30 +626,33 @@ NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model
 }
 
 Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
-{
+{    
     Ogre::Vector3 ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
 
-    Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-    if(mViewMode == VM_FirstPerson)
+    if (mSkelBase)
     {
-        float pitch = mPtr.getRefData().getPosition().rot[0];
-        Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-        node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
+        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
+        if(mViewMode == VM_FirstPerson)
+        {
+            float pitch = mPtr.getRefData().getPosition().rot[0];
+            Ogre::Node *node = baseinst->getBone("Bip01 Neck");
+            node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
 
-        // This has to be done before this function ends;
-        // updateSkeletonInstance, below, touches the hands.
-        node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
-    }
-    else
-    {
-        // In third person mode we may still need pitch for ranged weapon targeting
-        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
+            // This has to be done before this function ends;
+            // updateSkeletonInstance, below, touches the hands.
+            node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
+        }
+        else
+        {
+            // In third person mode we may still need pitch for ranged weapon targeting
+            pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
 
-        Ogre::Node* node = baseinst->getBone("Bip01 Head");
-        if (node)
-            node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
+            Ogre::Node* node = baseinst->getBone("Bip01 Head");
+            if (node)
+                node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
+        }
     }
     mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
@@ -646,7 +667,9 @@ Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
         if (!isSkinned(mObjectParts[i]))
             continue;
 
-        updateSkeletonInstance(baseinst, mObjectParts[i]->mSkelBase->getSkeleton());
+        if (mSkelBase)
+            updateSkeletonInstance(mSkelBase->getSkeleton(), mObjectParts[i]->mSkelBase->getSkeleton());
+
         mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
     }
 
@@ -798,6 +821,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
                     bodypart = NULL;
             }
+            else if (!bodypart)
+                std::cerr << "Failed to find body part '" << part->mFemale << "'" << std::endl;
         }
         if(!bodypart && !part->mMale.empty())
         {
@@ -811,6 +836,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
                     bodypart = NULL;
             }
+            else if (!bodypart)
+                std::cerr << "Failed to find body part '" << part->mMale << "'" << std::endl;
         }
 
         if(bodypart)
@@ -916,7 +943,7 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
     if (!magicEffect->mHit.empty())
     {
         const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
-        bool loop = magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx;
+        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         // Don't play particle VFX unless the effect is new or it should be looping.
         if (isNew || loop)
             addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
@@ -1003,7 +1030,10 @@ void NpcAnimation::setVampire(bool vampire)
         return;
     if ((mNpcType == Type_Vampire) != vampire)
     {
-        rebuild();
+        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            MWBase::Environment::get().getWorld()->reattachPlayerCamera();
+        else
+            rebuild();
     }
 }
 

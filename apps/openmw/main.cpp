@@ -152,6 +152,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
 
+        ("load-savegame", bpo::value<std::string>()->default_value(""),
+            "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
+
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "skip main menu on game startup")
 
@@ -187,29 +190,23 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     bpo::store(valid_opts, variables);
     bpo::notify(variables);
 
-    bool run = true;
-
     if (variables.count ("help"))
     {
         std::cout << desc << std::endl;
-        run = false;
+        return false;
     }
+
+    std::cout << "OpenMW version " << OPENMW_VERSION;
+    std::string rev = OPENMW_VERSION_COMMITHASH;
+    std::string tag = OPENMW_VERSION_TAGHASH;
+    if (!rev.empty() && !tag.empty())
+    {
+        rev = rev.substr(0, 10);
+        std::cout << " (revision " << rev << ")";
+    }
+    std::cout << std::endl;
 
     if (variables.count ("version"))
-    {
-        std::cout << "OpenMW version " << OPENMW_VERSION << std::endl;
-
-        std::string rev = OPENMW_VERSION_COMMITHASH;
-        std::string tag = OPENMW_VERSION_TAGHASH;
-        if (!rev.empty() && !tag.empty())
-        {
-            rev = rev.substr(0, 10);
-            std::cout << "Revision " << rev << std::endl;
-        }
-        run = false;
-    }
-
-    if (!run)
         return false;
 
     cfgMgr.readConfiguration(variables, desc);
@@ -274,6 +271,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<StringsVector>());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
+    engine.setSaveGameFile (variables["load-savegame"].as<std::string>());
 
     // other settings
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
@@ -292,7 +290,7 @@ public:
     std::streamsize write(const char *str, std::streamsize size)
     {
         // Make a copy for null termination
-        std::string tmp (str, size);
+        std::string tmp (str, static_cast<unsigned int>(size));
         // Write string to Visual Studio Debug output
         OutputDebugString (tmp.c_str ());
         return size;
@@ -392,11 +390,11 @@ int main(int argc, char**argv)
     catch (std::exception &e)
     {
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        if (isatty(fileno(stdin)))
-            std::cerr << "\nERROR: " << e.what() << std::endl;
-        else
+        if (!isatty(fileno(stdin)))
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+
+        std::cerr << "\nERROR: " << e.what() << std::endl;
 
         ret = 1;
     }

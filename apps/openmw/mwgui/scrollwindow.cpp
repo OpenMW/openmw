@@ -1,6 +1,9 @@
 #include "scrollwindow.hpp"
 
+#include <MyGUI_ScrollView.h>
+
 #include <components/esm/loadbook.hpp>
+#include <components/widgets/imagebutton.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -45,7 +48,7 @@ namespace MWGui
         center();
     }
 
-    void ScrollWindow::open (MWWorld::Ptr scroll)
+    void ScrollWindow::open (MWWorld::Ptr scroll, bool showTakeButton)
     {
         // no 3d sounds because the object could be in a container.
         MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
@@ -68,7 +71,7 @@ namespace MWGui
 
         mTextView->setViewOffset(MyGUI::IntPoint(0,0));
 
-        setTakeButtonShow(true);
+        setTakeButtonShow(showTakeButton);
     }
 
     void ScrollWindow::exit()

@@ -8,26 +8,48 @@ namespace ESM
 {
     unsigned int Lockpick::sRecordId = REC_LOCK;
 
-void Lockpick::load(ESMReader &esm)
-{
-    mModel = esm.getHNString("MODL");
-    mName = esm.getHNOString("FNAM");
+    void Lockpick::load(ESMReader &esm)
+    {
+        bool hasData = true;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'L','K','D','T'>::value:
+                    esm.getHT(mData, 16);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'I','T','E','X'>::value:
+                    mIcon = esm.getHString();
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing LKDT subrecord");
+    }
 
-    esm.getHNT(mData, "LKDT", 16);
+    void Lockpick::save(ESMWriter &esm) const
+    {
+        esm.writeHNCString("MODL", mModel);
+        esm.writeHNOCString("FNAM", mName);
 
-    mScript = esm.getHNOString("SCRI");
-    mIcon = esm.getHNOString("ITEX");
-}
-
-void Lockpick::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("MODL", mModel);
-    esm.writeHNOCString("FNAM", mName);
-
-    esm.writeHNT("LKDT", mData, 16);
-    esm.writeHNOString("SCRI", mScript);
-    esm.writeHNOCString("ITEX", mIcon);
-}
+        esm.writeHNT("LKDT", mData, 16);
+        esm.writeHNOString("SCRI", mScript);
+        esm.writeHNOCString("ITEX", mIcon);
+    }
 
     void Lockpick::blank()
     {

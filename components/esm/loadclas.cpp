@@ -10,17 +10,17 @@ namespace ESM
 {
     unsigned int Class::sRecordId = REC_CLAS;
 
-const Class::Specialization Class::sSpecializationIds[3] = {
-  Class::Combat,
-  Class::Magic,
-  Class::Stealth
-};
+    const Class::Specialization Class::sSpecializationIds[3] = {
+      Class::Combat,
+      Class::Magic,
+      Class::Stealth
+    };
 
-const char *Class::sGmstSpecializationIds[3] = {
-  "sSpecializationCombat",
-  "sSpecializationMagic",
-  "sSpecializationStealth"
-};
+    const char *Class::sGmstSpecializationIds[3] = {
+      "sSpecializationCombat",
+      "sSpecializationMagic",
+      "sSpecializationStealth"
+    };
 
 
     int& Class::CLDTstruct::getSkill (int index, bool major)
@@ -39,22 +39,40 @@ const char *Class::sGmstSpecializationIds[3] = {
         return mSkills[index][major ? 1 : 0];
     }
 
-void Class::load(ESMReader &esm)
-{
-    mName = esm.getHNOString("FNAM");
-    esm.getHNT(mData, "CLDT", 60);
-
-    if (mData.mIsPlayable > 1)
-        esm.fail("Unknown bool value");
-
-    mDescription = esm.getHNOString("DESC");
-}
-void Class::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNT("CLDT", mData, 60);
-    esm.writeHNOString("DESC", mDescription);
-}
+    void Class::load(ESMReader &esm)
+    {
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'C','L','D','T'>::value:
+                    esm.getHT(mData, 60);
+                    if (mData.mIsPlayable > 1)
+                        esm.fail("Unknown bool value");
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing CLDT subrecord");
+    }
+    void Class::save(ESMWriter &esm) const
+    {
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNT("CLDT", mData, 60);
+        esm.writeHNOString("DESC", mDescription);
+    }
 
     void Class::blank()
     {

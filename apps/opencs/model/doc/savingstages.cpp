@@ -90,7 +90,7 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 
 CSMDoc::WriteDialogueCollectionStage::WriteDialogueCollectionStage (Document& document,
     SavingState& state, bool journal)
-: mDocument (document), mState (state),
+: mState (state),
   mTopics (journal ? document.getData().getJournals() : document.getData().getTopics()),
   mInfos (journal ? document.getData().getJournalInfos() : document.getData().getTopicInfos())
 {}
@@ -372,6 +372,74 @@ void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& message
         mState.getWriter().endRecord (record.sRecordId);
     }
     else if (pathgrid.mState==CSMWorld::RecordBase::State_Deleted)
+    {
+        /// \todo write record with delete flag
+    }
+}
+
+
+CSMDoc::WriteLandCollectionStage::WriteLandCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteLandCollectionStage::setup()
+{
+    return mDocument.getData().getLand().getSize();
+}
+
+void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::Land>& land =
+        mDocument.getData().getLand().getRecord (stage);
+
+    if (land.mState==CSMWorld::RecordBase::State_Modified ||
+        land.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+    {
+        CSMWorld::Land record = land.get();
+
+        mState.getWriter().startRecord (record.mLand->sRecordId);
+
+        record.mLand->save (mState.getWriter());
+        if(record.mLand->mLandData)
+            record.mLand->mLandData->save (mState.getWriter());
+
+        mState.getWriter().endRecord (record.mLand->sRecordId);
+    }
+    else if (land.mState==CSMWorld::RecordBase::State_Deleted)
+    {
+        /// \todo write record with delete flag
+    }
+}
+
+
+CSMDoc::WriteLandTextureCollectionStage::WriteLandTextureCollectionStage (Document& document,
+    SavingState& state)
+: mDocument (document), mState (state)
+{}
+
+int CSMDoc::WriteLandTextureCollectionStage::setup()
+{
+    return mDocument.getData().getLandTextures().getSize();
+}
+
+void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::LandTexture>& landTexture =
+        mDocument.getData().getLandTextures().getRecord (stage);
+
+    if (landTexture.mState==CSMWorld::RecordBase::State_Modified ||
+        landTexture.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+    {
+        CSMWorld::LandTexture record = landTexture.get();
+
+        mState.getWriter().startRecord (record.sRecordId);
+
+        record.save (mState.getWriter());
+
+        mState.getWriter().endRecord (record.sRecordId);
+    }
+    else if (landTexture.mState==CSMWorld::RecordBase::State_Deleted)
     {
         /// \todo write record with delete flag
     }

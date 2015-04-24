@@ -38,7 +38,7 @@ namespace MWMechanics
                 for (unsigned int i=0; i<spell->mEffects.mList.size();++i)
                 {
                     if (spell->mEffects.mList[i].mMagnMin != spell->mEffects.mList[i].mMagnMax)
-                        random[i] = static_cast<float> (std::rand()) / RAND_MAX;
+                        random[i] = OEngine::Misc::Rng::rollClosedProbability();
                 }
             }
 
@@ -249,7 +249,7 @@ namespace MWMechanics
                     random = it->second.at(i);
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
-                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, -1, magnitude);
+                visitor.visit(MWMechanics::EffectKey(*effectIt), spell->mName, spell->mId, -1, magnitude);
             }
         }
     }
@@ -312,21 +312,17 @@ namespace MWMechanics
 
     void Spells::readState(const ESM::SpellState &state)
     {
-        mSpells = state.mSpells;
-        mSelectedSpell = state.mSelectedSpell;
-
-        // Discard spells that are no longer available due to changed content files
-        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        for (TContainer::const_iterator it = state.mSpells.begin(); it != state.mSpells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(iter->first);
-            if (!spell)
+            // Discard spells that are no longer available due to changed content files
+            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            if (spell)
             {
-                if (iter->first == mSelectedSpell)
-                    mSelectedSpell = "";
-                mSpells.erase(iter++);
+                mSpells[it->first] = it->second;
+
+                if (it->first == state.mSelectedSpell)
+                    mSelectedSpell = it->first;
             }
-            else
-                ++iter;
         }
 
         // No need to discard spells here (doesn't really matter if non existent ids are kept)

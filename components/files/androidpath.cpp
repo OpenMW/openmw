@@ -27,10 +27,11 @@ char const * Buffer::getData()
 }
 
 
-JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_getPathToJni(JNIEnv *env, jobject obj, jstring prompt)
+JNIEXPORT void JNICALL Java_ui_activity_GameActivity_getPathToJni(JNIEnv *env, jobject obj, jstring prompt)
 {
     jboolean iscopy;
     Buffer::setData((env)->GetStringUTFChars(prompt, &iscopy));
+    (env)->DeleteLocalRef(prompt);
 }
 
 namespace

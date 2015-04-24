@@ -3,7 +3,10 @@
 
 #include <MyGUI_ImageBox.h>
 
-#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+namespace Video
+{
+    class VideoPlayer;
+}
 
 namespace MWGui
 {
@@ -32,8 +35,14 @@ namespace MWGui
         /// Stop video and free resources (done automatically on destruction)
         void stop();
 
+        /// Adjust the coordinates of this video widget relative to its parent,
+        /// based on the dimensions of the playing video.
+        /// @param stretch Stretch the video to fill the whole screen? If false,
+        ///                black bars may be added to fix the aspect ratio.
+        void autoResize (bool stretch);
+
     private:
-        Video::VideoPlayer mPlayer;
+        std::auto_ptr<Video::VideoPlayer> mPlayer;
     };
 
 }

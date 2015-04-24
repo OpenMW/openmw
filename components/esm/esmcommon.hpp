@@ -5,7 +5,7 @@
 #include <cstring>
 
 #include <stdint.h>
-#include <libs/platform/string.h>
+#include <string.h>
 
 namespace ESM
 {
@@ -23,7 +23,7 @@ template <int LEN>
 union NAME_T
 {
     char name[LEN];
-    int32_t val;
+    uint32_t val;
 
   bool operator==(const char *str) const
   {
@@ -40,8 +40,8 @@ union NAME_T
   }
   bool operator!=(const std::string &str) const { return !((*this)==str); }
 
-  bool operator==(int v) const { return v == val; }
-  bool operator!=(int v) const { return v != val; }
+  bool operator==(uint32_t v) const { return v == val; }
+  bool operator!=(uint32_t v) const { return v != val; }
 
   std::string toString() const { return std::string(name, strnlen(name, LEN)); }
 
@@ -52,18 +52,6 @@ typedef NAME_T<4> NAME;
 typedef NAME_T<32> NAME32;
 typedef NAME_T<64> NAME64;
 typedef NAME_T<256> NAME256;
-
-#pragma pack(push)
-#pragma pack(1)
-// Data that is only present in save game files
-struct SaveData
-{
-  float pos[6];     // Player position and rotation
-  NAME64 cell;      // Cell name
-  float unk2;       // Unknown value - possibly game time?
-  NAME32 player;    // Player name
-};
-#pragma pack(pop)
 
 /* This struct defines a file 'context' which can be saved and later
    restored by an ESMReader instance. It will save the position within

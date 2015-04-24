@@ -18,6 +18,7 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include <libs/openengine/ogre/lights.hpp>
 
@@ -86,6 +87,12 @@ Animation::~Animation()
     mAnimSources.clear();
 }
 
+std::string Animation::getObjectRootName() const
+{
+    if (mSkelBase)
+        return mSkelBase->getMesh()->getName();
+    return std::string();
+}
 
 void Animation::setObjectRoot(const std::string &model, bool baseonly)
 {
@@ -97,22 +104,8 @@ void Animation::setObjectRoot(const std::string &model, bool baseonly)
     if(model.empty())
         return;
 
-    std::string mdlname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = mdlname.rfind('\\');
-    if(p == std::string::npos)
-        p = mdlname.rfind('/');
-    if(p != std::string::npos)
-        mdlname.insert(mdlname.begin()+p+1, 'x');
-    else
-        mdlname.insert(mdlname.begin(), 'x');
-    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
-    {
-        mdlname = model;
-        Misc::StringUtils::toLower(mdlname);
-    }
-
-    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, mdlname) :
-                               NifOgre::Loader::createObjectBase(mInsert, mdlname));
+    mObjectRoot = (!baseonly ? NifOgre::Loader::createObjects(mInsert, model) :
+                               NifOgre::Loader::createObjectBase(mInsert, model));
 
     if(mObjectRoot->mSkelBase)
     {
@@ -169,6 +162,9 @@ struct AddGlow
 
         instance->setProperty("env_map", sh::makeProperty(new sh::BooleanValue(true)));
         instance->setProperty("env_map_color", sh::makeProperty(new sh::Vector3(mColor->x, mColor->y, mColor->z)));
+        // Workaround for crash in Ogre (https://bitbucket.org/sinbad/ogre/pull-request/447/fix-shadows-crash-for-textureunitstates/diff)
+        // Remove when the fix is merged
+        instance->getMaterial()->setShadowCasterMaterial("openmw_shadowcaster_noalpha");
     }
 };
 
@@ -252,14 +248,8 @@ void Animation::addAnimSource(const std::string &model)
     if(!mSkelBase)
         return;
 
-    std::string kfname = Misc::StringUtils::lowerCase(model);
-    std::string::size_type p = kfname.rfind('\\');
-    if(p == std::string::npos)
-        p = kfname.rfind('/');
-    if(p != std::string::npos)
-        kfname.insert(kfname.begin()+p+1, 'x');
-    else
-        kfname.insert(kfname.begin(), 'x');
+    std::string kfname = model;
+    Misc::StringUtils::toLower(kfname);
 
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
@@ -336,7 +326,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 {
     const MWWorld::Fallback *fallback = MWBase::Environment::get().getWorld()->getFallback();
 
-    const int clr = light->mData.mColor;
+    const unsigned int clr = light->mData.mColor;
     Ogre::ColourValue color(((clr >> 0) & 0xFF) / 255.0f,
                             ((clr >> 8) & 0xFF) / 255.0f,
                             ((clr >> 16) & 0xFF) / 255.0f);
@@ -375,7 +365,7 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 
     // with the standard 1 / (c + d*l + d*d*q) equation the attenuation factor never becomes zero,
     // so we ignore lights if their attenuation falls below this factor.
-    const float threshold = 0.03;
+    const float threshold = 0.03f;
 
     float quadraticAttenuation = 0;
     float linearAttenuation = 0;
@@ -414,13 +404,23 @@ void Animation::addExtraLight(Ogre::SceneManager *sceneMgr, NifOgre::ObjectScene
 }
 
 
-Ogre::Node *Animation::getNode(const std::string &name)
+Ogre::Node* Animation::getNode(const std::string &name)
 {
     if(mSkelBase)
     {
         Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
         if(skel->hasBone(name))
             return skel->getBone(name);
+    }
+    return NULL;
+}
+
+Ogre::Node* Animation::getNode(int handle)
+{
+    if (mSkelBase)
+    {
+        Ogre::SkeletonInstance *skel = mSkelBase->getSkeleton();
+        return skel->getBone(handle);
     }
     return NULL;
 }
@@ -988,7 +988,11 @@ void Animation::resetActiveGroups()
 
     AnimStateMap::const_iterator state = mStates.find(mAnimationTimePtr[0]->getAnimName());
     if(state == mStates.end())
+    {
+        if (mAccumRoot && mNonAccumRoot)
+            mAccumRoot->setPosition(-mNonAccumRoot->getPosition()*mAccumulate);
         return;
+    }
 
     const Ogre::SharedPtr<AnimSource> &animsrc = state->second.mSource;
     const std::vector<Ogre::Controller<Ogre::Real> >&ctrls = animsrc->mControllers[0];
@@ -1142,9 +1146,6 @@ Ogre::Vector3 Animation::runAnimation(float duration)
 
         if(!state.mPlaying && state.mAutoDisable)
         {
-            if(mNonAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                mAccumRoot->setPosition(0.f,0.f,0.f);
-
             mStates.erase(stateiter++);
 
             resetActiveGroups();
@@ -1270,10 +1271,13 @@ void Animation::addEffect(const std::string &model, int effectId, bool loop, con
     if (bonename.empty())
         params.mObjects = NifOgre::Loader::createObjects(mInsert, model);
     else
+    {
+        if (!mSkelBase)
+            return;
         params.mObjects = NifOgre::Loader::createObjects(mSkelBase, bonename, "", mInsert, model);
+    }
 
-    // TODO: turn off shadow casting
-    setRenderProperties(params.mObjects, RV_Misc,
+    setRenderProperties(params.mObjects, RV_Effects,
                         RQG_Main, RQG_Alpha, 0.f, false, NULL);
 
     params.mLoop = loop;
@@ -1473,7 +1477,7 @@ void Animation::setLightEffect(float effect)
         }
         mGlowLight->setType(Ogre::Light::LT_POINT);
         effect += 3;
-        mGlowLight->setAttenuation(1.0f / (0.03 * (0.5/effect)), 0, 0.5/effect, 0);
+        mGlowLight->setAttenuation(1.0f / (0.03f * (0.5f/effect)), 0, 0.5f/effect, 0);
     }
 }
 

@@ -24,7 +24,7 @@ namespace SFO
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
         void setKeyboardEventCallback(KeyListener* listen) { mKeyboardListener = listen; }
         void setWindowEventCallback(WindowListener* listen) { mWindowListener = listen; }
-        void setJoyEventCallback(JoyListener* listen) { mJoyListener = listen; }
+        void setControllerEventCallback(ControllerListener* listen) { mConListener = listen; }
 
         void capture(bool windowEventsOnly);
 		bool isModifierHeld(SDL_Keymod mod);
@@ -54,7 +54,7 @@ namespace SFO
         SFO::MouseListener* mMouseListener;
         SFO::KeyListener* mKeyboardListener;
         SFO::WindowListener* mWindowListener;
-        SFO::JoyListener* mJoyListener;
+        SFO::ControllerListener* mConListener;
 
         typedef boost::unordered_map<SDL_Keycode, OIS::KeyCode> KeyMap;
         KeyMap mKeyMap;
@@ -70,6 +70,8 @@ namespace SFO
         bool mWantRelative;
         bool mGrabPointer;
         bool mMouseRelative;
+
+        bool mFirstMouseMove;
 
         Sint32 mMouseZ;
         Sint32 mMouseX;

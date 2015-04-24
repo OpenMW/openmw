@@ -1,4 +1,5 @@
-
+#include "cell.hpp"
+#include "idcollection.hpp"
 #include "pathgrid.hpp"
 
 #include <sstream>

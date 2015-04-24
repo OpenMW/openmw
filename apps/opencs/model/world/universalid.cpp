@@ -55,6 +55,7 @@ namespace
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_SoundGens, "Sound Generators", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MagicEffects, "Magic Effects", 0 },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Pathgrids, "Pathgrids", 0 },
+        { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_StartScripts, "Start Scripts", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -118,6 +119,7 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_SoundGen, "Sound Generator", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MagicEffect, "Magic Effect", 0 },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Pathgrid, "Pathgrid", 0 },
+        { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script", 0 },
 
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
@@ -126,6 +128,7 @@ namespace
     {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults, "Verification Results", 0 },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log", 0 },
+        { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_Search, "Global Search", 0 },
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 } // end marker
     };
 }
@@ -343,6 +346,25 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
             list.push_back (sIdArg[i].mType);
 
     return list;
+}
+
+std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listTypes (int classes)
+{
+    std::vector<CSMWorld::UniversalId::Type> list;
+
+    for (int i=0; sNoArg[i].mName; ++i)
+        if (sNoArg[i].mClass & classes)
+            list.push_back (sNoArg[i].mType);
+
+    for (int i=0; sIdArg[i].mName; ++i)
+        if (sIdArg[i].mClass & classes)
+            list.push_back (sIdArg[i].mType);
+
+    for (int i=0; sIndexArg[i].mName; ++i)
+        if (sIndexArg[i].mClass & classes)
+            list.push_back (sIndexArg[i].mType);
+            
+    return list;    
 }
 
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType (Type type)

@@ -79,6 +79,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T
     return ContainerStoreIterator (this, --collection.mList.end());
 }
 
+void MWWorld::ContainerStore::storeEquipmentState(const MWWorld::LiveCellRefBase &ref, int index, ESM::InventoryState &inventory) const
+{
+}
+
+void MWWorld::ContainerStore::readEquipmentState(const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState &inventory)
+{
+}
+
 template<typename T>
 void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const
 {
@@ -86,8 +94,8 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
 }
 
 template<typename T>
-void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
-    std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >& states, bool equipable) const
+void MWWorld::ContainerStore::storeStates (CellRefList<T>& collection,
+    ESM::InventoryState& inventory, int& index, bool equipable) const
 {
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
         iter!=collection.mList.end(); ++iter)
@@ -96,17 +104,12 @@ void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
             continue;
         ESM::ObjectState state;
         storeState (*iter, state);
-        int slot = equipable ? getSlot (*iter) : -1;
-        states.push_back (std::make_pair (state, std::make_pair (T::sRecordId, slot)));
+        if (equipable)
+            storeEquipmentState(*iter, index, inventory);
+        inventory.mItems.push_back (state);
+        ++index;
     }
 }
-
-int MWWorld::ContainerStore::getSlot (const MWWorld::LiveCellRefBase& ref) const
-{
-    return -1;
-}
-
-void MWWorld::ContainerStore::setSlot (const MWWorld::ContainerStoreIterator& iter, int slot) {}
 
 const std::string MWWorld::ContainerStore::sGoldId = "gold_001";
 
@@ -182,7 +185,7 @@ bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
     {
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
                     ptr1.getClass().getEnchantment(ptr1));
-        float maxCharge = enchantment->mData.mCharge;
+        float maxCharge = static_cast<float>(enchantment->mData.mCharge);
         float enchantCharge1 = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
         float enchantCharge2 = ptr2.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr2.getCellRef().getEnchantmentCharge();
         if (enchantCharge1 != maxCharge || enchantCharge2 != maxCharge)
@@ -207,7 +210,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
     // a bit pointless to set owner for the player
-    if (actorPtr.getRefData().getHandle() != "player")
+    if (actorPtr != MWBase::Environment::get().getWorld()->getPlayerPtr())
         return add(ref.getPtr(), count, actorPtr, true);
     else
         return add(ref.getPtr(), count, actorPtr, false);
@@ -219,28 +222,21 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
 
     MWWorld::ContainerStoreIterator it = end();
 
-    if (setOwner && actorPtr.getClass().isActor())
+    // HACK: Set owner on the original item, then reset it after we have copied it
+    // If we set the owner on the copied item, it would not stack correctly...
+    std::string oldOwner = itemPtr.getCellRef().getOwner();
+    if (!setOwner || actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()) // No point in setting owner to the player - NPCs will not respect this anyway
     {
-        // HACK: Set owner on the original item, then reset it after we have copied it
-        // If we set the owner on the copied item, it would not stack correctly...
-        std::string oldOwner = itemPtr.getCellRef().getOwner();
-        if (actorPtr == player)
-        {
-            // No point in setting owner to the player - NPCs will not respect this anyway
-            // Additionally, setting it to "player" would make those items not stack with items that don't have an owner
-            itemPtr.getCellRef().setOwner("");
-        }
-        else
-            itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
-
-        it = addImp(itemPtr, count);
-
-        itemPtr.getCellRef().setOwner(oldOwner);
+        itemPtr.getCellRef().setOwner("");
     }
     else
     {
-        it = addImp(itemPtr, count);
+        itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
     }
+
+    it = addImp(itemPtr, count);
+
+    itemPtr.getCellRef().setOwner(oldOwner);
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
@@ -255,6 +251,14 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     pos.pos[1] = 0;
     pos.pos[2] = 0;
     item.getCellRef().setPosition(pos);
+
+    // reset ownership stuff, owner was already handled above
+    item.getCellRef().resetGlobalVariable();
+    item.getCellRef().setFaction("");
+    item.getCellRef().setFactionRank(-1);
+
+    // must reset the RefNum on the copied item, so that the RefNum on the original item stays unique
+    // maybe we should do this in the copy constructor instead?
     item.getCellRef().unsetRefNum(); // destroy link to content file
 
     std::string script = item.getClass().getScript(item);
@@ -396,19 +400,19 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, const std::string& faction, int factionRank, const MWWorld::ESMStore& store)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner)
 {
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
         std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
-        addInitialItem(id, owner, faction, factionRank, iter->mCount);
+        addInitialItem(id, owner, iter->mCount);
     }
 
     flagAsModified();
 }
 
-void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, const std::string& faction, int factionRank,
+void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner,
                                               int count, bool topLevel, const std::string& levItem)
 {
     ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
@@ -420,7 +424,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         if (topLevel && std::abs(count) > 1 && levItem->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<std::abs(count); ++i)
-                addInitialItem(id, owner, faction, factionRank, count > 0 ? 1 : -1, true, levItem->mId);
+                addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItem->mId);
             return;
         }
         else
@@ -428,7 +432,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             std::string id = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             if (id.empty())
                 return;
-            addInitialItem(id, owner, faction, factionRank, count, false, levItem->mId);
+            addInitialItem(id, owner, count, false, levItem->mId);
         }
     }
     else
@@ -444,13 +448,11 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         count = std::abs(count);
 
         ref.getPtr().getCellRef().setOwner(owner);
-        ref.getPtr().getCellRef().setFaction(faction);
-        ref.getPtr().getCellRef().setFactionRank(factionRank);
         addImp (ref.getPtr(), count);
     }
 }
 
-void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner, const std::string& faction, int factionRank)
+void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
     // Remove the items already spawned by levelled items that will restock
     for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
@@ -469,13 +471,13 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
 
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, faction, factionRank, it->mCount, true);
+            addInitialItem(item, owner, it->mCount, true);
         }
         else
         {
             int currentCount = count(item);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(item, owner, faction, factionRank, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(item, owner, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();
@@ -641,72 +643,66 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
-void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state)
 {
     state.mItems.clear();
 
-    storeStates (potions, state.mItems);
-    storeStates (appas, state.mItems);
-    storeStates (armors, state.mItems, true);
-    storeStates (books, state.mItems);
-    storeStates (clothes, state.mItems, true);
-    storeStates (ingreds, state.mItems);
-    storeStates (lockpicks, state.mItems, true);
-    storeStates (miscItems, state.mItems);
-    storeStates (probes, state.mItems, true);
-    storeStates (repairs, state.mItems);
-    storeStates (weapons, state.mItems, true);
-
-    state.mLights.clear();
+    int index = 0;
+    storeStates (potions, state, index);
+    storeStates (appas, state, index);
+    storeStates (armors, state, index, true);
+    storeStates (books, state, index, true); // not equipable as such, but for selectedEnchantItem
+    storeStates (clothes, state, index, true);
+    storeStates (ingreds, state, index);
+    storeStates (lockpicks, state, index, true);
+    storeStates (miscItems, state, index);
+    storeStates (probes, state, index, true);
+    storeStates (repairs, state, index);
+    storeStates (weapons, state, index, true);
+    storeStates (lights, state, index, true);
 
     state.mLevelledItemMap = mLevelledItemMap;
-
-    for (MWWorld::CellRefList<ESM::Light>::List::const_iterator iter (lights.mList.begin());
-        iter!=lights.mList.end(); ++iter)
-    {
-        ESM::LightState objectState;
-        storeState (*iter, objectState);
-        state.mLights.push_back (std::make_pair (objectState, getSlot (*iter)));
-    }
 }
 
-void MWWorld::ContainerStore::readState (const ESM::InventoryState& state)
+void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
 {
     clear();
 
-    for (std::vector<std::pair<ESM::ObjectState, std::pair<unsigned int, int> > >::const_iterator
-        iter (state.mItems.begin()); iter!=state.mItems.end(); ++iter)
+    int index = 0;
+    for (std::vector<ESM::ObjectState>::const_iterator
+        iter (inventory.mItems.begin()); iter!=inventory.mItems.end(); ++iter)
     {
-        int slot = iter->second.second;
+        const ESM::ObjectState& state = *iter;
 
-        switch (iter->second.first)
+        int type = MWBase::Environment::get().getWorld()->getStore().find(state.mRef.mRefID);
+
+        int thisIndex = index++;
+
+        switch (type)
         {
-            case ESM::REC_ALCH: getState (potions, iter->first); break;
-            case ESM::REC_APPA: getState (appas, iter->first); break;
-            case ESM::REC_ARMO: setSlot (getState (armors, iter->first), slot); break;
-            case ESM::REC_BOOK: getState (books, iter->first); break;
-            case ESM::REC_CLOT: setSlot (getState (clothes, iter->first), slot); break;
-            case ESM::REC_INGR: getState (ingreds, iter->first); break;
-            case ESM::REC_LOCK: setSlot (getState (lockpicks, iter->first), slot); break;
-            case ESM::REC_MISC: getState (miscItems, iter->first); break;
-            case ESM::REC_PROB: setSlot (getState (probes, iter->first), slot); break;
-            case ESM::REC_REPA: getState (repairs, iter->first); break;
-            case ESM::REC_WEAP: setSlot (getState (weapons, iter->first), slot); break;
-
+            case ESM::REC_ALCH: getState (potions, state); break;
+            case ESM::REC_APPA: getState (appas, state); break;
+            case ESM::REC_ARMO: readEquipmentState (getState (armors, state), thisIndex, inventory); break;
+            case ESM::REC_BOOK: readEquipmentState (getState (books, state), thisIndex, inventory); break; // not equipable as such, but for selectedEnchantItem
+            case ESM::REC_CLOT: readEquipmentState (getState (clothes, state), thisIndex, inventory); break;
+            case ESM::REC_INGR: getState (ingreds, state); break;
+            case ESM::REC_LOCK: readEquipmentState (getState (lockpicks, state), thisIndex, inventory); break;
+            case ESM::REC_MISC: getState (miscItems, state); break;
+            case ESM::REC_PROB: readEquipmentState (getState (probes, state), thisIndex, inventory); break;
+            case ESM::REC_REPA: getState (repairs, state); break;
+            case ESM::REC_WEAP: readEquipmentState (getState (weapons, state), thisIndex, inventory); break;
+            case ESM::REC_LIGH: readEquipmentState (getState (lights, state), thisIndex, inventory); break;
+            case 0:
+                std::cerr << "Dropping reference to '" << state.mRef.mRefID << "' (object no longer exists)" << std::endl;
+                break;
             default:
-
-                std::cerr << "invalid item type in inventory state" << std::endl;
+                std::cerr << "Invalid item type in inventory state, refid " << state.mRef.mRefID << std::endl;
+                break;
         }
     }
 
-    for (std::vector<std::pair<ESM::LightState, int> >::const_iterator iter (state.mLights.begin());
-        iter!=state.mLights.end(); ++iter)
-    {
-        int slot = iter->second;
-        setSlot (getState (lights, iter->first), slot);
-    }
 
-    mLevelledItemMap = state.mLevelledItemMap;
+    mLevelledItemMap = inventory.mLevelledItemMap;
 }
 
 

@@ -27,19 +27,17 @@ namespace MWClass
         return ptr.get<ESM::Lockpick>()->mBase->mId;
     }
 
-    void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Lockpick::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Lockpick::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Lockpick::getModel(const MWWorld::Ptr &ptr) const
@@ -175,7 +173,7 @@ namespace MWClass
 
     bool Lockpick::canSell (const MWWorld::Ptr& item, int npcServices) const
     {
-        return npcServices & ESM::NPC::Picks;
+        return (npcServices & ESM::NPC::Picks) != 0;
     }
 
     int Lockpick::getItemMaxHealth (const MWWorld::Ptr& ptr) const

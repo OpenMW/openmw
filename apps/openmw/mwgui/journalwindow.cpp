@@ -1,21 +1,25 @@
 #include "journalwindow.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
-#include "../mwbase/journal.hpp"
-
 #include <sstream>
 #include <set>
 #include <stack>
 #include <string>
 #include <utility>
+
+#include <MyGUI_TextBox.h>
+#include <MyGUI_Button.h>
+
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
-#include "boost/lexical_cast.hpp"
 
+#include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/journal.hpp"
 
 #include "bookpage.hpp"
 #include "windowbase.hpp"
@@ -71,7 +75,7 @@ namespace
         void setText (char const * name, value_type const & value)
         {
             getWidget <MyGUI::TextBox> (name) ->
-                setCaption (boost::lexical_cast <std::string> (value));
+                setCaption (MyGUI::utility::toString (value));
         }
 
         void setVisible (char const * name, bool visible)
@@ -425,9 +429,22 @@ namespace
             AddNamesToList(Gui::MWList* list) : mList(list) {}
 
             Gui::MWList* mList;
-            void operator () (const std::string& name)
+            void operator () (const std::string& name, bool finished=false)
             {
                 mList->addItem(name);
+            }
+        };
+        struct SetNamesInactive
+        {
+            SetNamesInactive(Gui::MWList* list) : mList(list) {}
+
+            Gui::MWList* mList;
+            void operator () (const std::string& name, bool finished)
+            {
+                if (finished)
+                {
+                    mList->getItemWidget(name)->setStateSelected(true);
+                }
             }
         };
 
@@ -450,6 +467,12 @@ namespace
             mModel->visitQuestNames(!mAllQuests, add);
 
             list->adjustSize();
+
+            if (mAllQuests)
+            {
+                SetNamesInactive setInactive(list);
+                mModel->visitQuestNames(!mAllQuests, setInactive);
+            }
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)

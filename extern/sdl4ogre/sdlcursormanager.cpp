@@ -4,7 +4,10 @@
 #include <OgreTextureManager.h>
 #include <OgreRoot.h>
 
-#include <openengine/ogre/imagerotate.hpp>
+#include <SDL_mouse.h>
+#include <SDL_endian.h>
+
+#include "imagerotate.hpp"
 
 namespace SFO
 {
@@ -88,7 +91,7 @@ namespace SFO
 
         // we use a render target to uncompress the DDS texture
         // just blitting doesn't seem to work on D3D9
-        OEngine::Render::ImageRotate::rotate(tex->getName(), tempName, -rotDegrees);
+        ImageRotate::rotate(tex->getName(), tempName, static_cast<float>(-rotDegrees));
 
         Ogre::TexturePtr resultTexture = Ogre::TextureManager::getSingleton().getByName(tempName);
 
@@ -107,7 +110,8 @@ namespace SFO
                 Ogre::ColourValue clr = destImage.getColourAt(x, y, 0);
 
                 //set the pixel on the SDL surface to the same value as the Ogre texture's
-                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, clr.r*255, clr.g*255, clr.b*255, clr.a*255));
+                _putPixel(surf, x, y, SDL_MapRGBA(surf->format, static_cast<Uint8>(clr.r * 255), 
+                    static_cast<Uint8>(clr.g * 255), static_cast<Uint8>(clr.b * 255), static_cast<Uint8>(clr.a * 255)));
             }
         }
 

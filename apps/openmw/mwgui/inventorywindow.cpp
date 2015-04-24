@@ -2,7 +2,13 @@
 
 #include <stdexcept>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Window.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_InputManager.h>
+#include <MyGUI_Button.h>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -15,17 +21,16 @@
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwbase/scriptmanager.hpp"
+#include "../mwrender/characterpreview.hpp"
 
-#include "bookwindow.hpp"
-#include "scrollwindow.hpp"
-#include "spellwindow.hpp"
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "tradewindow.hpp"
-#include "container.hpp"
+#include "draganddrop.hpp"
+#include "widgets.hpp"
 
 namespace
 {
@@ -93,7 +98,7 @@ namespace MWGui
     void InventoryWindow::adjustPanes()
     {
         const float aspect = 0.5; // fixed aspect ratio for the avatar image
-        float leftPaneWidth = (mMainWidget->getSize().height-44-mArmorRating->getHeight()) * aspect;
+        int leftPaneWidth = static_cast<int>((mMainWidget->getSize().height - 44 - mArmorRating->getHeight()) * aspect);
         mLeftPane->setSize( leftPaneWidth, mMainWidget->getSize().height-44 );
         mRightPane->setCoord( mLeftPane->getPosition().left + leftPaneWidth + 4,
                               mRightPane->getPosition().top,
@@ -145,10 +150,10 @@ namespace MWGui
         }
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos (Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height);
-        MyGUI::IntSize size (Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width,
-                             Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height);
+        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height));
+        MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
+                            static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
             mPreviewResize = true;
@@ -309,8 +314,7 @@ namespace MWGui
 
     void InventoryWindow::updateItemView()
     {
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         mItemView->update();
         mPreviewDirty = true;
@@ -412,7 +416,7 @@ namespace MWGui
 
         // Give the script a chance to run once before we do anything else
         // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
-        if (!script.empty())
+        if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
         {
             MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
             MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
@@ -423,13 +427,6 @@ namespace MWGui
             boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
             action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
-
-            // this is necessary for books/scrolls: if they are already in the player's inventory,
-            // the "Take" button should not be visible.
-            // NOTE: the take button is "reset" when the window opens, so we can safely do the following
-            // without screwing up future book windows
-            MWBase::Environment::get().getWindowManager()->getBookWindow()->setTakeButtonShow(false);
-            MWBase::Environment::get().getWindowManager()->getScrollWindow()->setTakeButtonShow(false);
 
             mSkippedToEquip = MWWorld::Ptr();
         }
@@ -511,7 +508,7 @@ namespace MWGui
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
         mTradeModel->adjustEncumbrance(encumbrance);
-        mEncumbranceBar->setValue(encumbrance, capacity);
+        mEncumbranceBar->setValue(static_cast<int>(encumbrance), static_cast<int>(capacity));
     }
 
     void InventoryWindow::onFrame()
@@ -534,9 +531,9 @@ namespace MWGui
         if (mPreviewResize || mPreviewDirty)
         {
             mArmorRating->setCaptionWithReplacing ("#{sArmor}: "
-                + boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+                + MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
             if (mArmorRating->getTextSize().width > mArmorRating->getSize().width)
-                mArmorRating->setCaptionWithReplacing (boost::lexical_cast<std::string>(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
+                mArmorRating->setCaptionWithReplacing (MyGUI::utility::toString(static_cast<int>(mPtr.getClass().getArmorRating(mPtr))));
         }
         if (mPreviewResize)
         {
@@ -560,8 +557,7 @@ namespace MWGui
     void InventoryWindow::notifyContentChanged()
     {
         // update the spell window just in case new enchanted items were added to inventory
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
                     MWBase::Environment::get().getWorld()->getPlayerPtr());
@@ -616,10 +612,9 @@ namespace MWGui
             throw std::runtime_error("Added item not found");
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
-        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, count);
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
 
-        if (MWBase::Environment::get().getWindowManager()->getSpellWindow())
-            MWBase::Environment::get().getWindowManager()->getSpellWindow()->updateSpells();
+        MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
 
     void InventoryWindow::cycle(bool next)
@@ -645,15 +640,12 @@ namespace MWGui
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
-        while (!found)
+        for (unsigned int i=0; i<model.getItemCount(); ++i)
         {
             cycled += incr;
             cycled = (cycled + model.getItemCount()) % model.getItemCount();
 
             MWWorld::Ptr item = model.getItem(cycled).mBase;
-
-            if (cycled == selected) // we've been through all items, nothing found
-                return;
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their relative ordering
             if (Misc::StringUtils::ciEqual(lastId, item.getCellRef().getRefId()))
@@ -662,9 +654,20 @@ namespace MWGui
             lastId = item.getCellRef().getRefId();
 
             if (item.getClass().getTypeName() == typeid(ESM::Weapon).name() && isRightHandWeapon(item))
+            {
                 found = true;
+                break;
+            }
         }
 
+        if (!found)
+            return;
+
         useItem(model.getItem(cycled).mBase);
+    }
+
+    void InventoryWindow::rebuildAvatar()
+    {
+        mPreview->rebuild();
     }
 }

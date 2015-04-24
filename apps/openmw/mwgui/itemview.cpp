@@ -2,8 +2,6 @@
 
 #include <cmath>
 
-#include <boost/lexical_cast.hpp>
-
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
@@ -143,10 +141,10 @@ void ItemView::onSelectedBackground(MyGUI::Widget *sender)
 
 void ItemView::onMouseWheel(MyGUI::Widget *_sender, int _rel)
 {
-    if (mScrollView->getViewOffset().left + _rel*0.3 > 0)
+    if (mScrollView->getViewOffset().left + _rel*0.3f > 0)
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
     else
-        mScrollView->setViewOffset(MyGUI::IntPoint(mScrollView->getViewOffset().left + _rel*0.3, 0));
+        mScrollView->setViewOffset(MyGUI::IntPoint(static_cast<int>(mScrollView->getViewOffset().left + _rel*0.3f), 0));
 }
 
 void ItemView::setSize(const MyGUI::IntSize &_value)
@@ -157,22 +155,12 @@ void ItemView::setSize(const MyGUI::IntSize &_value)
         layoutWidgets();
 }
 
-void ItemView::setSize(int _width, int _height)
-{
-    setSize(MyGUI::IntSize(_width, _height));
-}
-
 void ItemView::setCoord(const MyGUI::IntCoord &_value)
 {
     bool changed = (_value.width != getWidth() || _value.height != getHeight());
     Base::setCoord(_value);
     if (changed)
         layoutWidgets();
-}
-
-void ItemView::setCoord(int _left, int _top, int _width, int _height)
-{
-    setCoord(MyGUI::IntCoord(_left, _top, _width, _height));
 }
 
 void ItemView::registerComponents()

@@ -13,6 +13,8 @@ namespace Misc
         std::string correctIconPath(const std::string &resPath);
         std::string correctBookartPath(const std::string &resPath);
         std::string correctBookartPath(const std::string &resPath, int width, int height);
+        /// Uses "xfoo.nif" instead of "foo.nif" if available
+        std::string correctActorModelPath(const std::string &resPath);
     }
 }
 

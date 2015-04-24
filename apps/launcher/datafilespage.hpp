@@ -58,6 +58,10 @@ namespace Launcher
         void on_newProfileAction_triggered();
         void on_deleteProfileAction_triggered();
 
+    public:
+        /// Content List that is always present
+        const static char *mDefaultContentListName;
+
     private:
 
         TextInputDialog *mProfileDialog;
@@ -82,6 +86,7 @@ namespace Launcher
         bool showDeleteMessageBox (const QString &text);
         void addProfile (const QString &profile, bool setAsCurrent);
         void checkForDefaultProfile();
+        void populateFileViews(const QString& contentModelName);
 
         class PathIterator
         {
@@ -134,6 +139,8 @@ namespace Launcher
             }
 
         };
+
+        QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);
     };
 }
 #endif

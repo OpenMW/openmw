@@ -4,8 +4,9 @@
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include <vector>
+
+#include "../mwmechanics/stat.hpp"
 
 namespace MWGui
 {
@@ -103,6 +104,8 @@ namespace MWGui
     };
 
     CSE mCreationStage; // Which state the character creating is in, controls back/next/ok buttons
+
+    void handleDialogDone(CSE currentStage, int nextMode);
     };
 }
 

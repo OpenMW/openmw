@@ -22,7 +22,7 @@ struct ESMData
 {
     std::string author;
     std::string description;
-    int version;
+    unsigned int version;
     std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
@@ -48,9 +48,9 @@ const std::set<int> ESMData::sLabeledRec =
 // Based on the legacy struct
 struct Arguments
 {
-    unsigned int raw_given;
-    unsigned int quiet_given;
-    unsigned int loadcells_given;
+    bool raw_given;
+    bool quiet_given;
+    bool loadcells_given;
     bool plain_given;
 
     std::string mode;
@@ -59,6 +59,7 @@ struct Arguments
     std::string outname;
 
     std::vector<std::string> types;
+    std::string name;
 
     ESMData data;
     ESM::ESMReader reader;
@@ -78,6 +79,8 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("type,t", bpo::value< std::vector<std::string> >(),
          "Show only records of this type (four character record code).  May "
          "be specified multiple times.  Only affects dump mode.")
+        ("name,n", bpo::value<std::string>(),
+         "Show only the record with this name.  Only affects dump mode.")
         ("plain,p", "Print contents of dialogs, books and scripts. "
          "(skipped by default)"
          "Only affects dump mode.")
@@ -148,7 +151,9 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     }
 
     if (variables.count("type") > 0)
-      info.types = variables["type"].as< std::vector<std::string> >();
+        info.types = variables["type"].as< std::vector<std::string> >();
+    if (variables.count("name") > 0)
+        info.name = variables["name"].as<std::string>();
 
     info.mode = variables["mode"].as<std::string>();
     if (!(info.mode == "dump" || info.mode == "clone" || info.mode == "comp"))
@@ -177,10 +182,10 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
         info.outname = variables["input-file"].as< std::vector<std::string> >()[1];
 
-    info.raw_given = variables.count ("raw");
-    info.quiet_given = variables.count ("quiet");
-    info.loadcells_given = variables.count ("loadcells");
-    info.plain_given = (variables.count("plain") > 0);
+    info.raw_given = variables.count ("raw") != 0;
+    info.quiet_given = variables.count ("quiet") != 0;
+    info.loadcells_given = variables.count ("loadcells") != 0;
+    info.plain_given = variables.count("plain") != 0;
 
     // Font encoding settings
     info.encoding = variables["encoding"].as<std::string>();
@@ -261,10 +266,12 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Faction: '" << ref.mFaction << "'" << std::endl;
         std::cout << "    Faction rank: '" << ref.mFactionRank << "'" << std::endl;
         std::cout << "    Enchantment charge: '" << ref.mEnchantmentCharge << "'\n";
-        std::cout << "    Uses/health: '" << ref.mCharge << "'\n";
+        std::cout << "    Uses/health: '" << ref.mChargeInt << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
         std::cout << "    Deleted: " << deleted << std::endl;
+        if (!ref.mKey.empty())
+            std::cout << "    Key: '" << ref.mKey << "'" << std::endl;
     }
 }
 
@@ -358,6 +365,9 @@ int load(Arguments& info)
             if (id.empty())
                 id = esm.getHNOString("INAM");
 
+            if (!info.name.empty() && !Misc::StringUtils::ciEqual(info.name, id))
+                interested = false;
+
             if(!quiet && interested)
                 std::cout << "\nRecord: " << n.toString()
                      << " '" << id << "'\n";
@@ -385,7 +395,7 @@ int load(Arguments& info)
                 record->load(esm);
                 if (!quiet && interested) record->print();
 
-                if (record->getType().val == ESM::REC_CELL && loadCells) {
+                if (record->getType().val == ESM::REC_CELL && loadCells && interested) {
                     loadCell(record->cast<ESM::Cell>()->get(), esm, info);
                 }
 
@@ -430,7 +440,7 @@ int clone(Arguments& info)
         return 1;
     }
 
-    int recordCount = info.data.mRecords.size();
+    size_t recordCount = info.data.mRecords.size();
 
     int digitCount = 1; // For a nicer output
     if (recordCount > 9) ++digitCount;
@@ -450,7 +460,7 @@ int clone(Arguments& info)
     for (Stats::iterator it = stats.begin(); it != stats.end(); ++it)
     {
         name.val = it->first;
-        float amount = it->second;
+        int amount = it->second;
         std::cout << std::setw(digitCount) << amount << " " << name.toString() << "  ";
 
         if (++i % 3 == 0)
@@ -501,9 +511,9 @@ int clone(Arguments& info)
             if (!info.data.mCellRefs[ptr].empty()) {
                 typedef std::deque<ESM::CellRef> RefList;
                 RefList &refs = info.data.mCellRefs[ptr];
-                for (RefList::iterator it = refs.begin(); it != refs.end(); ++it)
+                for (RefList::iterator refIt = refs.begin(); refIt != refs.end(); ++refIt)
                 {
-                    it->save(esm);
+                    refIt->save(esm);
                 }
             }
         }
@@ -511,7 +521,7 @@ int clone(Arguments& info)
         esm.endRecord(name.toString());
 
         saved++;
-        int perc = (saved / (float)recordCount)*100;
+        int perc = (int)((saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";

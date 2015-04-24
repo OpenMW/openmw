@@ -167,6 +167,7 @@ namespace Compiler
         const int opcodeSameFaction = 0x20001b5;
         const int opcodeSameFactionExplicit = 0x20001b6;
         const int opcodeModFactionReaction = 0x2000242;
+        const int opcodeSetFactionReaction = 0x20002ff;
         const int opcodeGetFactionReaction = 0x2000243;
         const int opcodeClearInfoActor = 0x2000245;
         const int opcodeClearInfoActorExplicit = 0x2000246;
@@ -184,6 +185,7 @@ namespace Compiler
         const int opcodeEnableMapMenu = 0x2000015;
         const int opcodeEnableStatsMenu = 0x2000016;
         const int opcodeEnableRest = 0x2000017;
+        const int opcodeEnableLevelupMenu = 0x2000300;
         const int opcodeShowRestMenu = 0x2000018;
         const int opcodeShowRestMenuExplicit = 0x2000234;
         const int opcodeGetButtonPressed = 0x2000137;
@@ -276,6 +278,7 @@ namespace Compiler
         const int opcodeShowVars = 0x200021d;
         const int opcodeShowVarsExplicit = 0x200021e;
         const int opcodeToggleGodMode = 0x200021f;
+        const int opcodeToggleScripts = 0x2000301;
         const int opcodeDisableLevitation = 0x2000220;
         const int opcodeEnableLevitation = 0x2000221;
         const int opcodeCast = 0x2000227;

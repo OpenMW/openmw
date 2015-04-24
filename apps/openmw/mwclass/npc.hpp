@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    class GameSetting;
+    struct GameSetting;
 }
 
 namespace MWClass
@@ -38,8 +38,6 @@ namespace MWClass
                 const ESM::GameSetting *fKnockDownMult;
                 const ESM::GameSetting *iKnockDownOddsMult;
                 const ESM::GameSetting *iKnockDownOddsBase;
-                const ESM::GameSetting *fDamageStrengthBase;
-                const ESM::GameSetting *fDamageStrengthMult;
                 const ESM::GameSetting *fCombatArmorMinMult;
             };
 
@@ -50,10 +48,10 @@ namespace MWClass
             virtual std::string getId (const MWWorld::Ptr& ptr) const;
             ///< Return ID of \a ptr
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const;
 
             virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
@@ -189,6 +187,9 @@ namespace MWClass
             virtual void restock (const MWWorld::Ptr& ptr) const;
 
             virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getPrimaryFaction(const MWWorld::Ptr &ptr) const;
+            virtual int getPrimaryFactionRank(const MWWorld::Ptr &ptr) const;
     };
 }
 

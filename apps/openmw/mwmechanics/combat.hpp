@@ -30,9 +30,16 @@ void applyElementalShields(const MWWorld::Ptr& attacker, const MWWorld::Ptr& vic
 void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const MWWorld::Ptr& attacker);
 
 /// Adjust weapon damage based on its condition. A used weapon will be less effective.
-void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon);
+void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon, const MWWorld::Ptr& attacker);
 
 void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+
+/// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
+void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon);
+
+/// Can attacker operate in victim's environment?
+/// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
+bool isEnvironmentCompatible(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim);
 
 }
 

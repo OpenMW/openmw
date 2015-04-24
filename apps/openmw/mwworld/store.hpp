@@ -5,6 +5,9 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <sstream>
+
+#include <openengine/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -28,9 +31,9 @@ namespace MWWorld
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
-        virtual void write (ESM::ESMWriter& writer) const {}
+        virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual void read (ESM::ESMReader& reader) {}
+        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
         ///< Read into dynamic storage
     };
 
@@ -140,6 +143,7 @@ namespace MWWorld
         virtual void clearDynamic()
         {
             // remove the dynamic part of mShared
+            assert(mShared.size() >= mStatic.size());
             mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             mDynamic.clear();
         }
@@ -176,7 +180,7 @@ namespace MWWorld
             std::vector<const T*> results;
             std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
             if(!results.empty())
-                return results[int(std::rand()/((double)RAND_MAX+1)*results.size())];
+                return results[OEngine::Misc::Rng::rollDice(results.size())];
             return NULL;
         }
 
@@ -216,8 +220,6 @@ namespace MWWorld
         }
 
         void setUp() {
-            // remove the dynamic part of mShared
-            mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
         }
 
         iterator begin() const {
@@ -234,7 +236,7 @@ namespace MWWorld
 
         int getDynamicSize() const
         {
-            return mDynamic.size();
+            return static_cast<int> (mDynamic.size()); // truncated from unsigned __int64 if _MSC_VER && _WIN64
         }
 
         void listIdentifier(std::vector<std::string> &list) const {
@@ -305,6 +307,7 @@ namespace MWWorld
             mDynamic.erase(it);
 
             // have to reinit the whole shared part
+            assert(mShared.size() >= mStatic.size());
             mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
             for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
                 mShared.push_back(&it->second);
@@ -325,32 +328,17 @@ namespace MWWorld
                 writer.writeHNString ("NAME", iter->second.mId);
                 iter->second.save (writer);
                 writer.endRecord (T::sRecordId);
-                progress.increaseProgress();
             }
         }
 
-        void read (ESM::ESMReader& reader)
+        void read (ESM::ESMReader& reader, const std::string& id)
         {
             T record;
-            record.mId = reader.getHNString ("NAME");
+            record.mId = id;
             record.load (reader);
             insert (record);
         }
     };
-
-    template <>
-    inline void Store<ESM::NPC>::clearDynamic()
-    {
-        std::map<std::string, ESM::NPC>::iterator iter = mDynamic.begin();
-
-        while (iter!=mDynamic.end())
-            if (iter->first=="player")
-                ++iter;
-            else
-                mDynamic.erase (iter++);
-
-        mShared.clear();
-    }
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
@@ -374,17 +362,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
-    }
-
-    template <>
-    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id) {
-        ESM::StartScript s;
-        s.load(esm);
-        s.mId = Misc::StringUtils::toLower(s.mScript);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = scpt;
     }
 
     template <>
@@ -451,9 +430,7 @@ namespace MWWorld
             ltexl[lt.mIndex] = lt;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            load(esm, id, esm.getIndex());
-        }
+        void load(ESM::ESMReader &esm, const std::string &id);
 
         iterator begin(size_t plugin) const {
             assert(plugin < mStatic.size());
@@ -567,6 +544,9 @@ namespace MWWorld
                 if (left.first == right.first)
                     return left.second > right.second;
 
+                // Exterior cells are listed in descending, row-major order,
+                // this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
+                // there is one at -22,16 and one at -2,-9, the latter should be used.
                 return left.first > right.first;
             }
         };
@@ -593,13 +573,7 @@ namespace MWWorld
         void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
 
     public:
-        ESMStore *mEsmStore;
-
         typedef SharedIterator<ESM::Cell> iterator;
-
-        Store<ESM::Cell>()
-        : mEsmStore(NULL)
-        {}
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;

@@ -84,7 +84,13 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_MeshType, CSMWorld::Columns::ColumnId_MeshType, false },
         { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true },
         { CSMWorld::ColumnBase::Display_SoundGeneratorType, CSMWorld::Columns::ColumnId_SoundGeneratorType, false },
-        { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, true }
+        { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, true },
+        { CSMWorld::ColumnBase::Display_SkillImpact, CSMWorld::Columns::ColumnId_SkillImpact, true },
+        { CSMWorld::ColumnBase::Display_EffectRange, CSMWorld::Columns::ColumnId_EffectRange, false },
+        { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
+        { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
+        { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
+        { CSMWorld::ColumnBase::Display_YesNo, CSMWorld::Columns::ColumnId_AiWanderRepeat, false }
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
@@ -248,7 +254,7 @@ bool CSVDoc::ViewManager::showModifiedDocumentMessageBox (CSVDoc::View *view)
     QMessageBox messageBox(view);
     CSMDoc::Document *document = view->getDocument();
 
-    messageBox.setWindowTitle (document->getSavePath().filename().string().c_str());
+    messageBox.setWindowTitle (QString::fromUtf8(document->getSavePath().filename().string().c_str()));
     messageBox.setText ("The document has been modified.");
     messageBox.setInformativeText ("Do you want to save your changes?");
     messageBox.setStandardButtons (QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);

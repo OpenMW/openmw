@@ -15,7 +15,7 @@ namespace MWRender
     class CreatureAnimation : public Animation
     {
     public:
-        CreatureAnimation(const MWWorld::Ptr& ptr);
+        CreatureAnimation(const MWWorld::Ptr& ptr, const std::string &model);
         virtual ~CreatureAnimation() {}
     };
 
@@ -25,7 +25,7 @@ namespace MWRender
     class CreatureWeaponAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
     {
     public:
-        CreatureWeaponAnimation(const MWWorld::Ptr& ptr);
+        CreatureWeaponAnimation(const MWWorld::Ptr& ptr, const std::string &model);
         virtual ~CreatureWeaponAnimation() {}
 
         virtual void equipmentChanged() { updateParts(); }

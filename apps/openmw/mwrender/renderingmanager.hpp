@@ -111,7 +111,7 @@ public:
     /// Write current fog of war for this cell to the CellStore
     void writeFog (MWWorld::CellStore* store);
 
-    void addObject (const MWWorld::Ptr& ptr);
+    void addObject (const MWWorld::Ptr& ptr, const std::string& model);
     void removeObject (const MWWorld::Ptr& ptr);
 
     void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
@@ -141,7 +141,7 @@ public:
 
     void setAmbientColour(const Ogre::ColourValue& colour);
     void setSunColour(const Ogre::ColourValue& colour);
-    void setSunDirection(const Ogre::Vector3& direction, bool is_moon);
+    void setSunDirection(const Ogre::Vector3& direction, bool is_night);
     void sunEnable(bool real); ///< @param real whether or not to really disable the sunlight (otherwise just set diffuse to 0)
     void sunDisable(bool real);
 

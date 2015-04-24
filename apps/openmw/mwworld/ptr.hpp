@@ -6,13 +6,13 @@
 #include <string>
 #include <sstream>
 
-#include "cellreflist.hpp"
+#include "livecellref.hpp"
 
 namespace MWWorld
 {
     class ContainerStore;
     class CellStore;
-    class LiveCellRefBase;
+    struct LiveCellRefBase;
 
     /// \brief Pointer to a LiveCellRef
 

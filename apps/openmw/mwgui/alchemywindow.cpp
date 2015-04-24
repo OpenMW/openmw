@@ -1,7 +1,8 @@
 #include "alchemywindow.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
+
+#include <MyGUI_Gui.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -9,6 +10,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/magiceffects.hpp"
+#include "../mwmechanics/alchemy.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -27,6 +29,7 @@ namespace MWGui
         , mApparatus (4)
         , mIngredients (4)
         , mSortModel(NULL)
+        , mAlchemy(new MWMechanics::Alchemy())
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -66,7 +69,7 @@ namespace MWGui
         std::string name = mNameEdit->getCaption();
         boost::algorithm::trim(name);
 
-        MWMechanics::Alchemy::Result result = mAlchemy.create (mNameEdit->getCaption ());
+        MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
 
         if (result == MWMechanics::Alchemy::Result_NoName)
         {
@@ -121,7 +124,7 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
         InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr());
         mSortModel = new SortFilterItemModel(model);
@@ -132,10 +135,10 @@ namespace MWGui
 
         int index = 0;
 
-        mAlchemy.setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
 
-        for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy.beginTools());
-            iter!=mAlchemy.endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
+        for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
+            iter!=mAlchemy->endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {
             mApparatus.at (index)->setItem(*iter);
             mApparatus.at (index)->clearUserStrings();
@@ -150,7 +153,7 @@ namespace MWGui
     }
 
     void AlchemyWindow::exit() {
-        mAlchemy.clear();
+        mAlchemy->clear();
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Alchemy);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Inventory);
     }
@@ -164,7 +167,7 @@ namespace MWGui
     void AlchemyWindow::onSelectedItem(int index)
     {
         MWWorld::Ptr item = mSortModel->getItem(index).mBase;
-        int res = mAlchemy.addIngredient(item);
+        int res = mAlchemy->addIngredient(item);
 
         if (res != -1)
         {
@@ -177,20 +180,20 @@ namespace MWGui
 
     void AlchemyWindow::update()
     {
-        std::string suggestedName = mAlchemy.suggestPotionName();
+        std::string suggestedName = mAlchemy->suggestPotionName();
         if (suggestedName != mSuggestedPotionName)
             mNameEdit->setCaptionWithReplacing(suggestedName);
         mSuggestedPotionName = suggestedName;
 
         mSortModel->clearDragItems();
 
-        MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy.beginIngredients ();
+        MWMechanics::Alchemy::TIngredientsIterator it = mAlchemy->beginIngredients ();
         for (int i=0; i<4; ++i)
         {
             ItemWidget* ingredient = mIngredients[i];
 
             MWWorld::Ptr item;
-            if (it != mAlchemy.endIngredients ())
+            if (it != mAlchemy->endIngredients ())
             {
                 item = *it;
                 ++it;
@@ -217,7 +220,7 @@ namespace MWGui
 
         mItemView->update();
 
-        std::set<MWMechanics::EffectKey> effectIds = mAlchemy.listEffects();
+        std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
         for (std::set<MWMechanics::EffectKey>::iterator it = effectIds.begin(); it != effectIds.end(); ++it)
         {
@@ -252,7 +255,7 @@ namespace MWGui
     {
         for (int i=0; i<4; ++i)
             if (mIngredients[i] == ingredient)
-                mAlchemy.removeIngredient (i);
+                mAlchemy->removeIngredient (i);
 
         update();
     }

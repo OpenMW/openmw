@@ -16,8 +16,8 @@
 namespace MWGui
 {
 struct TypesetBookImpl;
-struct PageDisplay;
-struct BookPageImpl;
+class PageDisplay;
+class BookPageImpl;
 
 static bool ucsSpace (int codePoint);
 static bool ucsLineBreak (int codePoint);
@@ -195,8 +195,20 @@ struct TypesetBookImpl : TypesetBook
 
 struct TypesetBookImpl::Typesetter : BookTypesetter
 {
+    struct PartialText {
+        StyleImpl *mStyle;
+        Utf8Stream::Point mBegin;
+        Utf8Stream::Point mEnd;
+        int mWidth;
+
+        PartialText( StyleImpl *style, Utf8Stream::Point begin, Utf8Stream::Point end, int width) :
+            mStyle(style), mBegin(begin), mEnd(end), mWidth(width)
+        {}
+    };
+
     typedef TypesetBookImpl Book;
     typedef boost::shared_ptr <Book> BookPtr;
+    typedef std::vector<PartialText>::const_iterator PartialTextConstIterator;
 
     int mPageWidth;
     int mPageHeight;
@@ -207,6 +219,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     Run * mRun;
 
     std::vector <Alignment> mSectionAlignment;
+    std::vector <PartialText> mPartialWhitespace;
+    std::vector <PartialText> mPartialWord;
 
     Book::Content const * mCurrentContent;
     Alignment mCurrentAlignment;
@@ -246,7 +260,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     Style* createHotStyle (Style* baseStyle, Colour normalColour, Colour hoverColour, Colour activeColour, InteractiveId id, bool unique)
     {
-        StyleImpl* BaseStyle = dynamic_cast <StyleImpl*> (baseStyle);
+        StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 
         if (!unique)
             for (Styles::iterator i = mBook->mStyles.begin (); i != mBook->mStyles.end (); ++i)
@@ -268,11 +282,13 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
         Range range = mBook->addContent (text);
 
-        writeImpl (dynamic_cast <StyleImpl*> (style), range.first, range.second);
+        writeImpl (static_cast <StyleImpl*> (style), range.first, range.second);
     }
 
     intptr_t addContent (Utf8Span text, bool select)
     {
+        add_partial_text();
+
         Contents::iterator i = mBook->mContents.insert (mBook->mContents.end (), Content (text.first, text.second));
 
         if (select)
@@ -283,6 +299,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     void selectContent (intptr_t contentHandle)
     {
+        add_partial_text();
+
         mCurrentContent = reinterpret_cast <Content const *> (contentHandle);
     }
 
@@ -295,19 +313,23 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         Utf8Point begin_ = &mCurrentContent->front () + begin;
         Utf8Point end_   = &mCurrentContent->front () + end  ;
 
-        writeImpl (dynamic_cast <StyleImpl*> (style), begin_, end_);
+        writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
     
     void lineBreak (float margin)
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
 
+        add_partial_text();
+
         mRun = NULL;
         mLine = NULL;
     }
     
-    void sectionBreak (float margin)
+    void sectionBreak (int margin)
     {
+        add_partial_text();
+
         if (mBook->mSections.size () > 0)
         {
             mRun = NULL;
@@ -321,6 +343,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     void setSectionAlignment (Alignment sectionAlignment)
     {
+        add_partial_text();
+
         if (mSection != NULL)
             mSectionAlignment.back () = sectionAlignment;
         mCurrentAlignment = sectionAlignment;
@@ -330,6 +354,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
         int curPageStart = 0;
         int curPageStop  = 0;
+
+        add_partial_text();
 
         std::vector <Alignment>::iterator sa = mSectionAlignment.begin ();
         for (Sections::iterator i = mBook->mSections.begin (); i != mBook->mSections.end (); ++i, ++sa)
@@ -415,23 +441,23 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
     void writeImpl (StyleImpl * style, Utf8Stream::Point _begin, Utf8Stream::Point _end)
     {
-        int line_height = style->mFont->getDefaultHeight ();
-
         Utf8Stream stream (_begin, _end);
 
         while (!stream.eof ())
         {
             if (ucsLineBreak (stream.peek ()))
             {
+                add_partial_text();
                 stream.consume ();
                 mLine = NULL, mRun = NULL;
                 continue;
             }
 
+            if (ucsBreakingSpace (stream.peek ()) && !mPartialWord.empty())
+                add_partial_text();
+
             int word_width = 0;
-            int word_height = 0;
             int space_width = 0;
-            int character_count = 0;
 
             Utf8Stream::Point lead = stream.current ();
 
@@ -439,7 +465,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 if (gi)
-                    space_width += gi->advance + gi->bearingX;
+                    space_width += static_cast<int>(gi->advance + gi->bearingX);
                 stream.consume ();
             }
 
@@ -449,9 +475,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             {
                 MyGUI::GlyphInfo* gi = style->mFont->getGlyphInfo (stream.peek ());
                 if (gi)
-                    word_width += gi->advance + gi->bearingX;
-                word_height = line_height;
-                ++character_count;
+                    word_width += static_cast<int>(gi->advance + gi->bearingX);
                 stream.consume ();
             }
 
@@ -460,21 +484,57 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
             if (lead == extent)
                 break;
 
-            int left = mLine ? mLine->mRect.right : 0;
+            if ( lead != origin )
+                mPartialWhitespace.push_back (PartialText (style, lead, origin, space_width));
+            if ( origin != extent )
+                mPartialWord.push_back (PartialText (style, origin, extent, word_width));
+        }
+    }
 
-            if (left + space_width + word_width > mPageWidth)
-            {
-                mLine = NULL, mRun = NULL;
+    void add_partial_text ()
+    {
+        if (mPartialWhitespace.empty() && mPartialWord.empty())
+            return;
 
-                append_run (style, origin, extent, extent - origin, word_width, mBook->mRect.bottom + word_height);
-            }
-            else
+        int space_width = 0;
+        int word_width  = 0;
+
+        for (PartialTextConstIterator i = mPartialWhitespace.begin (); i != mPartialWhitespace.end (); ++i)
+            space_width += i->mWidth;
+        for (PartialTextConstIterator i = mPartialWord.begin (); i != mPartialWord.end (); ++i)
+            word_width += i->mWidth;
+
+        int left = mLine ? mLine->mRect.right : 0;
+
+        if (left + space_width + word_width > mPageWidth)
+        {
+            mLine = NULL, mRun = NULL, left = 0;
+        }
+        else
+        {
+            for (PartialTextConstIterator i = mPartialWhitespace.begin (); i != mPartialWhitespace.end (); ++i)
             {
                 int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
+                int line_height = i->mStyle->mFont->getDefaultHeight ();
 
-                append_run (style, lead, extent, extent - origin, left + space_width + word_width, top + word_height);
+                append_run ( i->mStyle, i->mBegin, i->mEnd, 0, left + i->mWidth, top + line_height);
+
+                left = mLine->mRect.right;
             }
         }
+
+        for (PartialTextConstIterator i = mPartialWord.begin (); i != mPartialWord.end (); ++i)
+        {
+            int top = mLine ? mLine->mRect.top : mBook->mRect.bottom;
+            int line_height = i->mStyle->mFont->getDefaultHeight ();
+
+            append_run (i->mStyle, i->mBegin, i->mEnd, i->mEnd - i->mBegin, left + i->mWidth, top + line_height);
+
+            left = mLine->mRect.right;
+        }
+
+        mPartialWhitespace.clear();
+        mPartialWord.clear();
     }
 
     void append_run (StyleImpl * style, Utf8Stream::Point begin, Utf8Stream::Point end, int pc, int right, int bottom)
@@ -563,15 +623,15 @@ namespace
 
         RenderXform (MyGUI::ICroppedRectangle* croppedParent, MyGUI::RenderTargetInfo const & renderTargetInfo)
         {
-            clipTop    = croppedParent->_getMarginTop ();
-            clipLeft   = croppedParent->_getMarginLeft ();
-            clipRight  = croppedParent->getWidth () - croppedParent->_getMarginRight ();
-            clipBottom = croppedParent->getHeight () - croppedParent->_getMarginBottom ();
+            clipTop    = static_cast<float>(croppedParent->_getMarginTop());
+            clipLeft   = static_cast<float>(croppedParent->_getMarginLeft ());
+            clipRight  = static_cast<float>(croppedParent->getWidth () - croppedParent->_getMarginRight ());
+            clipBottom = static_cast<float>(croppedParent->getHeight() - croppedParent->_getMarginBottom());
 
-            absoluteLeft = croppedParent->getAbsoluteLeft();
-            absoluteTop  = croppedParent->getAbsoluteTop();
-            leftOffset   = renderTargetInfo.leftOffset;
-            topOffset    = renderTargetInfo.topOffset;
+            absoluteLeft = static_cast<float>(croppedParent->getAbsoluteLeft());
+            absoluteTop  = static_cast<float>(croppedParent->getAbsoluteTop());
+            leftOffset   = static_cast<float>(renderTargetInfo.leftOffset);
+            topOffset    = static_cast<float>(renderTargetInfo.topOffset);
 
             pixScaleX   = renderTargetInfo.pixScaleX;
             pixScaleY   = renderTargetInfo.pixScaleY;
@@ -1076,7 +1136,7 @@ public:
 
             MyGUI::Colour colour = isActive ? (this_->mItemActive ? run.mStyle->mActiveColour: run.mStyle->mHotColour) : run.mStyle->mNormalColour;
 
-            glyphStream.reset (section.mRect.left + line.mRect.left + run.mLeft, line.mRect.top, colour);
+            glyphStream.reset(static_cast<float>(section.mRect.left + line.mRect.left + run.mLeft), static_cast<float>(line.mRect.top), colour);
 
             Utf8Stream stream (run.mRange);
 
@@ -1104,7 +1164,7 @@ public:
 
         RenderXform renderXform (mCroppedParent, textFormat.mRenderItem->getRenderTarget()->getInfo());
 
-        GlyphStream glyphStream (textFormat.mFont, mCoord.left, mCoord.top-mViewTop,
+        GlyphStream glyphStream(textFormat.mFont, static_cast<float>(mCoord.left), static_cast<float>(mCoord.top - mViewTop),
                                   -1 /*mNode->getNodeDepth()*/, vertices, renderXform);
 
         int visit_top    = (std::max) (mViewTop,    mViewTop + int (renderXform.clipTop   ));

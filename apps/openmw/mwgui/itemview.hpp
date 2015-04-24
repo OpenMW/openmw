@@ -37,8 +37,6 @@ namespace MWGui
 
         virtual void setSize(const MyGUI::IntSize& _value);
         virtual void setCoord(const MyGUI::IntCoord& _value);
-        void setSize(int _width, int _height);
-        void setCoord(int _left, int _top, int _width, int _height);
 
         void onSelectedItem (MyGUI::Widget* sender);
         void onSelectedBackground (MyGUI::Widget* sender);

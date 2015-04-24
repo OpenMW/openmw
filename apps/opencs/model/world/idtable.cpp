@@ -1,5 +1,6 @@
-
 #include "idtable.hpp"
+
+#include <stdexcept>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
@@ -49,6 +50,9 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
     if (orientation==Qt::Vertical)
         return QVariant();
 
+    if (orientation != Qt::Horizontal)
+        throw std::logic_error("Unknown header orientation specified");
+
     if (role==Qt::DisplayRole)
         return tr (mIdCollection->getColumn (section).getTitle().c_str());
 
@@ -64,7 +68,7 @@ QVariant CSMWorld::IdTable::headerData (int section, Qt::Orientation orientation
     return QVariant();
 }
 
-bool CSMWorld::IdTable::setData ( const QModelIndex &index, const QVariant &value, int role)
+bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value, int role)
 {
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
@@ -138,15 +142,16 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
                                     CSMWorld::UniversalId::Type type)
 {
     int index = mIdCollection->getAppendIndex (destination);
+
     beginInsertRows (QModelIndex(), index, index);
     mIdCollection->cloneRecord(origin, destination, type);
     endInsertRows();
 }
 
-
+///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
-    return index (mIdCollection->getIndex (id), column);
+    return index(mIdCollection->getIndex (id), column);
 }
 
 void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record)
@@ -230,6 +235,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view (int row) 
     return std::make_pair (UniversalId (UniversalId::Type_Scene, id), hint);
 }
 
+///For top level data/columns
 bool CSMWorld::IdTable::isDeleted (const std::string& id) const
 {
     return getRecord (id).isDeleted();
@@ -238,4 +244,9 @@ bool CSMWorld::IdTable::isDeleted (const std::string& id) const
 int CSMWorld::IdTable::getColumnId(int column) const
 {
     return mIdCollection->getColumn(column).getId();
+}
+
+CSMWorld::CollectionBase *CSMWorld::IdTable::idCollection() const
+{
+    return mIdCollection;
 }

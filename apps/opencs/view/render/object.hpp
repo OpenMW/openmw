@@ -3,7 +3,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#ifndef Q_MOC_RUN
 #include <components/nifogre/ogrenifloader.hpp>
+#endif
 
 class QModelIndex;
 
@@ -15,7 +17,7 @@ namespace Ogre
 namespace CSMWorld
 {
     class Data;
-    class CellRef;
+    struct CellRef;
 }
 
 namespace CSVWorld

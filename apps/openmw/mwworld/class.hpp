@@ -43,7 +43,6 @@ namespace ESM
 
 namespace MWWorld
 {
-    class Ptr;
     class ContainerStore;
     class InventoryStore;
     class PhysicsSystem;
@@ -81,9 +80,11 @@ namespace MWWorld
             virtual std::string getId (const Ptr& ptr) const;
             ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
+            /// @note This function is currently redundant; the same ID can be retrieved by CellRef::getRefId.
+            ///       Leaving it here for now in case we want to optimize later.
 
-            virtual void insertObjectRendering (const Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
+            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const Ptr& ptr) const = 0;
@@ -308,6 +309,8 @@ namespace MWWorld
             virtual bool canFly(const MWWorld::Ptr& ptr) const;
             virtual bool canSwim(const MWWorld::Ptr& ptr) const;
             virtual bool canWalk(const MWWorld::Ptr& ptr) const;
+            bool isPureWaterCreature(const MWWorld::Ptr& ptr) const;
+            bool isMobile(const MWWorld::Ptr& ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
@@ -341,6 +344,12 @@ namespace MWWorld
             virtual std::string getSound(const MWWorld::Ptr& ptr) const;
 
             virtual int getBaseFightRating (const MWWorld::Ptr& ptr) const;
+
+            virtual std::string getPrimaryFaction (const MWWorld::Ptr& ptr) const;
+            virtual int getPrimaryFactionRank (const MWWorld::Ptr& ptr) const;
+
+            /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
+            virtual int getEffectiveArmorRating(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const;
     };
 }
 

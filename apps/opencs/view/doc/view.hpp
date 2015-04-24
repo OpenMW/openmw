@@ -215,6 +215,10 @@ namespace CSVDoc
 
             void addPathgridSubView();
 
+            void addStartScriptsSubView();
+
+            void addSearchSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();

@@ -4,10 +4,8 @@ set (OPENCS_SRC main.cpp
 
 opencs_units (. editor)
 
-set (CMAKE_BUILD_TYPE DEBUG)
-
 opencs_units (model/doc
-    document operation saving documentmanager loader runner
+    document operation saving documentmanager loader runner operationholder
     )
 
 opencs_units_noqt (model/doc
@@ -20,14 +18,14 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree
     )
 
 
 opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
-    pathgrid landtexture land
+    pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     )
 
 opencs_hdrs_noqt (model/world
@@ -41,7 +39,8 @@ opencs_units (model/tools
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
-    birthsigncheck spellcheck referenceablecheck scriptcheck bodypartcheck
+    birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
+    startscriptcheck search searchoperation searchstage
     )
 
 
@@ -63,7 +62,7 @@ opencs_hdrs_noqt (view/doc
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
-    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable
+    infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     )
 
 opencs_units_noqt (view/world
@@ -92,7 +91,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable
+    reportsubview reporttable searchsubview searchbox
     )
 
 opencs_units_noqt (view/tools
@@ -146,7 +145,7 @@ set (OPENCS_UI
     ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
     )
 
-source_group (opencs FILES ${OPENCS_SRC} ${OPENCS_HDR})
+source_group (openmw-cs FILES ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
     set(QT_USE_QTMAIN TRUE)
@@ -166,17 +165,17 @@ qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
 qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
 qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR} ${BULLET_INCLUDE_DIRS})
+# for compiled .ui files
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if(APPLE)
-    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/opencs.icns)
+    set (OPENCS_MAC_ICON ${CMAKE_SOURCE_DIR}/files/mac/openmw-cs.icns)
 else()
     set (OPENCS_MAC_ICON "")
 endif(APPLE)
 
-add_executable(opencs
+add_executable(openmw-cs
     MACOSX_BUNDLE
-    ${OENGINE_BULLET}
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
@@ -185,10 +184,10 @@ add_executable(opencs
 )
 
 if(APPLE)
-    set_target_properties(opencs PROPERTIES
+    set_target_properties(openmw-cs PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}"
-        OUTPUT_NAME "OpenCS"
-        MACOSX_BUNDLE_ICON_FILE "opencs.icns"
+        OUTPUT_NAME "OpenMW-CS"
+        MACOSX_BUNDLE_ICON_FILE "openmw-cs.icns"
         MACOSX_BUNDLE_BUNDLE_NAME "OpenCS"
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
@@ -199,7 +198,8 @@ if(APPLE)
         MACOSX_PACKAGE_LOCATION Resources)
 endif(APPLE)
 
-target_link_libraries(opencs
+target_link_libraries(openmw-cs
+    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
@@ -211,5 +211,5 @@ target_link_libraries(opencs
 )
 
 if(APPLE)
-    INSTALL(TARGETS opencs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
 endif()

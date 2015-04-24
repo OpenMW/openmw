@@ -1,5 +1,9 @@
 #include "class.hpp"
 
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_Gui.h>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

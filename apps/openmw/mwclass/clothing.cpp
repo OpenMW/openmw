@@ -28,19 +28,17 @@ namespace MWClass
         return ptr.get<ESM::Clothing>()->mBase->mId;
     }
 
-    void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, MWRender::RenderingInterface& renderingInterface) const
+    void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        const std::string model = getModel(ptr);
         if (!model.empty()) {
             renderingInterface.getObjects().insertModel(ptr, model);
         }
     }
 
-    void Clothing::insertObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics) const
+    void Clothing::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
     {
-        const std::string model = getModel(ptr);
         if(!model.empty())
-            physics.addObject(ptr,true);
+            physics.addObject(ptr, model, true);
     }
 
     std::string Clothing::getModel(const MWWorld::Ptr &ptr) const
@@ -205,7 +203,7 @@ namespace MWClass
 
         info.enchant = ref->mBase->mEnchant;
         if (!info.enchant.empty())
-            info.remainingEnchantCharge = ptr.getCellRef().getEnchantmentCharge();
+            info.remainingEnchantCharge = static_cast<int>(ptr.getCellRef().getEnchantmentCharge());
 
         info.text = text;
 

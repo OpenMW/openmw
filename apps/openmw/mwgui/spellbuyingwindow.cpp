@@ -1,6 +1,8 @@
 #include "spellbuyingwindow.hpp"
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_Gui.h>
+#include <MyGUI_Button.h>
+#include <MyGUI_ScrollView.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -44,7 +46,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore();
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        int price = spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat();
+        int price = static_cast<int>(spell->mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -65,7 +67,7 @@ namespace MWGui
         mCurrentY += sLineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+boost::lexical_cast<std::string>(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing(spell->mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
         toAdd->setSize(toAdd->getTextSize().width,sLineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
@@ -166,7 +168,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + boost::lexical_cast<std::string>(playerGold));
+        mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
         mPlayerGold->setCoord(8,
                               mPlayerGold->getTop(),
                               mPlayerGold->getTextSize().width,
@@ -185,7 +187,7 @@ namespace MWGui
         if (mSpellsView->getViewOffset().top + _rel*0.3 > 0)
             mSpellsView->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mSpellsView->setViewOffset(MyGUI::IntPoint(0, mSpellsView->getViewOffset().top + _rel*0.3));
+            mSpellsView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mSpellsView->getViewOffset().top + _rel*0.3f)));
     }
 }
 

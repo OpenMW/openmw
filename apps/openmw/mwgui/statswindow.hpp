@@ -1,10 +1,10 @@
 #ifndef MWGUI_STATS_WINDOW_H
 #define MWGUI_STATS_WINDOW_H
 
-#include "../mwworld/esmstore.hpp"
-
 #include "../mwmechanics/stat.hpp"
 #include "windowpinnablebase.hpp"
+
+#include <components/esm/loadskil.hpp>
 
 namespace MWGui
 {

@@ -635,7 +635,7 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
-        startDrag(*this);
+        startDragFromTable(*this);
     }
 }
 

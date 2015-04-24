@@ -59,7 +59,7 @@ int wmain(int argc, wchar_t *wargv[]) {
 
     try
     {
-        bpo::options_description desc("Syntax: mwiniimporter <options> inifile configfile\nAllowed options");
+        bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
         bpo::positional_options_description p_desc;
         desc.add_options()
             ("help,h", "produce help message")
@@ -93,8 +93,8 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         bpo::notify(vm);
 
-        std::string iniFile = vm["ini"].as<std::string>();
-        std::string cfgFile = vm["cfg"].as<std::string>();
+        boost::filesystem::path iniFile(vm["ini"].as<std::string>());
+        boost::filesystem::path cfgFile(vm["cfg"].as<std::string>());
 
         // if no output is given, write back to cfg file
         std::string outputFile(vm["output"].as<std::string>());
@@ -110,7 +110,7 @@ int wmain(int argc, wchar_t *wargv[]) {
             std::cerr << "cfg file does not exist" << std::endl;
 
         MwIniImporter importer;
-        importer.setVerbose(vm.count("verbose"));
+        importer.setVerbose(vm.count("verbose") != 0);
 
         // Font encoding settings
         std::string encoding(vm["encoding"].as<std::string>());
@@ -123,7 +123,7 @@ int wmain(int argc, wchar_t *wargv[]) {
         importer.mergeFallback(cfg, ini);
 
         if(vm.count("game-files")) {
-            importer.importGameFiles(cfg, ini);
+            importer.importGameFiles(cfg, ini, iniFile);
         }
 
         if(!vm.count("no-archives")) {

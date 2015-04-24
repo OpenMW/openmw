@@ -1,19 +1,22 @@
 #include "formatting.hpp"
 
+#include <OgreUTFString.h>
+#include <OgreResourceGroupManager.h>
+
+#include <MyGUI_EditText.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_EditBox.h>
+#include <MyGUI_ImageBox.h>
+#include <MyGUI_FontManager.h>
+
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
 #include <components/interpreter/defines.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../mwscript/interpretercontext.hpp"
-
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <OgreUTFString.h>
-#include <OgreResourceGroupManager.h>
-
-#include <MyGUI_EditText.h>
 
 namespace MWGui
 {
@@ -280,8 +283,8 @@ namespace MWGui
                             continue;
 
                         std::string src = attr.at("src");
-                        int width = boost::lexical_cast<int>(attr.at("width"));
-                        int height = boost::lexical_cast<int>(attr.at("height"));
+                        int width = MyGUI::utility::parseInt(attr.at("width"));
+                        int height = MyGUI::utility::parseInt(attr.at("height"));
 
                         ImageElement elem(paper, pag, mBlockStyle,
                                           src, width, height);
@@ -340,7 +343,7 @@ namespace MWGui
         {
             if (attr.find("color") != attr.end())
             {
-                int color;
+                unsigned int color;
                 std::stringstream ss;
                 ss << attr.at("color");
                 ss >> std::hex >> color;
@@ -393,7 +396,7 @@ namespace MWGui
         {
             MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
                 MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
-                parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
             box->setProperty("Static", "true");
             box->setProperty("MultiLine", "true");
             box->setProperty("WordWrap", "true");
@@ -461,7 +464,7 @@ namespace MWGui
 
             mImageBox = parent->createWidget<MyGUI::ImageBox> ("ImageBox",
                 MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
-                parent->getName() + boost::lexical_cast<std::string>(parent->getChildCount()));
+                parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
 
             std::string image = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
             mImageBox->setImageTexture(image);

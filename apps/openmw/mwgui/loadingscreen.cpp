@@ -8,6 +8,16 @@
 #include <OgreTextureManager.h>
 #include <OgreViewport.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreSceneManager.h>
+
+#include <MyGUI_RenderManager.h>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Gui.h>
+#include <MyGUI_TextBox.h>
+
+#include <openengine/misc/rng.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -25,8 +35,8 @@ namespace MWGui
         : mSceneMgr(sceneMgr)
         , mWindow(rw)
         , WindowBase("openmw_loading_screen.layout")
-        , mLastRenderTime(0.f)
-        , mLastWallpaperChangeTime(0.f)
+        , mLastRenderTime(0)
+        , mLastWallpaperChangeTime(0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -138,12 +148,14 @@ namespace MWGui
 
         if (!mResources.empty())
         {
-            std::string const & randomSplash = mResources.at (rand() % mResources.size());
+            std::string const & randomSplash = mResources.at(OEngine::Misc::Rng::rollDice(mResources.size()));
 
             Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
-            mBackgroundImage->setBackgroundImage(randomSplash, true, true);
+            // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
+            bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+            mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
         else
             std::cerr << "No loading screens found!" << std::endl;
@@ -163,7 +175,7 @@ namespace MWGui
             return;
         mProgress = value;
         mProgressBar->setScrollPosition(0);
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -172,7 +184,7 @@ namespace MWGui
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
         mProgress = value;
-        mProgressBar->setTrackSize(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize());
+        mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
     }
 
@@ -183,7 +195,7 @@ namespace MWGui
             time = (time-2)*-1;
 
         mProgressBar->setTrackSize(50);
-        mProgressBar->setScrollPosition(time * (mProgressBar->getScrollRange()-1));
+        mProgressBar->setScrollPosition(static_cast<size_t>(time * (mProgressBar->getScrollRange() - 1)));
         draw();
     }
 

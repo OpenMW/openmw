@@ -15,6 +15,8 @@ namespace MWGui
 
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner);
         virtual void removeItem (const ItemStack& item, size_t count);
+
+        bool hasProfit(const MWWorld::Ptr& actor);
     };
 
 }

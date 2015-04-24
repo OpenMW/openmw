@@ -1,15 +1,22 @@
 #include "settingswindow.hpp"
 
 #include <OgreRoot.h>
-#include <OgrePlugin.h>
 
-#include <boost/lexical_cast.hpp>
+#include <MyGUI_ScrollBar.h>
+#include <MyGUI_Window.h>
+#include <MyGUI_ComboBox.h>
+#include <MyGUI_ListBox.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_Gui.h>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
 
 #include <SDL_video.h>
 
+#include <components/misc/stringops.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -48,8 +55,8 @@ namespace
         assert (split.size() >= 2);
         boost::trim(split[0]);
         boost::trim(split[1]);
-        x = boost::lexical_cast<int> (split[0]);
-        y = boost::lexical_cast<int> (split[1]);
+        x = MyGUI::utility::parseInt (split[0]);
+        y = MyGUI::utility::parseInt (split[1]);
     }
 
     bool sortResolutions (std::pair<int, int> left, std::pair<int, int> right)
@@ -67,7 +74,7 @@ namespace
         // special case: 8 : 5 is usually referred to as 16:10
         if (xaspect == 8 && yaspect == 5)
             return "16 : 10";
-        return boost::lexical_cast<std::string>(xaspect) + " : " + boost::lexical_cast<std::string>(yaspect);
+        return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
     }
 
     std::string hlslGlsl ()
@@ -105,9 +112,9 @@ namespace
         min = 0.f;
         max = 1.f;
         if (!widget->getUserString(settingMin).empty())
-            min = boost::lexical_cast<float>(widget->getUserString(settingMin));
+            min = MyGUI::utility::parseFloat(widget->getUserString(settingMin));
         if (!widget->getUserString(settingMax).empty())
-            max = boost::lexical_cast<float>(widget->getUserString(settingMax));
+            max = MyGUI::utility::parseFloat(widget->getUserString(settingMax));
     }
 }
 
@@ -141,11 +148,11 @@ namespace MWGui
                     value = std::max(min, std::min(value, max));
                     value = (value-min)/(max-min);
 
-                    scroll->setScrollPosition( value * (scroll->getScrollRange()-1));
+                    scroll->setScrollPosition(static_cast<size_t>(value * (scroll->getScrollRange() - 1)));
                 }
                 else
                 {
-                    int value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    int value = Settings::Manager::getInt(getSettingName(current), getSettingCategory(current));
                     scroll->setScrollPosition(value);
                 }
                 scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
@@ -156,7 +163,8 @@ namespace MWGui
     }
 
     SettingsWindow::SettingsWindow() :
-        WindowBase("openmw_settings_window.layout")
+        WindowBase("openmw_settings_window.layout"),
+        mKeyboardMode(true)
     {
         configureWidgets(mMainWidget);
 
@@ -181,6 +189,8 @@ namespace MWGui
         getWidget(mResetControlsButton, "ResetControlsButton");
         getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
+        getWidget(mKeyboardSwitch, "KeyboardButton");
+        getWidget(mControllerSwitch, "ControllerButton");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -206,6 +216,9 @@ namespace MWGui
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
+        mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
+        mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
+
         center();
 
         mResetControlsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
@@ -224,7 +237,7 @@ namespace MWGui
         for (std::vector < std::pair<int, int> >::const_iterator it=resolutions.begin();
              it!=resolutions.end(); ++it)
         {
-            std::string str = boost::lexical_cast<std::string>(it->first) + " x " + boost::lexical_cast<std::string>(it->second)
+            std::string str = MyGUI::utility::toString(it->first) + " x " + MyGUI::utility::toString(it->second)
                     + " (" + getAspect(it->first,it->second) + ")";
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
@@ -233,7 +246,7 @@ namespace MWGui
 
         std::string tf = Settings::Manager::getString("texture filtering", "General");
         mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
-        mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(Settings::Manager::getInt("anisotropy", "General")) + ")");
+        mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
 
@@ -249,13 +262,17 @@ namespace MWGui
 
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
-        fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "General"))) + ")");
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
-        diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
+
+        diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(Settings::Manager::getInt("difficulty", "Game"))) + ")");
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
+
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -425,13 +442,13 @@ namespace MWGui
                 {
                     MyGUI::TextBox* fovText;
                     getWidget(fovText, "FovText");
-                    fovText->setCaption("Field of View (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                    fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(value)) + ")");
                 }
                 if (scroller == mDifficultySlider)
                 {
                     MyGUI::TextBox* diffText;
                     getWidget(diffText, "DifficultyText");
-                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + boost::lexical_cast<std::string>(int(value)) + ")");
+                    diffText->setCaptionWithReplacing("#{sDifficulty} (" + MyGUI::utility::toString(int(value)) + ")");
                 }
             }
             else
@@ -439,7 +456,7 @@ namespace MWGui
                 Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), pos);
                 if (scroller == mAnisotropySlider)
                 {
-                    mAnisotropyLabel->setCaption("Anisotropy (" + boost::lexical_cast<std::string>(pos) + ")");
+                    mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(pos) + ")");
                 }
             }
             apply();
@@ -455,14 +472,37 @@ namespace MWGui
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
     }
 
+    void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(mKeyboardMode)
+            return;
+        mKeyboardMode = true;
+        mKeyboardSwitch->setStateSelected(true);
+        mControllerSwitch->setStateSelected(false);
+        updateControlsBox();
+    }
+
+    void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
+    {
+        if(!mKeyboardMode)
+            return;
+        mKeyboardMode = false;
+        mKeyboardSwitch->setStateSelected(false);
+        mControllerSwitch->setStateSelected(true);
+        updateControlsBox();
+    }
+
     void SettingsWindow::updateControlsBox()
     {
         while (mControlsBox->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mControlsBox->getChildAt(0));
 
-        MWBase::Environment::get().getWindowManager ()->removeStaticMessageBox();
-
-        std::vector<int> actions = MWBase::Environment::get().getInputManager()->getActionSorting ();
+        MWBase::Environment::get().getWindowManager()->removeStaticMessageBox();
+        std::vector<int> actions;
+        if(mKeyboardMode)
+            actions = MWBase::Environment::get().getInputManager()->getActionKeySorting();
+        else
+            actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
 
         const int h = 18;
         const int w = mControlsBox->getWidth() - 28;
@@ -473,7 +513,11 @@ namespace MWGui
             if (desc == "")
                 continue;
 
-            std::string binding = MWBase::Environment::get().getInputManager()->getActionBindingName (*it);
+            std::string binding;
+            if(mKeyboardMode)
+                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(*it);
+            else
+                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(*it);
 
             Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(0,curH,w,h), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
@@ -507,16 +551,16 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager ()->staticMessageBox ("#{sControlsMenu3}");
         MWBase::Environment::get().getWindowManager ()->disallowMouse();
 
-        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId);
+        MWBase::Environment::get().getInputManager ()->enableDetectingBindingMode (actionId, mKeyboardMode);
 
     }
 
     void SettingsWindow::onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel)
     {
-        if (mControlsBox->getViewOffset().top + _rel*0.3 > 0)
+        if (mControlsBox->getViewOffset().top + _rel*0.3f > 0)
             mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
         else
-            mControlsBox->setViewOffset(MyGUI::IntPoint(0, mControlsBox->getViewOffset().top + _rel*0.3));
+            mControlsBox->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mControlsBox->getViewOffset().top + _rel*0.3f)));
     }
 
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
@@ -530,7 +574,10 @@ namespace MWGui
 
     void SettingsWindow::onResetDefaultBindingsAccept()
     {
-        MWBase::Environment::get().getInputManager ()->resetToDefaultBindings ();
+        if(mKeyboardMode)
+            MWBase::Environment::get().getInputManager ()->resetToDefaultKeyBindings ();
+        else
+            MWBase::Environment::get().getInputManager()->resetToDefaultControllerBindings();
         updateControlsBox ();
     }
 

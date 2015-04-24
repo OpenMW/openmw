@@ -44,7 +44,6 @@
     border-radius: 2px;
 
     font-size: 12pt;
-    font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
 	color: black;
 }
 
@@ -95,13 +94,12 @@
         <property name="styleSheet">
          <string notr="true">#profileLabel {
     font-size: 18pt;
-    font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
 	color: black;
 }
 </string>
         </property>
         <property name="text">
-         <string>Current Profile:</string>
+         <string>Current Content List:</string>
         </property>
        </widget>
       </item>
@@ -133,7 +131,6 @@
         stop:1 rgba(0, 0, 0, 100));
 
     font-size: 26pt;
-    font-family: &quot;EB Garamond&quot;, &quot;EB Garamond 08&quot;;
     color: black;
 
     border-right: 1px solid rgba(0, 0, 0, 155);

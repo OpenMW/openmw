@@ -21,6 +21,7 @@ enum RenderQueueGroups
     RQG_UnderWater = Ogre::RENDER_QUEUE_4,
 
     RQG_Water = RQG_Alpha,
+    RQG_Ripples = RQG_Water+1,
 
     // Sky late (sun & sun flare)
     RQG_SkiesLate = Ogre::RENDER_QUEUE_SKIES_LATE
@@ -30,39 +31,44 @@ enum RenderQueueGroups
 enum VisibilityFlags
 {
     // Terrain
-    RV_Terrain = 1,
+    RV_Terrain = (1<<0),
 
     // Statics (e.g. trees, houses)
-    RV_Statics = 2,
+    RV_Statics = (1<<1),
 
     // Small statics
-    RV_StaticsSmall = 4,
+    RV_StaticsSmall = (1<<2),
 
     // Water
-    RV_Water = 8,
+    RV_Water = (1<<3),
 
     // Actors (npcs, creatures)
-    RV_Actors = 16,
+    RV_Actors = (1<<4),
 
     // Misc objects (containers, dynamic objects)
-    RV_Misc = 32,
+    RV_Misc = (1<<5),
 
-    RV_Sky = 64,
+    // VFX, don't appear on map and don't cast shadows
+    RV_Effects = (1<<6),
+
+    RV_Sky = (1<<7),
 
     // not visible in reflection
-    RV_NoReflection = 128,
+    RV_NoReflection = (1<<8),
 
-    RV_OcclusionQuery = 256,
+    RV_OcclusionQuery = (1<<9),
 
-    RV_Debug = 512,
+    RV_Debug = (1<<10),
 
     // overlays, we only want these on the main render target
-    RV_Overlay = 1024,
+    RV_Overlay = (1<<11),
 
     // First person meshes do not cast shadows
-    RV_FirstPerson = 2048,
+    RV_FirstPerson = (1<<12),
 
-    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water
+    RV_Map = RV_Terrain + RV_Statics + RV_StaticsSmall + RV_Misc + RV_Water,
+
+    RV_Refraction = RV_Actors + RV_Misc + RV_Statics + RV_StaticsSmall + RV_Terrain + RV_Effects + RV_Sky + RV_FirstPerson
 };
 
 }

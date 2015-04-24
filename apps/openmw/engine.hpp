@@ -71,7 +71,6 @@ namespace OMW
             OEngine::Render::OgreRenderer *mOgre;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
-            int mFpsLevel;
             bool mVerboseScripts;
             bool mSkipMenu;
             bool mUseSound;
@@ -83,6 +82,7 @@ namespace OMW
             bool mScriptConsoleMode;
             std::string mStartupScript;
             int mActivationDistanceOverride;
+            std::string mSaveGameFile;
             // Grab mouse?
             bool mGrab;
 
@@ -150,9 +150,6 @@ namespace OMW
              */
             void addContentFile(const std::string& file);
 
-            /// Enable fps counter
-            void showFPS(int level);
-
             /// Enable or disable verbose script output
             void setScriptsVerbosity(bool scriptsVerbosity);
 
@@ -203,6 +200,9 @@ namespace OMW
             void setScriptBlacklistUse (bool use);
 
             void enableFontExport(bool exportFonts);
+
+            /// Set the save game file to load after initialising the engine.
+            void setSaveGameFile(const std::string& savegame);
 
         private:
             Files::ConfigurationManager& mCfgMgr;

@@ -4,7 +4,6 @@
     <Widget type="Window" skin="MW_Dialog" layer="Windows" position="0 0 418 248" name="_Main">
         <Property key="Visible" value="false"/>
 
-
         <Widget type="TextBox" skin="SandText" position="8 18 418 24" align="Right Top">
             <Property key="TextAlign" value="Left"/>
             <Property key="Caption" value="#{sRepairServiceTitle}"/>
@@ -20,10 +19,10 @@
             </Widget>
         </Widget>
 
-        <Widget type="TextBox" skin="SandText" position="10 210 300 24" name="PlayerGold" align="Right Top">
+        <Widget type="TextBox" skin="SandText" position="10 206 300 24" name="PlayerGold" align="Right Top">
             <Property key="TextAlign" value="Left"/>
         </Widget>
-        <Widget type="AutoSizedButton" skin="MW_Button" position="343 210 60 24" name="OkButton" align="Right Top">
+        <Widget type="AutoSizedButton" skin="MW_Button" position="343 210 56 24" name="OkButton" align="Right Top">
             <Property key="ExpandDirection" value="Left"/>
             <Property key="Caption" value="#{sOK}"/>
         </Widget>

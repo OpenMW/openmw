@@ -1,8 +1,8 @@
 #ifndef _SFO_EVENTS_H
 #define _SFO_EVENTS_H
 
-#include <SDL.h>
-
+#include <SDL_types.h>
+#include <SDL_events.h>
 
 ////////////
 // Events //
@@ -40,23 +40,25 @@ public:
     virtual void keyReleased(const SDL_KeyboardEvent &arg) = 0;
 };
 
-class JoyListener
+class ControllerListener
 {
 public:
-    virtual ~JoyListener() {}
+    virtual ~ControllerListener() {}
     /** @remarks Joystick button down event */
-    virtual void buttonPressed( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &evt) = 0;
 
     /** @remarks Joystick button up event */
-    virtual void buttonReleased( const SDL_JoyButtonEvent &evt, int button ) = 0;
+    virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &evt) = 0;
 
     /** @remarks Joystick axis moved event */
-    virtual void axisMoved( const SDL_JoyAxisEvent &arg, int axis ) = 0;
+    virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg) = 0;
 
-    //-- Not so common control events, so are not required --//
+    /** @remarks Joystick Added **/
+    virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg) = 0;
 
-    //! Joystick Event, and povID
-    virtual void povMoved( const SDL_JoyHatEvent &arg, int index) {}
+    /** @remarks Joystick Removed **/
+    virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg) = 0;
+
 };
 
 class WindowListener
@@ -65,7 +67,7 @@ public:
     virtual ~WindowListener() {}
 
     /** @remarks The window's visibility changed */
-    virtual void windowVisibilityChange( bool visible ) {};
+    virtual void windowVisibilityChange( bool visible ) {}
 
     /** @remarks The window got / lost input focus */
     virtual void windowFocusChange( bool have_focus ) {}

@@ -9,6 +9,7 @@
 #include "aipackage.hpp"
 #include "spelllist.hpp"
 #include "loadskil.hpp"
+#include "transport.hpp"
 
 namespace ESM {
 
@@ -98,17 +99,13 @@ struct NPC
         char mUnknown1, mUnknown2, mUnknown3;
         int mGold;
     }; // 12 bytes
-
-    struct Dest
-    {
-        Position    mPos;
-        std::string mCellName;
-    };
     #pragma pack(pop)
 
     unsigned char mNpdtType;
     NPDTstruct52 mNpdt52;
     NPDTstruct12 mNpdt12; //for autocalculated characters
+
+    int getFactionRank() const; /// wrapper for mNpdt*, -1 = no rank
 
     int mFlags;
 
@@ -120,7 +117,10 @@ struct NPC
     AIData mAiData;
     bool mHasAI;
 
-    std::vector<Dest> mTransport;
+    Transport mTransport;
+
+    const std::vector<Transport::Dest>& getTransport() const;
+
     AIPackageList     mAiPackage;
 
     std::string mId, mName, mModel, mRace, mClass, mFaction, mScript;

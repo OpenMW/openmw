@@ -24,8 +24,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mMurdered = false;
     esm.getHNOT (mMurdered, "MURD");
 
-    mFriendlyHits = 0;
-    esm.getHNOT (mFriendlyHits, "FRHT");
+    if (esm.isNextSub("FRHT"))
+        esm.skipHSub(); // Friendly hits, no longer used
 
     mTalkedTo = false;
     esm.getHNOT (mTalkedTo, "TALK");
@@ -94,9 +94,10 @@ void ESM::CreatureStats::load (ESMReader &esm)
     {
         int magicEffect;
         esm.getHT(magicEffect);
+        std::string source = esm.getHNOString("SOUR");
         int actorId;
         esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[magicEffect] = actorId;
+        mSummonedCreatureMap[std::make_pair(magicEffect, source)] = actorId;
     }
 
     while (esm.isNextSub("GRAV"))
@@ -138,9 +139,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mMurdered)
         esm.writeHNT ("MURD", mMurdered);
-
-    if (mFriendlyHits)
-        esm.writeHNT ("FRHT", mFriendlyHits);
 
     if (mTalkedTo)
         esm.writeHNT ("TALK", mTalkedTo);
@@ -204,9 +202,10 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (std::map<int, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    for (std::map<std::pair<int, std::string>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {
-        esm.writeHNT ("SUMM", it->first);
+        esm.writeHNT ("SUMM", it->first.first);
+        esm.writeHNString ("SOUR", it->first.second);
         esm.writeHNT ("ACID", it->second);
     }
 
@@ -216,6 +215,37 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     }
 
     esm.writeHNT("AISE", mHasAiSettings);
-    for (int i=0; i<4; ++i)
-        mAiSettings[i].save(esm);
+    if (mHasAiSettings)
+    {
+        for (int i=0; i<4; ++i)
+            mAiSettings[i].save(esm);
+    }
+}
+
+void ESM::CreatureStats::blank()
+{
+    mTradeTime.mHour = 0;
+    mTradeTime.mDay = 0;
+    mGoldPool = 0;
+    mActorId = -1;
+    mHasAiSettings = false;
+    mDead = false;
+    mDied = false;
+    mMurdered = false;
+    mTalkedTo = false;
+    mAlarmed = false;
+    mAttacked = false;
+    mAttackingOrSpell = false;
+    mKnockdown = false;
+    mKnockdownOneFrame = false;
+    mKnockdownOverOneFrame = false;
+    mHitRecovery = false;
+    mBlock = false;
+    mMovementFlags = 0;
+    mAttackStrength = 0.f;
+    mFallHeight = 0.f;
+    mRecalcDynamicStats = false;
+    mDrawState = 0;
+    mDeathAnimation = 0;
+    mLevel = 1;
 }

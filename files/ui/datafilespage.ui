@@ -29,7 +29,7 @@
       <enum>Qt::NoFocus</enum>
      </property>
      <property name="title">
-      <string>Profile</string>
+      <string>Content List</string>
      </property>
      <property name="flat">
       <bool>false</bool>
@@ -69,10 +69,10 @@
       <item>
        <widget class="QToolButton" name="newProfileButton">
         <property name="toolTip">
-         <string>New Profile</string>
+         <string>New Content List</string>
         </property>
         <property name="text">
-         <string>&amp;New Profile</string>
+         <string>&amp;New Content List</string>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
@@ -82,10 +82,10 @@
       <item>
        <widget class="QToolButton" name="deleteProfileButton">
         <property name="toolTip">
-         <string>Delete Profile</string>
+         <string>Delete Content List</string>
         </property>
         <property name="text">
-         <string>Delete Profile</string>
+         <string>Delete Content List</string>
         </property>
         <property name="shortcut">
          <string>Ctrl+D</string>
@@ -106,10 +106,10 @@
     </iconset>
    </property>
    <property name="text">
-    <string>New Profile</string>
+    <string>New Content List</string>
    </property>
    <property name="toolTip">
-    <string>New Profile</string>
+    <string>New Content List</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -125,10 +125,10 @@
     </iconset>
    </property>
    <property name="text">
-    <string>Delete Profile</string>
+    <string>Delete Content List</string>
    </property>
    <property name="toolTip">
-    <string>Delete Profile</string>
+    <string>Delete Content List</string>
    </property>
   </action>
   <action name="checkAction">

@@ -55,6 +55,10 @@ struct PartReferenceList
 {
     std::vector<PartReference> mParts;
 
+    /// Load one part, assumes the subrecord name was already read
+    void add(ESMReader &esm);
+
+    /// TODO: remove this method. The ESM format does not guarantee that all Part subrecords follow one another.
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 };

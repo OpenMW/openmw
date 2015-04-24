@@ -15,7 +15,7 @@
 #include <extern/shiny/Platforms/Ogre/OgrePlatform.hpp>
 
 #include <components/ogreinit/ogreinit.hpp>
-
+#include <components/nifogre/ogrenifloader.hpp>
 #include <components/bsa/resources.hpp>
 
 #include "model/doc/document.hpp"
@@ -34,6 +34,8 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     mSettings.setModel (CSMSettings::UserSettings::instance());
 
     ogreInit.init ((mCfgMgr.getUserConfigPath() / "opencsOgre.log").string());
+
+    NifOgre::Loader::setShowMarkers(true);
 
     mOverlaySystem.reset (new CSVRender::OverlaySystem);
 
@@ -75,7 +77,8 @@ CS::Editor::~Editor ()
     mPidFile.close();
 
     if(mServer && boost::filesystem::exists(mPid))
-        remove(mPid.string().c_str()); // ignore any error
+        static_cast<void> ( // silence coverity warning
+        remove(mPid.string().c_str())); // ignore any error
 
     // cleanup global resources used by OEngine
     delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
@@ -93,7 +96,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
 std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
 {
     boost::program_options::variables_map variables;
-    boost::program_options::options_description desc("Syntax: opencs <options>\nAllowed options");
+    boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
 
     desc.add_options()
     ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
@@ -246,7 +249,7 @@ bool CS::Editor::makeIPCServer()
     try
     {
         mPid = boost::filesystem::temp_directory_path();
-        mPid /= "opencs.pid";
+        mPid /= "openmw-cs.pid";
         bool pidExists = boost::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
