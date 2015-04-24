@@ -176,18 +176,12 @@ void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::
 ==============================DialogueDelegateDispatcher==========================================
 */
 
-<<<<<<< HEAD
-CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document) :
-mParent(parent),
-mTable(table),
-mCommandDispatcher (commandDispatcher), mDocument (document),
-=======
 CSVWorld::DialogueDelegateDispatcher::DialogueDelegateDispatcher(QObject* parent,
-        CSMWorld::IdTable* table, CSMDoc::Document& document, QAbstractItemModel *model) :
+        CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher,
+        CSMDoc::Document& document, QAbstractItemModel *model) :
 mParent(parent),
 mTable(model ? model : table),
-mDocument (document),
->>>>>>> master
+mCommandDispatcher (commandDispatcher), mDocument (document),
 mNotEditableDelegate(table, parent)
 {
 }
@@ -350,10 +344,6 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 =============================================================EditWidget=====================================================
 */
 
-<<<<<<< HEAD
-CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, table, commandDispatcher, document),
-=======
 CSVWorld::EditWidget::~EditWidget()
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
@@ -363,15 +353,17 @@ CSVWorld::EditWidget::~EditWidget()
     delete mNestedTableDispatcher;
 }
 
-CSVWorld::EditWidget::EditWidget(QWidget *parent, int row, CSMWorld::IdTable* table, CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, table, document),
+CSVWorld::EditWidget::EditWidget(QWidget *parent,
+        int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher,
+        CSMDoc::Document& document, bool createAndDelete) :
+mDispatcher(this, table, commandDispatcher, document),
 mNestedTableDispatcher(NULL),
->>>>>>> master
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mNestedTableMapper(NULL),
 mMainWidget(NULL),
 mCommandDispatcher (commandDispatcher),
+mDocument (document),
 mTable(table)
 {
     remake (row);
@@ -454,7 +446,14 @@ void CSVWorld::EditWidget::remake(int row)
             {
                 mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
 
-                NestedTable* table = new NestedTable(mDocument, mNestedModels.back(), this);
+                int idColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+                int typeColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+
+                CSMWorld::UniversalId id = CSMWorld::UniversalId(
+                    static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (row, typeColumn)).toInt()),
+                    mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
+
+                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
                 // FIXME: does not work well when enum delegates are used
                 //table->resizeColumnsToContents();
                 table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
@@ -511,7 +510,7 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedTableMapper->setModel(mNestedModels.back());
                 // FIXME: lack MIME support?
                 mNestedTableDispatcher =
-                        new DialogueDelegateDispatcher (this, mTable, mDocument, mNestedModels.back());
+                        new DialogueDelegateDispatcher (this, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
                 mNestedTableMapper->setItemDelegate(mNestedTableDispatcher);
 
                 int columnCount =
@@ -638,11 +637,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mMainLayout = new QVBoxLayout(mainWidget);
 
-<<<<<<< HEAD
-    mEditWidget = new EditWidget(mainWidget, mRow, mTable, mCommandDispatcher, document, false);
-=======
-    mEditWidget = new EditWidget(mainWidget, mTable->getModelIndex(mCurrentId, 0).row(), mTable, document, false);
->>>>>>> master
+    mEditWidget = new EditWidget(mainWidget,
+            mTable->getModelIndex(mCurrentId, 0).row(), mTable, mCommandDispatcher, document, false);
     connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 

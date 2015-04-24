@@ -13,21 +13,16 @@ namespace ESM
 
     struct RefNum
     {
-<<<<<<< HEAD
-        int mIndex;
-        int mContentFile; // -1 no content file
+        unsigned int mIndex;
+        int mContentFile;
 
         void load (ESMReader& esm, bool wide = false);
 
         void save (ESMWriter &esm, bool wide = false, const std::string& tag = "FRMR") const;
-=======
-        unsigned int mIndex;
-        int mContentFile;
 
         enum { RefNum_NoContentFile = -1 };
         inline bool hasContentFile() const { return mContentFile != RefNum_NoContentFile; }
         inline void unset() { mIndex = 0; mContentFile = RefNum_NoContentFile; }
->>>>>>> master
     };
 
     /* Cell reference. This represents ONE object (of many) inside the
@@ -105,9 +100,9 @@ namespace ESM
             Position mPos;
 
             /// Calls loadId and loadData
-            void load (ESMReader& esm, bool wideRefNum = false);
+            void load (ESMReader& esm, bool wideRefNum = false, bool ignoreRefNum = false);
 
-            void loadId (ESMReader& esm, bool wideRefNum = false);
+            void loadId (ESMReader& esm, bool wideRefNum = false, bool ignoreRefNum = false);
 
             /// Implicitly called by load
             void loadData (ESMReader& esm);

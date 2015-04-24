@@ -109,10 +109,7 @@ namespace CSVWorld
 
         QAbstractItemModel* mTable;
 
-<<<<<<< HEAD
         CSMWorld::CommandDispatcher& mCommandDispatcher;
-=======
->>>>>>> master
         CSMDoc::Document& mDocument;
 
         NotEditableSubDelegate mNotEditableDelegate;
@@ -121,15 +118,11 @@ namespace CSVWorld
         //once we move to the C++11 we should use unique_ptr
 
     public:
-<<<<<<< HEAD
-        DialogueDelegateDispatcher(QObject* parent, CSMWorld::IdTable* table,
-            CSMWorld::CommandDispatcher& commandDispatcher,  CSMDoc::Document& document);
-=======
         DialogueDelegateDispatcher(QObject* parent,
                                    CSMWorld::IdTable* table,
+                                   CSMWorld::CommandDispatcher& commandDispatcher,
                                    CSMDoc::Document& document,
                                    QAbstractItemModel* model = 0);
->>>>>>> master
 
         ~DialogueDelegateDispatcher();
 
@@ -176,23 +169,17 @@ namespace CSVWorld
             DialogueDelegateDispatcher *mNestedTableDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
-<<<<<<< HEAD
             CSMWorld::CommandDispatcher& mCommandDispatcher;
-
-        public:
-
-            EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher, CSMDoc::Document& document, bool createAndDelete = false);
-=======
             CSMDoc::Document& mDocument;
             std::vector<CSMWorld::NestedTableProxyModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:
 
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
+                        CSMWorld::CommandDispatcher& commandDispatcher,
                         CSMDoc::Document& document, bool createAndDelete = false);
 
             virtual ~EditWidget();
->>>>>>> master
 
             void remake(int row);
 

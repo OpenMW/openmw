@@ -18,7 +18,7 @@ namespace CSMWorld
         {
             Role_Flags = Qt::UserRole,
             Role_Display = Qt::UserRole+1,
-            Role_ColumnId = Qt::UserRole+1
+            Role_ColumnId = Qt::UserRole+2
         };
 
         enum Flags

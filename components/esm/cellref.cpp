@@ -18,7 +18,7 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
         esm.writeHNT (tag, *this, 8);
     else
     {
-        int refNum = (mIndex & 0xffffff) | ((mContentFile==-1 ? 0xff : mContentFile)<<24);
+        int refNum = (mIndex & 0xffffff) | ((hasContentFile() ? mContentFile<<24 : 0xff));
 
         esm.writeHNT (tag, refNum, 4);
     }
@@ -27,11 +27,11 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum, bool ignoreRefNum)
 {
-    loadId(esm, wideRefNum);
+    loadId(esm, wideRefNum, ignoreRefNum);
     loadData(esm);
 }
 
-void ESM::CellRef::loadId(ESMReader &esm, bool wideRefNum)
+void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum, bool ignoreRefNum)
 {
     // According to Hrnchamd, this does not belong to the actual ref. Instead, it is a marker indicating that
     // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
