@@ -129,7 +129,7 @@ namespace MWClass
             /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
 
-            virtual void adjustScale (const MWWorld::Ptr &ptr, float &scale) const;
+            virtual void adjustScale (const MWWorld::Ptr &ptr, osg::Vec3f &scale) const;
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.

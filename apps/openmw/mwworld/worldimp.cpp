@@ -1254,12 +1254,8 @@ namespace MWWorld
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         ptr.getCellRef().setScale(scale);
-        ptr.getClass().adjustScale(ptr,scale);
 
-        if(ptr.getRefData().getBaseNode() == 0)
-            return;
-        mRendering->scaleObject(ptr, osg::Vec3f(scale,scale,scale));
-        //mPhysics->scaleObject(ptr);
+        mWorldScene->updateObjectScale(ptr);
     }
 
     void World::rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust)
@@ -1307,10 +1303,8 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        if(ptr.getRefData().getBaseNode() == 0)
-            return;
-
-        mWorldScene->updateObjectLocalRotation(ptr);
+        if(ptr.getRefData().getBaseNode() != 0)
+            mWorldScene->updateObjectLocalRotation(ptr);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)

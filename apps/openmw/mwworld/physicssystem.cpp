@@ -769,10 +769,11 @@ namespace MWWorld
         if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
         {
             float scale = ptr.getCellRef().getScale();
+            osg::Vec3f scaleVec (scale,scale,scale);
             if (!ptr.getClass().isNpc())
                 // NOTE: Ignoring Npc::adjustScale (race height) on purpose. This is a bug in MW and must be replicated for compatibility reasons
-                ptr.getClass().adjustScale(ptr, scale);
-            act->setScale(scale);
+                ptr.getClass().adjustScale(ptr, scaleVec);
+            act->setScale(scaleVec.x());
         }
     }
 

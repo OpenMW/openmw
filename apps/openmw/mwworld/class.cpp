@@ -295,7 +295,7 @@ namespace MWWorld
         return "";
     }
 
-    void Class::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    void Class::adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const
     {
     }
 

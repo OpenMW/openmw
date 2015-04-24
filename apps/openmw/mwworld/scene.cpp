@@ -65,6 +65,18 @@ namespace
         }
     }
 
+    void updateObjectScale(const MWWorld::Ptr& ptr, /*MWWorld::PhysicsSystem& physics,*/
+                            MWRender::RenderingManager& rendering)
+    {
+        if (ptr.getRefData().getBaseNode() != NULL)
+        {
+            float scale = ptr.getCellRef().getScale();
+            osg::Vec3f scaleVec (scale, scale, scale);
+            ptr.getClass().adjustScale(ptr, scaleVec);
+            rendering.scaleObject(ptr, scaleVec);
+        }
+    }
+
     struct InsertFunctor
     {
         MWWorld::CellStore& mCell;
@@ -103,12 +115,7 @@ namespace
             {
                 addObject(ptr, /*mPhysics, */mRendering);
                 updateObjectLocalRotation(ptr, /*mPhysics,*/ mRendering);
-                if (ptr.getRefData().getBaseNode())
-                {
-                    float scale = ptr.getCellRef().getScale();
-                    ptr.getClass().adjustScale(ptr, scale);
-                    mRendering.scaleObject(ptr, osg::Vec3f(scale, scale, scale));
-                }
+                updateObjectScale(ptr, /*mPhysics,*/ mRendering);
                 ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
@@ -131,6 +138,11 @@ namespace MWWorld
     void Scene::updateObjectLocalRotation (const Ptr& ptr)
     {
         ::updateObjectLocalRotation(ptr, /* *mPhysics,*/ mRendering);
+    }
+
+    void Scene::updateObjectScale(const Ptr &ptr)
+    {
+        ::updateObjectScale(ptr, /* *mPhysics,*/ mRendering);
     }
 
     void Scene::getGridCenter(int &cellX, int &cellY)

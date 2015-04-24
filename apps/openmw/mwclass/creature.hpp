@@ -157,7 +157,7 @@ namespace MWClass
 
             virtual int getBaseFightRating(const MWWorld::Ptr &ptr) const;
 
-            virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
+            virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const;
     };
 }
 

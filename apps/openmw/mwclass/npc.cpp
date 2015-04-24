@@ -1110,7 +1110,7 @@ namespace MWClass
                 + shield;
     }
 
-    void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f&scale) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
@@ -1119,9 +1119,18 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
 
         if (ref->mBase->isMale())
-            scale *= race->mData.mHeight.mMale;
+        {
+            scale.x() *= race->mData.mWeight.mMale;
+            scale.y() *= race->mData.mWeight.mMale;
+            scale.z() *= race->mData.mHeight.mMale;
+        }
         else
-            scale *= race->mData.mHeight.mFemale;
+        {
+            scale.x() *= race->mData.mWeight.mFemale;
+            scale.y() *= race->mData.mWeight.mFemale;
+            scale.z() *= race->mData.mHeight.mFemale;
+        }
+
     }
 
     int Npc::getServices(const MWWorld::Ptr &actor) const

@@ -893,7 +893,7 @@ namespace MWClass
         return ref->mBase->mAiData.mFight;
     }
 
-    void Creature::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    void Creature::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f &scale) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
