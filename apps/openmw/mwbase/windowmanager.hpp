@@ -303,8 +303,6 @@ namespace MWBase
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 
-            virtual void frameStarted(float dt) = 0;
-
             virtual void changePointer (const std::string& name) = 0;
 
             virtual void setEnemy (const MWWorld::Ptr& enemy) = 0;

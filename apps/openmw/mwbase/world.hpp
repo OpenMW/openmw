@@ -460,7 +460,6 @@ namespace MWBase
             virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
-            virtual void frameStarted (float dt, bool paused) = 0;
             virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
 
             /// Find default position inside exterior cell specified by name

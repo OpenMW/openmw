@@ -2166,11 +2166,6 @@ namespace MWWorld
         return mRendering->getAnimation(ptr);
     }
 
-    void World::frameStarted (float dt, bool paused)
-    {
-        //mRendering->frameStarted(dt, paused);
-    }
-
     void World::screenshot(Ogre::Image &image, int w, int h)
     {
         //mRendering->screenshot(image, w, h);

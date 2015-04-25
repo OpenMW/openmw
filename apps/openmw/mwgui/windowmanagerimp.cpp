@@ -1501,12 +1501,6 @@ namespace MWGui
         updateVisible();
     }
 
-    void WindowManager::frameStarted (float dt)
-    {
-        mInventoryWindow->doRenderUpdate ();
-        mCharGen->doRenderUpdate();
-    }
-
     void WindowManager::updatePlayer()
     {
         mInventoryWindow->updatePlayer();

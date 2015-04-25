@@ -564,7 +564,6 @@ namespace MWWorld
             virtual void reattachPlayerCamera();
 
             /// \todo this does not belong here
-            virtual void frameStarted (float dt, bool paused);
             virtual void screenshot (Ogre::Image& image, int w, int h);
 
             /// Find center of exterior cell above land surface

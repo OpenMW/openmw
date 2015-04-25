@@ -460,15 +460,13 @@ void RenderManager::initialise()
     state->setTextureAttribute(0, new osg::TexEnv(osg::TexEnv::MODULATE));
     state->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT, osg::PolygonMode::FILL));
     state->setAttribute(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    state->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    state->setRenderBinDetails(11, "RenderBin");
     state->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
     geode->setStateSet(state);
     geode->setCullingActive(false);
     camera->addChild(geode.get());
 
     mGuiRoot = camera;
-    mSceneRoot->addChild(mGuiRoot.get());
+    //mSceneRoot->addChild(mGuiRoot.get());
     mViewer->addEventHandler(new ResizeHandler(this));
 
     osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();

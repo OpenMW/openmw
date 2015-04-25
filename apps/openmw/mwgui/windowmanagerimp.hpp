@@ -309,8 +309,6 @@ namespace MWGui
     virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
     virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
-    virtual void frameStarted(float dt);
-
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
