@@ -31,12 +31,14 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         // original cell will always be equal the current cell).
         ref.mOriginalCell = base ? cell2.mId : "";
 
+#if 0
         if (mref.mRefNum.mIndex != 0 &&
             ((int)std::floor(ref.mPos.pos[0]/8192) != mref.mTarget[0] ||
              (int)std::floor(ref.mPos.pos[1]/8192) != mref.mTarget[1]))
         {
-            //std::cout <<"refcollection  #" << mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
+            std::cout <<"refcollection  #" << mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
         }
+#endif
 
         if (cell.get().isExterior())
         {
