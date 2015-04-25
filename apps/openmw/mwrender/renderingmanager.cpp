@@ -248,4 +248,9 @@ namespace MWRender
         notifyWorldSpaceChanged();
     }
 
+    MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
+    {
+        return mObjects->getAnimation(ptr);
+    }
+
 }

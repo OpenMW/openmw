@@ -54,6 +54,7 @@
 #include "actionteleport.hpp"
 //#include "projectilemanager.hpp"
 #include "weather.hpp"
+#include "physicssystem.hpp"
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
@@ -160,7 +161,7 @@ namespace MWWorld
       mStartCell (startCell), mStartupScript(startupScript),
       mScriptsEnabled(true)
     {
-        //mPhysics = new PhysicsSystem(renderer);
+        mPhysics = new PhysicsSystem();
         //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
@@ -199,7 +200,7 @@ namespace MWWorld
 
         mGlobalVariables.fill (mStore);
 
-        mWorldScene = new Scene(*mRendering, NULL/*mPhysics*/);
+        mWorldScene = new Scene(*mRendering, mPhysics);
     }
 
     void World::startNewGame (bool bypass)
@@ -480,7 +481,7 @@ namespace MWWorld
         delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
-        //delete mPhysics;
+        delete mPhysics;
 
         delete mPlayer;
     }
@@ -2000,7 +2001,7 @@ namespace MWWorld
                 && isLevitationEnabled())
             return true;
 
-        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(ptr.getRefData().getHandle());
+        const OEngine::Physic::PhysicActor *actor = 0;//mPhysEngine->getCharacter(ptr.getRefData().getHandle());
         if(!actor || !actor->getCollisionMode())
             return true;
 
@@ -2040,7 +2041,7 @@ namespace MWWorld
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(object.getRefData().getHandle());
+        const OEngine::Physic::PhysicActor *actor = 0;//mPhysEngine->getCharacter(object.getRefData().getHandle());
         if (actor)
         {
             pos.z += heightRatio*2*actor->getHalfExtents().z;
@@ -2069,8 +2070,8 @@ namespace MWWorld
     // TODO: There might be better places to update PhysicActor::mOnGround.
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
-        RefData &refdata = ptr.getRefData();
-        OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
+        //RefData &refdata = ptr.getRefData();
+        OEngine::Physic::PhysicActor *physactor = 0;//mPhysEngine->getCharacter(refdata.getHandle());
 
         if(!physactor)
             return false;
@@ -2142,15 +2143,17 @@ namespace MWWorld
         CellStore *currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
-        RefData &refdata = player.getRefData();
-        Ogre::Vector3 playerPos(refdata.getPosition().pos);
+        //RefData &refdata = player.getRefData();
+        //Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
+        /*
         const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
         if (!physactor)
             throw std::runtime_error("can't find player");
 
         if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
+            */
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
            player.getClass().getNpcStats(player).isWerewolf())
             return 1;
@@ -2160,7 +2163,7 @@ namespace MWWorld
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
     {
-        return 0;//return mRendering->getAnimation(ptr);
+        return mRendering->getAnimation(ptr);
     }
 
     void World::frameStarted (float dt, bool paused)
@@ -2295,7 +2298,7 @@ namespace MWWorld
     float World::getWindSpeed()
     {
         if (isCellExterior() || isCellQuasiExterior())
-            return 0;//mWeatherManager->getWindSpeed();
+            return mWeatherManager->getWindSpeed();
         else
             return 0.f;
     }
@@ -2303,7 +2306,7 @@ namespace MWWorld
     bool World::isInStorm() const
     {
         if (isCellExterior() || isCellQuasiExterior())
-            return 0;//mWeatherManager->isInStorm();
+            return mWeatherManager->isInStorm();
         else
             return false;
     }
@@ -2311,7 +2314,7 @@ namespace MWWorld
     Ogre::Vector3 World::getStormDirection() const
     {
         if (isCellExterior() || isCellQuasiExterior())
-            return Ogre::Vector3();//mWeatherManager->getStormDirection();
+            return mWeatherManager->getStormDirection();
         else
             return Ogre::Vector3(0,1,0);
     }
@@ -2800,7 +2803,7 @@ namespace MWWorld
     {
         MWWorld::CellStore* cell = mPlayer->getPlayer().getCell();
         if (cell->isExterior())
-            return 0;//mWeatherManager->isDark();
+            return mWeatherManager->isDark();
         else
         {
             uint32_t ambient = cell->getCell()->mAmbi.mAmbient;

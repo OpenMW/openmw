@@ -69,23 +69,10 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-bool OMW::Engine::frameStarted (const Ogre::FrameEvent& evt)
-{
-    if (MWBase::Environment::get().getStateManager()->getState()!=
-        MWBase::StateManager::State_NoGame)
-    {
-        bool paused = MWBase::Environment::get().getWindowManager()->isGuiMode();
-        MWBase::Environment::get().getWorld()->frameStarted(evt.timeSinceLastFrame, paused);
-        MWBase::Environment::get().getWindowManager ()->frameStarted(evt.timeSinceLastFrame);
-    }
-    return true;
-}
-
-bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
+void OMW::Engine::frame(float frametime)
 {
     try
     {
-        float frametime = evt.timeSinceLastFrame;
         mEnvironment.setFrameDuration (frametime);
 
         // update input
@@ -173,8 +160,6 @@ bool OMW::Engine::frameRenderingQueued (const Ogre::FrameEvent& evt)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
-
-    return true;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -486,12 +471,7 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         //dt = std::min(dt, 0.2f);
 
-        // frameRenderingQueued(dt);
-        MWBase::Environment::get().getWorld()->update(dt, false);
-
-        MWBase::Environment::get().getWorld()->advanceTime(
-            dt*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
-
+        frame(dt);
         mViewer->frame(/*simulationTime*/);
     }
 

@@ -294,27 +294,22 @@ namespace MWMechanics
 
     void MechanicsManager::add(const MWWorld::Ptr& ptr)
     {
-        /*
         if(ptr.getClass().isActor())
             mActors.addActor(ptr);
         else
             mObjects.addObject(ptr);
-            */
     }
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
     {
-        /*
         if(ptr == mWatched)
             mWatched = MWWorld::Ptr();
         mActors.removeActor(ptr);
         mObjects.removeObject(ptr);
-        */
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        /*
         if(old == mWatched)
             mWatched = ptr;
 
@@ -322,16 +317,13 @@ namespace MWMechanics
             mActors.updateActor(old, ptr);
         else
             mObjects.updateObject(old, ptr);
-            */
     }
 
 
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
-        /*
         mActors.dropActors(cellStore, mWatched);
         mObjects.dropObjects(cellStore);
-        */
     }
 
 
@@ -472,24 +464,24 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            //MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            //mActors.removeActor(ptr);
-            //mActors.addActor(ptr, true);
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            mActors.removeActor(ptr);
+            mActors.addActor(ptr, true);
         }
 
-        //mActors.update(duration, paused);
-        //mObjects.update(duration, paused);
+        mActors.update(duration, paused);
+        mObjects.update(duration, paused);
     }
 
     void MechanicsManager::rest(bool sleep)
     {
-        //mActors.restoreDynamicStats (sleep);
-        //mActors.fastForwardAi();
+        mActors.restoreDynamicStats (sleep);
+        mActors.fastForwardAi();
     }
 
     int MechanicsManager::getHoursToRest() const
     {
-        return 0;//mActors.getHoursToRest(mWatched);
+        return mActors.getHoursToRest(mWatched);
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
@@ -679,7 +671,7 @@ namespace MWMechanics
 
     int MechanicsManager::countDeaths (const std::string& id) const
     {
-        return 0;//mActors.countDeaths (id);
+        return mActors.countDeaths (id);
     }
 
     void MechanicsManager::getPersuasionDispositionChange (const MWWorld::Ptr& npc, PersuasionType type,
@@ -835,39 +827,35 @@ namespace MWMechanics
 
     void MechanicsManager::forceStateUpdate(const MWWorld::Ptr &ptr)
     {
-        //if(ptr.getClass().isActor())
-            //mActors.forceStateUpdate(ptr);
+        if(ptr.getClass().isActor())
+            mActors.forceStateUpdate(ptr);
     }
 
     void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
-        /*
         if(ptr.getClass().isActor())
             mActors.playAnimationGroup(ptr, groupName, mode, number);
         else
             mObjects.playAnimationGroup(ptr, groupName, mode, number);
-            */
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
-        /*
         if(ptr.getClass().isActor())
             mActors.skipAnimation(ptr);
         else
             mObjects.skipAnimation(ptr);
-            */
     }
     bool MechanicsManager::checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName)
     {
-        //if(ptr.getClass().isActor())
-        //    return mActors.checkAnimationPlaying(ptr, groupName);
-        //else
+        if(ptr.getClass().isActor())
+            return mActors.checkAnimationPlaying(ptr, groupName);
+        else
             return false;
     }
 
     void MechanicsManager::updateMagicEffects(const MWWorld::Ptr &ptr)
     {
-        //mActors.updateMagicEffects(ptr);
+        mActors.updateMagicEffects(ptr);
     }
 
     bool MechanicsManager::toggleAI()
@@ -1062,7 +1050,7 @@ namespace MWMechanics
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
-        //mActors.getObjectsInRange(from, radius, neighbors);
+        mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
         if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
@@ -1151,7 +1139,7 @@ namespace MWMechanics
         Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
-        //mActors.getObjectsInRange(from, radius, neighbors);
+        mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
         if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
@@ -1406,7 +1394,6 @@ namespace MWMechanics
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
-                /*
                 for (Actors::PtrActorMap::const_iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
                 {
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
@@ -1419,7 +1406,6 @@ namespace MWMechanics
                         }
                     }
                 }
-                */
             }
         }
 
@@ -1430,27 +1416,27 @@ namespace MWMechanics
 
     void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
-        //mActors.getObjectsInRange(position, radius, objects);
-        //mObjects.getObjectsInRange(position, radius, objects);
+        mActors.getObjectsInRange(position, radius, objects);
+        mObjects.getObjectsInRange(position, radius, objects);
     }
 
     void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
-        //mActors.getObjectsInRange(position, radius, objects);
+        mActors.getObjectsInRange(position, radius, objects);
     }
 
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
     {
-        return std::list<MWWorld::Ptr>();//mActors.getActorsFollowing(actor);
+        return mActors.getActorsFollowing(actor);
     }
 
     std::list<int> MechanicsManager::getActorsFollowingIndices(const MWWorld::Ptr& actor)
     {
-        return std::list<int>(); //mActors.getActorsFollowingIndices(actor);
+        return mActors.getActorsFollowingIndices(actor);
     }
 
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
-        return std::list<MWWorld::Ptr>();// mActors.getActorsFighting(actor);
+        return mActors.getActorsFighting(actor);
     }
 
     int MechanicsManager::countSavedGameRecords() const
@@ -1461,7 +1447,7 @@ namespace MWMechanics
 
     void MechanicsManager::write(ESM::ESMWriter &writer, Loading::Listener &listener) const
     {
-        //mActors.write(writer, listener);
+        mActors.write(writer, listener);
 
         ESM::StolenItems items;
         items.mStolenItems = mStolenItems;
@@ -1478,13 +1464,13 @@ namespace MWMechanics
             items.load(reader);
             mStolenItems = items.mStolenItems;
         }
-        //else
-            //mActors.readRecord(reader, type);
+        else
+            mActors.readRecord(reader, type);
     }
 
     void MechanicsManager::clear()
     {
-        //mActors.clear();
+        mActors.clear();
         mStolenItems.clear();
     }
 
@@ -1530,6 +1516,6 @@ namespace MWMechanics
 
     bool MechanicsManager::isReadyToBlock(const MWWorld::Ptr &ptr) const
     {
-        return 0;//mActors.isReadyToBlock(ptr);
+        return mActors.isReadyToBlock(ptr);
     }
 }

@@ -503,15 +503,15 @@ namespace MWWorld
     {
         // Create physics. shapeLoader is deleted by the physic engine
         //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-        mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
+        //mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-        if (mWaterCollisionObject.get())
-            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
-        delete mEngine;
-        delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+        //if (mWaterCollisionObject.get())
+        //    mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+        //delete mEngine;
+        //delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
     }
 
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
@@ -674,19 +674,23 @@ namespace MWWorld
 
     void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
     {
+        /*
         Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         handleToMesh[node->getName()] = mesh;
         mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
         mEngine->createAndAdjustRigidBody(
             mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
+        */
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
     {
+        /*
         Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
         //TODO:optimize this. Searching the std::map isn't very efficient i think.
         mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
+        */
     }
 
     void PhysicsSystem::removeObject (const std::string& handle)

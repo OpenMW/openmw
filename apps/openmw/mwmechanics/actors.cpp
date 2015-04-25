@@ -1014,6 +1014,8 @@ namespace MWMechanics
         removeActor(ptr);
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if (!anim)
+            return;
         mActors.insert(std::make_pair(ptr, new Actor(ptr, anim)));
         if (updateImmediately)
             mActors[ptr]->getCharacterController()->update(0);

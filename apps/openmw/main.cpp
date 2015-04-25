@@ -12,6 +12,8 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include <OgrePlatform.h>
+
 #if defined(_WIN32)
 // For OutputDebugString
 #define WIN32_LEAN_AND_MEAN

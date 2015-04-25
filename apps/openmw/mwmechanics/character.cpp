@@ -20,7 +20,6 @@
 #include "character.hpp"
 
 #include <OgreStringConverter.h>
-#include <OgreSceneNode.h>
 
 #include "movement.hpp"
 #include "npcstats.hpp"

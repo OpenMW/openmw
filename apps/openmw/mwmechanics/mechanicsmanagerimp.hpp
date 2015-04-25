@@ -7,8 +7,8 @@
 
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
-//#include "objects.hpp"
-//#include "actors.hpp"
+#include "objects.hpp"
+#include "actors.hpp"
 
 namespace Ogre
 {
@@ -32,8 +32,8 @@ namespace MWMechanics
             bool mRaceSelected;
             bool mAI;///< is AI active?
 
-            //Objects mObjects;
-            //Actors mActors;
+            Objects mObjects;
+            Actors mActors;
 
             typedef std::pair<std::string, bool> Owner; // < Owner id, bool isFaction >
             typedef std::map<Owner, int> OwnerMap; // < Owner, number of stolen items with this id from this owner >

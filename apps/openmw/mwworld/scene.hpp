@@ -63,7 +63,7 @@ namespace MWWorld
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            //PhysicsSystem *mPhysics;
+            PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
             bool mNeedMapUpdate;

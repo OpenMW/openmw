@@ -78,6 +78,8 @@ namespace MWRender
 
         void update(float dt, bool paused);
 
+        MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr);
+
     private:
         osgViewer::Viewer& mViewer;
         osg::ref_ptr<osg::Group> mRootNode;

@@ -1,8 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <OgreFrameListener.h>
-
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
@@ -58,7 +56,7 @@ namespace Files
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
-    class Engine : private Ogre::FrameListener
+    class Engine
     {
             std::auto_ptr<VFS::Manager> mVFS;
             std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
@@ -104,8 +102,7 @@ namespace OMW
 
             void executeLocalScripts();
 
-            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
-            virtual bool frameStarted (const Ogre::FrameEvent& evt);
+            void frame (float dt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);

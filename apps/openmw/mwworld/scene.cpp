@@ -31,7 +31,7 @@
 namespace
 {
 
-    void addObject(const MWWorld::Ptr& ptr, //MWWorld::PhysicsSystem& physics,
+    void addObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
         std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), rendering.getResourceSystem()->getVFS());
@@ -39,10 +39,10 @@ namespace
         if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
-        //ptr.getClass().insertObject (ptr, model, physics);
+        ptr.getClass().insertObject (ptr, model, physics);
     }
 
-    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, /*MWWorld::PhysicsSystem& physics,*/
+    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
@@ -65,7 +65,7 @@ namespace
         }
     }
 
-    void updateObjectScale(const MWWorld::Ptr& ptr, /*MWWorld::PhysicsSystem& physics,*/
+    void updateObjectScale(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
                             MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
@@ -82,20 +82,20 @@ namespace
         MWWorld::CellStore& mCell;
         bool mRescale;
         Loading::Listener& mLoadingListener;
-        //MWWorld::PhysicsSystem& mPhysics;
+        MWWorld::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
         InsertFunctor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
-            /*MWWorld::PhysicsSystem& physics, */MWRender::RenderingManager& rendering);
+            MWWorld::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
     };
 
     InsertFunctor::InsertFunctor (MWWorld::CellStore& cell, bool rescale,
-        Loading::Listener& loadingListener, /*MWWorld::PhysicsSystem& physics,*/
+        Loading::Listener& loadingListener, MWWorld::PhysicsSystem& physics,
         MWRender::RenderingManager& rendering)
     : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
-      //mPhysics (physics),
+      mPhysics (physics),
       mRendering (rendering)
     {}
 
@@ -113,9 +113,9 @@ namespace
         {
             try
             {
-                addObject(ptr, /*mPhysics, */mRendering);
-                updateObjectLocalRotation(ptr, /*mPhysics,*/ mRendering);
-                updateObjectScale(ptr, /*mPhysics,*/ mRendering);
+                addObject(ptr, mPhysics, mRendering);
+                updateObjectLocalRotation(ptr, mPhysics, mRendering);
+                updateObjectScale(ptr, mPhysics, mRendering);
                 ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
@@ -137,12 +137,12 @@ namespace MWWorld
 
     void Scene::updateObjectLocalRotation (const Ptr& ptr)
     {
-        ::updateObjectLocalRotation(ptr, /* *mPhysics,*/ mRendering);
+        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
     {
-        ::updateObjectScale(ptr, /* *mPhysics,*/ mRendering);
+        ::updateObjectScale(ptr, *mPhysics, mRendering);
     }
 
     void Scene::getGridCenter(int &cellX, int &cellY)
@@ -447,7 +447,7 @@ namespace MWWorld
 
     //We need the ogre renderer and a scene node.
     Scene::Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), /*mPhysics(physics),*/ mRendering(rendering), mNeedMapUpdate(false)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
     {
     }
 
@@ -557,7 +557,7 @@ namespace MWWorld
 
     void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
-        InsertFunctor functor (cell, rescale, *loadingListener, /* *mPhysics, */mRendering);
+        InsertFunctor functor (cell, rescale, *loadingListener, *mPhysics, mRendering);
         cell.forEach (functor);
     }
 
@@ -565,7 +565,7 @@ namespace MWWorld
     {
         try
         {
-            addObject(ptr, /* *mPhysics, */mRendering);
+            addObject(ptr, *mPhysics, mRendering);
             MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
         }
