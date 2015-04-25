@@ -2,8 +2,10 @@
 #include "refcollection.hpp"
 
 #include <sstream>
+#include <iostream> // FIXME: debug only
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "ref.hpp"
 #include "cell.hpp"
@@ -20,12 +22,21 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     CellRef ref;
 
     bool deleted = false;
+    ESM::MovedCellRef mref;
 
-    while (ESM::Cell::getNextRef (reader, ref, deleted, true))
+    // hack to initialise mindex
+    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef (reader, ref, deleted, true, &mref))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
         ref.mOriginalCell = base ? cell2.mId : "";
+
+        if (mref.mRefNum.mIndex != 0 &&
+            ((int)std::floor(ref.mPos.pos[0]/8192) != mref.mTarget[0] ||
+             (int)std::floor(ref.mPos.pos[1]/8192) != mref.mTarget[1]))
+        {
+            //std::cout <<"refcollection  #" << mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
+        }
 
         if (cell.get().isExterior())
         {
@@ -33,7 +44,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             std::pair<int, int> index = ref.getCellIndex();
 
             std::ostringstream stream;
-            stream << "#" << index.first << " " << index.second;
+            if (mref.mRefNum.mIndex)
+            {
+                stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
+                //std::cout <<"refcollection " + stream.str() << std::endl;
+            }
+            else
+                stream << "#" << index.first << " " << index.second;
 
             ref.mCell = stream.str();
         }

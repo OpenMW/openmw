@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <iostream> // FIXME: debugging only
 
 #include <boost/concept_check.hpp>
 
@@ -168,11 +169,12 @@ std::string Cell::getDescription() const
     }
 }
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves)
+bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves, MovedCellRef *mref)
 {
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
         return false;
+    //bool print = false; // FIXME: debugging only
 
     // NOTE: We should not need this check. It is a safety check until we have checked
     // more plugins, and how they treat these moved references.
@@ -180,9 +182,12 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMo
     {
         if (ignoreMoves)
         {
-            MovedCellRef mref;
-            esm.getHT (mref.mRefNum.mIndex);
-            esm.getHNOT (mref.mTarget, "CNDT");
+            esm.getHT (mref->mRefNum.mIndex);
+            esm.getHNOT (mref->mTarget, "CNDT");
+            //std::cout << "index " + std::to_string(mref->mRefNum.mIndex) + " target " <<
+                //std::to_string(mref->mTarget[0]) + ", " + std::to_string(mref->mTarget[1]) << std::endl;
+            //print = true; // FIXME: debugging only
+            adjustRefNum (mref->mRefNum, esm);
         }
         else
         {
@@ -193,6 +198,19 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMo
     }
 
     ref.load (esm);
+
+#if 0
+    // FIXME: debugging only
+    if (print &&
+            ((int)std::floor(ref.mPos.pos[0]/8192) != mref->mTarget[0] ||
+             (int)std::floor(ref.mPos.pos[1]/8192) != mref->mTarget[1]))
+    {
+        std::cout << ref.mRefID <<
+            ", " + std::to_string((int)std::floor(ref.mPos.pos[0]/8192)) <<
+            ", " + std::to_string((int)std::floor(ref.mPos.pos[1]/8192)) <<
+            ", Z: " +std::to_string(ref.mPos.pos[2]) << std::endl;
+    }
+#endif
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
     adjustRefNum (ref.mRefNum, esm);
