@@ -114,17 +114,58 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         return false;
     }
 
+    typedef std::map<unsigned short, std::vector<BoneWeight> > Vertex2BoneMap;
+    Vertex2BoneMap vertex2BoneMap;
     for (std::map<std::string, BoneInfluence>::const_iterator it = mInfluenceMap->mMap.begin(); it != mInfluenceMap->mMap.end(); ++it)
     {
-        Bone* b = mSkeleton->getBone(it->first);
-        if (!b)
+        Bone* bone = mSkeleton->getBone(it->first);
+        if (!bone)
         {
             std::cerr << "RigGeometry did not find bone " << it->first << std::endl;
+            continue;
         }
 
-        mResolvedInfluenceMap[b] = it->second;
+        const BoneInfluence& bi = it->second;
+
+        const std::map<unsigned short, float>& weights = it->second.mWeights;
+        for (std::map<unsigned short, float>::const_iterator weightIt = weights.begin(); weightIt != weights.end(); ++weightIt)
+        {
+            std::vector<BoneWeight>& vec = vertex2BoneMap[weightIt->first];
+
+            BoneWeight b = std::make_pair(std::make_pair(bone, bi.mInvBindMatrix), weightIt->second);
+
+            vec.push_back(b);
+        }
     }
+
+    for (Vertex2BoneMap::iterator it = vertex2BoneMap.begin(); it != vertex2BoneMap.end(); it++)
+    {
+        mBone2VertexMap[it->second].push_back(it->first);
+    }
+
     return true;
+}
+
+void accummulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
+{
+    osg::Matrixf m = invBindMatrix * matrix;
+    float* ptr = m.ptr();
+    float* ptrresult = result.ptr();
+    ptrresult[0] += ptr[0] * weight;
+    ptrresult[1] += ptr[1] * weight;
+    ptrresult[2] += ptr[2] * weight;
+
+    ptrresult[4] += ptr[4] * weight;
+    ptrresult[5] += ptr[5] * weight;
+    ptrresult[6] += ptr[6] * weight;
+
+    ptrresult[8] += ptr[8] * weight;
+    ptrresult[9] += ptr[9] * weight;
+    ptrresult[10] += ptr[10] * weight;
+
+    ptrresult[12] += ptr[12] * weight;
+    ptrresult[13] += ptr[13] * weight;
+    ptrresult[14] += ptr[14] * weight;
 }
 
 void RigGeometry::update(osg::NodeVisitor* nv)
@@ -158,29 +199,28 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(getVertexArray());
     osg::Vec3Array* normalDst = static_cast<osg::Vec3Array*>(getNormalArray());
 
-    for (unsigned int i=0; i<positionDst->size(); ++i)
-        (*positionDst)[i] = osg::Vec3f(0,0,0);
-    for (unsigned int i=0; i<positionDst->size(); ++i)
-        (*normalDst)[i] = osg::Vec3f(0,0,0);
-
-    for (ResolvedInfluenceMap::const_iterator it = mResolvedInfluenceMap.begin(); it != mResolvedInfluenceMap.end(); ++it)
+    for (Bone2VertexMap::const_iterator it = mBone2VertexMap.begin(); it != mBone2VertexMap.end(); ++it)
     {
-        const BoneInfluence& bi = it->second;
-        Bone* bone = it->first;
+        osg::Matrixf resultMat  (0, 0, 0, 0,
+                                0, 0, 0, 0,
+                                0, 0, 0, 0,
+                                0, 0, 0, 1);
 
-        // Here we could cache the (weighted) matrix for each combination of bone weights
-
-        osg::Matrixf finalMatrix = bi.mInvBindMatrix * bone->mMatrixInSkeletonSpace * geomToSkel;
-
-        for (std::map<unsigned short, float>::const_iterator weightIt = bi.mWeights.begin(); weightIt != bi.mWeights.end(); ++weightIt)
+        for (std::vector<BoneWeight>::const_iterator weightIt = it->first.begin(); weightIt != it->first.end(); ++weightIt)
         {
-            unsigned short vertex = weightIt->first;
+            Bone* bone = weightIt->first.first;
+            const osg::Matrix& invBindMatrix = weightIt->first.second;
             float weight = weightIt->second;
+            const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
+            accummulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
+        }
+        resultMat = resultMat * geomToSkel;
 
-            osg::Vec3f a = (*positionSrc)[vertex];
-
-            (*positionDst)[vertex] += finalMatrix.preMult(a) * weight;
-            (*normalDst)[vertex] += osg::Matrix::transform3x3((*normalSrc)[vertex], finalMatrix) * weight;
+        for (std::vector<unsigned short>::const_iterator vertexIt = it->second.begin(); vertexIt != it->second.end(); ++vertexIt)
+        {
+            unsigned short vertex = *vertexIt;
+            (*positionDst)[vertex] = resultMat.preMult((*positionSrc)[vertex]);
+            (*normalDst)[vertex] = osg::Matrix::transform3x3((*normalSrc)[vertex], resultMat);
         }
     }
 

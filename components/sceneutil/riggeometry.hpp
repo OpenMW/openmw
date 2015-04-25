@@ -47,8 +47,15 @@ namespace SceneUtil
 
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
 
-        typedef std::map<Bone*, BoneInfluence> ResolvedInfluenceMap;
-        ResolvedInfluenceMap mResolvedInfluenceMap;
+        typedef std::pair<Bone*, osg::Matrixf> BoneBindMatrixPair;
+
+        typedef std::pair<BoneBindMatrixPair, float> BoneWeight;
+
+        typedef std::vector<unsigned short> VertexList;
+
+        typedef std::map<std::vector<BoneWeight>, VertexList> Bone2VertexMap;
+
+        Bone2VertexMap mBone2VertexMap;
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
     };
