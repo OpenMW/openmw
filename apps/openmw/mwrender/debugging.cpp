@@ -155,10 +155,10 @@ ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 }
 
 Debugging::Debugging(SceneNode *root, OEngine::Physic::PhysicEngine *engine) :
-    mRootNode(root), mEngine(engine),
-    mSceneMgr(root->getCreator()),
+    mEngine(engine), mSceneMgr(root->getCreator()),
     mPathgridEnabled(false),
-    mInteriorPathgridNode(NULL), mPathGridRoot(NULL),
+    mRootNode(root),
+    mPathGridRoot(NULL), mInteriorPathgridNode(NULL),
     mGridMatsCreated(false)
 {
     ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);

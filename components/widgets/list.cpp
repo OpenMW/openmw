@@ -9,8 +9,8 @@ namespace Gui
 {
 
     MWList::MWList() :
-        mClient(0)
-        , mScrollView(0)
+        mScrollView(0)
+        ,mClient(0)
         , mItemHeight(0)
     {
     }

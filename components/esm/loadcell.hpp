@@ -78,9 +78,9 @@ struct Cell
     float mFogDensity;
   };
 
-  Cell() : mWater(0),
-           mName(""),
+  Cell() : mName(""),
            mRegion(""),
+           mWater(0),
            mWaterInt(false),
            mMapColor(0),
            mRefNumCounter(0)

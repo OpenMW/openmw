@@ -36,17 +36,17 @@ namespace MWGui
         struct SpellEffectParams
         {
             SpellEffectParams()
-                : mMagnMin(-1)
+                : mNoTarget(false)
+                , mIsConstant(false)
+                , mKnown(true)
+                , mEffectID(-1)
+                , mSkill(-1)
+                , mAttribute(-1)
+                , mMagnMin(-1)
                 , mMagnMax(-1)
                 , mRange(-1)
                 , mDuration(-1)
-                , mSkill(-1)
                 , mArea(0)
-                , mAttribute(-1)
-                , mEffectID(-1)
-                , mNoTarget(false)
-                , mIsConstant(false)
-                , mKnown(true)
             {
             }
 

@@ -20,10 +20,10 @@ namespace MWGui
     {
     public:
         ToolTipInfo()
-            : isPotion(false)
-            , imageSize(32)
-            , wordWrap(true)
+            : imageSize(32)
             , remainingEnchantCharge(-1)
+            , isPotion(false)
+            , wordWrap(true)
         {}
 
         std::string caption;

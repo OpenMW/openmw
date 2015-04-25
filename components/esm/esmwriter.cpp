@@ -9,10 +9,10 @@
 namespace ESM
 {
     ESMWriter::ESMWriter()
-        : mEncoder (0)
+        : mStream(NULL)
+        , mEncoder (0)
         , mRecordCount (0)
         , mCounting (true)
-        , mStream(NULL)
     {}
 
     unsigned int ESMWriter::getVersion() const

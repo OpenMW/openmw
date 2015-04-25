@@ -78,15 +78,15 @@ namespace Terrain
     DefaultWorld::DefaultWorld(Ogre::SceneManager* sceneMgr,
                      Storage* storage, int visibilityFlags, bool shaders, Alignment align, float minBatchSize, float maxBatchSize)
         : World(sceneMgr, storage, visibilityFlags, shaders, align)
+        , mWorkQueueChannel(0)
+        , mVisible(true)
+        , mChunksLoading(0)
+        , mMinX(0)
+        , mMaxX(0)
+        , mMinY(0)
+        , mMaxY(0)
         , mMinBatchSize(minBatchSize)
         , mMaxBatchSize(maxBatchSize)
-        , mVisible(true)
-        , mMaxX(0)
-        , mMinX(0)
-        , mMaxY(0)
-        , mMinY(0)
-        , mChunksLoading(0)
-        , mWorkQueueChannel(0)
         , mLayerLoadPending(true)
     {
 #if TERRAIN_USE_SHADER == 0
