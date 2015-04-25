@@ -18,7 +18,7 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
         esm.writeHNT (tag, *this, 8);
     else
     {
-        int refNum = (mIndex & 0xffffff) | ((hasContentFile() ? mContentFile<<24 : 0xff));
+        int refNum = (mIndex & 0xffffff) | ((hasContentFile() ? mContentFile : 0xff)<<24);
 
         esm.writeHNT (tag, refNum, 4);
     }
