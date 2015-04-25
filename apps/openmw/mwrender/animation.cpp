@@ -549,9 +549,16 @@ namespace MWRender
         {
             osg::Node* node = it->first;
             node->removeUpdateCallback(it->second);
+
+            // Should be no longer needed with OSG 3.4
+            it->second->setNestedCallback(NULL);
         }
         if (mResetAccumRootCallback && mAccumRoot)
+        {
             mAccumRoot->removeUpdateCallback(mResetAccumRootCallback);
+            // Should be no longer needed with OSG 3.4
+            mResetAccumRootCallback->setNestedCallback(NULL);
+        }
         mAnimSourceControllers.clear();
 
         mAccumCtrl = NULL;
@@ -589,6 +596,7 @@ namespace MWRender
                     {
                         mAccumCtrl = it->second;
 
+                        // make sure reset is last in the chain of callbacks
                         if (!mResetAccumRootCallback)
                         {
                             mResetAccumRootCallback = new ResetAccumRootCallback;
