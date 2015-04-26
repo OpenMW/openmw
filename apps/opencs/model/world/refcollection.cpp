@@ -2,6 +2,7 @@
 #include "refcollection.hpp"
 
 #include <sstream>
+#include <iostream>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
@@ -12,8 +13,10 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
+    std::map<std::string, std::map<ESM::RefNum, std::string> >& cache, const std::string& origCellId,
+    CSMDoc::Messages& messages)
 {
+    std::string cellid = origCellId;
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
@@ -73,18 +76,20 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                         std::cerr << "Position: #" << index.first << " " << index.second
                             <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
                     }
-                    // FIXME: need to transfer the ref to the new cell
+
+                    // transfer the ref to the new cell
+                    cellid = ref.mCell;
                 }
             }
         }
         else
             ref.mCell = cell2.mId;
 
-        std::map<ESM::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
+        std::map<ESM::RefNum, std::string>::iterator iter = cache[cellid].find (ref.mRefNum);
 
         if (deleted)
         {
-            if (iter==cache.end())
+            if (iter==cache[cellid].end())
             {
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
                     mCells.getId (cellIndex));
@@ -101,7 +106,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             if (record.mState==RecordBase::State_BaseOnly)
             {
                 removeRows (index, 1);
-                cache.erase (iter);
+                cache[cellid].erase (iter);
             }
             else
             {
@@ -112,7 +117,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             continue;
         }
 
-        if (iter==cache.end())
+        if (iter==cache[cellid].end())
         {
             // new reference
             ref.mId = getNewId();
@@ -123,7 +128,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             appendRecord (record);
 
-            cache.insert (std::make_pair (ref.mRefNum, ref.mId));
+            cache[cellid].insert (std::make_pair (ref.mRefNum, ref.mId));
         }
         else
         {
