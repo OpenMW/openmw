@@ -331,15 +331,10 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         moved.mRefNum = ref.get().mRefNum;
 
                         // Need to fill mTarget with the ref's new position.
-                        //
-                        // For this to work the view tht modified this ref needed to have the
-                        // ref's mCell updted properly.
-                        //
-                        // For now use the temporary solution calculated above
-                        std::istringstream stream (stream.str().c_str());
+                        std::istringstream istream (stream.str().c_str());
 
                         char ignore;
-                        stream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
+                        istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
 
                         ref.get().mRefNum.save (mState.getWriter(), false, "MVRF");
                         mState.getWriter().writeHNT ("CNDT", moved.mTarget, 8);
