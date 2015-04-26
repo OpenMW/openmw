@@ -2401,7 +2401,7 @@ namespace MWWorld
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
-        OEngine::Physic::PhysicActor *physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        OEngine::Physic::PhysicActor *physicActor = 0;//mPhysEngine->getCharacter(actor.getRefData().getHandle());
         if (physicActor)
             physicActor->enableCollisionBody(enable);
     }
