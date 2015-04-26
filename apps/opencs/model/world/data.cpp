@@ -870,7 +870,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
-            mRefs.load (*mReader, index, mBase, mRefLoadCache, cellId, messages);
+            mRefs.load (*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 

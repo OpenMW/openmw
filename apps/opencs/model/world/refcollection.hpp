@@ -27,8 +27,7 @@ namespace CSMWorld
             {}
 
             void load (ESM::ESMReader& reader, int cellIndex, bool base,
-                std::map<std::string, std::map<ESM::RefNum, std::string> >& cache, const std::string& cellid,
-                CSMDoc::Messages& messages);
+                std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages);
             ///< Load a sequence of references.
 
             std::string getNewId();

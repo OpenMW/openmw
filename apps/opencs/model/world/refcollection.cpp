@@ -13,10 +13,8 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<std::string, std::map<ESM::RefNum, std::string> >& cache, const std::string& origCellId,
-    CSMDoc::Messages& messages)
+    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
 {
-    std::string cellid = origCellId;
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
@@ -43,18 +41,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             ref.mCell = stream.str();
 
-            // It is not always possibe to ignore moved references sub-record and calculate from
-            // coordinates. Some mods may place the ref in positions outside normal bounds,
-            // resulting in non sensical cell id's.
-            //
-            // Use the target cell from the MVRF tag but if different output an error message
             if (!base &&                  // don't try to update base records
                 mref.mRefNum.mIndex != 0) // MVRF tag found
             {
-                std::ostringstream stream;
-                stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
-                ref.mCell = stream.str(); // overwrite
-
+                // there is a requirement for a placeholder where the original object was
+                //
+                // see the forum discussions here for more details:
+                // https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
                 ref.mOriginalCell = cell2.mId;
 
                 if (deleted)
@@ -67,29 +60,35 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
                     continue;
                 }
-                else
-                {
-                    if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
-                    {
-                        std::cerr << "The Position of moved ref "
-                            << ref.mRefID << " does not match the target cell" << std::endl;
-                        std::cerr << "Position: #" << index.first << " " << index.second
-                            <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
-                    }
 
-                    // transfer the ref to the new cell
-                    cellid = ref.mCell;
+                // It is not always possibe to ignore moved references sub-record and
+                // calculate from coordinates. Some mods may place the ref in positions
+                // outside normal bounds, resulting in non sensical cell id's.  This often
+                // happens if the moved ref was deleted.
+                //
+                // Use the target cell from the MVRF tag but if different output an error
+                // message
+                if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
+                {
+                    std::cerr << "The Position of moved ref "
+                        << ref.mRefID << " does not match the target cell" << std::endl;
+                    std::cerr << "Position: #" << index.first << " " << index.second
+                        <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
+
+                    std::ostringstream stream;
+                    stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
+                    ref.mCell = stream.str(); // overwrite
                 }
             }
         }
         else
             ref.mCell = cell2.mId;
 
-        std::map<ESM::RefNum, std::string>::iterator iter = cache[cellid].find (ref.mRefNum);
+        std::map<ESM::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
 
         if (deleted)
         {
-            if (iter==cache[cellid].end())
+            if (iter==cache.end())
             {
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
                     mCells.getId (cellIndex));
@@ -106,7 +105,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             if (record.mState==RecordBase::State_BaseOnly)
             {
                 removeRows (index, 1);
-                cache[cellid].erase (iter);
+                cache.erase (iter);
             }
             else
             {
@@ -117,7 +116,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             continue;
         }
 
-        if (iter==cache[cellid].end())
+        if (iter==cache.end())
         {
             // new reference
             ref.mId = getNewId();
@@ -128,7 +127,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             appendRecord (record);
 
-            cache[cellid].insert (std::make_pair (ref.mRefNum, ref.mId));
+            cache.insert (std::make_pair (ref.mRefNum, ref.mId));
         }
         else
         {
