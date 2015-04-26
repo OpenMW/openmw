@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
 
 #include <QAbstractItemModel>
 
@@ -861,9 +862,15 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_CELL:
         {
-            mCells.load (*mReader, mBase);
-            std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (mCells.getSize()-1));
-            mRefs.load (*mReader, mCells.getSize()-1, mBase, mRefLoadCache[cellId], messages);
+            int index = mCells.load (*mReader, mBase);
+            if (index < 0 || index >= mCells.getSize())
+            {
+                // log an error and continue loading the refs to the last loaded cell
+                std::cerr << "Logic error: cell index out of bounds" << std::endl;
+                index = mCells.getSize()-1;
+            }
+            std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
+            mRefs.load (*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 

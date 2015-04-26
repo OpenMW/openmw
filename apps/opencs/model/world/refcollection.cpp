@@ -2,7 +2,6 @@
 #include "refcollection.hpp"
 
 #include <sstream>
-#include <iostream> // FIXME: debug only
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
@@ -25,20 +24,11 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     ESM::MovedCellRef mref;
 
     // hack to initialise mindex
-    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef (reader, ref, deleted, true, &mref))
+    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef(reader, ref, deleted, true, &mref))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
         ref.mOriginalCell = base ? cell2.mId : "";
-
-#if 0
-        if (mref.mRefNum.mIndex != 0 &&
-            ((int)std::floor(ref.mPos.pos[0]/8192) != mref.mTarget[0] ||
-             (int)std::floor(ref.mPos.pos[1]/8192) != mref.mTarget[1]))
-        {
-            std::cout <<"refcollection  #" << mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
-        }
-#endif
 
         if (cell.get().isExterior())
         {
@@ -46,15 +36,46 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             std::pair<int, int> index = ref.getCellIndex();
 
             std::ostringstream stream;
-            if (mref.mRefNum.mIndex)
-            {
-                stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
-                //std::cout <<"refcollection " + stream.str() << std::endl;
-            }
-            else
-                stream << "#" << index.first << " " << index.second;
+            stream << "#" << index.first << " " << index.second;
 
             ref.mCell = stream.str();
+
+            // It is not always possibe to ignore moved references sub-record and calculate from
+            // coordinates. Some mods may place the ref in positions outside normal bounds,
+            // resulting in non sensical cell id's.
+            //
+            // Use the target cell from the MVRF tag but if different output an error message
+            if (!base &&                  // don't try to update base records
+                mref.mRefNum.mIndex != 0) // MVRF tag found
+            {
+                std::ostringstream stream;
+                stream << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
+                ref.mCell = stream.str(); // overwrite
+
+                ref.mOriginalCell = cell2.mId;
+
+                if (deleted)
+                {
+                    // FIXME: how to mark the record deleted?
+                    CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
+                        mCells.getId (cellIndex));
+
+                    messages.add (id, "Moved reference "+ref.mRefID+" is in DELE state");
+
+                    continue;
+                }
+                else
+                {
+                    if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
+                    {
+                        std::cerr << "The Position of moved ref "
+                            << ref.mRefID << " does not match the target cell" << std::endl;
+                        std::cerr << "Position: #" << index.first << " " << index.second
+                            <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
+                    }
+                    // FIXME: need to transfer the ref to the new cell
+                }
+            }
         }
         else
             ref.mCell = cell2.mId;
