@@ -49,8 +49,7 @@ void CSVTools::SearchSubView::replace (bool selection)
 }
 
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id), mDocument (document), mPaddingBefore (10), mPaddingAfter (10),
-  mLocked (false)
+: CSVDoc::SubView (id), mDocument (document), mLocked (false)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -91,14 +90,6 @@ void CSVTools::SearchSubView::setEditLock (bool locked)
 void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting (name, list);
-
-    if (!list.empty())
-    {
-        if (name=="search/char-before")
-            mPaddingBefore = list.at (0).toInt();
-        else if (name=="search/char-after")
-            mPaddingAfter = list.at (0).toInt();
-    }
 }
 
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
@@ -108,8 +99,13 @@ void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *documen
 
 void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 {
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    int paddingBefore = userSettings.setting ("search/char-before", QString ("5")).toInt();
+    int paddingAfter = userSettings.setting ("search/char-after", QString ("5")).toInt();
+
     mSearch = search;
-    mSearch.setPadding (mPaddingBefore, mPaddingAfter);
+    mSearch.setPadding (paddingBefore, paddingAfter);
     
     mTable->clear();
     mDocument.runSearch (getUniversalId(), mSearch);
