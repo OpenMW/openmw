@@ -20,7 +20,6 @@ class QAbstractItemModel;
 namespace CSMWorld
 {
     class IdTable;
-    class RecordBase;
     class IdTree;
     struct RecordBase;
     struct NestedTableWrapperBase;

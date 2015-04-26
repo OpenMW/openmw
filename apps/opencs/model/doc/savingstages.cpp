@@ -238,8 +238,19 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
                 mState.getSubRecords()[Misc::StringUtils::lowerCase (cellId)];
 
             // collect moved references at the end of the container
-            if (!record.get().mOriginalCell.empty() &&
-                record.get().mOriginalCell!=record.get().mCell)
+            bool interior = cellId.substr (0, 1)!="#";
+            std::ostringstream stream;
+            if (!interior)
+            {
+                // recalculate the ref's cell location
+                std::pair<int, int> index = record.get().getCellIndex();
+                stream << "#" << index.first << " " << index.second;
+            }
+
+            // An empty mOriginalCell is meant to indicate that it is the same as
+            // the current cell.  It is possible that a moved ref is moved again.
+            if ((record.get().mOriginalCell.empty() ?
+                    record.get().mCell : record.get().mOriginalCell) != stream.str() && !interior)
                 indices.push_back (i);
             else
                 indices.push_front (i);
@@ -314,7 +325,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                     // An empty mOriginalCell is meant to indicate that it is the same as
                     // the current cell.  It is possible that a moved ref is moved again.
                     if ((ref.get().mOriginalCell.empty() ? ref.get().mCell : ref.get().mOriginalCell)
-                            != stream.str())
+                            != stream.str() && !interior)
                     {
                         ESM::MovedCellRef moved;
                         moved.mRefNum = ref.get().mRefNum;

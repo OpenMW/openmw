@@ -8,10 +8,9 @@
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
 
+#include "idtable.hpp"
 #include "idtree.hpp"
 #include "nestedtablewrapper.hpp"
-
-#include "idtable.hpp"
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
@@ -225,10 +224,6 @@ void CSMWorld::UpdateCellCommand::undo()
 {
     mModel.setData (mIndex, mOld);
 }
-
-
-
-
 
 
 CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
