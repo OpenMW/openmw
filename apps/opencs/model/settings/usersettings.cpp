@@ -220,7 +220,10 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Characters after search string");
         after->setDefaultValue (10);
         after->setRange (0, 1000);
-        after->setToolTip ("Maximum number of character to display in search result after the searched text");        
+        after->setToolTip ("Maximum number of character to display in search result after the searched text");
+
+        Setting *autoDelete = createSetting (Type_CheckBox, "auto-delete", "Delete row from result table after a successful replace");
+        autoDelete->setDefaultValue ("true");
     }
     
     {

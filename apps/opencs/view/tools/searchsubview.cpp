@@ -7,6 +7,7 @@
 #include "../../model/tools/search.hpp"
 #include "../../model/tools/reportmodel.hpp"
 #include "../../model/world/idtablebase.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "reporttable.hpp"
 #include "searchbox.hpp"
@@ -22,7 +23,10 @@ void CSVTools::SearchSubView::replace (bool selection)
 
     const CSMTools::ReportModel& model =
         dynamic_cast<const CSMTools::ReportModel&> (*mTable->model());
-    
+
+    bool autoDelete = CSMSettings::UserSettings::instance().setting (
+        "search/auto-delete", QString ("true"))=="true";
+        
     // We are running through the indices in reverse order to avoid messing up multiple results
     // in a single string.
     for (std::vector<int>::const_reverse_iterator iter (indices.rbegin()); iter!=indices.rend(); ++iter)
@@ -38,6 +42,9 @@ void CSVTools::SearchSubView::replace (bool selection)
         
         mSearch.replace (mDocument, table, id, hint, replace);
         mTable->flagAsReplaced (*iter);
+
+        if (autoDelete)
+            mTable->model()->removeRows (*iter, 1);
     }
 }
 
