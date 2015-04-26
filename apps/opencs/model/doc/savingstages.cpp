@@ -303,13 +303,34 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                 if (ref.mState==CSMWorld::RecordBase::State_Modified ||
                     ref.mState==CSMWorld::RecordBase::State_ModifiedOnly)
                 {
+                    // To get an MVRF tag, the ref's mOriginalCell needs to be non-empty (empty
+                    // is meant to indicate that it is the same as the current cell) and
+                    // different to mCell (its current cell) TODO: the second check seems redundant?
+                    //
+                    // To have mOriginalCell be non-empty, it needs to be loaded as 'base' in
+                    // RefCollection::load()
+                    //
+                    // recalculate the ref's cell location
+                    std::ostringstream stream;
+                    if (!interior)
+                    {
+                        std::pair<int, int> index = ref.get().getCellIndex();
+                        stream << "#" << index.first << " " << index.second;
+                    }
+
                     if (!ref.get().mOriginalCell.empty() &&
-                        ref.get().mOriginalCell!=ref.get().mCell)
+                        ref.get().mOriginalCell!=stream.str())
                     {
                         ESM::MovedCellRef moved;
                         moved.mRefNum = ref.get().mRefNum;
 
-                        std::istringstream stream (ref.get().mCell.c_str());
+                        // Need to fill mTarget with the ref's new position.
+                        //
+                        // For this to work the view tht modified this ref needed to have the
+                        // ref's mCell updted properly.
+                        //
+                        // For now use the temporary solution calculated above
+                        std::istringstream stream (stream.str().c_str());
 
                         char ignore;
                         stream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
