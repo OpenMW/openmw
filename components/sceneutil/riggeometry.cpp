@@ -6,13 +6,33 @@
 #include <cstdlib>
 
 #include <osg/MatrixTransform>
+#include <osg/io_utils>
 
 #include "skeleton.hpp"
-
-#include <osg/io_utils>
+#include "util.hpp"
 
 namespace SceneUtil
 {
+
+class UpdateRigBounds : public osg::Drawable::UpdateCallback
+{
+public:
+    UpdateRigBounds()
+    {
+    }
+
+    UpdateRigBounds(const UpdateRigBounds& copy, const osg::CopyOp& copyop)
+        : osg::Drawable::UpdateCallback(copy, copyop)
+    {
+    }
+
+    void update(osg::NodeVisitor* nv, osg::Drawable* drw)
+    {
+        RigGeometry* rig = static_cast<RigGeometry*>(drw);
+
+        rig->updateBounds(nv);
+    }
+};
 
 // TODO: make threadsafe for multiple cull threads
 class UpdateRigGeometry : public osg::Drawable::CullCallback
@@ -40,6 +60,7 @@ public:
 RigGeometry::RigGeometry()
 {
     setCullCallback(new UpdateRigGeometry);
+    setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
 }
 
@@ -125,6 +146,8 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
             continue;
         }
 
+        mBoneSphereMap[bone] = it->second.mBoundSphere;
+
         const BoneInfluence& bi = it->second;
 
         const std::map<unsigned short, float>& weights = it->second.mWeights;
@@ -178,19 +201,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 
     mSkeleton->updateBoneMatrices(nv);
 
-    osg::NodePath path;
-    bool foundSkel = false;
-    for (osg::NodePath::const_iterator it = nv->getNodePath().begin(); it != nv->getNodePath().end(); ++it)
-    {
-        if (!foundSkel)
-        {
-            if (*it == mSkeleton)
-                foundSkel = true;
-        }
-        else
-            path.push_back(*it);
-    }
-    osg::Matrixf geomToSkel = osg::computeWorldToLocal(path);
+    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
 
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -226,6 +237,47 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 
     positionDst->dirty();
     normalDst->dirty();
+}
+
+void RigGeometry::updateBounds(osg::NodeVisitor *nv)
+{
+    if (!mSkeleton)
+    {
+        if (!initFromParentSkeleton(nv))
+            return;
+    }
+
+    mSkeleton->updateBoneMatrices(nv);
+
+    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
+    osg::BoundingBox box;
+    for (BoneSphereMap::const_iterator it = mBoneSphereMap.begin(); it != mBoneSphereMap.end(); ++it)
+    {
+        Bone* bone = it->first;
+        osg::BoundingSpheref bs = it->second;
+        transformBoundingSphere(bone->mMatrixInSkeletonSpace * geomToSkel, bs);
+        box.expandBy(bs);
+    }
+
+    setInitialBound(box);
+}
+
+osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
+{
+    osg::NodePath path;
+    bool foundSkel = false;
+    for (osg::NodePath::const_iterator it = nv->getNodePath().begin(); it != nv->getNodePath().end(); ++it)
+    {
+        if (!foundSkel)
+        {
+            if (*it == mSkeleton)
+                foundSkel = true;
+        }
+        else
+            path.push_back(*it);
+    }
+    return osg::computeWorldToLocal(path);
+
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)

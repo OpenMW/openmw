@@ -24,6 +24,7 @@ namespace SceneUtil
         struct BoneInfluence
         {
             osg::Matrixf mInvBindMatrix;
+            osg::BoundingSpheref mBoundSphere;
             // <vertex index, weight>
             std::map<unsigned short, float> mWeights;
         };
@@ -40,6 +41,8 @@ namespace SceneUtil
         // Called automatically by our CullCallback
         void update(osg::NodeVisitor* nv);
 
+        // Called automatically by our UpdateCallback
+        void updateBounds(osg::NodeVisitor* nv);
 
     private:
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
@@ -57,7 +60,13 @@ namespace SceneUtil
 
         Bone2VertexMap mBone2VertexMap;
 
+        typedef std::map<Bone*, osg::BoundingSpheref> BoneSphereMap;
+
+        BoneSphereMap mBoneSphereMap;
+
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
+
+        osg::Matrixf getGeomToSkelMatrix(osg::NodeVisitor* nv);
     };
 
 }

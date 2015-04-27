@@ -1043,24 +1043,6 @@ namespace NifOsg
             return morphGeom;
         }
 
-        class BoundingBoxCallback : public osg::NodeCallback
-        {
-        public:
-            virtual void operator()( osg::Node* node, osg::NodeVisitor* nv )
-            {
-                osg::BoundingBox bb = mDrawable->getBound();
-
-                static_cast<osg::MatrixTransform*>(node)->setMatrix(
-                    osg::Matrix::scale(bb.xMax()-bb.xMin(), bb.yMax()-bb.yMin(), bb.zMax()-bb.zMin()) *
-                    osg::Matrix::translate(bb.center()) );
-
-                traverse(node, nv);
-            }
-
-            osg::Drawable* mDrawable;
-        };
-
-
         static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
@@ -1091,24 +1073,11 @@ namespace NifOsg
                     influence.mWeights.insert(indexWeight);
                 }
                 influence.mInvBindMatrix = toMatrix(data->bones[i].trafo);
+                influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
                 map->mMap.insert(std::make_pair(boneName, influence));
             }
             rig->setInfluenceMap(map);
-
-            // Compute the bounding box
-            osg::BoundingBox boundingBox;
-
-            osg::Matrix worldTrans = getWorldTransform(triShape);
-            for(size_t i = 0;i < bones.length();i++)
-            {
-                osg::BoundingSphere boneSphere (data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
-                osg::Matrix boneWorldTrans(getWorldTransform(bones[i].getPtr()));
-                osg::Matrix mat = boneWorldTrans * worldTrans.inverse(worldTrans);
-                SceneUtil::transformBoundingSphere(mat, boneSphere);
-                boundingBox.expandBy(boneSphere);
-            }
-            rig->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(boundingBox));
 
             geode->addDrawable(rig);
 
