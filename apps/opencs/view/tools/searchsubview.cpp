@@ -26,6 +26,9 @@ void CSVTools::SearchSubView::replace (bool selection)
 
     bool autoDelete = CSMSettings::UserSettings::instance().setting (
         "search/auto-delete", QString ("true"))=="true";
+
+    CSMTools::Search search (mSearch);
+    CSMWorld::IdTableBase *currentTable = 0;
         
     // We are running through the indices in reverse order to avoid messing up multiple results
     // in a single string.
@@ -37,14 +40,23 @@ void CSVTools::SearchSubView::replace (bool selection)
 
         CSMWorld::IdTableBase *table = &dynamic_cast<CSMWorld::IdTableBase&> (
             *mDocument.getData().getTableModel (type));
-    
-        std::string hint = model.getHint (*iter);
-        
-        mSearch.replace (mDocument, table, id, hint, replace);
-        mTable->flagAsReplaced (*iter);
 
-        if (autoDelete)
-            mTable->model()->removeRows (*iter, 1);
+        if (table!=currentTable)
+        {
+            search.configure (table);
+            currentTable = table;
+        }
+            
+        std::string hint = model.getHint (*iter);
+
+        if (search.verify (mDocument, table, id, hint))
+        {
+            search.replace (mDocument, table, id, hint, replace);
+            mTable->flagAsReplaced (*iter);
+
+            if (autoDelete)
+                mTable->model()->removeRows (*iter, 1);
+        }
     }
 }
 
