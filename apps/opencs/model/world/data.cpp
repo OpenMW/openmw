@@ -458,6 +458,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+
+    mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
 
 CSMWorld::Data::~Data()
@@ -779,7 +781,6 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mReader = 0;
 
     mDialogue = 0;
-    mRefLoadCache.clear();
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
@@ -816,7 +817,6 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         mReader = 0;
 
         mDialogue = 0;
-        mRefLoadCache.clear();
         return true;
     }
 

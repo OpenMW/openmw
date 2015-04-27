@@ -84,7 +84,13 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
             ref.mCell = cell2.mId;
 
-        std::map<ESM::RefNum, std::string>::iterator iter = cache.find (ref.mRefNum);
+        // ignore content file number
+        std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
+        for (; iter != cache.end(); ++iter)
+        {
+            if (ref.mRefNum.mIndex == iter->first.mIndex)
+                break;
+        }
 
         if (deleted)
         {

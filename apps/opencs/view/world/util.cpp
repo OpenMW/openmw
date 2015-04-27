@@ -125,7 +125,6 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
     QVariant new_ = hack.getData();
 
     if ((model->data (index)!=new_) && (model->flags(index) & Qt::ItemIsEditable))
-        //getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_)); // FIXME
         mCommandDispatcher->executeModify (model, index, new_);
 }
 
