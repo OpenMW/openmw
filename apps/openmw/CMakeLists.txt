@@ -139,7 +139,6 @@ target_link_libraries(openmw
     ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
-    ${MYGUI_PLATFORM_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     "osg-ffmpeg-videoplayer"
     "oics"
@@ -153,7 +152,6 @@ if (ANDROID)
         android
         log
         dl
-        MyGUI.OgrePlatform
         MyGUIEngineStatic
         Plugin_StrangeButtonStatic
         cpufeatures

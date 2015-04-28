@@ -27,7 +27,6 @@ IF (WIN32) #Windows
         STRING(REGEX REPLACE "[\\]" "/" MYGUISDK "${MYGUISDK}" )
 
         find_path ( MYGUI_INCLUDE_DIRS MyGUI.h "${MYGUISDK}/MyGUIEngine/include" NO_DEFAULT_PATH )
-        find_path ( MYGUI_PLATFORM_INCLUDE_DIRS MyGUI_OgrePlatform.h "${MYGUISDK}/Platforms/Ogre/OgrePlatform/include" NO_DEFAULT_PATH )
 
         SET ( MYGUI_LIB_DIR ${MYGUISDK}/lib ${MYGUISDK}/*/lib )
 
@@ -35,27 +34,15 @@ IF (WIN32) #Windows
            set(LIB_SUFFIX "Static")
         endif ( MYGUI_STATIC )
 
-        find_library ( MYGUI_LIBRARIES_REL NAMES MyGUIEngine${LIB_SUFFIX}.lib MyGUI.OgrePlatform.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_LIBRARIES_DBG NAMES MyGUIEngine${LIB_SUFFIX}_d.lib MyGUI.OgrePlatform_d.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
-
-        find_library ( MYGUI_PLATFORM_LIBRARIES_REL NAMES MyGUI.OgrePlatform.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
-        find_library ( MYGUI_PLATFORM_LIBRARIES_DBG NAMES MyGUI.OgrePlatform_d.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
+        find_library ( MYGUI_LIBRARIES_REL NAMES MyGUIEngine${LIB_SUFFIX}.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+        find_library ( MYGUI_LIBRARIES_DBG NAMES MyGUIEngine${LIB_SUFFIX}_d.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" debug )
 
         make_library_set ( MYGUI_LIBRARIES )
-        make_library_set ( MYGUI_PLATFORM_LIBRARIES )
 
         MESSAGE ("${MYGUI_LIBRARIES}")
-        MESSAGE ("${MYGUI_PLATFORM_LIBRARIES}")
 
         #findpkg_finish ( "MYGUI" )
     ENDIF (MYGUISDK)
-    IF (OGRESOURCE)
-        MESSAGE(STATUS "Using MyGUI in OGRE dependencies")
-        STRING(REGEX REPLACE "[\\]" "/" OGRESDK "${OGRESOURCE}" )
-        SET(MYGUI_INCLUDE_DIRS ${OGRESOURCE}/OgreMain/include/MYGUI)
-        SET(MYGUI_LIB_DIR ${OGRESOURCE}/lib)
-        SET(MYGUI_LIBRARIES debug Debug/MyGUIEngine_d optimized Release/MyGUIEngine)
-    ENDIF (OGRESOURCE)
 ELSE (WIN32) #Unix
     CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
     FIND_PACKAGE(PkgConfig)
@@ -67,11 +54,9 @@ ELSE (WIN32) #Unix
                 SET(MYGUI_INCLUDE_DIRS ${MYGUI_INCLUDE_DIRS})
                 SET(MYGUI_LIB_DIR ${MYGUI_LIBDIR})
                 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
-                SET(MYGUI_PLATFORM_LIBRARIES "MyGUI.DummyPlatform")
             ELSE (MYGUI_INCLUDE_DIRS)
                 FIND_PATH(MYGUI_INCLUDE_DIRS MyGUI.h PATHS /usr/local/include /usr/include PATH_SUFFIXES MyGUI MYGUI)
                 FIND_LIBRARY(MYGUI_LIBRARIES myguistatic PATHS /usr/lib /usr/local/lib)
-                SET(MYGUI_PLATFORM_LIBRARIES "MyGUI.DummyPlatform")
                 SET(MYGUI_LIB_DIR ${MYGUI_LIBRARIES})
                 STRING(REGEX REPLACE "(.*)/.*" "\\1" MYGUI_LIB_DIR "${MYGUI_LIB_DIR}")
                 STRING(REGEX REPLACE ".*/" "" MYGUI_LIBRARIES "${MYGUI_LIBRARIES}")
@@ -81,7 +66,6 @@ ELSE (WIN32) #Unix
             FIND_PACKAGE(freetype)
             FIND_PATH(MYGUI_INCLUDE_DIRS MyGUI.h PATHS /usr/local/include /usr/include PATH_SUFFIXES MyGUI MYGUI)
             FIND_LIBRARY(MYGUI_LIBRARIES MyGUIEngineStatic PATHS /usr/lib /usr/local/lib)
-            SET(MYGUI_PLATFORM_LIBRARIES "MyGUI.DummyPlatform")
             SET(MYGUI_LIB_DIR ${MYGUI_LIBRARIES})
             STRING(REGEX REPLACE "(.*)/.*" "\\1" MYGUI_LIB_DIR "${MYGUI_LIB_DIR}")
             STRING(REGEX REPLACE ".*/" "" MYGUI_LIBRARIES "${MYGUI_LIBRARIES}")
@@ -92,11 +76,9 @@ ELSE (WIN32) #Unix
             SET(MYGUI_INCLUDE_DIRS ${MYGUI_INCLUDE_DIRS})
             SET(MYGUI_LIB_DIR ${MYGUI_LIBDIR})
             SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
-            SET(MYGUI_PLATFORM_LIBRARIES "MyGUI.DummyPlatform")
         ELSE (MYGUI_INCLUDE_DIRS)
             FIND_PATH(MYGUI_INCLUDE_DIRS MyGUI.h PATHS /usr/local/include /usr/include PATH_SUFFIXES MyGUI MYGUI)
             FIND_LIBRARY(MYGUI_LIBRARIES mygui PATHS /usr/lib /usr/local/lib)
-            SET(MYGUI_PLATFORM_LIBRARIES "MyGUI.DummyPlatform")
             SET(MYGUI_LIB_DIR ${MYGUI_LIBRARIES})
             STRING(REGEX REPLACE "(.*)/.*" "\\1" MYGUI_LIB_DIR "${MYGUI_LIB_DIR}")
             STRING(REGEX REPLACE ".*/" "" MYGUI_LIBRARIES "${MYGUI_LIBRARIES}")
@@ -108,14 +90,12 @@ ENDIF (WIN32)
 IF (NOT WIN32) # This does not work on Windows for paths with spaces in them
 	SEPARATE_ARGUMENTS(MYGUI_INCLUDE_DIRS)
 	SEPARATE_ARGUMENTS(MYGUI_LIBRARIES)
-	SEPARATE_ARGUMENTS(MYGUI_PLATFORM_LIBRARIES)
 ENDIF (NOT WIN32)
 
 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} ${FREETYPE_LIBRARIES})
 
 SET(MYGUI_INCLUDE_DIRS ${MYGUI_INCLUDE_DIRS} CACHE PATH "")
 SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
-SET(MYGUI_PLATFORM_LIBRARIES ${MYGUI_PLATFORM_LIBRARIES} CACHE STRING "")
 SET(MYGUI_LIB_DIR ${MYGUI_LIB_DIR} CACHE PATH "")
 
 IF (NOT APPLE OR NOT MYGUI_STATIC) # we need explicit freetype libs only on OS X for static build, for other cases just make it TRUE
