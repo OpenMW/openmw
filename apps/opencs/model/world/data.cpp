@@ -368,7 +368,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRefs.addColumn (new StringIdColumn<CellRef> (true));
     mRefs.addColumn (new RecordStateColumn<CellRef>);
     mRefs.addColumn (new FixedRecordTypeColumn<CellRef> (UniversalId::Type_Reference));
-    mRefs.addColumn (new CellColumn<CellRef>);
+    mRefs.addColumn (new CellColumn<CellRef> (true));
+    mRefs.addColumn (new OriginalCellColumn<CellRef>);
     mRefs.addColumn (new IdColumn<CellRef>);
     mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 0, false));
     mRefs.addColumn (new PosColumn<CellRef> (&CellRef::mPos, 1, false));
@@ -457,6 +458,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+
+    mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
 
 CSMWorld::Data::~Data()
@@ -778,7 +781,6 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mReader = 0;
 
     mDialogue = 0;
-    mRefLoadCache.clear();
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
@@ -815,7 +817,6 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         mReader = 0;
 
         mDialogue = 0;
-        mRefLoadCache.clear();
         return true;
     }
 
@@ -860,9 +861,16 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_CELL:
         {
-            mCells.load (*mReader, mBase);
-            std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (mCells.getSize()-1));
-            mRefs.load (*mReader, mCells.getSize()-1, mBase, mRefLoadCache[cellId], messages);
+            int index = mCells.load (*mReader, mBase);
+            if (index < 0 || index >= mCells.getSize())
+            {
+                // log an error and continue loading the refs to the last loaded cell
+                CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_None);
+                messages.add (id, "Logic error: cell index out of bounds");
+                index = mCells.getSize()-1;
+            }
+            std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
+            mRefs.load (*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
         }
 

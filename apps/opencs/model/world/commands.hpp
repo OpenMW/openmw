@@ -144,6 +144,29 @@ namespace CSMWorld
             virtual void undo();
     };
 
+    /// \brief Update cell ID according to x/y-coordinates
+    ///
+    /// \note The new value will be calculated in the first call to redo instead of the
+    /// constructor to accommodate multiple coordinate-affecting commands being executed
+    /// in a macro.
+    class UpdateCellCommand : public QUndoCommand
+    {
+            IdTable& mModel;
+            int mRow;
+            QModelIndex mIndex;
+            QVariant mNew; // invalid, if new cell ID has not been calculated yet
+            QVariant mOld;
+
+        public:
+
+            UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent = 0);
+
+            virtual void redo();
+
+            virtual void undo();
+    };
+
+
     class NestedTableStoring
     {
         NestedTableWrapperBase* mOld;

@@ -2,6 +2,7 @@
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/commanddispatcher.hpp"
 #include "util.hpp"
 
 #include <QHeaderView>
@@ -10,12 +11,14 @@
 #include <QDebug>
 
 CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
+                                   CSMWorld::UniversalId id,
                                    CSMWorld::NestedTableProxyModel* model,
                                    QWidget* parent)
     : QTableView(parent),
       mUndoStack(document.getUndoStack()),
       mModel(model)
 {
+    mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
 
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
@@ -31,6 +34,7 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
             model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
         CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
+                                                                                         mDispatcher,
                                                                                          document,
                                                                                          this);
 

@@ -222,6 +222,7 @@ namespace CSMWorld
             { ColumnId_HitSound, "Hit Sound" },
             { ColumnId_AreaSound, "Area Sound" },
             { ColumnId_BoltSound, "Bolt Sound" },
+            { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_PathgridPoints, "Points" },
             { ColumnId_PathgridIndex, "Index" },

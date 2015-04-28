@@ -9,16 +9,16 @@
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
                                                      const IconList & icons,
-                                                     CSMDoc::Document& document, QObject *parent)
-    : DataDisplayDelegate (values, icons, document,
+                                                     CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
+    : DataDisplayDelegate (values, icons, dispatcher, document,
                            "records", "status-format",
                            parent)
 {}
 
 CSVWorld::CommandDelegate *CSVWorld::RecordStatusDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new RecordStatusDelegate (mValues, mIcons, document, parent);
+    return new RecordStatusDelegate (mValues, mIcons, dispatcher, document, parent);
 }
 
 CSVWorld::RecordStatusDelegateFactory::RecordStatusDelegateFactory()

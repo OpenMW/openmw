@@ -109,6 +109,7 @@ namespace CSVWorld
 
         QAbstractItemModel* mTable;
 
+        CSMWorld::CommandDispatcher& mCommandDispatcher;
         CSMDoc::Document& mDocument;
 
         NotEditableSubDelegate mNotEditableDelegate;
@@ -119,6 +120,7 @@ namespace CSVWorld
     public:
         DialogueDelegateDispatcher(QObject* parent,
                                    CSMWorld::IdTable* table,
+                                   CSMWorld::CommandDispatcher& commandDispatcher,
                                    CSMDoc::Document& document,
                                    QAbstractItemModel* model = 0);
 
@@ -167,12 +169,14 @@ namespace CSVWorld
             DialogueDelegateDispatcher *mNestedTableDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
+            CSMWorld::CommandDispatcher& mCommandDispatcher;
             CSMDoc::Document& mDocument;
             std::vector<CSMWorld::NestedTableProxyModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
         public:
 
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
+                        CSMWorld::CommandDispatcher& commandDispatcher,
                         CSMDoc::Document& document, bool createAndDelete = false);
 
             virtual ~EditWidget();
