@@ -2,9 +2,6 @@
 #define OPENMW_MWGUI_MYGUIPLATFORM_H
 
 #include "MyGUI_Prerequest.h"
-#include "MyGUI_DummyRenderManager.h"
-#include "MyGUI_DummyDataManager.h"
-#include "MyGUI_DummyDiagnostic.h"
 #include "MyGUI_LogManager.h"
 
 #include "myguirendermanager.hpp"
@@ -36,7 +33,7 @@ namespace MWGui
             mLogManager = nullptr;
         }
 
-        void initialise(const std::string& resourcePath, const std::string& _logName = MYGUI_PLATFORM_LOG_FILENAME)
+        void initialise(const std::string& resourcePath, const std::string& _logName = "MyGUI.log")
         {
             if (!_logName.empty())
                 MyGUI::LogManager::getInstance().createDefaultSource(_logName);

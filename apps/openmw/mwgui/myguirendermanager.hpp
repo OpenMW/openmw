@@ -53,6 +53,7 @@ public:
     virtual ~RenderManager();
 
     void initialise();
+    void shutdown();
 
     static RenderManager& getInstance() { return *getInstancePtr(); }
     static RenderManager* getInstancePtr()

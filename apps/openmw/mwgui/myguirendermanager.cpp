@@ -476,6 +476,10 @@ void RenderManager::initialise()
     mIsInitialise = true;
 }
 
+void RenderManager::shutdown()
+{
+}
+
 MyGUI::IVertexBuffer* RenderManager::createVertexBuffer()
 {
     return new OSGVertexBuffer();
