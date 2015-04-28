@@ -5,6 +5,8 @@
 #include <QDragEnterEvent>
 #include <QRegExp>
 #include <QString>
+#include <QPainter>
+#include <QTextDocumentFragment>
 
 #include "../../model/doc/document.hpp"
 
@@ -72,6 +74,20 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
     connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
 
     mUpdateTimer.setSingleShot (true);
+
+    // FIXME: make this configurable or provide a font selector dialogue
+    // FIXME: save QFontInfo somewhere before switching to a new one
+    QFont font("Monospace");
+    font.setStyleHint(QFont::TypeWriter);
+    setFont(font);
+
+    // FIXME: make this configurable
+    lineNumberArea = new LineNumberArea(this);
+
+    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+
+    updateLineNumberAreaWidth(0);
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const
@@ -156,4 +172,110 @@ void CSVWorld::ScriptEdit::updateHighlighting()
     ChangeLock lock (*this);
 
     mHighlighter->rehighlight();
+}
+
+int CSVWorld::ScriptEdit::lineNumberAreaWidth()
+{
+    int digits = 1;
+    int max = qMax(1, blockCount());
+    while (max >= 10)
+    {
+        max /= 10;
+        ++digits;
+    }
+
+    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+
+    return space;
+}
+
+void CSVWorld::ScriptEdit::updateLineNumberAreaWidth(int /* newBlockCount */)
+{
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy)
+        lineNumberArea->scroll(0, dy);
+    else
+        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+
+    if (rect.contains(viewport()->rect()))
+        updateLineNumberAreaWidth(0);
+}
+
+void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
+{
+    QPlainTextEdit::resizeEvent(e);
+
+    QRect cr = contentsRect();
+    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
+{
+    QPainter painter(lineNumberArea);
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+    int bottom = top + (int) blockBoundingRect(block).height();
+
+    int startBlock = textCursor().blockNumber();
+    int endBlock = textCursor().blockNumber();
+    if(textCursor().hasSelection())
+    {
+        QString str = textCursor().selection().toPlainText();
+        int selectedLines = str.count("\n")+1;
+        if(textCursor().position() < textCursor().anchor())
+            endBlock += selectedLines;
+        else
+            startBlock -= selectedLines;
+    }
+    painter.setBackgroundMode(Qt::OpaqueMode);
+    QFont font = painter.font();
+    QBrush background = painter.background();
+
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
+            QFont newFont = painter.font();
+            QString number = QString::number(blockNumber + 1);
+            if(blockNumber >= startBlock && blockNumber <= endBlock)
+            {
+                painter.setBackground(Qt::cyan);
+                painter.setPen(Qt::darkMagenta);
+                newFont.setBold(true);
+            }
+            else
+            {
+                painter.setBackground(background);
+                painter.setPen(Qt::black);
+            }
+            painter.setFont(newFont);
+            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
+                             Qt::AlignRight, number);
+            painter.setFont(font);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + (int) blockBoundingRect(block).height();
+        ++blockNumber;
+    }
+}
+
+CSVWorld::LineNumberArea::LineNumberArea(ScriptEdit *editor) : QWidget(editor), mScriptEdit(editor)
+{}
+
+QSize CSVWorld::LineNumberArea::sizeHint() const
+{
+    return QSize(mScriptEdit->lineNumberAreaWidth(), 0);
+}
+
+void CSVWorld::LineNumberArea::paintEvent(QPaintEvent *event)
+{
+    mScriptEdit->lineNumberAreaPaintEvent(event);
 }

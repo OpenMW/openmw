@@ -2,6 +2,7 @@
 #define SCRIPTEDIT_H
 
 #include <QPlainTextEdit>
+#include <QWidget>
 #include <QVector>
 #include <QTimer>
 
@@ -9,7 +10,6 @@
 
 #include "scripthighlighter.hpp"
 
-class QWidget;
 class QRegExp;
 
 namespace CSMDoc
@@ -19,6 +19,8 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
+    class LineNumberArea;
+
     class ScriptEdit : public QPlainTextEdit
     {
             Q_OBJECT
@@ -45,6 +47,7 @@ namespace CSVWorld
             int mChangeLocked;
             ScriptHighlighter *mHighlighter;
             QTimer mUpdateTimer;
+            QWidget *lineNumberArea;
 
         public:
 
@@ -55,6 +58,13 @@ namespace CSVWorld
             ///
             /// \note This mechanism is used to avoid infinite update recursions
             bool isChangeLocked() const;
+
+            void lineNumberAreaPaintEvent(QPaintEvent *event);
+            int lineNumberAreaWidth();
+
+        protected:
+
+            virtual void resizeEvent(QResizeEvent *e);
 
         private:
             QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
@@ -74,6 +84,23 @@ namespace CSVWorld
             void idListChanged();
 
             void updateHighlighting();
+
+            void updateLineNumberAreaWidth(int newBlockCount);
+            void updateLineNumberArea(const QRect &, int);
+    };
+
+    class LineNumberArea : public QWidget
+    {
+            ScriptEdit *mScriptEdit;
+
+        public:
+
+            LineNumberArea(ScriptEdit *editor);
+            QSize sizeHint() const;
+
+        protected:
+
+            void paintEvent(QPaintEvent *event);
     };
 }
 #endif // SCRIPTEDIT_H
