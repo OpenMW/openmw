@@ -100,9 +100,9 @@ namespace ESM
             Position mPos;
 
             /// Calls loadId and loadData
-            void load (ESMReader& esm, bool wideRefNum = false, bool ignoreRefNum = false);
+            void load (ESMReader& esm, bool wideRefNum = false);
 
-            void loadId (ESMReader& esm, bool wideRefNum = false, bool ignoreRefNum = false);
+            void loadId (ESMReader& esm, bool wideRefNum = false);
 
             /// Implicitly called by load
             void loadData (ESMReader& esm);
