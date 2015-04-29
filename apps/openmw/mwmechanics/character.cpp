@@ -1898,6 +1898,11 @@ bool CharacterController::isKnockedOut() const
     return mHitState == CharState_KnockOut;
 }
 
+void CharacterController::setActive(bool active)
+{
+    mAnimation->setActive(active);
+}
+
 void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
 {
     mHeadTrackTarget = target;

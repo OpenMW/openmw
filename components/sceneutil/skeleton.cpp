@@ -35,6 +35,7 @@ Skeleton::Skeleton()
     : mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
     , mLastFrameNumber(0)
+    , mActive(true)
 {
 
 }
@@ -44,11 +45,10 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     , mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
     , mLastFrameNumber(0)
+    , mActive(copy.mActive)
 {
 
 }
-
-
 
 Bone* Skeleton::getBone(const std::string &name)
 {
@@ -121,6 +121,16 @@ void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
 
         mNeedToUpdateBoneMatrices = false;
     }
+}
+
+void Skeleton::setActive(bool active)
+{
+    mActive = active;
+}
+
+bool Skeleton::getActive() const
+{
+    return mActive;
 }
 
 Bone::Bone()

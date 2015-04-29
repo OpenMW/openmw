@@ -228,6 +228,9 @@ public:
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
 
+    /// @see Animation::setActive
+    void setActive(bool active);
+
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::Ptr& target);
 };

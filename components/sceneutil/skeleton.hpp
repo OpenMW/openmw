@@ -47,6 +47,12 @@ namespace SceneUtil
         /// Request an update of bone matrices. May be a no-op if already updated in this frame.
         void updateBoneMatrices(osg::NodeVisitor* nv);
 
+        /// Set the skinning active flag. Inactive skeletons will not have their child rigs updated.
+        /// You should set this flag to false if you know that bones are not currently moving.
+        void setActive(bool active);
+
+        bool getActive() const;
+
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.
         // As far as the scene graph goes we support multiple root bones.
@@ -57,6 +63,8 @@ namespace SceneUtil
         bool mBoneCacheInit;
 
         bool mNeedToUpdateBoneMatrices;
+
+        bool mActive;
 
         unsigned int mLastFrameNumber;
     };

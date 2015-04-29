@@ -58,6 +58,8 @@ public:
 };
 
 RigGeometry::RigGeometry()
+    : mFirstFrame(true)
+    , mBoundsFirstFrame(true)
 {
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
@@ -67,6 +69,8 @@ RigGeometry::RigGeometry()
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : osg::Geometry(copy, copyop)
     , mInfluenceMap(copy.mInfluenceMap)
+    , mFirstFrame(copy.mFirstFrame)
+    , mBoundsFirstFrame(copy.mBoundsFirstFrame)
 {
     setSourceGeometry(copy.mSourceGeometry);
 }
@@ -199,6 +203,10 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             return;
     }
 
+    if (!mSkeleton->getActive() && !mFirstFrame)
+        return;
+    mFirstFrame = false;
+
     mSkeleton->updateBoneMatrices(nv);
 
     osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
@@ -246,6 +254,10 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         if (!initFromParentSkeleton(nv))
             return;
     }
+
+    if (!mSkeleton->getActive() && !mBoundsFirstFrame)
+        return;
+    mBoundsFirstFrame = false;
 
     mSkeleton->updateBoneMatrices(nv);
 

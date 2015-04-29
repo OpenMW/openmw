@@ -1085,12 +1085,15 @@ namespace MWMechanics
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                bool inProcessingRange = Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                        <= sqrProcessingDistance;
+
+                iter->second->getCharacterController()->setActive(inProcessingRange);
+
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     updateActor(iter->first, duration);
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() &&
-                            Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
-                                    <= sqrProcessingDistance)
+                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
                     {
                         if (timerUpdateAITargets == 0)
                         {

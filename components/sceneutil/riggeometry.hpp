@@ -64,6 +64,9 @@ namespace SceneUtil
 
         BoneSphereMap mBoneSphereMap;
 
+        bool mFirstFrame;
+        bool mBoundsFirstFrame;
+
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
         osg::Matrixf getGeomToSkelMatrix(osg::NodeVisitor* nv);
