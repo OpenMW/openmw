@@ -12,6 +12,7 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "scriptedit.hpp"
 
@@ -65,10 +66,16 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
 }
 
-void CSVWorld::ScriptSubView::setStatusBar (bool show)
+void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
 {
-    mEditor->showLineNum(show);
-    mBottom->setVisible(show);
+    if (name != "script-editor/show-linenum")
+        return;
+
+    std::string showLinenum =
+        CSMSettings::UserSettings::instance().settingValue("script-editor/show-linenum").toStdString();
+
+    mEditor->showLineNum(showLinenum == "true");
+    mBottom->setVisible(showLinenum == "true");
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()

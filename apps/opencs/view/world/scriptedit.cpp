@@ -80,7 +80,7 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
 
     // TODO: provide a font selector dialogue
     std::string useMonoFont =
-        CSMSettings::UserSettings::instance().setting("window/mono-font", "true").toStdString();
+        CSMSettings::UserSettings::instance().setting("script-editor/mono-font", "true").toStdString();
     if (useMonoFont == "true")
     {
         QFont font("Monospace");
@@ -95,7 +95,7 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
     std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
+        CSMSettings::UserSettings::instance().settingValue("script-editor/show-linenum").toStdString();
 
     showLineNum(showStatusBar == "true");
 }

@@ -39,7 +39,7 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
-            virtual void setStatusBar (bool show);
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
 
         public slots:
 

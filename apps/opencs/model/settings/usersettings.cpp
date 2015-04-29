@@ -143,10 +143,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue (325);
         minWidth->setRange (50, 10000);
         minWidth->setToolTip ("Minimum width of subviews.");
-
-        Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
-        monoFont->setDefaultValue ("true");
-        monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
     }
 
     declareSection ("records", "Records");
@@ -228,6 +224,18 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *autoDelete = createSetting (Type_CheckBox, "auto-delete", "Delete row from result table after a successful replace");
         autoDelete->setDefaultValue ("true");
+    }
+
+    declareSection ("script-editor", "Script Editor");
+    {
+        Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
+        lineNum->setDefaultValue ("true");
+        lineNum->setToolTip ("Show line numbers to the left of the script editor window."
+                "The current row and column numbers of the text cursor are shown at the bottom.");
+
+        Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
+        monoFont->setDefaultValue ("true");
+        monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
     }
 
     {
