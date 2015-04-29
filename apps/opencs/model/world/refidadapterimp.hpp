@@ -2,6 +2,7 @@
 #define CSM_WOLRD_REFIDADAPTERIMP_H
 
 #include <map>
+#include <iostream>
 
 #include <QVariant>
 
@@ -1894,6 +1895,20 @@ namespace CSMWorld
                             record.get().mFlags == 0x02)
                     {
                         return QString("All Levels");
+                    }
+                    else if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
+                            record.get().mFlags == 0x00)
+                    {
+                        std::cerr << "Unknown creature leveled list type: " << record.get().mFlags
+                            << ", Using \"All Levels\""<< std::endl;
+                        return QString("All Levels");
+                    }
+                    else if (mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
+                            record.get().mFlags == 0x00)
+                    {
+                        std::cerr << "Unknown item leveled list type: " << record.get().mFlags
+                            << ", Using \"Each\""<< std::endl;
+                        return QString("Each");
                     }
                     else
                         throw std::runtime_error("unknown leveled list type");
