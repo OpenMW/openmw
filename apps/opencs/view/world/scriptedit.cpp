@@ -12,6 +12,7 @@
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
@@ -30,7 +31,9 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
     : QPlainTextEdit (parent),
     mDocument (document),
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
-    mChangeLocked (0)
+    mChangeLocked (0),
+    mLineNumberArea(0),
+    mShowLineNum(false)
 {
 //    setAcceptRichText (false);
     setLineWrapMode (QPlainTextEdit::NoWrap);
@@ -75,19 +78,35 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
 
     mUpdateTimer.setSingleShot (true);
 
-    // FIXME: make this configurable or provide a font selector dialogue
-    // FIXME: save QFontInfo somewhere before switching to a new one
-    QFont font("Monospace");
-    font.setStyleHint(QFont::TypeWriter);
-    setFont(font);
+    // TODO: provide a font selector dialogue
+    std::string useMonoFont =
+        CSMSettings::UserSettings::instance().setting("window/mono-font", "true").toStdString();
+    if (useMonoFont == "true")
+    {
+        QFont font("Monospace");
+        font.setStyleHint(QFont::TypeWriter);
+        setFont(font);
+    }
 
-    // FIXME: make this configurable
-    lineNumberArea = new LineNumberArea(this);
+    mLineNumberArea = new LineNumberArea(this);
+    updateLineNumberAreaWidth(0);
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
 
-    updateLineNumberAreaWidth(0);
+    std::string showStatusBar =
+        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
+
+    showLineNum(showStatusBar == "true");
+}
+
+void CSVWorld::ScriptEdit::showLineNum(bool show)
+{
+    if(show!=mShowLineNum)
+    {
+        mShowLineNum = show;
+        updateLineNumberAreaWidth(0);
+    }
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const
@@ -176,6 +195,9 @@ void CSVWorld::ScriptEdit::updateHighlighting()
 
 int CSVWorld::ScriptEdit::lineNumberAreaWidth()
 {
+    if(!mShowLineNum)
+        return 0;
+
     int digits = 1;
     int max = qMax(1, blockCount());
     while (max >= 10)
@@ -197,9 +219,9 @@ void CSVWorld::ScriptEdit::updateLineNumberAreaWidth(int /* newBlockCount */)
 void CSVWorld::ScriptEdit::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
-        lineNumberArea->scroll(0, dy);
+        mLineNumberArea->scroll(0, dy);
     else
-        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+        mLineNumberArea->update(0, rect.y(), mLineNumberArea->width(), rect.height());
 
     if (rect.contains(viewport()->rect()))
         updateLineNumberAreaWidth(0);
@@ -210,12 +232,12 @@ void CSVWorld::ScriptEdit::resizeEvent(QResizeEvent *e)
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    mLineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
-    QPainter painter(lineNumberArea);
+    QPainter painter(mLineNumberArea);
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -255,7 +277,7 @@ void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
                 painter.setPen(Qt::black);
             }
             painter.setFont(newFont);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
+            painter.drawText(0, top, mLineNumberArea->width(), fontMetrics().height(),
                              Qt::AlignRight, number);
             painter.setFont(font);
         }

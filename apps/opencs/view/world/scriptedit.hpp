@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QTimer>
+#include <QFont>
 
 #include "../../model/world/universalid.hpp"
 
@@ -47,7 +48,8 @@ namespace CSVWorld
             int mChangeLocked;
             ScriptHighlighter *mHighlighter;
             QTimer mUpdateTimer;
-            QWidget *lineNumberArea;
+            bool mShowLineNum;
+            LineNumberArea *mLineNumberArea;
 
         public:
 
@@ -61,6 +63,7 @@ namespace CSVWorld
 
             void lineNumberAreaPaintEvent(QPaintEvent *event);
             int lineNumberAreaWidth();
+            void showLineNum(bool show);
 
         protected:
 
