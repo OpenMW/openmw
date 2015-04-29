@@ -99,8 +99,8 @@ public:
         mManualRender(false),
         mCountBatch(0),
         mVertexProgramNoTexture(NULL),
-        mFragmentProgramNoTexture(NULL),
         mVertexProgramOneTexture(NULL),
+        mFragmentProgramNoTexture(NULL),
         mFragmentProgramOneTexture(NULL)
     {
         mTextureAddressMode.u = Ogre::TextureUnitState::TAM_CLAMP;

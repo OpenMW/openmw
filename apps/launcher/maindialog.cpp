@@ -25,7 +25,7 @@
 using namespace Process;
 
 Launcher::MainDialog::MainDialog(QWidget *parent)
-    : mGameSettings(mCfgMgr), QMainWindow (parent)
+    : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
     setupUi(this);
 

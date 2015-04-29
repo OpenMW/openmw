@@ -24,9 +24,9 @@ namespace MWGui
         bool mActive; // (Items only) is the item equipped?
 
         Spell()
-            : mSelected(false)
+            : mType(Type_Spell)
+            , mSelected(false)
             , mActive(false)
-            , mType(Type_Spell)
         {
         }
     };
