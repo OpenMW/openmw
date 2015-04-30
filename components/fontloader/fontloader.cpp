@@ -2,8 +2,10 @@
 
 #include <stdexcept>
 
-#include <OgreResourceGroupManager.h>
-#include <OgreTextureManager.h>
+#include <osg/Image>
+#include <osg/Texture2D>
+
+#include <osgDB/WriteFile>
 
 #include <MyGUI_ResourceManager.h>
 #include <MyGUI_FontManager.h>
@@ -11,8 +13,11 @@
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
 
+#include <components/vfs/manager.hpp>
 
 #include <components/misc/stringops.hpp>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 namespace
 {
@@ -123,12 +128,12 @@ namespace
             return encoder.getUtf8(std::string(1, c));
     }
 
-    void fail (Ogre::DataStreamPtr file, const std::string& fileName, const std::string& message)
+    void fail (Files::IStreamPtr file, const std::string& fileName, const std::string& message)
     {
         std::stringstream error;
         error << "Font loading error: " << message;
         error << "\n  File: " << fileName;
-        error << "\n  Offset: 0x" << std::hex << file->tell();
+        error << "\n  Offset: 0x" << std::hex << file->tellg();
         throw std::runtime_error(error.str());
     }
 
@@ -137,7 +142,8 @@ namespace
 namespace Gui
 {
 
-    FontLoader::FontLoader(ToUTF8::FromType encoding)
+    FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs)
+        : mVFS(vfs)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
@@ -145,19 +151,38 @@ namespace Gui
             mEncoding = encoding;
     }
 
+    FontLoader::~FontLoader()
+    {
+        for (std::vector<MyGUI::ITexture*>::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+            delete *it;
+        mTextures.clear();
+
+        for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end(); ++it)
+            MyGUI::ResourceManager::getInstance().removeByName((*it)->getResourceName());
+        mFonts.clear();
+    }
+
     void FontLoader::loadAllFonts(bool exportToFile)
     {
-        /*
-        Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-        for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+
+        std::string pattern = "Fonts/";
+        mVFS->normalizeFilename(pattern);
+
+        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+        while (found != index.end())
         {
-            Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "*.fnt");
-            for (Ogre::StringVector::iterator resource = resourcesInThisGroup->begin(); resource != resourcesInThisGroup->end(); ++resource)
+            const std::string& name = found->first;
+            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
             {
-                loadFont(*resource, exportToFile);
+                size_t pos = name.find_last_of('.');
+                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".fnt") == 0)
+                    loadFont(name, exportToFile);
             }
+            else
+                break;
+            ++found;
         }
-        */
     }
 
 
@@ -183,54 +208,62 @@ namespace Gui
 
     void FontLoader::loadFont(const std::string &fileName, bool exportToFile)
     {
-        Ogre::DataStreamPtr file = Ogre::ResourceGroupManager::getSingleton().openResource(fileName);
+        Files::IStreamPtr file = mVFS->get(fileName);
 
         float fontSize;
-        if (file->read(&fontSize, sizeof(fontSize)) < sizeof(fontSize))
+        file->read((char*)&fontSize, sizeof(fontSize));
+        if (!file->good())
             fail(file, fileName, "File too small to be a valid font");
 
         int one;
-        if (file->read(&one, sizeof(int)) < sizeof(int))
+        file->read((char*)&one, sizeof(one));
+        if (!file->good())
             fail(file, fileName, "File too small to be a valid font");
 
         if (one != 1)
             fail(file, fileName, "Unexpected value");
 
-        if (file->read(&one, sizeof(int)) < sizeof(int))
+        file->read((char*)&one, sizeof(one));
+        if (!file->good())
             fail(file, fileName, "File too small to be a valid font");
 
         if (one != 1)
             fail(file, fileName, "Unexpected value");
 
         char name_[284];
-        if (file->read(name_, sizeof(name_)) < sizeof(name_))
+        file->read(name_, sizeof(name_));
+        if (!file->good())
             fail(file, fileName, "File too small to be a valid font");
         std::string name(name_);
 
         GlyphInfo data[256];
-        if (file->read(data, sizeof(data)) < sizeof(data))
+        file->read((char*)data, sizeof(data));
+        if (!file->good())
             fail(file, fileName, "File too small to be a valid font");
-        file->close();
+
+        file.reset();
 
         // Create the font texture
         std::string bitmapFilename = "Fonts/" + std::string(name) + ".tex";
-        Ogre::DataStreamPtr bitmapFile = Ogre::ResourceGroupManager::getSingleton().openResource(bitmapFilename);
+
+        Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 
         int width, height;
-        if (bitmapFile->read(&width, sizeof(int)) < sizeof(int))
-            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+        bitmapFile->read((char*)&width, sizeof(int));
+        bitmapFile->read((char*)&height, sizeof(int));
 
-        if (bitmapFile->read(&height, sizeof(int)) < sizeof(int))
+        if (!bitmapFile->good())
             fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
 
         if (width <= 0 || height <= 0)
             fail(bitmapFile, bitmapFilename, "Width and height must be positive");
 
-        std::vector<Ogre::uchar> textureData;
+        std::vector<char> textureData;
         textureData.resize(width*height*4);
-        if (bitmapFile->read(&textureData[0], width*height*4) < (size_t)(width*height*4))
-            fail(bitmapFile, bitmapFilename, "Bitmap does not contain the specified number of pixels");
-        bitmapFile->close();
+        bitmapFile->read(&textureData[0], width*height*4);
+        if (!bitmapFile->good())
+            fail(bitmapFile, bitmapFilename, "File too small to be a valid bitmap");
+        bitmapFile.reset();
 
         std::string resourceName;
         if (name.size() >= 5 && Misc::StringUtils::ciEqual(name.substr(0, 5), "magic"))
@@ -239,24 +272,31 @@ namespace Gui
             resourceName = "Century Gothic";
         else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
             resourceName = "Daedric";
-        else
-            return; // no point in loading it, since there is no way of using additional fonts
 
         std::string textureName = name;
-        Ogre::Image image;
-        image.loadDynamicImage(&textureData[0], width, height, Ogre::PF_BYTE_RGBA);
-        Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-            Ogre::TEX_TYPE_2D,
-            width, height, 0, Ogre::PF_BYTE_RGBA);
-        texture->loadImage(image);
+
+        osg::ref_ptr<osg::Image> image = new osg::Image;
+
+        unsigned char* bytes = (unsigned char*)calloc(width*height*4, sizeof(unsigned char));
+        memcpy(bytes, &textureData[0], textureData.size());
+        image->setImage(width, height, 1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, bytes, osg::Image::USE_MALLOC_FREE);
+
+        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
+        texture->setImage(image);
 
         if (exportToFile)
-            image.save(resourceName + ".png");
+        {
+            std::cout << "Writing " << resourceName + ".png" << std::endl;
+            osgDB::writeImageFile(*image, resourceName + ".png");
+        }
 
         // Register the font with MyGUI
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
+        mFonts.push_back(font);
+        osgMyGUI::OSGTexture* myguiTex = new osgMyGUI::OSGTexture(texture);
+        mTextures.push_back(myguiTex);
+        font->setTexture(myguiTex);
 
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
@@ -390,6 +430,7 @@ namespace Gui
 
         if (exportToFile)
         {
+            std::cout << "Writing " << resourceName + ".xml" << std::endl;
             xmlDocument.createDeclaration();
             xmlDocument.save(resourceName + ".xml");
         }

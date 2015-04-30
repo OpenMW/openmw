@@ -184,8 +184,8 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        Gui::FontLoader fontLoader (encoding);
-        fontLoader.loadAllFonts(exportFonts);
+        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS()));
+        mFontLoader->loadAllFonts(exportFonts);
 
         //Register own widgets with MyGUI
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSkill>("Widget");

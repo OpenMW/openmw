@@ -62,6 +62,11 @@ namespace osgMyGUI
     class Platform;
 }
 
+namespace Gui
+{
+    class FontLoader;
+}
+
 namespace MWGui
 {
   class WindowBase;
@@ -355,6 +360,8 @@ namespace MWGui
 
   private:
     osgMyGUI::Platform* mGuiPlatform;
+
+    std::auto_ptr<Gui::FontLoader> mFontLoader;
 
     bool mConsoleOnlyScripts;
 
