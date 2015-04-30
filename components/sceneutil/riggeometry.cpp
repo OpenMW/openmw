@@ -271,7 +271,9 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         box.expandBy(bs);
     }
 
-    setInitialBound(box);
+    _boundingBox = box;
+    for (unsigned int i=0; i<getNumParents(); ++i)
+        getParent(i)->dirtyBound();
 }
 
 osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
