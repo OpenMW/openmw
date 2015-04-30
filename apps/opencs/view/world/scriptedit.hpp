@@ -50,6 +50,8 @@ namespace CSVWorld
             QTimer mUpdateTimer;
             bool mShowLineNum;
             LineNumberArea *mLineNumberArea;
+            QFont mDefaultFont;
+            QFont mMonoFont;
 
         public:
 
@@ -64,6 +66,7 @@ namespace CSVWorld
             void lineNumberAreaPaintEvent(QPaintEvent *event);
             int lineNumberAreaWidth();
             void showLineNum(bool show);
+            void setMonoFont(bool show);
 
         protected:
 

@@ -33,7 +33,9 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
     mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
     mChangeLocked (0),
     mLineNumberArea(0),
-    mShowLineNum(false)
+    mShowLineNum(false),
+    mDefaultFont(font()),
+    mMonoFont(QFont("Monospace"))
 {
 //    setAcceptRichText (false);
     setLineWrapMode (QPlainTextEdit::NoWrap);
@@ -79,14 +81,11 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
     mUpdateTimer.setSingleShot (true);
 
     // TODO: provide a font selector dialogue
+    mMonoFont.setStyleHint(QFont::TypeWriter);
     std::string useMonoFont =
         CSMSettings::UserSettings::instance().setting("script-editor/mono-font", "true").toStdString();
     if (useMonoFont == "true")
-    {
-        QFont font("Monospace");
-        font.setStyleHint(QFont::TypeWriter);
-        setFont(font);
-    }
+        setFont(mMonoFont);
 
     mLineNumberArea = new LineNumberArea(this);
     updateLineNumberAreaWidth(0);
@@ -107,6 +106,14 @@ void CSVWorld::ScriptEdit::showLineNum(bool show)
         mShowLineNum = show;
         updateLineNumberAreaWidth(0);
     }
+}
+
+void CSVWorld::ScriptEdit::setMonoFont(bool show)
+{
+    if(show)
+        setFont(mMonoFont);
+    else
+        setFont(mDefaultFont);
 }
 
 bool CSVWorld::ScriptEdit::isChangeLocked() const

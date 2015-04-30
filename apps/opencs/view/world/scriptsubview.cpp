@@ -68,14 +68,16 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
 void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
 {
-    if (name != "script-editor/show-linenum")
-        return;
-
-    std::string showLinenum =
-        CSMSettings::UserSettings::instance().settingValue("script-editor/show-linenum").toStdString();
-
-    mEditor->showLineNum(showLinenum == "true");
-    mBottom->setVisible(showLinenum == "true");
+    if (name == "script-editor/show-linenum")
+    {
+        std::string showLinenum = value.at(0).toStdString();
+        mEditor->showLineNum(showLinenum == "true");
+        mBottom->setVisible(showLinenum == "true");
+    }
+    else if (name == "script-editor/mono-font")
+    {
+        mEditor->setMonoFont(value.at(0).toStdString() == "true");
+    }
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()
