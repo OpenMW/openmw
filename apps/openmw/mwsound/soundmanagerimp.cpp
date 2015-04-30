@@ -223,6 +223,8 @@ namespace MWSound
             {
                 if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
                     filelist.push_back(found->first);
+                else
+                    break;
                 ++found;
             }
 

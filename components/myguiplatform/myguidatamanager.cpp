@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-namespace MWGui
+namespace osgMyGUI
 {
 
 void DataManager::setResourcePath(const std::string &path)

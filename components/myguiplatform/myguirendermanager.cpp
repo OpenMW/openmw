@@ -48,24 +48,24 @@ namespace
 
 // Proxy to forward a Drawable's draw call to RenderManager::drawFrame
 class Renderable : public osg::Drawable {
-    MWGui::RenderManager *mParent;
+    osgMyGUI::RenderManager *mParent;
 
     virtual void drawImplementation(osg::RenderInfo &renderInfo) const
     { mParent->drawFrame(renderInfo); }
 
 public:
-    Renderable(MWGui::RenderManager *parent=nullptr) : mParent(parent) { }
+    Renderable(osgMyGUI::RenderManager *parent=nullptr) : mParent(parent) { }
     Renderable(const Renderable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
         : osg::Drawable(copy, copyop)
         , mParent(copy.mParent)
     { }
 
-    META_Object(MWGui, Renderable)
+    META_Object(osgMyGUI, Renderable)
 };
 
 // Proxy to forward an OSG resize event to RenderManager::setViewSize
 class ResizeHandler : public osgGA::GUIEventHandler {
-    MWGui::RenderManager *mParent;
+    osgMyGUI::RenderManager *mParent;
 
     virtual bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
     {
@@ -79,19 +79,19 @@ class ResizeHandler : public osgGA::GUIEventHandler {
     }
 
 public:
-    ResizeHandler(MWGui::RenderManager *parent=nullptr) : mParent(parent) { }
+    ResizeHandler(osgMyGUI::RenderManager *parent=nullptr) : mParent(parent) { }
     ResizeHandler(const ResizeHandler &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
         : osg::Object(copy, copyop), osgGA::GUIEventHandler(copy, copyop)
         , mParent(copy.mParent)
     { }
 
-    META_Object(MWGui, ResizeHandler)
+    META_Object(osgMyGUI, ResizeHandler)
 };
 
 }
 
 
-namespace MWGui
+namespace osgMyGUI
 {
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer

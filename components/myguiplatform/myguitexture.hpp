@@ -1,5 +1,5 @@
-#ifndef OPENMW_MWGUI_MYGUITEXTURE_H
-#define OPENMW_MWGUI_MYGUITEXTURE_H
+#ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
+#define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUITEXTURE_H
 
 #include <MyGUI_ITexture.h>
 
@@ -16,7 +16,7 @@ namespace Resource
     class TextureManager;
 }
 
-namespace MWGui
+namespace osgMyGUI
 {
 
     class OSGTexture : public MyGUI::ITexture {

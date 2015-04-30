@@ -33,15 +33,9 @@ namespace Loading
     class Listener;
 }
 
-namespace Render
-{
-    class OgreRenderer;
-}
-
 namespace MWRender
 {
     class SkyManager;
-    class CellRender;
     class RenderingManager;
 }
 
@@ -59,7 +53,6 @@ namespace MWWorld
 
         private:
 
-            //OEngine::Render::OgreRenderer& mRenderer;
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;

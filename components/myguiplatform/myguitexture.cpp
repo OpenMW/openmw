@@ -7,7 +7,7 @@
 
 #include <components/resource/texturemanager.hpp>
 
-namespace MWGui
+namespace osgMyGUI
 {
 
     OSGTexture::OSGTexture(const std::string &name, Resource::TextureManager* textureManager)

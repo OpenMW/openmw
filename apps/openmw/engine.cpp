@@ -343,7 +343,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
-    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem->getTextureManager(),
+    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
     mEnvironment.setWindowManager (window);

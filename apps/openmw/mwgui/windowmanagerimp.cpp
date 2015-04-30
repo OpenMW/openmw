@@ -26,7 +26,11 @@
 
 #include <components/fontloader/fontloader.hpp>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include <components/translation/translation.hpp>
+
+#include <components/myguiplatform/myguiplatform.hpp>
 
 #include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
@@ -91,13 +95,11 @@
 #include "controllers.hpp"
 #include "jailscreen.hpp"
 
-#include "myguiplatform.hpp"
-
 namespace MWGui
 {
 
     WindowManager::WindowManager(
-            osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager
+            osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
@@ -173,7 +175,7 @@ namespace MWGui
       , mCurrentModals()
       , mFallbackMap(fallbackMap)
     {
-        mGuiPlatform = new Platform(viewer, guiRoot, textureManager);
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager());
         mGuiPlatform->initialise(resourcePath, logpath);
 
         MyGUI::Gui* gui = new MyGUI::Gui;

@@ -1,5 +1,5 @@
-#ifndef OPENMW_MWGUI_MYGUIPLATFORM_H
-#define OPENMW_MWGUI_MYGUIPLATFORM_H
+#ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
+#define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIPLATFORM_H
 
 #include "MyGUI_Prerequest.h"
 #include "MyGUI_LogManager.h"
@@ -7,7 +7,7 @@
 #include "myguirendermanager.hpp"
 #include "myguidatamanager.hpp"
 
-namespace MWGui
+namespace osgMyGUI
 {
 
     class Platform

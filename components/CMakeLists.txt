@@ -20,6 +20,8 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
 endif (GIT_CHECKOUT)
 
+find_package(OpenGL REQUIRED)
+
 # source files
 
 add_component_dir (settings
@@ -116,6 +118,10 @@ add_component_dir (ogreinit
     ogreinit ogreplugin
     )
 
+add_component_dir (myguiplatform
+    myguirendermanager myguidatamanager myguiplatform myguitexture
+    )
+
 add_component_dir (widgets
     box imagebutton tags list numericeditbox sharedstatebutton windowcaption widgets
     )
@@ -170,6 +176,8 @@ target_link_libraries(components
     ${OGRE_LIBRARIES}
     ${OENGINE_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
+    # For MyGUI platform
+    ${OPENGL_gl_LIBRARY}
 )
 
 if (GIT_CHECKOUT)

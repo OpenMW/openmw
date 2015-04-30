@@ -53,15 +53,9 @@ namespace Files
     class Collections;
 }
 
-namespace Render
-{
-    class OgreRenderer;
-}
-
 namespace MWRender
 {
     class SkyManager;
-    class CellRender;
     class Animation;
     class Camera;
 }

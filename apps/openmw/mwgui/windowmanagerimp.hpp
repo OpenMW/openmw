@@ -38,20 +38,6 @@ namespace Translation
     class Storage;
 }
 
-namespace OEngine
-{
-    namespace GUI
-    {
-        class Layout;
-        class MyGUIManager;
-    }
-
-    namespace Render
-    {
-        class OgreRenderer;
-    }
-}
-
 namespace osg
 {
     class Group;
@@ -63,12 +49,17 @@ namespace osgViewer
 
 namespace Resource
 {
-    class TextureManager;
+    class ResourceSystem;
 }
 
 namespace SFO
 {
     class CursorManager;
+}
+
+namespace osgMyGUI
+{
+    class Platform;
 }
 
 namespace MWGui
@@ -107,15 +98,13 @@ namespace MWGui
   class DebugWindow;
   class JailScreen;
 
-  class Platform;
-
   class WindowManager : public MWBase::WindowManager
   {
   public:
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager,
+    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
@@ -365,7 +354,7 @@ namespace MWGui
     virtual void cycleWeapon(bool next);
 
   private:
-    Platform* mGuiPlatform;
+    osgMyGUI::Platform* mGuiPlatform;
 
     bool mConsoleOnlyScripts;
 

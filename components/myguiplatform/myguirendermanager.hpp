@@ -1,5 +1,5 @@
-#ifndef OPENMW_MWGUI_MYGUIRENDERMANAGER_H
-#define OPENMW_MWGUI_MYGUIRENDERMANAGER_H
+#ifndef OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
+#define OPENMW_COMPONENTS_MYGUIPLATFORM_MYGUIRENDERMANAGER_H
 
 #include <MyGUI_RenderManager.h>
 
@@ -22,7 +22,7 @@ namespace osg
     class RenderInfo;
 }
 
-namespace MWGui
+namespace osgMyGUI
 {
 
 class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
