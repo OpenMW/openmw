@@ -41,6 +41,8 @@
 #include "mwworld/player.hpp"
 #include "mwworld/worldimp.hpp"
 
+#include "mwrender/vismask.hpp"
+
 #include "mwclass/classes.hpp"
 
 #include "mwdialogue/dialoguemanagerimp.hpp"
@@ -339,6 +341,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
+    guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem->getTextureManager(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,

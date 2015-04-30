@@ -466,7 +466,7 @@ void RenderManager::initialise()
     camera->addChild(geode.get());
 
     mGuiRoot = camera;
-    //mSceneRoot->addChild(mGuiRoot.get());
+    mSceneRoot->addChild(mGuiRoot.get());
     mViewer->addEventHandler(new ResizeHandler(this));
 
     osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();

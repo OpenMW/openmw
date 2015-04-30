@@ -554,7 +554,6 @@ void SkyManager::create()
     depth->setWriteMask(false);
     mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
     mRootNode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-    mRootNode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 
     mCreated = true;
 }
@@ -562,6 +561,11 @@ void SkyManager::create()
 SkyManager::~SkyManager()
 {
     clearRain();
+    if (mRootNode)
+    {
+        mRootNode->getParent(0)->removeChild(mRootNode);
+        mRootNode = NULL;
+    }
 }
 
 int SkyManager::getMasserPhase() const

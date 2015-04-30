@@ -23,6 +23,7 @@
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
+#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -87,8 +88,6 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
 
-        mSky.reset(new SkyManager(mRootNode, resourceSystem->getSceneManager()));
-
         mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
 
         mViewer.setLightingMode(osgViewer::View::NO_LIGHT);
@@ -104,6 +103,10 @@ namespace MWRender
         lightRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
         lightRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
         lightRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+
+        lightRoot->setNodeMask(Mask_Scene);
+
+        mSky.reset(new SkyManager(lightRoot, resourceSystem->getSceneManager()));
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
@@ -128,6 +131,8 @@ namespace MWRender
         zNear = 5.f;
         zFar = mViewDistance;
         mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+
+        mViewer.getCamera()->setCullMask(mViewer.getCamera()->getCullMask() & (~Mask_GUI));
     }
 
     RenderingManager::~RenderingManager()

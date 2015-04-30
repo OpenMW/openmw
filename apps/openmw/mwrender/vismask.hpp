@@ -9,7 +9,12 @@ namespace MWRender
     {
         Mask_UpdateVisitor = 0x1, // reserved for separating UpdateVisitors from CullVisitors
 
-        Mask_Effect = 0x2
+        // child of Scene
+        Mask_Effect = 0x2,
+
+        // top level masks
+        Mask_Scene = 0x10,
+        Mask_GUI = 0x20
     };
 
 }
