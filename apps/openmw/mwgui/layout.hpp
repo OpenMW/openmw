@@ -1,12 +1,11 @@
-#ifndef OENGINE_MYGUI_LAYOUT_H
-#define OENGINE_MYGUI_LAYOUT_H
+#ifndef OPENMW_MWGUI_LAYOUT_H
+#define OPENMW_MWGUI_LAYOUT_H
 
 #include <string>
 #include <MyGUI_WidgetDefines.h>
 #include <MyGUI_Widget.h>
 
-namespace OEngine {
-namespace GUI
+namespace MWGui
 {
   /** The Layout class is an utility class used to load MyGUI layouts
       from xml files, and to manipulate member widgets.
@@ -60,5 +59,5 @@ namespace GUI
     std::string mLayoutName;
     MyGUI::VectorWidgetPtr mListWindowRoot;
   };
-}}
+}
 #endif

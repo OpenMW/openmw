@@ -6,9 +6,7 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Window.h>
 
-namespace OEngine
-{
-namespace GUI
+namespace MWGui
 {
     void Layout::initialise(const std::string& _layout, MyGUI::Widget* _parent)
     {
@@ -77,5 +75,4 @@ namespace GUI
         MYGUI_EXCEPT("widget name '" << _name << "' in layout '" << mLayoutName << "' not found.");
     }
 
-}
 }

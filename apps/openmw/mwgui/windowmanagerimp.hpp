@@ -242,7 +242,7 @@ namespace MWGui
     virtual void addVisitedLocation(const std::string& name, int x, int y);
 
     ///Hides dialog and schedules dialog to be deleted.
-    virtual void removeDialog(OEngine::GUI::Layout* dialog);
+    virtual void removeDialog(Layout* dialog);
 
     ///Gracefully attempts to exit the topmost GUI mode
     virtual void exitCurrentGuiMode();
@@ -366,7 +366,7 @@ namespace MWGui
     bool mConsoleOnlyScripts;
 
     std::map<MyGUI::Window*, std::string> mTrackedWindows;
-    void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
+    void trackWindow(Layout* layout, const std::string& name);
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
@@ -448,7 +448,7 @@ namespace MWGui
 
     SFO::CursorManager* mCursorManager;
 
-    std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
+    std::vector<Layout*> mGarbageDialogs;
     void cleanupGarbage();
 
     GuiWindow mShown; // Currently shown windows in inventory mode

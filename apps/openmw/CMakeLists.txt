@@ -33,7 +33,7 @@ add_openmw_dir (mwrender
 #    )
 
 add_openmw_dir (mwgui
-    textinput widgets race class birth review windowmanagerimp console dialogue
+    layout textinput widgets race class birth review windowmanagerimp console dialogue
     windowbase statswindow messagebox journalwindow charactercreation
     mapwindow windowpinnablebase tooltips scrollwindow bookwindow
     formatting inventorywindow container hud countdialog tradewindow settingswindow

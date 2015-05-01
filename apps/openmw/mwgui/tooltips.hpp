@@ -2,7 +2,7 @@
 #ifndef MWGUI_TOOLTIPS_H
 #define MWGUI_TOOLTIPS_H
 
-#include <openengine/gui/layout.hpp>
+#include "layout.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "widgets.hpp"
@@ -45,7 +45,7 @@ namespace MWGui
         bool wordWrap;
     };
 
-    class ToolTips : public OEngine::GUI::Layout
+    class ToolTips : public Layout
     {
     public:
         ToolTips();

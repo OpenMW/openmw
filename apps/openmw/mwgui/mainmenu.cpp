@@ -30,7 +30,7 @@ namespace MWGui
 {
 
     MainMenu::MainMenu(int w, int h)
-        : OEngine::GUI::Layout("openmw_mainmenu.layout")
+        : Layout("openmw_mainmenu.layout")
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
         , mBackground(NULL)
@@ -80,7 +80,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
             MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
 
-        OEngine::GUI::Layout::setVisible (visible);
+        Layout::setVisible (visible);
     }
 
     void MainMenu::onNewGameConfirmed()

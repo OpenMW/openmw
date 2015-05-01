@@ -422,7 +422,7 @@ namespace MWGui
         // Delete any dialogs which are no longer in use
         if (!mGarbageDialogs.empty())
         {
-            for (std::vector<OEngine::GUI::Layout*>::iterator it = mGarbageDialogs.begin(); it != mGarbageDialogs.end(); ++it)
+            for (std::vector<Layout*>::iterator it = mGarbageDialogs.begin(); it != mGarbageDialogs.end(); ++it)
             {
                 delete *it;
             }
@@ -722,7 +722,7 @@ namespace MWGui
         mStatsWindow->updateSkillArea();
     }
 
-    void WindowManager::removeDialog(OEngine::GUI::Layout*dialog)
+    void WindowManager::removeDialog(Layout*dialog)
     {
         if (!dialog)
             return;
@@ -1566,7 +1566,7 @@ namespace MWGui
         return mCursorVisible;
     }
 
-    void WindowManager::trackWindow(OEngine::GUI::Layout *layout, const std::string &name)
+    void WindowManager::trackWindow(Layout *layout, const std::string &name)
     {
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(name + " x", "Windows") * viewSize.width),

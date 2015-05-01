@@ -26,14 +26,6 @@ namespace MyGUI
     class UString;
 }
 
-namespace OEngine
-{
-    namespace GUI
-    {
-        class Layout;
-    }
-}
-
 namespace ESM
 {
     struct Class;
@@ -58,6 +50,8 @@ namespace MWWorld
 
 namespace MWGui
 {
+    class Layout;
+
     class Console;
     class SpellWindow;
     class TradeWindow;
@@ -241,7 +235,7 @@ namespace MWBase
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
             /// Hides dialog and schedules dialog to be deleted.
-            virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
+            virtual void removeDialog(MWGui::Layout* dialog) = 0;
 
             ///Gracefully attempts to exit the topmost GUI mode
             /** No guarentee of actually closing the window **/

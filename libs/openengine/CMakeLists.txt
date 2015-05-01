@@ -1,7 +1,3 @@
-set(OENGINE_GUI
-    gui/layout.cpp
-)
-
 set(OENGINE_BULLET
     bullet/BtOgre.cpp
     bullet/BtOgreExtras.h
@@ -15,7 +11,7 @@ set(OENGINE_BULLET
     bullet/trace.h
 )
 
-set(OENGINE_ALL ${OENGINE_GUI} ${OENGINE_BULLET})
+set(OENGINE_ALL ${OENGINE_BULLET})
 
 set(OENGINE_LIBRARY "oengine")
 set(OENGINE_LIBRARY ${OENGINE_LIBRARY} PARENT_SCOPE)
