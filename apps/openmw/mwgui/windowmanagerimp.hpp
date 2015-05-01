@@ -360,6 +360,7 @@ namespace MWGui
 
   private:
     osgMyGUI::Platform* mGuiPlatform;
+    osgViewer::Viewer* mViewer;
 
     std::auto_ptr<Gui::FontLoader> mFontLoader;
 

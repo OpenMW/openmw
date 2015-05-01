@@ -1,51 +1,70 @@
 #include "videowidget.hpp"
 
-//#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
+#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
 
 #include <MyGUI_RenderManager.h>
 
-//#include "../mwsound/movieaudiofactory.hpp"
+#include <osg/Texture2D>
+
+#include <components/vfs/manager.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
+
+#include "../mwsound/movieaudiofactory.hpp"
 
 namespace MWGui
 {
 
 VideoWidget::VideoWidget()
+    : mVFS(NULL)
 {
-    //mPlayer.reset(new Video::VideoPlayer());
+    mPlayer.reset(new Video::VideoPlayer());
     setNeedKeyFocus(true);
+}
+
+void VideoWidget::setVFS(const VFS::Manager *vfs)
+{
+    mVFS = vfs;
 }
 
 void VideoWidget::playVideo(const std::string &video)
 {
-    //mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
-    //mPlayer->playVideo(video);
+    mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
 
-    //setImageTexture(mPlayer->getTextureName());
+    mPlayer->playVideo(mVFS->get(video));
+
+    osg::ref_ptr<osg::Texture2D> texture = mPlayer->getVideoTexture();
+    if (!texture)
+        return;
+
+    mTexture.reset(new osgMyGUI::OSGTexture(texture));
+
+    setRenderItemTexture(mTexture.get());
+    getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 }
 
 int VideoWidget::getVideoWidth()
 {
-    return 0;//mPlayer->getVideoWidth();
+    return mPlayer->getVideoWidth();
 }
 
 int VideoWidget::getVideoHeight()
 {
-    return 0;//mPlayer->getVideoHeight();
+    return mPlayer->getVideoHeight();
 }
 
 bool VideoWidget::update()
 {
-    return 0;//mPlayer->update();
+    return mPlayer->update();
 }
 
 void VideoWidget::stop()
 {
-    //mPlayer->close();
+    mPlayer->close();
 }
 
 bool VideoWidget::hasAudioStream()
 {
-    return 0;//mPlayer->hasAudioStream();
+    return mPlayer->hasAudioStream();
 }
 
 void VideoWidget::autoResize(bool stretch)

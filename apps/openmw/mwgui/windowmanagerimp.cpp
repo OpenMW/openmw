@@ -3,9 +3,7 @@
 #include <cassert>
 #include <iterator>
 
-#include <OgreTextureManager.h>
-#include <OgreRenderWindow.h>
-#include <OgreSceneManager.h>
+#include <osgViewer/Viewer>
 
 #include <MyGUI_UString.h>
 #include <MyGUI_IPointer.h>
@@ -37,6 +35,8 @@
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+
+#include "../mwrender/vismask.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -102,7 +102,8 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
-      : mConsoleOnlyScripts(consoleOnlyScripts)
+      : mViewer(viewer)
+      , mConsoleOnlyScripts(consoleOnlyScripts)
       , mHud(NULL)
       , mMap(NULL)
       , mMenu(NULL)
@@ -236,6 +237,7 @@ namespace MWGui
         mVideoWidget = mVideoBackground->createWidgetReal<VideoWidget>("ImageBox", 0,0,1,1, MyGUI::Align::Default);
         mVideoWidget->setNeedMouseFocus(true);
         mVideoWidget->setNeedKeyFocus(true);
+        mVideoWidget->setVFS(resourceSystem->getVFS());
 
         // Removes default MyGUI system clipboard implementation, which supports windows only
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged.clear();
@@ -1127,8 +1129,8 @@ namespace MWGui
 
         mGuiModes.push_back(mode);
 
-        bool gameMode = !isGuiMode();
-        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+        //bool gameMode = !isGuiMode();
+        //MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
     }
@@ -1683,7 +1685,6 @@ namespace MWGui
 
     void WindowManager::playVideo(const std::string &name, bool allowSkipping)
     {
-        return;
         mVideoWidget->playVideo("video\\" + name);
 
         mVideoWidget->eventKeyButtonPressed.clear();
@@ -1695,16 +1696,10 @@ namespace MWGui
         }
 
         // Turn off all rendering except for the GUI
-        /*
-        mRendering->getScene()->clearSpecialCaseRenderQueues();
-        // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work?
-        for(int i = 0;i < Ogre::RENDER_QUEUE_MAX;++i)
-        {
-            if(i > 0 && i < 96)
-                mRendering->getScene()->addSpecialCaseRenderQueue(i);
-        }
-        mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
-        */
+        int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
+        int oldCullMask = mViewer->getCamera()->getCullMask();
+        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
+        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
@@ -1722,9 +1717,9 @@ namespace MWGui
 
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            MWBase::Environment::get().getInputManager()->update(0, true, false);
+            //MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-            //mRendering->getWindow()->update();
+            mViewer->frame();
         }
         mVideoWidget->stop();
 
@@ -1733,8 +1728,8 @@ namespace MWGui
         setCursorVisible(cursorWasVisible);
 
         // Restore normal rendering
-        //mRendering->getScene()->clearSpecialCaseRenderQueues();
-        //mRendering->getScene()->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+        mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
+        mViewer->getCamera()->setCullMask(oldCullMask);
 
         mVideoBackground->setVisible(false);
     }

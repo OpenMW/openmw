@@ -468,7 +468,7 @@ void OMW::Engine::go()
 
     mViewer->realize();
     osg::Timer frameTimer;
-    while (!mViewer->done())
+    while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();

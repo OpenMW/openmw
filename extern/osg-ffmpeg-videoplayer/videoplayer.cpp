@@ -65,16 +65,16 @@ osg::ref_ptr<osg::Texture2D> VideoPlayer::getVideoTexture()
 int VideoPlayer::getVideoWidth()
 {
     int width=0;
-    if (mState && mState->mTexture.get())
-        width = mState->mTexture->getTextureWidth();
+    if (mState && mState->mTexture.get() && mState->mTexture->getImage())
+        width = mState->mTexture->getImage()->s();
     return width;
 }
 
 int VideoPlayer::getVideoHeight()
 {
     int height=0;
-    if (mState && mState->mTexture.get())
-        height = mState->mTexture->getTextureHeight();
+    if (mState && mState->mTexture.get() && mState->mTexture->getImage())
+        height = mState->mTexture->getImage()->t();
     return height;
 }
 
