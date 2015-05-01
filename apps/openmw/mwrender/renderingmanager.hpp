@@ -11,6 +11,7 @@
 namespace osg
 {
     class Group;
+    class PositionAttitudeTransform;
 }
 
 namespace Resource
@@ -35,6 +36,7 @@ namespace MWRender
 
     class EffectManager;
     class SkyManager;
+    class NpcAnimation;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -78,11 +80,16 @@ namespace MWRender
 
         void update(float dt, bool paused);
 
-        MWRender::Animation* getAnimation(const MWWorld::Ptr& ptr);
+        Animation* getAnimation(const MWWorld::Ptr& ptr);
+        Animation* getPlayerAnimation();
+
+        void setupPlayer(const MWWorld::Ptr& player);
+        void renderPlayer(const MWWorld::Ptr& player);
 
     private:
         osgViewer::Viewer& mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mLightRoot;
         Resource::ResourceSystem* mResourceSystem;
 
         osg::ref_ptr<osg::Light> mSunLight;
@@ -90,6 +97,8 @@ namespace MWRender
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
+        std::auto_ptr<NpcAnimation> mPlayerAnimation;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 

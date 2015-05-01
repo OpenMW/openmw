@@ -10,9 +10,6 @@
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
 
-// light
-#include <components/sceneutil/lightmanager.hpp>
-
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/visitor.hpp>
@@ -112,9 +109,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 
     std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, allowLight));
 
-    if (anim->getObjectRoot())
-        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
-
     if (!allowLight)
     {
         RemoveParticlesVisitor visitor;
@@ -137,9 +131,6 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
 
-    if (anim->getObjectRoot())
-        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
-
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
@@ -148,9 +139,6 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     insertBegin(ptr);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
-
-    if (anim->getObjectRoot())
-        anim->getObjectRoot()->addCullCallback(new SceneUtil::LightListCallback);
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }

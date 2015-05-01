@@ -23,6 +23,7 @@
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
+#include "npcanimation.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -82,6 +83,7 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
     {
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
+        mLightRoot = lightRoot;
         lightRoot->setStartLight(1);
 
         mRootNode->addChild(lightRoot);
@@ -256,6 +258,33 @@ namespace MWRender
     MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
     {
         return mObjects->getAnimation(ptr);
+    }
+
+    MWRender::Animation* RenderingManager::getPlayerAnimation()
+    {
+        return mPlayerAnimation.get();
+    }
+
+    void RenderingManager::setupPlayer(const MWWorld::Ptr &player)
+    {
+        if (!mPlayerNode)
+        {
+            mPlayerNode = new osg::PositionAttitudeTransform;
+            mLightRoot->addChild(mPlayerNode);
+        }
+
+        player.getRefData().setBaseNode(mPlayerNode);
+
+        //attachCameraTo(player);
+    }
+
+    void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
+    {
+        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0));
+
+        //mCamera->setAnimation(mPlayerAnimation);
+        //mWater->removeEmitter(ptr);
+        //mWater->addEmitter(ptr);
     }
 
 }

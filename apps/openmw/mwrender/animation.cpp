@@ -866,6 +866,8 @@ namespace MWRender
         NodeMapVisitor visitor;
         mObjectRoot->accept(visitor);
         mNodeMap = visitor.getNodeMap();
+
+        mObjectRoot->addCullCallback(new SceneUtil::LightListCallback);
     }
 
     osg::Group* Animation::getObjectRoot()
