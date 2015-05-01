@@ -114,10 +114,6 @@ add_component_dir (loadinglistener
     loadinglistener
     )
 
-add_component_dir (ogreinit
-    ogreinit ogreplugin
-    )
-
 add_component_dir (myguiplatform
     myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener
     )
