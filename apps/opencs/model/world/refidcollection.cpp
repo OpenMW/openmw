@@ -514,7 +514,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new NestedListLevListRefIdAdapter<ESM::ItemLevList> (UniversalId::Type_ItemLevelledList)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), nestedListLevListMap));
     mColumns.back().addColumn(
-        new RefIdColumn (Columns::ColumnId_LevelledItemType, CSMWorld::ColumnBase::Display_String));
+        new RefIdColumn (Columns::ColumnId_LevelledItemTypeEach, CSMWorld::ColumnBase::Display_Boolean));
+    mColumns.back().addColumn(
+        new RefIdColumn (Columns::ColumnId_LevelledItemType, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
         new RefIdColumn (Columns::ColumnId_LevelledItemChanceNone, CSMWorld::ColumnBase::Display_Integer));
 

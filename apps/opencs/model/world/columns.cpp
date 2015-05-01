@@ -222,7 +222,6 @@ namespace CSMWorld
             { ColumnId_HitSound, "Hit Sound" },
             { ColumnId_AreaSound, "Area Sound" },
             { ColumnId_BoltSound, "Bolt Sound" },
-            { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_PathgridPoints, "Points" },
             { ColumnId_PathgridIndex, "Index" },
@@ -267,13 +266,15 @@ namespace CSMWorld
             { ColumnId_LevelledList,"Levelled List" },
             { ColumnId_LevelledItemId,"Item ID" },
             { ColumnId_LevelledItemLevel,"Level" },
-            { ColumnId_LevelledItemType, "Type" },
+            { ColumnId_LevelledItemType, "Calculate all levels <= player" },
+            { ColumnId_LevelledItemTypeEach, "Select a new item each instance" },
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
             { ColumnId_SkillImpact, "Skills" },
 
             { ColumnId_InfoList, "Info List" },
+            { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
