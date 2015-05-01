@@ -7,8 +7,8 @@ const QString CSVSettings::Frame::sInvisibleBoxStyle =
 
 CSVSettings::Frame::Frame (bool isVisible, const QString &title,
                                                                QWidget *parent)
-    : mIsHorizontal (true), mLayout (new SettingLayout()),
-    QGroupBox (title, parent)
+    : QGroupBox (title, parent), mIsHorizontal (true),
+    mLayout (new SettingLayout())
 {
     setFlat (true);
     mVisibleBoxStyle = styleSheet();

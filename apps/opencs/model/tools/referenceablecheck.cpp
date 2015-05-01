@@ -11,8 +11,8 @@ CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::IdCollection<ESM::Faction>& faction)
     :
     mReferencables(referenceable),
-    mClasses(classes),
     mRaces(races),
+    mClasses(classes),
     mFactions(faction),
     mPlayerPresent(false)
 {

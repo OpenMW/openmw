@@ -786,10 +786,10 @@ namespace MWMechanics
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
         : mDistance(wander->mData.mDistance)
         , mDuration(wander->mData.mDuration)
-        , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
+        , mStartTime(MWWorld::TimeStamp(wander->mStartTime))
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;

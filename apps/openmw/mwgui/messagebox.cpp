@@ -161,10 +161,10 @@ namespace MWGui
 
     MessageBox::MessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message)
       : Layout("openmw_messagebox.layout")
-      , mMessageBoxManager(parMessageBoxManager)
-      , mMessage(message)
       , mCurrentTime(0)
       , mMaxTime(0)
+      , mMessageBoxManager(parMessageBoxManager)
+      , mMessage(message)
     {
         // defines
         mBottomPadding = 48;
@@ -195,8 +195,8 @@ namespace MWGui
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
         : WindowModal("openmw_interactive_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
+      , mTextButtonPadding(0)
       , mButtonPressed(-1)
-        , mTextButtonPadding(0)
     {
         WindowModal::open();
 

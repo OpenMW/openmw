@@ -15,16 +15,12 @@ namespace MWMechanics
     int CreatureStats::sActorId = 0;
 
     CreatureStats::CreatureStats()
-        : mLevel (0), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
-          mTalkedTo (false), mAlarmed (false),
-          mAttacked (false),
-          mAttackingOrSpell(false),
-          mIsWerewolf(false),
-          mFallHeight(0), mRecalcMagicka(false), mKnockdown(false), mKnockdownOneFrame(false),
-          mKnockdownOverOneFrame(false), mHitRecovery(false), mBlock(false),
-          mMovementFlags(0), mDrawState (DrawState_Nothing), mAttackStrength(0.f),
-          mLastRestock(0,0), mGoldPool(0), mActorId(-1),
-          mDeathAnimation(0)
+        : mDrawState (DrawState_Nothing), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
+          mTalkedTo (false), mAlarmed (false), mAttacked (false), mAttackingOrSpell(false),
+          mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
+          mHitRecovery(false), mBlock(false), mMovementFlags(0), mAttackStrength(0.f),
+          mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
+          mDeathAnimation(0), mIsWerewolf(false), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;

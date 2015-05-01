@@ -48,12 +48,15 @@
 namespace MWDialogue
 {
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions, bool scriptVerbose, Translation::Storage& translationDataStorage) :
-      mCompilerContext (MWScript::CompilerContext::Type_Dialogue),
-        mErrorStream(std::cout.rdbuf()),mErrorHandler(mErrorStream)
-      , mTemporaryDispositionChange(0.f)
-      , mPermanentDispositionChange(0.f), mScriptVerbose (scriptVerbose)
-      , mTranslationDataStorage(translationDataStorage)
+      mTranslationDataStorage(translationDataStorage)
+      , mCompilerContext (MWScript::CompilerContext::Type_Dialogue)
+      , mErrorStream(std::cout.rdbuf())
+      , mErrorHandler(mErrorStream)
       , mTalkedTo(false)
+      , mTemporaryDispositionChange(0.f)
+      , mPermanentDispositionChange(0.f)
+      , mScriptVerbose (scriptVerbose)
+
     {
         mChoice = -1;
         mIsInChoice = false;

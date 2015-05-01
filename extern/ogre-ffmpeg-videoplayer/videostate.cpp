@@ -59,16 +59,18 @@ namespace Video
 {
 
 VideoState::VideoState()
-    : format_ctx(NULL), av_sync_type(AV_SYNC_DEFAULT)
+    : mAudioFactory(NULL)
+    , format_ctx(NULL)
+    , av_sync_type(AV_SYNC_DEFAULT)
     , audio_st(NULL)
     , video_st(NULL), frame_last_pts(0.0)
     , video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0)
     , pictq_rindex(0), pictq_windex(0)
-    , mQuit(false), mPaused(false)
-    , mAudioFactory(NULL)
     , mSeekRequested(false)
     , mSeekPos(0)
     , mVideoEnded(false)
+    , mPaused(false)
+    , mQuit(false)
 {
     mFlushPktData = flush_pkt.data;
 

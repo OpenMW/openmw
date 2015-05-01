@@ -23,7 +23,7 @@
 #include <QStandardItem>
 
 CSVSettings::Dialog::Dialog(QMainWindow *parent)
-    : mStackedWidget (0), mDebugMode (false), SettingWindow (parent)
+    : SettingWindow (parent), mStackedWidget (0), mDebugMode (false)
 {
     setWindowTitle(QString::fromUtf8 ("User Settings"));
 

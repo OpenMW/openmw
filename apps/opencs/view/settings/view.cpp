@@ -12,12 +12,12 @@
 CSVSettings::View::View(CSMSettings::Setting *setting,
                         Page *parent)
 
-    : mDataModel(0), mParentPage (parent),
+    : Frame(true, setting->getLabel(), parent),
+      mParentPage (parent), mDataModel(0),
       mHasFixedValues (!setting->declaredValues().isEmpty()),
       mIsMultiValue (setting->isMultiValue()),
       mViewKey (setting->page() + '/' + setting->name()),
-      mSerializable (setting->serializable()),
-      Frame(true, setting->getLabel(), parent)
+      mSerializable (setting->serializable())
 {
     if (!setting->getToolTip().isEmpty())
         setToolTip (setting->getToolTip());

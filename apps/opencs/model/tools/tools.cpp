@@ -103,8 +103,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 }
 
 CSMTools::Tools::Tools (CSMDoc::Document& document)
-: mDocument (document), mData (document.getData()), mVerifierOperation (0), mNextReportNumber (0),
-  mSearchOperation (0)
+: mDocument (document), mData (document.getData()), mVerifierOperation (0),
+  mSearchOperation (0), mNextReportNumber (0)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
