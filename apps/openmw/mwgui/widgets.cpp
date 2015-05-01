@@ -474,7 +474,7 @@ namespace MWGui
             mTextWidget->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
-            //mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
+            mImageWidget->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(magicEffect->mIcon));
         }
 
         MWSpellEffect::~MWSpellEffect()

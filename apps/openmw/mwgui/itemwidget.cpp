@@ -6,6 +6,10 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
+// correctIconPath
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/class.hpp"
 
 namespace
@@ -77,7 +81,7 @@ namespace MWGui
 
     void ItemWidget::setIcon(const MWWorld::Ptr &ptr)
     {
-        //setIcon(Misc::ResourceHelpers::correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
+        setIcon(MWBase::Environment::get().getWindowManager()->correctIconPath(ptr.getClass().getInventoryIcon(ptr)));
     }
 
 

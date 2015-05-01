@@ -353,6 +353,11 @@ namespace MWBase
             virtual void cycleSpell(bool next) = 0;
             /// Cycle to next or previous weapon
             virtual void cycleWeapon(bool next) = 0;
+
+            // In WindowManager for now since there isn't a VFS singleton
+            virtual std::string correctIconPath(const std::string& path) = 0;
+            virtual std::string correctBookartPath(const std::string& path, int width, int height) = 0;
+            virtual std::string correctTexturePath(const std::string& path) = 0;
     };
 }
 

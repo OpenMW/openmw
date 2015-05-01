@@ -33,6 +33,8 @@
 #include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 
@@ -102,7 +104,8 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
-      : mViewer(viewer)
+      : mResourceSystem(resourceSystem)
+      , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
       , mHud(NULL)
       , mMap(NULL)
@@ -1915,6 +1918,21 @@ namespace MWGui
     {
         pushGuiMode(GM_Scroll);
         mScrollWindow->open(item, showTakeButton);
+    }
+
+    std::string WindowManager::correctIconPath(const std::string& path)
+    {
+        return Misc::ResourceHelpers::correctIconPath(path, mResourceSystem->getVFS());
+    }
+
+    std::string WindowManager::correctBookartPath(const std::string& path, int width, int height)
+    {
+        return Misc::ResourceHelpers::correctBookartPath(path, width, height, mResourceSystem->getVFS());
+    }
+
+    std::string WindowManager::correctTexturePath(const std::string& path)
+    {
+        return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
     }
 
 }

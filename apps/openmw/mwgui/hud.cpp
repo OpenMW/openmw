@@ -448,7 +448,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        //icon = Misc::ResourceHelpers::correctIconPath(icon);
+        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
         mSpellImage->setItem(MWWorld::Ptr());
         mSpellImage->setIcon(icon);

@@ -10,6 +10,9 @@ namespace VFS
 
 namespace Misc
 {
+    // Workarounds for messy resource handling in vanilla morrowind
+    // The below functions are provided on a opt-in basis, instead of built into the VFS,
+    // so we have the opportunity to use proper resource handling for content created in OpenMW-CS.
     namespace ResourceHelpers
     {
         bool changeExtensionToDds(std::string &path);
@@ -18,7 +21,7 @@ namespace Misc
         std::string correctIconPath(const std::string &resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(const std::string &resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs);
-        /// Uses "xfoo.nif" instead of "foo.nif" if available
+        /// Use "xfoo.nif" instead of "foo.nif" if available
         std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
     }
 }

@@ -388,7 +388,7 @@ namespace MWGui
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
-        std::string realImage;// = Misc::ResourceHelpers::correctIconPath(image);
+        std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
         MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setProperty("Static", "true");
@@ -686,7 +686,7 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        widget->setUserString("ImageTexture_BirthSignImage", "");//Misc::ResourceHelpers::correctTexturePath(sign->mTexture));
+        widget->setUserString("ImageTexture_BirthSignImage", MWBase::Environment::get().getWindowManager()->correctTexturePath(sign->mTexture));
         std::string text;
 
         text += sign->mName;

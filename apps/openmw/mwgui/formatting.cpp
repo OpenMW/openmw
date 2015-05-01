@@ -6,6 +6,10 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_FontManager.h>
 
+// correctBookartPath
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -463,7 +467,7 @@ namespace MWGui
                 MyGUI::IntCoord(left, pag.getCurrentTop(), width, mImageHeight), MyGUI::Align::Left | MyGUI::Align::Top,
                 parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
 
-            std::string image;// = Misc::ResourceHelpers::correctBookartPath(src, width, mImageHeight);
+            std::string image = MWBase::Environment::get().getWindowManager()->correctBookartPath(src, width, mImageHeight);
             mImageBox->setImageTexture(image);
             mImageBox->setProperty("NeedMouse", "false");
         }

@@ -358,7 +358,14 @@ namespace MWGui
     /// Cycle to next or previous weapon
     virtual void cycleWeapon(bool next);
 
+    // In WindowManager for now since there isn't a VFS singleton
+    virtual std::string correctIconPath(const std::string& path);
+    virtual std::string correctBookartPath(const std::string& path, int width, int height);
+    virtual std::string correctTexturePath(const std::string& path);
+
   private:
+    Resource::ResourceSystem* mResourceSystem;
+
     osgMyGUI::Platform* mGuiPlatform;
     osgViewer::Viewer* mViewer;
 
