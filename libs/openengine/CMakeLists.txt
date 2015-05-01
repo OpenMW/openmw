@@ -1,6 +1,4 @@
 set(OENGINE_GUI
-    gui/loglistener.cpp
-    #gui/manager.cpp
     gui/layout.cpp
 )
 

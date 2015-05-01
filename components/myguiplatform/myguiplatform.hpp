@@ -6,6 +6,7 @@
 
 #include "myguirendermanager.hpp"
 #include "myguidatamanager.hpp"
+#include "myguiloglistener.hpp"
 
 namespace osgMyGUI
 {
@@ -13,10 +14,11 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager) :
-            mLogManager(nullptr),
-            mRenderManager(nullptr),
-            mDataManager(nullptr)
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager)
+            : mRenderManager(nullptr)
+            , mDataManager(nullptr)
+            , mLogManager(nullptr)
+            , mLogFacility(nullptr)
         {
             mLogManager = new MyGUI::LogManager();
             mRenderManager = new RenderManager(viewer, guiRoot, textureManager);
@@ -31,12 +33,17 @@ namespace osgMyGUI
             mDataManager = nullptr;
             delete mLogManager;
             mLogManager = nullptr;
+            delete mLogFacility;
+            mLogFacility = nullptr;
         }
 
         void initialise(const std::string& resourcePath, const std::string& _logName = "MyGUI.log")
         {
-            if (!_logName.empty())
-                MyGUI::LogManager::getInstance().createDefaultSource(_logName);
+            if (!_logName.empty() && !mLogFacility)
+            {
+                mLogFacility = new LogFacility(_logName, false);
+                mLogManager->addLogSource(mLogFacility->getSource());
+            }
 
             mDataManager->setResourcePath(resourcePath);
 
@@ -46,7 +53,7 @@ namespace osgMyGUI
 
         void shutdown()
         {
-            //mRenderManager->shutdown();
+            mRenderManager->shutdown();
             mDataManager->shutdown();
         }
 
@@ -64,6 +71,7 @@ namespace osgMyGUI
         RenderManager* mRenderManager;
         DataManager* mDataManager;
         MyGUI::LogManager* mLogManager;
+        LogFacility* mLogFacility;
     };
 
 }

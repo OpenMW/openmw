@@ -1,11 +1,11 @@
-#include "loglistener.hpp"
+#include "myguiloglistener.hpp"
 
 #include <iomanip>
 #include <time.h>
 
 #include <boost/filesystem/path.hpp>
 
-namespace MyGUI
+namespace osgMyGUI
 {
     void CustomLogListener::open()
     {
@@ -24,7 +24,7 @@ namespace MyGUI
             mStream.flush();
     }
 
-    void CustomLogListener::log(const std::string& _section, LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line)
+    void CustomLogListener::log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line)
     {
         if (mStream.is_open())
         {

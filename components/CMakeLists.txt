@@ -119,7 +119,7 @@ add_component_dir (ogreinit
     )
 
 add_component_dir (myguiplatform
-    myguirendermanager myguidatamanager myguiplatform myguitexture
+    myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener
     )
 
 add_component_dir (widgets
