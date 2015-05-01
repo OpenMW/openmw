@@ -29,8 +29,8 @@
 #include "../../model/world/record.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtree.hpp"
-#include "../../model/doc/document.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/doc/document.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -444,7 +444,8 @@ void CSVWorld::EditWidget::remake(int row)
             if (mTable->hasChildren(mTable->index(row, i)) &&
                     !(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
-                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
+                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (
+                            mTable->index(row, i), display, dynamic_cast<CSMWorld::IdTree*>(mTable)));
 
                 int idColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
                 int typeColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);

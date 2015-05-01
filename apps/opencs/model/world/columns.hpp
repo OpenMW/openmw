@@ -257,14 +257,15 @@ namespace CSMWorld
             ColumnId_LevelledItemId = 234,
             ColumnId_LevelledItemLevel = 235,
             ColumnId_LevelledItemType = 236,
-            ColumnId_LevelledItemChanceNone = 237,
+            ColumnId_LevelledItemTypeEach = 237,
+            ColumnId_LevelledItemChanceNone = 238,
 
-            ColumnId_PowerList = 238,
-            ColumnId_SkillImpact = 239, // impact from magic effects
+            ColumnId_PowerList = 239,
+            ColumnId_SkillImpact = 240, // impact from magic effects
 
-            ColumnId_InfoList = 240,
+            ColumnId_InfoList = 241,
 
-            ColumnId_OriginalCell = 241,
+            ColumnId_OriginalCell = 242,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

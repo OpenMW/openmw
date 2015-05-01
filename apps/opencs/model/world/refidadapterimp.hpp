@@ -1830,10 +1830,10 @@ namespace CSMWorld
     }
 
 
+    // for non-tables
     template <typename ESXRecordT>
     class NestedListLevListRefIdAdapter : public NestedRefIdAdapterBase
     {
-
         UniversalId::Type mType;
 
         // not implemented
@@ -1877,45 +1877,27 @@ namespace CSMWorld
             const Record<ESXRecordT>& record =
                 static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-            switch (subColIndex)
+            if (mType == UniversalId::Type_CreatureLevelledList)
             {
-                case 0:
+                switch (subColIndex)
                 {
-                    if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
-                            record.get().mFlags == 0x01)
-                    {
-                        return QString("All Levels");
-                    }
-                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
-                            record.get().mFlags == 0x01)
-                    {
-                        return QString("Each");
-                    }
-                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
-                            record.get().mFlags == 0x02)
-                    {
-                        return QString("All Levels");
-                    }
-                    else if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
-                            record.get().mFlags == 0x00)
-                    {
-                        std::cerr << "Unknown creature leveled list type: " << record.get().mFlags
-                            << ", Using \"All Levels\""<< std::endl;
-                        return QString("All Levels");
-                    }
-                    else if (mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
-                            record.get().mFlags == 0x00)
-                    {
-                        std::cerr << "Unknown item leveled list type: " << record.get().mFlags
-                            << ", Using \"Each\""<< std::endl;
-                        return QString("Each");
-                    }
-                    else
-                        throw std::runtime_error("unknown leveled list type");
+                    case 0: return QVariant(); // don't allow checkbox editor to be created
+                    case 1: return record.get().mFlags & ESM::CreatureLevList::AllLevels;
+                    case 2: return static_cast<int> (record.get().mChanceNone);
+                    default:
+                        throw std::runtime_error("Trying to access non-existing column in levelled creatues!");
                 }
-                case 1: return static_cast<int> (record.get().mChanceNone);
-                default:
-                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+            else
+            {
+                switch (subColIndex)
+                {
+                    case 0: return record.get().mFlags & ESM::ItemLevList::Each;
+                    case 1: return record.get().mFlags & ESM::ItemLevList::AllLevels;
+                    case 2: return static_cast<int> (record.get().mChanceNone);
+                    default:
+                        throw std::runtime_error("Trying to access non-existing column in levelled items!");
+                }
             }
         }
 
@@ -1926,34 +1908,63 @@ namespace CSMWorld
                 static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
             ESXRecordT leveled = record.get();
 
-            switch(subColIndex)
+            if (mType == UniversalId::Type_CreatureLevelledList)
             {
-                case 0:
+                switch(subColIndex)
                 {
-                    if (mType == CSMWorld::UniversalId::Type_CreatureLevelledList &&
-                            value.toString().toStdString() == "All Levels")
+                    case 0: return; // return without saving
+                    case 1:
                     {
-                        leveled.mFlags = 0x01;
-                        break;
+                        if(value.toBool())
+                        {
+                            leveled.mFlags |= ESM::CreatureLevList::AllLevels;
+                            break;
+                        }
+                        else
+                        {
+                            leveled.mFlags &= ~ESM::CreatureLevList::AllLevels;
+                            break;
+                        }
                     }
-                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
-                            value.toString().toStdString() == "Each")
-                    {
-                        leveled.mFlags = 0x01;
-                        break;
-                    }
-                    else if(mType == CSMWorld::UniversalId::Type_ItemLevelledList &&
-                            value.toString().toStdString() == "All Levels")
-                    {
-                        leveled.mFlags = 0x02;
-                        break;
-                    }
-                    else
-                        return; // return without saving
+                    case 2: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
+                    default:
+                        throw std::runtime_error("Trying to set non-existing column in levelled creatures!");
                 }
-                case 1: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
-                default:
-                    throw std::runtime_error("Trying to access non-existing column in the nested table!");
+            }
+            else
+            {
+                switch(subColIndex)
+                {
+                    case 0:
+                    {
+                        if(value.toBool())
+                        {
+                            leveled.mFlags |= ESM::ItemLevList::Each;
+                            break;
+                        }
+                        else
+                        {
+                            leveled.mFlags &= ~ESM::ItemLevList::Each;
+                            break;
+                        }
+                    }
+                    case 1:
+                    {
+                        if(value.toBool())
+                        {
+                            leveled.mFlags |= ESM::ItemLevList::AllLevels;
+                            break;
+                        }
+                        else
+                        {
+                            leveled.mFlags &= ~ESM::ItemLevList::AllLevels;
+                            break;
+                        }
+                    }
+                    case 2: leveled.mChanceNone = static_cast<unsigned char>(value.toInt()); break;
+                    default:
+                        throw std::runtime_error("Trying to set non-existing column in levelled items!");
+                }
             }
 
             record.setModified (leveled);
@@ -1961,7 +1972,7 @@ namespace CSMWorld
 
         virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
         {
-            return 2;
+            return 3;
         }
 
         virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
@@ -1970,6 +1981,7 @@ namespace CSMWorld
         }
     };
 
+    // for tables
     template <typename ESXRecordT>
     class NestedLevListRefIdAdapter : public NestedRefIdAdapterBase
     {
