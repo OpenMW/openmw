@@ -2724,12 +2724,13 @@ namespace MWWorld
                     origin += node->_getDerivedPosition();
             }
 #endif
+            /*
+
             Ogre::Quaternion orient;
             orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
                     Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
             Ogre::Vector3 direction = orient.yAxis();
             Ogre::Vector3 dest = origin + direction * distance;
-
 
             std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(btVector3(origin.x, origin.y, origin.z), btVector3(dest.x, dest.y, dest.z));
             for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
@@ -2741,6 +2742,7 @@ namespace MWWorld
                     break;
                 }
             }
+            */
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();

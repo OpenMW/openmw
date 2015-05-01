@@ -107,8 +107,7 @@ private:
     /**
     *Parse a node.
     */
-    void handleNode(Nif::Node const *node, int flags, bool isCollisionNode,
-                    bool raycasting, bool isAnimated=false);
+    void handleNode(Nif::Node const *node, int flags, bool isCollisionNode, bool isAnimated=false);
 
     /**
     *Helper function
@@ -118,7 +117,7 @@ private:
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool raycasting, bool isAnimated);
+    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool isAnimated);
 
     std::string mResourceName;
 

@@ -519,58 +519,6 @@ namespace MWWorld
         return mEngine;
     }
 
-    std::pair<float, std::string> PhysicsSystem::getFacedHandle(float queryDistance)
-    {
-        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
-
-        Ogre::Vector3 origin_ = ray.getOrigin();
-        btVector3 origin(origin_.x, origin_.y, origin_.z);
-        Ogre::Vector3 dir_ = ray.getDirection().normalisedCopy();
-        btVector3 dir(dir_.x, dir_.y, dir_.z);
-
-        btVector3 dest = origin + dir * queryDistance;
-        std::pair <std::string, float> result = mEngine->rayTest(origin, dest);
-        result.second *= queryDistance;
-
-        return std::make_pair (result.second, result.first);
-    }
-
-    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float queryDistance)
-    {
-        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(0.5, 0.5);
-
-        Ogre::Vector3 origin_ = ray.getOrigin();
-        btVector3 origin(origin_.x, origin_.y, origin_.z);
-        Ogre::Vector3 dir_ = ray.getDirection().normalisedCopy();
-        btVector3 dir(dir_.x, dir_.y, dir_.z);
-
-        btVector3 dest = origin + dir * queryDistance;
-        std::vector < std::pair <float, std::string> > results;
-        /* auto */ results = mEngine->rayTest2(origin, dest);
-        std::vector < std::pair <float, std::string> >::iterator i;
-        for (/* auto */ i = results.begin (); i != results.end (); ++i)
-            i->first *= queryDistance;
-        return results;
-    }
-
-    std::vector < std::pair <float, std::string> > PhysicsSystem::getFacedHandles (float mouseX, float mouseY, float queryDistance)
-    {
-        Ray ray;// = mRender.getCamera()->getCameraToViewportRay(mouseX, mouseY);
-        Ogre::Vector3 from = ray.getOrigin();
-        Ogre::Vector3 to = ray.getPoint(queryDistance);
-
-        btVector3 _from, _to;
-        _from = btVector3(from.x, from.y, from.z);
-        _to = btVector3(to.x, to.y, to.z);
-
-        std::vector < std::pair <float, std::string> > results;
-        /* auto */ results = mEngine->rayTest2(_from,_to);
-        std::vector < std::pair <float, std::string> >::iterator i;
-        for (/* auto */ i = results.begin (); i != results.end (); ++i)
-            i->first *= queryDistance;
-        return results;
-    }
-
     std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
                                                                       const Ogre::Vector3 &origin,
                                                                       const Ogre::Quaternion &orient,
@@ -600,13 +548,13 @@ namespace MWWorld
     }
 
 
-    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool raycastingObjectOnly,bool ignoreHeightMap)
+    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool ignoreHeightMap)
     {
         btVector3 _from, _to;
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, raycastingObjectOnly,ignoreHeightMap);
+        std::pair<std::string, float> result = mEngine->rayTest(_from, _to,ignoreHeightMap);
         return !(result.first == "");
     }
 
@@ -624,30 +572,6 @@ namespace MWWorld
             return std::make_pair(false, Ogre::Vector3());
         }
         return std::make_pair(true, ray.getPoint(len * test.second));
-    }
-
-    std::pair<bool, Ogre::Vector3> PhysicsSystem::castRay(float mouseX, float mouseY, Ogre::Vector3* normal, std::string* hit)
-    {
-        Ogre::Ray ray;// = mRender.getCamera()->getCameraToViewportRay(
-            //mouseX,
-            //mouseY);
-        Ogre::Vector3 from = ray.getOrigin();
-        Ogre::Vector3 to = ray.getPoint(200); /// \todo make this distance (ray length) configurable
-
-        btVector3 _from, _to;
-        _from = btVector3(from.x, from.y, from.z);
-        _to = btVector3(to.x, to.y, to.z);
-
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to, true, false, normal);
-
-        if (result.first == "")
-            return std::make_pair(false, Ogre::Vector3());
-        else
-        {
-            if (hit != NULL)
-                *hit = result.first;
-            return std::make_pair(true, ray.getPoint(200*result.second));  /// \todo make this distance (ray length) configurable
-        }
     }
 
     std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
@@ -712,12 +636,6 @@ namespace MWWorld
             mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
 
-        if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle, true))
-        {
-            body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
-            mEngine->mDynamicsWorld->updateSingleAabb(body);
-        }
-
         // Actors update their AABBs every frame (DISABLE_DEACTIVATION), so no need to do it manually
         if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
             physact->setPosition(position);
@@ -742,14 +660,6 @@ namespace MWWorld
                 mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
             mEngine->mDynamicsWorld->updateSingleAabb(body);
         }
-        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle, true))
-        {
-            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
-                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-            else
-                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
-            mEngine->mDynamicsWorld->updateSingleAabb(body);
-        }
     }
 
     void PhysicsSystem::scaleObject (const Ptr& ptr)
@@ -762,9 +672,7 @@ namespace MWWorld
             //model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
 
             bool placeable = false;
-            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,true))
-                placeable = body->mPlaceable;
-            else if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle,false))
+            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
                 placeable = body->mPlaceable;
             removeObject(handle);
             addObject(ptr, model, placeable);
@@ -805,30 +713,6 @@ namespace MWWorld
 
         throw std::logic_error ("can't find player");
     }
-
-    bool PhysicsSystem::getObjectAABB(const MWWorld::Ptr &ptr, Ogre::Vector3 &min, Ogre::Vector3 &max)
-    {
-        // FIXME: since raycasting shapes are going away, this should use the osg ComputeBoundingBoxVisitor
-        std::string model = ptr.getClass().getModel(ptr);
-        //model = Misc::ResourceHelpers::correctActorModelPath(model);
-        if (model.empty()) {
-            return false;
-        }
-        btVector3 btMin, btMax;
-        float scale = ptr.getCellRef().getScale();
-        mEngine->getObjectAABB(model, scale, btMin, btMax);
-
-        min.x = btMin.x();
-        min.y = btMin.y();
-        min.z = btMin.z();
-
-        max.x = btMax.x();
-        max.y = btMax.y();
-        max.z = btMax.z();
-
-        return true;
-    }
-
 
     void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
     {
@@ -913,7 +797,6 @@ namespace MWWorld
     void PhysicsSystem::stepSimulation(float dt)
     {
         animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
-        animateCollisionShapes(mEngine->mAnimatedRaycastingShapes, mEngine->mDynamicsWorld);
 
         mEngine->stepSimulation(dt);
     }

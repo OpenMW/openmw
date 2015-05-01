@@ -46,9 +46,8 @@ namespace Physic
         CollisionType_World = 1<<0, //<Collide with world objects
         CollisionType_Actor = 1<<1, //<Collide sith actors
         CollisionType_HeightMap = 1<<2, //<collide with heightmap
-        CollisionType_Raycasting = 1<<3,
-        CollisionType_Projectile = 1<<4,
-        CollisionType_Water = 1<<5
+        CollisionType_Projectile = 1<<3,
+        CollisionType_Water = 1<<4
     };
 
     /**
@@ -211,7 +210,7 @@ namespace Physic
          */
         RigidBody* createAndAdjustRigidBody(const std::string &mesh, const std::string &name,
             float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
-            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool raycasting=false, bool placeable=false);
+            Ogre::Vector3* scaledBoxTranslation = 0, Ogre::Quaternion* boxRotation = 0, bool placeable=false);
 
         /**
          * Adjusts a rigid body to the right position and rotation
@@ -249,7 +248,7 @@ namespace Physic
         /**
          * Return a pointer to a given rigid body.
          */
-        RigidBody* getRigidBody(const std::string &name, bool raycasting=false);
+        RigidBody* getRigidBody(const std::string &name);
 
         /**
          * Create and add a character to the scene, and add it to the ActorMap.
@@ -286,21 +285,14 @@ namespace Physic
 
         bool toggleDebugRendering();
 
-        void getObjectAABB(const std::string &mesh, float scale, btVector3 &min, btVector3 &max);
-
         void setSceneManager(Ogre::SceneManager* sceneMgr);
 
         /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
-        std::pair<std::string,float> rayTest(const btVector3& from,const btVector3& to,bool raycastingObjectOnly = true,
+        std::pair<std::string,float> rayTest(const btVector3& from,const btVector3& to,
                                              bool ignoreHeightMap = false, Ogre::Vector3* normal = NULL);
-
-        /**
-         * Return all objects hit by a ray.
-         */
-        std::vector< std::pair<float, std::string> > rayTest2(const btVector3 &from, const btVector3 &to, int filterGroup=0xff);
 
         std::pair<bool, float> sphereCast (float radius, btVector3& from, btVector3& to);
         ///< @return (hit, relative distance)
@@ -332,10 +324,6 @@ namespace Physic
         // Compound shapes that must be animated each frame based on bone positions
         // the index refers to an element in mCollisionObjectMap
         std::map<RigidBody*, AnimatedShapeInstance > mAnimatedShapes;
-
-        RigidBodyContainer mRaycastingObjectMap;
-
-        std::map<RigidBody*, AnimatedShapeInstance > mAnimatedRaycastingShapes;
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer mActorMap;
