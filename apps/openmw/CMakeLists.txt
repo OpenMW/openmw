@@ -22,6 +22,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     actors objects renderingmanager animation sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface debugging rendermode
+    bulletdebugdraw
 #    camera activatoranimation
 #    localmap occlusionquery water shadows
 #    characterpreview globalmap ripplesimulation refraction

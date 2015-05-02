@@ -18,15 +18,13 @@
 
 #include "../mwrender/renderingmanager.hpp"
 
-//#include "physicssystem.hpp"
+#include "physicssystem.hpp"
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
 #include "cellfunctors.hpp"
 #include "cellstore.hpp"
-
-#include <osg/Timer>
 
 namespace
 {
@@ -194,26 +192,22 @@ namespace MWWorld
         ListAndResetHandles functor;
 
         (*iter)->forEach<ListAndResetHandles>(functor);
+        for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
+            iter2!=functor.mHandles.end(); ++iter2)
         {
-            // silence annoying g++ warning
-            for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
-                iter2!=functor.mHandles.end(); ++iter2)
-            {
-                //Ogre::SceneNode* node = *iter2;
-                //mPhysics->removeObject (node->getName());
-            }
+            //Ogre::SceneNode* node = *iter2;
+            //mPhysics->removeObject (node->getName());
         }
 
         if ((*iter)->getCell()->isExterior())
         {
-            /*ESM::Land* land =
+            ESM::Land* land =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
                     (*iter)->getCell()->getGridX(),
                     (*iter)->getCell()->getGridY()
                 );
             if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
                 mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
-                */
         }
 
         mRendering.removeCell(*iter);
@@ -234,10 +228,9 @@ namespace MWWorld
         {
             std::cout << "loading cell " << cell->getCell()->getDescription() << std::endl;
 
-            //float verts = ESM::Land::LAND_SIZE;
-            //float worldsize = ESM::Land::REAL_SIZE;
+            float verts = ESM::Land::LAND_SIZE;
+            float worldsize = ESM::Land::REAL_SIZE;
 
-#if 0
             // Load terrain physics first...
             if (cell->getCell()->isExterior())
             {
@@ -262,7 +255,6 @@ namespace MWWorld
                     ;
                 }
             }
-#endif
 
             cell->respawn();
 
@@ -316,9 +308,7 @@ namespace MWWorld
         {
             int newX, newY;
             MWBase::Environment::get().getWorld()->positionToIndex(pos.x(), pos.y(), newX, newY);
-            osg::Timer timer;
             changeCellGrid(newX, newY);
-            std::cout << "changeCellGrid took " << timer.time_m() << std::endl;
             //mRendering.updateTerrain();
         }
     }

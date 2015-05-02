@@ -240,9 +240,7 @@ namespace Physic
 
 
 
-    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader) :
-        mDebugActive(0)
-      , mSceneMgr(NULL)
+    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
     {
         // Set up the collision configuration and dispatcher
         collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -263,42 +261,6 @@ namespace Physic
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
         mShapeLoader = shapeLoader;
-
-        isDebugCreated = false;
-        mDebugDrawer = NULL;
-    }
-
-    void PhysicEngine::createDebugRendering()
-    {
-        if(!isDebugCreated)
-        {
-            Ogre::SceneNode* node = mSceneMgr->getRootSceneNode()->createChildSceneNode();
-            mDebugDrawer = new BtOgre::DebugDrawer(node, mDynamicsWorld);
-            mDynamicsWorld->setDebugDrawer(mDebugDrawer);
-            isDebugCreated = true;
-            mDynamicsWorld->debugDrawWorld();
-        }
-    }
-
-    void PhysicEngine::setDebugRenderingMode(bool isDebug)
-    {
-        if(!isDebugCreated)
-        {
-            createDebugRendering();
-        }
-        mDebugDrawer->setDebugMode(isDebug);
-        mDebugActive = isDebug;
-    }
-
-    bool  PhysicEngine::toggleDebugRendering()
-    {
-        setDebugRenderingMode(!mDebugActive);
-        return mDebugActive;
-    }
-
-    void PhysicEngine::setSceneManager(Ogre::SceneManager* sceneMgr)
-    {
-        mSceneMgr = sceneMgr;
     }
 
     PhysicEngine::~PhysicEngine()
@@ -335,8 +297,6 @@ namespace Physic
                 pa_it->second = NULL;
             }
         }
-
-        delete mDebugDrawer;
 
         delete mDynamicsWorld;
         delete solver;
@@ -652,10 +612,6 @@ namespace Physic
     {
         // This seems to be needed for character controller objects
         mDynamicsWorld->stepSimulation(static_cast<btScalar>(deltaT), 10, 1 / 60.0f);
-        if(isDebugCreated)
-        {
-            mDebugDrawer->step();
-        }
     }
 
     void PhysicEngine::addCharacter(const std::string &name, const std::string &mesh,

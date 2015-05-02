@@ -7,8 +7,14 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include <osg/ref_ptr>
+
 #include "ptr.hpp"
 
+namespace osg
+{
+    class Group;
+}
 
 namespace OEngine
 {
@@ -16,6 +22,11 @@ namespace OEngine
     {
         class PhysicEngine;
     }
+}
+
+namespace MWRender
+{
+    class DebugDrawer;
 }
 
 namespace MWWorld
@@ -27,7 +38,7 @@ namespace MWWorld
     class PhysicsSystem
     {
         public:
-            PhysicsSystem ();
+            PhysicsSystem (osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
 
             void enableWater(float height);
@@ -98,9 +109,13 @@ namespace MWWorld
             /// Get the handle of all actors colliding with \a object in this frame.
             void getActorsCollidingWith(const MWWorld::Ptr& object, std::vector<std::string>& out) const;
 
+            bool toggleDebugRendering();
+
         private:
 
             void updateWater();
+
+            bool mDebugDrawEnabled;
 
             OEngine::Physic::PhysicEngine* mEngine;
             std::map<std::string, std::string> handleToMesh;
@@ -122,6 +137,10 @@ namespace MWWorld
 
             std::auto_ptr<btCollisionObject> mWaterCollisionObject;
             std::auto_ptr<btCollisionShape> mWaterCollisionShape;
+
+            std::auto_ptr<MWRender::DebugDrawer> mDebugDrawer;
+
+            osg::ref_ptr<osg::Group> mParentNode;
 
             PhysicsSystem (const PhysicsSystem&);
             PhysicsSystem& operator= (const PhysicsSystem&);

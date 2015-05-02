@@ -161,7 +161,7 @@ namespace MWWorld
       mStartCell (startCell), mStartupScript(startupScript),
       mScriptsEnabled(true)
     {
-        mPhysics = new PhysicsSystem();
+        mPhysics = new PhysicsSystem(rootNode);
         //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
@@ -1409,9 +1409,8 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
+        mPhysics->stepSimulation(duration);
 #if 0
-        //mPhysics->stepSimulation(duration);
-
         processDoors(duration);
 
         mProjectileManager->update(duration);
@@ -1503,7 +1502,13 @@ namespace MWWorld
 
     bool World::toggleRenderMode (MWRender::RenderMode mode)
     {
-        return mRendering->toggleRenderMode (mode);
+        switch (mode)
+        {
+            case MWRender::Render_CollisionDebug:
+                return mPhysics->toggleDebugRendering();
+            default:
+                return mRendering->toggleRenderMode(mode);
+        }
     }
 
     const ESM::Potion *World::createRecord (const ESM::Potion& record)
@@ -1601,8 +1606,8 @@ namespace MWWorld
 
         updateWeather(duration, paused);
 
-        //if (!paused)
-        //    doPhysics (duration);
+        if (!paused)
+            doPhysics (duration);
 
         mWorldScene->update (duration, paused);
 

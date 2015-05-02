@@ -10,6 +10,8 @@
 #include <OgreTextureManager.h>
 #include <OgreSceneNode.h>
 
+#include <osg/Group>
+
 #include <openengine/bullet/trace.h>
 #include <openengine/bullet/physic.hpp>
 #include <openengine/bullet/BtOgreExtras.h>
@@ -28,6 +30,8 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+
+#include "../mwrender/bulletdebugdraw.hpp"
 
 //#include "../apps/openmw/mwrender/animation.hpp"
 #include "../apps/openmw/mwbase/world.hpp"
@@ -498,8 +502,8 @@ namespace MWWorld
     };
 
 
-    PhysicsSystem::PhysicsSystem() :
-        mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
+    PhysicsSystem::PhysicsSystem(osg::ref_ptr<osg::Group> parentNode) :
+        mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0), mDebugDrawEnabled(false), mParentNode(parentNode)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
@@ -512,6 +516,21 @@ namespace MWWorld
             mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         delete mEngine;
         //delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
+    }
+
+    bool PhysicsSystem::toggleDebugRendering()
+    {
+        mDebugDrawEnabled = !mDebugDrawEnabled;
+
+        if (mDebugDrawEnabled && !mDebugDrawer.get())
+        {
+            mDebugDrawer.reset(new MWRender::DebugDrawer(mParentNode, mEngine->mDynamicsWorld));
+            mEngine->mDynamicsWorld->setDebugDrawer(mDebugDrawer.get());
+            mDebugDrawer->setDebugMode(mDebugDrawEnabled);
+        }
+        else if (mDebugDrawer.get())
+            mDebugDrawer->setDebugMode(mDebugDrawEnabled);
+        return mDebugDrawEnabled;
     }
 
     OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
@@ -799,6 +818,9 @@ namespace MWWorld
         animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
 
         mEngine->stepSimulation(dt);
+
+        if (mDebugDrawer.get())
+            mDebugDrawer->step();
     }
 
     bool PhysicsSystem::isActorStandingOn(const Ptr &actor, const Ptr &object) const

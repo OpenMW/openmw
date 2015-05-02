@@ -272,22 +272,6 @@ namespace Physic
         void stepSimulation(double deltaT);
 
         /**
-         * Create a debug rendering. It is called by setDebgRenderingMode if it's not created yet.
-         * Important Note: this will crash if the Render is not yet initialise!
-         */
-        void createDebugRendering();
-
-        /**
-         * Set the debug rendering mode. 0 to turn it off.
-         * Important Note: this will crash if the Render is not yet initialise!
-         */
-        void setDebugRenderingMode(bool isDebug);
-
-        bool toggleDebugRendering();
-
-        void setSceneManager(Ogre::SceneManager* sceneMgr);
-
-        /**
          * Return the closest object hit by a ray. If there are no objects, it will return ("",-1).
          * If \a normal is non-NULL, the hit normal will be written there (if there is a hit)
          */
@@ -327,13 +311,6 @@ namespace Physic
 
         typedef std::map<std::string, PhysicActor*>  PhysicActorContainer;
         PhysicActorContainer mActorMap;
-
-        Ogre::SceneManager* mSceneMgr;
-
-        //debug rendering
-        BtOgre::DebugDrawer* mDebugDrawer;
-        bool isDebugCreated;
-        bool mDebugActive;
 
     private:
         PhysicEngine(const PhysicEngine&);

@@ -146,10 +146,6 @@ Debugging::~Debugging()
 bool Debugging::toggleRenderMode (int mode){
     switch (mode)
     {
-        //case Render_CollisionDebug:
-
-            //return mEngine->toggleDebugRendering();
-
         case Render_Pathgrid:
             togglePathgrid();
             return mPathgridEnabled;
