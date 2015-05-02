@@ -174,8 +174,6 @@ namespace MWGui
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
       , mFPS(0.0f)
-      , mTriangleCount(0)
-      , mBatchCount(0)
       , mCurrentModals()
       , mFallbackMap(fallbackMap)
     {
@@ -440,8 +438,6 @@ namespace MWGui
         cleanupGarbage();
 
         mHud->setFPS(mFPS);
-        mHud->setTriangleCount(mTriangleCount);
-        mHud->setBatchCount(mBatchCount);
 
         mHud->update();
     }
@@ -1078,7 +1074,7 @@ namespace MWGui
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mHud->setFpsLevel(Settings::Manager::getInt("fps", "HUD"));
+        mHud->setFpsVisible(static_cast<bool>(Settings::Manager::getInt("fps", "HUD")));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
@@ -1278,11 +1274,9 @@ namespace MWGui
         mConsole->executeFile (path);
     }
 
-    void WindowManager::wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount)
+    void WindowManager::wmUpdateFps(float fps)
     {
         mFPS = fps;
-        mTriangleCount = triangleCount;
-        mBatchCount = batchCount;
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }

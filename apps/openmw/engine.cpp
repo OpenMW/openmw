@@ -150,10 +150,7 @@ void OMW::Engine::frame(float frametime)
             MWBase::StateManager::State_NoGame)
         {
 #if 0
-            Ogre::RenderWindow* window = mOgre->getWindow();
-            unsigned int tri, batch;
-            MWBase::Environment::get().getWorld()->getTriangleBatchCount(tri, batch);
-            MWBase::Environment::get().getWindowManager()->wmUpdateFps(window->getLastFPS(), tri, batch);
+            MWBase::Environment::get().getWindowManager()->wmUpdateFps(fps);
 #endif
             MWBase::Environment::get().getWindowManager()->update();
         }

@@ -70,7 +70,7 @@ namespace MWGui
     };
 
 
-    HUD::HUD(CustomMarkerCollection &customMarkers, int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, bool showFps, DragAndDrop* dragAndDrop)
         : Layout("openmw_hud.layout")
         , LocalMapBase(customMarkers)
         , mHealth(NULL)
@@ -89,8 +89,6 @@ namespace MWGui
         , mCrosshair(NULL)
         , mFpsBox(NULL)
         , mFpsCounter(NULL)
-        , mTriangleCounter(NULL)
-        , mBatchCounter(NULL)
         , mHealthManaStaminaBaseLeft(0)
         , mWeapBoxBaseLeft(0)
         , mSpellBoxBaseLeft(0)
@@ -166,10 +164,7 @@ namespace MWGui
 
         getWidget(mCrosshair, "Crosshair");
 
-        setFpsLevel(fpsLevel);
-
-        getWidget(mTriangleCounter, "TriangleCounter");
-        getWidget(mBatchCounter, "BatchCounter");
+        setFpsVisible(showFps);
 
         LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
@@ -189,23 +184,15 @@ namespace MWGui
         delete mSpellIcons;
     }
 
-    void HUD::setFpsLevel(int level)
+    void HUD::setFpsVisible(const bool visible)
     {
         mFpsCounter = 0;
 
         MyGUI::Widget* fps;
-        getWidget(fps, "FPSBoxAdv");
-        fps->setVisible(false);
         getWidget(fps, "FPSBox");
         fps->setVisible(false);
 
-        if (level == 2)
-        {
-            getWidget(mFpsBox, "FPSBoxAdv");
-            mFpsBox->setVisible(true);
-            getWidget(mFpsCounter, "FPSCounterAdv");
-        }
-        else if (level == 1)
+        if (visible)
         {
             getWidget(mFpsBox, "FPSBox");
             mFpsBox->setVisible(true);
@@ -217,16 +204,6 @@ namespace MWGui
     {
         if (mFpsCounter)
             mFpsCounter->setCaption(MyGUI::utility::toString((int)fps));
-    }
-
-    void HUD::setTriangleCount(unsigned int count)
-    {
-        mTriangleCounter->setCaption(MyGUI::utility::toString(count));
-    }
-
-    void HUD::setBatchCount(unsigned int count)
-    {
-        mBatchCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)

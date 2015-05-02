@@ -152,7 +152,7 @@ namespace MWBase
 
             virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
 
-            virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
+            virtual void wmUpdateFps(float fps) = 0;
 
             /// Set value for the given ID.
             virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;

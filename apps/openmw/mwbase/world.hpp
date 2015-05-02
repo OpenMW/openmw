@@ -130,8 +130,6 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
-
             virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;

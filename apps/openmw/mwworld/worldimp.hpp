@@ -205,8 +205,6 @@ namespace MWWorld
 
             virtual void adjustSky();
 
-            virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
-
             virtual const Fallback *getFallback() const;
 
             virtual Player& getPlayer();

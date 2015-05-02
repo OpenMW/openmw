@@ -32,10 +32,8 @@ namespace
     {
         if (level == 0)
             return "#{sOff}";
-        else if (level == 1)
-            return "Basic";
-        else
-            return "Detailed";
+        else //if (level == 1)
+            return "#{sOn}";
     }
 
     std::string textureFilteringToStr(const std::string& val)
@@ -413,7 +411,7 @@ namespace MWGui
 
     void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
     {
-        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 3;
+        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 2;
         Settings::Manager::setInt("fps", "HUD", newLevel);
         mFPSButton->setCaptionWithReplacing(fpsLevelToStr(newLevel));
         apply();

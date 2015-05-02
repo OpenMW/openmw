@@ -1979,11 +1979,6 @@ namespace MWWorld
         //mRendering->processChangedSettings(settings);
     }
 
-    void World::getTriangleBatchCount(unsigned int &triangles, unsigned int &batches)
-    {
-        //mRendering->getTriangleBatchCount(triangles, batches);
-    }
-
     bool World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);

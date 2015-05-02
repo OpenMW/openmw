@@ -172,7 +172,7 @@ namespace MWGui
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
-    virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
+    virtual void wmUpdateFps(float fps);
 
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
@@ -474,8 +474,6 @@ namespace MWGui
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
     float mFPS;
-    unsigned int mTriangleCount;
-    unsigned int mBatchCount;
 
     std::map<std::string, std::string> mFallbackMap;
 
