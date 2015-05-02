@@ -277,9 +277,10 @@ namespace Gui
 
         osg::ref_ptr<osg::Image> image = new osg::Image;
 
-        unsigned char* bytes = (unsigned char*)calloc(width*height*4, sizeof(unsigned char));
-        memcpy(bytes, &textureData[0], textureData.size());
-        image->setImage(width, height, 1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, bytes, osg::Image::USE_MALLOC_FREE);
+        image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+        assert (image->isDataContiguous());
+
+        memcpy(image->data(), &textureData[0], textureData.size());
 
         osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
         texture->setImage(image);

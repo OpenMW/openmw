@@ -13,15 +13,16 @@ namespace
     {
         osg::ref_ptr<osg::Image> warningImage = new osg::Image;
 
-        int width=8, height=8;
-        unsigned char* bytes = (unsigned char*)calloc(width*height*3, sizeof(unsigned char));
+        int width = 8, height = 8;
+        warningImage->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
+        assert (warningImage->isDataContiguous());
+        unsigned char* data = warningImage->data();
         for (int i=0;i<width*height;++i)
         {
-            bytes[3*i] = (255);
-            bytes[3*i+1] = (0);
-            bytes[3*i+2] = (255);
+            data[3*i] = (255);
+            data[3*i+1] = (0);
+            data[3*i+2] = (255);
         }
-        warningImage->setImage(width, height, 1, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE, bytes, osg::Image::USE_MALLOC_FREE);
 
         osg::ref_ptr<osg::Texture2D> warningTexture = new osg::Texture2D;
         warningTexture->setImage(warningImage);
