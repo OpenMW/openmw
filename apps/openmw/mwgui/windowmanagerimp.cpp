@@ -183,6 +183,8 @@ namespace MWGui
         MyGUI::Gui* gui = new MyGUI::Gui;
         gui->initialise("");
 
+        createTextures();
+
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
@@ -1084,6 +1086,8 @@ namespace MWGui
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
             else if (it->first == "GUI" && it->second == "subtitles")
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
+            else if (it->first == "GUI" && it->second == "menu transparency")
+                setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
     }
 
@@ -1927,6 +1931,58 @@ namespace MWGui
     std::string WindowManager::correctTexturePath(const std::string& path)
     {
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
+    }
+
+    void WindowManager::createTextures()
+    {
+        {
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("white.png");
+            tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
+            unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
+            for (int x=0; x<8; ++x)
+                for (int y=0; y<8; ++y)
+                {
+                    *(data++) = 255;
+                    *(data++) = 255;
+                    *(data++) = 255;
+                }
+            tex->unlock();
+        }
+
+        {
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("black.png");
+            tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
+            unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
+            for (int x=0; x<8; ++x)
+                for (int y=0; y<8; ++y)
+                {
+                    *(data++) = 0;
+                    *(data++) = 0;
+                    *(data++) = 0;
+                }
+            tex->unlock();
+        }
+
+        {
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("transparent.png");
+            tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
+            setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+        }
+    }
+
+    void WindowManager::setMenuTransparency(float value)
+    {
+        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("transparent.png");
+        unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
+        for (int x=0; x<8; ++x)
+            for (int y=0; y<8; ++y)
+            {
+                *(data++) = 255;
+                *(data++) = 255;
+                *(data++) = 255;
+                *(data++) = static_cast<unsigned char>(value*255);
+            }
+        tex->unlock();
     }
 
 }

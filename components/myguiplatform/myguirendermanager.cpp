@@ -420,6 +420,9 @@ void RenderManager::destroyTexture(MyGUI::ITexture *texture)
 
 MyGUI::ITexture* RenderManager::getTexture(const std::string &name)
 {
+    if (name.empty())
+        return NULL;
+
     MapTexture::const_iterator item = mTextures.find(name);
     if(item == mTextures.end())
     {
