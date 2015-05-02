@@ -23,7 +23,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "renderconst.hpp"
 #include "camera.hpp"
 
 namespace

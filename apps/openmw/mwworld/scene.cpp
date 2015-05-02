@@ -270,8 +270,8 @@ namespace MWWorld
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
 
+            mRendering.addCell(cell);
 #if 0
-            mRendering.cellAdded (cell);
             bool waterEnabled = cell->getCell()->hasWater();
             mRendering.setWaterEnabled(waterEnabled);
             if (waterEnabled)

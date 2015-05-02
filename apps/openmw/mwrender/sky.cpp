@@ -34,7 +34,6 @@
 
 #include "../mwworld/fallback.hpp"
 
-#include "renderconst.hpp"
 #include "renderingmanager.hpp"
 
 namespace

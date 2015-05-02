@@ -7,6 +7,7 @@
 #include "objects.hpp"
 
 #include "renderinginterface.hpp"
+#include "rendermode.hpp"
 
 namespace osg
 {
@@ -37,6 +38,7 @@ namespace MWRender
     class EffectManager;
     class SkyManager;
     class NpcAnimation;
+    class Debugging;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -57,6 +59,7 @@ namespace MWRender
         void configureFog(const ESM::Cell* cell);
         void configureFog(float fogDepth, const osg::Vec4f& colour);
 
+        void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
 
         // TODO rename to setRotation/setPosition/setScale, along with the World equivalents
@@ -65,6 +68,8 @@ namespace MWRender
         void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
 
         void setSkyEnabled(bool enabled);
+
+        bool toggleRenderMode(RenderMode mode);
 
         SkyManager* getSkyManager();
 
@@ -94,6 +99,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Light> mSunLight;
 
+        std::auto_ptr<Debugging> mDebugging;
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;

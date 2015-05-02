@@ -12,11 +12,8 @@
 
 #include "../mwworld/class.hpp"
 
-#include "renderconst.hpp"
-
 namespace MWRender
 {
-
 
 CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
                                      const std::string& model, Resource::ResourceSystem* resourceSystem)

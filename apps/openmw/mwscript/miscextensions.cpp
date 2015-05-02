@@ -213,7 +213,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_CollisionDebug);
 
                     runtime.getContext().report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
@@ -228,7 +228,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_BoundingBoxes);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_BoundingBoxes);
 
                     runtime.getContext().report (enabled ?
                         "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
@@ -242,7 +242,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_Wireframe);
 
                     runtime.getContext().report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
@@ -255,7 +255,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 bool enabled =
-                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
+                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_Pathgrid);
 
                 runtime.getContext().report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");

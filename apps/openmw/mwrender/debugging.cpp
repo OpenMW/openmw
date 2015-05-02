@@ -2,13 +2,10 @@
 
 #include <cassert>
 
-#include <OgreNode.h>
-#include <OgreSceneManager.h>
-#include <OgreMaterial.h>
-#include <OgreMaterialManager.h>
-#include <OgreManualObject.h>
-#include <OgreTechnique.h>
-#include <OgreSceneNode.h>
+#include <osg/Geometry>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Geode>
+#include <osg/Group>
 
 #include <openengine/bullet/physic.hpp>
 
@@ -23,145 +20,118 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/pathfinding.hpp"
 
-#include "renderconst.hpp"
-
-using namespace Ogre;
+#include "vismask.hpp"
 
 namespace MWRender
 {
 
-static const std::string PATHGRID_POINT_MATERIAL = "pathgridPointMaterial";
-static const std::string PATHGRID_LINE_MATERIAL = "pathgridLineMaterial";
-static const std::string DEBUGGING_GROUP = "debugging";
 static const int POINT_MESH_BASE = 35;
 
-void Debugging::createGridMaterials()
+osg::ref_ptr<osg::Geometry> Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
 {
-    if (mGridMatsCreated) return;
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
-    if (MaterialManager::getSingleton().getByName(PATHGRID_LINE_MATERIAL, DEBUGGING_GROUP).isNull())
-    {
-        MaterialPtr lineMatPtr = MaterialManager::getSingleton().create(PATHGRID_LINE_MATERIAL, DEBUGGING_GROUP);
-        lineMatPtr->setReceiveShadows(false);
-        lineMatPtr->getTechnique(0)->setLightingEnabled(true);
-        lineMatPtr->getTechnique(0)->getPass(0)->setDiffuse(1,1,0,0);
-        lineMatPtr->getTechnique(0)->getPass(0)->setAmbient(1,1,0);
-        lineMatPtr->getTechnique(0)->getPass(0)->setSelfIllumination(1,1,0);
-    }
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
 
-    if (MaterialManager::getSingleton().getByName(PATHGRID_POINT_MATERIAL, DEBUGGING_GROUP).isNull())
-    {
-        MaterialPtr pointMatPtr = MaterialManager::getSingleton().create(PATHGRID_POINT_MATERIAL, DEBUGGING_GROUP);
-        pointMatPtr->setReceiveShadows(false);
-        pointMatPtr->getTechnique(0)->setLightingEnabled(true);
-        pointMatPtr->getTechnique(0)->getPass(0)->setDiffuse(1,0,0,0);
-        pointMatPtr->getTechnique(0)->getPass(0)->setAmbient(1,0,0);
-        pointMatPtr->getTechnique(0)->getPass(0)->setSelfIllumination(1,0,0);
-    }
-    mGridMatsCreated = true;
-}
-
-void Debugging::destroyGridMaterials()
-{
-    if (mGridMatsCreated)
-    {
-        MaterialManager::getSingleton().remove(PATHGRID_POINT_MATERIAL);
-        MaterialManager::getSingleton().remove(PATHGRID_LINE_MATERIAL);
-        mGridMatsCreated = false;
-    }
-}
-
-ManualObject *Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
-{
-    ManualObject *result = mSceneMgr->createManualObject();
-
-    result->begin(PATHGRID_LINE_MATERIAL, RenderOperation::OT_LINE_LIST);
     for(ESM::Pathgrid::EdgeList::const_iterator it = pathgrid->mEdges.begin();
         it != pathgrid->mEdges.end();
         ++it)
     {
         const ESM::Pathgrid::Edge &edge = *it;
         const ESM::Pathgrid::Point &p1 = pathgrid->mPoints[edge.mV0], &p2 = pathgrid->mPoints[edge.mV1];
-        Vector3 direction = (MWMechanics::PathFinder::MakeOgreVector3(p2) - MWMechanics::PathFinder::MakeOgreVector3(p1));
-        Vector3 lineDisplacement = direction.crossProduct(Vector3::UNIT_Z).normalisedCopy();
+
+        osg::Vec3f direction = MWMechanics::PathFinder::MakeOsgVec3(p2) - MWMechanics::PathFinder::MakeOsgVec3(p1);
+        osg::Vec3f lineDisplacement = (direction^osg::Vec3f(0,0,1));
+        lineDisplacement.normalize();
+
         lineDisplacement = lineDisplacement * POINT_MESH_BASE +
-                                Vector3(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
-        result->position(MWMechanics::PathFinder::MakeOgreVector3(p1) + lineDisplacement);
-        result->position(MWMechanics::PathFinder::MakeOgreVector3(p2) + lineDisplacement);
+                                osg::Vec3f(0, 0, 10); // move lines up a little, so they will be less covered by meshes/landscape
+
+        vertices->push_back(MWMechanics::PathFinder::MakeOsgVec3(p1) + lineDisplacement);
+        vertices->push_back(MWMechanics::PathFinder::MakeOsgVec3(p2) + lineDisplacement);
     }
-    result->end();
 
-    result->setVisibilityFlags (RV_Debug);
+    geom->setVertexArray(vertices);
 
-    return result;
+    geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINES, 0, vertices->size()));
+
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+    colors->push_back(osg::Vec4(1.f, 1.f, 0.f, 1.f));
+    geom->setColorArray(colors, osg::Array::BIND_OVERALL);
+
+    return geom;
 }
 
-ManualObject *Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
+osg::ref_ptr<osg::Geometry> Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 {
-    ManualObject *result = mSceneMgr->createManualObject();
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+
     const float height = POINT_MESH_BASE * sqrtf(2);
 
-    result->begin(PATHGRID_POINT_MATERIAL, RenderOperation::OT_TRIANGLE_STRIP);
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::UShortArray> indices = new osg::UShortArray;
 
     bool first = true;
-    uint32 startIndex = 0;
+    unsigned short startIndex = 0;
     for(ESM::Pathgrid::PointList::const_iterator it = pathgrid->mPoints.begin();
         it != pathgrid->mPoints.end();
         ++it, startIndex += 6)
     {
-        Vector3 pointPos(MWMechanics::PathFinder::MakeOgreVector3(*it));
+        osg::Vec3f pointPos(MWMechanics::PathFinder::MakeOsgVec3(*it));
 
         if (!first)
         {
             // degenerate triangle from previous octahedron
-            result->index(startIndex - 4); // 2nd point of previous octahedron
-            result->index(startIndex); // start point of current octahedron
+            indices->push_back(startIndex - 4); // 2nd point of previous octahedron
+            indices->push_back(startIndex); // start point of current octahedron
         }
 
-        Ogre::Real pointMeshBase = static_cast<Ogre::Real>(POINT_MESH_BASE);
+        float pointMeshBase = static_cast<float>(POINT_MESH_BASE);
 
-        result->position(pointPos + Vector3(0, 0, height)); // 0
-        result->position(pointPos + Vector3(-pointMeshBase, -pointMeshBase, 0)); // 1
-        result->position(pointPos + Vector3(pointMeshBase, -pointMeshBase, 0)); // 2
-        result->position(pointPos + Vector3(pointMeshBase, pointMeshBase, 0)); // 3
-        result->position(pointPos + Vector3(-pointMeshBase, pointMeshBase, 0)); // 4
-        result->position(pointPos + Vector3(0, 0, -height)); // 5
+        vertices->push_back(pointPos + osg::Vec3f(0, 0, height)); // 0
+        vertices->push_back(pointPos + osg::Vec3f(-pointMeshBase, -pointMeshBase, 0)); // 1
+        vertices->push_back(pointPos + osg::Vec3f(pointMeshBase, -pointMeshBase, 0)); // 2
+        vertices->push_back(pointPos + osg::Vec3f(pointMeshBase, pointMeshBase, 0)); // 3
+        vertices->push_back(pointPos + osg::Vec3f(-pointMeshBase, pointMeshBase, 0)); // 4
+        vertices->push_back(pointPos + osg::Vec3f(0, 0, -height)); // 5
 
-        result->index(startIndex + 0);
-        result->index(startIndex + 1);
-        result->index(startIndex + 2);
-        result->index(startIndex + 5);
-        result->index(startIndex + 3);
-        result->index(startIndex + 4);
+        indices->push_back(startIndex + 0);
+        indices->push_back(startIndex + 1);
+        indices->push_back(startIndex + 2);
+        indices->push_back(startIndex + 5);
+        indices->push_back(startIndex + 3);
+        indices->push_back(startIndex + 4);
         // degenerates
-        result->index(startIndex + 4);
-        result->index(startIndex + 5);
-        result->index(startIndex + 5);
+        indices->push_back(startIndex + 4);
+        indices->push_back(startIndex + 5);
+        indices->push_back(startIndex + 5);
         // end degenerates
-        result->index(startIndex + 1);
-        result->index(startIndex + 4);
-        result->index(startIndex + 0);
-        result->index(startIndex + 3);
-        result->index(startIndex + 2);
+        indices->push_back(startIndex + 1);
+        indices->push_back(startIndex + 4);
+        indices->push_back(startIndex + 0);
+        indices->push_back(startIndex + 3);
+        indices->push_back(startIndex + 2);
 
         first = false;
     }
 
-    result->end();
+    geom->setVertexArray(vertices);
 
-    result->setVisibilityFlags (RV_Debug);
+    geom->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, indices->size(), &(*indices)[0]));
 
-    return result;
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+    colors->push_back(osg::Vec4(1.f, 0.f, 0.f, 1.f));
+    geom->setColorArray(colors, osg::Array::BIND_OVERALL);
+
+    return geom;
 }
 
-Debugging::Debugging(SceneNode *root, OEngine::Physic::PhysicEngine *engine) :
-    mRootNode(root), mEngine(engine),
-    mSceneMgr(root->getCreator()),
-    mPathgridEnabled(false),
-    mInteriorPathgridNode(NULL), mPathGridRoot(NULL),
-    mGridMatsCreated(false)
+Debugging::Debugging(osg::ref_ptr<osg::Group> root /*, OEngine::Physic::PhysicEngine *engine*/)
+    : mRootNode(root)
+    , mPathgridEnabled(false)
+    , mInteriorPathgridNode(NULL)
+    , mPathGridRoot(NULL)
 {
-    ResourceGroupManager::getSingleton().createResourceGroup(DEBUGGING_GROUP);
 }
 
 Debugging::~Debugging()
@@ -170,34 +140,34 @@ Debugging::~Debugging()
     {
         togglePathgrid();
     }
-
-    ResourceGroupManager::getSingleton().destroyResourceGroup(DEBUGGING_GROUP);
 }
 
 
 bool Debugging::toggleRenderMode (int mode){
     switch (mode)
     {
-        case MWBase::World::Render_CollisionDebug:
+        //case Render_CollisionDebug:
 
-            return mEngine->toggleDebugRendering();
+            //return mEngine->toggleDebugRendering();
 
-        case MWBase::World::Render_Pathgrid:
+        case Render_Pathgrid:
             togglePathgrid();
             return mPathgridEnabled;
+        default:
+            return false;
     }
 
     return false;
 }
 
-void Debugging::cellAdded(MWWorld::CellStore *store)
+void Debugging::addCell(const MWWorld::CellStore *store)
 {
     mActiveCells.push_back(store);
     if (mPathgridEnabled)
         enableCellPathgrid(store);
 }
 
-void Debugging::cellRemoved(MWWorld::CellStore *store)
+void Debugging::removeCell(const MWWorld::CellStore *store)
 {
     mActiveCells.erase(std::remove(mActiveCells.begin(), mActiveCells.end(), store), mActiveCells.end());
     if (mPathgridEnabled)
@@ -209,10 +179,11 @@ void Debugging::togglePathgrid()
     mPathgridEnabled = !mPathgridEnabled;
     if (mPathgridEnabled)
     {
-        createGridMaterials();
-
         // add path grid meshes to already loaded cells
-        mPathGridRoot = mRootNode->createChildSceneNode();
+        mPathGridRoot = new osg::Group;
+        mPathGridRoot->setNodeMask(Mask_Debug);
+        mRootNode->addChild(mPathGridRoot);
+
         for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
         {
             enableCellPathgrid(*it);
@@ -225,29 +196,44 @@ void Debugging::togglePathgrid()
         {
             disableCellPathgrid(*it);
         }
-        mPathGridRoot->removeAndDestroyAllChildren();
-        mSceneMgr->destroySceneNode(mPathGridRoot);
-        mPathGridRoot = NULL;
-        destroyGridMaterials();
+
+        if (mPathGridRoot)
+        {
+            mRootNode->removeChild(mPathGridRoot);
+            mPathGridRoot = NULL;
+        }
     }
 }
 
-void Debugging::enableCellPathgrid(MWWorld::CellStore *store)
+void Debugging::enableCellPathgrid(const MWWorld::CellStore *store)
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
     const ESM::Pathgrid *pathgrid =
         world->getStore().get<ESM::Pathgrid>().search(*store->getCell());
     if (!pathgrid) return;
 
-    Vector3 cellPathGridPos(0, 0, 0);
+    osg::Vec3f cellPathGridPos(0, 0, 0);
     if (store->getCell()->isExterior())
     {
-        cellPathGridPos.x = static_cast<Ogre::Real>(store->getCell()->mData.mX * ESM::Land::REAL_SIZE);
-        cellPathGridPos.y = static_cast<Ogre::Real>(store->getCell()->mData.mY * ESM::Land::REAL_SIZE);
+        cellPathGridPos.x() = static_cast<float>(store->getCell()->mData.mX * ESM::Land::REAL_SIZE);
+        cellPathGridPos.y() = static_cast<float>(store->getCell()->mData.mY * ESM::Land::REAL_SIZE);
     }
-    SceneNode *cellPathGrid = mPathGridRoot->createChildSceneNode(cellPathGridPos);
-    cellPathGrid->attachObject(createPathgridLines(pathgrid));
-    cellPathGrid->attachObject(createPathgridPoints(pathgrid));
+
+    osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
+    cellPathGrid->setPosition(cellPathGridPos);
+
+    osg::ref_ptr<osg::Geode> lineGeode = new osg::Geode;
+    osg::ref_ptr<osg::Geometry> lines = createPathgridLines(pathgrid);
+    lineGeode->addDrawable(lines);
+
+    osg::ref_ptr<osg::Geode> pointGeode = new osg::Geode;
+    osg::ref_ptr<osg::Geometry> points = createPathgridPoints(pathgrid);
+    pointGeode->addDrawable(points);
+
+    cellPathGrid->addChild(lineGeode);
+    cellPathGrid->addChild(pointGeode);
+
+    mPathGridRoot->addChild(cellPathGrid);
 
     if (store->getCell()->isExterior())
     {
@@ -260,7 +246,7 @@ void Debugging::enableCellPathgrid(MWWorld::CellStore *store)
     }
 }
 
-void Debugging::disableCellPathgrid(MWWorld::CellStore *store)
+void Debugging::disableCellPathgrid(const MWWorld::CellStore *store)
 {
     if (store->getCell()->isExterior())
     {
@@ -268,7 +254,7 @@ void Debugging::disableCellPathgrid(MWWorld::CellStore *store)
                 mExteriorPathgridNodes.find(std::make_pair(store->getCell()->getGridX(), store->getCell()->getGridY()));
         if (it != mExteriorPathgridNodes.end())
         {
-            destroyCellPathgridNode(it->second);
+            mPathGridRoot->removeChild(it->second);
             mExteriorPathgridNodes.erase(it);
         }
     }
@@ -276,26 +262,9 @@ void Debugging::disableCellPathgrid(MWWorld::CellStore *store)
     {
         if (mInteriorPathgridNode)
         {
-            destroyCellPathgridNode(mInteriorPathgridNode);
+            mPathGridRoot->removeChild(mInteriorPathgridNode);
             mInteriorPathgridNode = NULL;
         }
-    }
-}
-
-void Debugging::destroyCellPathgridNode(SceneNode *node)
-{
-    mPathGridRoot->removeChild(node);
-    destroyAttachedObjects(node);
-    mSceneMgr->destroySceneNode(node);
-}
-
-void Debugging::destroyAttachedObjects(SceneNode *node)
-{
-    SceneNode::ObjectIterator objIt = node->getAttachedObjectIterator();
-    while (objIt.hasMoreElements())
-    {
-        MovableObject *mesh = static_cast<MovableObject *>(objIt.getNext());
-        mSceneMgr->destroyMovableObject(mesh);
     }
 }
 

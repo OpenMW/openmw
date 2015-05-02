@@ -21,10 +21,13 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include "../mwbase/world.hpp"
+
 #include "sky.hpp"
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
+#include "debugging.hpp"
 
 namespace MWRender
 {
@@ -87,6 +90,8 @@ namespace MWRender
         lightRoot->setStartLight(1);
 
         mRootNode->addChild(lightRoot);
+
+        mDebugging.reset(new Debugging(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
 
@@ -182,14 +187,39 @@ namespace MWRender
         return eye;
     }
 
+    void RenderingManager::addCell(const MWWorld::CellStore *store)
+    {
+        mDebugging->addCell(store);
+    }
+
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
+        mDebugging->removeCell(store);
         mObjects->removeCell(store);
     }
 
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+    }
+
+    bool RenderingManager::toggleRenderMode(RenderMode mode)
+    {
+        if (mode == Render_CollisionDebug || mode == Render_Pathgrid)
+            return mDebugging->toggleRenderMode(mode);
+        else if (mode == Render_Wireframe)
+        {
+            return false;
+        }
+        /*
+        else //if (mode == Render_BoundingBoxes)
+        {
+            bool show = !mRendering.getScene()->getShowBoundingBoxes();
+            mRendering.getScene()->showBoundingBoxes(show);
+            return show;
+        }
+        */
+        return false;
     }
 
     void RenderingManager::configureFog(const ESM::Cell *cell)

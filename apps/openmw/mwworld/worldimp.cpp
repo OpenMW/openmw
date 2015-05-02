@@ -1501,9 +1501,9 @@ namespace MWWorld
         return 0;//mPhysics->toggleCollisionMode();
     }
 
-    bool World::toggleRenderMode (RenderMode mode)
+    bool World::toggleRenderMode (MWRender::RenderMode mode)
     {
-        return 0;//mRendering->toggleRenderMode (mode);
+        return mRendering->toggleRenderMode (mode);
     }
 
     const ESM::Potion *World::createRecord (const ESM::Potion& record)

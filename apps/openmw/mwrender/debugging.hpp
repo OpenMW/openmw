@@ -7,6 +7,8 @@
 #include <string>
 #include <map>
 
+#include <osg/ref_ptr>
+
 namespace ESM
 {
     struct Pathgrid;
@@ -20,16 +22,10 @@ namespace OEngine
     }
 }
 
-namespace Ogre
+namespace osg
 {
-    class Camera;
-    class Viewport;
-    class SceneManager;
-    class SceneNode;
-    class RaySceneQuery;
-    class Quaternion;
-    class Vector3;
-    class ManualObject;
+    class Group;
+    class Geometry;
 }
 
 namespace MWWorld
@@ -42,47 +38,37 @@ namespace MWRender
 {
     class Debugging
     {
-        OEngine::Physic::PhysicEngine* mEngine;
-        Ogre::SceneManager *mSceneMgr;
+        //OEngine::Physic::PhysicEngine* mEngine;
 
         // Path grid stuff
         bool mPathgridEnabled;
 
         void togglePathgrid();
 
-        typedef std::vector<MWWorld::CellStore *> CellList;
+        typedef std::vector<const MWWorld::CellStore *> CellList;
         CellList mActiveCells;
 
-        Ogre::SceneNode *mRootNode;
+        osg::ref_ptr<osg::Group> mRootNode;
 
-        Ogre::SceneNode *mPathGridRoot;
+        osg::ref_ptr<osg::Group> mPathGridRoot;
 
-        typedef std::map<std::pair<int,int>, Ogre::SceneNode *> ExteriorPathgridNodes;
+        typedef std::map<std::pair<int,int>, osg::ref_ptr<osg::Group> > ExteriorPathgridNodes;
         ExteriorPathgridNodes mExteriorPathgridNodes;
-        Ogre::SceneNode *mInteriorPathgridNode;
+        osg::ref_ptr<osg::Group> mInteriorPathgridNode;
 
-        void enableCellPathgrid(MWWorld::CellStore *store);
-        void disableCellPathgrid(MWWorld::CellStore *store);
-
-        // utility
-        void destroyCellPathgridNode(Ogre::SceneNode *node);
-        void destroyAttachedObjects(Ogre::SceneNode *node);
-
-        // materials
-        bool mGridMatsCreated;
-        void createGridMaterials();
-        void destroyGridMaterials();
+        void enableCellPathgrid(const MWWorld::CellStore *store);
+        void disableCellPathgrid(const MWWorld::CellStore *store);
 
         // path grid meshes
-        Ogre::ManualObject *createPathgridLines(const ESM::Pathgrid *pathgrid);
-        Ogre::ManualObject *createPathgridPoints(const ESM::Pathgrid *pathgrid);
+        osg::ref_ptr<osg::Geometry> createPathgridLines(const ESM::Pathgrid *pathgrid);
+        osg::ref_ptr<osg::Geometry> createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
-        Debugging(Ogre::SceneNode* root, OEngine::Physic::PhysicEngine *engine);
+        Debugging(osg::ref_ptr<osg::Group> root /*, OEngine::Physic::PhysicEngine *engine*/);
         ~Debugging();
         bool toggleRenderMode (int mode);
 
-        void cellAdded(MWWorld::CellStore* store);
-        void cellRemoved(MWWorld::CellStore* store);
+        void addCell(const MWWorld::CellStore* store);
+        void removeCell(const MWWorld::CellStore* store);
     };
 
 

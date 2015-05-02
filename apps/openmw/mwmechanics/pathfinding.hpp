@@ -88,6 +88,11 @@ namespace MWMechanics
                 return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
             }
 
+            static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
+            {
+                return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
+            }
+
             /// utility function to convert a Pathgrid::Point to a Ogre::Vector3
             static Ogre::Vector3 MakeOgreVector3(const ESM::Pathgrid::Point& p)
             {

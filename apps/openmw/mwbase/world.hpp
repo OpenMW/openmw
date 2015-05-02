@@ -9,6 +9,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "../mwrender/rendermode.hpp"
+
 namespace Ogre
 {
     class Vector2;
@@ -82,14 +84,6 @@ namespace MWBase
             ///< not implemented
 
         public:
-
-            enum RenderMode
-            {
-                Render_CollisionDebug,
-                Render_Wireframe,
-                Render_Pathgrid,
-                Render_BoundingBoxes
-            };
 
             struct DoorMarker
             {
@@ -320,7 +314,7 @@ namespace MWBase
             /// collisions and gravity.
             /// \return Resulting mode
 
-            virtual bool toggleRenderMode (RenderMode mode) = 0;
+            virtual bool toggleRenderMode (MWRender::RenderMode mode) = 0;
             ///< Toggle a render mode.
             ///< \return Resulting mode
 

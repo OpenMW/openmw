@@ -396,7 +396,7 @@ namespace MWWorld
             /// collisions and gravity.
             ///< \return Resulting mode
 
-            virtual bool toggleRenderMode (RenderMode mode);
+            virtual bool toggleRenderMode (MWRender::RenderMode mode);
             ///< Toggle a render mode.
             ///< \return Resulting mode
 

@@ -17,7 +17,6 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
-#include "renderconst.hpp"
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
