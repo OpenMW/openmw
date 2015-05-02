@@ -12,10 +12,6 @@
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/misc/stringops.hpp>
 
-#include "BtOgrePG.h"
-#include "BtOgreGP.h"
-#include "BtOgreExtras.h"
-
 namespace
 {
 
@@ -90,7 +86,7 @@ namespace Physic
             mMeshOrientation = Ogre::Quaternion::IDENTITY;
         }
         */
-
+        /*
         // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
         if (std::abs(mHalfExtents.x-mHalfExtents.y)<mHalfExtents.x*0.05 && mHalfExtents.z >= mHalfExtents.x)
         {
@@ -99,6 +95,7 @@ namespace Physic
         }
         else
             mShape.reset(new btBoxShape(BtOgre::Convert::toBullet(mHalfExtents)));
+        */
 
         mShape->setLocalScaling(btVector3(scale,scale,scale));
 
@@ -160,20 +157,20 @@ namespace Physic
 
         mPosition = position;
 
-        btTransform tr = mBody->getWorldTransform();
-        Ogre::Quaternion meshrot = mMeshOrientation;
-        Ogre::Vector3 transrot = meshrot * (mMeshTranslation * mScale);
-        Ogre::Vector3 newPosition = transrot + position;
+        //btTransform tr = mBody->getWorldTransform();
+        //Ogre::Quaternion meshrot = mMeshOrientation;
+        //Ogre::Vector3 transrot = meshrot * (mMeshTranslation * mScale);
+        //Ogre::Vector3 newPosition = transrot + position;
 
-        tr.setOrigin(BtOgre::Convert::toBullet(newPosition));
-        mBody->setWorldTransform(tr);
+        //tr.setOrigin(BtOgre::Convert::toBullet(newPosition));
+        //mBody->setWorldTransform(tr);
     }
 
     void PhysicActor::setRotation (const Ogre::Quaternion& rotation)
     {
-        btTransform tr = mBody->getWorldTransform();
-        tr.setRotation(BtOgre::Convert::toBullet(mMeshOrientation * rotation));
-        mBody->setWorldTransform(tr);
+        //btTransform tr = mBody->getWorldTransform();
+        //tr.setRotation(BtOgre::Convert::toBullet(mMeshOrientation * rotation));
+        //mBody->setWorldTransform(tr);
     }
 
     void PhysicActor::setScale(float scale)

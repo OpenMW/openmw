@@ -1,8 +1,4 @@
 set(OENGINE_BULLET
-    bullet/BtOgre.cpp
-    bullet/BtOgreExtras.h
-    bullet/BtOgreGP.h
-    bullet/BtOgrePG.h
     bullet/physic.cpp
     bullet/physic.hpp
     bullet/BulletShapeLoader.cpp
