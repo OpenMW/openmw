@@ -37,8 +37,14 @@ namespace Resource
     TextureManager::TextureManager(const VFS::Manager *vfs)
         : mVFS(vfs)
         , mWarningTexture(createWarningTexture())
+        , mUnRefImageDataAfterApply(false)
     {
 
+    }
+
+    void TextureManager::setUnRefImageDataAfterApply(bool unref)
+    {
+        mUnRefImageDataAfterApply = unref;
     }
 
     /*
@@ -91,8 +97,7 @@ namespace Resource
             texture->setWrap(osg::Texture::WRAP_S, wrapS);
             texture->setWrap(osg::Texture::WRAP_T, wrapT);
 
-            // Can be enabled for single-context, i.e. in openmw
-            //texture->setUnRefImageDataAfterApply(true);
+            texture->setUnRefImageDataAfterApply(mUnRefImageDataAfterApply);
 
             mTextures.insert(std::make_pair(key, texture));
             return texture;

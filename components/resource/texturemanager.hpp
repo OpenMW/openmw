@@ -24,6 +24,10 @@ namespace Resource
 
         // TODO: texture filtering settings
 
+        /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
+        /// otherwise should be disabled to reduce memory usage.
+        void setUnRefImageDataAfterApply(bool unref);
+
         /// Create or retrieve a Texture2D using the specified image filename, and wrap parameters.
         osg::ref_ptr<osg::Texture2D> getTexture2D(const std::string& filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT);
 
@@ -43,6 +47,7 @@ namespace Resource
 
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
 
+        bool mUnRefImageDataAfterApply;
     };
 
 }

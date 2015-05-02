@@ -17,6 +17,7 @@
 #include <components/vfs/registerarchives.hpp>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/texturemanager.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -307,6 +308,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+    mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
