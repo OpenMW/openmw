@@ -503,14 +503,14 @@ namespace MWWorld
     {
         // Create physics. shapeLoader is deleted by the physic engine
         //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-        //mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
+        mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-        //if (mWaterCollisionObject.get())
-        //    mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
-        //delete mEngine;
+        if (mWaterCollisionObject.get())
+            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+        delete mEngine;
         //delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
     }
 

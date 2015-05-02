@@ -262,10 +262,6 @@ namespace Physic
 
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
 
-        if(BulletShapeManager::getSingletonPtr() == NULL)
-        {
-            new BulletShapeManager();
-        }
         mShapeLoader = shapeLoader;
 
         isDebugCreated = false;
@@ -761,77 +757,6 @@ namespace Physic
             return std::make_pair(true, callback.m_closestHitFraction);
         else
             return std::make_pair(false, 1.0f);
-    }
-
-    int PhysicEngine::toggleDebugRendering(Ogre::SceneManager *sceneMgr)
-    {
-        if(!sceneMgr)
-            return 0;
-
-        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
-            mDebugDrawers.find(sceneMgr);
-        if(iter != mDebugDrawers.end()) // found scene manager
-        {
-            if((*iter).second)
-            {
-                // set a new drawer each time (maybe with a different scene manager)
-                mDynamicsWorld->setDebugDrawer(mDebugDrawers[sceneMgr]);
-                if(!mDebugDrawers[sceneMgr]->getDebugMode())
-                    mDebugDrawers[sceneMgr]->setDebugMode(1 /*mDebugDrawFlags*/);
-                else
-                    mDebugDrawers[sceneMgr]->setDebugMode(0);
-                mDynamicsWorld->debugDrawWorld();
-
-                return mDebugDrawers[sceneMgr]->getDebugMode();
-            }
-        }
-        return 0;
-    }
-
-    void PhysicEngine::stepDebug(Ogre::SceneManager *sceneMgr)
-    {
-        if(!sceneMgr)
-            return;
-
-        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
-            mDebugDrawers.find(sceneMgr);
-        if(iter != mDebugDrawers.end()) // found scene manager
-        {
-            if((*iter).second)
-                (*iter).second->step();
-            else
-                return;
-        }
-    }
-
-    void PhysicEngine::createDebugDraw(Ogre::SceneManager *sceneMgr)
-    {
-        if(mDebugDrawers.find(sceneMgr) == mDebugDrawers.end())
-        {
-            mDebugSceneNodes[sceneMgr] = sceneMgr->getRootSceneNode()->createChildSceneNode();
-            mDebugDrawers[sceneMgr] = new BtOgre::DebugDrawer(mDebugSceneNodes[sceneMgr], mDynamicsWorld);
-            mDebugDrawers[sceneMgr]->setDebugMode(0);
-        }
-    }
-
-    void PhysicEngine::removeDebugDraw(Ogre::SceneManager *sceneMgr)
-    {
-        std::map<Ogre::SceneManager *, BtOgre::DebugDrawer *>::iterator iter =
-            mDebugDrawers.find(sceneMgr);
-        if(iter != mDebugDrawers.end())
-        {
-            delete (*iter).second;
-            mDebugDrawers.erase(iter);
-        }
-
-        std::map<Ogre::SceneManager *, Ogre::SceneNode *>::iterator it =
-            mDebugSceneNodes.find(sceneMgr);
-        if(it != mDebugSceneNodes.end())
-        {
-            std::string sceneNodeName = (*it).second->getName();
-            if(sceneMgr->hasSceneNode(sceneNodeName))
-                sceneMgr->destroySceneNode(sceneNodeName);
-        }
     }
 
 }
