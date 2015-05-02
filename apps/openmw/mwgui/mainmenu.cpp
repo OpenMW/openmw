@@ -10,6 +10,7 @@
 
 #include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -29,8 +30,9 @@
 namespace MWGui
 {
 
-    MainMenu::MainMenu(int w, int h)
+    MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs)
         : Layout("openmw_mainmenu.layout")
+        , mVFS(vfs)
         , mButtonBox(0), mWidth (w), mHeight (h)
         , mSaveGameDialog(NULL)
         , mBackground(NULL)
@@ -53,7 +55,7 @@ namespace MWGui
         std::string output = sstream.str();
         mVersionText->setCaption(output);
 
-        mHasAnimatedMenu = 0;//(Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
+        mHasAnimatedMenu = mVFS->exists("video/menu_background.bik");
 
         updateMenu();
     }
@@ -174,6 +176,7 @@ namespace MWGui
 
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
+                mVideo->setVFS(mVFS);
 
                 mVideo->playVideo("video\\menu_background.bik");
             }

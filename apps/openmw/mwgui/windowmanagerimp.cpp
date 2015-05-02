@@ -259,7 +259,7 @@ namespace MWGui
         mDragAndDrop = new DragAndDrop();
 
         mRecharge = new Recharge();
-        mMenu = new MainMenu(w,h);
+        mMenu = new MainMenu(w, h, mResourceSystem->getVFS());
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, "");
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);

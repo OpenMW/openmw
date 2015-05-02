@@ -8,6 +8,11 @@ namespace Gui
     class ImageButton;
 }
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace MWGui
 {
 
@@ -24,7 +29,7 @@ namespace MWGui
 
         public:
 
-            MainMenu(int w, int h);
+            MainMenu(int w, int h, const VFS::Manager* vfs);
             ~MainMenu();
 
             void onResChange(int w, int h);
@@ -34,6 +39,7 @@ namespace MWGui
             void update(float dt);
 
         private:
+            const VFS::Manager* mVFS;
 
             MyGUI::Widget* mButtonBox;
             MyGUI::TextBox* mVersionText;
