@@ -1,16 +1,20 @@
 #ifndef MWGUI_LOADINGSCREEN_H
 #define MWGUI_LOADINGSCREEN_H
 
-#include <OgreTimer.h>
-#include <OgreStringVector.h>
+#include <osg/Timer>
+#include <osg/ref_ptr>
 
 #include "windowbase.hpp"
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
-namespace Ogre
+namespace osgViewer
 {
-    class SceneManager;
+    class Viewer;
+}
+namespace VFS
+{
+    class Manager;
 }
 
 namespace MWGui
@@ -20,6 +24,9 @@ namespace MWGui
     class LoadingScreen : public WindowBase, public Loading::Listener
     {
     public:
+        LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer);
+        virtual ~LoadingScreen();
+
         virtual void setLabel (const std::string& label);
 
         /// Indicate that some progress has been made, without specifying how much
@@ -34,21 +41,18 @@ namespace MWGui
 
         virtual void setVisible(bool visible);
 
-        LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw);
-        virtual ~LoadingScreen();
-
         void setLoadingProgress (const std::string& stage, int depth, int current, int total);
         void loadingDone();
 
-        void updateWindow(Ogre::RenderWindow* rw) { mWindow = rw; }
-
     private:
-        Ogre::SceneManager* mSceneMgr;
-        Ogre::RenderWindow* mWindow;
+        void findSplashScreens();
+
+        const VFS::Manager* mVFS;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
 
         unsigned long mLastWallpaperChangeTime;
         unsigned long mLastRenderTime;
-        Ogre::Timer mTimer;
+        osg::Timer mTimer;
 
         size_t mProgress;
 
@@ -58,7 +62,7 @@ namespace MWGui
         MyGUI::ScrollBar* mProgressBar;
         BackgroundImage* mBackgroundImage;
 
-        Ogre::StringVector mResources;
+        std::vector<std::string> mSplashScreens;
 
         bool mVSyncWasEnabled;
 

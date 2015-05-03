@@ -1,14 +1,6 @@
 #include "loadingscreen.hpp"
 
-#include <OgreRenderWindow.h>
-#include <OgreMaterialManager.h>
-#include <OgreTechnique.h>
-#include <OgreRectangle2D.h>
-#include <OgreSceneNode.h>
-#include <OgreTextureManager.h>
-#include <OgreViewport.h>
-#include <OgreHardwarePixelBuffer.h>
-#include <OgreSceneManager.h>
+#include <osgViewer/Viewer>
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
@@ -18,6 +10,7 @@
 #include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -26,15 +19,17 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 
+#include "../mwrender/vismask.hpp"
+
 #include "backgroundimage.hpp"
 
 namespace MWGui
 {
 
-    LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw)
-        : mSceneMgr(sceneMgr)
-        , mWindow(rw)
-        , WindowBase("openmw_loading_screen.layout")
+    LoadingScreen::LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer)
+        : WindowBase("openmw_loading_screen.layout")
+        , mVFS(vfs)
+        , mViewer(viewer)
         , mLastRenderTime(0)
         , mLastWallpaperChangeTime(0)
         , mProgress(0)
@@ -52,6 +47,32 @@ namespace MWGui
             MyGUI::Align::Stretch, "Menu");
 
         setVisible(false);
+
+        findSplashScreens();
+    }
+
+    void LoadingScreen::findSplashScreens()
+    {
+        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+        std::string pattern = "Splash/";
+        mVFS->normalizeFilename(pattern);
+
+        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+        while (found != index.end())
+        {
+            const std::string& name = found->first;
+            if (name.size() >= pattern.size() && name.substr(0, pattern.size()) == pattern)
+            {
+                size_t pos = name.find_last_of('.');
+                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".tga") == 0)
+                    mSplashScreens.push_back(found->first);
+            }
+            else
+                break;
+            ++found;
+        }
+        if (mSplashScreens.empty())
+            std::cerr << "No splash screens found!" << std::endl;
     }
 
     void LoadingScreen::setLabel(const std::string &label)
@@ -80,17 +101,13 @@ namespace MWGui
         if (mMainWidget->getVisible())
             return;
 
-        // Temporarily turn off VSync, we want to do actual loading rather than waiting for the screen to sync.
-        // Threaded loading would be even better, of course - especially because some drivers force VSync to on and we can't change it.
-        mVSyncWasEnabled = mWindow->isVSyncEnabled();
-        mWindow->setVSyncEnabled(false);
-
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
 
-
         if (!showWallpaper)
         {
+            // TODO
+            /*
             mBackgroundImage->setImageTexture("");
             int width = mWindow->getWidth();
             int height = mWindow->getHeight();
@@ -111,6 +128,7 @@ namespace MWGui
             mWindow->copyContentsToMemory(texture->getBuffer()->lock(Ogre::Image::Box(0,0,width,height), Ogre::HardwareBuffer::HBL_DISCARD));
             texture->getBuffer()->unlock();
             mBackgroundImage->setBackgroundImage(texture->getName(), false, false);
+            */
         }
 
         setVisible(true);
@@ -125,9 +143,6 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
-        // Re-enable vsync now.
-        mWindow->setVSyncEnabled(mVSyncWasEnabled);
-
         setVisible(false);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
@@ -136,29 +151,15 @@ namespace MWGui
 
     void LoadingScreen::changeWallpaper ()
     {
-        if (mResources.empty())
+        if (!mSplashScreens.empty())
         {
-            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
-            {
-                Ogre::StringVectorPtr resourcesInThisGroup = Ogre::ResourceGroupManager::getSingleton ().findResourceNames (*it, "Splash/*.tga");
-                mResources.insert(mResources.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
-            }
-        }
-
-        if (!mResources.empty())
-        {
-            std::string const & randomSplash = mResources.at(Misc::Rng::rollDice(mResources.size()));
-
-            Ogre::TextureManager::getSingleton ().load (randomSplash, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+            std::string const & randomSplash = mSplashScreens.at(Misc::Rng::rollDice(mSplashScreens.size()));
 
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed as 4:3
             bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
             mBackgroundImage->setBackgroundImage(randomSplash, true, stretch);
         }
-        else
-            std::cerr << "No loading screens found!" << std::endl;
     }
 
     void LoadingScreen::setProgressRange (size_t range)
@@ -190,7 +191,7 @@ namespace MWGui
 
     void LoadingScreen::indicateProgress()
     {
-        float time = (mTimer.getMilliseconds() % 2001) / 1000.f;
+        float time = (static_cast<int>(mTimer.time_m()) % 2001) / 1000.f;
         if (time > 1)
             time = (time-2)*-1;
 
@@ -203,43 +204,32 @@ namespace MWGui
     {
         const float loadingScreenFps = 20.f;
 
-        if (mTimer.getMilliseconds () > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
+        if (mTimer.time_m() > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
         {
-            mLastRenderTime = mTimer.getMilliseconds ();
+            mLastRenderTime = mTimer.time_m();
 
             bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                     == MWBase::StateManager::State_NoGame);
 
-            if (showWallpaper && mTimer.getMilliseconds () > mLastWallpaperChangeTime + 5000*1)
+            if (showWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
             {
-                mLastWallpaperChangeTime = mTimer.getMilliseconds ();
+                mLastWallpaperChangeTime = mTimer.time_m();
                 changeWallpaper();
             }
 
             // Turn off rendering except the GUI
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            // SCRQM_INCLUDE with RENDER_QUEUE_OVERLAY does not work.
-            for (int i = 0; i < Ogre::RENDER_QUEUE_MAX; ++i)
-            {
-                if (i > 0 && i < 96)
-                    mSceneMgr->addSpecialCaseRenderQueue(i);
-            }
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+            int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
+            int oldCullMask = mViewer->getCamera()->getCullMask();
+            mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
+            mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
-            MWBase::Environment::get().getInputManager()->update(0, true, true);
+            //MWBase::Environment::get().getInputManager()->update(0, true, true);
 
-            // First, swap buffers from last draw, then, queue an update of the
-            // window contents, but don't swap buffers (which would have
-            // caused a sync / flush and would be expensive).
-            // We're doing this so we can do some actual loading while the GPU is busy with the render.
-            // This means the render is lagging a frame behind, but this is hardly noticable.
-            mWindow->swapBuffers();
-
-            mWindow->update(false);
+            mViewer->frame();
 
             // resume 3d rendering
-            mSceneMgr->clearSpecialCaseRenderQueues();
-            mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+            mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
+            mViewer->getCamera()->setCullMask(oldCullMask);
         }
     }
 }
