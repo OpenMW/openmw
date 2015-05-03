@@ -92,6 +92,15 @@ namespace Resource
             }
 
             osg::Image* image = result.getImage();
+
+            // We need to flip images, because the Morrowind texture coordinates use the DirectX convention (top-left image origin),
+            // but OpenGL uses bottom left as the image origin.
+            // For some reason this doesn't concern DDS textures, which are already flipped when loaded.
+            if (ext != "dds")
+            {
+                image->flipVertical();
+            }
+
             osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D);
             texture->setImage(image);
             texture->setWrap(osg::Texture::WRAP_S, wrapS);
