@@ -28,7 +28,7 @@
 
 #include <components/esm/loadcell.hpp>
 
-//#include "mwinput/inputmanagerimp.hpp"
+#include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
 
@@ -79,7 +79,7 @@ void OMW::Engine::frame(float frametime)
         mEnvironment.setFrameDuration (frametime);
 
         // update input
-        //MWBase::Environment::get().getInputManager()->update(frametime, false);
+        MWBase::Environment::get().getInputManager()->update(frametime, false);
 
         // When the window is minimized, pause everything. Currently this *has* to be here to work around a MyGUI bug.
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures.
@@ -335,8 +335,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    //MWInput::InputManager* input = new MWInput::InputManager (*mOgre, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
-    //mEnvironment.setInputManager (input);
+    // FIXME: shouldn't depend on Engine
+    MWInput::InputManager* input = new MWInput::InputManager (*this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
@@ -354,7 +355,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     {
         std::string logo = mFallbackMap["Movies_Company_Logo"];
         if (!logo.empty())
-            window->playVideo(logo, 1);
+            window->playVideo(logo, true);
     }
 
     // Create the world
@@ -362,7 +363,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mFileCollections, mContentFiles, mEncoder, mFallbackMap,
         mActivationDistanceOverride, mCellName, mStartupScript));
     MWBase::Environment::get().getWorld()->setupPlayer();
-    //input->setPlayer(&mEnvironment.getWorld()->getPlayer());
+    input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->initUI();
     window->renderWorldMap();

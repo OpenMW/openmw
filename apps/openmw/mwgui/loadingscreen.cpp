@@ -221,7 +221,7 @@ namespace MWGui
             mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
             mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
-            //MWBase::Environment::get().getInputManager()->update(0, true, true);
+            MWBase::Environment::get().getInputManager()->update(0, true, true);
 
             mViewer->frame();
 

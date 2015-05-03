@@ -23,15 +23,15 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface debugging rendermode
     bulletdebugdraw
-#    camera activatoranimation
+#    camera
 #    localmap occlusionquery water shadows
 #    characterpreview globalmap ripplesimulation refraction
-#    terrainstorage renderconst weaponanimation
+#    terrainstorage weaponanimation
     )
 
-#add_openmw_dir (mwinput
-#    inputmanagerimp
-#    )
+add_openmw_dir (mwinput
+    inputmanagerimp
+    )
 
 add_openmw_dir (mwgui
     layout textinput widgets race class birth review windowmanagerimp console dialogue

@@ -66,7 +66,7 @@ namespace MWInput
             public ICS::DetectingBindingListener
     {
     public:
-        InputManager(OEngine::Render::OgreRenderer &_ogre,
+        InputManager(
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab);
@@ -143,7 +143,6 @@ namespace MWInput
 
     private:
         bool mJoystickLastUsed;
-        OEngine::Render::OgreRenderer &mOgre;
         MWWorld::Player* mPlayer;
         OMW::Engine& mEngine;
 

@@ -270,7 +270,6 @@ namespace MWScript
 
     std::string InterpreterContext::getActionBinding(const std::string& action) const
     {
-        /*
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         std::vector<int> actions = input->getActionKeySorting ();
         for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
@@ -287,7 +286,6 @@ namespace MWScript
                     return input->getActionKeyBindingName (*it);
             }
         }
-        */
 
         return "None";
     }

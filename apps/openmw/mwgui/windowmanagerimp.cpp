@@ -334,7 +334,7 @@ namespace MWGui
         // Set up visibility
         updateVisible();
 
-        //MWBase::Environment::get().getInputManager()->changeInputMode(false);
+        MWBase::Environment::get().getInputManager()->changeInputMode(false);
     }
 
     void WindowManager::renderWorldMap()
@@ -834,7 +834,7 @@ namespace MWGui
                 mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-                //mRendering->getWindow()->update();
+                mViewer->frame();
             }
         }
     }
@@ -1132,8 +1132,8 @@ namespace MWGui
 
         mGuiModes.push_back(mode);
 
-        //bool gameMode = !isGuiMode();
-        //MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+        bool gameMode = !isGuiMode();
+        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
     }
@@ -1173,8 +1173,8 @@ namespace MWGui
         if (!mGuiModes.empty())
             mGuiModes.pop_back();
 
-        //bool gameMode = !isGuiMode();
-        //MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+        bool gameMode = !isGuiMode();
+        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
     }
@@ -1190,8 +1190,8 @@ namespace MWGui
                 ++it;
         }
 
-        //bool gameMode = !isGuiMode();
-        //MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
+        bool gameMode = !isGuiMode();
+        MWBase::Environment::get().getInputManager()->changeInputMode(!gameMode);
 
         updateVisible();
     }
@@ -1705,7 +1705,7 @@ namespace MWGui
 
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            //MWBase::Environment::get().getInputManager()->update(0, true, false);
+            MWBase::Environment::get().getInputManager()->update(0, true, false);
 
             mViewer->frame();
         }
