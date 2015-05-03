@@ -30,8 +30,8 @@ namespace MWGui
         : WindowBase("openmw_loading_screen.layout")
         , mVFS(vfs)
         , mViewer(viewer)
-        , mLastRenderTime(0)
-        , mLastWallpaperChangeTime(0)
+        , mLastRenderTime(0.0)
+        , mLastWallpaperChangeTime(0.0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -202,12 +202,10 @@ namespace MWGui
 
     void LoadingScreen::draw()
     {
-        const float loadingScreenFps = 20.f;
+        const float loadingScreenFps = 120.f;
 
         if (mTimer.time_m() > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
         {
-            mLastRenderTime = mTimer.time_m();
-
             bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                     == MWBase::StateManager::State_NoGame);
 
@@ -230,6 +228,8 @@ namespace MWGui
             // resume 3d rendering
             mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
             mViewer->getCamera()->setCullMask(oldCullMask);
+
+            mLastRenderTime = mTimer.time_m();
         }
     }
 }

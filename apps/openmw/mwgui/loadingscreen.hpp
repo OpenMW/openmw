@@ -50,8 +50,8 @@ namespace MWGui
         const VFS::Manager* mVFS;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
-        unsigned long mLastWallpaperChangeTime;
-        unsigned long mLastRenderTime;
+        double mLastWallpaperChangeTime;
+        double mLastRenderTime;
         osg::Timer mTimer;
 
         size_t mProgress;
