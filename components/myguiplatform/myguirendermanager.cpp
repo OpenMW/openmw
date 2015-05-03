@@ -97,9 +97,7 @@ namespace osgMyGUI
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
 {
     osg::ref_ptr<osg::VertexBufferObject> mBuffer;
-    osg::ref_ptr<osg::Vec3Array> mPositionArray;
-    osg::ref_ptr<osg::Vec4ubArray> mColorArray;
-    osg::ref_ptr<osg::Vec2Array> mTexCoordArray;
+    osg::ref_ptr<osg::UByteArray> mVertexArray;
     std::vector<MyGUI::Vertex> mLockedData;
 
     size_t mNeedVertexCount;
@@ -150,71 +148,32 @@ MyGUI::Vertex *OSGVertexBuffer::lock()
 {
     MYGUI_PLATFORM_ASSERT(mBuffer.valid(), "Vertex buffer is not created");
 
-    // NOTE: Unfortunately, MyGUI wants the VBO data to be interleaved as a
-    // MyGUI::Vertex structure. However, OSG uses non-interleaved elements, so
-    // we have to give back a "temporary" structure array then copy it to the
-    // actual VBO arrays on unlock. This is extra unfortunate since the VBO may
-    // be backed by VRAM, meaning we could have up to 3 copies of the data
-    // (which we'll need to keep for VBOs that are continually updated).
-    mLockedData.resize(mNeedVertexCount, MyGUI::Vertex());
-    return mLockedData.data();
+    mVertexArray->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
+    return (MyGUI::Vertex*)&(*mVertexArray)[0];
 }
 
 void OSGVertexBuffer::unlock()
 {
-    osg::Vec3 *vec = &mPositionArray->front();
-    for (std::vector<MyGUI::Vertex>::const_iterator it = mLockedData.begin(); it != mLockedData.end(); ++it)
-    {
-        const MyGUI::Vertex& elem = *it;
-        vec->set(elem.x, elem.y, elem.z);
-        ++vec;
-    }
-    osg::Vec4ub *clr = &mColorArray->front();
-    for (std::vector<MyGUI::Vertex>::const_iterator it = mLockedData.begin(); it != mLockedData.end(); ++it)
-    {
-        const MyGUI::Vertex& elem = *it;
-        union {
-            MyGUI::uint32 ui;
-            unsigned char ub4[4];
-        } val = { elem.colour };
-        clr->set(val.ub4[0], val.ub4[1], val.ub4[2], val.ub4[3]);
-        ++clr;
-    }
-    osg::Vec2 *crds = &mTexCoordArray->front();
-    for (std::vector<MyGUI::Vertex>::const_iterator it = mLockedData.begin(); it != mLockedData.end(); ++it)
-    {
-        const MyGUI::Vertex& elem = *it;
-        crds->set(elem.u, elem.v);
-        ++crds;
-    }
-
+    mVertexArray->dirty();
     mBuffer->dirty();
 }
 
 void OSGVertexBuffer::destroy()
 {
     mBuffer = nullptr;
-    mPositionArray = nullptr;
-    mColorArray = nullptr;
-    mTexCoordArray = nullptr;
-    std::vector<MyGUI::Vertex>().swap(mLockedData);
+    mVertexArray = nullptr;
 }
 
 void OSGVertexBuffer::create()
 {
     MYGUI_PLATFORM_ASSERT(!mBuffer.valid(), "Vertex buffer already exist");
 
-    mPositionArray = new osg::Vec3Array(mNeedVertexCount);
-    mColorArray = new osg::Vec4ubArray(mNeedVertexCount);
-    mTexCoordArray = new osg::Vec2Array(mNeedVertexCount);
-    mColorArray->setNormalize(true);
+    mVertexArray = new osg::UByteArray(mNeedVertexCount*sizeof(MyGUI::Vertex));
 
     mBuffer = new osg::VertexBufferObject;
     mBuffer->setDataVariance(osg::Object::DYNAMIC);
-    mBuffer->setUsage(GL_STREAM_DRAW);
-    mBuffer->setArray(0, mPositionArray.get());
-    mBuffer->setArray(1, mColorArray.get());
-    mBuffer->setArray(2, mTexCoordArray.get());
+    mBuffer->setUsage(GL_DYNAMIC_DRAW);
+    mBuffer->setArray(0, mVertexArray.get());
 }
 
 // ---------------------------------------------------------------------------
@@ -270,19 +229,10 @@ void RenderManager::initialise()
     camera->setRenderOrder(osg::Camera::POST_RENDER);
     camera->setClearMask(GL_NONE);
     osg::StateSet *state = new osg::StateSet;
-    state->setTextureMode(0, GL_TEXTURE_GEN_S, osg::StateAttribute::OFF);
-    state->setTextureMode(0, GL_TEXTURE_GEN_T, osg::StateAttribute::OFF);
-    state->setTextureMode(0, GL_TEXTURE_GEN_R, osg::StateAttribute::OFF);
     state->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
     state->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    state->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    state->setMode(GL_LIGHT0, osg::StateAttribute::OFF);
     state->setMode(GL_BLEND, osg::StateAttribute::ON);
-    state->setMode(GL_FOG, osg::StateAttribute::OFF);
-    state->setTextureAttribute(0, new osg::TexEnv(osg::TexEnv::MODULATE));
-    state->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT, osg::PolygonMode::FILL));
     state->setAttribute(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    state->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
     geode->setStateSet(state);
     geode->setCullingActive(false);
     camera->addChild(geode.get());
@@ -317,6 +267,10 @@ void RenderManager::begin()
 {
     osg::State *state = mRenderInfo->getState();
     state->disableAllVertexArrays();
+    state->setClientActiveTextureUnit(0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
 }
 
 void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count)
@@ -332,9 +286,21 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
         state->applyTextureAttribute(0, tex);
     }
 
-    state->setVertexPointer(vbo->getArray(0));
-    state->setColorPointer(vbo->getArray(1));
-    state->setTexCoordPointer(0, vbo->getArray(2));
+    osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+    if (bufferobject)
+    {
+        state->bindVertexBufferObject(bufferobject);
+
+        glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
+        glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
+        glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+    }
+    else
+    {
+        glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
+        glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
+        glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
+    }
 
     glDrawArrays(GL_TRIANGLES, 0, count);
 }
@@ -342,10 +308,9 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
 void RenderManager::end()
 {
     osg::State *state = mRenderInfo->getState();
-    state->disableTexCoordPointer(0);
-    state->disableColorPointer();
-    state->disableVertexPointer();
     state->unbindVertexBufferObject();
+    state->dirtyAllVertexArrays();
+    state->disableAllVertexArrays();
 }
 
 void RenderManager::drawFrame(osg::RenderInfo &renderInfo)
