@@ -30,6 +30,8 @@
 
 #include <components/myguiplatform/myguiplatform.hpp>
 
+#include <components/vfs/manager.hpp>
+
 #include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
 
@@ -180,8 +182,8 @@ namespace MWGui
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager());
         mGuiPlatform->initialise(resourcePath, logpath);
 
-        MyGUI::Gui* gui = new MyGUI::Gui;
-        gui->initialise("");
+        mGui = new MyGUI::Gui;
+        mGui->initialise("");
 
         createTextures();
 
@@ -307,8 +309,8 @@ namespace MWGui
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         // TODO: check if non-BM versions actually use player_hit_01.dds
-        //if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(hitFaderTexture))
-        //    hitFaderTexture = "textures\\player_hit_01.dds";
+        if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
+            hitFaderTexture = "textures\\player_hit_01.dds";
         mHitFader = new ScreenFader(hitFaderTexture);
         mScreenFader = new ScreenFader("black.png");
 
@@ -421,6 +423,7 @@ namespace MWGui
 
         mFontLoader.reset();
 
+        delete mGui;
         delete mGuiPlatform;
     }
 

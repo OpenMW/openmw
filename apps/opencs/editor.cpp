@@ -311,11 +311,6 @@ int CS::Editor::run()
     return QApplication::exec();
 }
 
-    // for font used in overlays
-    //Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
-    //        "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-
-
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
     mViewManager.addView (document);

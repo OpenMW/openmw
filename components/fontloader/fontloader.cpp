@@ -438,7 +438,16 @@ namespace Gui
 
         font->deserialization(root, MyGUI::Version(3,2,0));
 
-        MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
+        for (std::vector<MyGUI::ResourceManualFont*>::iterator it = mFonts.begin(); it != mFonts.end();)
+        {
+            if ((*it)->getResourceName() == font->getResourceName())
+            {
+                MyGUI::ResourceManager::getInstance().removeByName(font->getResourceName());
+                it = mFonts.erase(it);
+            }
+            else
+                ++it;
+        }
         MyGUI::ResourceManager::getInstance().addResource(font);
     }
 
