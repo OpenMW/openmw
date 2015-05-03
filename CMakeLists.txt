@@ -310,7 +310,6 @@ endif()
 
 
 add_subdirectory(files/)
-add_subdirectory(files/mygui)
 
 # Specify build paths
 
