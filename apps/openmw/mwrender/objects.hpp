@@ -12,6 +12,11 @@ namespace osg
     class Group;
 }
 
+namespace osgUtil
+{
+    class IncrementalCompileOperation;
+}
+
 namespace Resource
 {
     class ResourceSystem;
@@ -41,9 +46,13 @@ class Objects{
 
     Resource::ResourceSystem* mResourceSystem;
 
+    osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+
 public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode);
     ~Objects();
+
+    void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
     /// @param animated Attempt to load separate keyframes from a .kf file matching the model file?
     /// @param allowLight If false, no lights will be created, and particles systems will be removed.

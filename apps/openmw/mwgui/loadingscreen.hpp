@@ -53,6 +53,7 @@ namespace MWGui
         double mLastWallpaperChangeTime;
         double mLastRenderTime;
         osg::Timer mTimer;
+        double mLoadingOnTime;
 
         size_t mProgress;
 

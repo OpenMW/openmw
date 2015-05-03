@@ -30,8 +30,9 @@ namespace MWGui
         : WindowBase("openmw_loading_screen.layout")
         , mVFS(vfs)
         , mViewer(viewer)
-        , mLastRenderTime(0.0)
         , mLastWallpaperChangeTime(0.0)
+        , mLastRenderTime(0.0)
+        , mLoadingOnTime(0.0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {
@@ -97,6 +98,7 @@ namespace MWGui
 
     void LoadingScreen::loadingOn()
     {
+        mLoadingOnTime = mTimer.time_m();
         // Early-out if already on
         if (mMainWidget->getVisible())
             return;
@@ -143,6 +145,7 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
+        //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
@@ -215,6 +218,8 @@ namespace MWGui
                 changeWallpaper();
             }
 
+            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(80);
+
             // Turn off rendering except the GUI
             int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
             int oldCullMask = mViewer->getCamera()->getCullMask();
@@ -222,6 +227,8 @@ namespace MWGui
             mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
             MWBase::Environment::get().getInputManager()->update(0, true, true);
+
+            //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
 
             mViewer->frame();
 

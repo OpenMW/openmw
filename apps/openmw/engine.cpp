@@ -391,8 +391,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setJournal (new MWDialogue::Journal);
     mEnvironment.setDialogueManager (new MWDialogue::DialogueManager (mExtensions, mVerboseScripts, mTranslationDataStorage));
 
-    //mOgre->getRoot()->addFrameListener (this);
-
     // scripts
     if (mCompileAll)
     {
@@ -466,13 +464,12 @@ void OMW::Engine::go()
     mViewer->setCameraManipulator(new osgGA::TrackballManipulator);
     mViewer->addEventHandler(new osgViewer::StatsHandler);
 
-    mViewer->realize();
     osg::Timer frameTimer;
     while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
-        //dt = std::min(dt, 0.2f);
+        //dt = std::min(dt, 0.2);
 
         frame(dt);
         mViewer->frame(/*simulationTime*/);

@@ -9,6 +9,8 @@
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <osgViewer/Viewer>
 
 #include <components/resource/resourcesystem.hpp>
@@ -94,6 +96,10 @@ namespace MWRender
         mDebugging.reset(new Debugging(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
+
+        mViewer.setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
+
+        mObjects->setIncrementalCompileOperation(mViewer.getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
 
