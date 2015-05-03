@@ -258,7 +258,7 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (Element_Reference, "References");
+    tool->addButton (Element_Reference, "Instances");
     tool->addButton (Element_Water, "Water");
     tool->addButton (Element_Pathgrid, "Pathgrid");
 }
@@ -267,7 +267,7 @@ void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneTo
 {
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Reference editing"),
+        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Instance editing"),
         "object");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
