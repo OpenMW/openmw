@@ -419,6 +419,8 @@ namespace MWGui
 
         cleanupGarbage();
 
+        mFontLoader.reset();
+
         delete mGuiPlatform;
     }
 
