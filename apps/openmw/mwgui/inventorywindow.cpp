@@ -117,10 +117,10 @@ namespace MWGui
 
         mPreview.reset(NULL);
         mAvatarImage->setImageTexture("");
+#if 0
         MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("CharacterPreview");
         if (tex)
             MyGUI::RenderManager::getInstance().destroyTexture(tex);
-#if 0
         mPreview.reset(new MWRender::InventoryPreview(mPtr));
         mPreview->setup();
 #endif
