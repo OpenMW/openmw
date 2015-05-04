@@ -120,7 +120,14 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
     if (parent.isValid())
         return false;
 
-    mRows.erase (mRows.begin()+row, mRows.begin()+row+count);
+    if (count>0)
+    {
+        beginRemoveRows (parent, row, row+count-1);
+
+        mRows.erase (mRows.begin()+row, mRows.begin()+row+count);
+
+        endRemoveRows();
+    }
 
     return true;
 }

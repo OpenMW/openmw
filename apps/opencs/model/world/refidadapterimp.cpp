@@ -1,10 +1,19 @@
-
 #include "refidadapterimp.hpp"
 
-CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const InventoryColumns& columns,
+#include <cassert>
+#include <stdexcept>
+#include <utility>
+
+#include <components/esm/loadcont.hpp>
+#include "nestedtablewrapper.hpp"
+
+CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
+: InventoryColumns (columns) {}
+
+CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const PotionColumns& columns,
     const RefIdColumn *autoCalc)
 : InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, columns),
-  mAutoCalc (autoCalc)
+  mAutoCalc (autoCalc), mColumns(columns)
 {}
 
 QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
@@ -15,6 +24,9 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
 
     if (column==mAutoCalc)
         return record.get().mData.mAutoCalc!=0;
+
+    if (column==mColumns.mEffects)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -69,9 +81,10 @@ void CSMWorld::ApparatusRefIdAdapter::setData (const RefIdColumn *column, RefIdD
 
 
 CSMWorld::ArmorRefIdAdapter::ArmorRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *type, const RefIdColumn *health, const RefIdColumn *armor)
+    const RefIdColumn *type, const RefIdColumn *health, const RefIdColumn *armor,
+    const RefIdColumn *partRef)
 : EnchantableRefIdAdapter<ESM::Armor> (UniversalId::Type_Armor, columns),
-    mType (type), mHealth (health), mArmor (armor)
+    mType (type), mHealth (health), mArmor (armor), mPartRef(partRef)
 {}
 
 QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
@@ -88,6 +101,9 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
 
     if (column==mArmor)
         return record.get().mData.mArmor;
+
+    if (column==mPartRef)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -144,8 +160,9 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
 }
 
 CSMWorld::ClothingRefIdAdapter::ClothingRefIdAdapter (const EnchantableColumns& columns,
-    const RefIdColumn *type)
-: EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, columns), mType (type)
+    const RefIdColumn *type, const RefIdColumn *partRef)
+: EnchantableRefIdAdapter<ESM::Clothing> (UniversalId::Type_Clothing, columns), mType (type),
+  mPartRef(partRef)
 {}
 
 QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
@@ -156,6 +173,9 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
 
     if (column==mType)
         return record.get().mData.mType;
+
+    if (column==mPartRef)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }
@@ -173,13 +193,14 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 }
 
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
-    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn)
+    const RefIdColumn *weight, const RefIdColumn *organic, const RefIdColumn *respawn, const RefIdColumn *content)
 : NameRefIdAdapter<ESM::Container> (UniversalId::Type_Container, columns), mWeight (weight),
-  mOrganic (organic), mRespawn (respawn)
+  mOrganic (organic), mRespawn (respawn), mContent(content)
 {}
 
-QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
-    int index) const
+QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
+                                                   const RefIdData& data,
+                                                   int index) const
 {
     const Record<ESM::Container>& record = static_cast<const Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
@@ -192,6 +213,9 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column, co
 
     if (column==mRespawn)
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
+
+    if (column==mContent)
+        return true; // Required to show nested tables in dialogue subview
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }

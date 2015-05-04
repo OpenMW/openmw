@@ -71,7 +71,7 @@ namespace MWRender
 {
 
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
-    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0), mEnabled(true)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mEnabled(true), mValue(0)
 {
     resetBlinkTimer();
 }

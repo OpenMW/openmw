@@ -2,6 +2,8 @@
 #define CSM_WOLRD_COLUMNBASE_H
 
 #include <string>
+#include <vector>
+#include <stdexcept>
 
 #include <Qt>
 #include <QVariant>
@@ -15,13 +17,15 @@ namespace CSMWorld
         enum Roles
         {
             Role_Flags = Qt::UserRole,
-            Role_Display = Qt::UserRole+1
+            Role_Display = Qt::UserRole+1,
+            Role_ColumnId = Qt::UserRole+2
         };
 
         enum Flags
         {
             Flag_Table = 1, // column should be displayed in table view
-            Flag_Dialogue = 2 // column should be displayed in dialogue view
+            Flag_Dialogue = 2, // column should be displayed in dialogue view
+            Flag_Dialogue_List = 4 // column should be diaplyed in dialogue view
         };
 
         enum Display
@@ -30,7 +34,7 @@ namespace CSMWorld
             Display_String,
             Display_LongString,
 
-            //CONCRETE TYPES STARTS HERE
+            //CONCRETE TYPES STARTS HERE (for drag and drop)
             Display_Skill,
             Display_Class,
             Display_Faction,
@@ -105,7 +109,16 @@ namespace CSMWorld
             Display_ScriptLines, // console context
             Display_SoundGeneratorType,
             Display_School,
-            Display_Id
+            Display_Id,
+            Display_SkillImpact,
+            Display_EffectRange,
+            Display_EffectId,
+            Display_PartRefType,
+            Display_AiPackageType,
+            Display_YesNo,
+
+            //top level columns that nest other columns
+            Display_NestedHeader
         };
 
         int mColumnId;
@@ -132,11 +145,28 @@ namespace CSMWorld
         static bool isScript (Display display);
     };
 
+    class NestableColumn : public ColumnBase
+    {
+        std::vector<NestableColumn *> mNestedColumns;
+
+    public:
+
+        NestableColumn(int columnId, Display displayType, int flag);
+
+        ~NestableColumn();
+
+        void addColumn(CSMWorld::NestableColumn *column);
+
+        const ColumnBase& nestedColumn(int subColumn) const;
+
+        bool hasChildren() const;
+    };
+
     template<typename ESXRecordT>
-    struct Column : public ColumnBase
+    struct Column : public NestableColumn
     {
         Column (int columnId, Display displayType, int flags = Flag_Table | Flag_Dialogue)
-        : ColumnBase (columnId, displayType, flags) {}
+        : NestableColumn (columnId, displayType, flags) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const = 0;
 
@@ -144,6 +174,34 @@ namespace CSMWorld
         {
             throw std::logic_error ("Column " + getTitle() + " is not editable");
         }
+    };
+
+    template<typename ESXRecordT>
+    struct NestedParentColumn : public Column<ESXRecordT>
+    {
+        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
+                ColumnBase::Display_NestedHeader, flags)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return true; // required by IdTree::hasChildren()
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    struct NestedChildColumn : public NestableColumn
+    {
+        NestedChildColumn (int id, Display display, bool isEditable = true);
+
+        virtual bool isEditable() const;
+
+    private:
+        bool mIsEditable;
     };
 }
 

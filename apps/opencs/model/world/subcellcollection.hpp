@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_SUBCOLLECTION_H
 #define CSM_WOLRD_SUBCOLLECTION_H
 
+#include "nestedidcollection.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -14,7 +16,7 @@ namespace CSMWorld
 
     /// \brief Single type collection of top level records that are associated with cells
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
-    class SubCellCollection : public IdCollection<ESXRecordT, IdAccessorT>
+    class SubCellCollection : public NestedIdCollection<ESXRecordT, IdAccessorT>
     {
             const IdCollection<Cell>& mCells;
 
@@ -23,8 +25,6 @@ namespace CSMWorld
         public:
 
             SubCellCollection (const IdCollection<Cell>& cells);
-
-
     };
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -39,7 +39,6 @@ namespace CSMWorld
         const IdCollection<Cell>& cells)
     : mCells (cells)
     {}
-
 }
 
 #endif

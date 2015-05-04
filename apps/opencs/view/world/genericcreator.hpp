@@ -101,6 +101,9 @@ namespace CSVWorld
 
             virtual void setScope (unsigned int scope);
 
+            /// Focus main input widget
+            virtual void focus();
+
         private slots:
 
             void textChanged (const QString& text);

@@ -66,7 +66,7 @@ namespace MWMechanics
     public:
         /// \a weapon may be empty for hand-to-hand combat
         ActionWeapon(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo = MWWorld::Ptr())
-            : mWeapon(weapon), mAmmunition(ammo) {}
+            : mAmmunition(ammo), mWeapon(weapon) {}
         /// Equips the given weapon.
         virtual void prepare(const MWWorld::Ptr& actor);
         virtual void getCombatRange (float& rangeAttack, float& rangeFollow);

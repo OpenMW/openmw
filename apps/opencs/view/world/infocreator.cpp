@@ -91,6 +91,11 @@ std::string CSVWorld::InfoCreator::getErrors() const
     return errors;
 }
 
+void CSVWorld::InfoCreator::focus()
+{
+    mTopic->setFocus();
+}
+
 void CSVWorld::InfoCreator::topicChanged()
 {
     update();

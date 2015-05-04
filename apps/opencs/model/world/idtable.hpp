@@ -59,7 +59,8 @@ namespace CSMWorld
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setRecord (const std::string& id, const RecordBase& record);
+            void setRecord (const std::string& id, const RecordBase& record,
+                    UniversalId::Type type = UniversalId::Type_None);
             ///< Add record or overwrite existing recrod.
 
             const RecordBase& getRecord (const std::string& id) const;
@@ -83,6 +84,10 @@ namespace CSMWorld
             virtual bool isDeleted (const std::string& id) const;
 
             virtual int getColumnId(int column) const;
+
+        protected:
+
+            virtual CollectionBase *idCollection() const;
     };
 }
 

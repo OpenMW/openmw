@@ -21,9 +21,9 @@ namespace MWGui
     }
 
     SpellView::SpellView()
-        : mShowCostColumn(true)
+        : mScrollView(NULL)
+        , mShowCostColumn(true)
         , mHighlightSelected(true)
-        , mScrollView(NULL)
     {
     }
 

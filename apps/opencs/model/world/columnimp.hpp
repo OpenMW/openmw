@@ -870,7 +870,13 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct CellColumn : public Column<ESXRecordT>
     {
-        CellColumn() : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell) {}
+        bool mBlocked;
+
+        /// \param blocked Do not allow user-modification
+        CellColumn (bool blocked = false)
+        : Column<ESXRecordT> (Columns::ColumnId_Cell, ColumnBase::Display_Cell),
+          mBlocked (blocked)
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -893,7 +899,39 @@ namespace CSMWorld
 
         virtual bool isUserEditable() const
         {
+            return !mBlocked;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct OriginalCellColumn : public Column<ESXRecordT>
+    {
+        OriginalCellColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_OriginalCell, ColumnBase::Display_Cell)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mOriginalCell.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mOriginalCell = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
             return true;
+        }
+
+        virtual bool isUserEditable() const
+        {
+            return false;
         }
     };
 
@@ -1276,7 +1314,6 @@ namespace CSMWorld
             return true;
         }
     };
-
 
     template<typename ESXRecordT>
     struct PosColumn : public Column<ESXRecordT>

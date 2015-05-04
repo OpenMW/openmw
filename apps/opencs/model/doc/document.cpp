@@ -2386,7 +2386,8 @@ CSMWorld::UniversalId CSMDoc::Document::newSearch()
 
 void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search)
 {
-    return mTools.runSearch (searchId, search);
+    mTools.runSearch (searchId, search);
+    emit stateChanged (getState(), this);
 }
 
 void CSMDoc::Document::abortOperation (int type)

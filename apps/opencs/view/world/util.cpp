@@ -18,6 +18,7 @@
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/world/commanddispatcher.hpp"
 
 #include "scriptedit.hpp"
 
@@ -82,15 +83,15 @@ void CSVWorld::CommandDelegateFactoryCollection::add (CSMWorld::ColumnBase::Disp
 }
 
 CSVWorld::CommandDelegate *CSVWorld::CommandDelegateFactoryCollection::makeDelegate (
-    CSMWorld::ColumnBase::Display display, CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::ColumnBase::Display display, CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
     std::map<CSMWorld::ColumnBase::Display, CommandDelegateFactory *>::const_iterator iter =
         mFactories.find (display);
 
     if (iter!=mFactories.end())
-        return iter->second->makeDelegate (document, parent);
+        return iter->second->makeDelegate (dispatcher, document, parent);
 
-    return new CommandDelegate (document, parent);
+    return new CommandDelegate (dispatcher, document, parent);
 }
 
 const CSVWorld::CommandDelegateFactoryCollection& CSVWorld::CommandDelegateFactoryCollection::get()
@@ -115,17 +116,22 @@ CSMDoc::Document& CSVWorld::CommandDelegate::getDocument() const
 void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const
 {
+    if (!mCommandDispatcher)
+        return;
+
     NastyTableModelHack hack (*model);
     QStyledItemDelegate::setModelData (editor, &hack, index);
 
     QVariant new_ = hack.getData();
 
-    if (model->data (index)!=new_)
-        getUndoStack().push (new CSMWorld::ModifyCommand (*model, index, new_));
+    if ((model->data (index)!=new_) && (model->flags(index) & Qt::ItemIsEditable))
+        mCommandDispatcher->executeModify (model, index, new_);
 }
 
-CSVWorld::CommandDelegate::CommandDelegate (CSMDoc::Document& document, QObject *parent)
-: QStyledItemDelegate (parent), mDocument (document), mEditLock (false)
+CSVWorld::CommandDelegate::CommandDelegate (CSMWorld::CommandDispatcher *commandDispatcher,
+    CSMDoc::Document& document, QObject *parent)
+: QStyledItemDelegate (parent), mEditLock (false),
+  mCommandDispatcher (commandDispatcher), mDocument (document)
 {}
 
 void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemModel *model,
@@ -180,7 +186,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Float:
         {
             QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
-            dsb->setRange(FLT_MIN, FLT_MAX);
+            dsb->setRange(-FLT_MAX, FLT_MAX);
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(3);
             return dsb;

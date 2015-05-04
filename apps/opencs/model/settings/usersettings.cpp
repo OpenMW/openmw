@@ -203,9 +203,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Characters after search string");
         after->setDefaultValue (10);
         after->setRange (0, 1000);
-        after->setToolTip ("Maximum number of character to display in search result after the searched text");        
+        after->setToolTip ("Maximum number of character to display in search result after the searched text");
+
+        Setting *autoDelete = createSetting (Type_CheckBox, "auto-delete", "Delete row from result table after a successful replace");
+        autoDelete->setDefaultValue ("true");
     }
-    
+
+    declareSection ("script-editor", "Script Editor");
+    {
+        Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
+        lineNum->setDefaultValue ("true");
+        lineNum->setToolTip ("Show line numbers to the left of the script editor window."
+                "The current row and column numbers of the text cursor are shown at the bottom.");
+
+        Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
+        monoFont->setDefaultValue ("true");
+        monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
+    }
+
     {
         /******************************************************************
         * There are three types of values:

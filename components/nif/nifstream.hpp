@@ -34,7 +34,7 @@ public:
 
     NIFFile * const file;
 
-    NIFStream (NIFFile * file, Files::IStreamPtr inp): file (file), inp (inp) {}
+    NIFStream (NIFFile * file, Files::IStreamPtr inp): inp (inp), file (file) {}
 
     void skip(size_t size) { inp->ignore(size); }
 

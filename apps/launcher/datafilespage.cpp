@@ -24,10 +24,10 @@
 const char *Launcher::DataFilesPage::mDefaultContentListName = "Default";
 
 Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings, Config::LauncherSettings &launcherSettings, QWidget *parent)
-    : mCfgMgr(cfg)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
-    , QWidget(parent)
 {
     ui.setupUi (this);
     setObjectName ("DataFilesPage");

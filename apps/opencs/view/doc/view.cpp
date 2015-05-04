@@ -94,7 +94,7 @@ void CSVDoc::View::setupEditMenu()
 
     QAction *search = new QAction (tr ("Search"), this);
     connect (search, SIGNAL (triggered()), this, SLOT (addSearchSubView()));
-    edit->addAction (search);    
+    edit->addAction (search);
 }
 
 void CSVDoc::View::setupViewMenu()
@@ -131,11 +131,11 @@ void CSVDoc::View::setupWorldMenu()
     connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
     world->addAction (cells);
 
-    QAction *referenceables = new QAction (tr ("Referenceables"), this);
+    QAction *referenceables = new QAction (tr ("Objects"), this);
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
     world->addAction (referenceables);
 
-    QAction *references = new QAction (tr ("References"), this);
+    QAction *references = new QAction (tr ("Instances"), this);
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
 

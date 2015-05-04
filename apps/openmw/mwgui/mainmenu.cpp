@@ -30,12 +30,12 @@ namespace MWGui
 
     MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs)
         : Layout("openmw_mainmenu.layout")
-        , mVFS(vfs)
-        , mButtonBox(0), mWidth (w), mHeight (h)
-        , mSaveGameDialog(NULL)
+        , mWidth (w), mHeight (h)
+        , mVFS(vfs), mButtonBox(0)
         , mBackground(NULL)
         , mVideoBackground(NULL)
         , mVideo(NULL)
+        , mSaveGameDialog(NULL)
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;

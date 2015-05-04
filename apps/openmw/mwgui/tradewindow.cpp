@@ -54,10 +54,10 @@ namespace MWGui
 
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
-        , mCurrentBalance(0)
-        , mItemToSell(-1)
-        , mTradeModel(NULL)
         , mSortModel(NULL)
+        , mTradeModel(NULL)
+        , mItemToSell(-1)
+        , mCurrentBalance(0)
         , mCurrentMerchantOffer(0)
     {
         getWidget(mFilterAll, "AllButton");

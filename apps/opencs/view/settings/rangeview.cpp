@@ -12,7 +12,7 @@
 
 CSVSettings::RangeView::RangeView (CSMSettings::Setting *setting,
                                        Page *parent)
-    : mRangeWidget (0), mRangeType (setting->type()), View (setting, parent)
+    : View (setting, parent), mRangeWidget (0), mRangeType (setting->type())
 {
 
     mRangeWidget = 0;

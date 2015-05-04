@@ -225,6 +225,11 @@ void CSVWorld::GenericCreator::toggleWidgets(bool active)
 {
 }
 
+void CSVWorld::GenericCreator::focus()
+{
+    mId->setFocus();
+}
+
 void CSVWorld::GenericCreator::setScope (unsigned int scope)
 {
     mScopes = scope;
