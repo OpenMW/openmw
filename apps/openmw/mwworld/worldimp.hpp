@@ -1,8 +1,6 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include "../mwrender/debugging.hpp"
-
 #include <boost/shared_ptr.hpp>
 
 #include <osg/ref_ptr>
@@ -22,6 +20,14 @@
 #include "contentloader.hpp"
 
 #include <components/settings/settings.hpp>
+
+namespace OEngine
+{
+namespace Physic
+{
+    class PhysicEngine;
+}
+}
 
 namespace osg
 {

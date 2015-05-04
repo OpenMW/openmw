@@ -38,7 +38,7 @@ namespace MWRender
     class EffectManager;
     class SkyManager;
     class NpcAnimation;
-    class Debugging;
+    class Pathgrid;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -99,7 +99,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Light> mSunLight;
 
-        std::auto_ptr<Debugging> mDebugging;
+        std::auto_ptr<Pathgrid> mPathgrid;
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;

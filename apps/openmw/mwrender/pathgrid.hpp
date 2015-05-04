@@ -14,14 +14,6 @@ namespace ESM
     struct Pathgrid;
 }
 
-namespace OEngine
-{
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
-}
-
 namespace osg
 {
     class Group;
@@ -36,11 +28,8 @@ namespace MWWorld
 
 namespace MWRender
 {
-    class Debugging
+    class Pathgrid
     {
-        //OEngine::Physic::PhysicEngine* mEngine;
-
-        // Path grid stuff
         bool mPathgridEnabled;
 
         void togglePathgrid();
@@ -63,8 +52,8 @@ namespace MWRender
         osg::ref_ptr<osg::Geometry> createPathgridLines(const ESM::Pathgrid *pathgrid);
         osg::ref_ptr<osg::Geometry> createPathgridPoints(const ESM::Pathgrid *pathgrid);
     public:
-        Debugging(osg::ref_ptr<osg::Group> root /*, OEngine::Physic::PhysicEngine *engine*/);
-        ~Debugging();
+        Pathgrid(osg::ref_ptr<osg::Group> root);
+        ~Pathgrid();
         bool toggleRenderMode (int mode);
 
         void addCell(const MWWorld::CellStore* store);

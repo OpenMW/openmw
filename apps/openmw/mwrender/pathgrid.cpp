@@ -1,4 +1,4 @@
-#include "debugging.hpp"
+#include "pathgrid.hpp"
 
 #include <cassert>
 
@@ -6,8 +6,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
 #include <osg/Group>
-
-#include <openengine/bullet/physic.hpp>
 
 #include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
@@ -27,7 +25,7 @@ namespace MWRender
 
 static const int POINT_MESH_BASE = 35;
 
-osg::ref_ptr<osg::Geometry> Debugging::createPathgridLines(const ESM::Pathgrid *pathgrid)
+osg::ref_ptr<osg::Geometry> Pathgrid::createPathgridLines(const ESM::Pathgrid *pathgrid)
 {
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
@@ -62,7 +60,7 @@ osg::ref_ptr<osg::Geometry> Debugging::createPathgridLines(const ESM::Pathgrid *
     return geom;
 }
 
-osg::ref_ptr<osg::Geometry> Debugging::createPathgridPoints(const ESM::Pathgrid *pathgrid)
+osg::ref_ptr<osg::Geometry> Pathgrid::createPathgridPoints(const ESM::Pathgrid *pathgrid)
 {
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
 
@@ -126,7 +124,7 @@ osg::ref_ptr<osg::Geometry> Debugging::createPathgridPoints(const ESM::Pathgrid 
     return geom;
 }
 
-Debugging::Debugging(osg::ref_ptr<osg::Group> root /*, OEngine::Physic::PhysicEngine *engine*/)
+Pathgrid::Pathgrid(osg::ref_ptr<osg::Group> root)
     : mRootNode(root)
     , mPathgridEnabled(false)
     , mInteriorPathgridNode(NULL)
@@ -134,7 +132,7 @@ Debugging::Debugging(osg::ref_ptr<osg::Group> root /*, OEngine::Physic::PhysicEn
 {
 }
 
-Debugging::~Debugging()
+Pathgrid::~Pathgrid()
 {
     if (mPathgridEnabled)
     {
@@ -143,7 +141,7 @@ Debugging::~Debugging()
 }
 
 
-bool Debugging::toggleRenderMode (int mode){
+bool Pathgrid::toggleRenderMode (int mode){
     switch (mode)
     {
         case Render_Pathgrid:
@@ -156,21 +154,21 @@ bool Debugging::toggleRenderMode (int mode){
     return false;
 }
 
-void Debugging::addCell(const MWWorld::CellStore *store)
+void Pathgrid::addCell(const MWWorld::CellStore *store)
 {
     mActiveCells.push_back(store);
     if (mPathgridEnabled)
         enableCellPathgrid(store);
 }
 
-void Debugging::removeCell(const MWWorld::CellStore *store)
+void Pathgrid::removeCell(const MWWorld::CellStore *store)
 {
     mActiveCells.erase(std::remove(mActiveCells.begin(), mActiveCells.end(), store), mActiveCells.end());
     if (mPathgridEnabled)
         disableCellPathgrid(store);
 }
 
-void Debugging::togglePathgrid()
+void Pathgrid::togglePathgrid()
 {
     mPathgridEnabled = !mPathgridEnabled;
     if (mPathgridEnabled)
@@ -201,7 +199,7 @@ void Debugging::togglePathgrid()
     }
 }
 
-void Debugging::enableCellPathgrid(const MWWorld::CellStore *store)
+void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
 {
     MWBase::World* world = MWBase::Environment::get().getWorld();
     const ESM::Pathgrid *pathgrid =
@@ -242,7 +240,7 @@ void Debugging::enableCellPathgrid(const MWWorld::CellStore *store)
     }
 }
 
-void Debugging::disableCellPathgrid(const MWWorld::CellStore *store)
+void Pathgrid::disableCellPathgrid(const MWWorld::CellStore *store)
 {
     if (store->getCell()->isExterior())
     {

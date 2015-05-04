@@ -29,7 +29,7 @@
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
-#include "debugging.hpp"
+#include "pathgrid.hpp"
 
 namespace MWRender
 {
@@ -93,7 +93,7 @@ namespace MWRender
 
         mRootNode->addChild(lightRoot);
 
-        mDebugging.reset(new Debugging(mRootNode));
+        mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
 
@@ -195,12 +195,12 @@ namespace MWRender
 
     void RenderingManager::addCell(const MWWorld::CellStore *store)
     {
-        mDebugging->addCell(store);
+        mPathgrid->addCell(store);
     }
 
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
-        mDebugging->removeCell(store);
+        mPathgrid->removeCell(store);
         mObjects->removeCell(store);
     }
 
@@ -212,7 +212,7 @@ namespace MWRender
     bool RenderingManager::toggleRenderMode(RenderMode mode)
     {
         if (mode == Render_CollisionDebug || mode == Render_Pathgrid)
-            return mDebugging->toggleRenderMode(mode);
+            return mPathgrid->toggleRenderMode(mode);
         else if (mode == Render_Wireframe)
         {
             return false;
