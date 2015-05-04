@@ -25,10 +25,13 @@ namespace osg
 namespace osgMyGUI
 {
 
+class Drawable;
+
 class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
 {
     osg::ref_ptr<osgViewer::Viewer> mViewer;
     osg::ref_ptr<osg::Group> mSceneRoot;
+    osg::ref_ptr<Drawable> mDrawable;
     Resource::TextureManager* mTextureManager;
 
     MyGUI::IntSize mViewSize;
@@ -80,20 +83,25 @@ public:
     /** @see RenderManager::getTexture */
     virtual MyGUI::ITexture* getTexture(const std::string &name);
 
+    // Called by the update traversal
+    void update();
 
+    // Called by the cull traversal
     /** @see IRenderTarget::begin */
     virtual void begin();
     /** @see IRenderTarget::end */
     virtual void end();
     /** @see IRenderTarget::doRender */
     virtual void doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count);
+
     /** @see IRenderTarget::getInfo */
     virtual const MyGUI::RenderTargetInfo& getInfo() { return mInfo; }
 
     bool checkTexture(MyGUI::ITexture* _texture);
 
 /*internal:*/
-    void drawFrame(osg::RenderInfo &renderInfo);
+
+    void collectDrawCalls();
     void setViewSize(int width, int height);
 };
 

@@ -46,23 +46,6 @@
 namespace
 {
 
-// Proxy to forward a Drawable's draw call to RenderManager::drawFrame
-class Renderable : public osg::Drawable {
-    osgMyGUI::RenderManager *mParent;
-
-    virtual void drawImplementation(osg::RenderInfo &renderInfo) const
-    { mParent->drawFrame(renderInfo); }
-
-public:
-    Renderable(osgMyGUI::RenderManager *parent=nullptr) : mParent(parent) { }
-    Renderable(const Renderable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
-        : osg::Drawable(copy, copyop)
-        , mParent(copy.mParent)
-    { }
-
-    META_Object(osgMyGUI, Renderable)
-};
-
 // Proxy to forward an OSG resize event to RenderManager::setViewSize
 class ResizeHandler : public osgGA::GUIEventHandler {
     osgMyGUI::RenderManager *mParent;
@@ -93,6 +76,147 @@ public:
 
 namespace osgMyGUI
 {
+
+class Drawable : public osg::Drawable {
+    osgMyGUI::RenderManager *mParent;
+
+    // Stage 0: update widget animations and controllers. Run during the Update traversal.
+    class FrameUpdate : public osg::Drawable::UpdateCallback
+    {
+    public:
+        FrameUpdate()
+            : mRenderManager(NULL)
+        {
+        }
+
+        void setRenderManager(osgMyGUI::RenderManager* renderManager)
+        {
+            mRenderManager = renderManager;
+        }
+
+        virtual void update(osg::NodeVisitor*, osg::Drawable*)
+        {
+            if (mRenderManager)
+                mRenderManager->update();
+        }
+
+    private:
+        osgMyGUI::RenderManager* mRenderManager;
+    };
+
+    // Stage 1: collect draw calls. Run during the Cull traversal.
+    class CollectDrawCalls : public osg::Drawable::CullCallback
+    {
+    public:
+        CollectDrawCalls()
+            : mRenderManager(NULL)
+        {
+        }
+
+        void setRenderManager(osgMyGUI::RenderManager* renderManager)
+        {
+            mRenderManager = renderManager;
+        }
+
+        virtual bool cull(osg::NodeVisitor*, osg::Drawable*, osg::State*) const
+        {
+            if (!mRenderManager)
+                return false;
+
+            mRenderManager->collectDrawCalls();
+            return false;
+        }
+
+    private:
+        osgMyGUI::RenderManager* mRenderManager;
+    };
+
+    // Stage 2: execute the draw calls. Run during the Draw traversal. May run in parallel with the update traversal of the next frame.
+    virtual void drawImplementation(osg::RenderInfo &renderInfo) const
+    {
+        osg::State *state = renderInfo.getState();
+        state->disableAllVertexArrays();
+        state->setClientActiveTextureUnit(0);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        for (std::vector<Batch>::const_iterator it = mBatchVector.begin(); it != mBatchVector.end(); ++it)
+        {
+            const Batch& batch = *it;
+            osg::VertexBufferObject *vbo = batch.mVertexBuffer;
+            osg::Texture2D* texture = batch.mTexture;
+            if(texture)
+                state->applyTextureAttribute(0, texture);
+
+            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+            if (bufferobject)
+            {
+                state->bindVertexBufferObject(bufferobject);
+
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+            }
+            else
+            {
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
+            }
+
+            glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
+        }
+
+        state->unbindVertexBufferObject();
+        state->dirtyAllVertexArrays();
+        state->disableAllVertexArrays();
+    }
+
+public:
+    Drawable(osgMyGUI::RenderManager *parent = nullptr) : mParent(parent)
+    {
+        setSupportsDisplayList(false);
+
+        osg::ref_ptr<CollectDrawCalls> collectDrawCalls = new CollectDrawCalls;
+        collectDrawCalls->setRenderManager(mParent);
+        setCullCallback(collectDrawCalls);
+
+        osg::ref_ptr<FrameUpdate> frameUpdate = new Drawable::FrameUpdate;
+        frameUpdate->setRenderManager(mParent);
+        setUpdateCallback(frameUpdate);
+    }
+    Drawable(const Drawable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
+        : osg::Drawable(copy, copyop)
+        , mParent(copy.mParent)
+    {
+    }
+
+    // Defines the necessary information for a draw call
+    struct Batch
+    {
+        // May be empty
+        osg::ref_ptr<osg::Texture2D> mTexture;
+
+        osg::ref_ptr<osg::VertexBufferObject> mVertexBuffer;
+        size_t mVertexCount;
+    };
+
+    void addBatch(const Batch& batch)
+    {
+        mBatchVector.push_back(batch);
+    }
+
+    void clear()
+    {
+        mBatchVector.clear();
+    }
+
+    META_Object(osgMyGUI, Drawable)
+
+private:
+    std::vector<Batch> mBatchVector;
+};
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
 {
@@ -213,13 +337,11 @@ void RenderManager::initialise()
 
     mUpdate = false;
 
-    osg::ref_ptr<osg::Drawable> drawable = new Renderable(this);
-    drawable->setSupportsDisplayList(false);
-    drawable->setUseVertexBufferObjects(true);
-    drawable->setDataVariance(osg::Object::DYNAMIC);
+    mDrawable = new Drawable(this);
+    mDrawable->setDataVariance(osg::Object::DYNAMIC);
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-    geode->addDrawable(drawable.get());
+    geode->addDrawable(mDrawable.get());
 
     osg::ref_ptr<osg::Camera> camera = new osg::Camera();
     camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
@@ -265,61 +387,25 @@ void RenderManager::destroyVertexBuffer(MyGUI::IVertexBuffer *buffer)
 
 void RenderManager::begin()
 {
-    osg::State *state = mRenderInfo->getState();
-    state->disableAllVertexArrays();
-    state->setClientActiveTextureUnit(0);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
 }
 
 void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count)
 {
-    osg::State *state = mRenderInfo->getState();
-    osg::VertexBufferObject *vbo = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
-    MYGUI_PLATFORM_ASSERT(vbo, "Vertex buffer is not created");
+    Drawable::Batch batch;
+    batch.mVertexCount = count;
+    batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
+    if (texture)
+        batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
 
-    if(texture)
-    {
-        osg::Texture2D *tex = static_cast<OSGTexture*>(texture)->getTexture();
-        MYGUI_PLATFORM_ASSERT(tex, "Texture is not created");
-        state->applyTextureAttribute(0, tex);
-    }
-
-    osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
-    if (bufferobject)
-    {
-        state->bindVertexBufferObject(bufferobject);
-
-        glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
-        glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
-    }
-    else
-    {
-        glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer());
-        glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 12);
-        glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)vbo->getArray(0)->getDataPointer() + 16);
-    }
-
-    glDrawArrays(GL_TRIANGLES, 0, count);
+    mDrawable->addBatch(batch);
 }
 
 void RenderManager::end()
 {
-    osg::State *state = mRenderInfo->getState();
-    state->unbindVertexBufferObject();
-    state->dirtyAllVertexArrays();
-    state->disableAllVertexArrays();
 }
 
-void RenderManager::drawFrame(osg::RenderInfo &renderInfo)
+void RenderManager::update()
 {
-    MyGUI::Gui *gui = MyGUI::Gui::getInstancePtr();
-    if(gui == nullptr) return;
-
-    mRenderInfo = &renderInfo;
-
     static MyGUI::Timer timer;
     static unsigned long last_time = timer.getMilliseconds();
     unsigned long now_time = timer.getMilliseconds();
@@ -328,10 +414,12 @@ void RenderManager::drawFrame(osg::RenderInfo &renderInfo)
     onFrameEvent((float)((double)(time) / (double)1000));
 
     last_time = now_time;
+}
 
-    begin();
+void RenderManager::collectDrawCalls()
+{
+    mDrawable->clear();
     onRenderToTarget(this, mUpdate);
-    end();
 
     mUpdate = false;
 }
