@@ -271,12 +271,6 @@
                                 <Property key="Caption" value="Object shaders"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 154 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShaderModeButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 93 16" align="Left Top">
-                                <Property key="Caption" value="Shader mode"/>
-                            </Widget>
-                        </Widget>
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>
                         </Widget>

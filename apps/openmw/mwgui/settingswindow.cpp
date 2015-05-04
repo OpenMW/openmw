@@ -75,11 +75,6 @@ namespace
         return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
     }
 
-    std::string hlslGlsl ()
-    {
-        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
-    }
-
     const char* checkButtonType = "CheckButton";
     const char* sliderType = "Slider";
 
@@ -180,7 +175,6 @@ namespace MWGui
         getWidget(mAnisotropyLabel, "AnisotropyLabel");
         getWidget(mAnisotropyBox, "AnisotropyBox");
         getWidget(mShadersButton, "ShadersButton");
-        getWidget(mShaderModeButton, "ShaderModeButton");
         getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
@@ -207,7 +201,6 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
-        mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
@@ -247,8 +240,6 @@ namespace MWGui
         mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
-
-        mShaderModeButton->setCaption (Settings::Manager::getString("shader mode", "General"));
 
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
@@ -396,17 +387,6 @@ namespace MWGui
             apply();
             return;
         }
-    }
-
-    void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
-    {
-        std::string val = hlslGlsl();
-
-        _sender->castType<MyGUI::Button>()->setCaption(val);
-
-        Settings::Manager::setString("shader mode", "General", val);
-
-        apply();
     }
 
     void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)

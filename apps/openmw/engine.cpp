@@ -277,16 +277,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.setStateManager (
         new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
 
-    std::string renderSystem = settings.getString("render system", "Video");
-    if (renderSystem == "")
-    {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        renderSystem = "Direct3D9 Rendering Subsystem";
-#else
-        renderSystem = "OpenGL Rendering Subsystem";
-#endif
-    }
-
     //OEngine::Render::WindowSettings windowSettings;
     //windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
     //windowSettings.window_border = settings.getBool("window border", "Video");

@@ -201,8 +201,6 @@ endif(APPLE)
 target_link_libraries(openmw-cs
     ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
-    ${OGRE_Overlay_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
     ${BULLET_LIBRARIES}

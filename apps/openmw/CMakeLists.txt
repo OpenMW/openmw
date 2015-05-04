@@ -129,7 +129,6 @@ include_directories(${SOUND_INPUT_INCLUDES})
 target_link_libraries(openmw
     ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
@@ -144,13 +143,11 @@ target_link_libraries(openmw
 
 if (ANDROID)
     target_link_libraries(openmw
-        ${OGRE_STATIC_PLUGINS}
         EGL
         android
         log
         dl
         MyGUIEngineStatic
-        Plugin_StrangeButtonStatic
         cpufeatures
         BulletCollision
         BulletDynamics

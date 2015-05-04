@@ -54,11 +54,8 @@ endif (ANDROID)
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
-
-set(CUSTOM_OGRE_PLUGIN_DIR "" CACHE PATH "Specify a custom directory for Ogre plugins (autodetected by default)")
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
@@ -197,46 +194,9 @@ find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 
-set(OGRE_PLUGIN_INCLUDE_DIRS "")
-set(OGRE_STATIC_PLUGINS "")
-
-macro(add_static_ogre_plugin PLUGIN)
-    if(OGRE_${PLUGIN}_FOUND)
-        # strip RenderSystem_ or Plugin_ prefix from plugin name
-        string(REPLACE "RenderSystem_" "" PLUGIN_TEMP ${PLUGIN})
-        string(REPLACE "Plugin_" "" PLUGIN_NAME ${PLUGIN_TEMP})
-        add_definitions(-DENABLE_PLUGIN_${PLUGIN_NAME})
-
-        list(APPEND OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_${PLUGIN}_INCLUDE_DIRS})
-        list(APPEND OGRE_STATIC_PLUGINS ${OGRE_${PLUGIN}_LIBRARIES})
-    endif(OGRE_${PLUGIN}_FOUND)
-endmacro(add_static_ogre_plugin)
-
-if(OGRE_STATIC)
-    # set up OGRE_PLUGIN_INCLUDE_DIRS and OGRE_STATIC_PLUGINS
-    add_static_ogre_plugin(Plugin_OctreeSceneManager)
-    add_static_ogre_plugin(Plugin_ParticleFX)
-    find_package(Cg)
-    if(Cg_FOUND)
-        add_static_ogre_plugin(Plugin_CgProgramManager)
-        list(APPEND OGRE_STATIC_PLUGINS ${Cg_LIBRARIES})
-    endif(Cg_FOUND)
-
-if (ANDROID)
-    add_static_ogre_plugin(RenderSystem_GLES2)
-else ()
-    add_static_ogre_plugin(RenderSystem_GL)
-endif ()
-
-    if(WIN32)
-        add_static_ogre_plugin(RenderSystem_Direct3D9)
-    endif(WIN32)
-endif(OGRE_STATIC)
-
 include_directories("." ${LIBS_DIR}
     SYSTEM
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
-    ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
+    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
@@ -252,31 +212,6 @@ if(MYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)
-    # List used Ogre plugins
-    SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
-
-    # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
-    # not reliable and equals TRUE even if there's no Ogre Cg plugin
-    if (Cg_FOUND)
-        set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
-                              ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
-    endif ()
-
-    if (${OGRE_PLUGIN_DIR_REL}})
-        set(OGRE_PLUGINS_REL_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGIN_DIR_DBG})
-        set(OGRE_PLUGINS_DBG_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGINS_REL_FOUND})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else ()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    endif ()
-
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
@@ -286,28 +221,6 @@ endif (APPLE)
 
 # Set up DEBUG define
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
-
-# Set up Ogre plugin folder & debug suffix
-if (APPLE)
-    # Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
-    add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
-else ()
-    add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
-endif()
-
-if (APPLE AND OPENMW_OSX_DEPLOYMENT)
-    # make it empty so plugin loading code can check this and try to find plugins inside app bundle
-    add_definitions(-DOGRE_PLUGIN_DIR="")
-else()
-    if (CUSTOM_OGRE_PLUGIN_DIR STREQUAL "")
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else()
-        set(OGRE_PLUGIN_DIR ${CUSTOM_OGRE_PLUGIN_DIR})
-    endif()
-
-    add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
-endif()
-
 
 add_subdirectory(files/)
 
@@ -651,12 +564,6 @@ if (WIN32)
         4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
-        # cause by ogre extensivly
-        4193 # #pragma warning(pop) : no matching '#pragma warning(push)'
-        4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
-        4275 # non dll-interface struct 'XXXX' used as base for dll-interface class 'YYYY'
-        4315 # undocumented, 'this' pointer for member might not be aligned (OgreMemoryStlAllocator.h)
-
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
 
@@ -722,90 +629,14 @@ if (APPLE)
     set(OPENCS_BUNDLE_NAME "OpenMW-CS.app")
     set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
 
-    set(ABSOLUTE_PLUGINS "")
-
-    foreach (PLUGIN ${USED_OGRE_PLUGINS})
-        get_filename_component(PLUGIN_ABS ${PLUGIN} REALPATH)
-        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
-    endforeach ()
-
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         include(BundleUtilities)
     " COMPONENT Runtime)
 
-    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
-    # and returns list of install paths for all installed plugins
-    function (install_plugins_for_bundle bundle_path plugins_var)
-        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Frameworks")
-
-        set(PLUGINS "")
-        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
-
-        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
-            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
-            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
-
-            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
-            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
-
-            install(CODE "
-                copy_resolved_framework_into_bundle(\"${PLUGIN}/${PLUGIN_RELATIVE_WE}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
-            " COMPONENT Runtime)
-        endforeach ()
-
-        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
-    endfunction (install_plugins_for_bundle)
-
-    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
-    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
-
     #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
     set(DIRS "")
 
-    # Overriding item resolving during installation, it needed if
-    # some library already has been "fixed up", i.e. its id name contains @executable_path,
-    # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
-    # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
-    #
-    # Current limitations:
-    #   1. Handles only frameworks, not simple libs
-    INSTALL(CODE "
-        cmake_policy(SET CMP0009 OLD)
-        set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
-
-        set(OPENMW_RESOLVED_ITEMS \"\")
-
-        function(gp_resolve_item_override context item exepath dirs resolved_item_var resolved_var)
-            if(item MATCHES \"@executable_path\" AND NOT \${\${resolved_var}})
-                if (item MATCHES \"Frameworks\") # if it is a framework
-                    # get last segment of path
-                    get_filename_component(fname \"\${item}\" NAME_WE)
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} \${CMAKE_SYSTEM_FRAMEWORK_PATH})
-                    if (ri)
-                        string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
-                        set(ri \"\${ri}\${item_part}\")
-                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
-                        set(\${resolved_var} 1 PARENT_SCOPE)
-                    endif()
-                else()
-                    # code path for standard (non-framework) libs (ogre & qt pugins)
-                    get_filename_component(fname \"\${item}\" NAME_WE)
-                    string(REGEX REPLACE \"^lib\" \"\" fname \${fname})
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /usr/lib /usr/local/lib)
-                    if (ri)
-                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
-                        set(\${resolved_var} 1 PARENT_SCOPE)
-                    endif ()
-                endif()
-            endif()
-        endfunction(gp_resolve_item_override)
-
-        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
-        " COMPONENT Runtime)
         include(CPack)
 endif (APPLE)
 
