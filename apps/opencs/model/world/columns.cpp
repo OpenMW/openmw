@@ -172,7 +172,7 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_ReferenceableId, "Object ID" },
 
             { ColumnId_ContainerContent, "Content" },
             { ColumnId_ItemCount, "Count" },
