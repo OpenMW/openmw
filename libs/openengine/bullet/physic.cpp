@@ -480,7 +480,7 @@ namespace Physic
 #endif
 
         bool needDelete = false;
-        if (btBvhTriangleMeshShape* triangleShape = dynamic_cast<btBvhTriangleMeshShape*>(shape->mCollisionShape))
+        if (btBvhTriangleMeshShape* triangleShape = dynamic_cast<btBvhTriangleMeshShape*>(collisionShape))
         {
             btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(triangleShape, btVector3(scale,scale,scale));
             collisionShape = scaled;
