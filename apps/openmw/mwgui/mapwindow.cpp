@@ -468,21 +468,17 @@ namespace MWGui
             return;
 
         std::string markerTexture;
-        MyGUI::Colour markerColour;
         if (type == MWBase::World::Detect_Creature)
         {
-            markerTexture = "textures\\menu_map_dcreature.dds";
-            markerColour = MyGUI::Colour(1,0,0,1);
+            markerTexture = "textures\\detect_animal_icon.dds";
         }
         if (type == MWBase::World::Detect_Key)
         {
-            markerTexture = "textures\\menu_map_dkey.dds";
-            markerColour = MyGUI::Colour(0,1,0,1);
+            markerTexture = "textures\\detect_key_icon.dds";
         }
         if (type == MWBase::World::Detect_Enchantment)
         {
-            markerTexture = "textures\\menu_map_dmagic.dds";
-            markerColour = MyGUI::Colour(0,0,1,1);
+            markerTexture = "textures\\detect_enchantment_icon.dds";
         }
 
         int counter = 0;
@@ -499,7 +495,7 @@ namespace MWGui
                 widgetCoord, MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture(markerTexture);
-            markerWidget->setColour(markerColour);
+            markerWidget->setImageCoord(MyGUI::IntCoord(0,0,8,8));
             markerWidget->setNeedMouseFocus(false);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
