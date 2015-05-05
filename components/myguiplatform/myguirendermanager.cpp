@@ -148,7 +148,7 @@ class Drawable : public osg::Drawable {
             if(texture)
                 state->applyTextureAttribute(0, texture);
 
-            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+            osg::GLBufferObject* bufferobject = 0;//state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
             if (bufferobject)
             {
                 state->bindVertexBufferObject(bufferobject);
