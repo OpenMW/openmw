@@ -7,10 +7,7 @@
 
 #include <osg/Drawable>
 #include <osg/Geode>
-#include <osg/PolygonMode>
 #include <osg/BlendFunc>
-#include <osg/Depth>
-#include <osg/TexEnv>
 #include <osg/Texture2D>
 
 #include <osgViewer/Viewer>
@@ -141,7 +138,9 @@ class Drawable : public osg::Drawable {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        for (std::vector<Batch>::const_iterator it = mBatchVector.begin(); it != mBatchVector.end(); ++it)
+        mReadFrom = (mReadFrom+1)%2;
+        const std::vector<Batch>& vec = mBatchVector[mReadFrom];
+        for (std::vector<Batch>::const_iterator it = vec.begin(); it != vec.end(); ++it)
         {
             const Batch& batch = *it;
             osg::VertexBufferObject *vbo = batch.mVertexBuffer;
@@ -174,7 +173,10 @@ class Drawable : public osg::Drawable {
     }
 
 public:
-    Drawable(osgMyGUI::RenderManager *parent = nullptr) : mParent(parent)
+    Drawable(osgMyGUI::RenderManager *parent = nullptr)
+        : mParent(parent)
+        , mWriteTo(0)
+        , mReadFrom(0)
     {
         setSupportsDisplayList(false);
 
@@ -182,7 +184,7 @@ public:
         collectDrawCalls->setRenderManager(mParent);
         setCullCallback(collectDrawCalls);
 
-        osg::ref_ptr<FrameUpdate> frameUpdate = new Drawable::FrameUpdate;
+        osg::ref_ptr<FrameUpdate> frameUpdate = new FrameUpdate;
         frameUpdate->setRenderManager(mParent);
         setUpdateCallback(frameUpdate);
     }
@@ -199,30 +201,35 @@ public:
         osg::ref_ptr<osg::Texture2D> mTexture;
 
         osg::ref_ptr<osg::VertexBufferObject> mVertexBuffer;
+        // need to hold on to this too as the mVertexBuffer does not hold a ref to its own array
+        osg::ref_ptr<osg::UByteArray> mArray;
+
         size_t mVertexCount;
     };
 
     void addBatch(const Batch& batch)
     {
-        mBatchVector.push_back(batch);
+        mBatchVector[mWriteTo].push_back(batch);
     }
 
     void clear()
     {
-        mBatchVector.clear();
+        mWriteTo = (mWriteTo+1)%2;
+        mBatchVector[mWriteTo].clear();
     }
 
     META_Object(osgMyGUI, Drawable)
 
 private:
-    std::vector<Batch> mBatchVector;
+    std::vector<Batch> mBatchVector[2];
+    int mWriteTo;
+    mutable int mReadFrom;
 };
 
 class OSGVertexBuffer : public MyGUI::IVertexBuffer
 {
     osg::ref_ptr<osg::VertexBufferObject> mBuffer;
     osg::ref_ptr<osg::UByteArray> mVertexArray;
-    std::vector<MyGUI::Vertex> mLockedData;
 
     size_t mNeedVertexCount;
 
@@ -241,6 +248,7 @@ public:
     void create();
 
     osg::VertexBufferObject *getBuffer() const { return mBuffer.get(); }
+    osg::UByteArray *getArray() const { return mVertexArray.get(); }
 };
 
 OSGVertexBuffer::OSGVertexBuffer()
@@ -270,6 +278,12 @@ size_t OSGVertexBuffer::getVertexCount()
 
 MyGUI::Vertex *OSGVertexBuffer::lock()
 {
+    // Force recreating the buffer, to make sure we are not modifying a buffer currently
+    // queued for rendering in the last frame's draw thread.
+    // a more efficient solution might be double buffering
+    destroy();
+    create();
+
     MYGUI_PLATFORM_ASSERT(mBuffer.valid(), "Vertex buffer is not created");
 
     mVertexArray->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
@@ -297,6 +311,7 @@ void OSGVertexBuffer::create()
     mBuffer = new osg::VertexBufferObject;
     mBuffer->setDataVariance(osg::Object::DYNAMIC);
     mBuffer->setUsage(GL_DYNAMIC_DRAW);
+    // NB mBuffer does not own the array
     mBuffer->setArray(0, mVertexArray.get());
 }
 
@@ -338,7 +353,6 @@ void RenderManager::initialise()
     mUpdate = false;
 
     mDrawable = new Drawable(this);
-    mDrawable->setDataVariance(osg::Object::DYNAMIC);
 
     osg::ref_ptr<osg::Geode> geode = new osg::Geode;
     geode->addDrawable(mDrawable.get());
@@ -394,6 +408,7 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     Drawable::Batch batch;
     batch.mVertexCount = count;
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
+    batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getArray();
     if (texture)
         batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
 

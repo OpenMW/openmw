@@ -144,8 +144,6 @@ namespace MWRender
         zNear = 5.f;
         zFar = mViewDistance;
         mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
-
-        mViewer.getCamera()->setCullMask(mViewer.getCamera()->getCullMask() & (~Mask_GUI));
     }
 
     RenderingManager::~RenderingManager()

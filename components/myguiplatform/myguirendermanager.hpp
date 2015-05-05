@@ -46,9 +46,6 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
 
     osg::ref_ptr<osg::Camera> mGuiRoot;
 
-    // Only valid during drawFrame()!
-    osg::RenderInfo *mRenderInfo;
-
     void destroyAllResources();
 
 public:
