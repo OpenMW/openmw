@@ -2956,7 +2956,7 @@ namespace MWWorld
                         Ogre::Vector3(mDetector.getRefData().getPosition().pos)) >= mSquaredDist)
                 return true;
 
-            if (!ptr.getRefData().isEnabled())
+            if (!ptr.getRefData().isEnabled() || ptr.getRefData().isDeleted())
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
