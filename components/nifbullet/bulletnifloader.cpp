@@ -41,55 +41,16 @@ http://www.gnu.org/licenses/ .
 // For warning messages
 #include <iostream>
 
-// Extract a list of keyframe-controlled nodes from a .kf file
-// FIXME: this is a similar copy of OgreNifLoader::loadKf
-void extractControlledNodes(Nif::NIFFilePtr kfFile, std::set<std::string>& controlled)
+namespace
 {
-    if(kfFile->numRoots() < 1)
-    {
-        kfFile->warn("Found no root nodes in "+kfFile->getFilename()+".");
-        return;
-    }
 
-    const Nif::Record *r = kfFile->getRoot(0);
-    assert(r != NULL);
+osg::Matrixf getWorldTransform(const Nif::Node *node)
+{
+    if(node->parent != NULL)
+        return node->trafo.toMatrix() * getWorldTransform(node->parent);
+    return node->trafo.toMatrix();
+}
 
-    if(r->recType != Nif::RC_NiSequenceStreamHelper)
-    {
-        kfFile->warn("First root was not a NiSequenceStreamHelper, but a "+
-                  r->recName+".");
-        return;
-    }
-    const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
-
-    Nif::ExtraPtr extra = seq->extra;
-    if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
-    {
-        kfFile->warn("First extra data was not a NiTextKeyExtraData, but a "+
-                  (extra.empty() ? std::string("nil") : extra->recName)+".");
-        return;
-    }
-
-    extra = extra->extra;
-    Nif::ControllerPtr ctrl = seq->controller;
-    for(;!extra.empty() && !ctrl.empty();(extra=extra->extra),(ctrl=ctrl->next))
-    {
-        if(extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
-        {
-            kfFile->warn("Unexpected extra data "+extra->recName+" with controller "+ctrl->recName);
-            continue;
-        }
-
-        if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-            continue;
-
-        const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
-        const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-
-        if(key->data.empty())
-            continue;
-        controlled.insert(strdata->string);
-    }
 }
 
 namespace NifBullet
@@ -133,7 +94,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(kfname))
     {
         Nif::NIFFilePtr kf;// (Nif::Cache::getInstance().load(kfname));
-        extractControlledNodes(kf, mControlledNodes);
+        //extractControlledNodes(kf, mControlledNodes);
     }
 
     Nif::Record *r = nif.getRoot(0);
@@ -259,7 +220,7 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
         }
         else if(node->recType == Nif::RC_NiTriShape)
         {
-            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, Ogre::Matrix4()/*node->getWorldTransform()*/, isAnimated);
+            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, getWorldTransform(node), isAnimated);
         }
     }
 
@@ -276,7 +237,7 @@ void ManualBulletShapeLoader::handleNode(const Nif::Node *node, int flags,
     }
 }
 
-void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool isAnimated)
+void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf &transform, bool isAnimated)
 {
     assert(shape != NULL);
 
@@ -312,18 +273,18 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
         childMesh->preallocateVertices(data->vertices.size());
         childMesh->preallocateIndices(data->triangles.size());
 
-        //const std::vector<osg::Vec3f> &vertices = data->vertices;
-        //const std::vector<unsigned short> &triangles = data->triangles;
+        const std::vector<osg::Vec3f> &vertices = data->vertices;
+        const std::vector<unsigned short> &triangles = data->triangles;
 
         for(size_t i = 0;i < data->triangles.size();i+=3)
         {
-            //Ogre::Vector3 b1 = vertices[triangles[i+0]];
-            //Ogre::Vector3 b2 = vertices[triangles[i+1]];
-            //Ogre::Vector3 b3 = vertices[triangles[i+2]];
-            //childMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
+            osg::Vec3f b1 = vertices[triangles[i+0]];
+            osg::Vec3f b2 = vertices[triangles[i+1]];
+            osg::Vec3f b3 = vertices[triangles[i+2]];
+            childMesh->addTriangle(btVector3(b1.x(),b1.y(),b1.z()),btVector3(b2.x(),b2.y(),b2.z()),btVector3(b3.x(),b3.y(),b3.z()));
         }
 
-        //TriangleMeshShape* childShape = new TriangleMeshShape(childMesh,true);
+        TriangleMeshShape* childShape = new TriangleMeshShape(childMesh,true);
 
         float scale = shape->trafo.scale;
         const Nif::Node* parent = shape;
@@ -332,15 +293,15 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
             parent = parent->parent;
             scale *= parent->trafo.scale;
         }
-        //Ogre::Quaternion q = transform.extractQuaternion();
-        //Ogre::Vector3 v = transform.getTrans();
-        //childShape->setLocalScaling(btVector3(scale, scale, scale));
+        osg::Quat q = transform.getRotate();
+        osg::Vec3f v = transform.getTrans();
+        childShape->setLocalScaling(btVector3(scale, scale, scale));
 
-        //btTransform trans(btQuaternion(q.x, q.y, q.z, q.w), btVector3(v.x, v.y, v.z));
+        btTransform trans(btQuaternion(q.x(), q.y(), q.z(), q.w()), btVector3(v.x(), v.y(), v.z()));
 
-        //mShape->mAnimatedShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
+        mShape->mAnimatedShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
 
-        //mCompoundShape->addChildShape(trans, childShape);
+        mCompoundShape->addChildShape(trans, childShape);
     }
     else
     {
@@ -349,17 +310,15 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
 
         // Static shape, just transform all vertices into position
         const Nif::NiTriShapeData *data = shape->data.getPtr();
-        //const std::vector<osg::Vec3f> &vertices = data->vertices;
-        //const std::vector<unsigned short> &triangles = data->triangles;
+        const std::vector<osg::Vec3f> &vertices = data->vertices;
+        const std::vector<unsigned short> &triangles = data->triangles;
 
         for(size_t i = 0;i < data->triangles.size();i+=3)
         {
-            /*
             osg::Vec3f b1 = transform*vertices[triangles[i+0]];
             osg::Vec3f b2 = transform*vertices[triangles[i+1]];
             osg::Vec3f b3 = transform*vertices[triangles[i+2]];
-            mStaticMesh->addTriangle(btVector3(b1.x,b1.y,b1.z),btVector3(b2.x,b2.y,b2.z),btVector3(b3.x,b3.y,b3.z));
-            */
+            mStaticMesh->addTriangle(btVector3(b1.x(),b1.y(),b1.z()),btVector3(b2.x(),b2.y(),b2.z()),btVector3(b3.x(),b3.y(),b3.z()));
         }
     }
 }

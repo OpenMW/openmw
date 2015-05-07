@@ -32,6 +32,8 @@
 #include <btBulletDynamicsCommon.h>
 #include <openengine/bullet/BulletShapeLoader.h>
 
+#include <osg/Matrixf>
+
 // For warning messages
 #include <iostream>
 
@@ -117,7 +119,7 @@ private:
     /**
     *convert a NiTriShape to a bullet trishape.
     */
-    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const Ogre::Matrix4 &transform, bool isAnimated);
+    void handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf& transform, bool isAnimated);
 
     std::string mResourceName;
 

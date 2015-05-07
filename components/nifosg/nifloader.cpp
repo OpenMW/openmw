@@ -49,24 +49,6 @@
 
 namespace
 {
-    osg::Matrixf toMatrix(const Nif::Transformation& nifTrafo)
-    {
-        osg::Matrixf transform;
-        transform.setTrans(nifTrafo.pos);
-
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                transform(j,i) = nifTrafo.rotation.mValues[i][j] * nifTrafo.scale; // NB column/row major difference
-
-        return transform;
-    }
-
-    osg::Matrixf getWorldTransform(const Nif::Node* node)
-    {
-        if(node->parent != NULL)
-            return toMatrix(node->trafo) * getWorldTransform(node->parent);
-        return toMatrix(node->trafo);
-    }
 
     void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
     {
@@ -467,7 +449,7 @@ namespace NifOsg
         static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
-            osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform(toMatrix(nifNode->trafo));
+            osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
             if (nifNode->recType == Nif::RC_NiBillboardNode)
             {
@@ -1072,7 +1054,7 @@ namespace NifOsg
                     std::pair<unsigned short, float> indexWeight = std::make_pair(weights[j].vertex, weights[j].weight);
                     influence.mWeights.insert(indexWeight);
                 }
-                influence.mInvBindMatrix = toMatrix(data->bones[i].trafo);
+                influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
                 map->mMap.insert(std::make_pair(boneName, influence));

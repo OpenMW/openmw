@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 
 #include <osg/Vec3f>
+#include <osg/Matrixf>
 
 // Common types used in NIF files
 
@@ -48,6 +49,18 @@ struct Transformation
     osg::Vec3f pos;
     Matrix3 rotation; // this can contain scale components too, including negative and nonuniform scales
     float scale;
+
+    osg::Matrixf toMatrix() const
+    {
+        osg::Matrixf transform;
+        transform.setTrans(pos);
+
+        for (int i=0;i<3;++i)
+            for (int j=0;j<3;++j)
+                transform(j,i) = rotation.mValues[i][j] * scale; // NB column/row major difference
+
+        return transform;
+    }
 
     static const Transformation& getIdentity()
     {
