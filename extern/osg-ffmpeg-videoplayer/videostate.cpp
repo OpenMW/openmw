@@ -602,7 +602,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     return 0;
 }
 
-void VideoState::init(boost::shared_ptr<std::istream> inputstream)
+void VideoState::init(boost::shared_ptr<std::istream> inputstream, const std::string &name)
 {
     int video_index = -1;
     int audio_index = -1;
@@ -622,8 +622,6 @@ void VideoState::init(boost::shared_ptr<std::istream> inputstream)
     if(this->format_ctx)
         this->format_ctx->pb = ioCtx;
 
-    std::string videoName;
-
     // Open video file
     ///
     /// format_ctx->pb->buffer must be freed by hand,
@@ -631,7 +629,7 @@ void VideoState::init(boost::shared_ptr<std::istream> inputstream)
     ///
     /// https://trac.ffmpeg.org/ticket/1357
     ///
-    if(!this->format_ctx || avformat_open_input(&this->format_ctx, videoName.c_str(), NULL, NULL))
+    if(!this->format_ctx || avformat_open_input(&this->format_ctx, name.c_str(), NULL, NULL))
     {
         if (this->format_ctx != NULL)
         {
@@ -655,7 +653,7 @@ void VideoState::init(boost::shared_ptr<std::istream> inputstream)
         throw std::runtime_error("Failed to retrieve stream information");
 
     // Dump information about file onto standard error
-    av_dump_format(this->format_ctx, 0, videoName.c_str(), 0);
+    av_dump_format(this->format_ctx, 0, name.c_str(), 0);
 
     for(i = 0;i < this->format_ctx->nb_streams;i++)
     {

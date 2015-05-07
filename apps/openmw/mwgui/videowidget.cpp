@@ -30,7 +30,7 @@ void VideoWidget::playVideo(const std::string &video)
 {
     mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
 
-    mPlayer->playVideo(mVFS->get(video));
+    mPlayer->playVideo(mVFS->get(video), video);
 
     osg::ref_ptr<osg::Texture2D> texture = mPlayer->getVideoTexture();
     if (!texture)

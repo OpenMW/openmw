@@ -84,7 +84,7 @@ struct VideoState {
 
     void setAudioFactory(MovieAudioFactory* factory);
 
-    void init(boost::shared_ptr<std::istream> inputstream);
+    void init(boost::shared_ptr<std::istream> inputstream, const std::string& name);
     void deinit();
 
     void setPaused(bool isPaused);
