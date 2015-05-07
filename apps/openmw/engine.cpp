@@ -76,6 +76,7 @@ void OMW::Engine::frame(float frametime)
 {
     try
     {
+        mStartTick = mViewer->getStartTick();
         mEnvironment.setFrameDuration (frametime);
 
         // update input
@@ -99,6 +100,7 @@ void OMW::Engine::frame(float frametime)
         // update game state
         MWBase::Environment::get().getStateManager()->update (frametime);
 
+        osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
@@ -120,15 +122,17 @@ void OMW::Engine::frame(float frametime)
                 MWBase::Environment::get().getWorld()->advanceTime(
                     frametime*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/3600);
         }
-
+        osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
 
         // update actors
+        osg::Timer_t beforeMechanicsTick = osg::Timer::instance()->tick();
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
             MWBase::Environment::get().getMechanicsManager()->update(frametime,
                 guiActive);
         }
+        osg::Timer_t afterMechanicsTick = osg::Timer::instance()->tick();
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_Running)
@@ -139,11 +143,13 @@ void OMW::Engine::frame(float frametime)
         }
 
         // update world
+        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();;
         if (MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
             MWBase::Environment::get().getWorld()->update(frametime, guiActive);
         }
+        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
 
         // update GUI
         MWBase::Environment::get().getWindowManager()->onFrame(frametime);
@@ -155,6 +161,21 @@ void OMW::Engine::frame(float frametime)
 #endif
             MWBase::Environment::get().getWindowManager()->update();
         }
+
+        int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        osg::Stats* stats = mViewer->getViewerStats();
+        stats->setAttribute(frameNumber, "script_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeScriptTick));
+        stats->setAttribute(frameNumber, "script_time_taken", osg::Timer::instance()->delta_s(beforeScriptTick, afterScriptTick));
+        stats->setAttribute(frameNumber, "script_time_end", osg::Timer::instance()->delta_s(mStartTick, afterScriptTick));
+
+        stats->setAttribute(frameNumber, "mechanics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeMechanicsTick));
+        stats->setAttribute(frameNumber, "mechanics_time_taken", osg::Timer::instance()->delta_s(beforeMechanicsTick, afterMechanicsTick));
+        stats->setAttribute(frameNumber, "mechanics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterMechanicsTick));
+
+        stats->setAttribute(frameNumber, "physics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforePhysicsTick));
+        stats->setAttribute(frameNumber, "physics_time_taken", osg::Timer::instance()->delta_s(beforePhysicsTick, afterPhysicsTick));
+        stats->setAttribute(frameNumber, "physics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterPhysicsTick));
+
     }
     catch (const std::exception& e)
     {
@@ -194,6 +215,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
             throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
         }
     }
+
+    mStartTick = osg::Timer::instance()->tick();
 }
 
 OMW::Engine::~Engine()
@@ -430,7 +453,7 @@ void OMW::Engine::go()
     {
         MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
     }
-    else if (0)// !mSkipMenu)
+    else if (!mSkipMenu)
     {
         // start in main menu
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
@@ -452,7 +475,18 @@ void OMW::Engine::go()
 
     // Start the main rendering loop
     mViewer->setCameraManipulator(new osgGA::TrackballManipulator);
-    mViewer->addEventHandler(new osgViewer::StatsHandler);
+
+    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
+
+    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
+    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
+    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
+
+    mViewer->addEventHandler(statshandler);
+
 
     osg::Timer frameTimer;
     while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())

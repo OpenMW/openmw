@@ -198,11 +198,6 @@ void Objects::removeCell(const MWWorld::CellStore* store)
     }
 }
 
-void Objects::update(float dt)
-{
-
-}
-
 void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
     /*

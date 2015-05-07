@@ -63,9 +63,6 @@ public:
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 
-    void update (float dt);
-    ///< per-frame update
-
     //Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
     ///< get a bounding box that encloses all objects in the specified cell
 

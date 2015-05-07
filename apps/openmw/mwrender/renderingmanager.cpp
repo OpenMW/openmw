@@ -248,7 +248,6 @@ namespace MWRender
 
     void RenderingManager::update(float dt, bool paused)
     {
-        mObjects->update(dt);
         mEffectManager->update(dt);
         mSky->update(dt);
     }
