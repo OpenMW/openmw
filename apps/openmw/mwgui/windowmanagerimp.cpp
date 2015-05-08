@@ -423,7 +423,10 @@ namespace MWGui
 
         mFontLoader.reset();
 
+        mGui->shutdown();
         delete mGui;
+
+        mGuiPlatform->shutdown();
         delete mGuiPlatform;
     }
 
