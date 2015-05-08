@@ -21,6 +21,7 @@ namespace Resource
     {
     public:
         ResourceSystem(const VFS::Manager* vfs);
+        ~ResourceSystem();
 
         SceneManager* getSceneManager();
         TextureManager* getTextureManager();
@@ -32,6 +33,9 @@ namespace Resource
         std::auto_ptr<TextureManager> mTextureManager;
 
         const VFS::Manager* mVFS;
+
+        ResourceSystem(const ResourceSystem&);
+        void operator = (const ResourceSystem&);
     };
 
 }

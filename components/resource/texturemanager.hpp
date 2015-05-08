@@ -21,6 +21,7 @@ namespace Resource
     {
     public:
         TextureManager(const VFS::Manager* vfs);
+        ~TextureManager();
 
         // TODO: texture filtering settings
 
@@ -48,6 +49,9 @@ namespace Resource
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
 
         bool mUnRefImageDataAfterApply;
+
+        TextureManager(const TextureManager&);
+        void operator = (const TextureManager&);
     };
 
 }

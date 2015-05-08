@@ -13,6 +13,11 @@ namespace Resource
         mSceneManager.reset(new SceneManager(vfs, mTextureManager.get()));
     }
 
+    ResourceSystem::~ResourceSystem()
+    {
+        // this has to be defined in the .cpp file as we can't delete incomplete types
+    }
+
     SceneManager* ResourceSystem::getSceneManager()
     {
         return mSceneManager.get();

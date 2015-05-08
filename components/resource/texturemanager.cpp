@@ -42,6 +42,11 @@ namespace Resource
 
     }
 
+    TextureManager::~TextureManager()
+    {
+
+    }
+
     void TextureManager::setUnRefImageDataAfterApply(bool unref)
     {
         mUnRefImageDataAfterApply = unref;

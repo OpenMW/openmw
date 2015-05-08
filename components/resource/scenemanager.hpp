@@ -32,6 +32,7 @@ namespace Resource
     {
     public:
         SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager);
+        ~SceneManager();
 
         /// Get a read-only copy of this scene "template"
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name);
@@ -69,6 +70,9 @@ namespace Resource
 
         typedef std::map<std::string, osg::ref_ptr<const NifOsg::KeyframeHolder> > KeyframeIndex;
         KeyframeIndex mKeyframeIndex;
+
+        SceneManager(const SceneManager&);
+        void operator = (const SceneManager&);
     };
 
 }

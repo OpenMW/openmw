@@ -70,6 +70,11 @@ namespace Resource
     {
     }
 
+    SceneManager::~SceneManager()
+    {
+        // this has to be defined in the .cpp file as we can't delete incomplete types
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
         std::string normalized = name;
