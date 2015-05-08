@@ -485,6 +485,12 @@ namespace MWDialogue
 
                     executeScript (info->mResultScript);
                 }
+                else
+                {
+                    mChoice = -1;
+                    mIsInChoice = false;
+                    MWBase::Environment::get().getWindowManager()->getDialogueWindow()->clearChoices();
+                }
             }
         }
 
