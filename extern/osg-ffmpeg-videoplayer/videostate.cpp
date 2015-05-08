@@ -721,7 +721,12 @@ void VideoState::deinit()
         avformat_close_input(&this->format_ctx);
     }
 
-    mTexture = NULL;
+    if (mTexture)
+    {
+        // reset Image separately, it's pointing to *this and there might still be outside references to mTexture
+        mTexture->setImage(NULL);
+        mTexture = NULL;
+    }
 }
 
 double VideoState::get_external_clock()
