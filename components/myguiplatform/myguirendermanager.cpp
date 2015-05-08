@@ -401,6 +401,9 @@ void RenderManager::destroyVertexBuffer(MyGUI::IVertexBuffer *buffer)
 
 void RenderManager::begin()
 {
+    mDrawable->clear();
+    // variance will be recomputed based on textures being rendered in this frame
+    mDrawable->setDataVariance(osg::Object::STATIC);
 }
 
 void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count)
@@ -410,7 +413,11 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
     batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getArray();
     if (texture)
+    {
         batch.mTexture = static_cast<OSGTexture*>(texture)->getTexture();
+        if (batch.mTexture->getDataVariance() == osg::Object::DYNAMIC)
+            mDrawable->setDataVariance(osg::Object::DYNAMIC); // only for this frame, reset in begin()
+    }
 
     mDrawable->addBatch(batch);
 }
@@ -433,8 +440,9 @@ void RenderManager::update()
 
 void RenderManager::collectDrawCalls()
 {
-    mDrawable->clear();
+    begin();
     onRenderToTarget(this, mUpdate);
+    end();
 
     mUpdate = false;
 }
