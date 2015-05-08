@@ -30,6 +30,7 @@ namespace MWGui
         : WindowBase("openmw_loading_screen.layout")
         , mVFS(vfs)
         , mViewer(viewer)
+        , mTargetFrameRate(120.0)
         , mLastWallpaperChangeTime(0.0)
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
@@ -50,6 +51,10 @@ namespace MWGui
         setVisible(false);
 
         findSplashScreens();
+    }
+
+    LoadingScreen::~LoadingScreen()
+    {
     }
 
     void LoadingScreen::findSplashScreens()
@@ -86,10 +91,6 @@ namespace MWGui
         mLoadingBox->setPosition(mMainWidget->getWidth()/2 - mLoadingBox->getWidth()/2, mLoadingBox->getTop());
     }
 
-    LoadingScreen::~LoadingScreen()
-    {
-    }
-
     void LoadingScreen::setVisible(bool visible)
     {
         WindowBase::setVisible(visible);
@@ -105,9 +106,8 @@ namespace MWGui
 
         if (mViewer->getIncrementalCompileOperation())
         {
-            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(200);
-            // keep this in sync with loadingScreenFps
-            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(1.0/120.0);
+            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(mTargetFrameRate);
         }
 
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
@@ -212,9 +212,7 @@ namespace MWGui
 
     void LoadingScreen::draw()
     {
-        const float loadingScreenFps = 120.f;
-
-        if (mTimer.time_m() > mLastRenderTime + (1.f/loadingScreenFps) * 1000.f)
+        if (mTimer.time_m() > mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
         {
             bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                     == MWBase::StateManager::State_NoGame);
@@ -233,7 +231,12 @@ namespace MWGui
 
             MWBase::Environment::get().getInputManager()->update(0, true, true);
 
+            //osg::Timer timer;
             mViewer->frame();
+            //std::cout << "frame took " << timer.time_m() << std::endl;
+
+            //if (mViewer->getIncrementalCompileOperation())
+                //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
 
             // resume 3d rendering
             mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
@@ -242,4 +245,5 @@ namespace MWGui
             mLastRenderTime = mTimer.time_m();
         }
     }
+
 }
