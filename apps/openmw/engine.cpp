@@ -435,6 +435,17 @@ void OMW::Engine::go()
 
     mViewer = new osgViewer::Viewer;
 
+    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
+
+    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
+    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
+    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
+                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
+
+    mViewer->addEventHandler(statshandler);
+
     Settings::Manager settings;
     std::string settingspath;
 
@@ -475,18 +486,6 @@ void OMW::Engine::go()
 
     // Start the main rendering loop
     mViewer->setCameraManipulator(new osgGA::TrackballManipulator);
-
-    osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
-
-    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
-    statshandler->addUserStatsLine("Mechanics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
-    statshandler->addUserStatsLine("Physics", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
-
-    mViewer->addEventHandler(statshandler);
-
 
     osg::Timer frameTimer;
     while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
