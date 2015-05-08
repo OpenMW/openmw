@@ -612,7 +612,7 @@ namespace MWGui
             throw std::runtime_error("Added item not found");
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
-        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }
