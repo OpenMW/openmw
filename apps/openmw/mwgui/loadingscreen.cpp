@@ -103,6 +103,13 @@ namespace MWGui
         if (mMainWidget->getVisible())
             return;
 
+        if (mViewer->getIncrementalCompileOperation())
+        {
+            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(200);
+            // keep this in sync with loadingScreenFps
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(1.0/120.0);
+        }
+
         bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
                 == MWBase::StateManager::State_NoGame);
 
@@ -218,8 +225,6 @@ namespace MWGui
                 changeWallpaper();
             }
 
-            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(80);
-
             // Turn off rendering except the GUI
             int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
             int oldCullMask = mViewer->getCamera()->getCullMask();
@@ -227,8 +232,6 @@ namespace MWGui
             mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
             MWBase::Environment::get().getInputManager()->update(0, true, true);
-
-            //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
 
             mViewer->frame();
 
