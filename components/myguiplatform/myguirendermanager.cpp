@@ -148,6 +148,7 @@ class Drawable : public osg::Drawable {
             if(texture)
                 state->applyTextureAttribute(0, texture);
 
+            // VBOs disabled due to crash in OSG: http://forum.openscenegraph.org/viewtopic.php?t=14909
             osg::GLBufferObject* bufferobject = 0;//state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
             if (bufferobject)
             {
