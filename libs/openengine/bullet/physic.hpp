@@ -197,7 +197,7 @@ namespace Physic
         /**
          * Note that the shapeLoader IS destroyed by the phyic Engine!!
          */
-        PhysicEngine(BulletShapeLoader* shapeLoader);
+        PhysicEngine();
 
         /**
          * It DOES destroy the shape loader!
@@ -290,14 +290,11 @@ namespace Physic
                                                                  btCollisionObject *object);
 
         //Bullet Stuff
-        btBroadphaseInterface* broadphase;
-        btDefaultCollisionConfiguration* collisionConfiguration;
-        btSequentialImpulseConstraintSolver* solver;
-        btCollisionDispatcher* dispatcher;
+        btBroadphaseInterface* mBroadphase;
+        btDefaultCollisionConfiguration* mCollisionConfiguration;
+        btSequentialImpulseConstraintSolver* mSolver;
+        btCollisionDispatcher* mDispatcher;
         btDiscreteDynamicsWorld* mDynamicsWorld;
-
-        //the NIF file loader.
-        BulletShapeLoader* mShapeLoader;
 
         typedef std::map<std::string, HeightField> HeightFieldContainer;
         HeightFieldContainer mHeightFieldMap;
@@ -317,24 +314,6 @@ namespace Physic
         PhysicEngine& operator=(const PhysicEngine&);
     };
 
-
-    struct MyRayResultCallback : public btCollisionWorld::RayResultCallback
-    {
-        virtual btScalar addSingleResult( btCollisionWorld::LocalRayResult& rayResult, bool bNormalInWorldSpace)
-        {
-            results.push_back( std::make_pair(rayResult.m_hitFraction, rayResult.m_collisionObject) );
-            return rayResult.m_hitFraction;
-        }
-
-        static bool cmp( const std::pair<float, std::string>& i, const std::pair<float, std::string>& j )
-        {
-            if( i.first > j.first ) return false;
-            if( j.first > i.first ) return true;
-            return false;
-        }
-
-        std::vector < std::pair<float, const btCollisionObject*> > results;
-    };
 
 }}
 

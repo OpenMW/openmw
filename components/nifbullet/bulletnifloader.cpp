@@ -323,15 +323,6 @@ void ManualBulletShapeLoader::handleNiTriShape(const Nif::NiTriShape *shape, int
     }
 }
 
-void ManualBulletShapeLoader::load(const std::string &name,const std::string &group)
-{
-    // Check if the resource already exists
-    Ogre::ResourcePtr ptr = OEngine::Physic::BulletShapeManager::getSingleton().getByName(name, group);
-    if (!ptr.isNull())
-        return;
-    OEngine::Physic::BulletShapeManager::getSingleton().create(name,group,true,this);
-}
-
 bool findBoundingBox (const Nif::Node* node, Ogre::Vector3& halfExtents, Ogre::Vector3& translation, Ogre::Quaternion& orientation)
 {
     if(node->hasBounds)

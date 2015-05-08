@@ -168,6 +168,10 @@ class Drawable : public osg::Drawable {
             glDrawArrays(GL_TRIANGLES, 0, batch.mVertexCount);
         }
 
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY);
+
         state->unbindVertexBufferObject();
         state->dirtyAllVertexArrays();
         state->disableAllVertexArrays();

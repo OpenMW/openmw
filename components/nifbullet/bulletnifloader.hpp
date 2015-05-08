@@ -66,7 +66,7 @@ struct TriangleMeshShape : public btBvhTriangleMeshShape
 /**
 *Load bulletShape from NIF files.
 */
-class ManualBulletShapeLoader : public OEngine::Physic::BulletShapeLoader
+class ManualBulletShapeLoader
 {
 public:
     ManualBulletShapeLoader(bool showMarkers=false)
@@ -95,13 +95,6 @@ public:
     *This function should not be called manualy. Use load instead. (this is called by the BulletShapeManager when you use load).
     */
     void loadResource(Ogre::Resource *resource);
-
-    /**
-    *This function load a new bulletShape from a NIF file into the BulletShapeManager.
-    *When the file is loaded, you can then use BulletShapeManager::getByName() to retrive the bulletShape.
-    *Warning: this function will just crash if the resourceGroup doesn't exist!
-    */
-    void load(const std::string &name,const std::string &group);
 
 private:
     btVector3 getbtVector(Ogre::Vector3 const &v);

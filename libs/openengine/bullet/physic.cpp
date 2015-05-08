@@ -235,27 +235,25 @@ namespace Physic
 
 
 
-    PhysicEngine::PhysicEngine(BulletShapeLoader* shapeLoader)
+    PhysicEngine::PhysicEngine()
     {
         // Set up the collision configuration and dispatcher
-        collisionConfiguration = new btDefaultCollisionConfiguration();
-        dispatcher = new btCollisionDispatcher(collisionConfiguration);
+        mCollisionConfiguration = new btDefaultCollisionConfiguration();
+        mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
 
         // The actual physics solver
-        solver = new btSequentialImpulseConstraintSolver;
+        mSolver = new btSequentialImpulseConstraintSolver;
 
-        broadphase = new btDbvtBroadphase();
+        mBroadphase = new btDbvtBroadphase();
 
         // The world.
-        mDynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+        mDynamicsWorld = new btDiscreteDynamicsWorld(mDispatcher,mBroadphase,mSolver,mCollisionConfiguration);
 
         // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
         // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
         mDynamicsWorld->setForceUpdateAllAabbs(false);
 
         mDynamicsWorld->setGravity(btVector3(0,0,-10));
-
-        mShapeLoader = shapeLoader;
     }
 
     PhysicEngine::~PhysicEngine()
@@ -294,11 +292,10 @@ namespace Physic
         }
 
         delete mDynamicsWorld;
-        delete solver;
-        delete collisionConfiguration;
-        delete dispatcher;
-        delete broadphase;
-        delete mShapeLoader;
+        delete mSolver;
+        delete mCollisionConfiguration;
+        delete mDispatcher;
+        delete mBroadphase;
     }
 
     void PhysicEngine::addHeightField(float* heights,
@@ -382,9 +379,8 @@ namespace Physic
         std::string outputstring = mesh + sid;
 
         //get the shape from the .nif
-        mShapeLoader->load(outputstring,"General");
-        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+        //mShapeLoader->load(outputstring,"General");
+        //BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
 
         //adjustRigidBody(body, position, rotation, shape->mBoxTranslation * scale, shape->mBoxRotation);
     }
@@ -397,9 +393,8 @@ namespace Physic
         std::string outputstring = mesh + sid;
 
         //get the shape from the .nif
-        mShapeLoader->load(outputstring,"General");
-        BulletShapeManager::getSingletonPtr()->load(outputstring,"General");
-        BulletShapePtr shape = BulletShapeManager::getSingleton().getByName(outputstring,"General");
+        //mShapeLoader->load(outputstring,"General");
+        BulletShapePtr shape;// = BulletShapeManager::getSingleton().getByName(outputstring,"General");
 
         // TODO: add option somewhere to enable collision for placeable meshes
 

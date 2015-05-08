@@ -533,9 +533,7 @@ namespace MWWorld
     PhysicsSystem::PhysicsSystem(osg::ref_ptr<osg::Group> parentNode) :
         mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0), mDebugDrawEnabled(false), mParentNode(parentNode)
     {
-        // Create physics. shapeLoader is deleted by the physic engine
-        //NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();
-        mEngine = new OEngine::Physic::PhysicEngine(0);//shapeLoader);
+        mEngine = new OEngine::Physic::PhysicEngine;
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -543,7 +541,6 @@ namespace MWWorld
         if (mWaterCollisionObject.get())
             mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         delete mEngine;
-        //delete OEngine::Physic::BulletShapeManager::getSingletonPtr();
     }
 
     bool PhysicsSystem::toggleDebugRendering()
