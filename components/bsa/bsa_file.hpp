@@ -25,12 +25,11 @@
 #define BSA_BSA_FILE_H
 
 #include <stdint.h>
-#include <libs/platform/strings.h>
 #include <string>
 #include <vector>
 #include <map>
 
-#include <OgreDataStream.h>
+#include <components/misc/stringops.hpp>
 
 #include <components/files/constrainedfilestream.hpp>
 
@@ -74,7 +73,7 @@ private:
     struct iltstr
     {
         bool operator()(const char *s1, const char *s2) const
-        { return strcasecmp(s1,s2) < 0; }
+        { return Misc::StringUtils::ciLess(s1, s2); }
     };
 
     /** A map used for fast file name lookup. The value is the index into

@@ -194,7 +194,7 @@ find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 
-include_directories("." ${LIBS_DIR}
+include_directories("."
     SYSTEM
     ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIR}

@@ -1,5 +1,8 @@
 #include "registerarchives.hpp"
 
+#include <iostream>
+#include <sstream>
+
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 #include <components/vfs/filesystemarchive.hpp>
