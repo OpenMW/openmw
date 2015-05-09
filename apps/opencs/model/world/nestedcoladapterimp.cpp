@@ -551,6 +551,7 @@ namespace CSMWorld
         ESM::DialInfo::SelectStruct condStruct;
         condStruct.mSelectRule = "00000";
         condStruct.mValue = ESM::Variant();
+        condStruct.mValue.setType(ESM::VT_Int); // default to ints
 
         conditions.insert(conditions.begin()+position, condStruct);
 
@@ -688,6 +689,7 @@ namespace CSMWorld
                 char condType = conditions[subRowIndex].mSelectRule[1];
                 switch (condType)
                 {
+                    case '0': return 0;  // blank space
                     case '1': return 1;  // Function
                     case '2': return 2;  // Global
                     case '3': return 3;  // Local
@@ -931,6 +933,7 @@ namespace CSMWorld
                     }
                     default: break;
                 }
+                break;
             }
             default: throw std::runtime_error("Info condition subcolumn index out of range");
         }
