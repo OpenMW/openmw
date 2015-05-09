@@ -590,83 +590,86 @@ namespace CSMWorld
 
     // See the mappings in MWDialogue::SelectWrapper::getArgument
     // from ESM::Attribute, ESM::Skill and MWMechanics::CreatureStats (for AI)
-    const std::map<const std::string, const std::string> sEncToInfoFunc =
+    static std::map<const std::string, std::string> populateEncToInfoFunc()
     {
-        { "00", "Rank Low"                },
-        { "01", "Rank High"               },
-        { "02", "Rank Requirement"        },
-        { "03", "Reputation"              },
-        { "04", "Health Percent"          },
-        { "05", "PC Reputation"           },
-        { "06", "PC Level"                },
-        { "07", "PC Health Percent"       },
-        { "08", "PC Magicka"              }, // dynamic stat
-        { "09", "PC Fatigue"              }, // dynamic stat
-        { "10", "PC Strength"             }, // attrib
-        { "11", "PC Block"                },
-        { "12", "PC Armoror"              },
-        { "13", "PC Medium Armor"         },
-        { "14", "PC Heavy Armor"          },
-        { "15", "PC Blunt Weapon"         },
-        { "16", "PC Long Blade"           },
-        { "17", "PC Axe"                  },
-        { "18", "PC Spear"                },
-        { "19", "PC Athletics"            },
-        { "20", "PC Enchant"              },
-        { "21", "PC Destruction"          },
-        { "22", "PC Alteration"           },
-        { "23", "PC Illusion"             },
-        { "24", "PC Conjuration"          },
-        { "25", "PC Mysticism"            },
-        { "26", "PC Restoration"          },
-        { "27", "PC Alchemy"              },
-        { "28", "PC Unarmored"            },
-        { "29", "PC Security"             },
-        { "30", "PC Sneak"                },
-        { "31", "PC Acrobatics"           },
-        { "32", "PC Light Armor"          },
-        { "33", "PC Short Blade"          },
-        { "34", "PC Marksman"             },
-        { "35", "PC Merchantile"          },
-        { "36", "PC Speechcraft"          },
-        { "37", "PC Hand To Hand"         },
-        { "38", "PC Sex"                  },
-        { "39", "PC Expelled"             },
-        { "40", "PC Common Disease"       },
-        { "41", "PC Blight Disease"       },
-        { "42", "PC Clothing Modifier"    },
-        { "43", "PC Crime Level"          },
-        { "44", "Same Sex"                },
-        { "45", "Same Race"               },
-        { "46", "Same Faction"            },
-        { "47", "Faction Rank Difference" },
-        { "48", "Detected"                },
-        { "49", "Alarmed"                 },
-        { "50", "Choice"                  },
-        { "51", "PC Intelligence"         }, // attrib
-        { "52", "PC Willpower"            }, // attrib
-        { "53", "PC Agility"              }, // attrib
-        { "54", "PC Speed"                }, // attrib
-        { "55", "PC Endurance"            }, // attrib
-        { "56", "PC Personality"          }, // attrib
-        { "57", "PC Luck"                 }, // attrib
-        { "58", "PC Corpus"               },
-        { "59", "Weather"                 },
-        { "60", "PC Vampire"              },
-        { "61", "Level"                   },
-        { "62", "Attacked"                },
-        { "63", "Talked To PC"            },
-        { "64", "PC Health"               }, // dynamic stat
-        { "65", "Creature Target"         },
-        { "66", "Friend Hit"              },
-        { "67", "Fight"                   }, // AI
-        { "68", "Hello"                   }, // AI
-        { "69", "Alarm"                   }, // AI
-        { "70", "Flee"                    }, // AI
-        { "71", "Should Attack"           },
-        { "72", "Werewolf"                },
-        { "73", "PC Werewolf Kills"       }
-    };
+        std::map<const std::string, std::string> funcMap;
+        funcMap["00"] = "Rank Low";
+        funcMap["01"] = "Rank High";
+        funcMap["02"] = "Rank Requirement";
+        funcMap["03"] = "Reputation";
+        funcMap["04"] = "Health Percent";
+        funcMap["05"] = "PC Reputation";
+        funcMap["06"] = "PC Level";
+        funcMap["07"] = "PC Health Percent";
+        funcMap["08"] = "PC Magicka";
+        funcMap["09"] = "PC Fatigue";
+        funcMap["10"] = "PC Strength";
+        funcMap["11"] = "PC Block";
+        funcMap["12"] = "PC Armoror";
+        funcMap["13"] = "PC Medium Armor";
+        funcMap["14"] = "PC Heavy Armor";
+        funcMap["15"] = "PC Blunt Weapon";
+        funcMap["16"] = "PC Long Blade";
+        funcMap["17"] = "PC Axe";
+        funcMap["18"] = "PC Spear";
+        funcMap["19"] = "PC Athletics";
+        funcMap["20"] = "PC Enchant";
+        funcMap["21"] = "PC Destruction";
+        funcMap["22"] = "PC Alteration";
+        funcMap["23"] = "PC Illusion";
+        funcMap["24"] = "PC Conjuration";
+        funcMap["25"] = "PC Mysticism";
+        funcMap["26"] = "PC Restoration";
+        funcMap["27"] = "PC Alchemy";
+        funcMap["28"] = "PC Unarmored";
+        funcMap["29"] = "PC Security";
+        funcMap["30"] = "PC Sneak";
+        funcMap["31"] = "PC Acrobatics";
+        funcMap["32"] = "PC Light Armor";
+        funcMap["33"] = "PC Short Blade";
+        funcMap["34"] = "PC Marksman";
+        funcMap["35"] = "PC Merchantile";
+        funcMap["36"] = "PC Speechcraft";
+        funcMap["37"] = "PC Hand To Hand";
+        funcMap["38"] = "PC Sex";
+        funcMap["39"] = "PC Expelled";
+        funcMap["40"] = "PC Common Disease";
+        funcMap["41"] = "PC Blight Disease";
+        funcMap["42"] = "PC Clothing Modifier";
+        funcMap["43"] = "PC Crime Level";
+        funcMap["44"] = "Same Sex";
+        funcMap["45"] = "Same Race";
+        funcMap["46"] = "Same Faction";
+        funcMap["47"] = "Faction Rank Difference";
+        funcMap["48"] = "Detected";
+        funcMap["49"] = "Alarmed";
+        funcMap["50"] = "Choice";
+        funcMap["51"] = "PC Intelligence";
+        funcMap["52"] = "PC Willpower";
+        funcMap["53"] = "PC Agility";
+        funcMap["54"] = "PC Speed";
+        funcMap["55"] = "PC Endurance";
+        funcMap["56"] = "PC Personality";
+        funcMap["57"] = "PC Luck";
+        funcMap["58"] = "PC Corpus";
+        funcMap["59"] = "Weather";
+        funcMap["60"] = "PC Vampire";
+        funcMap["61"] = "Level";
+        funcMap["62"] = "Attacked";
+        funcMap["63"] = "Talked To PC";
+        funcMap["64"] = "PC Health";
+        funcMap["65"] = "Creature Target";
+        funcMap["66"] = "Friend Hit";
+        funcMap["67"] = "Fight";
+        funcMap["68"] = "Hello";
+        funcMap["69"] = "Alarm";
+        funcMap["70"] = "Flee";
+        funcMap["71"] = "Should Attack";
+        funcMap["72"] = "Werewolf";
+        funcMap["73"] = "PC Werewolf Kills";
+        return funcMap;
+    }
+    static const std::map<const std::string, std::string> sEncToInfoFunc = populateEncToInfoFunc();
 
     QVariant InfoConditionAdapter::getData(const Record<Info>& record,
             int subRowIndex, int subColIndex) const
@@ -749,83 +752,86 @@ namespace CSMWorld
         }
     }
 
-    const std::map<const std::string, const std::string> sInfoFuncToEnc =
+    static std::map<const std::string, std::string> populateInfoFuncToEnc()
     {
-        { "Alarm",                   "69" }, // AI
-        { "Alarmed",                 "49" },
-        { "Attacked",                "62" },
-        { "Choice",                  "50" },
-        { "Creature Target",         "65" },
-        { "Detected",                "48" },
-        { "Faction Rank Difference", "47" },
-        { "Fight",                   "67" }, // AI
-        { "Flee",                    "70" }, // AI
-        { "Friend Hit",              "66" },
-        { "Health Percent",          "04" },
-        { "Hello",                   "68" }, // AI
-        { "Level",                   "61" },
-        { "PC Acrobatics",           "31" },
-        { "PC Agility",              "53" }, // attrib
-        { "PC Alchemy",              "27" },
-        { "PC Alteration",           "22" },
-        { "PC Armoror",              "12" },
-        { "PC Athletics",            "19" },
-        { "PC Axe",                  "17" },
-        { "PC Blight Disease",       "41" },
-        { "PC Block",                "11" },
-        { "PC Blunt Weapon",         "15" },
-        { "PC Clothing Modifier",    "42" },
-        { "PC Common Disease",       "40" },
-        { "PC Conjuration",          "24" },
-        { "PC Corpus",               "58" },
-        { "PC Crime Level",          "43" },
-        { "PC Destruction",          "21" },
-        { "PC Enchant",              "20" },
-        { "PC Endurance",            "55" }, // attrib
-        { "PC Expelled",             "39" },
-        { "PC Fatigue",              "09" }, // dynamic stat
-        { "PC Hand To Hand",         "37" },
-        { "PC Health",               "64" }, // dynamic stat
-        { "PC Health Percent",       "07" },
-        { "PC Heavy Armor",          "14" },
-        { "PC Illusion",             "23" },
-        { "PC Intelligence",         "51" }, // attrib
-        { "PC Level",                "06" },
-        { "PC Light Armor",          "32" },
-        { "PC Long Blade",           "16" },
-        { "PC Luck",                 "57" }, // attrib
-        { "PC Magicka",              "08" }, // dynamic stat
-        { "PC Marksman",             "34" },
-        { "PC Medium Armor",         "13" },
-        { "PC Merchantile",          "35" },
-        { "PC Mysticism",            "25" },
-        { "PC Personality",          "56" }, // attrib
-        { "PC Reputation",           "05" },
-        { "PC Restoration",          "26" },
-        { "PC Security",             "29" },
-        { "PC Sex",                  "38" },
-        { "PC Short Blade",          "33" },
-        { "PC Sneak",                "30" },
-        { "PC Spear",                "18" },
-        { "PC Speechcraft",          "36" },
-        { "PC Speed",                "54" }, // attrib
-        { "PC Strength",             "10" }, // attrib
-        { "PC Unarmored",            "28" },
-        { "PC Vampire",              "60" },
-        { "PC Werewolf Kills",       "73" },
-        { "PC Willpower",            "52" }, // attrib
-        { "Rank Requirement",        "02" },
-        { "Rank High",               "01" },
-        { "Rank Low",                "00" },
-        { "Reputation",              "03" },
-        { "Same Faction",            "46" },
-        { "Same Race",               "45" },
-        { "Same Sex",                "44" },
-        { "Should Attack",           "71" },
-        { "Talked To PC",            "63" },
-        { "Weather",                 "59" },
-        { "Werewolf",                "72" }
-    };
+        std::map<const std::string, std::string> encMap;
+        encMap["Alarm"] =                  "69"; // AI
+        encMap["Alarmed"] =                "49";
+        encMap["Attacked"] =               "62";
+        encMap["Choice"] =                 "50";
+        encMap["Creature Target"] =        "65";
+        encMap["Detected"] =               "48";
+        encMap["Faction Rank Difference"] ="47";
+        encMap["Fight"] =                  "67"; // AI
+        encMap["Flee"] =                   "70"; // AI
+        encMap["Friend Hit"] =             "66";
+        encMap["Health Percent"] =         "04";
+        encMap["Hello"] =                  "68"; // AI
+        encMap["Level"] =                  "61";
+        encMap["PC Acrobatics"] =          "31";
+        encMap["PC Agility"] =             "53"; // attrib
+        encMap["PC Alchemy"] =             "27";
+        encMap["PC Alteration"] =          "22";
+        encMap["PC Armoror"] =             "12";
+        encMap["PC Athletics"] =           "19";
+        encMap["PC Axe"] =                 "17";
+        encMap["PC Blight Disease"] =      "41";
+        encMap["PC Block"] =               "11";
+        encMap["PC Blunt Weapon"] =        "15";
+        encMap["PC Clothing Modifier"] =   "42";
+        encMap["PC Common Disease"] =      "40";
+        encMap["PC Conjuration"] =         "24";
+        encMap["PC Corpus"] =              "58";
+        encMap["PC Crime Level"] =         "43";
+        encMap["PC Destruction"] =         "21";
+        encMap["PC Enchant"] =             "20";
+        encMap["PC Endurance"] =           "55"; // attrib
+        encMap["PC Expelled"] =            "39";
+        encMap["PC Fatigue"] =             "09"; // dynamic stat
+        encMap["PC Hand To Hand"] =        "37";
+        encMap["PC Health"] =              "64"; // dynamic stat
+        encMap["PC Health Percent"] =      "07";
+        encMap["PC Heavy Armor"] =         "14";
+        encMap["PC Illusion"] =            "23";
+        encMap["PC Intelligence"] =        "51"; // attrib
+        encMap["PC Level"] =               "06";
+        encMap["PC Light Armor"] =         "32";
+        encMap["PC Long Blade"] =          "16";
+        encMap["PC Luck"] =                "57"; // attrib
+        encMap["PC Magicka"] =             "08"; // dynamic stat
+        encMap["PC Marksman"] =            "34";
+        encMap["PC Medium Armor"] =        "13";
+        encMap["PC Merchantile"] =         "35";
+        encMap["PC Mysticism"] =           "25";
+        encMap["PC Personality"] =         "56"; // attrib
+        encMap["PC Reputation"] =          "05";
+        encMap["PC Restoration"] =         "26";
+        encMap["PC Security"] =            "29";
+        encMap["PC Sex"] =                 "38";
+        encMap["PC Short Blade"] =         "33";
+        encMap["PC Sneak"] =               "30";
+        encMap["PC Spear"] =               "18";
+        encMap["PC Speechcraft"] =         "36";
+        encMap["PC Speed"] =               "54"; // attrib
+        encMap["PC Strength"] =            "10"; // attrib
+        encMap["PC Unarmored"] =           "28";
+        encMap["PC Vampire"] =             "60";
+        encMap["PC Werewolf Kills"] =      "73";
+        encMap["PC Willpower"] =           "52"; // attrib
+        encMap["Rank Requirement"] =       "02";
+        encMap["Rank High"] =              "01";
+        encMap["Rank Low"] =               "00";
+        encMap["Reputation"] =             "03";
+        encMap["Same Faction"] =           "46";
+        encMap["Same Race"] =              "45";
+        encMap["Same Sex"] =               "44";
+        encMap["Should Attack"] =          "71";
+        encMap["Talked To PC"] =           "63";
+        encMap["Weather"] =                "59";
+        encMap["Werewolf"] =               "72";
+        return encMap;
+    }
+    static const std::map<const std::string, std::string> sInfoFuncToEnc = populateInfoFuncToEnc();
 
     void InfoConditionAdapter::setData(Record<Info>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
@@ -867,7 +873,7 @@ namespace CSMWorld
                 if (conditions[subRowIndex].mSelectRule[1] == '1')
                 {
                     // throws an exception if the function is not found
-                    const std::map<const std::string, const std::string>::const_iterator it = sInfoFuncToEnc.find(
+                    const std::map<const std::string, std::string>::const_iterator it = sInfoFuncToEnc.find(
                         value.toString().toUtf8().constData());
                     if (it != sInfoFuncToEnc.end())
                     {
