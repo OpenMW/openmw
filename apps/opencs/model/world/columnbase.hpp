@@ -116,6 +116,9 @@ namespace CSMWorld
             Display_PartRefType,
             Display_AiPackageType,
             Display_YesNo,
+            Display_InfoCondFunc,
+            Display_InfoCondVar,
+            Display_InfoCondComp,
 
             //top level columns that nest other columns
             Display_NestedHeader

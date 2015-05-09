@@ -528,4 +528,417 @@ namespace CSMWorld
     {
         return 1; // fixed at size 1
     }
+
+    // ESM::DialInfo::SelectStruct.mSelectRule
+    // 012345...
+    // ^^^ ^^
+    // ||| ||
+    // ||| |+------------- condition variable string
+    // ||| +-------------- comparison type, ['0'..'5']; e.g. !=, <, >=, etc
+    // ||+---------------- function index (encoded, where function == '1')
+    // |+----------------- function, ['1'..'C']; e.g. Global, Local, Not ID, etc
+    // +------------------ unknown
+    //
+    InfoConditionAdapter::InfoConditionAdapter () {}
+
+    void InfoConditionAdapter::addRow(Record<Info>& record, int position) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        // blank row
+        ESM::DialInfo::SelectStruct condStruct;
+        condStruct.mSelectRule = "00000";
+        condStruct.mValue = ESM::Variant();
+
+        conditions.insert(conditions.begin()+position, condStruct);
+
+        record.setModified (info);
+    }
+
+    void InfoConditionAdapter::removeRow(Record<Info>& record, int rowToRemove) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        conditions.erase(conditions.begin()+rowToRemove);
+
+        record.setModified (info);
+    }
+
+    void InfoConditionAdapter::setTable(Record<Info>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        Info info = record.get();
+
+        info.mSelects =
+            static_cast<const NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >&>(nestedTable).mNestedTable;
+
+        record.setModified (info);
+    }
+
+    NestedTableWrapperBase* InfoConditionAdapter::table(const Record<Info>& record) const
+    {
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >(record.get().mSelects);
+    }
+
+    // See the mappings in MWDialogue::SelectWrapper::getArgument
+    // from ESM::Attribute, ESM::Skill and MWMechanics::CreatureStats (for AI)
+    static const std::map<const std::string, const std::string> sEncToInfoFunc =
+    {
+        { "00", "Rank Low"                },
+        { "01", "Rank High"               },
+        { "02", "Rank Requirement"        },
+        { "03", "Reputation"              },
+        { "04", "Health Percent"          },
+        { "05", "PC Reputation"           },
+        { "06", "PC Level"                },
+        { "07", "PC Health Percent"       },
+        { "08", "PC Magicka"              }, // dynamic stat
+        { "09", "PC Fatigue"              }, // dynamic stat
+        { "10", "PC Strength"             }, // attrib
+        { "11", "PC Block"                },
+        { "12", "PC Armoror"              },
+        { "13", "PC Medium Armor"         },
+        { "14", "PC Heavy Armor"          },
+        { "15", "PC Blunt Weapon"         },
+        { "16", "PC Long Blade"           },
+        { "17", "PC Axe"                  },
+        { "18", "PC Spear"                },
+        { "19", "PC Athletics"            },
+        { "20", "PC Enchant"              },
+        { "21", "PC Destruction"          },
+        { "22", "PC Alteration"           },
+        { "23", "PC Illusion"             },
+        { "24", "PC Conjuration"          },
+        { "25", "PC Mysticism"            },
+        { "26", "PC Restoration"          },
+        { "27", "PC Alchemy"              },
+        { "28", "PC Unarmored"            },
+        { "29", "PC Security"             },
+        { "30", "PC Sneak"                },
+        { "31", "PC Acrobatics"           },
+        { "32", "PC Light Armor"          },
+        { "33", "PC Short Blade"          },
+        { "34", "PC Marksman"             },
+        { "35", "PC Merchantile"          },
+        { "36", "PC Speechcraft"          },
+        { "37", "PC Hand To Hand"         },
+        { "38", "PC Sex"                  },
+        { "39", "PC Expelled"             },
+        { "40", "PC Common Disease"       },
+        { "41", "PC Blight Disease"       },
+        { "42", "PC Clothing Modifier"    },
+        { "43", "PC Crime Level"          },
+        { "44", "Same Sex"                },
+        { "45", "Same Race"               },
+        { "46", "Same Faction"            },
+        { "47", "Faction Rank Difference" },
+        { "48", "Detected"                },
+        { "49", "Alarmed"                 },
+        { "50", "Choice"                  },
+        { "51", "PC Intelligence"         }, // attrib
+        { "52", "PC Willpower"            }, // attrib
+        { "53", "PC Agility"              }, // attrib
+        { "54", "PC Speed"                }, // attrib
+        { "55", "PC Endurance"            }, // attrib
+        { "56", "PC Personality"          }, // attrib
+        { "57", "PC Luck"                 }, // attrib
+        { "58", "PC Corpus"               },
+        { "59", "Weather"                 },
+        { "60", "PC Vampire"              },
+        { "61", "Level"                   },
+        { "62", "Attacked"                },
+        { "63", "Talked To PC"            },
+        { "64", "PC Health"               }, // dynamic stat
+        { "65", "Creature Target"         },
+        { "66", "Friend Hit"              },
+        { "67", "Fight"                   }, // AI
+        { "68", "Hello"                   }, // AI
+        { "69", "Alarm"                   }, // AI
+        { "70", "Flee"                    }, // AI
+        { "71", "Should Attack"           },
+        { "72", "Werewolf"                },
+        { "73", "PC Werewolf Kills"       }
+    };
+
+    QVariant InfoConditionAdapter::getData(const Record<Info>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                char condType = conditions[subRowIndex].mSelectRule[1];
+                switch (condType)
+                {
+                    case '1': return 1;  // Function
+                    case '2': return 2;  // Global
+                    case '3': return 3;  // Local
+                    case '4': return 4;  // Journal
+                    case '5': return 5;  // Item
+                    case '6': return 6;  // Dead
+                    case '7': return 7;  // Not ID
+                    case '8': return 8;  // Not Factio
+                    case '9': return 9;  // Not Class
+                    case 'A': return 10; // Not Race
+                    case 'B': return 11; // Not Cell
+                    case 'C': return 12; // Not Local
+                    default: return QVariant(); // TODO: log an error?
+                }
+            }
+            case 1:
+            {
+                if (conditions[subRowIndex].mSelectRule[1] == '1')
+                {
+                    // throws an exception if the encoding is not found
+                    return sEncToInfoFunc.at(conditions[subRowIndex].mSelectRule.substr(2, 2)).c_str();
+                }
+                else
+                    return QString(conditions[subRowIndex].mSelectRule.substr(5).c_str());
+            }
+            case 2:
+            {
+                char compType = conditions[subRowIndex].mSelectRule[4];
+                switch (compType)
+                {
+                    case '0': return 3; // =
+                    case '1': return 0; // !=
+                    case '2': return 4; // >
+                    case '3': return 5; // >=
+                    case '4': return 1; // <
+                    case '5': return 2; // <=
+                    default: return QVariant(); // TODO: log an error?
+                }
+            }
+            case 3:
+            {
+                switch (conditions[subRowIndex].mValue.getType())
+                {
+                    case ESM::VT_String:
+                    {
+                        return QString::fromUtf8 (conditions[subRowIndex].mValue.getString().c_str());
+                    }
+                    case ESM::VT_Int:
+                    case ESM::VT_Short:
+                    case ESM::VT_Long:
+                    {
+                        return conditions[subRowIndex].mValue.getInteger();
+                    }
+                    case ESM::VT_Float:
+                    {
+                        return conditions[subRowIndex].mValue.getFloat();
+                    }
+                    default: return QVariant();
+                }
+            }
+            default: throw std::runtime_error("Info condition subcolumn index out of range");
+        }
+    }
+
+    static const std::map<const std::string, const std::string> sInfoFuncToEnc =
+    {
+        { "Alarm",                   "69" }, // AI
+        { "Alarmed",                 "49" },
+        { "Attacked",                "62" },
+        { "Choice",                  "50" },
+        { "Creature Target",         "65" },
+        { "Detected",                "48" },
+        { "Faction Rank Difference", "47" },
+        { "Fight",                   "67" }, // AI
+        { "Flee",                    "70" }, // AI
+        { "Friend Hit",              "66" },
+        { "Health Percent",          "04" },
+        { "Hello",                   "68" }, // AI
+        { "Level",                   "61" },
+        { "PC Acrobatics",           "31" },
+        { "PC Agility",              "53" }, // attrib
+        { "PC Alchemy",              "27" },
+        { "PC Alteration",           "22" },
+        { "PC Armoror",              "12" },
+        { "PC Athletics",            "19" },
+        { "PC Axe",                  "17" },
+        { "PC Blight Disease",       "41" },
+        { "PC Block",                "11" },
+        { "PC Blunt Weapon",         "15" },
+        { "PC Clothing Modifier",    "42" },
+        { "PC Common Disease",       "40" },
+        { "PC Conjuration",          "24" },
+        { "PC Corpus",               "58" },
+        { "PC Crime Level",          "43" },
+        { "PC Destruction",          "21" },
+        { "PC Enchant",              "20" },
+        { "PC Endurance",            "55" }, // attrib
+        { "PC Expelled",             "39" },
+        { "PC Fatigue",              "09" }, // dynamic stat
+        { "PC Hand To Hand",         "37" },
+        { "PC Health",               "64" }, // dynamic stat
+        { "PC Health Percent",       "07" },
+        { "PC Heavy Armor",          "14" },
+        { "PC Illusion",             "23" },
+        { "PC Intelligence",         "51" }, // attrib
+        { "PC Level",                "06" },
+        { "PC Light Armor",          "32" },
+        { "PC Long Blade",           "16" },
+        { "PC Luck",                 "57" }, // attrib
+        { "PC Magicka",              "08" }, // dynamic stat
+        { "PC Marksman",             "34" },
+        { "PC Medium Armor",         "13" },
+        { "PC Merchantile",          "35" },
+        { "PC Mysticism",            "25" },
+        { "PC Personality",          "56" }, // attrib
+        { "PC Reputation",           "05" },
+        { "PC Restoration",          "26" },
+        { "PC Security",             "29" },
+        { "PC Sex",                  "38" },
+        { "PC Short Blade",          "33" },
+        { "PC Sneak",                "30" },
+        { "PC Spear",                "18" },
+        { "PC Speechcraft",          "36" },
+        { "PC Speed",                "54" }, // attrib
+        { "PC Strength",             "10" }, // attrib
+        { "PC Unarmored",            "28" },
+        { "PC Vampire",              "60" },
+        { "PC Werewolf Kills",       "73" },
+        { "PC Willpower",            "52" }, // attrib
+        { "Rank Requirement",        "02" },
+        { "Rank High",               "01" },
+        { "Rank Low",                "00" },
+        { "Reputation",              "03" },
+        { "Same Faction",            "46" },
+        { "Same Race",               "45" },
+        { "Same Sex",                "44" },
+        { "Should Attack",           "71" },
+        { "Talked To PC",            "63" },
+        { "Weather",                 "59" },
+        { "Werewolf",                "72" }
+    };
+
+    void InfoConditionAdapter::setData(Record<Info>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                // See sInfoCondFunc in columns.cpp for the enum values
+                switch (value.toInt())
+                {
+                    // FIXME: when these change the values of the other columns need to change
+                    // correspondingly (and automatically)
+                    case 1:  conditions[subRowIndex].mSelectRule[1] = '1'; break; // Function
+                    case 2:  conditions[subRowIndex].mSelectRule[1] = '2'; break; // Global
+                    case 3:  conditions[subRowIndex].mSelectRule[1] = '3'; break; // Local
+                    case 4:  conditions[subRowIndex].mSelectRule[1] = '4'; break; // Journal
+                    case 5:  conditions[subRowIndex].mSelectRule[1] = '5'; break; // Item
+                    case 6:  conditions[subRowIndex].mSelectRule[1] = '6'; break; // Dead
+                    case 7:  conditions[subRowIndex].mSelectRule[1] = '7'; break; // Not ID
+                    case 8:  conditions[subRowIndex].mSelectRule[1] = '8'; break; // Not Faction
+                    case 9:  conditions[subRowIndex].mSelectRule[1] = '9'; break; // Not Class
+                    case 10: conditions[subRowIndex].mSelectRule[1] = 'A'; break; // Not Race
+                    case 11: conditions[subRowIndex].mSelectRule[1] = 'B'; break; // Not Cell
+                    case 12: conditions[subRowIndex].mSelectRule[1] = 'C'; break; // Not Local
+                    default: return; // return without saving
+                }
+                break;
+            }
+            case 1:
+            {
+                if (conditions[subRowIndex].mSelectRule[1] == '1')
+                {
+                    // throws an exception if the function is not found
+                    const std::map<const std::string, const std::string>::const_iterator it = sInfoFuncToEnc.find(
+                        value.toString().toUtf8().constData());
+                    if (it != sInfoFuncToEnc.end())
+                    {
+                        std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 2);
+                        rule.append(it->second);
+                        rule.append(std::string(1, conditions[subRowIndex].mSelectRule[4]));
+                        conditions[subRowIndex].mSelectRule = rule.append(value.toString().toUtf8().constData());
+                    }
+                    else
+                        return; // return without saving; TODO: maybe log an error here
+                }
+                else
+                {
+                    // FIXME: validate the string values before saving, based on the current function
+                    std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 5);
+                    conditions[subRowIndex].mSelectRule = rule.append(value.toString().toUtf8().constData());
+                }
+                break;
+            }
+            case 2:
+            {
+                // See sInfoCondComp in columns.cpp for the enum values
+                switch (value.toInt())
+                {
+                    case 0: conditions[subRowIndex].mSelectRule[4] = '1'; break; // !=
+                    case 1: conditions[subRowIndex].mSelectRule[4] = '4'; break; // <
+                    case 2: conditions[subRowIndex].mSelectRule[4] = '5'; break; // <=
+                    case 3: conditions[subRowIndex].mSelectRule[4] = '0'; break; // =
+                    case 4: conditions[subRowIndex].mSelectRule[4] = '2'; break; // >
+                    case 5: conditions[subRowIndex].mSelectRule[4] = '3'; break; // >=
+                    default: return; // return without saving
+                }
+                break;
+            }
+            case 3:
+            {
+                switch (conditions[subRowIndex].mValue.getType())
+                {
+                    case ESM::VT_String:
+                    {
+                        conditions[subRowIndex].mValue.setString (value.toString().toUtf8().constData());
+                        break;
+                    }
+                    case ESM::VT_Int:
+                    case ESM::VT_Short:
+                    case ESM::VT_Long:
+                    {
+                        conditions[subRowIndex].mValue.setInteger (value.toInt());
+                        break;
+                    }
+                    case ESM::VT_Float:
+                    {
+                        conditions[subRowIndex].mValue.setFloat (value.toFloat());
+                        break;
+                    }
+                    default: break;
+                }
+            }
+            default: throw std::runtime_error("Info condition subcolumn index out of range");
+        }
+
+        record.setModified (info);
+    }
+
+    int InfoConditionAdapter::getColumnsCount(const Record<Info>& record) const
+    {
+        return 4;
+    }
+
+    int InfoConditionAdapter::getRowsCount(const Record<Info>& record) const
+    {
+        return static_cast<int>(record.get().mSelects.size());
+    }
 }

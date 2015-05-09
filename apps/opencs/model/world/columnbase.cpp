@@ -81,6 +81,9 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_PartRefType,
         Display_AiPackageType,
         Display_YesNo,
+        Display_InfoCondFunc,
+        Display_InfoCondVar,
+        Display_InfoCondComp,
 
         Display_None
     };
