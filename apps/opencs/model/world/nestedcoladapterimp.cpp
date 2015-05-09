@@ -592,80 +592,80 @@ namespace CSMWorld
     // from ESM::Attribute, ESM::Skill and MWMechanics::CreatureStats (for AI)
     static const std::map<const std::string, const std::string> sEncToInfoFunc =
     {
-        { "00", "Rank Low"                },
-        { "01", "Rank High"               },
-        { "02", "Rank Requirement"        },
-        { "03", "Reputation"              },
-        { "04", "Health Percent"          },
-        { "05", "PC Reputation"           },
-        { "06", "PC Level"                },
-        { "07", "PC Health Percent"       },
-        { "08", "PC Magicka"              }, // dynamic stat
-        { "09", "PC Fatigue"              }, // dynamic stat
-        { "10", "PC Strength"             }, // attrib
-        { "11", "PC Block"                },
-        { "12", "PC Armoror"              },
-        { "13", "PC Medium Armor"         },
-        { "14", "PC Heavy Armor"          },
-        { "15", "PC Blunt Weapon"         },
-        { "16", "PC Long Blade"           },
-        { "17", "PC Axe"                  },
-        { "18", "PC Spear"                },
-        { "19", "PC Athletics"            },
-        { "20", "PC Enchant"              },
-        { "21", "PC Destruction"          },
-        { "22", "PC Alteration"           },
-        { "23", "PC Illusion"             },
-        { "24", "PC Conjuration"          },
-        { "25", "PC Mysticism"            },
-        { "26", "PC Restoration"          },
-        { "27", "PC Alchemy"              },
-        { "28", "PC Unarmored"            },
-        { "29", "PC Security"             },
-        { "30", "PC Sneak"                },
-        { "31", "PC Acrobatics"           },
-        { "32", "PC Light Armor"          },
-        { "33", "PC Short Blade"          },
-        { "34", "PC Marksman"             },
-        { "35", "PC Merchantile"          },
-        { "36", "PC Speechcraft"          },
-        { "37", "PC Hand To Hand"         },
-        { "38", "PC Sex"                  },
-        { "39", "PC Expelled"             },
-        { "40", "PC Common Disease"       },
-        { "41", "PC Blight Disease"       },
-        { "42", "PC Clothing Modifier"    },
-        { "43", "PC Crime Level"          },
-        { "44", "Same Sex"                },
-        { "45", "Same Race"               },
-        { "46", "Same Faction"            },
-        { "47", "Faction Rank Difference" },
-        { "48", "Detected"                },
-        { "49", "Alarmed"                 },
-        { "50", "Choice"                  },
-        { "51", "PC Intelligence"         }, // attrib
-        { "52", "PC Willpower"            }, // attrib
-        { "53", "PC Agility"              }, // attrib
-        { "54", "PC Speed"                }, // attrib
-        { "55", "PC Endurance"            }, // attrib
-        { "56", "PC Personality"          }, // attrib
-        { "57", "PC Luck"                 }, // attrib
-        { "58", "PC Corpus"               },
-        { "59", "Weather"                 },
-        { "60", "PC Vampire"              },
-        { "61", "Level"                   },
-        { "62", "Attacked"                },
-        { "63", "Talked To PC"            },
-        { "64", "PC Health"               }, // dynamic stat
-        { "65", "Creature Target"         },
-        { "66", "Friend Hit"              },
-        { "67", "Fight"                   }, // AI
-        { "68", "Hello"                   }, // AI
-        { "69", "Alarm"                   }, // AI
-        { "70", "Flee"                    }, // AI
-        { "71", "Should Attack"           },
-        { "72", "Werewolf"                },
-        { "73", "PC Werewolf Kills"       }
+        std::make_pair( "00", "Rank Low"                ),
+        std::make_pair( "01", "Rank High"               ),
+        std::make_pair( "02", "Rank Requirement"        ),
+        std::make_pair( "03", "Reputation"              ),
+        std::make_pair( "04", "Health Percent"          ),
+        std::make_pair( "05", "PC Reputation"           ),
+        std::make_pair( "06", "PC Level"                ),
+        std::make_pair( "07", "PC Health Percent"       ),
+        std::make_pair( "08", "PC Magicka"              ), // dynamic stat
+        std::make_pair( "09", "PC Fatigue"              ), // dynamic stat
+        std::make_pair( "10", "PC Strength"             ), // attrib
+        std::make_pair( "11", "PC Block"                ),
+        std::make_pair( "12", "PC Armoror"              ),
+        std::make_pair( "13", "PC Medium Armor"         ),
+        std::make_pair( "14", "PC Heavy Armor"          ),
+        std::make_pair( "15", "PC Blunt Weapon"         ),
+        std::make_pair( "16", "PC Long Blade"           ),
+        std::make_pair( "17", "PC Axe"                  ),
+        std::make_pair( "18", "PC Spear"                ),
+        std::make_pair( "19", "PC Athletics"            ),
+        std::make_pair( "20", "PC Enchant"              ),
+        std::make_pair( "21", "PC Destruction"          ),
+        std::make_pair( "22", "PC Alteration"           ),
+        std::make_pair( "23", "PC Illusion"             ),
+        std::make_pair( "24", "PC Conjuration"          ),
+        std::make_pair( "25", "PC Mysticism"            ),
+        std::make_pair( "26", "PC Restoration"          ),
+        std::make_pair( "27", "PC Alchemy"              ),
+        std::make_pair( "28", "PC Unarmored"            ),
+        std::make_pair( "29", "PC Security"             ),
+        std::make_pair( "30", "PC Sneak"                ),
+        std::make_pair( "31", "PC Acrobatics"           ),
+        std::make_pair( "32", "PC Light Armor"          ),
+        std::make_pair( "33", "PC Short Blade"          ),
+        std::make_pair( "34", "PC Marksman"             ),
+        std::make_pair( "35", "PC Merchantile"          ),
+        std::make_pair( "36", "PC Speechcraft"          ),
+        std::make_pair( "37", "PC Hand To Hand"         ),
+        std::make_pair( "38", "PC Sex"                  ),
+        std::make_pair( "39", "PC Expelled"             ),
+        std::make_pair( "40", "PC Common Disease"       ),
+        std::make_pair( "41", "PC Blight Disease"       ),
+        std::make_pair( "42", "PC Clothing Modifier"    ),
+        std::make_pair( "43", "PC Crime Level"          ),
+        std::make_pair( "44", "Same Sex"                ),
+        std::make_pair( "45", "Same Race"               ),
+        std::make_pair( "46", "Same Faction"            ),
+        std::make_pair( "47", "Faction Rank Difference" ),
+        std::make_pair( "48", "Detected"                ),
+        std::make_pair( "49", "Alarmed"                 ),
+        std::make_pair( "50", "Choice"                  ),
+        std::make_pair( "51", "PC Intelligence"         ), // attrib
+        std::make_pair( "52", "PC Willpower"            ), // attrib
+        std::make_pair( "53", "PC Agility"              ), // attrib
+        std::make_pair( "54", "PC Speed"                ), // attrib
+        std::make_pair( "55", "PC Endurance"            ), // attrib
+        std::make_pair( "56", "PC Personality"          ), // attrib
+        std::make_pair( "57", "PC Luck"                 ), // attrib
+        std::make_pair( "58", "PC Corpus"               ),
+        std::make_pair( "59", "Weather"                 ),
+        std::make_pair( "60", "PC Vampire"              ),
+        std::make_pair( "61", "Level"                   ),
+        std::make_pair( "62", "Attacked"                ),
+        std::make_pair( "63", "Talked To PC"            ),
+        std::make_pair( "64", "PC Health"               ), // dynamic stat
+        std::make_pair( "65", "Creature Target"         ),
+        std::make_pair( "66", "Friend Hit"              ),
+        std::make_pair( "67", "Fight"                   ), // AI
+        std::make_pair( "68", "Hello"                   ), // AI
+        std::make_pair( "69", "Alarm"                   ), // AI
+        std::make_pair( "70", "Flee"                    ), // AI
+        std::make_pair( "71", "Should Attack"           ),
+        std::make_pair( "72", "Werewolf"                ),
+        std::make_pair( "73", "PC Werewolf Kills"       )
     };
 
     QVariant InfoConditionAdapter::getData(const Record<Info>& record,
@@ -751,80 +751,80 @@ namespace CSMWorld
 
     static const std::map<const std::string, const std::string> sInfoFuncToEnc =
     {
-        { "Alarm",                   "69" }, // AI
-        { "Alarmed",                 "49" },
-        { "Attacked",                "62" },
-        { "Choice",                  "50" },
-        { "Creature Target",         "65" },
-        { "Detected",                "48" },
-        { "Faction Rank Difference", "47" },
-        { "Fight",                   "67" }, // AI
-        { "Flee",                    "70" }, // AI
-        { "Friend Hit",              "66" },
-        { "Health Percent",          "04" },
-        { "Hello",                   "68" }, // AI
-        { "Level",                   "61" },
-        { "PC Acrobatics",           "31" },
-        { "PC Agility",              "53" }, // attrib
-        { "PC Alchemy",              "27" },
-        { "PC Alteration",           "22" },
-        { "PC Armoror",              "12" },
-        { "PC Athletics",            "19" },
-        { "PC Axe",                  "17" },
-        { "PC Blight Disease",       "41" },
-        { "PC Block",                "11" },
-        { "PC Blunt Weapon",         "15" },
-        { "PC Clothing Modifier",    "42" },
-        { "PC Common Disease",       "40" },
-        { "PC Conjuration",          "24" },
-        { "PC Corpus",               "58" },
-        { "PC Crime Level",          "43" },
-        { "PC Destruction",          "21" },
-        { "PC Enchant",              "20" },
-        { "PC Endurance",            "55" }, // attrib
-        { "PC Expelled",             "39" },
-        { "PC Fatigue",              "09" }, // dynamic stat
-        { "PC Hand To Hand",         "37" },
-        { "PC Health",               "64" }, // dynamic stat
-        { "PC Health Percent",       "07" },
-        { "PC Heavy Armor",          "14" },
-        { "PC Illusion",             "23" },
-        { "PC Intelligence",         "51" }, // attrib
-        { "PC Level",                "06" },
-        { "PC Light Armor",          "32" },
-        { "PC Long Blade",           "16" },
-        { "PC Luck",                 "57" }, // attrib
-        { "PC Magicka",              "08" }, // dynamic stat
-        { "PC Marksman",             "34" },
-        { "PC Medium Armor",         "13" },
-        { "PC Merchantile",          "35" },
-        { "PC Mysticism",            "25" },
-        { "PC Personality",          "56" }, // attrib
-        { "PC Reputation",           "05" },
-        { "PC Restoration",          "26" },
-        { "PC Security",             "29" },
-        { "PC Sex",                  "38" },
-        { "PC Short Blade",          "33" },
-        { "PC Sneak",                "30" },
-        { "PC Spear",                "18" },
-        { "PC Speechcraft",          "36" },
-        { "PC Speed",                "54" }, // attrib
-        { "PC Strength",             "10" }, // attrib
-        { "PC Unarmored",            "28" },
-        { "PC Vampire",              "60" },
-        { "PC Werewolf Kills",       "73" },
-        { "PC Willpower",            "52" }, // attrib
-        { "Rank Requirement",        "02" },
-        { "Rank High",               "01" },
-        { "Rank Low",                "00" },
-        { "Reputation",              "03" },
-        { "Same Faction",            "46" },
-        { "Same Race",               "45" },
-        { "Same Sex",                "44" },
-        { "Should Attack",           "71" },
-        { "Talked To PC",            "63" },
-        { "Weather",                 "59" },
-        { "Werewolf",                "72" }
+        std::make_pair( "Alarm",                   "69" ), // AI
+        std::make_pair( "Alarmed",                 "49" ),
+        std::make_pair( "Attacked",                "62" ),
+        std::make_pair( "Choice",                  "50" ),
+        std::make_pair( "Creature Target",         "65" ),
+        std::make_pair( "Detected",                "48" ),
+        std::make_pair( "Faction Rank Difference", "47" ),
+        std::make_pair( "Fight",                   "67" ), // AI
+        std::make_pair( "Flee",                    "70" ), // AI
+        std::make_pair( "Friend Hit",              "66" ),
+        std::make_pair( "Health Percent",          "04" ),
+        std::make_pair( "Hello",                   "68" ), // AI
+        std::make_pair( "Level",                   "61" ),
+        std::make_pair( "PC Acrobatics",           "31" ),
+        std::make_pair( "PC Agility",              "53" ), // attrib
+        std::make_pair( "PC Alchemy",              "27" ),
+        std::make_pair( "PC Alteration",           "22" ),
+        std::make_pair( "PC Armoror",              "12" ),
+        std::make_pair( "PC Athletics",            "19" ),
+        std::make_pair( "PC Axe",                  "17" ),
+        std::make_pair( "PC Blight Disease",       "41" ),
+        std::make_pair( "PC Block",                "11" ),
+        std::make_pair( "PC Blunt Weapon",         "15" ),
+        std::make_pair( "PC Clothing Modifier",    "42" ),
+        std::make_pair( "PC Common Disease",       "40" ),
+        std::make_pair( "PC Conjuration",          "24" ),
+        std::make_pair( "PC Corpus",               "58" ),
+        std::make_pair( "PC Crime Level",          "43" ),
+        std::make_pair( "PC Destruction",          "21" ),
+        std::make_pair( "PC Enchant",              "20" ),
+        std::make_pair( "PC Endurance",            "55" ), // attrib
+        std::make_pair( "PC Expelled",             "39" ),
+        std::make_pair( "PC Fatigue",              "09" ), // dynamic stat
+        std::make_pair( "PC Hand To Hand",         "37" ),
+        std::make_pair( "PC Health",               "64" ), // dynamic stat
+        std::make_pair( "PC Health Percent",       "07" ),
+        std::make_pair( "PC Heavy Armor",          "14" ),
+        std::make_pair( "PC Illusion",             "23" ),
+        std::make_pair( "PC Intelligence",         "51" ), // attrib
+        std::make_pair( "PC Level",                "06" ),
+        std::make_pair( "PC Light Armor",          "32" ),
+        std::make_pair( "PC Long Blade",           "16" ),
+        std::make_pair( "PC Luck",                 "57" ), // attrib
+        std::make_pair( "PC Magicka",              "08" ), // dynamic stat
+        std::make_pair( "PC Marksman",             "34" ),
+        std::make_pair( "PC Medium Armor",         "13" ),
+        std::make_pair( "PC Merchantile",          "35" ),
+        std::make_pair( "PC Mysticism",            "25" ),
+        std::make_pair( "PC Personality",          "56" ), // attrib
+        std::make_pair( "PC Reputation",           "05" ),
+        std::make_pair( "PC Restoration",          "26" ),
+        std::make_pair( "PC Security",             "29" ),
+        std::make_pair( "PC Sex",                  "38" ),
+        std::make_pair( "PC Short Blade",          "33" ),
+        std::make_pair( "PC Sneak",                "30" ),
+        std::make_pair( "PC Spear",                "18" ),
+        std::make_pair( "PC Speechcraft",          "36" ),
+        std::make_pair( "PC Speed",                "54" ), // attrib
+        std::make_pair( "PC Strength",             "10" ), // attrib
+        std::make_pair( "PC Unarmored",            "28" ),
+        std::make_pair( "PC Vampire",              "60" ),
+        std::make_pair( "PC Werewolf Kills",       "73" ),
+        std::make_pair( "PC Willpower",            "52" ), // attrib
+        std::make_pair( "Rank Requirement",        "02" ),
+        std::make_pair( "Rank High",               "01" ),
+        std::make_pair( "Rank Low",                "00" ),
+        std::make_pair( "Reputation",              "03" ),
+        std::make_pair( "Same Faction",            "46" ),
+        std::make_pair( "Same Race",               "45" ),
+        std::make_pair( "Same Sex",                "44" ),
+        std::make_pair( "Should Attack",           "71" ),
+        std::make_pair( "Talked To PC",            "63" ),
+        std::make_pair( "Weather",                 "59" ),
+        std::make_pair( "Werewolf",                "72" )
     };
 
     void InfoConditionAdapter::setData(Record<Info>& record,
