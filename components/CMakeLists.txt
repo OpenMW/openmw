@@ -170,7 +170,6 @@ add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 target_link_libraries(components 
     ${Boost_LIBRARIES} 
     ${OGRE_LIBRARIES}
-    ${OENGINE_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
     # For MyGUI platform
     ${OPENGL_gl_LIBRARY}

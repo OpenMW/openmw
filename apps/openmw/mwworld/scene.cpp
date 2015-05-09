@@ -18,7 +18,8 @@
 
 #include "../mwrender/renderingmanager.hpp"
 
-#include "physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
+
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
@@ -29,7 +30,7 @@
 namespace
 {
 
-    void addObject(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+    void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering)
     {
         std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), rendering.getResourceSystem()->getVFS());
@@ -40,7 +41,7 @@ namespace
         ptr.getClass().insertObject (ptr, model, physics);
     }
 
-    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
@@ -63,7 +64,7 @@ namespace
         }
     }
 
-    void updateObjectScale(const MWWorld::Ptr& ptr, MWWorld::PhysicsSystem& physics,
+    void updateObjectScale(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                             MWRender::RenderingManager& rendering)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
@@ -80,17 +81,17 @@ namespace
         MWWorld::CellStore& mCell;
         bool mRescale;
         Loading::Listener& mLoadingListener;
-        MWWorld::PhysicsSystem& mPhysics;
+        MWPhysics::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
         InsertFunctor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
-            MWWorld::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
+            MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
     };
 
     InsertFunctor::InsertFunctor (MWWorld::CellStore& cell, bool rescale,
-        Loading::Listener& loadingListener, MWWorld::PhysicsSystem& physics,
+        Loading::Listener& loadingListener, MWPhysics::PhysicsSystem& physics,
         MWRender::RenderingManager& rendering)
     : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
       mPhysics (physics),
@@ -436,7 +437,7 @@ namespace MWWorld
     }
 
     //We need the ogre renderer and a scene node.
-    Scene::Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics)
+    Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
     {
     }

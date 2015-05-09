@@ -27,11 +27,6 @@ namespace CSMWorld
     struct CellRef;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSVRender
 {
     class Object

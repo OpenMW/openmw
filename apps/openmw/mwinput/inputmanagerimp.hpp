@@ -9,14 +9,6 @@
 #include "../mwbase/inputmanager.hpp"
 #include <extern/sdl4ogre/sdlinputwrapper.hpp>
 
-namespace OEngine
-{
-    namespace Render
-    {
-        class OgreRenderer;
-    }
-}
-
 namespace MWWorld
 {
     class Player;

@@ -73,6 +73,10 @@ add_openmw_dir (mwworld
 #  projectilemanager
     )
 
+add_openmw_dir (mwphysics
+    physicssystem
+    )
+
 add_openmw_dir (mwclass
     classes activator creature npc weapon armor potion apparatus book clothing container door
     ingredient creaturelevlist itemlevlist light lockpick misc probe repair static
@@ -127,7 +131,6 @@ endif ()
 include_directories(${SOUND_INPUT_INCLUDES})
 
 target_link_libraries(openmw
-    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}

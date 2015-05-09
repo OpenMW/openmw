@@ -39,9 +39,13 @@ namespace MWRender
     class RenderingManager;
 }
 
-namespace MWWorld
+namespace MWPhysics
 {
     class PhysicsSystem;
+}
+
+namespace MWWorld
+{
     class Player;
     class CellStore;
 
@@ -56,7 +60,7 @@ namespace MWWorld
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            PhysicsSystem *mPhysics;
+            MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
             bool mNeedMapUpdate;
@@ -70,7 +74,7 @@ namespace MWWorld
 
         public:
 
-            Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics);
+            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics);
 
             ~Scene();
 

@@ -9,19 +9,11 @@
 
 #include <osg/ref_ptr>
 
-#include "ptr.hpp"
+#include "../mwworld/ptr.hpp"
 
 namespace osg
 {
     class Group;
-}
-
-namespace OEngine
-{
-    namespace Physic
-    {
-        class PhysicEngine;
-    }
 }
 
 namespace MWRender
@@ -29,11 +21,9 @@ namespace MWRender
     class DebugDrawer;
 }
 
-namespace MWWorld
+namespace MWPhysics
 {
-    class World;
-
-    typedef std::vector<std::pair<Ptr,Ogre::Vector3> > PtrVelocityList;
+    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrVelocityList;
 
     class PhysicsSystem
     {
@@ -75,7 +65,7 @@ namespace MWWorld
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
-            void queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &velocity);
+            void queueObjectMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity);
 
             /// Apply all queued movements, then clear the list.
             const PtrVelocityList& applyQueuedMovement(float dt);

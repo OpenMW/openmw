@@ -24,8 +24,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
-#include "ptr.hpp"
-#include "class.hpp"
+#include "../mwworld/class.hpp"
 
 namespace
 {
@@ -78,7 +77,7 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
 
 }
 
-namespace MWWorld
+namespace MWPhysics
 {
 
     static const float sMaxSlope = 49.0f;
@@ -97,8 +96,7 @@ namespace MWWorld
         }
 
         static bool stepMove(btCollisionObject *colobj, Ogre::Vector3 &position,
-                             const Ogre::Vector3 &toMove, float &remainingTime,
-                             OEngine::Physic::PhysicEngine *engine)
+                             const Ogre::Vector3 &toMove, float &remainingTime /*, OEngine::Physic::PhysicEngine *engine*/)
         {
             /*
              * Slide up an incline or set of stairs.  Should be called only after a
@@ -220,7 +218,7 @@ namespace MWWorld
 
 
     public:
-        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, OEngine::Physic::PhysicEngine *engine, float maxHeight)
+        static Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, /*OEngine::Physic::PhysicEngine *engine,*/ float maxHeight)
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
@@ -267,7 +265,7 @@ namespace MWWorld
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, OEngine::Physic::PhysicEngine *engine
+                                  bool isFlying, float waterlevel, float slowFall /*, OEngine::Physic::PhysicEngine *engine*/
                                   , std::map<std::string, std::string>& collisionTracker
                                   , std::map<std::string, std::string>& standingCollisionTracker)
         {
@@ -584,7 +582,7 @@ namespace MWWorld
         */
     }
 
-    std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
+    std::vector<std::string> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)
     {
         return std::vector<std::string>();//mEngine->getCollisions(ptr.getRefData().getBaseNodeOld()->getName(), collisionGroup, collisionMask);
     }
@@ -604,12 +602,12 @@ namespace MWWorld
     {
     }
 
-    void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
+    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, bool placeable)
     {
 
     }
 
-    void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
+    void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
 
     }
@@ -642,7 +640,7 @@ namespace MWWorld
         return false;
     }
 
-    void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
+    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement)
     {
         PtrVelocityList::iterator iter = mMovementQueue.begin();
         for(;iter != mMovementQueue.end();++iter)
@@ -736,7 +734,7 @@ namespace MWWorld
             mDebugDrawer->step();
     }
 
-    bool PhysicsSystem::isActorStandingOn(const Ptr &actor, const Ptr &object) const
+    bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
         const std::string& actorHandle = actor.getRefData().getHandle();
         const std::string& objectHandle = object.getRefData().getHandle();
@@ -750,7 +748,7 @@ namespace MWWorld
         return false;
     }
 
-    void PhysicsSystem::getActorsStandingOn(const Ptr &object, std::vector<std::string> &out) const
+    void PhysicsSystem::getActorsStandingOn(const MWWorld::Ptr &object, std::vector<std::string> &out) const
     {
         const std::string& objectHandle = object.getRefData().getHandle();
 
@@ -762,7 +760,7 @@ namespace MWWorld
         }
     }
 
-    bool PhysicsSystem::isActorCollidingWith(const Ptr &actor, const Ptr &object) const
+    bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
         const std::string& actorHandle = actor.getRefData().getHandle();
         const std::string& objectHandle = object.getRefData().getHandle();
@@ -776,7 +774,7 @@ namespace MWWorld
         return false;
     }
 
-    void PhysicsSystem::getActorsCollidingWith(const Ptr &object, std::vector<std::string> &out) const
+    void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<std::string> &out) const
     {
         const std::string& objectHandle = object.getRefData().getHandle();
 

@@ -32,7 +32,7 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -412,7 +412,7 @@ namespace MWClass
         renderingInterface.getObjects().insertNPC(ptr);
     }
 
-    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         physics.addActor(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);

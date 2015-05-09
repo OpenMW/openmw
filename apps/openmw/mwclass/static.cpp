@@ -4,7 +4,7 @@
 #include <components/esm/loadstat.hpp>
 
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/objects.hpp"
@@ -24,7 +24,7 @@ namespace MWClass
         }
     }
 
-    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
             physics.addObject(ptr, model);

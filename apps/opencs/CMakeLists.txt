@@ -199,7 +199,6 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OENGINE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}

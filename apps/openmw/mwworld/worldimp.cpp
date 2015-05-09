@@ -51,7 +51,7 @@
 #include "actionteleport.hpp"
 //#include "projectilemanager.hpp"
 #include "weather.hpp"
-#include "physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
@@ -156,7 +156,7 @@ namespace MWWorld
       mStartCell (startCell), mStartupScript(startupScript),
       mScriptsEnabled(true)
     {
-        mPhysics = new PhysicsSystem(rootNode);
+        mPhysics = new MWPhysics::PhysicsSystem(rootNode);
         //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));

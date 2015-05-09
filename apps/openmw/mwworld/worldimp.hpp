@@ -21,14 +21,6 @@
 
 #include <components/settings/settings.hpp>
 
-namespace OEngine
-{
-namespace Physic
-{
-    class PhysicEngine;
-}
-}
-
 namespace osg
 {
     class Group;
@@ -89,14 +81,12 @@ namespace MWWorld
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-            MWWorld::PhysicsSystem *mPhysics;
+            MWPhysics::PhysicsSystem *mPhysics;
             bool mSky;
 
             Cells mCells;
 
             std::string mCurrentWorldSpace;
-
-            OEngine::Physic::PhysicEngine* mPhysEngine;
 
             boost::shared_ptr<ProjectileManager> mProjectileManager;
 
