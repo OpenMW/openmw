@@ -455,10 +455,6 @@ if(WIN32)
     include(CPack)
 endif(WIN32)
 
-# Libs
-include_directories(libs)
-add_subdirectory(libs/openengine)
-
 # Extern
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)

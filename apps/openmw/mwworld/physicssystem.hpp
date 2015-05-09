@@ -55,15 +55,6 @@ namespace MWWorld
 
             void removeHeightField (int x, int y);
 
-            // have to keep this as handle for now as unloadcell only knows scenenode names
-            void removeObject (const std::string& handle);
-
-            void moveObject (const MWWorld::Ptr& ptr);
-
-            void rotateObject (const MWWorld::Ptr& ptr);
-
-            void scaleObject (const MWWorld::Ptr& ptr);
-
             bool toggleCollisionMode();
 
             void stepSimulation(float dt);
@@ -81,8 +72,6 @@ namespace MWWorld
 
             std::pair<bool, Ogre::Vector3>
             castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
-
-            OEngine::Physic::PhysicEngine* getEngine();
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
@@ -117,7 +106,6 @@ namespace MWWorld
 
             bool mDebugDrawEnabled;
 
-            OEngine::Physic::PhysicEngine* mEngine;
             std::map<std::string, std::string> handleToMesh;
 
             // Tracks all movement collisions happening during a single frame. <actor handle, collided handle>

@@ -26,11 +26,11 @@
 
 #include <cassert>
 #include <string>
+#include <set>
 #include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <btBulletDynamicsCommon.h>
-#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <osg/Matrixf>
 
@@ -70,8 +70,7 @@ class ManualBulletShapeLoader
 {
 public:
     ManualBulletShapeLoader(bool showMarkers=false)
-      : mShape(NULL)
-      , mCompoundShape(NULL)
+      : mCompoundShape(NULL)
       , mStaticMesh(NULL)
       , mBoundingBox(NULL)
       , mShowMarkers(showMarkers)
@@ -90,11 +89,6 @@ public:
         std::cerr << "NIFLoader: Fail: "<< msg << std::endl;
         abort();
     }
-
-    /**
-    *This function should not be called manualy. Use load instead. (this is called by the BulletShapeManager when you use load).
-    */
-    void loadResource(Ogre::Resource *resource);
 
 private:
     btVector3 getbtVector(Ogre::Vector3 const &v);
@@ -116,7 +110,7 @@ private:
 
     std::string mResourceName;
 
-    OEngine::Physic::BulletShape* mShape;//current shape
+    //OEngine::Physic::BulletShape* mShape;//current shape
 
     btCompoundShape* mCompoundShape;
 

@@ -24,8 +24,6 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 
-#include <components/nifbullet/bulletnifloader.hpp>
-
 #include <components/esm/loadcell.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"

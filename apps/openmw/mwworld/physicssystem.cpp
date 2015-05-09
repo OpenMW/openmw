@@ -2,19 +2,7 @@
 
 #include <stdexcept>
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
-#include <OgreSceneManager.h>
-#include <OgreViewport.h>
-#include <OgreCamera.h>
-#include <OgreTextureManager.h>
-#include <OgreSceneNode.h>
-
 #include <osg/Group>
-
-#include <openengine/bullet/trace.h>
-#include <openengine/bullet/physic.hpp>
-//#include <openengine/bullet/BulletShapeLoader.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -33,20 +21,18 @@
 #include "../mwrender/bulletdebugdraw.hpp"
 
 //#include "../apps/openmw/mwrender/animation.hpp"
-#include "../apps/openmw/mwbase/world.hpp"
-#include "../apps/openmw/mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 
 #include "ptr.hpp"
 #include "class.hpp"
 
-using namespace Ogre;
-
 namespace
 {
 
+/*
 void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map, btDynamicsWorld* dynamicsWorld)
 {
-    /*
     for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
          it != map.end(); ++it)
     {
@@ -87,40 +73,10 @@ void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Phys
         // needed because we used btDynamicsWorld::setForceUpdateAllAabbs(false)
         dynamicsWorld->updateSingleAabb(it->first);
     }
+}
     */
-}
 
 }
-
-namespace BtOgre
-{
-//Converts from and to Bullet and Ogre stuff. Pretty self-explanatory.
-class Convert
-{
-public:
-    Convert() {};
-    ~Convert() {};
-
-    static btQuaternion toBullet(const Ogre::Quaternion &q)
-    {
-        return btQuaternion(q.x, q.y, q.z, q.w);
-    }
-    static btVector3 toBullet(const Ogre::Vector3 &v)
-    {
-        return btVector3(v.x, v.y, v.z);
-    }
-
-    static Ogre::Quaternion toOgre(const btQuaternion &q)
-    {
-        return Ogre::Quaternion(q.w(), q.x(), q.y(), q.z());
-    }
-    static Ogre::Vector3 toOgre(const btVector3 &v)
-    {
-        return Ogre::Vector3(v.x(), v.y(), v.z());
-    }
-};
-}
-
 
 namespace MWWorld
 {
@@ -188,6 +144,8 @@ namespace MWWorld
              *          +--+                         +--------
              *    ==============================================
              */
+            return false;
+#if 0
             OEngine::Physic::ActorTracer tracer, stepper;
 
             stepper.doTrace(colobj, position, position+Ogre::Vector3(0.0f,0.0f,sStepSizeUp), engine);
@@ -243,6 +201,7 @@ namespace MWWorld
 
             // moved between 0 and just under sStepSize distance but slope was too great,
             // or moved full sStepSize distance (FIXME: is this a bug?)
+#endif
             return false;
         }
 
@@ -266,6 +225,8 @@ namespace MWWorld
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
 
+            return position;
+#if 0
             OEngine::Physic::PhysicActor *physicActor = engine->getCharacter(ptr.getRefData().getHandle());
             if (!physicActor)
                 return position;
@@ -302,6 +263,7 @@ namespace MWWorld
 
                 return tracer.mEndPos;
             }
+#endif
         }
 
         static Ogre::Vector3 move(const MWWorld::Ptr &ptr, const Ogre::Vector3 &movement, float time,
@@ -311,7 +273,8 @@ namespace MWWorld
         {
             const ESM::Position &refpos = ptr.getRefData().getPosition();
             Ogre::Vector3 position(refpos.pos);
-
+            return position;
+#if 0
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
             if (!ptr.getClass().isMobile(ptr))
@@ -526,21 +489,20 @@ namespace MWWorld
 
             newPosition.z -= halfExtents.z; // remove what was added at the beginning
             return newPosition;
+#endif
         }
     };
 
 
     PhysicsSystem::PhysicsSystem(osg::ref_ptr<osg::Group> parentNode) :
-        mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0), mDebugDrawEnabled(false), mParentNode(parentNode)
+        mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0), mDebugDrawEnabled(false), mParentNode(parentNode)
     {
-        mEngine = new OEngine::Physic::PhysicEngine;
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-        if (mWaterCollisionObject.get())
-            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
-        delete mEngine;
+        //if (mWaterCollisionObject.get())
+        //    mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
     }
 
     bool PhysicsSystem::toggleDebugRendering()
@@ -549,18 +511,13 @@ namespace MWWorld
 
         if (mDebugDrawEnabled && !mDebugDrawer.get())
         {
-            mDebugDrawer.reset(new MWRender::DebugDrawer(mParentNode, mEngine->mDynamicsWorld));
-            mEngine->mDynamicsWorld->setDebugDrawer(mDebugDrawer.get());
-            mDebugDrawer->setDebugMode(mDebugDrawEnabled);
+            //mDebugDrawer.reset(new MWRender::DebugDrawer(mParentNode, mEngine->mDynamicsWorld));
+            //mEngine->mDynamicsWorld->setDebugDrawer(mDebugDrawer.get());
+            //mDebugDrawer->setDebugMode(mDebugDrawEnabled);
         }
         else if (mDebugDrawer.get())
             mDebugDrawer->setDebugMode(mDebugDrawEnabled);
         return mDebugDrawEnabled;
-    }
-
-    OEngine::Physic::PhysicEngine* PhysicsSystem::getEngine()
-    {
-        return mEngine;
     }
 
     std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
@@ -568,6 +525,8 @@ namespace MWWorld
                                                                       const Ogre::Quaternion &orient,
                                                                       float queryDistance)
     {
+        return std::make_pair(std::string(), Ogre::Vector3());
+        /*
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         btConeShape shape(Ogre::Degree(store.find("fCombatAngleXY")->getFloat()/2.0f).valueRadians(),
@@ -589,22 +548,28 @@ namespace MWWorld
         if(!result.first)
             return std::make_pair(std::string(), Ogre::Vector3(&result.second[0]));
         return std::make_pair(result.first->mName, Ogre::Vector3(&result.second[0]));
+        */
     }
 
 
-    bool PhysicsSystem::castRay(const Vector3& from, const Vector3& to, bool ignoreHeightMap)
+    bool PhysicsSystem::castRay(const Ogre::Vector3& from, const Ogre::Vector3& to, bool ignoreHeightMap)
     {
+        return false;
+        /*
         btVector3 _from, _to;
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
         std::pair<std::string, float> result = mEngine->rayTest(_from, _to,ignoreHeightMap);
         return !(result.first == "");
+        */
     }
 
     std::pair<bool, Ogre::Vector3>
     PhysicsSystem::castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len)
     {
+        return std::make_pair(false, Ogre::Vector3());
+        /*
         Ogre::Ray ray = Ogre::Ray(orig, dir);
         Ogre::Vector3 to = ray.getPoint(len);
 
@@ -616,125 +581,42 @@ namespace MWWorld
             return std::make_pair(false, Ogre::Vector3());
         }
         return std::make_pair(true, ray.getPoint(len * test.second));
+        */
     }
 
     std::vector<std::string> PhysicsSystem::getCollisions(const Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        return mEngine->getCollisions(ptr.getRefData().getBaseNodeOld()->getName(), collisionGroup, collisionMask);
+        return std::vector<std::string>();//mEngine->getCollisions(ptr.getRefData().getBaseNodeOld()->getName(), collisionGroup, collisionMask);
     }
 
     Ogre::Vector3 PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)
     {
-        return MovementSolver::traceDown(ptr, mEngine, maxHeight);
+        return Ogre::Vector3();//MovementSolver::traceDown(ptr, mEngine, maxHeight);
     }
 
     void PhysicsSystem::addHeightField (float* heights,
                 int x, int y, float yoffset,
                 float triSize, float sqrtVerts)
     {
-        mEngine->addHeightField(heights, x, y, yoffset, triSize, sqrtVerts);
     }
 
     void PhysicsSystem::removeHeightField (int x, int y)
     {
-        mEngine->removeHeightField(x, y);
     }
 
     void PhysicsSystem::addObject (const Ptr& ptr, const std::string& mesh, bool placeable)
     {
-        /*
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
-        handleToMesh[node->getName()] = mesh;
-        mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, false, placeable);
-        mEngine->createAndAdjustRigidBody(
-            mesh, node->getName(), ptr.getCellRef().getScale(), node->getPosition(), node->getOrientation(), 0, 0, true, placeable);
-        */
+
     }
 
     void PhysicsSystem::addActor (const Ptr& ptr, const std::string& mesh)
     {
-        /*
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
-        //TODO:optimize this. Searching the std::map isn't very efficient i think.
-        mEngine->addCharacter(node->getName(), mesh, node->getPosition(), node->getScale().x, node->getOrientation());
-        */
-    }
 
-    void PhysicsSystem::removeObject (const std::string& handle)
-    {
-        mEngine->removeCharacter(handle);
-        mEngine->removeRigidBody(handle);
-        mEngine->deleteRigidBody(handle);
-    }
-
-    void PhysicsSystem::moveObject (const Ptr& ptr)
-    {
-        Ogre::SceneNode *node = ptr.getRefData().getBaseNodeOld();
-        const std::string &handle = node->getName();
-        const Ogre::Vector3 &position = node->getPosition();
-
-        if(OEngine::Physic::RigidBody *body = mEngine->getRigidBody(handle))
-        {
-            body->getWorldTransform().setOrigin(btVector3(position.x,position.y,position.z));
-            mEngine->mDynamicsWorld->updateSingleAabb(body);
-        }
-
-        // Actors update their AABBs every frame (DISABLE_DEACTIVATION), so no need to do it manually
-        if(OEngine::Physic::PhysicActor *physact = mEngine->getCharacter(handle))
-            physact->setPosition(position);
-    }
-
-    void PhysicsSystem::rotateObject (const Ptr& ptr)
-    {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
-        const std::string &handle = node->getName();
-        const Ogre::Quaternion &rotation = node->getOrientation();
-
-        // TODO: map to MWWorld::Ptr for faster access
-        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-        {
-            act->setRotation(rotation);
-        }
-        if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
-        {
-            if(dynamic_cast<btBoxShape*>(body->getCollisionShape()) == NULL)
-                body->getWorldTransform().setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w));
-            else
-                mEngine->boxAdjustExternal(handleToMesh[handle], body, node->getScale().x, node->getPosition(), rotation);
-            mEngine->mDynamicsWorld->updateSingleAabb(body);
-        }
-    }
-
-    void PhysicsSystem::scaleObject (const Ptr& ptr)
-    {
-        Ogre::SceneNode* node = ptr.getRefData().getBaseNodeOld();
-        const std::string &handle = node->getName();
-        if(handleToMesh.find(handle) != handleToMesh.end())
-        {
-            std::string model = ptr.getClass().getModel(ptr);
-            //model = Misc::ResourceHelpers::correctActorModelPath(model); // FIXME: scaling shouldn't require model
-
-            bool placeable = false;
-            if (OEngine::Physic::RigidBody* body = mEngine->getRigidBody(handle))
-                placeable = body->mPlaceable;
-            removeObject(handle);
-            addObject(ptr, model, placeable);
-        }
-
-        if (OEngine::Physic::PhysicActor* act = mEngine->getCharacter(handle))
-        {
-            float scale = ptr.getCellRef().getScale();
-            osg::Vec3f scaleVec (scale,scale,scale);
-            if (!ptr.getClass().isNpc())
-                // NOTE: Ignoring Npc::adjustScale (race height) on purpose. This is a bug in MW and must be replicated for compatibility reasons
-                ptr.getClass().adjustScale(ptr, scaleVec);
-            act->setScale(scaleVec.x());
-        }
     }
 
     bool PhysicsSystem::toggleCollisionMode()
     {
+        /*
         for(std::map<std::string,OEngine::Physic::PhysicActor*>::iterator it = mEngine->mActorMap.begin(); it != mEngine->mActorMap.end();++it)
         {
             if (it->first=="player")
@@ -756,6 +638,8 @@ namespace MWWorld
         }
 
         throw std::logic_error ("can't find player");
+        */
+        return false;
     }
 
     void PhysicsSystem::queueObjectMovement(const Ptr &ptr, const Ogre::Vector3 &movement)
@@ -790,6 +674,8 @@ namespace MWWorld
             // Collision events should be available on every frame
             mCollisions.clear();
             mStandingCollisions.clear();
+
+            /*
 
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             PtrVelocityList::iterator iter = mMovementQueue.begin();
@@ -831,6 +717,8 @@ namespace MWWorld
                 mMovementResults.push_back(std::make_pair(iter->first, newpos));
             }
 
+            */
+
             mTimeAccum = 0.0f;
         }
         mMovementQueue.clear();
@@ -840,9 +728,9 @@ namespace MWWorld
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
+        //animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
 
-        mEngine->stepSimulation(dt);
+        //mEngine->stepSimulation(dt);
 
         if (mDebugDrawer.get())
             mDebugDrawer->step();
@@ -932,7 +820,7 @@ namespace MWWorld
     {
         if (mWaterCollisionObject.get())
         {
-            mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+            //mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         }
 
         if (!mWaterEnabled)
@@ -941,7 +829,7 @@ namespace MWWorld
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
-        mEngine->mDynamicsWorld->addCollisionObject(mWaterCollisionObject.get(), OEngine::Physic::CollisionType_Water,
-                                                    OEngine::Physic::CollisionType_Actor);
+        //mEngine->mDynamicsWorld->addCollisionObject(mWaterCollisionObject.get(), OEngine::Physic::CollisionType_Water,
+        //                                            OEngine::Physic::CollisionType_Actor);
     }
 }
