@@ -455,7 +455,8 @@ namespace Physic
         float scale, const Ogre::Vector3 &position, const Ogre::Quaternion &rotation,
         Ogre::Vector3* scaledBoxTranslation, Ogre::Quaternion* boxRotation, bool raycasting, bool placeable)
     {
-        std::string outputstring = mesh;
+        std::string sid = (boost::format("%07.3f") % scale).str();
+        std::string outputstring = mesh + sid;
 
         //get the shape from the .nif
         mShapeLoader->load(outputstring,"General");
@@ -474,35 +475,20 @@ namespace Physic
 
         btCollisionShape* collisionShape = raycasting ? shape->mRaycastingShape : shape->mCollisionShape;
 
-// TODO: check this from cmake?
-//#if BT_BULLET_VERSION < 283
-//#error "Bullet version 2.83 or later required"
-//#endif
+        // If this is an animated compound shape, we must duplicate it so we can animate
+        // multiple instances independently.
+        if (!raycasting && !shape->mAnimatedShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
+        if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
+            collisionShape = duplicateCollisionShape(collisionShape);
 
-        bool needDelete = false;
-        if (btBvhTriangleMeshShape* triangleShape = dynamic_cast<btBvhTriangleMeshShape*>(shape->mCollisionShape))
-        {
-            btScaledBvhTriangleMeshShape* scaled = new btScaledBvhTriangleMeshShape(triangleShape, btVector3(scale,scale,scale));
-            collisionShape = scaled;
-            needDelete = true;
-        }
-        else
-        {
-            // If this is an animated compound shape, we must duplicate it so we can animate
-            // multiple instances independently.
-            if (!raycasting && !shape->mAnimatedShapes.empty())
-                collisionShape = duplicateCollisionShape(collisionShape);
-            if (raycasting && !shape->mAnimatedRaycastingShapes.empty())
-                collisionShape = duplicateCollisionShape(collisionShape);
-        }
+        collisionShape->setLocalScaling( btVector3(scale,scale,scale));
 
         //create the real body
         btRigidBody::btRigidBodyConstructionInfo CI = btRigidBody::btRigidBodyConstructionInfo
                 (0,0, collisionShape);
         RigidBody* body = new RigidBody(CI,name);
         body->mPlaceable = placeable;
-        if (needDelete)
-            body->mCollisionShape.reset(collisionShape);
 
         if (!raycasting && !shape->mAnimatedShapes.empty())
         {

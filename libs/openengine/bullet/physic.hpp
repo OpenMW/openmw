@@ -63,9 +63,6 @@ namespace Physic
         virtual ~RigidBody();
         std::string mName;
 
-        // May be empty if the collision shape is a shared resource
-        std::auto_ptr<btCollisionShape> mCollisionShape;
-
         // Hack: placeable objects (that can be picked up by the player) have different collision behaviour.
         // This variable needs to be passed to BulletNifLoader.
         bool mPlaceable;

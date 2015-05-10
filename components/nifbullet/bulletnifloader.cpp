@@ -123,7 +123,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     mCompoundShape = NULL;
     mStaticMesh = NULL;
 
-    Nif::NIFFilePtr pnif (Nif::Cache::getInstance().load(mResourceName));
+    Nif::NIFFilePtr pnif (Nif::Cache::getInstance().load(mResourceName.substr(0, mResourceName.length()-7)));
     Nif::NIFFile & nif = *pnif.get ();
     if (nif.numRoots() < 1)
     {
@@ -134,7 +134,7 @@ void ManualBulletShapeLoader::loadResource(Ogre::Resource *resource)
     // Have to load controlled nodes from the .kf
     // FIXME: the .kf has to be loaded both for rendering and physics, ideally it should be opened once and then reused
     mControlledNodes.clear();
-    std::string kfname = mResourceName;
+    std::string kfname = mResourceName.substr(0, mResourceName.length()-7);
     Misc::StringUtils::toLower(kfname);
     if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
         kfname.replace(kfname.size()-4, 4, ".kf");
