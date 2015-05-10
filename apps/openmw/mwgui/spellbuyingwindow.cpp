@@ -127,13 +127,7 @@ namespace MWGui
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::Spells& playerSpells = player.getClass().getCreatureStats (player).getSpells();
-        for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(id, it->first))
-                return true;
-        }
-        return false;
+        return player.getClass().getCreatureStats(player).getSpells().hasSpell(id);
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)
