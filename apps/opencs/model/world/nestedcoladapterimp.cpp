@@ -754,87 +754,6 @@ namespace CSMWorld
         }
     }
 
-    static std::map<const std::string, std::string> populateInfoFuncToEnc()
-    {
-        std::map<const std::string, std::string> encMap;
-        encMap["Alarm"] =                  "69"; // AI
-        encMap["Alarmed"] =                "49";
-        encMap["Attacked"] =               "62";
-        encMap["Choice"] =                 "50";
-        encMap["Creature Target"] =        "65";
-        encMap["Detected"] =               "48";
-        encMap["Faction Rank Difference"] ="47";
-        encMap["Fight"] =                  "67"; // AI
-        encMap["Flee"] =                   "70"; // AI
-        encMap["Friend Hit"] =             "66";
-        encMap["Health Percent"] =         "04";
-        encMap["Hello"] =                  "68"; // AI
-        encMap["Level"] =                  "61";
-        encMap["PC Acrobatics"] =          "31";
-        encMap["PC Agility"] =             "53"; // attrib
-        encMap["PC Alchemy"] =             "27";
-        encMap["PC Alteration"] =          "22";
-        encMap["PC Armoror"] =             "12";
-        encMap["PC Athletics"] =           "19";
-        encMap["PC Axe"] =                 "17";
-        encMap["PC Blight Disease"] =      "41";
-        encMap["PC Block"] =               "11";
-        encMap["PC Blunt Weapon"] =        "15";
-        encMap["PC Clothing Modifier"] =   "42";
-        encMap["PC Common Disease"] =      "40";
-        encMap["PC Conjuration"] =         "24";
-        encMap["PC Corpus"] =              "58";
-        encMap["PC Crime Level"] =         "43";
-        encMap["PC Destruction"] =         "21";
-        encMap["PC Enchant"] =             "20";
-        encMap["PC Endurance"] =           "55"; // attrib
-        encMap["PC Expelled"] =            "39";
-        encMap["PC Fatigue"] =             "09"; // dynamic stat
-        encMap["PC Hand To Hand"] =        "37";
-        encMap["PC Health"] =              "64"; // dynamic stat
-        encMap["PC Health Percent"] =      "07";
-        encMap["PC Heavy Armor"] =         "14";
-        encMap["PC Illusion"] =            "23";
-        encMap["PC Intelligence"] =        "51"; // attrib
-        encMap["PC Level"] =               "06";
-        encMap["PC Light Armor"] =         "32";
-        encMap["PC Long Blade"] =          "16";
-        encMap["PC Luck"] =                "57"; // attrib
-        encMap["PC Magicka"] =             "08"; // dynamic stat
-        encMap["PC Marksman"] =            "34";
-        encMap["PC Medium Armor"] =        "13";
-        encMap["PC Merchantile"] =         "35";
-        encMap["PC Mysticism"] =           "25";
-        encMap["PC Personality"] =         "56"; // attrib
-        encMap["PC Reputation"] =          "05";
-        encMap["PC Restoration"] =         "26";
-        encMap["PC Security"] =            "29";
-        encMap["PC Sex"] =                 "38";
-        encMap["PC Short Blade"] =         "33";
-        encMap["PC Sneak"] =               "30";
-        encMap["PC Spear"] =               "18";
-        encMap["PC Speechcraft"] =         "36";
-        encMap["PC Speed"] =               "54"; // attrib
-        encMap["PC Strength"] =            "10"; // attrib
-        encMap["PC Unarmored"] =           "28";
-        encMap["PC Vampire"] =             "60";
-        encMap["PC Werewolf Kills"] =      "73";
-        encMap["PC Willpower"] =           "52"; // attrib
-        encMap["Rank Requirement"] =       "02";
-        encMap["Rank High"] =              "01";
-        encMap["Rank Low"] =               "00";
-        encMap["Reputation"] =             "03";
-        encMap["Same Faction"] =           "46";
-        encMap["Same Race"] =              "45";
-        encMap["Same Sex"] =               "44";
-        encMap["Should Attack"] =          "71";
-        encMap["Talked To PC"] =           "63";
-        encMap["Weather"] =                "59";
-        encMap["Werewolf"] =               "72";
-        return encMap;
-    }
-    static const std::map<const std::string, std::string> sInfoFuncToEnc = populateInfoFuncToEnc();
-
     void InfoConditionAdapter::setData(Record<Info>& record,
             const QVariant& value, int subRowIndex, int subColIndex) const
     {
@@ -881,16 +800,21 @@ namespace CSMWorld
             {
                 if (conditions[subRowIndex].mSelectRule[1] == '1')
                 {
-                    const std::map<const std::string, std::string>::const_iterator it = sInfoFuncToEnc.find(
-                        value.toString().toUtf8().constData());
-                    if (it != sInfoFuncToEnc.end())
+                    std::map<const std::string, std::string>::const_iterator it = sEncToInfoFunc.begin();
+                    for (;it != sEncToInfoFunc.end(); ++it)
                     {
-                        std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 2);
-                        rule.append(it->second);
-                        rule.append(std::string(1, conditions[subRowIndex].mSelectRule[4]));
-                        conditions[subRowIndex].mSelectRule = rule.append(value.toString().toUtf8().constData());
+                        if (it->second == value.toString().toUtf8().constData())
+                        {
+                            std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 2);
+                            rule.append(it->first);
+                            // leave old values for undo (NOTE: may not be vanilla's behaviour)
+                            rule.append(conditions[subRowIndex].mSelectRule.substr(4));
+                            conditions[subRowIndex].mSelectRule = rule;
+                            break;
+                        }
                     }
-                    else
+
+                    if (it == sEncToInfoFunc.end())
                         return; // return without saving; TODO: maybe log an error here
                 }
                 else
