@@ -143,6 +143,20 @@ namespace MWMechanics
         return mSelectedSpell;
     }
 
+    bool Spells::isSpellActive(const std::string &id) const
+    {
+        TContainer::const_iterator found = mSpells.find(id);
+        if (found != mSpells.end())
+        {
+            const ESM::Spell *spell =
+                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
+
+            return (spell->mData.mType==ESM::Spell::ST_Ability || spell->mData.mType==ESM::Spell::ST_Blight ||
+                spell->mData.mType==ESM::Spell::ST_Disease || spell->mData.mType==ESM::Spell::ST_Curse);
+        }
+        return false;
+    }
+
     bool Spells::hasCommonDisease() const
     {
         for (TIterator iter = mSpells.begin(); iter!=mSpells.end(); ++iter)
