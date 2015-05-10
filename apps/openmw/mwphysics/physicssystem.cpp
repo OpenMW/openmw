@@ -4,6 +4,8 @@
 
 #include <osg/Group>
 
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
@@ -187,7 +189,7 @@ namespace MWPhysics
             if(stepper.mFraction < 1.0f && getSlope(stepper.mPlaneNormal) <= sMaxSlope)
             {
                 // don't allow stepping up other actors
-                if (stepper.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
+                if (stepper.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
                     return false;
                 // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
                 // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
@@ -246,7 +248,7 @@ namespace MWPhysics
 
                 btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
                 resultCallback1.m_collisionFilterGroup = 0xff;
-                resultCallback1.m_collisionFilterMask = OEngine::Physic::CollisionType_World|OEngine::Physic::CollisionType_HeightMap;
+                resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
 
                 engine->mDynamicsWorld->rayTest(from, to, resultCallback1);
                 if (resultCallback1.hasHit() &&
@@ -437,14 +439,14 @@ namespace MWPhysics
                              Ogre::Vector3(0,0,sStepSizeDown+2.f) : Ogre::Vector3(0,0,2.f));
                 tracer.doTrace(colobj, from, to, engine);
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
-                        && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != OEngine::Physic::CollisionType_Actor)
+                        && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
                     if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
                     {
                         standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
                     }
-                    if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Water)
+                    if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
 
                     if (!isFlying)
@@ -457,7 +459,7 @@ namespace MWPhysics
                     // standing on actors is not allowed (see above).
                     // in addition to that, apply a sliding effect away from the center of the actor,
                     // so that we do not stay suspended in air indefinitely.
-                    if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == OEngine::Physic::CollisionType_Actor)
+                    if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
                     {
                         if (Ogre::Vector3(velocity.x, velocity.y, 0).squaredLength() < 100.f*100.f)
                         {
@@ -492,15 +494,94 @@ namespace MWPhysics
     };
 
 
-    PhysicsSystem::PhysicsSystem(osg::ref_ptr<osg::Group> parentNode) :
-        mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0), mDebugDrawEnabled(false), mParentNode(parentNode)
+    // ---------------------------------------------------------------
+
+    class HeightField
     {
+    public:
+        HeightField(float* heights, int x, int y, float triSize, float sqrtVerts)
+        {
+            // find the minimum and maximum heights (needed for bullet)
+            float minh = heights[0];
+            float maxh = heights[0];
+            for(int i = 1;i < sqrtVerts*sqrtVerts;++i)
+            {
+                float h = heights[i];
+                if(h > maxh) maxh = h;
+                if(h < minh) minh = h;
+            }
+
+            mShape = new btHeightfieldTerrainShape(
+                sqrtVerts, sqrtVerts, heights, 1,
+                minh, maxh, 2,
+                PHY_FLOAT, true
+            );
+            mShape->setUseDiamondSubdivision(true);
+            mShape->setLocalScaling(btVector3(triSize, triSize, 1));
+
+            btTransform transform(btQuaternion::getIdentity(),
+                                  btVector3((x+0.5f) * triSize * (sqrtVerts-1),
+                                            (y+0.5f) * triSize * (sqrtVerts-1),
+                                            (maxh+minh)*0.5f));
+
+            mCollisionObject = new btCollisionObject;
+            mCollisionObject->setCollisionShape(mShape);
+            mCollisionObject->setWorldTransform(transform);
+        }
+        ~HeightField()
+        {
+            delete mCollisionObject;
+            delete mShape;
+        }
+        btCollisionObject* getCollisionObject()
+        {
+            return mCollisionObject;
+        }
+
+    private:
+        btHeightfieldTerrainShape* mShape;
+        btCollisionObject* mCollisionObject;
+    };
+
+    // ---------------------------------------------------------------
+
+
+    PhysicsSystem::PhysicsSystem(osg::ref_ptr<osg::Group> parentNode)
+        : mTimeAccum(0.0f)
+        , mWaterEnabled(false)
+        , mWaterHeight(0)
+        , mDebugDrawEnabled(false)
+        , mParentNode(parentNode)
+    {
+        mCollisionConfiguration = new btDefaultCollisionConfiguration();
+        mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
+        mSolver = new btSequentialImpulseConstraintSolver;
+        mBroadphase = new btDbvtBroadphase();
+        mDynamicsWorld = new btDiscreteDynamicsWorld(mDispatcher,mBroadphase,mSolver,mCollisionConfiguration);
+
+        // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.
+        // Should a "static" object ever be moved, we have to update its AABB manually using DynamicsWorld::updateSingleAabb.
+        mDynamicsWorld->setForceUpdateAllAabbs(false);
+
+        mDynamicsWorld->setGravity(btVector3(0,0,-10));
     }
 
     PhysicsSystem::~PhysicsSystem()
     {
-        //if (mWaterCollisionObject.get())
-        //    mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+        if (mWaterCollisionObject.get())
+            mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+
+        for (HeightFieldMap::iterator it = mHeightFields.begin(); it != mHeightFields.end(); ++it)
+        {
+            mDynamicsWorld->removeCollisionObject(it->second->getCollisionObject());
+            delete it->second;
+        }
+
+        delete mDynamicsWorld;
+        delete mSolver;
+        delete mCollisionConfiguration;
+        delete mDispatcher;
+        delete mBroadphase;
     }
 
     bool PhysicsSystem::toggleDebugRendering()
@@ -509,9 +590,9 @@ namespace MWPhysics
 
         if (mDebugDrawEnabled && !mDebugDrawer.get())
         {
-            //mDebugDrawer.reset(new MWRender::DebugDrawer(mParentNode, mEngine->mDynamicsWorld));
-            //mEngine->mDynamicsWorld->setDebugDrawer(mDebugDrawer.get());
-            //mDebugDrawer->setDebugMode(mDebugDrawEnabled);
+            mDebugDrawer.reset(new MWRender::DebugDrawer(mParentNode, mDynamicsWorld));
+            mDynamicsWorld->setDebugDrawer(mDebugDrawer.get());
+            mDebugDrawer->setDebugMode(mDebugDrawEnabled);
         }
         else if (mDebugDrawer.get())
             mDebugDrawer->setDebugMode(mDebugDrawEnabled);
@@ -592,14 +673,24 @@ namespace MWPhysics
         return Ogre::Vector3();//MovementSolver::traceDown(ptr, mEngine, maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (float* heights,
-                int x, int y, float yoffset,
-                float triSize, float sqrtVerts)
+    void PhysicsSystem::addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts)
     {
+        HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts);
+        mHeightFields[std::make_pair(x,y)] = heightfield;
+
+        mDynamicsWorld->addCollisionObject(heightfield->getCollisionObject(), CollisionType_HeightMap,
+            CollisionType_Actor|CollisionType_Projectile);
     }
 
     void PhysicsSystem::removeHeightField (int x, int y)
     {
+        HeightFieldMap::iterator heightfield = mHeightFields.find(std::make_pair(x,y));
+        if(heightfield != mHeightFields.end())
+        {
+            mDynamicsWorld->removeCollisionObject(heightfield->second->getCollisionObject());
+            delete heightfield->second;
+            mHeightFields.erase(heightfield);
+        }
     }
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, bool placeable)
@@ -726,9 +817,10 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        //animateCollisionShapes(mEngine->mAnimatedShapes, mEngine->mDynamicsWorld);
+        //animateCollisionShapes(mEngine->mAnimatedShapes, mDynamicsWorld);
 
-        //mEngine->stepSimulation(dt);
+        // We have nothing to simulate, but character controllers aren't working without this call. Might be related to updating AABBs.
+        mDynamicsWorld->stepSimulation(static_cast<btScalar>(dt), 1, 1 / 60.0f);
 
         if (mDebugDrawer.get())
             mDebugDrawer->step();
@@ -818,7 +910,7 @@ namespace MWPhysics
     {
         if (mWaterCollisionObject.get())
         {
-            //mEngine->mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
+            mDynamicsWorld->removeCollisionObject(mWaterCollisionObject.get());
         }
 
         if (!mWaterEnabled)
@@ -827,7 +919,7 @@ namespace MWPhysics
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
-        //mEngine->mDynamicsWorld->addCollisionObject(mWaterCollisionObject.get(), OEngine::Physic::CollisionType_Water,
-        //                                            OEngine::Physic::CollisionType_Actor);
+        mDynamicsWorld->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
+                                                    CollisionType_Actor);
     }
 }

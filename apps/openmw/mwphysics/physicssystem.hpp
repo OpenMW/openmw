@@ -21,9 +21,22 @@ namespace MWRender
     class DebugDrawer;
 }
 
+class btSequentialImpulseConstraintSolver;
+class btDiscreteDynamicsWorld;
+
 namespace MWPhysics
 {
     typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrVelocityList;
+
+    enum CollisionType {
+        CollisionType_World = 1<<0,
+        CollisionType_Actor = 1<<1,
+        CollisionType_HeightMap = 1<<2,
+        CollisionType_Projectile = 1<<4,
+        CollisionType_Water = 1<<5
+    };
+
+    class HeightField;
 
     class PhysicsSystem
     {
@@ -39,9 +52,7 @@ namespace MWPhysics
 
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
-            void addHeightField (float* heights,
-                int x, int y, float yoffset,
-                float triSize, float sqrtVerts);
+            void addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts);
 
             void removeHeightField (int x, int y);
 
@@ -93,6 +104,15 @@ namespace MWPhysics
         private:
 
             void updateWater();
+
+            btBroadphaseInterface* mBroadphase;
+            btDefaultCollisionConfiguration* mCollisionConfiguration;
+            btSequentialImpulseConstraintSolver* mSolver;
+            btCollisionDispatcher* mDispatcher;
+            btDiscreteDynamicsWorld* mDynamicsWorld;
+
+            typedef std::map<std::pair<int, int>, HeightField*> HeightFieldMap;
+            HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
 

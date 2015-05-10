@@ -246,14 +246,8 @@ namespace MWWorld
                     const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
                     if (!land->isDataLoaded(flags))
                         land->loadData(flags);
-                    mPhysics->addHeightField (
-                        land->mLandData->mHeights,
-                        cell->getCell()->getGridX(),
-                        cell->getCell()->getGridY(),
-                        0,
-                        worldsize / (verts-1),
-                        verts)
-                    ;
+                    mPhysics->addHeightField (land->mLandData->mHeights, cell->getCell()->getGridX(), cell->getCell()->getGridY(),
+                        worldsize / (verts-1), verts);
                 }
             }
 
