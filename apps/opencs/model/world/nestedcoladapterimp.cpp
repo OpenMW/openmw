@@ -854,7 +854,14 @@ namespace CSMWorld
                 {
                     // FIXME: when these change the values of the other columns need to change
                     // correspondingly (and automatically)
-                    case 1:  conditions[subRowIndex].mSelectRule[1] = '1'; break; // Function
+                    case 1:
+                    {
+                        conditions[subRowIndex].mSelectRule[1] = '1';             // Function
+                        // default to "Rank Low"
+                        conditions[subRowIndex].mSelectRule[2] = '0';
+                        conditions[subRowIndex].mSelectRule[3] = '0';
+                        break;
+                    }
                     case 2:  conditions[subRowIndex].mSelectRule[1] = '2'; break; // Global
                     case 3:  conditions[subRowIndex].mSelectRule[1] = '3'; break; // Local
                     case 4:  conditions[subRowIndex].mSelectRule[1] = '4'; break; // Journal
@@ -874,7 +881,6 @@ namespace CSMWorld
             {
                 if (conditions[subRowIndex].mSelectRule[1] == '1')
                 {
-                    // throws an exception if the function is not found
                     const std::map<const std::string, std::string>::const_iterator it = sInfoFuncToEnc.find(
                         value.toString().toUtf8().constData());
                     if (it != sInfoFuncToEnc.end())
