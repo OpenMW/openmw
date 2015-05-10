@@ -274,6 +274,11 @@ namespace CSMWorld
             { ColumnId_SkillImpact, "Skills" },
 
             { ColumnId_InfoList, "Info List" },
+            { ColumnId_InfoCondition, "Info Conditions" },
+            { ColumnId_InfoCondFunc, "Function" },
+            { ColumnId_InfoCondVar, "Func/Variable" },
+            { ColumnId_InfoCondComp, "Comp" },
+            { ColumnId_InfoCondValue, "Value" },
             { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_UseValue1, "Use value 1" },
@@ -502,6 +507,18 @@ namespace
         "No", "Yes", 0
     };
 
+    static const char *sInfoCondFunc[] =
+    {
+        " ", "Function", "Global", "Local", "Journal",
+        "Item", "Dead", "Not ID", "Not Faction", "Not Class",
+        "Not Race", "Not Cell", "Not Local", 0
+    };
+
+    static const char *sInfoCondComp[] =
+    {
+        "!=", "<", "<=", "=", ">", ">=", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -530,6 +547,10 @@ namespace
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
             case CSMWorld::Columns::ColumnId_AiWanderRepeat: return sAiWanderRepeat;
+            case CSMWorld::Columns::ColumnId_InfoCondFunc: return sInfoCondFunc;
+            // FIXME: don't have dynamic value enum delegate, use Display_String for now
+            //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
+            case CSMWorld::Columns::ColumnId_InfoCondComp: return sInfoCondComp;
 
             default: return 0;
         }
