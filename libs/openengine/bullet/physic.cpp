@@ -475,9 +475,9 @@ namespace Physic
         btCollisionShape* collisionShape = raycasting ? shape->mRaycastingShape : shape->mCollisionShape;
 
 // TODO: check this from cmake?
-#if BT_BULLET_VERSION < 283
-#error "Bullet version 2.83 or later required"
-#endif
+//#if BT_BULLET_VERSION < 283
+//#error "Bullet version 2.83 or later required"
+//#endif
 
         bool needDelete = false;
         if (btBvhTriangleMeshShape* triangleShape = dynamic_cast<btBvhTriangleMeshShape*>(shape->mCollisionShape))
