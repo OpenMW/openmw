@@ -48,6 +48,9 @@ namespace CSVDoc
             QMainWindow mSubViewWindow;
             GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
 
+            bool mSaveWindowState;
+            bool mXWorkaround;
+
 
             // not implemented
             View (const View&);
@@ -111,6 +114,11 @@ namespace CSVDoc
 
             /// Function called by view manager when user preferences are updated
             void updateEditorSetting (const QString &, const QString &);
+
+        protected:
+
+            virtual void moveEvent(QMoveEvent * event);
+            virtual void resizeEvent(QResizeEvent * event);
 
         signals:
 
@@ -228,6 +236,8 @@ namespace CSVDoc
             void stop();
 
             void closeRequest (SubView *subView);
+
+            void saveWindowState();
     };
 }
 

@@ -405,6 +405,27 @@ bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
             else
                 remainingViews.push_back(*iter);
         }
+
+        // FIXME: seems removeDocument() and closeRequest() are duplicated functionality
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        if (remainingViews.empty() && !mViews.empty() &&
+            userSettings.settingValue ("window/save-state").toStdString() == "true")
+        {
+            if (userSettings.settingValue ("window/x-save-state-workaround").toStdString() == "true"
+                    && mViews.back()->isMaximized())
+            {
+                userSettings.setDefinitions("window/maximized", (QStringList() << "true"));
+                userSettings.saveDefinitions(); // store previously saved geometry & state
+            }
+            else
+            {
+                userSettings.value("window/geometry", mViews.back()->saveGeometry());
+                userSettings.value("window/state", mViews.back()->saveState());
+                userSettings.setDefinitions("window/maximized", (QStringList() << "false"));
+                userSettings.saveDefinitions();
+            }
+        }
+
         mDocumentManager.removeDocument(document);
         mViews = remainingViews;
     }

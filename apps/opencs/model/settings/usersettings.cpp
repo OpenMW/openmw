@@ -143,6 +143,16 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue (325);
         minWidth->setRange (50, 10000);
         minWidth->setToolTip ("Minimum width of subviews.");
+
+        Setting *saveState = createSetting (Type_CheckBox, "save-state", "Save window size and position");
+        saveState->setDefaultValue ("true");
+        saveState->setToolTip ("Remember window size and position between editing sessions.");
+
+        Setting *saveX = createSetting (Type_CheckBox, "x-save-state-workaround", "X windows workaround");
+        saveX->setDefaultValue ("false");
+        saveX->setToolTip ("Some X window managers don't remember the windows state before being"
+            " maximized. In such environments exiting while maximized will correctly start in a maximized"
+            " window, but restoring back to the normal size won't work.  Try this workaround.");
     }
 
     declareSection ("records", "Records");
@@ -456,6 +466,21 @@ QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString
     }
 
     return QString();
+}
+
+QVariant CSMSettings::UserSettings::value(const QString &viewKey, const QVariant &value)
+{
+    if(value != QVariant())
+    {
+        mSettingDefinitions->setValue (viewKey, value);
+        return value;
+    }
+    else if(mSettingDefinitions->contains(viewKey))
+    {
+        return mSettingDefinitions->value (viewKey);
+    }
+
+    return QVariant();
 }
 
 bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const
