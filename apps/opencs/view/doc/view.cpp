@@ -32,6 +32,23 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
     else
     {
+        if (mSaveWindowState)
+        {
+            CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+            if (isMaximized() && mXWorkaround)
+            {
+                userSettings.setDefinitions("window/maximized", (QStringList() << "true"));
+                userSettings.saveDefinitions(); // store previously saved geometry & state
+            }
+            else
+            {
+                userSettings.value("window/geometry", saveGeometry());
+                userSettings.value("window/state", saveState());
+                userSettings.setDefinitions("window/maximized", (QStringList() << "false"));
+                userSettings.saveDefinitions();
+            }
+        }
+
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }
@@ -381,22 +398,35 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews)
+      mViewTotal (totalViews), mSaveWindowState(false), mXWorkaround(false)
 {
-    int width = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-width").toInt();
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    mXWorkaround = userSettings.settingValue ("window/x-save-state-workaround").toStdString() == "true";
+    mSaveWindowState = userSettings.setting ("window/save-state", "true").toStdString() == "true";
 
-    int height = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-height").toInt();
+    // check if saved state should be used and whether it is the first time
+    if (mSaveWindowState && userSettings.hasSettingDefinitions ("window/maximized"))
+    {
+        restoreGeometry(userSettings.value("window/geometry").toByteArray());
+        restoreState(userSettings.value("window/state").toByteArray());
 
-    width = std::max(width, 300);
-    height = std::max(height, 300);
+        if (mXWorkaround && userSettings.settingValue ("window/maximized").toStdString() == "true")
+            setWindowState(windowState() | Qt::WindowMaximized);
+    }
+    else
+    {
+        int width = userSettings.settingValue ("window/default-width").toInt();
+        int height = userSettings.settingValue ("window/default-height").toInt();
 
-    // trick to get the window decorations and their sizes
-    show();
-    hide();
-    resize (width - (frameGeometry().width() - geometry().width()),
-            height - (frameGeometry().height() - geometry().height()));
+        width = std::max(width, 300);
+        height = std::max(height, 300);
+
+        // trick to get the window decorations and their sizes
+        show();
+        hide();
+        resize (width - (frameGeometry().width() - geometry().width()),
+                height - (frameGeometry().height() - geometry().height()));
+    }
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -770,6 +800,12 @@ void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &li
     if (name=="window/hide-subview")
         updateSubViewIndicies (0);
 
+    if (name == "window/save-state")
+        mSaveWindowState = list.at(0) == "true";
+
+    if (name == "window/x-save-state-workaround")
+        mXWorkaround = list.at(0) == "true";
+
     foreach (SubView *subView, mSubViews)
     {
         subView->updateUserSetting (name, list);
@@ -814,4 +850,34 @@ void CSVDoc::View::closeRequest (SubView *subView)
         subView->deleteLater();
     else if (mViewManager.closeRequest (this))
         mViewManager.removeDocAndView (mDocument);
+}
+
+// for more reliable detetion of isMaximized(), see https://bugreports.qt.io/browse/QTBUG-30085
+void CSVDoc::View::saveWindowState()
+{
+    if (!isMaximized())
+    {
+        // update but don't save to config file yet
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        userSettings.value("window/geometry", saveGeometry());
+        userSettings.value("window/state", saveState());
+    }
+}
+
+// For X11 where Qt does not remember pre-maximised state
+void CSVDoc::View::moveEvent (QMoveEvent *event)
+{
+    if (mXWorkaround && mSaveWindowState)
+        QMetaObject::invokeMethod(this, "saveWindowState", Qt::QueuedConnection);
+
+    QMainWindow::moveEvent(event);
+}
+
+// For X11 where Qt does not remember pre-maximised state
+void CSVDoc::View::resizeEvent (QResizeEvent *event)
+{
+    if (mXWorkaround && mSaveWindowState)
+        QMetaObject::invokeMethod(this, "saveWindowState", Qt::QueuedConnection);
+
+    QMainWindow::resizeEvent(event);
 }
