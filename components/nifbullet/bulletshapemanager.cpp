@@ -40,7 +40,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         std::set<std::string> animatedNodes;
         if (mVFS->exists(kfname))
         {
-            osg::ref_ptr<const NifOsg::KeyframeHolder> keyframes = mSceneManager->getKeyframes(normalized);
+            osg::ref_ptr<const NifOsg::KeyframeHolder> keyframes = mSceneManager->getKeyframes(kfname);
             for (NifOsg::KeyframeHolder::KeyframeControllerMap::const_iterator it = keyframes->mKeyframeControllers.begin();
                  it != keyframes->mKeyframeControllers.end(); ++it)
                 animatedNodes.insert(it->first);
