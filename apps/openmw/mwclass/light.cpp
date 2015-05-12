@@ -48,7 +48,7 @@ namespace MWClass
         assert (ref->mBase != NULL);
 
         // TODO: add option somewhere to enable collision for placeable objects
-        if ((ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
+        if (!model.empty() && (ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
             physics.addObject(ptr, model);
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
