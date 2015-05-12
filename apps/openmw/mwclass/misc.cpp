@@ -53,8 +53,7 @@ namespace MWClass
 
     void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
     std::string Miscellaneous::getModel(const MWWorld::Ptr &ptr) const

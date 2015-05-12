@@ -415,11 +415,11 @@ void WeatherManager::update(float duration, bool paused)
     if (mIsStorm)
     {
         MWWorld::Ptr player = world->getPlayerPtr();
-        Ogre::Vector3 playerPos (player.getRefData().getPosition().pos);
-        Ogre::Vector3 redMountainPos (19950, 72032, 27831);
+        osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
+        osg::Vec3f redMountainPos (19950, 72032, 27831);
 
         mStormDirection = (playerPos - redMountainPos);
-        mStormDirection.z = 0;
+        mStormDirection.z() = 0;
         //mRendering->getSkyManager()->setStormDirection(mStormDirection);
     }
 
@@ -844,7 +844,7 @@ bool WeatherManager::isInStorm() const
     return mIsStorm;
 }
 
-Ogre::Vector3 WeatherManager::getStormDirection() const
+osg::Vec3f WeatherManager::getStormDirection() const
 {
     return mStormDirection;
 }

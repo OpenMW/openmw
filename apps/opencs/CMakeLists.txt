@@ -151,7 +151,7 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+set(BOOST_COMPONENTS system filesystem program_options thread)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -202,7 +202,6 @@ target_link_libraries(openmw-cs
     ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${BULLET_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )

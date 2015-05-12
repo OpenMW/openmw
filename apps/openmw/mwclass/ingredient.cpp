@@ -41,8 +41,7 @@ namespace MWClass
 
     void Ingredient::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
     std::string Ingredient::getModel(const MWWorld::Ptr &ptr) const

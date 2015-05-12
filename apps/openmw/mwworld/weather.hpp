@@ -184,7 +184,7 @@ namespace MWWorld
         /// Are we in an ash or blight storm?
         bool isInStorm() const;
 
-        Ogre::Vector3 getStormDirection() const;
+        osg::Vec3f getStormDirection() const;
 
         void advanceTime(double hours);
 
@@ -205,7 +205,7 @@ namespace MWWorld
         float mHour;
         float mWindSpeed;
         bool mIsStorm;
-        Ogre::Vector3 mStormDirection;
+        osg::Vec3f mStormDirection;
 
         MWBase::SoundPtr mAmbientSound;
         std::string mPlayingSoundID;

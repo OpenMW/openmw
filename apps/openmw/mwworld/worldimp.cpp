@@ -7,8 +7,6 @@
 #else
 #include <tr1/unordered_map>
 #endif
-#include "../mwbase/scriptmanager.hpp"
-#include "../mwscript/globalscripts.hpp"
 #include <OgreSceneNode.h>
 
 #include <osg/Group>
@@ -19,6 +17,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -26,6 +25,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -39,8 +39,11 @@
 #include "../mwrender/renderingmanager.hpp"
 
 #include "../mwscript/interpretercontext.hpp"
+#include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"
+
+#include "../mwphysics/physicssystem.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -51,7 +54,6 @@
 #include "actionteleport.hpp"
 //#include "projectilemanager.hpp"
 #include "weather.hpp"
-#include "../mwphysics/physicssystem.hpp"
 
 #include "contentloader.hpp"
 #include "esmloader.hpp"
@@ -156,7 +158,7 @@ namespace MWWorld
       mStartCell (startCell), mStartupScript(startupScript),
       mScriptsEnabled(true)
     {
-        mPhysics = new MWPhysics::PhysicsSystem(rootNode);
+        mPhysics = new MWPhysics::PhysicsSystem(resourceSystem->getVFS(), rootNode);
         //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
@@ -1216,7 +1218,7 @@ namespace MWWorld
         if (haveToMove && ptr.getRefData().getBaseNode())
         {
             mRendering->moveObject(ptr, osg::Vec3f(vec.x, vec.y, vec.z));
-            //mPhysics->moveObject (ptr);
+            mPhysics->updatePosition(ptr);
         }
         if (isPlayer)
         {
@@ -1343,9 +1345,9 @@ namespace MWWorld
 
         if (force || !isFlying(ptr))
         {
-            //Ogre::Vector3 traced = mPhysics->traceDown(ptr, 500);
-            //if (traced.z < pos.pos[2])
-            //    pos.pos[2] = traced.z;
+            osg::Vec3f traced = mPhysics->traceDown(ptr, 500);
+            if (traced.z() < pos.pos[2])
+                pos.pos[2] = traced.z();
         }
 
         moveObject(ptr, ptr.getCell(), pos.pos[0], pos.pos[1], pos.pos[2]);
@@ -1358,8 +1360,8 @@ namespace MWWorld
         pos.pos[2] += dist;
         actor.getRefData().setPosition(pos);
 
-        Ogre::Vector3 traced;// = mPhysics->traceDown(actor, dist*1.1f);
-        moveObject(actor, actor.getCell(), traced.x, traced.y, traced.z);
+        osg::Vec3f traced = mPhysics->traceDown(actor, dist*1.1f);
+        moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -1397,34 +1399,32 @@ namespace MWWorld
         cellY = static_cast<int>(std::floor(y / cellSize));
     }
 
-    void World::queueMovement(const Ptr &ptr, const Ogre::Vector3 &velocity)
+    void World::queueMovement(const Ptr &ptr, const osg::Vec3f &velocity)
     {
-        //mPhysics->queueObjectMovement(ptr, velocity);
+        mPhysics->queueObjectMovement(ptr, velocity);
     }
 
     void World::doPhysics(float duration)
     {
         mPhysics->stepSimulation(duration);
-#if 0
         processDoors(duration);
 
-        mProjectileManager->update(duration);
+        //mProjectileManager->update(duration);
 
-        const PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
-        PtrVelocityList::const_iterator player(results.end());
-        for(PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
+        const MWPhysics::PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
+        MWPhysics::PtrVelocityList::const_iterator player(results.end());
+        for(MWPhysics::PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
         {
             if(iter->first == getPlayerPtr())
             {
-                /* Handle player last, in case a cell transition occurs */
+                // Handle player last, in case a cell transition occurs
                 player = iter;
                 continue;
             }
-            moveObjectImp(iter->first, iter->second.x, iter->second.y, iter->second.z);
+            moveObjectImp(iter->first, iter->second.x(), iter->second.y(), iter->second.z());
         }
         if(player != results.end())
-            moveObjectImp(player->first, player->second.x, player->second.y, player->second.z);
-#endif
+            moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z());
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -2312,12 +2312,12 @@ namespace MWWorld
             return false;
     }
 
-    Ogre::Vector3 World::getStormDirection() const
+    osg::Vec3f World::getStormDirection() const
     {
         if (isCellExterior() || isCellQuasiExterior())
             return mWeatherManager->getStormDirection();
         else
-            return Ogre::Vector3(0,1,0);
+            return osg::Vec3f(0,1,0);
     }
 
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)

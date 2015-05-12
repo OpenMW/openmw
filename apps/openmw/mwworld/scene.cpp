@@ -60,7 +60,7 @@ namespace
                 rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
 
             rendering.rotateObject(ptr, rot * worldRotQuat);
-            //physics.rotateObject(ptr);
+            physics.updateRotation(ptr);
         }
     }
 
@@ -190,14 +190,13 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
-        ListAndResetHandles functor;
+        ListAndResetObjects functor;
 
-        (*iter)->forEach<ListAndResetHandles>(functor);
-        for (std::vector<Ogre::SceneNode*>::const_iterator iter2 (functor.mHandles.begin());
-            iter2!=functor.mHandles.end(); ++iter2)
+        (*iter)->forEach<ListAndResetObjects>(functor);
+        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (functor.mObjects.begin());
+            iter2!=functor.mObjects.end(); ++iter2)
         {
-            //Ogre::SceneNode* node = *iter2;
-            //mPhysics->removeObject (node->getName());
+            mPhysics->remove(*iter2);
         }
 
         if ((*iter)->getCell()->isExterior())
@@ -258,17 +257,16 @@ namespace MWWorld
             insertCell (*cell, true, loadingListener);
 
             mRendering.addCell(cell);
-#if 0
             bool waterEnabled = cell->getCell()->hasWater();
-            mRendering.setWaterEnabled(waterEnabled);
+            //mRendering.setWaterEnabled(waterEnabled);
             if (waterEnabled)
             {
                 mPhysics->enableWater(cell->getWaterLevel());
-                mRendering.setWaterHeight(cell->getWaterLevel());
+                //mRendering.setWaterHeight(cell->getWaterLevel());
             }
             else
                 mPhysics->disableWater();
-#endif
+
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
@@ -564,8 +562,8 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
-        //mPhysics->removeObject (ptr.getRefData().getHandle());
-        //mRendering.removeObject (ptr);
+        mPhysics->remove(ptr);
+        //Rendering.removeObject (ptr);
     }
 
     bool Scene::isCellActive(const CellStore &cell)

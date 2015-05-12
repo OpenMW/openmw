@@ -52,9 +52,9 @@ add_component_dir (nifosg
     nifloader controller particle userdata
     )
 
-#add_component_dir (nifbullet
-#    bulletnifloader
-#    )
+add_component_dir (nifbullet
+    bulletnifloader bulletshapemanager
+    )
 
 add_component_dir (to_utf8
     to_utf8
@@ -171,6 +171,7 @@ target_link_libraries(components
     ${Boost_LIBRARIES} 
     ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
+    ${BULLET_LIBRARIES}
     # For MyGUI platform
     ${OPENGL_gl_LIBRARY}
 )

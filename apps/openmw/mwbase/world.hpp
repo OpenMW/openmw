@@ -302,7 +302,7 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void queueMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity) = 0;
+            virtual void queueMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity) = 0;
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
@@ -555,7 +555,7 @@ namespace MWBase
             virtual bool isInStorm() const = 0;
 
             /// @see MWWorld::WeatherManager::getStormDirection
-            virtual Ogre::Vector3 getStormDirection() const = 0;
+            virtual osg::Vec3f getStormDirection() const = 0;
 
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors() = 0;

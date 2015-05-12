@@ -1346,7 +1346,7 @@ void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
-    Ogre::Vector3 movement(0.0f);
+    osg::Vec3f movement(0.f, 0.f, 0.f);
 
     updateMagicEffects();
 
@@ -1403,23 +1403,23 @@ void CharacterController::update(float duration)
             }
         }
 
-        Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        vec.normalise();
+        osg::Vec3f vec(cls.getMovementSettings(mPtr).asVec3());
+        vec.normalize();
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
-            vec = Ogre::Vector3(0.0f);
+            vec = osg::Vec3f(0.f, 0.f, 0.f);
         Ogre::Vector3 rot = cls.getRotationVector(mPtr);
 
         mMovementSpeed = cls.getSpeed(mPtr);
 
-        vec.x *= mMovementSpeed;
-        vec.y *= mMovementSpeed;
+        vec.x() *= mMovementSpeed;
+        vec.y() *= mMovementSpeed;
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
         bool forcestateupdate = false;
 
-        mHasMovedInXY = std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
+        mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
 
 
@@ -1482,7 +1482,7 @@ void CharacterController::update(float duration)
         cls.getCreatureStats(mPtr).setFatigue(fatigue);
 
         if(sneak || inwater || flying)
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
         if (inwater || flying)
             cls.getCreatureStats(mPtr).land();
@@ -1505,22 +1505,23 @@ void CharacterController::update(float duration)
             static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
             float factor = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics)/100.f;
             factor = std::min(1.f, factor);
-            vec.x *= factor;
-            vec.y *= factor;
-            vec.z  = 0.0f;
+            vec.x() *= factor;
+            vec.y() *= factor;
+            vec.z()  = 0.0f;
         }
-        else if(vec.z > 0.0f && mJumpState == JumpState_None)
+        else if(vec.z() > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
             if (z > 0)
             {
-                if(vec.x == 0 && vec.y == 0)
-                    vec = Ogre::Vector3(0.0f, 0.0f, z);
+                if(vec.x() == 0 && vec.y() == 0)
+                    vec = osg::Vec3f(0.0f, 0.0f, z);
                 else
                 {
-                    Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                    vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                    osg::Vec3f lat (vec.x(), vec.y(), 0.0f);
+                    lat.normalize();
+                    vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
                 }
 
                 // advance acrobatics
@@ -1544,7 +1545,7 @@ void CharacterController::update(float duration)
         {
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
             float healthLost = getFallDamage(mPtr, height);
@@ -1575,28 +1576,28 @@ void CharacterController::update(float duration)
         else
         {
             mJumpState = JumpState_None;
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
             inJump = false;
 
-            if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+            if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
             {
-                if(vec.x > 0.0f)
+                if(vec.x() > 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
                                          : (sneak ? CharState_SneakRight
                                                   : (isrunning ? CharState_RunRight : CharState_WalkRight)));
-                else if(vec.x < 0.0f)
+                else if(vec.x() < 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
                                          : (sneak ? CharState_SneakLeft
                                                   : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
             }
-            else if(vec.y != 0.0f)
+            else if(vec.y() != 0.0f)
             {
-                if(vec.y > 0.0f)
+                if(vec.y() > 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
                                          : (sneak ? CharState_SneakForward
                                                   : (isrunning ? CharState_RunForward : CharState_WalkForward)));
-                else if(vec.y < 0.0f)
+                else if(vec.y() < 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
@@ -1676,7 +1677,7 @@ void CharacterController::update(float duration)
         }
         else
             // We must always queue movement, even if there is none, to apply gravity.
-            world->queueMovement(mPtr, Ogre::Vector3(0.0f));
+            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
@@ -1688,7 +1689,7 @@ void CharacterController::update(float duration)
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
-        world->queueMovement(mPtr, Ogre::Vector3(0.0f));
+        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
@@ -1702,15 +1703,15 @@ void CharacterController::update(float duration)
     {
         float l = moved.length();
 
-        if((movement.x < 0.0f && movement.x < moved.x()*2.0f) ||
-           (movement.x > 0.0f && movement.x > moved.x()*2.0f))
-            moved.x() = movement.x;
-        if((movement.y < 0.0f && movement.y < moved.y()*2.0f) ||
-           (movement.y > 0.0f && movement.y > moved.y()*2.0f))
-            moved.y() = movement.y;
-        if((movement.z < 0.0f && movement.z < moved.z()*2.0f) ||
-           (movement.z > 0.0f && movement.z > moved.z()*2.0f))
-            moved.z() = movement.z;
+        if((movement.x() < 0.0f && movement.x() < moved.x()*2.0f) ||
+           (movement.x() > 0.0f && movement.x() > moved.x()*2.0f))
+            moved.x() = movement.x();
+        if((movement.y() < 0.0f && movement.y() < moved.y()*2.0f) ||
+           (movement.y() > 0.0f && movement.y() > moved.y()*2.0f))
+            moved.y() = movement.y();
+        if((movement.z() < 0.0f && movement.z() < moved.z()*2.0f) ||
+           (movement.z() > 0.0f && movement.z() > moved.z()*2.0f))
+            moved.z() = movement.z();
         // but keep the original speed
         float newLength = moved.length();
         if (newLength > 0)
@@ -1722,7 +1723,7 @@ void CharacterController::update(float duration)
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
-        world->queueMovement(mPtr, Ogre::Vector3(moved.x(), moved.y(), moved.z()));
+        world->queueMovement(mPtr, moved);
 
     mSkipAnim = false;
 

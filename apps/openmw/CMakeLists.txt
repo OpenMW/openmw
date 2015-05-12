@@ -74,7 +74,7 @@ add_openmw_dir (mwworld
     )
 
 add_openmw_dir (mwphysics
-    physicssystem
+    physicssystem trace collisiontype actor convert
     )
 
 add_openmw_dir (mwclass
@@ -101,9 +101,9 @@ add_openmw_dir (mwbase
 
 # Main executable
 if (ANDROID)
-    set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
+    set(BOOST_COMPONENTS system filesystem program_options thread atomic)
 else ()
-    set(BOOST_COMPONENTS system filesystem program_options thread wave)
+    set(BOOST_COMPONENTS system filesystem program_options thread)
 endif ()
 
 if(WIN32)

@@ -1,5 +1,5 @@
-#ifndef GAME_MWWORLD_PHYSICSSYSTEM_H
-#define GAME_MWWORLD_PHYSICSSYSTEM_H
+#ifndef OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
+#define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
 #include <memory>
 
@@ -21,34 +21,48 @@ namespace MWRender
     class DebugDrawer;
 }
 
+namespace NifBullet
+{
+    class BulletShapeManager;
+}
+
+namespace VFS
+{
+    class Manager;
+}
+
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
 
 namespace MWPhysics
 {
-    typedef std::vector<std::pair<MWWorld::Ptr,Ogre::Vector3> > PtrVelocityList;
-
-    enum CollisionType {
-        CollisionType_World = 1<<0,
-        CollisionType_Actor = 1<<1,
-        CollisionType_HeightMap = 1<<2,
-        CollisionType_Projectile = 1<<4,
-        CollisionType_Water = 1<<5
-    };
+    typedef std::vector<std::pair<MWWorld::Ptr,osg::Vec3f> > PtrVelocityList;
 
     class HeightField;
+    class Object;
+    class Actor;
 
     class PhysicsSystem
     {
         public:
-            PhysicsSystem (osg::ref_ptr<osg::Group> parentNode);
+            PhysicsSystem (const VFS::Manager* vfs, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
 
             void enableWater(float height);
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, bool placeable=false);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh);
+
+            // Object or Actor
+            void remove (const MWWorld::Ptr& ptr);
+
+            void updateScale (const MWWorld::Ptr& ptr);
+            void updateRotation (const MWWorld::Ptr& ptr);
+            void updatePosition (const MWWorld::Ptr& ptr);
+
+            // TODO
+            //void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
@@ -61,7 +75,7 @@ namespace MWPhysics
             void stepSimulation(float dt);
 
             std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
-            Ogre::Vector3 traceDown(const MWWorld::Ptr &ptr, float maxHeight);
+            osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<std::string,Ogre::Vector3> getHitContact(const std::string &name,
                                                                const Ogre::Vector3 &origin,
@@ -76,7 +90,7 @@ namespace MWPhysics
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
-            void queueObjectMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity);
+            void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
             const PtrVelocityList& applyQueuedMovement(float dt);
@@ -111,6 +125,14 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btDiscreteDynamicsWorld* mDynamicsWorld;
 
+            std::auto_ptr<NifBullet::BulletShapeManager> mShapeManager;
+
+            typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
+            ObjectMap mObjects;
+
+            typedef std::map<MWWorld::Ptr, Actor*> ActorMap;
+            ActorMap mActors;
+
             typedef std::map<std::pair<int, int>, HeightField*> HeightFieldMap;
             HeightFieldMap mHeightFields;
 
@@ -121,9 +143,9 @@ namespace MWPhysics
             // Tracks all movement collisions happening during a single frame. <actor handle, collided handle>
             // This will detect e.g. running against a vertical wall. It will not detect climbing up stairs,
             // stepping up small objects, etc.
-            std::map<std::string, std::string> mCollisions;
+            std::map<std::string, std::string> mCollisions; // FIXME: reimplement
 
-            std::map<std::string, std::string> mStandingCollisions;
+            std::map<std::string, std::string> mStandingCollisions;  // FIXME: reimplement
 
             PtrVelocityList mMovementQueue;
             PtrVelocityList mMovementResults;

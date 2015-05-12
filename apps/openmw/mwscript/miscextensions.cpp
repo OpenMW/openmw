@@ -811,10 +811,10 @@ namespace MWScript
 
                 const std::string script = ptr.getClass().getScript(ptr);
                 if(script.empty())
-                    str<< ptr.getCellRef().getRefId()<<" ("<<ptr.getRefData().getHandle()<<") does not have a script.";
+                    str<< ptr.getCellRef().getRefId()<<"  does not have a script.";
                 else
                 {
-                    str<< "Local variables for "<<ptr.getCellRef().getRefId()<<" ("<<ptr.getRefData().getHandle()<<")";
+                    str<< "Local variables for "<<ptr.getCellRef().getRefId();
 
                     const Locals &locals = ptr.getRefData().getLocals();
                     const Compiler::Locals &complocals = MWBase::Environment::get().getScriptManager()->getLocals(script);
