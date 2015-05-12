@@ -6,6 +6,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include <osg/Vec3f>
+#include <osg/Quat>
 #include <osg/ref_ptr>
 
 class btDynamicsWorld;
@@ -109,6 +110,7 @@ namespace MWPhysics
 
         osg::Vec3f mMeshTranslation;
         osg::Vec3f mHalfExtents;
+        osg::Quat mRotation;
 
         osg::Vec3f mScale;
         osg::Vec3f mPosition;

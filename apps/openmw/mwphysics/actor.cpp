@@ -87,7 +87,7 @@ void Actor::updatePosition()
     osg::Vec3f position = mPtr.getRefData().getPosition().asVec3();
 
     btTransform tr = mCollisionObject->getWorldTransform();
-    osg::Vec3f scaledTranslation = osg::componentMultiply(mMeshTranslation, mScale);
+    osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
     osg::Vec3f newPosition = scaledTranslation + position;
 
     tr.setOrigin(toBullet(newPosition));
@@ -97,8 +97,11 @@ void Actor::updatePosition()
 void Actor::updateRotation ()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
-    tr.setRotation(toBullet(mPtr.getRefData().getBaseNode()->getAttitude()));
+    mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
+    tr.setRotation(toBullet(mRotation));
     mCollisionObject->setWorldTransform(tr);
+
+    updatePosition();
 }
 
 void Actor::updateScale()
