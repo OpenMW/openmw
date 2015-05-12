@@ -6,18 +6,14 @@
 #include <OgreVector3.h>
 
 #include <components/esm/effectlist.hpp>
-#include <components/nifogre/ogrenifloader.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
 #include "ptr.hpp"
 
-namespace OEngine
+namespace MWPhysics
 {
-namespace Physic
-{
-    class PhysicEngine;
-}
+    class PhysicsSystem;
 }
 
 namespace Loading

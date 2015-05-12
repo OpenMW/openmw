@@ -53,6 +53,11 @@ namespace MWPhysics
             void disableWater();
 
             void addObject (const MWWorld::Ptr& ptr, const std::string& mesh);
+            void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
+
+            void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
+
+            Actor* getActor(const MWWorld::Ptr& ptr);
 
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
@@ -61,9 +66,6 @@ namespace MWPhysics
             void updateRotation (const MWWorld::Ptr& ptr);
             void updatePosition (const MWWorld::Ptr& ptr);
 
-            void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
-
-            void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             void addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts);
 

@@ -4,8 +4,6 @@
 #include <string>
 #include <memory>
 
-#include <OgreVector3.h>
-
 #include "soundmanagerimp.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -27,11 +25,11 @@ namespace MWSound
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
         virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags, float offset) = 0;
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound3D(const std::string &fname, const Ogre::Vector3 &pos,
+        virtual MWBase::SoundPtr playSound3D(const std::string &fname, const osg::Vec3f &pos,
                                              float vol, float basevol, float pitch, float min, float max, int flags, float offset, bool extractLoudness=false) = 0;
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags) = 0;
 
-        virtual void updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env) = 0;
+        virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env) = 0;
 
         virtual void pauseSounds(int types) = 0;
         virtual void resumeSounds(int types) = 0;
@@ -41,7 +39,7 @@ namespace MWSound
 
     protected:
         bool mInitialized;
-        Ogre::Vector3 mPos;
+        osg::Vec3f mPos;
 
         Sound_Output(SoundManager &mgr)
           : mManager(mgr)

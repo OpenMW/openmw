@@ -1,4 +1,4 @@
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadcell.hpp>
 
@@ -519,17 +519,17 @@ namespace MWScript
                     for (int i=0; i<count; ++i)
                     {
                         ESM::Position ipos = actor.getRefData().getPosition();
-                        Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                        Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
-                        if(direction == 0) pos = pos + distance*rot.yAxis();
-                        else if(direction == 1) pos = pos - distance*rot.yAxis();
-                        else if(direction == 2) pos = pos - distance*rot.xAxis();
-                        else if(direction == 3) pos = pos + distance*rot.xAxis();
+                        osg::Vec3f pos(ipos.asVec3());
+                        osg::Quat rot(ipos.rot[2], osg::Vec3f(0,0,-1));
+                        if(direction == 0) pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
+                        else if(direction == 1) pos = pos - (rot * osg::Vec3f(0,1,0)) * distance;
+                        else if(direction == 2) pos = pos - (rot * osg::Vec3f(1,0,0)) * distance;
+                        else if(direction == 3) pos = pos + (rot * osg::Vec3f(1,0,0)) * distance;
                         else throw std::runtime_error ("direction must be 0,1,2 or 3");
 
-                        ipos.pos[0] = pos.x;
-                        ipos.pos[1] = pos.y;
-                        ipos.pos[2] = pos.z;
+                        ipos.pos[0] = pos.x();
+                        ipos.pos[1] = pos.y();
+                        ipos.pos[2] = pos.z();
 
                         if (actor.getClass().isActor())
                         {
@@ -670,29 +670,30 @@ namespace MWScript
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    Ogre::Vector3 posChange;
+                    osg::Vec3f posChange;
                     if (axis == "x")
                     {
-                        posChange=Ogre::Vector3(movement, 0, 0);
+                        posChange=osg::Vec3f(movement, 0, 0);
                     }
                     else if (axis == "y")
                     {
-                        posChange=Ogre::Vector3(0, movement, 0);
+                        posChange=osg::Vec3f(0, movement, 0);
                     }
                     else if (axis == "z")
                     {
-                        posChange=Ogre::Vector3(0, 0, movement);
+                        posChange=osg::Vec3f(0, 0, movement);
                     }
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);
 
-                    if (!ptr.getRefData().getBaseNodeOld())
+                    // is it correct that disabled objects can't be Move-d?
+                    if (!ptr.getRefData().getBaseNode())
                         return;
 
-                    Ogre::Vector3 diff = ptr.getRefData().getBaseNodeOld()->getOrientation() * posChange;
-                    Ogre::Vector3 worldPos(ptr.getRefData().getPosition().pos);
+                    osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
+                    osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
                 }
         };
 

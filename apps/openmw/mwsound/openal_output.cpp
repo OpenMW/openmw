@@ -271,7 +271,7 @@ private:
 
 
 OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags)
-  : Sound(Ogre::Vector3(0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags)
+  : Sound(osg::Vec3f(0.f, 0.f, 0.f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags)
   , mOutput(output), mSource(src), mSamplesQueued(0), mDecoder(decoder), mIsFinished(true), mIsInitialBatchEnqueued(false)
 {
     throwALerror();
@@ -505,7 +505,7 @@ private:
     OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
+    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
     virtual ~OpenAL_Sound();
 
     virtual void stop();
@@ -524,14 +524,14 @@ class OpenAL_Sound3D : public OpenAL_Sound
     OpenAL_Sound3D& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
       : OpenAL_Sound(output, src, buf, pos, vol, basevol, pitch, mindist, maxdist, flags)
     { }
 
     virtual void update();
 };
 
-OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
   : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
   , mOutput(output), mSource(src), mBuffer(buf)
 {
@@ -628,7 +628,7 @@ void OpenAL_Sound3D::update()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
-    if(mPos.squaredDistance(mOutput.mPos) > mMaxDistance*mMaxDistance)
+    if((mPos - mOutput.mPos).length2() > mMaxDistance*mMaxDistance)
         gain = 0.0f;
     else if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
     {
@@ -867,7 +867,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
     try
     {
         buf = getBuffer(fname).mALBuffer;
-        sound.reset(new OpenAL_Sound(*this, src, buf, Ogre::Vector3(0.0f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
+        sound.reset(new OpenAL_Sound(*this, src, buf, osg::Vec3f(0.f, 0.f, 0.f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
     }
     catch(std::exception&)
     {
@@ -892,7 +892,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
     return sound;
 }
 
-MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const Ogre::Vector3 &pos, float vol, float basevol, float pitch,
+MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const osg::Vec3f &pos, float vol, float basevol, float pitch,
                                             float min, float max, int flags, float offset, bool extractLoudness)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
@@ -967,7 +967,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, fl
 }
 
 
-void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3 &atdir, const Ogre::Vector3 &updir, Environment env)
+void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env)
 {
     mPos = pos;
     mLastEnvironment = env;
@@ -975,10 +975,10 @@ void OpenAL_Output::updateListener(const Ogre::Vector3 &pos, const Ogre::Vector3
     if(mContext)
     {
         ALfloat orient[6] = {
-            atdir.x, atdir.y, atdir.z,
-            updir.x, updir.y, updir.z
+            atdir.x(), atdir.y(), atdir.z(),
+            updir.x(), updir.y(), updir.z()
         };
-        alListener3f(AL_POSITION, mPos.x, mPos.y, mPos.z);
+        alListener3f(AL_POSITION, mPos.x(), mPos.y(), mPos.z());
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }

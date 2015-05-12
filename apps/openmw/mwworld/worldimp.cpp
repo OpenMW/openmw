@@ -44,6 +44,7 @@
 #include "../mwclass/door.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
+#include "../mwphysics/actor.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -1314,7 +1315,7 @@ namespace MWWorld
     {
         ESM::Position pos (ptr.getRefData().getPosition());
 
-        if(!ptr.getRefData().getBaseNodeOld())
+        if(!ptr.getRefData().getBaseNode())
         {
             // will be adjusted when Ptr's cell becomes active
             return;
@@ -1596,9 +1597,9 @@ namespace MWWorld
         performUpdateSceneQueries ();
 
         updateWindowManager ();
-
+        */
         updateSoundListener();
-
+        /*
         if (!paused && mPlayer->getPlayer().getCell()->isExterior())
         {
             ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
@@ -1611,17 +1612,21 @@ namespace MWWorld
 
     void World::updateSoundListener()
     {
-        /*
-        Ogre::Vector3 playerPos = mPlayer->getPlayer().getRefData().getBaseNodeOld()->getPosition();
+        const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
+        osg::Vec3f playerPos = refpos.asVec3();
 
-        const OEngine::Physic::PhysicActor *actor = mPhysEngine->getCharacter(getPlayerPtr().getRefData().getHandle());
-        if(actor) playerPos.z += 1.85f * actor->getHalfExtents().z;
-        Ogre::Quaternion playerOrient = Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X) *
-                    Ogre::Quaternion(Ogre::Radian(getPlayerPtr().getRefData().getPosition().rot[1]), Ogre::Vector3::NEGATIVE_UNIT_Y);
-        MWBase::Environment::get().getSoundManager()->setListenerPosDir(playerPos, playerOrient.yAxis(),
-                                                                        playerOrient.zAxis());
-        */
+        const MWPhysics::Actor* actor = mPhysics->getActor(getPlayerPtr());
+        if (actor)
+            playerPos.z() += 1.85f * actor->getHalfExtents().z();
+
+        osg::Quat playerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0,-1,0)) *
+                osg::Quat(refpos.rot[0], osg::Vec3f(-1,0,0)) *
+                osg::Quat(refpos.rot[2], osg::Vec3f(0,0,-1));
+
+        osg::Vec3f forward = playerOrient * osg::Vec3f(0,1,0);
+        osg::Vec3f up = playerOrient * osg::Vec3f(0,0,1);
+
+        MWBase::Environment::get().getSoundManager()->setListenerPosDir(playerPos, forward, up);
     }
 
     void World::updateWindowManager ()
@@ -1987,9 +1992,9 @@ namespace MWWorld
                 && isLevitationEnabled())
             return true;
 
-        //const OEngine::Physic::PhysicActor *actor = 0;//mPhysEngine->getCharacter(ptr.getRefData().getHandle());
-        //if(!actor || !actor->getCollisionMode())
-        //    return true;
+        const MWPhysics::Actor* actor = mPhysics->getActor(ptr);
+        if(!actor || !actor->getCollisionMode())
+            return true;
 
         return false;
     }
@@ -2027,10 +2032,10 @@ namespace MWWorld
         const float *fpos = object.getRefData().getPosition().pos;
         Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
 
-        //const OEngine::Physic::PhysicActor *actor = 0;//mPhysEngine->getCharacter(object.getRefData().getHandle());
-        //if (actor)
+        const MWPhysics::Actor* actor = mPhysics->getActor(object);
+        if (actor)
         {
-        //    pos.z += heightRatio*2*actor->getHalfExtents().z;
+            pos.z += heightRatio*2*actor->getHalfExtents().z();
         }
 
         return isUnderwater(object.getCell(), pos);
@@ -2134,17 +2139,16 @@ namespace MWWorld
         CellStore *currentCell = mWorldScene->getCurrentCell();
 
         Ptr player = mPlayer->getPlayer();
-        //RefData &refdata = player.getRefData();
-        //Ogre::Vector3 playerPos(refdata.getPosition().pos);
+        RefData &refdata = player.getRefData();
+        Ogre::Vector3 playerPos(refdata.getPosition().pos);
 
-        /*
-        const OEngine::Physic::PhysicActor *physactor = mPhysEngine->getCharacter(refdata.getHandle());
-        if (!physactor)
+        const MWPhysics::Actor* actor = mPhysics->getActor(player);
+        if (!actor)
             throw std::runtime_error("can't find player");
 
-        if((!physactor->getOnGround()&&physactor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
+        if((!actor->getOnGround()&&actor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return 2;
-            */
+
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
            player.getClass().getNpcStats(player).isWerewolf())
             return 1;
@@ -2359,9 +2363,10 @@ namespace MWWorld
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        if (!targetActor.getRefData().getBaseNodeOld() || !targetActor.getRefData().getBaseNodeOld())
+        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
             return false; // not in active cell
 
+        // TODO: move to PhysicsSystem
         /*
         OEngine::Physic::PhysicActor* actor1 = mPhysEngine->getCharacter(actor.getRefData().getHandle());
         OEngine::Physic::PhysicActor* actor2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle());
@@ -2402,11 +2407,9 @@ namespace MWWorld
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
     {
-        /*
-        OEngine::Physic::PhysicActor *physicActor = 0;//mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        MWPhysics::Actor *physicActor = mPhysics->getActor(actor);
         if (physicActor)
             physicActor->enableCollisionBody(enable);
-            */
     }
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
@@ -3261,9 +3264,9 @@ namespace MWWorld
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                 if(!effect->mAreaSound.empty())
-                    sndMgr->playManualSound3D(origin, effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playManualSound3D(osg::Vec3f(origin.x, origin.y, origin.z), effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
                 else
-                    sndMgr->playManualSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playManualSound3D(osg::Vec3f(origin.x, origin.y, origin.z), schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
             }
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
@@ -3348,12 +3351,9 @@ namespace MWWorld
 
     bool World::isWalkingOnWater(const Ptr &actor)
     {
-        return false;
-        /*
-        OEngine::Physic::PhysicActor* physicActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
         if (physicActor && physicActor->isWalkingOnWater())
             return true;
         return false;
-        */
     }
 }

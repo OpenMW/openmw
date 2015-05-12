@@ -802,6 +802,14 @@ namespace MWPhysics
         }
     }
 
+    Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
+    {
+        ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+            return found->second;
+        return NULL;
+    }
+
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
