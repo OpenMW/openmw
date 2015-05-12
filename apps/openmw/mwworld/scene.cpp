@@ -119,7 +119,7 @@ namespace
             }
             catch (const std::exception& e)
             {
-                std::string error ("error during rendering: ");
+                std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
                 std::cerr << error + e.what() << std::endl;
             }
         }
