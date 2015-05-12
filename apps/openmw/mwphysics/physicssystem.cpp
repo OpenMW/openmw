@@ -966,6 +966,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
+        /*
         const std::string& actorHandle = actor.getRefData().getHandle();
         const std::string& objectHandle = object.getRefData().getHandle();
 
@@ -975,11 +976,13 @@ namespace MWPhysics
             if (it->first == actorHandle && it->second == objectHandle)
                 return true;
         }
+        */
         return false;
     }
 
     void PhysicsSystem::getActorsStandingOn(const MWWorld::Ptr &object, std::vector<std::string> &out) const
     {
+        /*
         const std::string& objectHandle = object.getRefData().getHandle();
 
         for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
@@ -988,10 +991,12 @@ namespace MWPhysics
             if (it->second == objectHandle)
                 out.push_back(it->first);
         }
+        */
     }
 
     bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
+        /*
         const std::string& actorHandle = actor.getRefData().getHandle();
         const std::string& objectHandle = object.getRefData().getHandle();
 
@@ -1001,11 +1006,13 @@ namespace MWPhysics
             if (it->first == actorHandle && it->second == objectHandle)
                 return true;
         }
+        */
         return false;
     }
 
     void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<std::string> &out) const
     {
+        /*
         const std::string& objectHandle = object.getRefData().getHandle();
 
         for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
@@ -1014,6 +1021,7 @@ namespace MWPhysics
             if (it->second == objectHandle)
                 out.push_back(it->first);
         }
+        */
     }
 
     void PhysicsSystem::disableWater()

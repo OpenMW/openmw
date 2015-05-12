@@ -94,9 +94,6 @@ namespace MWWorld
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
 
-            Ptr searchViaHandle (const std::string& handle);
-            ///< Will return an empty Ptr if cell is not loaded.
-
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
 

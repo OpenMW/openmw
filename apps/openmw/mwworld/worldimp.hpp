@@ -98,8 +98,6 @@ namespace MWWorld
             World (const World&);
             World& operator= (const World&);
 
-            Ptr getPtrViaHandle (const std::string& handle, CellStore& cellStore);
-
             int mActivationDistanceOverride;
 
             std::string mStartupScript;
@@ -265,12 +263,6 @@ namespace MWWorld
             virtual Ptr searchPtr (const std::string& name, bool activeOnly);
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
-
-            virtual Ptr getPtrViaHandle (const std::string& handle);
-            ///< Return a pointer to a liveCellRef with the given Ogre handle.
-
-            virtual Ptr searchPtrViaHandle (const std::string& handle);
-            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.

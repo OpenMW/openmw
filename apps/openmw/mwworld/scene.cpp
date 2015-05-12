@@ -563,7 +563,7 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->remove(ptr);
-        //Rendering.removeObject (ptr);
+        //mRendering.removeObject (ptr);
     }
 
     bool Scene::isCellActive(const CellStore &cell)
@@ -576,16 +576,6 @@ namespace MWWorld
             ++active;
         }
         return false;
-    }
-
-    Ptr Scene::searchPtrViaHandle (const std::string& handle)
-    {
-        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
-            iter!=mActiveCells.end(); ++iter)
-            if (Ptr ptr = (*iter)->searchViaHandle (handle))
-                return ptr;
-
-        return Ptr();
     }
 
     Ptr Scene::searchPtrViaActorId (int actorId)

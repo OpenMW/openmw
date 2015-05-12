@@ -81,9 +81,6 @@ namespace MWWorld
 
             RefData& operator= (const RefData& refData);
 
-            /// Return OGRE handle (may be empty).
-            const std::string &getHandle();
-
             /// Return OGRE base node (can be a null pointer).
             /// obsolete
             Ogre::SceneNode* getBaseNodeOld();

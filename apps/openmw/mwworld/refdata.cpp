@@ -123,17 +123,6 @@ namespace MWWorld
         {}
     }
 
-    const std::string &RefData::getHandle()
-    {
-        if(!mBaseNode)
-        {
-            static const std::string empty;
-            return empty;
-        }
-
-        return mBaseNode->getName();
-    }
-
     Ogre::SceneNode* RefData::getBaseNodeOld()
     {
         return mBaseNode;

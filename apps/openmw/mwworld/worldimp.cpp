@@ -676,22 +676,6 @@ namespace MWWorld
         throw std::runtime_error ("unknown ID: " + name);
     }
 
-    Ptr World::getPtrViaHandle (const std::string& handle)
-    {
-        Ptr res = searchPtrViaHandle (handle);
-        if (res.isEmpty ())
-            throw std::runtime_error ("unknown Ogre handle: " + handle);
-        return res;
-    }
-
-    Ptr World::searchPtrViaHandle (const std::string& handle)
-    {
-        if (mPlayer->getPlayer().getRefData().getHandle()==handle)
-            return mPlayer->getPlayer();
-
-        return mWorldScene->searchPtrViaHandle (handle);
-    }
-
     Ptr World::searchPtrViaActorId (int actorId)
     {
         // The player is not registered in any CellStore so must be checked manually
@@ -1060,10 +1044,10 @@ namespace MWWorld
             getFacedHandle(facedHandle, activationDistance);
         }
 
-        if (facedHandle.empty())
+        //if (facedHandle.empty())
             return MWWorld::Ptr();
 
-        return getPtrViaHandle(facedHandle);
+        //return getPtrViaHandle(facedHandle);
     }
 
     std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -1083,7 +1067,6 @@ namespace MWWorld
             if(node != NULL)
                 pos += node->_getDerivedPosition();
         }
-        */
 
         std::pair<std::string,Ogre::Vector3> result;// = mPhysics->getHitContact(ptr.getRefData().getHandle(),
                                                     //                          pos, rot, distance);
@@ -1091,6 +1074,8 @@ namespace MWWorld
             return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
 
         return std::make_pair(searchPtrViaHandle(result.first), result.second);
+        */
+        return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
     }
 
     void World::deleteObject (const Ptr& ptr)
@@ -1875,10 +1860,11 @@ namespace MWWorld
             if (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() >= 30)
                 return false;
 
+            /*
             MWWorld::Ptr hitObject = searchPtrViaHandle(handle);
             if (!hitObject.isEmpty() && hitObject.getClass().isActor())
                 return false;
-
+            */
             return true;
         }
         else
@@ -2239,8 +2225,9 @@ namespace MWWorld
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
+        /*
         std::vector<std::string> actors;
-        //mPhysics->getActorsStandingOn(object, actors);
+        mPhysics->getActorsStandingOn(object, actors);
         for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
         {
             MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
@@ -2263,6 +2250,7 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
             }
         }
+        */
     }
 
     void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
@@ -2270,8 +2258,9 @@ namespace MWWorld
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
+        /*
         std::vector<std::string> actors;
-        //mPhysics->getActorsCollidingWith(object, actors);
+        mPhysics->getActorsCollidingWith(object, actors);
         for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
         {
             MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
@@ -2294,6 +2283,7 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
             }
         }
+        */
     }
 
     float World::getWindSpeed()
@@ -2338,15 +2328,14 @@ namespace MWWorld
         }
     }
 
-    struct ListHandlesFunctor
+    struct ListObjectsFunctor
     {
-        std::vector<std::string> mHandles;
+        std::vector<MWWorld::Ptr> mObjects;
 
         bool operator() (Ptr ptr)
         {
-            Ogre::SceneNode* handle = ptr.getRefData().getBaseNodeOld();
-            if (handle)
-                mHandles.push_back(handle->getName());
+            if (ptr.getRefData().getBaseNode())
+                mObjects.push_back(ptr);
             return true;
         }
     };
@@ -2356,12 +2345,12 @@ namespace MWWorld
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            ListHandlesFunctor functor;
-            (*cellIt)->forEach<ListHandlesFunctor>(functor);
+            ListObjectsFunctor functor;
+            (*cellIt)->forEach<ListObjectsFunctor>(functor);
 
-            for (std::vector<std::string>::iterator it = functor.mHandles.begin(); it != functor.mHandles.end(); ++it)
-                if (Misc::StringUtils::ciEqual(searchPtrViaHandle(*it).getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(searchPtrViaHandle(*it));
+            for (std::vector<MWWorld::Ptr>::iterator it = functor.mObjects.begin(); it != functor.mObjects.end(); ++it)
+                if (Misc::StringUtils::ciEqual(it->getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    out.push_back(*it);
         }
     }
 
@@ -2714,8 +2703,8 @@ namespace MWWorld
             // For the player, use camera to aim
             std::string facedHandle;
             getFacedHandle(facedHandle, distance);
-            if (!facedHandle.empty())
-                target = getPtrViaHandle(facedHandle);
+            //if (!facedHandle.empty())
+            //    target = getPtrViaHandle(facedHandle);
         }
         else
         {
