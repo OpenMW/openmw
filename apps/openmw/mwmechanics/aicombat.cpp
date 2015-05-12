@@ -16,13 +16,13 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-//#include "../mwrender/animation.hpp"
+#include "../mwrender/animation.hpp"
 
 
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
-//#include "character.hpp" // fixme: for getActiveWeapon
+#include "character.hpp" // fixme: for getActiveWeapon
 
 #include "aicombataction.hpp"
 #include "combat.hpp"
@@ -188,7 +188,6 @@ namespace MWMechanics
      */
     bool AiCombat::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
-#if 0
         // get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
         
@@ -257,9 +256,11 @@ namespace MWMechanics
         
         if(readyToAttack)
         {
+
             if (!minMaxAttackDurationInitialised)
             {
                 // TODO: this must be updated when a different weapon is equipped
+                // FIXME: attack durations would be easier to control if we interact more closely with the CharacterController
                 getMinMaxAttackDuration(actor, minMaxAttackDuration);
                 minMaxAttackDurationInitialised = true;
             }
@@ -674,7 +675,6 @@ namespace MWMechanics
             // FIXME: can fool actors to stay behind doors, etc.
             // Related to Bug#1102 and to some degree #1155 as well
         }
-#endif
         return false;
     }
 
@@ -812,7 +812,6 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
     return attackType;
 }
 
-#if 0
 void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations)[2])
 {
     if (!actor.getClass().hasInventoryStore(actor)) // creatures
@@ -876,7 +875,6 @@ void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations
         fMinMaxDurations[i][1] = fMinMaxDurations[i][0] + (start1 - start2) / weapSpeed;
     }
 }
-#endif
 
 Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
     float duration, int weapType, float strength)

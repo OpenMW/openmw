@@ -34,6 +34,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
+
 #include "vismask.hpp"
 #include "util.hpp"
 
@@ -1066,6 +1068,18 @@ namespace MWRender
             }
             ++it;
         }
+    }
+
+    bool Animation::upperBodyReady() const
+    {
+        for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
+        {
+            if((stateiter->second.mPriority > MWMechanics::Priority_Movement
+                    && stateiter->second.mPriority < MWMechanics::Priority_Torch)
+                    || stateiter->second.mPriority == MWMechanics::Priority_Death)
+                return false;
+        }
+        return true;
     }
 
     bool Animation::hasNode(const std::string &name)

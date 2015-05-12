@@ -89,7 +89,6 @@ add_executable(openmw-launcher
 
 target_link_libraries(openmw-launcher
     ${Boost_LIBRARIES}
-    ${OGRE_LIBRARIES}
     ${SDL2_LIBRARY_ONLY}
     ${QT_LIBRARIES}
     components

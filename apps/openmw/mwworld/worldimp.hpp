@@ -70,6 +70,8 @@ namespace MWWorld
 
     class World : public MWBase::World
     {
+            Resource::ResourceSystem* mResourceSystem;
+
             MWWorld::Fallback mFallback;
             MWRender::RenderingManager* mRendering;
 

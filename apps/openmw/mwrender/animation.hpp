@@ -309,7 +309,7 @@ public:
     bool isPlaying(const std::string &groupname) const;
 
     /// Returns true if no important animations are currently playing on the upper body.
-    //bool upperBodyReady() const;
+    bool upperBodyReady() const;
 
     /** Gets info about the given animation group.
      * \param groupname Animation group to check.

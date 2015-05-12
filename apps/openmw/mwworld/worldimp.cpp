@@ -17,6 +17,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -148,7 +149,7 @@ namespace MWWorld
         const std::vector<std::string>& contentFiles,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
-    : mPlayer (0), mLocalScripts (mStore),
+    : mResourceSystem(resourceSystem), mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mActivationDistanceOverride (activationDistanceOverride),
       mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
@@ -1170,7 +1171,7 @@ namespace MWWorld
 
                     MWWorld::Ptr newPtr = ptr.getClass()
                             .copyToCell(ptr, *newCell);
-                    newPtr.getRefData().setBaseNodeOld(0);
+                    newPtr.getRefData().setBaseNode(0);
                 }
                 else if (!currCellActive && !newCellActive)
                     ptr.getClass().copyToCell(ptr, *newCell);
@@ -1180,8 +1181,9 @@ namespace MWWorld
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     //mRendering->updateObjectCell(ptr, copy);
-                    ptr.getRefData().setBaseNodeOld(NULL);
+                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
+                    mPhysics->updatePtr(ptr, copy);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, copy);
@@ -2123,8 +2125,8 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
-        //model = Misc::ResourceHelpers::correctActorModelPath(model);
-        //mPhysics->addActor(mPlayer->getPlayer(), model);
+        model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
+        mPhysics->addActor(getPlayerPtr(), model);
     }
 
     int World::canRest ()
