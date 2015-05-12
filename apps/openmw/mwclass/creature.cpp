@@ -173,7 +173,7 @@ namespace MWClass
     {
         if(!model.empty())
         {
-            //physics.addActor(ptr, model);
+            physics.addActor(ptr, model);
             if (getCreatureStats(ptr).isDead())
                 MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
         }
