@@ -26,9 +26,9 @@ namespace NifBullet
     class BulletShapeManager;
 }
 
-namespace VFS
+namespace Resource
 {
-    class Manager;
+    class ResourceSystem;
 }
 
 class btSequentialImpulseConstraintSolver;
@@ -45,7 +45,7 @@ namespace MWPhysics
     class PhysicsSystem
     {
         public:
-            PhysicsSystem (const VFS::Manager* vfs, osg::ref_ptr<osg::Group> parentNode);
+            PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
 
             void enableWater(float height);
@@ -61,8 +61,7 @@ namespace MWPhysics
             void updateRotation (const MWWorld::Ptr& ptr);
             void updatePosition (const MWWorld::Ptr& ptr);
 
-            // TODO
-            //void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
+            void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 

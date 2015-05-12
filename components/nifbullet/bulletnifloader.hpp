@@ -107,6 +107,8 @@ public:
         abort();
     }
 
+    void setAnimatedNodes(const std::set<std::string>& animatedNodes);
+
     osg::ref_ptr<BulletShape> load(const Nif::NIFFilePtr file);
 
 private:
@@ -122,7 +124,7 @@ private:
 
     btTriangleMesh* mStaticMesh;
 
-    std::set<std::string> mControlledNodes;
+    std::set<std::string> mAnimatedNodes;
 
     osg::ref_ptr<BulletShape> mShape;
 };

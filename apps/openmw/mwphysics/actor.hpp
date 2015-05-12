@@ -25,6 +25,11 @@ namespace MWPhysics
     public:
         virtual ~PtrHolder() {}
 
+        void updatePtr(const MWWorld::Ptr& updated)
+        {
+            mPtr = updated;
+        }
+
     protected:
         MWWorld::Ptr mPtr;
     };

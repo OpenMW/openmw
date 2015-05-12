@@ -17,7 +17,6 @@
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/resource/resourcesystem.hpp>
 
 #include <boost/math/special_functions/sign.hpp>
 
@@ -158,7 +157,7 @@ namespace MWWorld
       mStartCell (startCell), mStartupScript(startupScript),
       mScriptsEnabled(true)
     {
-        mPhysics = new MWPhysics::PhysicsSystem(resourceSystem->getVFS(), rootNode);
+        mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));

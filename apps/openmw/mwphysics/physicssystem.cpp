@@ -9,9 +9,11 @@
 
 #include <components/nifbullet/bulletshapemanager.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
-#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <components/esm/loadgmst.hpp>
+
+#include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -24,7 +26,6 @@
 
 #include "../mwrender/bulletdebugdraw.hpp"
 
-//#include "../apps/openmw/mwrender/animation.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -34,57 +35,6 @@
 #include "actor.hpp"
 #include "convert.hpp"
 #include "trace.h"
-
-namespace
-{
-
-/*
-void animateCollisionShapes (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>& map, btDynamicsWorld* dynamicsWorld)
-{
-    for (std::map<OEngine::Physic::RigidBody*, OEngine::Physic::AnimatedShapeInstance>::iterator it = map.begin();
-         it != map.end(); ++it)
-    {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->first->mName);
-        if (ptr.isEmpty()) // Shouldn't happen
-            throw std::runtime_error("can't find Ptr");
-
-        MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
-        if (!animation)
-            continue;
-
-        OEngine::Physic::AnimatedShapeInstance& instance = it->second;
-
-        std::map<int, int>& shapes = instance.mAnimatedShapes;
-        for (std::map<int, int>::iterator shapeIt = shapes.begin();
-             shapeIt != shapes.end(); ++shapeIt)
-        {
-
-            const std::string& mesh = animation->getObjectRootName();
-            int boneHandle = NifOgre::NIFSkeletonLoader::lookupOgreBoneHandle(mesh, shapeIt->first);
-            Ogre::Node* bone = animation->getNode(boneHandle);
-
-            if (bone == NULL)
-                continue;
-
-            btCompoundShape* compound = static_cast<btCompoundShape*>(instance.mCompound);
-
-            btTransform trans;
-            trans.setOrigin(BtOgre::Convert::toBullet(bone->_getDerivedPosition()) * compound->getLocalScaling());
-            trans.setRotation(BtOgre::Convert::toBullet(bone->_getDerivedOrientation()));
-
-            compound->getChildShape(shapeIt->second)->setLocalScaling(
-                        compound->getLocalScaling() *
-                        BtOgre::Convert::toBullet(bone->_getDerivedScale()));
-            compound->updateChildTransform(shapeIt->second, trans);
-        }
-
-        // needed because we used btDynamicsWorld::setForceUpdateAllAabbs(false)
-        dynamicsWorld->updateSingleAabb(it->first);
-    }
-}
-    */
-
-}
 
 namespace MWPhysics
 {
@@ -569,11 +519,6 @@ namespace MWPhysics
             setOrigin(btVector3(pos[0], pos[1], pos[2]));
         }
 
-        void updatePtr(const MWWorld::Ptr& updated)
-        {
-            mPtr = updated;
-        }
-
         void setScale(float scale)
         {
             mShapeInstance->getCollisionShape()->setLocalScaling(btVector3(scale,scale,scale));
@@ -594,6 +539,47 @@ namespace MWPhysics
             return mCollisionObject.get();
         }
 
+        void animateCollisionShapes(btDynamicsWorld* dynamicsWorld)
+        {
+            if (mShapeInstance->mAnimatedShapes.empty())
+                return;
+
+            assert (mShapeInstance->getCollisionShape()->isCompound());
+
+            btCompoundShape* compound = dynamic_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
+
+            for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
+            {
+                int recIndex = it->first;
+                int shapeIndex = it->second;
+
+                NifOsg::FindRecIndexVisitor visitor(recIndex);
+                mPtr.getRefData().getBaseNode()->accept(visitor);
+                if (!visitor.mFound)
+                {
+                    std::cerr << "animateCollisionShapes: Can't find node " << recIndex << std::endl;
+                    return;
+                }
+
+                osg::NodePath path = visitor.mFoundPath;
+                path.erase(path.begin());
+                osg::Matrixf matrix = osg::computeLocalToWorld(path);
+                osg::Vec3f scale = matrix.getScale();
+                matrix.orthoNormalize(matrix);
+
+                btTransform transform;
+                transform.setOrigin(toBullet(matrix.getTrans()) * compound->getLocalScaling());
+                for (int i=0; i<3; ++i)
+                    for (int j=0; j<3; ++j)
+                        transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference
+
+                compound->getChildShape(shapeIndex)->setLocalScaling(compound->getLocalScaling() * toBullet(scale));
+                compound->updateChildTransform(shapeIndex, transform);
+            }
+
+            dynamicsWorld->updateSingleAabb(mCollisionObject.get());
+        }
+
     private:
         std::auto_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<NifBullet::BulletShapeInstance> mShapeInstance;
@@ -601,8 +587,8 @@ namespace MWPhysics
 
     // ---------------------------------------------------------------
 
-    PhysicsSystem::PhysicsSystem(const VFS::Manager* vfs, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(new NifBullet::BulletShapeManager(vfs))
+    PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
+        : mShapeManager(new NifBullet::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager()))
         , mTimeAccum(0.0f)
         , mWaterEnabled(false)
         , mWaterHeight(0)
@@ -795,6 +781,27 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
+    {
+        ObjectMap::iterator found = mObjects.find(old);
+        if (found != mObjects.end())
+        {
+            Object* obj = found->second;
+            obj->updatePtr(updated);
+            mObjects.erase(found);
+            mObjects.insert(std::make_pair(updated, obj));
+        }
+
+        ActorMap::iterator foundActor = mActors.find(old);
+        if (foundActor != mActors.end())
+        {
+            Actor* actor = foundActor->second;
+            actor->updatePtr(updated);
+            mActors.erase(foundActor);
+            mActors.insert(std::make_pair(updated, actor));
+        }
+    }
+
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -955,7 +962,8 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        //animateCollisionShapes(mEngine->mAnimatedShapes, mDynamicsWorld);
+        for (ObjectMap::iterator it = mObjects.begin(); it != mObjects.end(); ++it)
+            it->second->animateCollisionShapes(mDynamicsWorld);
 
         // We have nothing to simulate, but character controllers aren't working without this call. Might be related to updating AABBs.
         mDynamicsWorld->stepSimulation(static_cast<btScalar>(dt), 1, 1 / 60.0f);

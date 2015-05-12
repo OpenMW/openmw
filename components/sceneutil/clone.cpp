@@ -18,7 +18,8 @@ namespace SceneUtil
     {
         setCopyFlags(osg::CopyOp::DEEP_COPY_NODES
                      // Controller might need different inputs per scene instance
-                     | osg::CopyOp::DEEP_COPY_CALLBACKS);
+                     | osg::CopyOp::DEEP_COPY_CALLBACKS
+                     | osg::CopyOp::DEEP_COPY_USERDATA);
     }
 
     osg::StateSet* CopyOp::operator ()(const osg::StateSet* stateset) const
