@@ -241,11 +241,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
         lineNum->setDefaultValue ("true");
         lineNum->setToolTip ("Show line numbers to the left of the script editor window."
-                "The current row and column numbers of the text cursor are shown at the bottom.");
+                " The current row and column numbers of the text cursor are shown at the bottom.");
 
         Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
         monoFont->setDefaultValue ("true");
         monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
+    }
+
+    declareSection ("filter", "Global Filter");
+    {
+        Setting *projAdded = createSetting (Type_CheckBox, "project-added", "Project::added initial value");
+        projAdded->setDefaultValue ("false");
+        projAdded->setToolTip ("Show records added by the project when a table is first opened."
+                " Other records are filterd out.");
+
+        Setting *projModified = createSetting (Type_CheckBox, "project-modified", "Project::modified initial value");
+        projModified->setDefaultValue ("false");
+        projModified->setToolTip ("Show records modified by the project when a table is first opened."
+                " Other records are filterd out.");
     }
 
     {
