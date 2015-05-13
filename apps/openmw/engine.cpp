@@ -201,7 +201,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mCfgMgr(configurationManager)
 {
     Misc::Rng::init();
-    std::srand ( static_cast<unsigned int>(std::time(NULL)) );
     MWClass::registerClasses();
 
     Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
@@ -219,6 +218,11 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mEnvironment.cleanup();
+
+    delete mScriptContext;
+    mScriptContext = NULL;
+
     mResourceSystem.reset();
 
     mViewer = NULL;
@@ -226,8 +230,6 @@ OMW::Engine::~Engine()
     SDL_DestroyWindow(mWindow);
     mWindow = NULL;
 
-    mEnvironment.cleanup();
-    delete mScriptContext;
     SDL_Quit();
 }
 
