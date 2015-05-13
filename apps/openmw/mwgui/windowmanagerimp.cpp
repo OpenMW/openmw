@@ -1098,11 +1098,7 @@ namespace MWGui
             else if (it->first == "GUI" && it->second == "subtitles")
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
             else if (it->first == "GUI" && it->second == "menu transparency")
-            {
-                mViewer->stopThreading();
                 setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
-                mViewer->startThreading();
-            }
         }
     }
 

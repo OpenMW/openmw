@@ -42,8 +42,6 @@ namespace osgMyGUI
 
         virtual void destroy();
 
-        /// @warning If you intend to change a texture during the frame update, you must either declare the texture with DataVariance::DYNAMIC
-        /// or temporarily stop the viewer threading, to prevent race conditions with the draw thread.
         virtual void* lock(MyGUI::TextureUsage access);
         virtual void unlock();
         virtual bool isLocked();

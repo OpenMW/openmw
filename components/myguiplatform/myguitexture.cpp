@@ -141,11 +141,21 @@ namespace osgMyGUI
         if (!mLockedImage.valid())
             throw std::runtime_error("Texture not locked");
 
+        // mTexture might be in use by the draw thread, so create a new texture instead and use that.
+        osg::ref_ptr<osg::Texture2D> newTexture = new osg::Texture2D;
+        newTexture->setTextureSize(getWidth(), getHeight());
+        newTexture->setSourceFormat(mTexture->getSourceFormat());
+        newTexture->setSourceType(mTexture->getSourceType());
+        newTexture->setFilter(osg::Texture::MIN_FILTER, mTexture->getFilter(osg::Texture::MIN_FILTER));
+        newTexture->setFilter(osg::Texture::MAG_FILTER, mTexture->getFilter(osg::Texture::MAG_FILTER));
+        newTexture->setWrap(osg::Texture::WRAP_S, mTexture->getWrap(osg::Texture::WRAP_S));
+        newTexture->setWrap(osg::Texture::WRAP_T, mTexture->getWrap(osg::Texture::WRAP_T));
+        newTexture->setImage(mLockedImage.get());
         // Tell the texture it can get rid of the image for static textures (since
         // they aren't expected to update much at all).
-        mTexture->setImage(mLockedImage.get());
-        mTexture->setUnRefImageDataAfterApply(mUsage.isValue(MyGUI::TextureUsage::Static) ? true : false);
-        mTexture->dirtyTextureObject();
+        newTexture->setUnRefImageDataAfterApply(mUsage.isValue(MyGUI::TextureUsage::Static) ? true : false);
+
+        mTexture = newTexture;
 
         mLockedImage = nullptr;
     }
