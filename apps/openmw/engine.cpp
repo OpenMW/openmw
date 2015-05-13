@@ -442,7 +442,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
     // FIXME: shouldn't depend on Engine
-    MWInput::InputManager* input = new MWInput::InputManager (*this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();

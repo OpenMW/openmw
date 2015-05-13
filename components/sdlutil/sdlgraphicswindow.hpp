@@ -1,7 +1,7 @@
-#ifndef OSGGRAPHICSWINDOW_H
-#define OSGGRAPHICSWINDOW_H
+#ifndef OPENMW_COMPONENTS_SDLUTIL_SDLGRAPHICSWINDOW_H
+#define OPENMW_COMPONENTS_SDLUTIL_SDLGRAPHICSWINDOW_H
 
-#include <SDL.h>
+#include <SDL_video.h>
 
 #include <osgViewer/GraphicsWindow>
 
@@ -22,32 +22,7 @@ class GraphicsWindowSDL2 : public osgViewer::GraphicsWindow
     virtual ~GraphicsWindowSDL2();
 
 public:
-    GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits)
-        : mWindow(0)
-        , mContext(0)
-        , mValid(false)
-        , mRealized(false)
-        , mOwnsWindow(false)
-    {
-        _traits = traits;
-
-        init();
-        if(valid())
-        {
-            setState(new osg::State);
-            getState()->setGraphicsContext(this);
-
-            if(_traits.valid() && _traits->sharedContext.valid())
-            {
-                getState()->setContextID(_traits->sharedContext->getState()->getContextID());
-                incrementContextIDUsageCount(getState()->getContextID());
-            }
-            else
-            {
-                getState()->setContextID(osg::GraphicsContext::createNewContextID());
-            }
-        }
-    }
+    GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits);
 
     virtual bool isSameKindAs(const Object* object) const { return dynamic_cast<const GraphicsWindowSDL2*>(object)!=0; }
     virtual const char* libraryName() const { return "osgViewer"; }

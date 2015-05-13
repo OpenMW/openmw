@@ -12,6 +12,33 @@ GraphicsWindowSDL2::~GraphicsWindowSDL2()
     close(true);
 }
 
+GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits)
+    : mWindow(0)
+    , mContext(0)
+    , mValid(false)
+    , mRealized(false)
+    , mOwnsWindow(false)
+{
+    _traits = traits;
+
+    init();
+    if(valid())
+    {
+        setState(new osg::State);
+        getState()->setGraphicsContext(this);
+
+        if(_traits.valid() && _traits->sharedContext.valid())
+        {
+            getState()->setContextID(_traits->sharedContext->getState()->getContextID());
+            incrementContextIDUsageCount(getState()->getContextID());
+        }
+        else
+        {
+            getState()->setContextID(osg::GraphicsContext::createNewContextID());
+        }
+    }
+}
+
 
 bool GraphicsWindowSDL2::setWindowDecorationImplementation(bool flag)
 {

@@ -1,24 +1,27 @@
-#ifndef SDL4OGRE_SDLINPUTWRAPPER_H
-#define SDL4OGRE_SDLINPUTWRAPPER_H
+#ifndef OPENMW_COMPONENTS_SDLUTIL_SDLINPUTWRAPPER_H
+#define OPENMW_COMPONENTS_SDLUTIL_SDLINPUTWRAPPER_H
 
-#define NOMINMAX
+#include <map>
+
+#include <osg/ref_ptr>
 
 #include <SDL_events.h>
 
-#include <OgreRenderWindow.h>
-#include <boost/unordered_map.hpp>
+#include "OISCompat.hpp"
+#include "events.hpp"
 
-#include "OISCompat.h"
-#include "events.h"
-
-
-
-namespace SFO
+namespace osgViewer
 {
+    class Viewer;
+}
+
+namespace SDLUtil
+{
+    /// \brief A wrapper around SDL's event queue, mostly used for handling input-related events.
     class InputWrapper
     {
     public:
-        InputWrapper(SDL_Window *window, Ogre::RenderWindow* ogreWindow, bool grab);
+        InputWrapper(SDL_Window *window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab);
         ~InputWrapper();
 
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
@@ -42,7 +45,6 @@ namespace SFO
         void updateMouseSettings();
 
     private:
-
         void handleWindowEvent(const SDL_Event& evt);
 
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
@@ -51,12 +53,15 @@ namespace SFO
 
         void _setupOISKeys();
 
-        SFO::MouseListener* mMouseListener;
-        SFO::KeyListener* mKeyboardListener;
-        SFO::WindowListener* mWindowListener;
-        SFO::ControllerListener* mConListener;
+        SDL_Window* mSDLWindow;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
 
-        typedef boost::unordered_map<SDL_Keycode, OIS::KeyCode> KeyMap;
+        MouseListener* mMouseListener;
+        KeyListener* mKeyboardListener;
+        WindowListener* mWindowListener;
+        ControllerListener* mConListener;
+
+        typedef std::map<SDL_Keycode, OIS::KeyCode> KeyMap;
         KeyMap mKeyMap;
 
         Uint16 mWarpX;
@@ -79,9 +84,6 @@ namespace SFO
 
         bool mWindowHasFocus;
         bool mMouseInWindow;
-
-        SDL_Window* mSDLWindow;
-        Ogre::RenderWindow* mOgreWindow;
     };
 
 }

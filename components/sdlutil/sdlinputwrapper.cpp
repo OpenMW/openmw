@@ -1,17 +1,16 @@
 #include "sdlinputwrapper.hpp"
-#include <SDL_syswm.h>
 
-#include <OgrePlatform.h>
-#include <OgreRoot.h>
+#include <iostream>
+#include <stdexcept>
 
+#include <osgViewer/Viewer>
 
-namespace SFO
+namespace SDLUtil
 {
-    /// \brief General purpose wrapper for OGRE applications around SDL's event
-    ///        queue, mostly used for handling input-related events.
-    InputWrapper::InputWrapper(SDL_Window* window, Ogre::RenderWindow* ogreWindow, bool grab) :
+
+InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab) :
         mSDLWindow(window),
-        mOgreWindow(ogreWindow),
+        mViewer(viewer),
         mWarpCompensate(false),
         mMouseRelative(false),
         mGrabPointer(false),
@@ -147,28 +146,26 @@ namespace SFO
                 mMouseInWindow = false;
                 updateMouseSettings();
                 break;
+            case SDL_WINDOWEVENT_MOVED:
+                // I'm not sure what OSG is using the window position for, but I don't think it's needed,
+                // so we ignore window moved events (improves window movement performance)
+                break;
             case SDL_WINDOWEVENT_SIZE_CHANGED:
                 int w,h;
                 SDL_GetWindowSize(mSDLWindow, &w, &h);
-                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-                mOgreWindow->resize(w, h);
-#else
-                mOgreWindow->windowMovedOrResized();
-#endif
+                int x,y;
+                SDL_GetWindowPosition(mSDLWindow, &x,&y);
+                mViewer->getCamera()->getGraphicsContext()->resized(x,y,w,h);
+
+                mViewer->getEventQueue()->windowResize(x,y,w,h);
+
                 if (mWindowListener)
                     mWindowListener->windowResized(w, h);
+
                 break;
 
             case SDL_WINDOWEVENT_RESIZED:
-                // TODO: Fix Ogre to handle this more consistently (fixed in 1.9)
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
-                mOgreWindow->resize(evt.window.data1, evt.window.data2);
-#else
-                mOgreWindow->windowMovedOrResized();
-#endif
-                if (mWindowListener)
-                    mWindowListener->windowResized(evt.window.data1, evt.window.data2);
+                // This should also fire SIZE_CHANGED, so no need to handle
                 break;
 
             case SDL_WINDOWEVENT_FOCUS_GAINED:
@@ -187,12 +184,10 @@ namespace SFO
             case SDL_WINDOWEVENT_CLOSE:
                 break;
             case SDL_WINDOWEVENT_SHOWN:
-                mOgreWindow->setVisible(true);
                 if (mWindowListener)
                     mWindowListener->windowVisibilityChange(true);
                 break;
             case SDL_WINDOWEVENT_HIDDEN:
-                mOgreWindow->setVisible(false);
                 if (mWindowListener)
                     mWindowListener->windowVisibilityChange(false);
                 break;

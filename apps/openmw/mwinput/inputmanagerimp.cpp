@@ -1,8 +1,7 @@
 #include "inputmanagerimp.hpp"
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
 #include <cmath>
+#include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -13,6 +12,8 @@
 #include <MyGUI_EditBox.h>
 
 #include <SDL_version.h>
+
+#include <components/sdlutil/sdlinputwrapper.hpp>
 
 #include "../engine.hpp"
 
@@ -30,8 +31,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwdialogue/dialoguemanagerimp.hpp"
-
-#include <iostream>
 
 using namespace ICS;
 
@@ -97,6 +96,8 @@ namespace
 namespace MWInput
 {
     InputManager::InputManager(
+            SDL_Window* window,
+            osg::ref_ptr<osgViewer::Viewer> viewer,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
@@ -118,8 +119,8 @@ namespace MWInput
         , mGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
-        , mMouseX(0)//ogre.getWindow()->getWidth ()/2.f)
-        , mMouseY(0)//ogre.getWindow()->getHeight ()/2.f)
+        , mMouseX(0)
+        , mMouseY(0)
         , mMouseWheel(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
@@ -128,19 +129,20 @@ namespace MWInput
         , mAttemptJump(false)
         , mFakeDeviceID(1)
     {
+        int w,h;
+        SDL_GetWindowSize(window, &w, &h);
 
-        /*
-        Ogre::RenderWindow* window = ogre.getWindow ();
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
+        mMouseX = w / 2.f;
+        mMouseY = h / 2.f;
+
+        mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setControllerEventCallback(this);
-        */
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
-        //adjustMouseRegion (window->getWidth(), window->getHeight());
 
         loadKeyDefaults();
         loadControllerDefaults();
@@ -198,7 +200,7 @@ namespace MWInput
 
         delete mInputBinder;
 
-        //delete mInputManager;
+        delete mInputManager;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -365,24 +367,24 @@ namespace MWInput
 
     void InputManager::updateCursorMode()
     {
-        //bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-        //     && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
+        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+             && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
 
-        bool was_relative = 0;//mInputManager->getMouseRelative();
+        bool was_relative = mInputManager->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         // don't keep the pointer away from the window edge in gui mode
         // stop using raw mouse motions and switch to system cursor movements
-        //mInputManager->setMouseRelative(is_relative);
+        mInputManager->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        //mInputManager->setGrabPointer(grab && (mGrabCursor || is_relative));
+        mInputManager->setGrabPointer(grab && (mGrabCursor || is_relative));
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
         if( !is_relative && was_relative != is_relative )
         {
-            //mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+            mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
         }
     }
 
@@ -390,9 +392,9 @@ namespace MWInput
     {
         mControlsDisabled = disableControls;
 
-        //mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
-        //mInputManager->capture(disableEvents);
+        mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
         MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
 
@@ -426,7 +428,7 @@ namespace MWInput
                 mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
 
                 MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mMouseX), static_cast<int>(mMouseY), mMouseWheel);
-                //mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+                mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
             }
             if (mMouseLookEnabled)
             {
@@ -657,17 +659,11 @@ namespace MWInput
         mControlSwitch[sw] = value;
     }
 
-    void InputManager::adjustMouseRegion(int width, int height)
-    {
-        mInputBinder->adjustMouseRegion(width, height);
-    }
-
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
         // This assumes that SDL_TextInput events always come *after* the key event
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)
-        /*
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
         if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
                 == arg.keysym.scancode
@@ -685,7 +681,6 @@ namespace MWInput
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
         mJoystickLastUsed = false;
-        */
     }
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
@@ -698,13 +693,11 @@ namespace MWInput
 
     void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
-        /*
         mJoystickLastUsed = false;
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
 
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->keyReleased (arg);
-        */
     }
 
     void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
@@ -751,7 +744,7 @@ namespace MWInput
         }
     }
 
-    void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
+    void InputManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
 
@@ -830,9 +823,9 @@ namespace MWInput
         setPlayerControlsEnabled(!guiMode);
 
         //esc, to leave initial movie screen
-        //OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
-        //bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-        //setPlayerControlsEnabled(!guiFocus);
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
+        bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        setPlayerControlsEnabled(!guiFocus);
 
         if (!mControlsDisabled)
             mInputBinder->buttonPressed(deviceID, arg);
@@ -857,8 +850,8 @@ namespace MWInput
             mInputBinder->buttonReleased(deviceID, arg);
 
         ///to escape initial movie
-        //OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
-        //setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
     }
 
     void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
@@ -883,12 +876,15 @@ namespace MWInput
 
     void InputManager::windowVisibilityChange(bool visible)
     {
-            //TODO: Pause game?
+        //TODO: Pause game?
     }
 
     void InputManager::windowResized(int x, int y)
     {
-        //mOgre.windowResized(x,y);
+        Settings::Manager::setInt("resolution x", "Video", x);
+        Settings::Manager::setInt("resolution y", "Video", y);
+
+        MWBase::Environment::get().getWindowManager()->windowResized(x, y);
     }
 
     void InputManager::windowClosed()

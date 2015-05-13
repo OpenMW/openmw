@@ -3,11 +3,17 @@
 
 #include "../mwgui/mode.hpp"
 
+#include <osg/ref_ptr>
+
+#include <extern/oics/ICSChannelListener.h>
+#include <extern/oics/ICSInputControlSystem.h>
+
 #include <components/settings/settings.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/sdlutil/events.hpp>
 
 #include "../mwbase/inputmanager.hpp"
-#include <extern/sdl4ogre/sdlinputwrapper.hpp>
+
 
 namespace MWWorld
 {
@@ -39,8 +45,17 @@ namespace Files
     struct ConfigurationManager;
 }
 
-#include <extern/oics/ICSChannelListener.h>
-#include <extern/oics/ICSInputControlSystem.h>
+namespace SDLUtil
+{
+    class InputWrapper;
+}
+
+namespace osgViewer
+{
+    class Viewer;
+}
+
+struct SDL_Window;
 
 namespace MWInput
 {
@@ -50,15 +65,17 @@ namespace MWInput
     */
     class InputManager :
             public MWBase::InputManager,
-            public SFO::KeyListener,
-            public SFO::MouseListener,
-            public SFO::WindowListener,
-            public SFO::ControllerListener,
+            public SDLUtil::KeyListener,
+            public SDLUtil::MouseListener,
+            public SDLUtil::WindowListener,
+            public SDLUtil::ControllerListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
     public:
         InputManager(
+            SDL_Window* window,
+            osg::ref_ptr<osgViewer::Viewer> viewer,
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab);
@@ -100,7 +117,7 @@ namespace MWInput
 
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
+        virtual void mouseMoved( const SDLUtil::MouseMotionEvent &arg );
 
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
@@ -140,8 +157,7 @@ namespace MWInput
 
         ICS::InputControlSystem* mInputBinder;
 
-
-        SFO::InputWrapper* mInputManager;
+        SDLUtil::InputWrapper* mInputManager;
 
         std::string mUserFile;
 
@@ -178,7 +194,6 @@ namespace MWInput
         std::map<std::string, bool> mControlSwitch;
 
     private:
-        void adjustMouseRegion(int width, int height);
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
         virtual std::string sdlControllerAxisToString(int axis);

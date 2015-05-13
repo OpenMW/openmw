@@ -8,7 +8,8 @@
 // Events //
 ////////////
 
-namespace SFO {
+namespace SDLUtil
+{
 
 /** Extended mouse event struct where we treat the wheel like an axis, like everyone expects */
 struct MouseMotionEvent : SDL_MouseMotionEvent {
