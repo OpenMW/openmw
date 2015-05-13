@@ -101,8 +101,6 @@ public:
     };
 };
 
-void setupWindowingSystemInterface();
-
 }
 
 #endif /* OSGGRAPHICSWINDOW_H */

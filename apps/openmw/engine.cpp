@@ -352,8 +352,6 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
     setWindowIcon();
 
-    SDLUtil::setupWindowingSystemInterface();
-
     osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
     SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
@@ -371,11 +369,11 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     traits->doubleBuffer = true;
     traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 
-    osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
-    if(!gc.valid()) throw std::runtime_error("Failed to create GraphicsContext");
+    osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
+    if(!graphicsWindow->valid()) throw std::runtime_error("Failed to create GraphicsContext");
 
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
-    camera->setGraphicsContext(gc.get());
+    camera->setGraphicsContext(graphicsWindow);
     camera->setViewport(0, 0, width, height);
 
     mViewer->realize();
