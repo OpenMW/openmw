@@ -8,6 +8,7 @@
 #include <osg/GraphicsContext>
 #include <osg/Geometry>
 #include <osg/Texture2D>
+#include <osg/TexMat>
 
 #include "imagetosurface.hpp"
 
@@ -21,8 +22,12 @@ namespace
                 osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
                 traits->x = 0;
                 traits->y = 0;
-                traits->width = 1;//w;
-                traits->height = 1;//h;
+                traits->width = w;
+                traits->height = h;
+                traits->red = 8;
+                traits->green = 8;
+                traits->blue = 8;
+                traits->alpha = 8;
                 traits->windowDecoration = false;
                 traits->doubleBuffer = false;
                 traits->sharedContext = 0;
@@ -56,7 +61,7 @@ namespace
             osg::ref_ptr<osg::GraphicsContext> _gc;
     };
 
-    osg::ref_ptr<osg::Image> decompress (osg::ref_ptr<osg::Image> source)
+    osg::ref_ptr<osg::Image> decompress (osg::ref_ptr<osg::Image> source, float rotDegrees)
     {
         int width = source->s();
         int height = source->t();
@@ -67,17 +72,50 @@ namespace
 
         osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
         texture->setImage(source);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_BORDER);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_BORDER);
+        texture->setBorderColor(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
 
+        osg::ref_ptr<osg::TexMat> texmat = new osg::TexMat;
+        osg::Matrix texRot (osg::Matrix::identity());
+        float theta ( osg::DegreesToRadians(-rotDegrees) );
+        float cosTheta = std::cos(theta);
+        float sinTheta = std::sin(theta);
+
+        texRot(0,0) = cosTheta;
+        texRot(1,0) = -sinTheta;
+        texRot(0,1) = sinTheta;
+        texRot(1,1) = cosTheta;
+        // Offset center of rotation to center of texture
+        texRot(3,0) = 0.5f + ( (-0.5f * cosTheta) - (-0.5f * sinTheta) );
+        texRot(3,1) = 0.5f + ( (-0.5f * sinTheta) + (-0.5f * cosTheta) );
+
+        texmat->setMatrix(texRot);
+
+        state->applyTextureAttribute(0, texmat);
+
+        osg::ref_ptr<osg::RefMatrix> identity (new osg::RefMatrix(osg::Matrix::identity()));
+        state->applyModelViewMatrix(identity);
+        state->applyProjectionMatrix(identity);
+
+        state->applyMode(GL_TEXTURE_2D, true);
         state->applyTextureAttribute(0, texture);
 
         osg::ref_ptr<osg::Image> resultImage = new osg::Image;
         resultImage->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
 
-        assert(resultImage->isDataContiguous());
+        osg::RenderInfo renderInfo;
+        renderInfo.setState(state);
 
-        // FIXME: implement for GL ES (PBO & glMapBufferRange?)
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, resultImage->data());
+        glViewport(0, 0, width, height);
 
+        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+        geom->drawImplementation(renderInfo);
+
+        // TODO: implement for GL ES
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, resultImage->data());
+
+        geom->releaseGLObjects();
         source->releaseGLObjects();
         texture->releaseGLObjects();
 
@@ -163,9 +201,7 @@ namespace SDLUtil
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
-        osg::ref_ptr<osg::Image> decompressed = decompress(image);
-
-        // TODO: rotate
+        osg::ref_ptr<osg::Image> decompressed = decompress(image, static_cast<float>(rotDegrees));
 
         SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, false);
 
