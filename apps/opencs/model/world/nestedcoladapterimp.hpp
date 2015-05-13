@@ -311,7 +311,7 @@ namespace CSMWorld
                 case 0:
                 {
                     if (effect.mEffectID >=0 && effect.mEffectID < ESM::MagicEffect::Length)
-                        return effect.mRange;
+                        return effect.mEffectID;
                     else
                         throw std::runtime_error("Magic effects ID unexpected value");
                 }
