@@ -6,7 +6,7 @@
 namespace SDLUtil
 {
 
-SDL_Surface* imageToSurface(osg::Image *image)
+SDL_Surface* imageToSurface(osg::Image *image, bool flip)
 {
     int width = image->s();
     int height = image->t();
@@ -15,7 +15,7 @@ SDL_Surface* imageToSurface(osg::Image *image)
     for(int x = 0; x < width; ++x)
         for(int y = 0; y < height; ++y)
         {
-            osg::Vec4f clr = image->getColor(x, (height-1)-y);
+            osg::Vec4f clr = image->getColor(x, flip ? ((height-1)-y) : y);
             int bpp = surface->format->BytesPerPixel;
             Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
             *(Uint32*)(p) = SDL_MapRGBA(surface->format, static_cast<Uint8>(clr.r() * 255),

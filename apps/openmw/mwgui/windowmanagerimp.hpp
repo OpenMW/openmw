@@ -52,9 +52,9 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace SFO
+namespace SDLUtil
 {
-    class CursorManager;
+    class SDLCursorManager;
 }
 
 namespace osgMyGUI
@@ -454,7 +454,7 @@ namespace MWGui
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
 
-    SFO::CursorManager* mCursorManager;
+    SDLUtil::SDLCursorManager* mCursorManager;
 
     std::vector<Layout*> mGarbageDialogs;
     void cleanupGarbage();

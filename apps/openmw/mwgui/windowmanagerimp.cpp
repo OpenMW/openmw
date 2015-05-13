@@ -20,11 +20,12 @@
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
-#include <extern/sdl4ogre/sdlcursormanager.hpp>
+#include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/texturemanager.hpp>
 
 #include <components/translation/translation.hpp>
 
@@ -34,6 +35,8 @@
 
 #include <components/widgets/widgets.hpp>
 #include <components/widgets/tags.hpp>
+
+#include <components/sdlutil/sdlcursormanager.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
 
@@ -219,7 +222,7 @@ namespace MWGui
         mLoadingScreen = new LoadingScreen(mResourceSystem->getVFS(), mViewer);
 
         //set up the hardware cursor manager
-        //mCursorManager = new SFO::SDLCursorManager();
+        mCursorManager = new SDLUtil::SDLCursorManager();
 
         MyGUI::PointerManager::getInstance().eventChangeMousePointer += MyGUI::newDelegate(this, &WindowManager::onCursorChange);
 
@@ -227,7 +230,7 @@ namespace MWGui
 
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
 
-        //mCursorManager->setEnabled(true);
+        mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
         MyGUI::PointerManager::getInstance().setVisible(false);
@@ -417,7 +420,7 @@ namespace MWGui
         delete mDebugWindow;
         delete mJailScreen;
 
-        //delete mCursorManager;
+        delete mCursorManager;
 
         cleanupGarbage();
 
@@ -1152,7 +1155,6 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
-        /*
         if(!mCursorManager->cursorChanged(name))
             return; //the cursor manager doesn't want any more info about this cursor
         //See if we can get the information we need out of the cursor resource
@@ -1163,10 +1165,11 @@ namespace MWGui
 
             std::string tex_name = imgSet->getIndexInfo(0,0).texture;
 
-            Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().getByName(tex_name);
+            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            tex->setUnRefImageDataAfterApply(false); // FIXME?
 
             //everything looks good, send it to the cursor manager
-            if(!tex.isNull())
+            if(tex.valid())
             {
                 Uint8 size_x = imgSetPtr->getSize().width;
                 Uint8 size_y = imgSetPtr->getSize().height;
@@ -1174,10 +1177,9 @@ namespace MWGui
                 Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
                 int rotation = imgSetPtr->getRotation();
 
-                mCursorManager->receiveCursorInfo(name, rotation, tex, size_x, size_y, hotspot_x, hotspot_y);
+                mCursorManager->receiveCursorInfo(name, rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
             }
         }
-        */
     }
 
     void WindowManager::popGuiMode()

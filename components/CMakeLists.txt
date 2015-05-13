@@ -127,7 +127,7 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    sdlgraphicswindow imagetosurface sdlinputwrapper OISCompat events
+    sdlgraphicswindow imagetosurface sdlinputwrapper OISCompat events sdlcursormanager
     )
 
 add_component_dir (version

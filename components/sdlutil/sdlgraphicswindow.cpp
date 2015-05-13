@@ -102,7 +102,7 @@ void GraphicsWindowSDL2::init()
         return;
     }
 
-    setSyncToVBlank(_traits->vsync);
+    SDL_GL_SetSwapInterval(_traits->vsync ? 1 : 0);
 
     SDL_GL_MakeCurrent(oldWin, oldCtx);
 
@@ -182,7 +182,14 @@ void GraphicsWindowSDL2::swapBuffersImplementation()
 
 void GraphicsWindowSDL2::setSyncToVBlank(bool on)
 {
+    SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
+    SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
+
+    SDL_GL_MakeCurrent(mWindow, mContext);
+
     SDL_GL_SetSwapInterval(on ? 1 : 0);
+
+    SDL_GL_MakeCurrent(oldWin, oldCtx);
 }
 
 void GraphicsWindowSDL2::raiseWindow()

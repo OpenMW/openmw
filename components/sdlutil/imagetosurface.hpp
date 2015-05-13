@@ -13,7 +13,7 @@ namespace SDLUtil
 
     /// Convert an osg::Image to an SDL_Surface.
     /// @note The returned surface must be freed using SDL_FreeSurface.
-    SDL_Surface* imageToSurface(osg::Image* image);
+    SDL_Surface* imageToSurface(osg::Image* image, bool flip=false);
 
 }
 

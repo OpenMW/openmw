@@ -82,10 +82,20 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 case SDL_KEYDOWN:
                     if (!evt.key.repeat)
                         mKeyboardListener->keyPressed(evt.key);
+
+                    // temporary for the stats viewer
+                    if (evt.key.keysym.sym == SDLK_s)
+                        mViewer->getEventQueue()->keyPress('s');
+
                     break;
                 case SDL_KEYUP:
                     if (!evt.key.repeat)
                         mKeyboardListener->keyReleased(evt.key);
+
+                    // temporary for the stats viewer
+                    if (evt.key.keysym.sym == SDLK_s)
+                        mViewer->getEventQueue()->keyRelease('s');
+
                     break;
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
