@@ -269,4 +269,4 @@ void setupWindowingSystemInterface()
     osg::GraphicsContext::setWindowingSystemInterface(new SDL2WindowingSystemInterface);
 }
 
-} // namespace TK
+}

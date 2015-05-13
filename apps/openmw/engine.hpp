@@ -116,6 +116,7 @@ namespace OMW
             void prepareEngine (Settings::Manager & settings);
 
             void createWindow(Settings::Manager& settings);
+            void setWindowIcon();
 
         public:
             Engine(Files::ConfigurationManager& configurationManager);

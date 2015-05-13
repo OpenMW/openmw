@@ -127,7 +127,7 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    sdlgraphicswindow
+    sdlgraphicswindow imagetosurface
     )
 
 add_component_dir (version

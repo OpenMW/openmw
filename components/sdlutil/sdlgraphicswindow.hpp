@@ -91,7 +91,7 @@ public:
     /** Set mouse cursor to a specific shape.*/
     virtual void setCursor(MouseCursor cursor);
 
-    /** WindowData is used to pass in the SDL2 window handle attached the GraphicsContext::Traits structure. */
+    /** WindowData is used to pass in the SDL2 window handle attached to the GraphicsContext::Traits structure. */
     struct WindowData : public osg::Referenced
     {
         WindowData(SDL_Window *window) : mWindow(window)
@@ -103,6 +103,6 @@ public:
 
 void setupWindowingSystemInterface();
 
-} // namespace TK
+}
 
 #endif /* OSGGRAPHICSWINDOW_H */

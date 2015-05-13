@@ -3,8 +3,11 @@
 #include <stdexcept>
 #include <iomanip>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
+#include <osgDB/ReadFile>
 
 #include <SDL.h>
 
@@ -14,6 +17,7 @@
 #include <components/vfs/registerarchives.hpp>
 
 #include <components/sdlutil/sdlgraphicswindow.hpp>
+#include <components/sdlutil/imagetosurface.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
@@ -346,7 +350,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
         return;
     }
 
-    // TODO: set window icon
+    setWindowIcon();
 
     SDLUtil::setupWindowingSystemInterface();
 
@@ -375,6 +379,26 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     camera->setViewport(0, 0, width, height);
 
     mViewer->realize();
+}
+
+void OMW::Engine::setWindowIcon()
+{
+    boost::filesystem::ifstream windowIconStream;
+    std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
+    windowIconStream.open(windowIcon);
+    if (windowIconStream.fail())
+        std::cerr << "Failed to open " << windowIcon << std::endl;
+    osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+    osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
+    if (!result.success())
+        std::cerr << "Failed to read " << windowIcon << ": " << result.message() << std::endl;
+    else
+    {
+        osg::ref_ptr<osg::Image> image = result.getImage();
+        SDL_Surface* surface = SDLUtil::imageToSurface(image);
+        SDL_SetWindowIcon(mWindow, surface);
+        SDL_FreeSurface(surface);
+    }
 }
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
