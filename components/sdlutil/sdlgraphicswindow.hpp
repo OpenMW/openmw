@@ -66,6 +66,12 @@ public:
     /** Set mouse cursor to a specific shape.*/
     virtual void setCursor(MouseCursor cursor);
 
+    /** Get focus.*/
+    virtual void grabFocus() {}
+
+    /** Get focus on if the pointer is in this window.*/
+    virtual void grabFocusIfPointerInWindow() {}
+
     /** WindowData is used to pass in the SDL2 window handle attached to the GraphicsContext::Traits structure. */
     struct WindowData : public osg::Referenced
     {
