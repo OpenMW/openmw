@@ -53,11 +53,14 @@ namespace Files
     struct ConfigurationManager;
 }
 
+struct SDL_Window;
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
     class Engine
     {
+            SDL_Window* mWindow;
             std::auto_ptr<VFS::Manager> mVFS;
             std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
             MWBase::Environment mEnvironment;
@@ -111,6 +114,8 @@ namespace OMW
 
             /// Prepare engine for game play
             void prepareEngine (Settings::Manager & settings);
+
+            void createWindow(Settings::Manager& settings);
 
         public:
             Engine(Files::ConfigurationManager& configurationManager);

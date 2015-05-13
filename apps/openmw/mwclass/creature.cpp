@@ -580,16 +580,6 @@ namespace MWClass
         return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    Ogre::Vector3 Creature::getMovementVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mPosition);
-        movement.mPosition[0] = 0.0f;
-        movement.mPosition[1] = 0.0f;
-        movement.mPosition[2] = 0.0f;
-        return vec;
-    }
-
     Ogre::Vector3 Creature::getRotationVector (const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);

@@ -126,6 +126,10 @@ add_component_dir (fontloader
     fontloader
     )
 
+add_component_dir (sdlutil
+    sdlgraphicswindow
+    )
+
 add_component_dir (version
     version
     )
@@ -172,6 +176,7 @@ target_link_libraries(components
     ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARY}
     # For MyGUI platform
     ${OPENGL_gl_LIBRARY}
 )

@@ -192,10 +192,6 @@ namespace MWWorld
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.
 
-            virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
-            ///< Return desired movement vector (determined based on movement settings,
-            /// stance and stats).
-
             virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 

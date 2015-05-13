@@ -6,15 +6,14 @@
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <MyGUI_WidgetManager.h>
-
 #include <SDL.h>
 
-// TODO: move to component
 #include <components/misc/rng.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
+
+#include <components/sdlutil/sdlgraphicswindow.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
@@ -182,7 +181,8 @@ void OMW::Engine::frame(float frametime)
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
-  : mEncoding(ToUTF8::WINDOWS_1252)
+  : mWindow(NULL)
+  , mEncoding(ToUTF8::WINDOWS_1252)
   , mEncoder(NULL)
   , mVerboseScripts (false)
   , mSkipMenu (false)
@@ -219,6 +219,13 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 
 OMW::Engine::~Engine()
 {
+    mResourceSystem.reset();
+
+    mViewer = NULL;
+
+    SDL_DestroyWindow(mWindow);
+    mWindow = NULL;
+
     mEnvironment.cleanup();
     delete mScriptContext;
     SDL_Quit();
@@ -293,24 +300,88 @@ std::string OMW::Engine::loadSettings (Settings::Manager & settings)
     return settingspath;
 }
 
+void OMW::Engine::createWindow(Settings::Manager& settings)
+{
+    int screen = settings.getInt("screen", "Video");
+    int width = settings.getInt("resolution x", "Video");
+    int height = settings.getInt("resolution y", "Video");
+    bool fullscreen = settings.getBool("fullscreen", "Video");
+    bool windowBorder = settings.getBool("window border", "Video");
+    bool vsync = settings.getBool("vsync", "Video");
+    int antialiasing = settings.getInt("antialiasing", "Video");
+
+    int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
+        pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
+
+    if(fullscreen)
+    {
+        pos_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+        pos_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(screen);
+    }
+
+    Uint32 flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE;
+    if(fullscreen)
+        flags |= SDL_WINDOW_FULLSCREEN;
+
+    if (!windowBorder)
+        flags |= SDL_WINDOW_BORDERLESS;
+
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
+                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
+
+    if (antialiasing > 0)
+    {
+        if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1) != 0)
+            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+        if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing) != 0)
+            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+    }
+
+    mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
+    if (mWindow == NULL)
+    {
+        std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
+        return;
+    }
+
+    // TODO: set window icon
+
+    SDLUtil::setupWindowingSystemInterface();
+
+    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
+    SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
+    traits->windowName = SDL_GetWindowTitle(mWindow);
+    traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
+    traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
+    // FIXME: Some way to get these settings back from the SDL window?
+    traits->red = 8;
+    traits->green = 8;
+    traits->blue = 8;
+    traits->alpha = 8;
+    traits->depth = 24;
+    traits->stencil = 8;
+    traits->vsync = vsync;
+    traits->doubleBuffer = true;
+    traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
+
+    osg::ref_ptr<osg::GraphicsContext> gc = osg::GraphicsContext::createGraphicsContext(traits.get());
+    if(!gc.valid()) throw std::runtime_error("Failed to create GraphicsContext");
+
+    osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
+    camera->setGraphicsContext(gc.get());
+    camera->setViewport(0, 0, width, height);
+
+    mViewer->realize();
+}
+
 void OMW::Engine::prepareEngine (Settings::Manager & settings)
 {
     mEnvironment.setStateManager (
         new MWState::StateManager (mCfgMgr.getUserDataPath() / "saves", mContentFiles.at (0)));
 
-    //OEngine::Render::WindowSettings windowSettings;
-    //windowSettings.fullscreen = settings.getBool("fullscreen", "Video");
-    //windowSettings.window_border = settings.getBool("window border", "Video");
-    //windowSettings.vsync = settings.getBool("vsync", "Video");
-    //windowSettings.icon = "openmw.png";
-    //std::string aa = settings.getString("antialiasing", "Video");
-    //windowSettings.fsaa = (aa.substr(0, 4) == "MSAA") ? aa.substr(5, aa.size()-5) : "0";
+    createWindow(settings);
 
-    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
-                settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
-
-    // not handling fullscreen yet, we should figure this out when adding SDL to the mix
-    mViewer->setUpViewInWindow(0, 0, settings.getInt("resolution x", "Video"), settings.getInt("resolution y", "Video"), settings.getInt("screen", "Video"));
     osg::ref_ptr<osg::Group> rootNode (new osg::Group);
     mViewer->setSceneData(rootNode);
 
