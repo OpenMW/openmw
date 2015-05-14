@@ -14,6 +14,7 @@
 #include <SDL_version.h>
 
 #include <components/sdlutil/sdlinputwrapper.hpp>
+#include <components/sdlutil/sdlvideowrapper.hpp>
 
 #include "../engine.hpp"
 
@@ -101,10 +102,13 @@ namespace MWInput
             OMW::Engine& engine,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
-        : mJoystickLastUsed(false)
+        : mWindow(window)
+        , mViewer(viewer)
+        , mJoystickLastUsed(false)
         , mPlayer(NULL)
         , mEngine(engine)
         , mInputManager(NULL)
+        , mVideoWrapper(NULL)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
@@ -140,6 +144,10 @@ namespace MWInput
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setControllerEventCallback(this);
+
+        mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
+        mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
+                                        Settings::Manager::getFloat("contrast", "Video"));
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
@@ -201,6 +209,8 @@ namespace MWInput
         delete mInputBinder;
 
         delete mInputManager;
+
+        delete mVideoWrapper;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -614,6 +624,8 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
+        bool changeRes = false;
+
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
@@ -629,6 +641,27 @@ namespace MWInput
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
+            if (it->first == "Video" && (
+                    it->second == "resolution x"
+                    || it->second == "resolution y"
+                    || it->second == "fullscreen"
+                    || it->second == "window border"))
+                changeRes = true;
+
+            if (it->first == "Video" && it->second == "vsync")
+                mVideoWrapper->setSyncToVBlank(Settings::Manager::getBool("vsync", "Video"));
+
+            if (it->first == "Video" && (it->second == "gamma" || it->second == "contrast"))
+                mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
+                                                Settings::Manager::getFloat("contrast", "Video"));
+        }
+
+        if (changeRes)
+        {
+            mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
+                                        Settings::Manager::getInt("resolution y", "Video"),
+                                        Settings::Manager::getBool("fullscreen", "Video"),
+                                        Settings::Manager::getBool("window border", "Video"));
         }
     }
 

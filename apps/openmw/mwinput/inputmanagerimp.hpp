@@ -48,6 +48,7 @@ namespace Files
 namespace SDLUtil
 {
     class InputWrapper;
+    class VideoWrapper;
 }
 
 namespace osgViewer
@@ -151,6 +152,9 @@ namespace MWInput
         void clearAllControllerBindings (ICS::Control* control);
 
     private:
+        SDL_Window* mWindow;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
+
         bool mJoystickLastUsed;
         MWWorld::Player* mPlayer;
         OMW::Engine& mEngine;
@@ -158,6 +162,7 @@ namespace MWInput
         ICS::InputControlSystem* mInputBinder;
 
         SDLUtil::InputWrapper* mInputManager;
+        SDLUtil::VideoWrapper* mVideoWrapper;
 
         std::string mUserFile;
 
