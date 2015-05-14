@@ -252,12 +252,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
     {
         Setting *projAdded = createSetting (Type_CheckBox, "project-added", "Project::added initial value");
         projAdded->setDefaultValue ("false");
-        projAdded->setToolTip ("Show records added by the project when a table is first opened."
+        projAdded->setToolTip ("Show records added by the project when opening a table."
                 " Other records are filterd out.");
 
         Setting *projModified = createSetting (Type_CheckBox, "project-modified", "Project::modified initial value");
         projModified->setDefaultValue ("false");
-        projModified->setToolTip ("Show records modified by the project when a table is first opened."
+        projModified->setToolTip ("Show records modified by the project when opening a table."
                 " Other records are filterd out.");
     }
 

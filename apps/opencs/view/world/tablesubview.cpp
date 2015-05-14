@@ -34,6 +34,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     QHBoxLayout *hLayout = new QHBoxLayout;
     QCheckBox *added = new QCheckBox("A");
     QCheckBox *modified = new QCheckBox("M");
+    added->setToolTip("Apply filter project::added.  Changes to\nthis filter setting is not saved in preferences.");
+    modified->setToolTip("Apply filter project::modified.  Changes to\nthis filter setting is not saved in preferences.");
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
     added->setCheckState(
             userSettings.settingValue ("filter/project-added") == "true" ? Qt::Checked : Qt::Unchecked);
