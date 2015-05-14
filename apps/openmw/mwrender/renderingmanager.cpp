@@ -128,8 +128,10 @@ namespace MWRender
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
-        // for consistent benchmarks against the ogre branch. remove later
-        cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
+        if (!Settings::Manager::getBool("small feature culling", "Viewing distance"))
+            cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
+        else
+            cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
 
         viewer.getCamera()->setCullingMode( cullingMode );
 
@@ -137,13 +139,8 @@ namespace MWRender
         mViewer.getCamera()->setCullingMode(cullingMode);
 
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
-
-        double fovy, aspect, zNear, zFar;
-        mViewer.getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
-        fovy = 55.f;
-        zNear = 5.f;
-        zFar = mViewDistance;
-        mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+        mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+        updateProjectionMatrix();
     }
 
     RenderingManager::~RenderingManager()
@@ -323,6 +320,33 @@ namespace MWRender
         //mCamera->setAnimation(mPlayerAnimation);
         //mWater->removeEmitter(ptr);
         //mWater->addEmitter(ptr);
+    }
+
+    void RenderingManager::updateProjectionMatrix()
+    {
+        double fovy, aspect, zNear, zFar;
+        mViewer.getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+        fovy = mFieldOfView;
+        zNear = 5.f;
+        zFar = mViewDistance;
+        mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+    }
+
+    void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)
+    {
+        for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
+        {
+            if (it->first == "General" && it->second == "field of view")
+            {
+                mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+                updateProjectionMatrix();
+            }
+            else if (it->first == "Viewing distance" && it->second == "viewing distance")
+            {
+                mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
+                updateProjectionMatrix();
+            }
+        }
     }
 
 }

@@ -4,6 +4,8 @@
 #include <osg/ref_ptr>
 #include <osg/Light>
 
+#include <components/settings/settings.hpp>
+
 #include "objects.hpp"
 
 #include "renderinginterface.hpp"
@@ -93,7 +95,11 @@ namespace MWRender
         void setupPlayer(const MWWorld::Ptr& player);
         void renderPlayer(const MWWorld::Ptr& player);
 
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
+
     private:
+        void updateProjectionMatrix();
+
         osgViewer::Viewer& mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mLightRoot;
@@ -111,6 +117,7 @@ namespace MWRender
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
         float mViewDistance;
+        float mFieldOfView;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);
