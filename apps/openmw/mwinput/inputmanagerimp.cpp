@@ -123,8 +123,8 @@ namespace MWInput
         , mGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
-        , mMouseX(0)
-        , mMouseY(0)
+        , mGuiCursorX(0)
+        , mGuiCursorY(0)
         , mMouseWheel(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
@@ -132,13 +132,8 @@ namespace MWInput
         , mSneaking(false)
         , mAttemptJump(false)
         , mFakeDeviceID(1)
+        , mInvUiScalingFactor(1.f)
     {
-        int w,h;
-        SDL_GetWindowSize(window, &w, &h);
-
-        mMouseX = w / 2.f;
-        mMouseY = h / 2.f;
-
         mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
@@ -193,6 +188,16 @@ namespace MWInput
                 //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
             }
 		}
+
+        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+        if (uiScale != 0.f)
+            mInvUiScalingFactor = 1.f / uiScale;
+
+        int w,h;
+        SDL_GetWindowSize(window, &w, &h);
+
+        mGuiCursorX = mInvUiScalingFactor * w / 2.f;
+        mGuiCursorY = mInvUiScalingFactor * h / 2.f;
     }
 
     void InputManager::clear()
@@ -394,7 +399,7 @@ namespace MWInput
         //cursor is
         if( !is_relative && was_relative != is_relative )
         {
-            mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+            mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
         }
     }
 
@@ -406,7 +411,7 @@ namespace MWInput
 
         mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+        MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
 
         if (mControlsDisabled)
         {
@@ -430,15 +435,15 @@ namespace MWInput
 
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
-                mMouseX += xAxis * dt * 1500.0f;
-                mMouseY += yAxis * dt * 1500.0f;
+                mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
+                mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
                 mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
 
-                mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
-                mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
+                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
 
-                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mMouseX), static_cast<int>(mMouseY), mMouseWheel);
-                mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+                mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
             }
             if (mMouseLookEnabled)
             {
@@ -741,7 +746,7 @@ namespace MWInput
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -768,7 +773,7 @@ namespace MWInput
             mInputBinder->mouseReleased (arg, id);
         } else {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
@@ -786,19 +791,14 @@ namespace MWInput
 
         if (mGuiCursorEnabled)
         {
-            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX = static_cast<float>(arg.x);
-            mMouseY = static_cast<float>(arg.y);
-
-            mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
-            mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+            mGuiCursorX = static_cast<float>(arg.x) * mInvUiScalingFactor;
+            mGuiCursorY = static_cast<float>(arg.y) * mInvUiScalingFactor;
 
             mMouseWheel = int(arg.z);
 
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
         }
 
         if (mMouseLookEnabled && !mControlsDisabled)
@@ -840,7 +840,7 @@ namespace MWInput
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             if(!mInputBinder->detectingBindingState())
             {
-                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), 
+                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY),
                     sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
                 if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
                 {
@@ -872,7 +872,7 @@ namespace MWInput
         else if(arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 

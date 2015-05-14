@@ -14,14 +14,14 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager)
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager, float uiScalingFactor)
             : mRenderManager(nullptr)
             , mDataManager(nullptr)
             , mLogManager(nullptr)
             , mLogFacility(nullptr)
         {
             mLogManager = new MyGUI::LogManager();
-            mRenderManager = new RenderManager(viewer, guiRoot, textureManager);
+            mRenderManager = new RenderManager(viewer, guiRoot, textureManager, uiScalingFactor);
             mDataManager = new DataManager();
         }
 

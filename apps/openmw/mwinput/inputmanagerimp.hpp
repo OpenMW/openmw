@@ -187,8 +187,8 @@ namespace MWInput
 
         float mOverencumberedMessageDelay;
 
-        float mMouseX;
-        float mMouseY;
+        float mGuiCursorX;
+        float mGuiCursorY;
         int mMouseWheel;
         bool mUserFileExists;
         bool mAlwaysRunActive;
@@ -198,7 +198,11 @@ namespace MWInput
 
         std::map<std::string, bool> mControlSwitch;
 
+        float mInvUiScalingFactor;
+
     private:
+        void convertMousePosForMyGUI(int& x, int& y);
+
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
         virtual std::string sdlControllerAxisToString(int axis);

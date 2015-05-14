@@ -46,14 +46,18 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
 
     osg::ref_ptr<osg::Camera> mGuiRoot;
 
+    float mInvScalingFactor;
+
     void destroyAllResources();
 
 public:
-    RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager);
+    RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor);
     virtual ~RenderManager();
 
     void initialise();
     void shutdown();
+
+    void setScalingFactor(float factor);
 
     static RenderManager& getInstance() { return *getInstancePtr(); }
     static RenderManager* getInstancePtr()

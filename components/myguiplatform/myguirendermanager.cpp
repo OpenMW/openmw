@@ -40,37 +40,6 @@
     } \
 } while(0)
 
-namespace
-{
-
-// Proxy to forward an OSG resize event to RenderManager::setViewSize
-class ResizeHandler : public osgGA::GUIEventHandler {
-    osgMyGUI::RenderManager *mParent;
-
-    virtual bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
-    {
-        if(ea.getEventType() == osgGA::GUIEventAdapter::RESIZE)
-        {
-            int width = ea.getWindowWidth();
-            int height = ea.getWindowHeight();
-            mParent->setViewSize(width, height);
-        }
-        return false;
-    }
-
-public:
-    ResizeHandler(osgMyGUI::RenderManager *parent=nullptr) : mParent(parent) { }
-    ResizeHandler(const ResizeHandler &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
-        : osg::Object(copy, copyop), osgGA::GUIEventHandler(copy, copyop)
-        , mParent(copy.mParent)
-    { }
-
-    META_Object(osgMyGUI, ResizeHandler)
-};
-
-}
-
-
 namespace osgMyGUI
 {
 
@@ -322,13 +291,16 @@ void OSGVertexBuffer::create()
 
 // ---------------------------------------------------------------------------
 
-RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager)
+RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor)
   : mViewer(viewer)
   , mSceneRoot(sceneroot)
   , mTextureManager(textureManager)
   , mUpdate(false)
   , mIsInitialise(false)
+  , mInvScalingFactor(1.f)
 {
+    if (scalingFactor != 0.f)
+        mInvScalingFactor = 1.f / scalingFactor;
 }
 
 RenderManager::~RenderManager()
@@ -380,7 +352,6 @@ void RenderManager::initialise()
 
     mGuiRoot = camera;
     mSceneRoot->addChild(mGuiRoot.get());
-    mViewer->addEventHandler(new ResizeHandler(this));
 
     osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();
     setViewSize(vp->width(), vp->height());
@@ -458,7 +429,8 @@ void RenderManager::setViewSize(int width, int height)
     if(height < 1) height = 1;
 
     mGuiRoot->setViewport(0, 0, width, height);
-    mViewSize.set(width, height);
+
+    mViewSize.set(width * mInvScalingFactor, height * mInvScalingFactor);
 
     mInfo.maximumDepth = 1;
     mInfo.hOffset = 0;

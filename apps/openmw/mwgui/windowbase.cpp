@@ -1,6 +1,7 @@
 #include "windowbase.hpp"
 
 #include <MyGUI_InputManager.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/settings/settings.hpp>
 
@@ -48,11 +49,7 @@ void WindowBase::center()
 {
     // Centre dialog
 
-    // MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
-    // Note by scrawl: The following works more reliably in the case when the window was _just_
-    // resized and MyGUI RenderManager doesn't know about the new size yet
-    MyGUI::IntSize gameWindowSize = MyGUI::IntSize(Settings::Manager::getInt("resolution x", "Video"),
-            Settings::Manager::getInt("resolution y", "Video"));
+    MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
 
     MyGUI::IntCoord coord = mMainWidget->getCoord();
     coord.left = (gameWindowSize.width - coord.width)/2;

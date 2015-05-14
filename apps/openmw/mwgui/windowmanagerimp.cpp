@@ -182,7 +182,8 @@ namespace MWGui
       , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
     {
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager());
+        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
         mGuiPlatform->initialise(resourcePath, logpath);
 
         mGui = new MyGUI::Gui;
@@ -1104,6 +1105,13 @@ namespace MWGui
 
     void WindowManager::windowResized(int x, int y)
     {
+        mGuiPlatform->getRenderManagerPtr()->setViewSize(x, y);
+
+        // scaled size
+        const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        x = viewSize.width;
+        y = viewSize.height;
+
         sizeVideo(x, y);
 
         if (!mHud)
