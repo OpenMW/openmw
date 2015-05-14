@@ -1321,7 +1321,7 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = 0;//mRendering->getTerrainHeightAt(Ogre::Vector3(pos.pos));
+        float terrainHeight = -FLT_MAX;//mRendering->getTerrainHeightAt(Ogre::Vector3(pos.pos));
 
         if (pos.pos[2] < terrainHeight)
             pos.pos[2] = terrainHeight;
