@@ -27,7 +27,7 @@ namespace SceneUtil
         if (!stateset)
             return NULL;
         if (stateset->getDataVariance() == osg::StateSet::DYNAMIC)
-            return osg::clone(stateset, osg::CopyOp::DEEP_COPY_STATESETS);
+            return osg::clone(stateset, *this);
         return const_cast<osg::StateSet*>(stateset);
     }
 
@@ -37,7 +37,7 @@ namespace SceneUtil
             return operator()(processor);
         if (const osgParticle::ParticleSystemUpdater* updater = dynamic_cast<const osgParticle::ParticleSystemUpdater*>(node))
         {
-            osgParticle::ParticleSystemUpdater* cloned = osg::clone(updater, osg::CopyOp::DEEP_COPY_NODES);
+            osgParticle::ParticleSystemUpdater* cloned = osg::clone(updater, *this);
             mMap2[cloned] = updater->getParticleSystem(0);
             return cloned;
         }
@@ -50,21 +50,26 @@ namespace SceneUtil
             return operator()(partsys);
         if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable)
                 || dynamic_cast<const osgAnimation::MorphGeometry*>(drawable))
-            return osg::clone(drawable, osg::CopyOp::DEEP_COPY_DRAWABLES);
+        {
+            osg::Drawable* cloned = osg::clone(drawable, *this);
+            if (cloned->getUpdateCallback())
+                cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));
+            return cloned;
+        }
 
         return osg::CopyOp::operator()(drawable);
     }
 
     osgParticle::ParticleProcessor* CopyOp::operator() (const osgParticle::ParticleProcessor* processor) const
     {
-        osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::DEEP_COPY_NODES);
+        osgParticle::ParticleProcessor* cloned = osg::clone(processor, *this);
         mMap[cloned] = processor->getParticleSystem();
         return cloned;
     }
 
     osgParticle::ParticleSystem* CopyOp::operator ()(const osgParticle::ParticleSystem* partsys) const
     {
-        osgParticle::ParticleSystem* cloned = osg::clone(partsys, osg::CopyOp::DEEP_COPY_DRAWABLES);
+        osgParticle::ParticleSystem* cloned = osg::clone(partsys, *this);
 
         for (std::map<osgParticle::ParticleProcessor*, const osgParticle::ParticleSystem*>::const_iterator it = mMap.begin(); it != mMap.end(); ++it)
         {
