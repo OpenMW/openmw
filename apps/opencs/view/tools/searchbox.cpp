@@ -153,6 +153,11 @@ void CSVTools::SearchBox::setEditLock (bool locked)
     mReplace.setEnabled (!locked);
 }
 
+void CSVTools::SearchBox::focus()
+{
+    mInput.currentWidget()->setFocus();
+}
+
 void CSVTools::SearchBox::modeSelected (int index)
 {
     switch (index)
@@ -172,6 +177,8 @@ void CSVTools::SearchBox::modeSelected (int index)
             break;
     }
 
+    mInput.currentWidget()->setFocus();
+    
     updateSearchButton();
 }
 

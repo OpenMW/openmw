@@ -60,6 +60,12 @@ void CSVTools::SearchSubView::replace (bool selection)
     }
 }
 
+void CSVTools::SearchSubView::showEvent (QShowEvent *event)
+{
+    CSVDoc::SubView::showEvent (event);
+    mSearchBox.focus();    
+}
+
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : CSVDoc::SubView (id), mDocument (document), mLocked (false)
 {
@@ -83,7 +89,7 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
         SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
 
     connect (mTable, SIGNAL (replaceRequest()), this, SLOT (replaceRequest()));
-        
+       
     connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
         this, SLOT (stateChanged (int, CSMDoc::Document *)));
 
