@@ -30,7 +30,18 @@ void VideoWidget::playVideo(const std::string &video)
 {
     mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
 
-    mPlayer->playVideo(mVFS->get(video), video);
+    Files::IStreamPtr videoStream;
+    try
+    {
+        videoStream = mVFS->get(video);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Failed to open video: " << e.what() << std::endl;
+        return;
+    }
+
+    mPlayer->playVideo(videoStream, video);
 
     osg::ref_ptr<osg::Texture2D> texture = mPlayer->getVideoTexture();
     if (!texture)
