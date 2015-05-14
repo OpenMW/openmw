@@ -326,7 +326,7 @@ namespace MWRender
         mStates.clear();
 
         for(size_t i = 0;i < sNumGroups;i++)
-            mAnimationTimePtr[i]->setAnimName(std::string());
+            mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
 
         mAccumCtrl = NULL;
 
@@ -433,32 +433,32 @@ namespace MWRender
                 state.mSource = *iter;
                 state.mSpeedMult = speedmult;
                 state.mLoopCount = loops;
-                state.mPlaying = (state.mTime < state.mStopTime);
+                state.mPlaying = (state.getTime() < state.mStopTime);
                 state.mPriority = priority;
                 state.mGroups = groups;
                 state.mAutoDisable = autodisable;
                 mStates[groupname] = state;
 
-                NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
+                NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.getTime()));
                 if (state.mPlaying)
                 {
-                    while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                    while(textkey != textkeys.end() && textkey->first <= state.getTime())
                     {
                         handleTextKey(state, groupname, textkey, textkeys);
                         ++textkey;
                     }
                 }
 
-                if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+                if(state.getTime() >= state.mLoopStopTime && state.mLoopCount > 0)
                 {
                     state.mLoopCount--;
-                    state.mTime = state.mLoopStartTime;
+                    state.setTime(state.mLoopStartTime);
                     state.mPlaying = true;
-                    if(state.mTime >= state.mLoopStopTime)
+                    if(state.getTime() >= state.mLoopStopTime)
                         break;
 
-                    NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.mTime));
-                    while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                    NifOsg::TextKeyMap::const_iterator textkey(textkeys.lower_bound(state.getTime()));
+                    while(textkey != textkeys.end() && textkey->first <= state.getTime())
                     {
                         handleTextKey(state, groupname, textkey, textkeys);
                         ++textkey;
@@ -527,11 +527,11 @@ namespace MWRender
         }
         state.mStopTime = stopkey->first;
 
-        state.mTime = state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint);
+        state.setTime(state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint));
 
         // mLoopStartTime and mLoopStopTime normally get assigned when encountering these keys while playing the animation
         // (see handleTextKey). But if startpoint is already past these keys, we need to assign them now.
-        if(state.mTime > state.mStartTime)
+        if(state.getTime() > state.mStartTime)
         {
             const std::string loopstarttag = groupname+": loop start";
             const std::string loopstoptag = groupname+": loop stop";
@@ -539,7 +539,7 @@ namespace MWRender
             NifOsg::TextKeyMap::const_reverse_iterator key(groupend);
             for (; key != startkey && key != keys.rend(); ++key)
             {
-                if (key->first > state.mTime)
+                if (key->first > state.getTime())
                     continue;
 
                 if (key->second == loopstarttag)
@@ -587,8 +587,7 @@ namespace MWRender
                     active = state;
             }
 
-            mAnimationTimePtr[grp]->setAnimName((active == mStates.end()) ?
-                                                 std::string() : active->first);
+            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
 
             // add external controllers for the AnimSource active in this group
             if (active != mStates.end())
@@ -671,7 +670,7 @@ namespace MWRender
         if(complete)
         {
             if(iter->second.mStopTime > iter->second.mStartTime)
-                *complete = (iter->second.mTime - iter->second.mStartTime) /
+                *complete = (iter->second.getTime() - iter->second.mStartTime) /
                             (iter->second.mStopTime - iter->second.mStartTime);
             else
                 *complete = (iter->second.mPlaying ? 0.0f : 1.0f);
@@ -686,7 +685,7 @@ namespace MWRender
         if(iter == mStates.end())
             return -1.f;
 
-        return iter->second.mTime;
+        return iter->second.getTime();
     }
 
     void Animation::disable(const std::string &groupname)
@@ -767,54 +766,54 @@ namespace MWRender
         {
             AnimState &state = stateiter->second;
             const NifOsg::TextKeyMap &textkeys = state.mSource->getTextKeys();
-            NifOsg::TextKeyMap::const_iterator textkey(textkeys.upper_bound(state.mTime));
+            NifOsg::TextKeyMap::const_iterator textkey(textkeys.upper_bound(state.getTime()));
 
             float timepassed = duration * state.mSpeedMult;
             while(state.mPlaying)
             {
                 float targetTime;
 
-                if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+                if(state.getTime() >= state.mLoopStopTime && state.mLoopCount > 0)
                     goto handle_loop;
 
-                targetTime = state.mTime + timepassed;
+                targetTime = state.getTime() + timepassed;
                 if(textkey == textkeys.end() || textkey->first > targetTime)
                 {
-                    if(mAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                        updatePosition(state.mTime, targetTime, movement);
-                    state.mTime = std::min(targetTime, state.mStopTime);
+                    if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                        updatePosition(state.getTime(), targetTime, movement);
+                    state.setTime(std::min(targetTime, state.mStopTime));
                 }
                 else
                 {
-                    if(mAccumCtrl && stateiter->first == mAnimationTimePtr[0]->getAnimName())
-                        updatePosition(state.mTime, textkey->first, movement);
-                    state.mTime = textkey->first;
+                    if(mAccumCtrl && state.mTime == mAnimationTimePtr[0]->getTimePtr())
+                        updatePosition(state.getTime(), textkey->first, movement);
+                    state.setTime(textkey->first);
                 }
 
-                state.mPlaying = (state.mTime < state.mStopTime);
-                timepassed = targetTime - state.mTime;
+                state.mPlaying = (state.getTime() < state.mStopTime);
+                timepassed = targetTime - state.getTime();
 
-                while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                while(textkey != textkeys.end() && textkey->first <= state.getTime())
                 {
                     handleTextKey(state, stateiter->first, textkey, textkeys);
                     ++textkey;
                 }
 
-                if(state.mTime >= state.mLoopStopTime && state.mLoopCount > 0)
+                if(state.getTime() >= state.mLoopStopTime && state.mLoopCount > 0)
                 {
                 handle_loop:
                     state.mLoopCount--;
-                    state.mTime = state.mLoopStartTime;
+                    state.setTime(state.mLoopStartTime);
                     state.mPlaying = true;
 
-                    textkey = textkeys.lower_bound(state.mTime);
-                    while(textkey != textkeys.end() && textkey->first <= state.mTime)
+                    textkey = textkeys.lower_bound(state.getTime());
+                    while(textkey != textkeys.end() && textkey->first <= state.getTime())
                     {
                         handleTextKey(state, stateiter->first, textkey, textkeys);
                         ++textkey;
                     }
 
-                    if(state.mTime >= state.mLoopStopTime)
+                    if(state.getTime() >= state.mLoopStopTime)
                         break;
                 }
 
@@ -1090,11 +1089,9 @@ namespace MWRender
 
     float Animation::AnimationTime::getValue(osg::NodeVisitor*)
     {
-        // FIXME: hold a pointer instead of searching every frame
-        AnimStateMap::const_iterator iter = mAnimation->mStates.find(mAnimationName);
-        if(iter != mAnimation->mStates.end())
-            return iter->second.mTime;
-        return 0.0f;
+        if (mTimePtr)
+            return *mTimePtr;
+        return 0.f;
     }
 
     float EffectAnimationTime::getValue(osg::NodeVisitor*)

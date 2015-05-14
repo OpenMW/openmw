@@ -62,17 +62,17 @@ protected:
     {
     private:
         Animation *mAnimation;
-        std::string mAnimationName;
+        boost::shared_ptr<float> mTimePtr;
 
     public:
         AnimationTime(Animation *anim)
           : mAnimation(anim)
         { }
 
-        void setAnimName(const std::string &name)
-        { mAnimationName = name; }
-        const std::string &getAnimName() const
-        { return mAnimationName; }
+        void setTimePtr(boost::shared_ptr<float> time)
+        { mTimePtr = time; }
+        boost::shared_ptr<float> getTimePtr() const
+        { return mTimePtr; }
 
         virtual float getValue(osg::NodeVisitor* nv);
     };
@@ -104,7 +104,8 @@ protected:
         float mLoopStopTime;
         float mStopTime;
 
-        float mTime;
+        typedef boost::shared_ptr<float> TimePtr;
+        TimePtr mTime;
         float mSpeedMult;
 
         bool mPlaying;
@@ -115,9 +116,18 @@ protected:
         bool mAutoDisable;
 
         AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
-                      mTime(0.0f), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
+                      mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
                       mPriority(0), mGroups(0), mAutoDisable(true)
-        { }
+        {
+        }
+        float getTime() const
+        {
+            return *mTime;
+        }
+        void setTime(float time)
+        {
+            *mTime = time;
+        }
     };
     typedef std::map<std::string,AnimState> AnimStateMap;
     AnimStateMap mStates;
