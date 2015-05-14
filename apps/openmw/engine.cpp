@@ -73,7 +73,7 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-void OMW::Engine::frame(float frametime)
+double OMW::Engine::frame(float frametime)
 {
     try
     {
@@ -94,6 +94,8 @@ void OMW::Engine::frame(float frametime)
 
         // GUI active? Most game processing will be paused, but scripts still run.
         bool guiActive = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        if (!guiActive)
+            mSimulationTime += frametime;
 
         // Main menu opened? Then scripts are also paused.
         bool paused = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
@@ -182,6 +184,7 @@ void OMW::Engine::frame(float frametime)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
+    return mSimulationTime;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -203,6 +206,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
   , mCfgMgr(configurationManager)
+  , mSimulationTime(0.0)
 {
     Misc::Rng::init();
     MWClass::registerClasses();
@@ -587,8 +591,8 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         //dt = std::min(dt, 0.2);
 
-        frame(dt);
-        mViewer->frame(/*simulationTime*/);
+        double simulationTime = frame(dt);
+        mViewer->frame(simulationTime);
     }
 
     // Save user settings

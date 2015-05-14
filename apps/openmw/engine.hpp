@@ -100,6 +100,7 @@ namespace OMW
             bool mNewGame;
 
             osg::Timer_t mStartTick;
+            double mSimulationTime;
 
             // not implemented
             Engine (const Engine&);
@@ -107,7 +108,8 @@ namespace OMW
 
             void executeLocalScripts();
 
-            void frame (float dt);
+            /// @return The new simulationTime
+            double frame (float dt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);
