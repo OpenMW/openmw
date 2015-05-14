@@ -36,6 +36,9 @@ namespace Resource
 
     TextureManager::TextureManager(const VFS::Manager *vfs)
         : mVFS(vfs)
+        , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
+        , mMagFilter(osg::Texture::LINEAR)
+        , mMaxAnisotropy(1)
         , mWarningTexture(createWarningTexture())
         , mUnRefImageDataAfterApply(false)
     {
@@ -50,6 +53,21 @@ namespace Resource
     void TextureManager::setUnRefImageDataAfterApply(bool unref)
     {
         mUnRefImageDataAfterApply = unref;
+    }
+
+    void TextureManager::setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+    {
+        mMinFilter = minFilter;
+        mMagFilter = magFilter;
+        mMaxAnisotropy = std::max(1, maxAnisotropy);
+
+        for (std::map<MapKey, osg::ref_ptr<osg::Texture2D> >::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
+        {
+            osg::ref_ptr<osg::Texture2D> tex = it->second;
+            tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+            tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+            tex->setMaxAnisotropy(static_cast<float>(mMaxAnisotropy));
+        }
     }
 
     /*
@@ -110,6 +128,9 @@ namespace Resource
             texture->setImage(image);
             texture->setWrap(osg::Texture::WRAP_S, wrapS);
             texture->setWrap(osg::Texture::WRAP_T, wrapT);
+            texture->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+            texture->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+            texture->setMaxAnisotropy(mMaxAnisotropy);
 
             texture->setUnRefImageDataAfterApply(mUnRefImageDataAfterApply);
 

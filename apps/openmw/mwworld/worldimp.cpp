@@ -143,7 +143,7 @@ namespace MWWorld
     }
 
     World::World (
-        osgViewer::Viewer& viewer,
+        osgViewer::Viewer* viewer,
         osg::ref_ptr<osg::Group> rootNode,
         Resource::ResourceSystem* resourceSystem,
         const Files::Collections& fileCollections,

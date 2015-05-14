@@ -38,12 +38,10 @@ namespace
 
     std::string textureFilteringToStr(const std::string& val)
     {
-        if (val == "anisotropic")
-            return "Anisotropic";
-        else if (val == "bilinear")
-            return "Bilinear";
-        else
+        if (val == "trilinear")
             return "Trilinear";
+        else
+            return "Bilinear";
     }
 
     void parseResolution (int &x, int &y, const std::string& str)

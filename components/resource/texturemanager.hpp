@@ -23,7 +23,8 @@ namespace Resource
         TextureManager(const VFS::Manager* vfs);
         ~TextureManager();
 
-        // TODO: texture filtering settings
+        /// @warning It is unsafe to call this function when a draw thread is using the textures. Call stopThreading() first!
+        void setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode maxFilter, int maxAnisotropy);
 
         /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
         /// otherwise should be disabled to reduce memory usage.
@@ -39,6 +40,10 @@ namespace Resource
 
     private:
         const VFS::Manager* mVFS;
+
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
 
         typedef std::pair<std::pair<int, int>, std::string> MapKey;
 

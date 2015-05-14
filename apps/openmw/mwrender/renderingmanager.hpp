@@ -45,7 +45,7 @@ namespace MWRender
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer& viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem);
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
@@ -99,8 +99,9 @@ namespace MWRender
 
     private:
         void updateProjectionMatrix();
+        void updateTextureFiltering();
 
-        osgViewer::Viewer& mViewer;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mLightRoot;
         Resource::ResourceSystem* mResourceSystem;

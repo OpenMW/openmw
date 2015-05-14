@@ -14,6 +14,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/texturemanager.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -82,7 +83,7 @@ namespace MWRender
         float mFogEnd;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer &viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem)
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -97,13 +98,13 @@ namespace MWRender
 
         mObjects.reset(new Objects(mResourceSystem, lightRoot));
 
-        mViewer.setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
+        mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
-        mObjects->setIncrementalCompileOperation(mViewer.getIncrementalCompileOperation());
+        mObjects->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
 
-        mViewer.setLightingMode(osgViewer::View::NO_LIGHT);
+        mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
         mSunLight = new osg::Light;
@@ -133,10 +134,10 @@ namespace MWRender
         else
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
 
-        viewer.getCamera()->setCullingMode( cullingMode );
+        mViewer->getCamera()->setCullingMode( cullingMode );
 
-        mViewer.getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
-        mViewer.getCamera()->setCullingMode(cullingMode);
+        mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+        mViewer->getCamera()->setCullingMode(cullingMode);
 
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
@@ -184,7 +185,7 @@ namespace MWRender
 
     osg::Vec3f RenderingManager::getEyePos()
     {
-        osg::Vec3d eye = mViewer.getCameraManipulator()->getMatrix().getTrans();
+        osg::Vec3d eye = mViewer->getCameraManipulator()->getMatrix().getTrans();
         return eye;
     }
 
@@ -232,7 +233,7 @@ namespace MWRender
 
     void RenderingManager::configureFog(float /* fogDepth */, const osg::Vec4f &colour)
     {
-        mViewer.getCamera()->setClearColor(colour);
+        mViewer->getCamera()->setClearColor(colour);
 
         mStateUpdater->setFogColor(colour);
         mStateUpdater->setFogEnd(mViewDistance);
@@ -325,11 +326,26 @@ namespace MWRender
     void RenderingManager::updateProjectionMatrix()
     {
         double fovy, aspect, zNear, zFar;
-        mViewer.getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+        mViewer->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
         fovy = mFieldOfView;
         zNear = 5.f;
         zFar = mViewDistance;
-        mViewer.getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+    }
+
+    void RenderingManager::updateTextureFiltering()
+    {
+        osg::Texture::FilterMode min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
+
+        if (Settings::Manager::getString("texture filtering", "General") == "trilinear")
+            min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+
+        int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
+
+        mViewer->stopThreading();
+        mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
+        mViewer->startThreading();
     }
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)
@@ -346,6 +362,8 @@ namespace MWRender
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
                 updateProjectionMatrix();
             }
+            else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
+                updateTextureFiltering();
         }
     }
 
