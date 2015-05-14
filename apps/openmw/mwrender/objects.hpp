@@ -72,7 +72,7 @@ public:
     void removeCell(const MWWorld::CellStore* store);
 
     /// Updates containing cell for object rendering data
-    void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
+    void updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 
 private:
     void operator = (const Objects&);

@@ -198,30 +198,33 @@ void Objects::removeCell(const MWWorld::CellStore* store)
     }
 }
 
-void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
+void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    /*
-    Ogre::SceneNode *node;
     MWWorld::CellStore *newCell = cur.getCell();
 
+    osg::Group* cellnode;
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        node = mRootNode->createChildSceneNode();
-        mCellSceneNodes[newCell] = node;
+        cellnode = new osg::Group;
+        mRootNode->addChild(cellnode);
+        mCellSceneNodes[newCell] = cellnode;
     } else {
-        node = mCellSceneNodes[newCell];
+        cellnode = mCellSceneNodes[newCell];
     }
 
-    node->addChild(cur.getRefData().getBaseNode());
+    osg::Node* objectNode = cur.getRefData().getBaseNode();
+
+    if (objectNode->getNumParents())
+        objectNode->getParent(0)->removeChild(objectNode);
+    cellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {
-        ObjectAnimation *anim = iter->second;
+        Animation *anim = iter->second;
         mObjects.erase(iter);
         anim->updatePtr(cur);
         mObjects[cur] = anim;
     }
-    */
 }
 
 Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)

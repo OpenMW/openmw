@@ -274,7 +274,7 @@ public:
     void removeEffect (int effectId);
     void getLoopingEffects (std::vector<int>& out);
 
-    void updatePtr(const MWWorld::Ptr &ptr);
+    virtual void updatePtr(const MWWorld::Ptr &ptr);
 
     bool hasAnimation(const std::string &anim);
 

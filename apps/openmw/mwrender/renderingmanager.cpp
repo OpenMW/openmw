@@ -271,6 +271,11 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setScale(scale);
     }
 
+    void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
+    {
+        mObjects->updatePtr(old, updated);
+    }
+
     void RenderingManager::spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale)
     {
         mEffectManager->addEffect(model, texture, worldPosition, scale);

@@ -34,6 +34,8 @@ private:
 public:
     HeadAnimationTime(MWWorld::Ptr reference);
 
+    void updatePtr(const MWWorld::Ptr& updated);
+
     void update(float dt);
 
     void setEnabled(bool enabled);
@@ -176,6 +178,8 @@ public:
     virtual void setAlpha(float alpha);
 
     virtual void setVampire(bool vampire);
+
+    virtual void updatePtr(const MWWorld::Ptr& updated);
 };
 
 }

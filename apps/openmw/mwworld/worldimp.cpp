@@ -1181,7 +1181,7 @@ namespace MWWorld
                     MWWorld::Ptr copy =
                         ptr.getClass().copyToCell(ptr, *newCell, pos);
 
-                    //mRendering->updateObjectCell(ptr, copy);
+                    mRendering->updatePtr(ptr, copy);
                     ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
                     mPhysics->updatePtr(ptr, copy);

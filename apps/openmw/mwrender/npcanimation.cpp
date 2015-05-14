@@ -76,6 +76,11 @@ HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
     resetBlinkTimer();
 }
 
+void HeadAnimationTime::updatePtr(const MWWorld::Ptr &updated)
+{
+    mReference = updated;
+}
+
 void HeadAnimationTime::setEnabled(bool enabled)
 {
     mEnabled = enabled;
@@ -899,6 +904,12 @@ void NpcAnimation::setVampire(bool vampire)
         else
             rebuild();
     }
+}
+
+void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
+{
+    Animation::updatePtr(updated);
+    mHeadAnimationTime->updatePtr(updated);
 }
 
 /*

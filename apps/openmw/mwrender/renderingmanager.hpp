@@ -62,6 +62,8 @@ namespace MWRender
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
 
+        void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
+
         // TODO rename to setRotation/setPosition/setScale, along with the World equivalents
         void rotateObject(const MWWorld::Ptr& ptr, const osg::Quat& rot);
         void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos);
