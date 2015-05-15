@@ -542,6 +542,7 @@ void OMW::Engine::go()
     mViewer = new osgViewer::Viewer;
 
     osg::ref_ptr<osgViewer::StatsHandler> statshandler = new osgViewer::StatsHandler;
+    statshandler->setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F9);
 
     statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
                                    "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
