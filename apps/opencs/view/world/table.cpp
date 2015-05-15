@@ -364,6 +364,9 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
 
+    connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+        this, SLOT (tableSizeUpdate()));
+
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
 
