@@ -206,6 +206,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         shiftCtrlDoubleClick->setDeclaredValues (values);
         shiftCtrlDoubleClick->setDefaultValue (editRecordAndClose);
         shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in table:<p>" + toolTip);
+
+        QString defaultValue = "Jump and Select";
+        QStringList jumpValues = QStringList() << defaultValue << "Jump Only" << "No Jump";
+
+        Setting *jumpToAdded = createSetting (Type_RadioButton, "jump-to-added",
+            "Jump to the added or cloned record.");
+        jumpToAdded->setDefaultValue (defaultValue);
+        jumpToAdded->setDeclaredValues (jumpValues);
     }
 
     declareSection ("search", "Search & Replace");
