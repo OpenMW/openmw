@@ -370,10 +370,14 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
 
-    /// \note This signal could instead be connected to a slot that filters out changes not affecting
-    /// the records status column (for permanence reasons)
-    connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (tableSizeUpdate()));
+    if (id == CSMWorld::UniversalId::Type_References)
+        connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
+    else
+        /// \note This signal could instead be connected to a slot that filters out changes not affecting
+        /// the records status column (for permanence reasons)
+        connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (tableSizeUpdate()));
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
@@ -640,7 +644,7 @@ void CSVWorld::Table::tableSizeUpdate()
                     case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
                     case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
                     case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                    case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                    case CSMWorld::RecordBase::State_Deleted: ++deleted; ++modified; break;
                 }
             }
         }
@@ -743,6 +747,7 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
 void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)
 {
     tableSizeUpdate();
+
     if(mJumpToAddedRecord)
     {
         selectRow(end);
@@ -750,4 +755,14 @@ void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, in
         if(mUnselectAfterJump)
             clearSelection();
     }
+}
+
+void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    tableSizeUpdate();
+
+    // this event is assumed to be infreqent, don't bother keeping a member variable
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    if (settings.setting("table-input/jump-to-modified", "true") == "true")
+        selectRow(bottomRight.row());
 }

@@ -142,7 +142,9 @@ namespace CSVWorld
 
             void updateUserSetting (const QString &name, const QStringList &list);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void rowsInsertedEvent(const QModelIndex &parent, int start, int end);
+
+            void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     };
 }
 

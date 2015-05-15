@@ -214,6 +214,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Jump to the added or cloned record.");
         jumpToAdded->setDefaultValue (defaultValue);
         jumpToAdded->setDeclaredValues (jumpValues);
+
+        Setting *jumpToModified = createSetting (Type_CheckBox, "jump-to-modified", "Jump to modified Record");
+        jumpToModified->setDefaultValue ("true");
+        jumpToModified->setToolTip ("Whether to jump to the modified record. This setting effects the instances table only."
+                "\nCan be useful in finding the moved or modified object instance while 3D editing.");
     }
 
     declareSection ("search", "Search & Replace");
