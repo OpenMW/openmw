@@ -235,8 +235,11 @@ OMW::Engine::~Engine()
 
     mViewer = NULL;
 
-    SDL_DestroyWindow(mWindow);
-    mWindow = NULL;
+    if (mWindow)
+    {
+        SDL_DestroyWindow(mWindow);
+        mWindow = NULL;
+    }
 
     SDL_Quit();
 }
