@@ -238,7 +238,7 @@ namespace MWGui
 
         mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
             MyGUI::Align::Default, "Overlay");
-        mVideoBackground->setImageTexture("black.png");
+        mVideoBackground->setImageTexture("black");
         mVideoBackground->setVisible(false);
         mVideoBackground->setNeedMouseFocus(true);
         mVideoBackground->setNeedKeyFocus(true);
@@ -309,14 +309,14 @@ namespace MWGui
         mJailScreen = new JailScreen();
 
         mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
-        mBlindnessFader = new ScreenFader("black.png");
+        mBlindnessFader = new ScreenFader("black");
         std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
         // TODO: check if non-BM versions actually use player_hit_01.dds
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
             hitFaderTexture = "textures\\player_hit_01.dds";
         mHitFader = new ScreenFader(hitFaderTexture);
-        mScreenFader = new ScreenFader("black.png");
+        mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
 
@@ -1941,7 +1941,7 @@ namespace MWGui
     void WindowManager::createTextures()
     {
         {
-            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("white.png");
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("white");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
             unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
             for (int x=0; x<8; ++x)
@@ -1955,7 +1955,7 @@ namespace MWGui
         }
 
         {
-            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("black.png");
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("black");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8);
             unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
             for (int x=0; x<8; ++x)
@@ -1969,7 +1969,7 @@ namespace MWGui
         }
 
         {
-            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("transparent.png");
+            MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("transparent");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
             setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
@@ -1977,7 +1977,7 @@ namespace MWGui
 
     void WindowManager::setMenuTransparency(float value)
     {
-        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("transparent.png");
+        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().getTexture("transparent");
         unsigned char* data = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
         for (int x=0; x<8; ++x)
             for (int y=0; y<8; ++y)

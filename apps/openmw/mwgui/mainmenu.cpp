@@ -170,7 +170,7 @@ namespace MWGui
                 // Use black background to correct aspect ratio
                 mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Default, "Menu");
-                mVideoBackground->setImageTexture("black.png");
+                mVideoBackground->setImageTexture("black");
 
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");

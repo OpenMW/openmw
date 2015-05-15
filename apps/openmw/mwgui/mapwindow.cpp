@@ -222,7 +222,7 @@ namespace MWGui
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
                 fog->setImageTexture(mFogOfWar ?
                     ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
-                    : "black.png" )
+                    : "black" )
                    : "");
             }
         }
@@ -354,7 +354,7 @@ namespace MWGui
                 if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
                     box->setImageTexture(image);
                 else
-                    box->setImageTexture("black.png");
+                    box->setImageTexture("black");
             }
         }
 #endif
