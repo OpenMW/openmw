@@ -2,8 +2,14 @@
 #define GAME_RENDER_GLOBALMAP_H
 
 #include <string>
+#include <vector>
 
-#include <OgreTexture.h>
+#include <osg/ref_ptr>
+
+namespace osg
+{
+    class Texture2D;
+}
 
 namespace Loading
 {
@@ -18,10 +24,10 @@ namespace ESM
 namespace MWRender
 {
 
-    class GlobalMap : public Ogre::ManualResourceLoader
+    class GlobalMap
     {
     public:
-        GlobalMap(const std::string& cacheDir);
+        GlobalMap();
         ~GlobalMap();
 
         void render(Loading::Listener* loadingListener);
@@ -37,23 +43,21 @@ namespace MWRender
 
         void exploreCell (int cellX, int cellY);
 
-        virtual void loadResource(Ogre::Resource* resource);
-
         /// Clears the overlay
         void clear();
 
         void write (ESM::GlobalMap& map);
         void read (ESM::GlobalMap& map);
 
-    private:
-        std::string mCacheDir;
+        osg::ref_ptr<osg::Texture2D> getBaseTexture();
+        //osg::ref_ptr<osg::Texture2D> getOverlayTexture();
 
+    private:
         int mCellSize;
 
         std::vector< std::pair<int,int> > mExploredCells;
 
-        Ogre::TexturePtr mOverlayTexture;
-        Ogre::Image mOverlayImage; // Backup in system memory
+        osg::ref_ptr<osg::Texture2D> mBaseTexture;
 
         int mWidth;
         int mHeight;

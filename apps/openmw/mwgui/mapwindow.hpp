@@ -195,6 +195,7 @@ namespace MWGui
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
+        MyGUI::ITexture* mGlobalMapTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;
@@ -216,7 +217,7 @@ namespace MWGui
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
-        //MWRender::GlobalMap* mGlobalMapRender;
+        MWRender::GlobalMap* mGlobalMapRender;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
