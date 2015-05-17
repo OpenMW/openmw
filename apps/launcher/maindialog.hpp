@@ -31,11 +31,12 @@ namespace Launcher
     class UnshieldThread;
     class SettingsPage;
 
-    typedef enum {
+    enum FirstRunDialogResult
+    {
         FirstRunDialogResultFailure,
         FirstRunDialogResultContinue,
         FirstRunDialogResultWizard
-    } FirstRunDialogResult;
+    };
 
 #ifndef WIN32
     bool expansions(Launcher::UnshieldThread& cd);
