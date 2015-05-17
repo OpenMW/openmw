@@ -811,7 +811,10 @@ void CSVDoc::View::closeRequest (SubView *subView)
 
     if (mSubViews.size()>1 || mViewTotal<=1 ||
         userSettings.setting ("window/hide-subview", QString ("false"))!="true")
+    {
         subView->deleteLater();
+        mSubViews.removeOne (subView);
+    }
     else if (mViewManager.closeRequest (this))
         mViewManager.removeDocAndView (mDocument);
 }
