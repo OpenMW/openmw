@@ -33,6 +33,12 @@ namespace
                 traits->sharedContext = 0;
                 traits->pbuffer = true;
 
+                osg::GraphicsContext::ScreenIdentifier si;
+                si.readDISPLAY();
+                traits->displayNum = si.displayNum;
+                traits->screenNum = si.screenNum;
+                traits->hostName = si.hostName;
+
                 _gc = osg::GraphicsContext::createGraphicsContext(traits.get());
 
                 if (!_gc)
