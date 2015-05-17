@@ -20,8 +20,6 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QHeaderView>
-#include <QApplication>
-#include <QDesktopWidget>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -583,15 +581,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     changeCurrentId(id.getId());
 
-    //QWidget *mainWidget = new QWidget(this);
-    CSVDoc::SizeHintWidget *mainWidget = new CSVDoc::SizeHintWidget;
-
-    const QRect rect = QApplication::desktop()->screenGeometry(this);
-    int frameHeight = 40; // set a reasonable default
-    QWidget *topLevel = QApplication::topLevelAt(pos());
-    if (topLevel)
-        frameHeight = topLevel->frameGeometry().height() - topLevel->height();
-    mainWidget->setSizeHint(QSize(400, rect.height()-frameHeight)); // FIXME: 400
+    QWidget *mainWidget = new QWidget(this);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     QToolButton* prevButton = new QToolButton(mainWidget);

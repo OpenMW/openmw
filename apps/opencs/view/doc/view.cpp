@@ -563,12 +563,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
     QString mainwinScroll = settings.settingValue ("window/mainwindow-scrollbar");
-    if (mainwinScroll.isEmpty() || mainwinScroll == "Scrollbar Only")
-        mScrollbarOnly = true;
-    else if(mainwinScroll == "Grow Only")
-        mScrollbarOnly = false;
-    else
-        mScrollbarOnly = false;
+    mScrollbarOnly = mainwinScroll.isEmpty() || mainwinScroll == "Scrollbar Only";
 
     QDesktopWidget *dw = QApplication::desktop();
     QRect rect;

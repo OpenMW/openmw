@@ -151,6 +151,10 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Add a horizontal scrollbar to the main view window.");
         mainwinScroll->setDefaultValue (defaultScroll);
         mainwinScroll->setDeclaredValues (scrollValues);
+        mainwinScroll->setToolTip ("Scrollbar Only: Simple addition of scrollbars, the view window does not grow"
+            " automatically.\n"
+            "Grow Only: Original Editor behaviour. The view window grows as subviews are added. No scrollbars.\n"
+            "Grow then Scroll: The view window grows. The scrollbar appears once it cannot grow any further.");
 
         Setting *grow = createSetting (Type_CheckBox, "grow-limit", "Grow Limit Screen");
         grow->setDefaultValue ("false");

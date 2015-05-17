@@ -10,6 +10,7 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
