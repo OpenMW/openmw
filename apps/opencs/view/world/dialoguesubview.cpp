@@ -20,6 +20,7 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QHeaderView>
+#include <QScrollBar>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -511,7 +512,7 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedTableMapper->setModel(mNestedModels.back());
                 // FIXME: lack MIME support?
                 mNestedTableDispatcher =
-                        new DialogueDelegateDispatcher (this, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
+                        new DialogueDelegateDispatcher (0/*this*/, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
                 mNestedTableMapper->setItemDelegate(mNestedTableDispatcher);
 
                 int columnCount =
@@ -763,6 +764,9 @@ void CSVWorld::DialogueSubView::dataChanged (const QModelIndex & index)
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
 
         mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
+        int y = mEditWidget->verticalScrollBar()->value();
+        mEditWidget->remake (index.row());
+        mEditWidget->verticalScrollBar()->setValue(y);
     }
 }
 

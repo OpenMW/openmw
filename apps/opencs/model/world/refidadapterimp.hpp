@@ -792,6 +792,9 @@ namespace CSMWorld
         const RefIdColumn *mFaction;
         const RefIdColumn *mHair;
         const RefIdColumn *mHead;
+        const RefIdColumn *mAttributes; // depends on npc type
+        const RefIdColumn *mSkills;     // depends on npc type
+        const RefIdColumn *mMisc;       // may depend on npc type, e.g. FactionID
 
         NpcColumns (const ActorColumns& actorColumns);
     };
@@ -842,7 +845,99 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
+
     class NestedRefIdAdapterBase;
+
+    class NpcAttributesRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        NpcAttributesRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class NpcSkillsRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        NpcSkillsRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class NpcMiscRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        NpcMiscRefIdAdapter (const NpcMiscRefIdAdapter&);
+        NpcMiscRefIdAdapter& operator= (const NpcMiscRefIdAdapter&);
+
+    public:
+
+        NpcMiscRefIdAdapter ();
+        virtual ~NpcMiscRefIdAdapter();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
 
     template<typename ESXRecordT>
     class EffectsListAdapter;

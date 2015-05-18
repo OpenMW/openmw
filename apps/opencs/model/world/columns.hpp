@@ -272,6 +272,21 @@ namespace CSMWorld
 
             ColumnId_OriginalCell = 247,
 
+            ColumnId_NpcAttributes = 248,
+            ColumnId_NpcSkills = 249,
+            ColumnId_UChar = 250,
+            ColumnId_NpcMisc = 251,
+            ColumnId_NpcLevel = 252,
+            ColumnId_NpcFactionID = 253,
+            ColumnId_NpcHealth = 254,
+            ColumnId_NpcMana = 255,
+            ColumnId_NpcFatigue = 256,
+            ColumnId_NpcDisposition = 257,
+            ColumnId_NpcReputation = 258,
+            ColumnId_NpcRank = 259,
+            ColumnId_NpcGold = 260,
+            ColumnId_NpcPersistence = 261,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,
