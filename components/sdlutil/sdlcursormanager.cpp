@@ -35,6 +35,7 @@ namespace
 
                 osg::GraphicsContext::ScreenIdentifier si;
                 si.readDISPLAY();
+                if (si.displayNum<0) si.displayNum = 0;
                 traits->displayNum = si.displayNum;
                 traits->screenNum = si.screenNum;
                 traits->hostName = si.hostName;
