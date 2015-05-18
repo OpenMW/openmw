@@ -296,6 +296,13 @@ namespace CSMWorld
             { ColumnId_NpcGold, "Gold" },
             { ColumnId_NpcPersistence, "Persistent" },
 
+            { ColumnId_RaceAttributes, "Attributes" },
+            { ColumnId_RaceMaleValue, "Male" },
+            { ColumnId_RaceFemaleValue, "Female" },
+            { ColumnId_RaceSkillBonus, "Skill Bonus" },
+            { ColumnId_RaceSkill, "Skills" },
+            { ColumnId_RaceBonus, "Bonus" },
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },
@@ -566,6 +573,7 @@ namespace
             // FIXME: don't have dynamic value enum delegate, use Display_String for now
             //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
             case CSMWorld::Columns::ColumnId_InfoCondComp: return sInfoCondComp;
+            case CSMWorld::Columns::ColumnId_RaceSkill: return sSkills;
 
             default: return 0;
         }

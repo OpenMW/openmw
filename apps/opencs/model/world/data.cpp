@@ -136,6 +136,24 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+    // Race attributes
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes));
+    index = mRaces.getColumns()-1;
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceAttributeAdapter()));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceAttributes, ColumnBase::Display_String, false));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceMaleValue, ColumnBase::Display_Integer));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceFemaleValue, ColumnBase::Display_Integer));
+    // Race skill bonus
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceSkillBonus));
+    index = mRaces.getColumns()-1;
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceSkillsBonusAdapter()));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceSkill, ColumnBase::Display_RaceSkill));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceBonus, ColumnBase::Display_Integer));
 
     mSounds.addColumn (new StringIdColumn<ESM::Sound>);
     mSounds.addColumn (new RecordStateColumn<ESM::Sound>);

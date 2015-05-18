@@ -287,6 +287,13 @@ namespace CSMWorld
             ColumnId_NpcGold = 260,
             ColumnId_NpcPersistence = 261,
 
+            ColumnId_RaceAttributes = 262,
+            ColumnId_RaceMaleValue = 263,
+            ColumnId_RaceFemaleValue = 264,
+            ColumnId_RaceSkillBonus = 265,
+            ColumnId_RaceSkill = 266,
+            ColumnId_RaceBonus = 267,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

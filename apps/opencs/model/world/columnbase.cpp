@@ -84,6 +84,7 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_InfoCondFunc,
         Display_InfoCondVar,
         Display_InfoCondComp,
+        Display_RaceSkill,
 
         Display_None
     };

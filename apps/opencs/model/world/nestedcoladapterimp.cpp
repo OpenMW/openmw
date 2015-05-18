@@ -880,4 +880,157 @@ namespace CSMWorld
     {
         return static_cast<int>(record.get().mSelects.size());
     }
+
+    RaceAttributeAdapter::RaceAttributeAdapter () {}
+
+    void RaceAttributeAdapter::addRow(Record<ESM::Race>& record, int position) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceAttributeAdapter::removeRow(Record<ESM::Race>& record, int rowToRemove) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceAttributeAdapter::setTable(Record<ESM::Race>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        ESM::Race race = record.get();
+
+        race.mData =
+            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+        record.setModified (race);
+    }
+
+    NestedTableWrapperBase* RaceAttributeAdapter::table(const Record<ESM::Race>& record) const
+    {
+        std::vector<typename ESM::Race::RADTstruct> wrap;
+        wrap.push_back(record.get().mData);
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+    }
+
+    QVariant RaceAttributeAdapter::getData(const Record<ESM::Race>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return QString(ESM::Attribute::sAttributeNames[subRowIndex].c_str());
+            case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
+            case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
+            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+        }
+    }
+
+    void RaceAttributeAdapter::setData(Record<ESM::Race>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return; // throw an exception here?
+            case 1: race.mData.mAttributeValues[subRowIndex].mMale = value.toInt(); break;
+            case 2: race.mData.mAttributeValues[subRowIndex].mFemale = value.toInt(); break;
+            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+        }
+
+        record.setModified (race);
+    }
+
+    int RaceAttributeAdapter::getColumnsCount(const Record<ESM::Race>& record) const
+    {
+        return 3; // attrib, male, female
+    }
+
+    int RaceAttributeAdapter::getRowsCount(const Record<ESM::Race>& record) const
+    {
+        return ESM::Attribute::Length; // there are 8 attributes
+    }
+
+    RaceSkillsBonusAdapter::RaceSkillsBonusAdapter () {}
+
+    void RaceSkillsBonusAdapter::addRow(Record<ESM::Race>& record, int position) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceSkillsBonusAdapter::removeRow(Record<ESM::Race>& record, int rowToRemove) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceSkillsBonusAdapter::setTable(Record<ESM::Race>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        ESM::Race race = record.get();
+
+        race.mData =
+            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+        record.setModified (race);
+    }
+
+    NestedTableWrapperBase* RaceSkillsBonusAdapter::table(const Record<ESM::Race>& record) const
+    {
+        std::vector<typename ESM::Race::RADTstruct> wrap;
+        wrap.push_back(record.get().mData);
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+    }
+
+    QVariant RaceSkillsBonusAdapter::getData(const Record<ESM::Race>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return race.mData.mBonus[subRowIndex].mSkill; // can be -1
+            case 1: return race.mData.mBonus[subRowIndex].mBonus;
+            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+        }
+    }
+
+    void RaceSkillsBonusAdapter::setData(Record<ESM::Race>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: race.mData.mBonus[subRowIndex].mSkill = value.toInt(); break; // can be -1
+            case 1: race.mData.mBonus[subRowIndex].mBonus = value.toInt(); break;
+            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+        }
+
+        record.setModified (race);
+    }
+
+    int RaceSkillsBonusAdapter::getColumnsCount(const Record<ESM::Race>& record) const
+    {
+        return 2; // skill, bonus
+    }
+
+    int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
+    {
+        // there are 7 skill bonuses
+        return static_cast<int>(sizeof(record.get().mData.mBonus)/sizeof(record.get().mData.mBonus[0]));
+    }
 }
