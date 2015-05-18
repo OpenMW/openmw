@@ -244,7 +244,10 @@ namespace SceneUtil
                 }
             }
             if (!mLightManager)
+            {
+                traverse(node, nv);
                 return;
+            }
         }
 
         mLightManager->prepareForCamera(cv->getCurrentCamera());
