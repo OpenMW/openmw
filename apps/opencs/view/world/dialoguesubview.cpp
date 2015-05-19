@@ -348,16 +348,19 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 CSVWorld::EditWidget::~EditWidget()
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
-    {
         delete mNestedModels[i];
-    }
-    delete mNestedTableDispatcher;
+
+    if (mDispatcher)
+        delete mDispatcher;
+
+    if (mNestedTableDispatcher)
+        delete mNestedTableDispatcher;
 }
 
 CSVWorld::EditWidget::EditWidget(QWidget *parent,
         int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher,
         CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, table, commandDispatcher, document),
+mDispatcher(0),
 mNestedTableDispatcher(NULL),
 QScrollArea(parent),
 mWidgetMapper(NULL),
@@ -369,41 +372,41 @@ mTable(table)
 {
     remake (row);
 
-    connect(&mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
+    connect(mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 }
 
 void CSVWorld::EditWidget::remake(int row)
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
-    {
         delete mNestedModels[i];
-    }
-    mNestedModels.clear();
-    delete mNestedTableDispatcher;
 
-    if (mMainWidget)
-    {
-        delete mMainWidget;
-        mMainWidget = 0;
-    }
-    mMainWidget = new QWidget (this);
+    mNestedModels.clear();
+
+    if (mDispatcher)
+        delete mDispatcher;
+    mDispatcher = new DialogueDelegateDispatcher(0/*this*/, mTable, mCommandDispatcher, mDocument);
+
+    if (mNestedTableDispatcher)
+        delete mNestedTableDispatcher;
 
     //not sure if widget mapper can handle deleting the widgets that were mapped
     if (mWidgetMapper)
-    {
         delete mWidgetMapper;
-        mWidgetMapper = 0;
-    }
-    if (mNestedTableMapper)
-    {
-        delete mNestedTableMapper;
-        mNestedTableMapper = 0;
-    }
-    mWidgetMapper = new QDataWidgetMapper (this);
 
+    mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel(mTable);
-    mWidgetMapper->setItemDelegate(&mDispatcher);
+    mWidgetMapper->setItemDelegate(mDispatcher);
+
+    if (mNestedTableMapper)
+        delete mNestedTableMapper;
+
+    if (mMainWidget)
+    {
+        QWidget *del = this->takeWidget();
+        del->deleteLater();
+    }
+    mMainWidget = new QWidget (this);
 
     QFrame* line = new QFrame(mMainWidget);
     line->setObjectName(QString::fromUtf8("line"));
@@ -476,8 +479,8 @@ void CSVWorld::EditWidget::remake(int row)
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
-                mDispatcher.makeDelegate (display);
-                QWidget* editor = mDispatcher.makeEditor (display, (mTable->index (row, i)));
+                mDispatcher->makeDelegate (display);
+                QWidget* editor = mDispatcher->makeEditor (display, (mTable->index (row, i)));
 
                 if (editor)
                 {
