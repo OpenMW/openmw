@@ -12,6 +12,7 @@
 
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
+#include "cell.hpp"
 
 namespace ESM
 {
@@ -487,6 +488,31 @@ namespace CSMWorld
         virtual int getColumnsCount(const Record<ESM::Race>& record) const;
 
         virtual int getRowsCount(const Record<ESM::Race>& record) const;
+    };
+
+    class CellListAdapter : public NestedColumnAdapter<CSMWorld::Cell>
+    {
+    public:
+        CellListAdapter ();
+
+        virtual void addRow(Record<CSMWorld::Cell>& record, int position) const;
+
+        virtual void removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<CSMWorld::Cell>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<CSMWorld::Cell>& record) const;
+
+        virtual QVariant getData(const Record<CSMWorld::Cell>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<CSMWorld::Cell>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<CSMWorld::Cell>& record) const;
+
+        virtual int getRowsCount(const Record<CSMWorld::Cell>& record) const;
     };
 }
 

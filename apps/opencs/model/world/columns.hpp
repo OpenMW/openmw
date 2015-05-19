@@ -57,7 +57,7 @@ namespace CSMWorld
             ColumnId_StarterSpell = 42,
             ColumnId_AlwaysSucceeds = 43,
             ColumnId_SleepForbidden = 44,
-            ColumnId_InteriorWater = 45,
+            ColumnId_Water = 45,
             ColumnId_InteriorSky = 46,
             ColumnId_Model = 47,
             ColumnId_Script = 48,
@@ -293,6 +293,15 @@ namespace CSMWorld
             ColumnId_RaceSkillBonus = 265,
             ColumnId_RaceSkill = 266,
             ColumnId_RaceBonus = 267,
+
+            ColumnId_Interior = 268,
+            ColumnId_Ambient = 269,
+            ColumnId_Sunlight = 270,
+            ColumnId_Fog = 271,
+            ColumnId_FogDensity = 272,
+            ColumnId_WaterLevel = 273,
+            ColumnId_InteriorWater = 274,
+            ColumnId_MapColor = 275,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

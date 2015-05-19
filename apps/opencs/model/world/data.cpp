@@ -287,10 +287,31 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
     mCells.addColumn (new NameColumn<Cell>);
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
-    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_Water, ESM::Cell::HasWater));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
     mCells.addColumn (new RefNumCounterColumn<Cell>);
+    // Misc Cell data
+    mCells.addColumn (new NestedParentColumn<Cell> (Columns::ColumnId_Cell,
+        ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
+    index = mCells.getColumns()-1;
+    mCells.addAdapter (std::make_pair(&mCells.getColumn(index), new CellListAdapter ()));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Interior, ColumnBase::Display_Boolean));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FogDensity, ColumnBase::Display_Float));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_InteriorWater, ColumnBase::Display_Boolean));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WaterLevel, ColumnBase::Display_Float));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Integer));
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -465,7 +486,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTree (&mTopicInfos, &mTopicInfos, IdTable::Feature_ReorderWithinTopic),
         UniversalId::Type_TopicInfo);
     addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
-    addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
+    addModel (new IdTree (&mCells, &mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
     addModel (new IdTree (&mEnchantments, &mEnchantments), UniversalId::Type_Enchantment);
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);

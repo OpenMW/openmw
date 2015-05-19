@@ -481,7 +481,7 @@ namespace CSMWorld
 
     void InfoListAdapter::removeRow(Record<Info>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error ("cannot remove a row to a fixed table");
     }
 
     void InfoListAdapter::setTable(Record<Info>& record,
@@ -1032,5 +1032,164 @@ namespace CSMWorld
     {
         // there are 7 skill bonuses
         return static_cast<int>(sizeof(record.get().mData.mBonus)/sizeof(record.get().mData.mBonus[0]));
+    }
+
+    CellListAdapter::CellListAdapter () {}
+
+    void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const
+    {
+        throw std::logic_error ("cannot add a row to a fixed table");
+    }
+
+    void CellListAdapter::removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const
+    {
+        throw std::logic_error ("cannot remove a row to a fixed table");
+    }
+
+    void CellListAdapter::setTable(Record<CSMWorld::Cell>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    NestedTableWrapperBase* CellListAdapter::table(const Record<CSMWorld::Cell>& record) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    QVariant CellListAdapter::getData(const Record<CSMWorld::Cell>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        CSMWorld::Cell cell = record.get();
+
+        bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
+        bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+
+        switch (subColIndex)
+        {
+            case 0: return isInterior;
+            case 1: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : QVariant();
+            case 2: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant();
+            case 3: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant();
+            case 4: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant();
+            case 5: return (isInterior && !behaveLikeExterior) ? cell.mWaterInt==true : QVariant();
+            case 6:
+            {
+                if (isInterior && !behaveLikeExterior && cell.mWaterInt)
+                    return cell.mWater;
+                else
+                    return QVariant();
+            }
+            case 7: return isInterior ? QVariant() : cell.mMapColor; // TODO: how to select?
+            //case 8: return isInterior ? behaveLikeExterior : QVariant();
+            default: throw std::runtime_error("Cell subcolumn index out of range");
+        }
+    }
+
+    void CellListAdapter::setData(Record<CSMWorld::Cell>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        CSMWorld::Cell cell = record.get();
+
+        bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
+        bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                if (value.toBool())
+                    cell.mData.mFlags |= ESM::Cell::Interior;
+                else
+                    cell.mData.mFlags &= ~ESM::Cell::Interior;
+                break;
+            }
+            case 1:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mAmbient = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 2:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mSunlight = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 3:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mFog = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 4:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mFogDensity = value.toFloat();
+                else
+                    return; // return without saving
+                break;
+            }
+            case 5:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mWaterInt = value.toBool();
+                else
+                    return; // return without saving
+                break;
+            }
+            case 6:
+            {
+                if (isInterior && !behaveLikeExterior && cell.mWaterInt)
+                    cell.mWater = value.toFloat();
+                else
+                    return; // return without saving
+                break;
+            }
+            case 7:
+            {
+                if (!isInterior)
+                    cell.mMapColor = value.toInt();
+                else
+                    return; // return without saving
+                break;
+            }
+#if 0
+            // redundant since this flag is shown in the main table as "Interior Sky"
+            // keep here for documenting the logic based on vanilla
+            case 8:
+            {
+                if (isInterior)
+                {
+                    if (value.toBool())
+                        cell.mData.mFlags |= ESM::Cell::QuasiEx;
+                    else
+                        cell.mData.mFlags &= ~ESM::Cell::QuasiEx;
+                }
+                else
+                    return; // return without saving
+                break;
+            }
+#endif
+            default: throw std::runtime_error("Cell subcolumn index out of range");
+        }
+
+        record.setModified (cell);
+    }
+
+    int CellListAdapter::getColumnsCount(const Record<CSMWorld::Cell>& record) const
+    {
+        return 8;
+    }
+
+    int CellListAdapter::getRowsCount(const Record<CSMWorld::Cell>& record) const
+    {
+        return 1; // fixed at size 1
     }
 }
