@@ -1108,7 +1108,7 @@ namespace MWWorld
         }
     }
 
-    void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
+    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
 
@@ -1123,6 +1123,7 @@ namespace MWWorld
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
+        MWWorld::Ptr newPtr = ptr;
 
         if (currCell != newCell)
         {
@@ -1140,6 +1141,7 @@ namespace MWWorld
                         mWorldScene->changeToExteriorCell(pos, false);
                 }
                 addContainerScripts (getPlayerPtr(), newCell);
+                newPtr = getPlayerPtr();
             }
             else
             {
@@ -1147,7 +1149,7 @@ namespace MWWorld
                 bool newCellActive = mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
-                    MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
                     mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
@@ -1163,23 +1165,21 @@ namespace MWWorld
                     removeContainerScripts (ptr);
                     haveToMove = false;
 
-                    MWWorld::Ptr newPtr = ptr.getClass()
-                            .copyToCell(ptr, *newCell);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
                 else if (!currCellActive && !newCellActive)
-                    ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
                 else // both cells active
                 {
-                    MWWorld::Ptr copy =
-                        ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
 
-                    mRendering->updateObjectCell(ptr, copy);
+                    mRendering->updateObjectCell(ptr, newPtr);
                     ptr.getRefData().setBaseNode(NULL);
-                    MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
+                    MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
-                    mechMgr->updateCell(ptr, copy);
+                    mechMgr->updateCell(ptr, newPtr);
 
                     std::string script =
                         ptr.getClass().getScript(ptr);
@@ -1187,22 +1187,23 @@ namespace MWWorld
                     {
                         mLocalScripts.remove(ptr);
                         removeContainerScripts (ptr);
-                        mLocalScripts.add(script, copy);
-                        addContainerScripts (copy, newCell);
+                        mLocalScripts.add(script, newPtr);
+                        addContainerScripts (newPtr, newCell);
                     }
                 }
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove && ptr.getRefData().getBaseNode())
+        if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(ptr, vec);
-            mPhysics->moveObject (ptr);
+            mRendering->moveObject(newPtr, vec);
+            mPhysics->moveObject (newPtr);
         }
         if (isPlayer)
         {
             mWorldScene->playerMoved (vec);
         }
+        return newPtr;
     }
 
     MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
@@ -1216,11 +1217,7 @@ namespace MWWorld
             cell = getExterior(cellX, cellY);
         }
 
-        moveObject(ptr, cell, x, y, z);
-
-        MWWorld::Ptr updated = ptr;
-        updated.mCell = cell;
-        return updated;
+        return moveObject(ptr, cell, x, y, z);
     }
 
     MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
