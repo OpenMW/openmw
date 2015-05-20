@@ -287,7 +287,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
     mCells.addColumn (new NameColumn<Cell>);
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
-    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_Water, ESM::Cell::HasWater));
+    mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
     mCells.addColumn (new RefNumCounterColumn<Cell>);
@@ -306,8 +306,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Integer));
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FogDensity, ColumnBase::Display_Float));
-    mCells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_InteriorWater, ColumnBase::Display_Boolean));
     mCells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_WaterLevel, ColumnBase::Display_Float));
     mCells.getNestableColumn(index)->addColumn(

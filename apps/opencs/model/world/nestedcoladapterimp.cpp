@@ -1064,6 +1064,7 @@ namespace CSMWorld
 
         bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
         bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+        bool interiorWater = (cell.mData.mFlags & ESM::Cell::HasWater) != 0;
 
         switch (subColIndex)
         {
@@ -1072,16 +1073,15 @@ namespace CSMWorld
             case 2: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant();
             case 3: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant();
             case 4: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant();
-            case 5: return (isInterior && !behaveLikeExterior) ? cell.mWaterInt==true : QVariant();
-            case 6:
+            case 5:
             {
-                if (isInterior && !behaveLikeExterior && cell.mWaterInt)
+                if (isInterior && !behaveLikeExterior && interiorWater)
                     return cell.mWater;
                 else
                     return QVariant();
             }
-            case 7: return isInterior ? QVariant() : cell.mMapColor; // TODO: how to select?
-            //case 8: return isInterior ? behaveLikeExterior : QVariant();
+            case 6: return isInterior ? QVariant() : cell.mMapColor; // TODO: how to select?
+            //case 7: return isInterior ? behaveLikeExterior : QVariant();
             default: throw std::runtime_error("Cell subcolumn index out of range");
         }
     }
@@ -1093,6 +1093,7 @@ namespace CSMWorld
 
         bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
         bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+        bool interiorWater = (cell.mData.mFlags & ESM::Cell::HasWater) != 0;
 
         switch (subColIndex)
         {
@@ -1138,21 +1139,13 @@ namespace CSMWorld
             }
             case 5:
             {
-                if (isInterior && !behaveLikeExterior)
-                    cell.mWaterInt = value.toBool();
-                else
-                    return; // return without saving
-                break;
-            }
-            case 6:
-            {
-                if (isInterior && !behaveLikeExterior && cell.mWaterInt)
+                if (isInterior && !behaveLikeExterior && interiorWater)
                     cell.mWater = value.toFloat();
                 else
                     return; // return without saving
                 break;
             }
-            case 7:
+            case 6:
             {
                 if (!isInterior)
                     cell.mMapColor = value.toInt();
@@ -1163,7 +1156,7 @@ namespace CSMWorld
 #if 0
             // redundant since this flag is shown in the main table as "Interior Sky"
             // keep here for documenting the logic based on vanilla
-            case 8:
+            case 7:
             {
                 if (isInterior)
                 {
@@ -1185,7 +1178,7 @@ namespace CSMWorld
 
     int CellListAdapter::getColumnsCount(const Record<CSMWorld::Cell>& record) const
     {
-        return 8;
+        return 7;
     }
 
     int CellListAdapter::getRowsCount(const Record<CSMWorld::Cell>& record) const

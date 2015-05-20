@@ -62,7 +62,7 @@ namespace CSMWorld
             { ColumnId_StarterSpell, "Starter Spell" },
             { ColumnId_AlwaysSucceeds, "Always Succeeds" },
             { ColumnId_SleepForbidden, "Sleep Forbidden" },
-            { ColumnId_Water, "Has Water" },
+            { ColumnId_InteriorWater, "Interior Water" },
             { ColumnId_InteriorSky, "Interior Sky" },
             { ColumnId_Model, "Model" },
             { ColumnId_Script, "Script" },
@@ -309,7 +309,6 @@ namespace CSMWorld
             { ColumnId_Fog, "Fog" },
             { ColumnId_FogDensity, "Fog Density" },
             { ColumnId_WaterLevel, "Water Level" },
-            { ColumnId_InteriorWater, "Interior Water" },
             { ColumnId_MapColor, "Map Color" },
 
             { ColumnId_UseValue1, "Use value 1" },
