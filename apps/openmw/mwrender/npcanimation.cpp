@@ -586,14 +586,12 @@ void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
     mFirstPersonOffset += offset;
 }*/
 
-Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, int group, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
+Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
     if (enchantedGlow)
         addGlow(attached, *glowColor);
-
-    // TODO: set group userdata for inventory picking
 
     return PartHolderPtr(new PartHolder(attached));
 }
@@ -679,7 +677,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         const std::string& bonename = sPartList.at(type);
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
         const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
-        mObjectParts[type] = insertBoundedPart(mesh, group, bonename, bonefilter, enchantedGlow, glowColor);
+        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor);
     }
     catch (std::exception& e)
     {
