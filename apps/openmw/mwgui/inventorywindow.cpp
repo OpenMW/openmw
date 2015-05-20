@@ -487,10 +487,8 @@ namespace MWGui
         {
             MyGUI::IntPoint mousePos = MyGUI::InputManager::getInstance ().getLastPressedPosition (MyGUI::MouseButton::Left);
             MyGUI::IntPoint relPos = mousePos - mAvatarImage->getAbsolutePosition ();
-            int realX = int(float(relPos.left) / float(mAvatarImage->getSize().width) * 512.f );
-            int realY = int(float(relPos.top) / float(mAvatarImage->getSize().height) * 1024.f );
 
-            MWWorld::Ptr itemSelected = getAvatarSelectedItem (realX, realY);
+            MWWorld::Ptr itemSelected = getAvatarSelectedItem (relPos.left, relPos.top);
             if (itemSelected.isEmpty ())
                 return;
 
@@ -508,6 +506,8 @@ namespace MWGui
 
     MWWorld::Ptr InventoryWindow::getAvatarSelectedItem(int x, int y)
     {
+        // convert to OpenGL lower-left origin
+        y = (mAvatarImage->getHeight()-1) - y;
         int slot = mPreview->getSlotSelected (x, y);
 
         if (slot == -1)

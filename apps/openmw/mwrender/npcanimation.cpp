@@ -235,6 +235,21 @@ void NpcAnimation::rebuild()
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
 }
 
+int NpcAnimation::getSlot(const osg::NodePath &path) const
+{
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        PartHolderPtr part = mObjectParts[i];
+        if (!part.get())
+            continue;
+        if (std::find(path.begin(), path.end(), part->getNode().get()) != path.end())
+        {
+            return mPartslots[i];
+        }
+    }
+    return -1;
+}
+
 void NpcAnimation::updateNpcBase()
 {
     clearAnimSources();

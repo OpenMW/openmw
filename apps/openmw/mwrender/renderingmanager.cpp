@@ -139,6 +139,8 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
+        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor));
+
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();

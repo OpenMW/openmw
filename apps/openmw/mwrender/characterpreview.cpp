@@ -5,6 +5,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osgViewer/Viewer>
 #include <osg/LightModel>
+#include <osgUtil/IntersectionVisitor>
+#include <osgUtil/LineSegmentIntersector>
 
 #include <components/sceneutil/lightmanager.hpp>
 
@@ -253,8 +255,21 @@ namespace MWRender
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
-        // TODO: implement
-        return 0;
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, posX, posY));
+        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_ONE);
+        osgUtil::IntersectionVisitor visitor(intersector);
+
+        osg::Node::NodeMask nodeMask = mCamera->getNodeMask();
+        mCamera->setNodeMask(~0);
+        mCamera->accept(visitor);
+        mCamera->setNodeMask(nodeMask);
+
+        if (intersector->containsIntersections())
+        {
+            osgUtil::LineSegmentIntersector::Intersection intersection = intersector->getFirstIntersection();
+            return mAnimation->getSlot(intersection.nodePath);
+        }
+        return -1;
     }
 
     void InventoryPreview::updatePtr(const MWWorld::Ptr &ptr)
