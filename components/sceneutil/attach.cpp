@@ -82,7 +82,7 @@ namespace SceneUtil
                 trans = new osg::PositionAttitudeTransform;
                 trans->setPosition(boneOffset->getMatrix().getTrans());
                 // The BoneOffset rotation seems to be incorrect
-                trans->setAttitude(osg::Quat(-90, osg::Vec3f(1,0,0)));
+                trans->setAttitude(osg::Quat(osg::DegreesToRadians(-90.f), osg::Vec3f(1,0,0)));
             }
 
             if (attachNode.find("Left") != std::string::npos)
