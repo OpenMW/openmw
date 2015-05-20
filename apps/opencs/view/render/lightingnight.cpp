@@ -11,7 +11,7 @@ void CSVRender::LightingNight::activate (osg::Group* rootNode)
     mLightSource = new osg::LightSource;
 
     osg::ref_ptr<osg::Light> light (new osg::Light);
-    light->setDirection(osg::Vec3f(0.f, 0.f, -1.f));
+    light->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
     light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     light->setDiffuse(osg::Vec4f(0.2f, 0.2f, 0.2f, 1.f));
     light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));

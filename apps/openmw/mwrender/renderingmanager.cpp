@@ -178,9 +178,10 @@ namespace MWRender
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)
     {
-        mSunLight->setDirection(direction*-1);
+        osg::Vec3 position = direction * -1;
+        mSunLight->setPosition(osg::Vec4(position.x(), position.y(), position.z(), 0));
 
-        mSky->setSunDirection(direction*-1);
+        mSky->setSunDirection(position);
     }
 
     osg::Vec3f RenderingManager::getEyePos()
