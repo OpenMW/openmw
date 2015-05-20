@@ -354,7 +354,11 @@ public:
 
     /// Is there a node with the specified name?
     /// @note The matching is case-insensitive.
-    bool hasNode(const std::string& name);
+    bool hasNode(const std::string& name) const;
+
+    /// Return a node with the specified name, throws an exception if the node is not found.
+    /// @note The matching is case-insensitive.
+    const osg::Node* getNode(const std::string& name) const;
 
     virtual void showWeapons(bool showWeapon) {}
     virtual void showCarriedLeft(bool show) {}

@@ -275,7 +275,7 @@ namespace MWGui
         mJournal = JournalWindow::create(JournalViewModel::create ());
         mMessageBoxManager = new MessageBoxManager(
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
-        mInventoryWindow = new InventoryWindow(mDragAndDrop);
+        mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
         mSpellBuyingWindow = new SpellBuyingWindow();
@@ -324,7 +324,7 @@ namespace MWGui
 
         mHud->setVisible(mHudEnabled);
 
-        mCharGen = new CharacterCreation();
+        mCharGen = new CharacterCreation(mViewer, mResourceSystem);
 
         // Setup player stats
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -358,7 +358,7 @@ namespace MWGui
         {
             disallowAll();
             delete mCharGen;
-            mCharGen = new CharacterCreation();
+            mCharGen = new CharacterCreation(mViewer, mResourceSystem);
             mGuiModes.clear();
             MWBase::Environment::get().getInputManager()->changeInputMode(false);
             mHud->unsetSelectedWeapon();

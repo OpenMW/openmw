@@ -5,7 +5,11 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Gui.h>
 
+#include <osg/Texture2D>
+
 #include <boost/format.hpp>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
@@ -37,8 +41,10 @@ namespace
 namespace MWGui
 {
 
-    RaceDialog::RaceDialog()
+    RaceDialog::RaceDialog(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
       : WindowModal("openmw_chargen_race.layout")
+      , mViewer(viewer)
+      , mResourceSystem(resourceSystem)
       , mGenderIndex(0)
       , mFaceIndex(0)
       , mHairIndex(0)
@@ -125,19 +131,20 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        //mPreview.reset(NULL);
+        mPreviewImage->setRenderItemTexture(NULL);
 
-        mPreviewImage->setImageTexture("");
+        mPreview.reset(NULL);
+        mPreviewTexture.reset(NULL);
 
-        const std::string textureName = "CharacterHeadPreview";
-        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
+        mPreview.reset(new MWRender::RaceSelectionPreview(mViewer, mResourceSystem));
+        mPreview->rebuild();
+        mPreview->setAngle (mCurrentAngle);
 
-        //mPreview.reset(new MWRender::RaceSelectionPreview());
-        //mPreview->setup();
-        //mPreview->update (mCurrentAngle);
+        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
+        mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
+        mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
-        //const ESM::NPC& proto = mPreview->getPrototype();
-        ESM::NPC proto;
+        const ESM::NPC& proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
         recountParts();
 
@@ -152,8 +159,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
         }
-
-        mPreviewImage->setImageTexture (textureName);
 
         mPreviewDirty = true;
 
@@ -182,10 +187,10 @@ namespace MWGui
 
     void RaceDialog::close()
     {
-        mPreviewImage->setImageTexture("");
-        const std::string textureName = "CharacterHeadPreview";
-        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
-        //mPreview.reset(NULL);
+        mPreviewImage->setRenderItemTexture(NULL);
+
+        mPreviewTexture.reset(NULL);
+        mPreview.reset(NULL);
     }
 
     // widget controls
@@ -205,8 +210,8 @@ namespace MWGui
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
         float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * 3.14f * 2;
-        //mPreview->update (angle);
-        mPreviewDirty = true;
+        mPreview->setAngle (angle);
+
         mCurrentAngle = angle;
     }
 
@@ -317,7 +322,7 @@ namespace MWGui
 
     void RaceDialog::updatePreview()
     {
-        ESM::NPC record;// = mPreview->getPrototype();
+        ESM::NPC record = mPreview->getPrototype();
         record.mRace = mCurrentRaceId;
         record.setIsMale(mGenderIndex == 0);
 
@@ -326,26 +331,11 @@ namespace MWGui
 
         try
         {
-            //mPreview->setPrototype(record);
+            mPreview->setPrototype(record);
         }
         catch (std::exception& e)
         {
             std::cerr << "Error creating preview: " << e.what() << std::endl;
-        }
-
-        mPreviewDirty = true;
-    }
-
-    void RaceDialog::doRenderUpdate()
-    {
-        //if (!mPreview.get())
-            return;
-
-        //mPreview->onFrame();
-        if (mPreviewDirty)
-        {
-            //mPreview->render();
-            mPreviewDirty = false;
         }
     }
 
@@ -451,8 +441,6 @@ namespace MWGui
 
     const ESM::NPC& RaceDialog::getResult() const
     {
-        static ESM::NPC result;
-        return result;
-        //return mPreview->getPrototype();
+        return mPreview->getPrototype();
     }
 }
