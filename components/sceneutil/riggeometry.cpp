@@ -26,6 +26,8 @@ public:
     {
     }
 
+    META_Object(SceneUtil, UpdateRigBounds)
+
     void update(osg::NodeVisitor* nv, osg::Drawable* drw)
     {
         RigGeometry* rig = static_cast<RigGeometry*>(drw);
@@ -47,7 +49,7 @@ public:
     {
     }
 
-    META_Object(NifOsg, UpdateRigGeometry)
+    META_Object(SceneUtil, UpdateRigGeometry)
 
     virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const
     {
