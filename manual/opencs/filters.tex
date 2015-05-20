@@ -13,14 +13,11 @@ Do not be afraid though, filters are fairly intuitive and easy to use.
  to the some criteria. In case of \OCS: records are being filtered according to the criteria of user choice. Criteria are written
  down in language with simple syntax.
  \item[Criteria] describes condition under with any any record is being select by the filter.
- \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is:
- written with correct syntax.
- \item[Expression] is way we are actually performing filtering. Filter can be treated as ``functions'': accepts arguments, and evaluates
- either to the true or false for every column record at the time.
+ \item[Syntax] as you may noticed computers (in general) are rather strict, and expect only strictly formulated orders -- that is: written with correct syntax.
+ \item[Expression] is way we are actually performing filtering. Filter can be treated as ``functions'': accepts arguments, and evaluates either to the true or false for every column record at the time.
  \item[N-ary] is any expression that expects one or more expressions as arguments. It is useful for grouping two (or more) other expressions
  together in order to create filter that will check for criteria placed in two (again: or more) columns (logical \textit{or}, \textit{and}).
- \item[unary] is any expression that expects one other expression. The example is \textit{not} expression. In fact \textit{not} is the only useful
- unary expression in \OCS{} record filters.
+ \item[unary] is any expression that expects one other expression. The example is \textit{not} expression. In fact \textit{not} is the only useful unary expression in \OCS{} record filters.
  \item[nullary] is expression that does not accepts other expressions. It accepts arguments specified later.
 \end{description}
 
@@ -29,10 +26,7 @@ In fact you do not need to learn everything about filters in order to use them. 
 with \OCS{} is inside basics section.
 
 \subsubsection{Interface}
-Above each table there is a field that is used to enter filter: either predefined by the \OMW{} developers or made by you, the user.
-You probably noticed it before. However there is also completely new element, although using familiar table layout. Go to the application
-menu view, and click filters. You should see set of default filters, made by the \OMW{} team in the table with the following columns: filter,
-description and modified.
+Above each table there is a field that is used to enter filter: either predefined by the \OMW{} developers or made by you, the user. You probably noticed it before. However there is also completely new element, although using familiar table layout. Go to the application menu view, and click filters. You should see set of default filters, made by the \OMW{} team in the table with the following columns: filter, description and modified.
 
 \begin{description}
  \item[ID] contains the name of the filter.
@@ -43,23 +37,14 @@ description and modified.
 
 So let's learn how to actually use those to speed up your work.
 \subsubsection{Using predefined filters}
-Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables
-table and type in the filters field the following: \mono{project::weapons}. As soon as you complete the text, table will magicly alter
-and will show only the weapons. As you could noticed \mono{project::weapons} is nothing else than a~ID of one of the predefined filters. That is it:
-in order to use the filter inside the table you simply type it is name inside the filter field.
+Using those filters is quite easy and involves typing inside the filter field above the table. For instance, try to open referencables table and type in the filters field the following: \mono{project::weapons}. As soon as you complete the text, table will magically alter and will show only the weapons. As you could noticed \mono{project::weapons} is nothing else than a~ID of one of the predefined filters. That is it: in order to use the filter inside the table you simply type it is name inside the filter field.
 
 To make life easier filter IDs follow simple convention.
 
 \begin{itemize}
- \item Filter ID filtering a specific record type contains usually the name of a specific group. For instance \mono{project::weapons} filter
- contains the word weapons (did you noticed?). Plural form is always used.
- \item When filtering specific subgroup the ID starts just like in the case of general filter. For instance \mono{project::weaponssilver} will
- filter only silver weapons (new mechanic introduced by the \BM{}, silver weapons deal double damage against werewolfs) and
- \mono{project::weaponsmagical} will filter only magical weapons (able to hurt ghosts and other supernatural creatures).
- \item There are few exceptions from the above rule. For instance there is a \mono{project::added}, \mono{project::removed},
-       \mono{project::modyfied}, \mono{project::base}.
- You would probably except something more like \mono{project::statusadded} but in this case typing this few extra characters would only
- help to break your keyboard faster.
+ \item Filter ID filtering a specific record type contains usually the name of a specific group. For instance \mono{project::weapons} filter  contains the word weapons (did you noticed?). Plural form is always used.
+ \item When filtering specific subgroup the ID starts just like in the case of general filter. For instance \mono{project::weaponssilver} will  filter only silver weapons (new mechanic introduced by the \BM{}, silver weapons deal double damage against werewolves) and \mono{project::weaponsmagical} will filter only magical weapons (able to hurt ghosts and other supernatural creatures).
+ \item There are few exceptions from the above rule. For instance there is a \mono{project::added}, \mono{project::removed},        \mono{project::modified}, \mono{project::base}. You would probably except something more like \mono{project::statusadded} but in this case typing this few extra characters would only help to break your keyboard faster.
 \end{itemize}
 
 We strongly recommend to take a look at the filters table right now to see what you can filter with that. And try using it! It is very simple.
@@ -67,8 +52,7 @@ We strongly recommend to take a look at the filters table right now to see what 
 \subsection{Advanced}
 Back to the manual? Great.
 
-If you want to create your own filter you have to know exactly what do you want to get in order to translate this into the expressions.
-Finally, you will have to write this with correct syntax. As a result table will show only desired rows.
+If you want to create your own filter you have to know exactly what do you want to get in order to translate this into the expressions. Finally, you will have to write this with correct syntax. As a result table will show only desired rows.
 
 Advance subsection covers everything that you need to know in order to create any filter you may want to %TODO the filter part is actually wrong
 \subsubsection{Namespaces}

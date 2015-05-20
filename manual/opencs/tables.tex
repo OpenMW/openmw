@@ -23,8 +23,7 @@ Some columns are recurring throughout \OCS. They show up in (nearly) every table
 \begin{description}
 \item[ID] Many items in the OpenCS database have a unique identifier in both OpenCS and Morrowind. This is usually a very self-explanatory name. For example, the ID for the (unique) black pants of Caius Cosades is ``Caius\_pants''. This allows you to manipulate the game in many ways. For example, you could add these pants to your inventory by simply opening the console and write: ``player->addItem Caius\_pants''. Either way, in both Morrowind and OpenCS, the ID is the primary way to identify all these different parts of the game.
 \item[Modified] This column shows what has happened (if something has happened) to this record. There are four possible states in which it can exist. 
-\item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with
-optionally the Bloodmoon and Tribunal expansions.
+\item[Base] means that this record is part of the base game and is in its original state. Usually, if you create a mod, the base game is Morrowind with optionally the Bloodmoon and Tribunal expansions.
 \item[Added] means that this record was not in the base game and has been added by a~modder.
 \item[Modified] means that the record is part of the base game, but has been changed in some way.
 \item[Deleted] means that this record used to be part of the base game, but has been removed as an entry. This does not mean, however, that the occurrences
@@ -41,8 +40,8 @@ This describes the general areas of Vvardenfell. Each of these areas has differe
 
 \begin{description}
  \item[Name:] This is how the game will show your location in-game.
- \item[Map Colour:] This is a six-digit hexidecimal representation of the colour used to identify the region on the map available in
- World > Region Map. If you do not have an application with a colour picker, you can use your favourite search engine to find a colour picker online.
+ \item[Map Colour:] This is a six-digit hexadecimal representation of the color used to identify the region on the map available in
+ World > Region Map. If you do not have an application with a color picker, you can use your favorite search engine to find a color picker online.
  \item[Sleep Encounter:] These are the rules for what kind of enemies you might encounter when you sleep outside in the wild.
 \end{description}
 
@@ -52,7 +51,7 @@ why would the computer need to keep track the exact locations of NPCs walking th
 be quite useless and bring your system to its knees! So the world has been divided up into squares we call "cells". Once your character enters a cell,
 the game will load everything that is going on in that cell so you can interact with it.
 
-In the original \MW{} this could be seen when you were travelling and you would see a small loading bar at the bottom of the screen;
+In the original \MW{} this could be seen when you were traveling and you would see a small loading bar at the bottom of the screen;
 you had just entered a new cell and the game would have to load all the items and NPCs. The Cells screen in \OCS{} provides you with a list of cells
 in the game, both the interior cells (houses, dungeons, mines, etc.) and the exterior cells (the outside world).
 
@@ -87,10 +86,8 @@ in the game, both the interior cells (houses, dungeons, mines, etc.) and the ext
 This is a library of all the items, triggers, containers, NPCs, etc. in the game. There are several kinds of Record Types. Depending on which type
 a record is, it will need specific information to function. For example, an NPC needs a value attached to its aggression level. A chest, of course,
 does not. All Record Types contain at least a~model. How else would the player see them? Usually they also have a Name, which is what you see
-when you hover your reticle  over the object.
+when you hover your reticle over the object.
 
 This is a library of all the items, triggers, containers, NPCs, etc. in the game. There are several kinds of Record Types. Depending on which type a record is, it will need specific information to function. For example, an NPC needs a value attached to its aggression level. A chest, of course, does not. All Record Types contain at least a model. How else would the player see them? Usually they also have a Name, which is what you see when you hover your reticle over the object.
 
 Please refer to the Record Types section for an overview of what each type of Referenceable does and what you can tell OpenCS about these objects.
-
-\end{description}

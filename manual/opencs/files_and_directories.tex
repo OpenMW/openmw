@@ -27,15 +27,15 @@ in the case of original engine, but clearly it's better to create a system that 
 this with our own content file types.
 
 We support both ESM and ESP files, but in order to make use of new features of OpenMW one should consider using new file types designed
-with our engine in mind: game files and addon files together called ``content files``.
+with our engine in mind: game files and add-on files together called ``content files``.
 
 \subparagraph{OpenMW content files}
-Game and Addon files are concept somewhat similar to the old ESM/ESP, only in the way it should be from the very beginning. Nothing easier
+Game and Add-on files are concept somewhat similar to the old ESM/ESP, only in the way it should be from the very beginning. Nothing easier
 to describe. If you want to make new game using \OMW{} as engine (so called ``total conversion'') you should create a game file.
-If you want to create a addon for existing game file -- simply create addon file. Nothing else matters: The only distinction you should
+If you want to create a add-on for existing game file -- simply create add-on file. Nothing else matters: The only distinction you should
 consider is if your project is about changing other game, or creating a new one. Simple as that.
 
-Other simple thing about content files are extensions. We are using .omwaddon for addon files and .omwgame for game files.
+Other simple thing about content files are extensions. We are using .omwaddon for add-on files and .omwgame for game files.
 
 %TODO describe what content files contains. and what not.
 \subparagraph{\MW{} content files}
@@ -51,17 +51,17 @@ in order to create your first \OCS{} file while full understanding your needs. F
 are created inside the user directory, in the the \textbf{data} subfolder (that is the one special data directory mentioned earlier).
 
 \subparagraph{Dependencies}
-Since addon is supposed to change the game it is logical that it also depends on the said game. It simply can not work otherwise.
+Since an add-on is supposed to change the game it is logical that it also depends on the said game. It simply can not work otherwise.
 Just think about it: your modification is changing prize of the iron sword. But what if there is no iron sword in game? That is right:
-we get nonsense. What you want to do is to tie your addon to the files you are changing. Those can be either game files (expansion island
-for a game) or other addon files (house on the said island). It is a good idea to be dependent only on files that are really changed
-in your addon obviously, but sadly there is no other way to achieve this than knowing what you want to do. Again, please remember that
+we get nonsense. What you want to do is to tie your add-on to the files you are changing. Those can be either game files (expansion island
+for a game) or other add-on files (house on the said island). It is a good idea to be dependent only on files that are really changed
+in your add-on obviously, but sadly there is no other way to achieve this than knowing what you want to do. Again, please remember that
 this section of the manual does not cover creating the content files -- it is only theoretical introduction to the subject. For now just
 keep in mind that dependencies exist, and is up to you what to decide if your content file should depend on other content file.
 
 Game files are not intend to have any dependencies for a very simple reasons: player is using only one game file (excluding original
 and dirty {ESP/ESM} system) at the time and therefore no game file can depend on other game file, and since game file makes the base
-for addon files -- it can not depend on addon files.
+for add-on files -- it can not depend on add-on files.
 
 %\subparagraph{Loading order} %TODO
 \paragraph{Project files}
@@ -69,14 +69,10 @@ Project files act as containers for data not used by the \OMW{} game engine itse
 of this data category are without doubt record filters (described in the later section of the manual you are reading currently).
 As a mod author you probably do not need and/or want to distribute project files at all, they are meant to be used only by you.
 
-As you would imagine, project file makes sense only in combination with actual content files. In fact, each time you start to work
-on new content file and project file was not found, it will be created.
-Project files extension is, to not surprise ``.project''. The whole name of the project file is the whole name of the content file
-with appended extensions. For instance swords.omwaddon file is associated with swords.omwaddon.project file.
+As you would imagine, project file makes sense only in combination with actual content files. In fact, each time you start to work on new content file and project file was not found, it will be created. Project files extension is, to not surprise ``.project''. The whole name of the project file is the whole name of the content file with appended extensions. For instance swords.omwaddon file is associated with swords.omwaddon.project file.
 
 %TODO where are they stored.
-Project files are stored inside the user directory, in the \textbf{projects} subfolder. This is the path location for both freshly
-created project files, and a place where \OCS{} looks for already existing files.
+Project files are stored inside the user directory, in the \textbf{projects} subfolder. This is the path location for both freshly created project files, and a place where \OCS{} looks for already existing files.
 
 \paragraph{Resources files}
 %textures, sounds, whatever
@@ -89,8 +85,7 @@ Therefore this section must cover ways to add resources files to your content fi
 to do just that. Later, you will learn how to make use of those files in your content.
 
 \subparagraph{Audio}
-OpenMW is using {FFmpeg} for audio playback, and so we support every audio type that is supported by this library. This makes a huge list.
-Below is only small portion of supported file types.
+OpenMW is using {FFmpeg} for audio playback, and so we support every audio type that is supported by this library. This makes a huge list. Below is only small portion of supported file types.
 
 \begin{description}
  \item mp3 ({MPEG}-1 {Part 3 Layer 3}) popular audio file format and \textit{de facto} standard for storing audio. Used by the \MW{} game.
@@ -114,7 +109,6 @@ only the most significant.
 Original \MW{} game uses {DDS} and {TGA} files for all kind of two dimensional images and textures alike. In addition, engine supported BMP
 files for some reason ({BMP} is a terrible format for a video game). We also support extended set of image files -- including {JPEG} and {PNG}.
 JPEG and PNG files can be useful in some cases, for instance JPEG file is a valid option for skybox texture and PNG can useful for masks.
-However please, keep in mind that JPEG can grow into large sizes quickly and are not the best option with {DirectX} rendering backend. You probabbly still want 
-to use {DDS} files for textures.
+However please, keep in mind that JPEG can grow into large sizes quickly and are not the best option with {DirectX} rendering back-end. You probably still want to use {DDS} files for textures.
 
 %\subparagraph{Meshes} %TODO once we will support something more than just nifs
