@@ -98,6 +98,7 @@ Programmers
     Sebastian Wick (swick)
     Sergey Shambir
     sir_herrbatka
+    smbas
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     Sylvain Thesnieres (Garvek)
