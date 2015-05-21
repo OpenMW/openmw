@@ -400,6 +400,7 @@ namespace MWRender
             else if (it->first == "Viewing distance" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
+                mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
             else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
