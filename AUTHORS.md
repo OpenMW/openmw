@@ -110,6 +110,12 @@ Programmers
     Vincent Heuken
     vocollapse
 
+Manual
+------
+
+    Bodillium
+    sir_herrbatka
+
 Packagers
 ---------
 
