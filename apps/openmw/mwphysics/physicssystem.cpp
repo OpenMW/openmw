@@ -176,7 +176,8 @@ namespace MWPhysics
 
         static inline osg::Vec3f reflect(const osg::Vec3& velocity, const osg::Vec3f& normal)
         {
-            return (normal * (normal * velocity)) * 2 - velocity;
+            return velocity - (normal * (normal * velocity)) * 2;
+            //                                  ^ dot product
         }
 
 
