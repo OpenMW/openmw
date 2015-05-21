@@ -28,7 +28,7 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         {
             index = getInfoIndex (record2.get().mPrev, topic);
 
-            if (index!=-1)
+            if (index!=-1 && getRecord(index).get().mId < record2.get().mId )
                 ++index;
         }
 
