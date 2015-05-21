@@ -299,7 +299,7 @@ void NpcAnimation::updateNpcBase()
                                       : "meshes\\wolf\\skin.1st.nif");
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
 
-    setObjectRoot(smodel, true /*, baseonly = true*/);
+    setObjectRoot(smodel, true, true);
 
     if(mViewMode != VM_FirstPerson)
     {

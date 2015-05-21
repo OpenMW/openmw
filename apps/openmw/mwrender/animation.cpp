@@ -9,6 +9,7 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
 #include <osg/io_utils>
+#include <osg/Geode>
 
 #include <components/nifosg/nifloader.hpp>
 
@@ -167,6 +168,38 @@ namespace
 
         return 0.0f;
     }
+
+
+    // Removes all drawables from a graph.
+    class RemoveDrawableVisitor : public osg::NodeVisitor
+    {
+    public:
+        RemoveDrawableVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Geode &node)
+        {
+            // Not safe to remove in apply(), since the visitor is still iterating the child list
+            mToRemove.push_back(&node);
+            traverse(node);
+        }
+
+        void remove()
+        {
+            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            {
+                osg::Node* node = *it;
+                if (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+            }
+        }
+
+    private:
+        std::vector<osg::Node*> mToRemove;
+    };
+
 }
 
 namespace MWRender
@@ -836,7 +869,7 @@ namespace MWRender
         return movement;
     }
 
-    void Animation::setObjectRoot(const std::string &model, bool forceskeleton)
+    void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly)
     {
         if (mObjectRoot)
         {
@@ -862,6 +895,13 @@ namespace MWRender
             }
             mInsert->addChild(newObjectRoot);
             mObjectRoot = newObjectRoot;
+        }
+
+        if (baseonly)
+        {
+            RemoveDrawableVisitor removeDrawableVisitor;
+            mObjectRoot->accept(removeDrawableVisitor);
+            removeDrawableVisitor.remove();
         }
 
         NodeMapVisitor visitor;
@@ -1130,7 +1170,7 @@ namespace MWRender
     {
         if (!model.empty())
         {
-            setObjectRoot(model, false);
+            setObjectRoot(model, false, false);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));
