@@ -721,8 +721,7 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
     const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
 
     if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
-        std::cout << "getNestedDatat index" << std::endl;
-        //throw std::runtime_error ("index out of range");
+        throw std::runtime_error ("index out of range");
 
     if (subColIndex == 0)
         return QString(ESM::Skill::sSkillNames[subRowIndex].c_str());
@@ -741,8 +740,7 @@ void CSMWorld::NpcSkillsRefIdAdapter::setNestedData (const RefIdColumn *column,
     ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
 
     if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
-        std::cout << "setNestedDatat index" << std::endl;
-        //throw std::runtime_error ("index out of range");
+        throw std::runtime_error ("index out of range");
 
     if (subColIndex == 1)
         npcStruct.mSkills[subRowIndex] = static_cast<unsigned char>(value.toInt());
