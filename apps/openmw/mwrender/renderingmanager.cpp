@@ -31,6 +31,7 @@
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 #include "pathgrid.hpp"
+#include "camera.hpp"
 
 namespace MWRender
 {
@@ -103,6 +104,8 @@ namespace MWRender
         mObjects->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
+
+        mCamera.reset(new Camera(mViewer->getCamera()));
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -253,11 +256,21 @@ namespace MWRender
         mSky->update(dt);
     }
 
+    void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
+    {
+        if(mPlayerAnimation.get())
+            mPlayerAnimation->updatePtr(ptr);
+
+        mCamera->attachTo(ptr);
+    }
+
     void RenderingManager::rotateObject(const MWWorld::Ptr &ptr, const osg::Quat& rot)
     {
-        //if(ptr.getRefData().getHandle() == mCamera->getHandle() &&
-        //   !mCamera->isVanityOrPreviewModeEnabled())
-        //    mCamera->rotateCamera(-rot, false);
+        if(ptr == mCamera->getTrackingPtr() &&
+           !mCamera->isVanityOrPreviewModeEnabled())
+        {
+            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
+        }
 
         ptr.getRefData().getBaseNode()->setAttitude(rot);
     }
@@ -321,9 +334,28 @@ namespace MWRender
     {
         mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0));
 
-        //mCamera->setAnimation(mPlayerAnimation);
+        mCamera->setAnimation(mPlayerAnimation.get());
+        mCamera->attachTo(player);
         //mWater->removeEmitter(ptr);
         //mWater->addEmitter(ptr);
+    }
+
+    void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
+    {
+        NpcAnimation *anim = NULL;
+        if(ptr == mPlayerAnimation->getPtr())
+            anim = mPlayerAnimation.get();
+        else
+            anim = dynamic_cast<NpcAnimation*>(mObjects->getAnimation(ptr));
+        if(anim)
+        {
+            anim->rebuild();
+            if(mCamera->getTrackingPtr() == ptr)
+            {
+                mCamera->attachTo(ptr);
+                mCamera->setAnimation(anim);
+            }
+        }
     }
 
     void RenderingManager::updateProjectionMatrix()
@@ -368,6 +400,77 @@ namespace MWRender
             else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
                 updateTextureFiltering();
         }
+    }
+
+    bool RenderingManager::vanityRotateCamera(const float *rot)
+    {
+        if(!mCamera->isVanityOrPreviewModeEnabled())
+            return false;
+
+        mCamera->rotateCamera(rot[0], rot[2], true);
+        return true;
+    }
+
+    void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
+    {
+        if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
+        {
+            if(mCamera->isNearest() && dist > 0.f)
+                mCamera->toggleViewMode();
+            else
+                mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+        }
+        else if(mCamera->isFirstPerson() && dist < 0.f)
+        {
+            mCamera->toggleViewMode();
+            mCamera->setCameraDistance(0.f, false, override);
+        }
+    }
+
+    void RenderingManager::resetCamera()
+    {
+        mCamera->reset();
+    }
+
+    float RenderingManager::getCameraDistance() const
+    {
+        return mCamera->getCameraDistance();
+    }
+
+    Camera* RenderingManager::getCamera()
+    {
+        return mCamera.get();
+    }
+
+    void RenderingManager::togglePOV()
+    {
+        mCamera->toggleViewMode();
+    }
+
+    void RenderingManager::togglePreviewMode(bool enable)
+    {
+        mCamera->togglePreviewMode(enable);
+    }
+
+    bool RenderingManager::toggleVanityMode(bool enable)
+    {
+        return mCamera->toggleVanityMode(enable);
+    }
+
+    void RenderingManager::allowVanityMode(bool allow)
+    {
+        mCamera->allowVanityMode(allow);
+    }
+
+    void RenderingManager::togglePlayerLooking(bool enable)
+    {
+        mCamera->togglePlayerLooking(enable);
+    }
+
+    void RenderingManager::changeVanityModeScale(float factor)
+    {
+        if(mCamera->isVanityOrPreviewModeEnabled())
+            mCamera->setCameraDistance(-factor/120.f*10, true, true);
     }
 
 }

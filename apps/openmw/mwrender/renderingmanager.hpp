@@ -41,6 +41,7 @@ namespace MWRender
     class SkyManager;
     class NpcAnimation;
     class Pathgrid;
+    class Camera;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -66,7 +67,6 @@ namespace MWRender
 
         void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
-        // TODO rename to setRotation/setPosition/setScale, along with the World equivalents
         void rotateObject(const MWWorld::Ptr& ptr, const osg::Quat& rot);
         void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos);
         void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
@@ -92,10 +92,27 @@ namespace MWRender
         Animation* getAnimation(const MWWorld::Ptr& ptr);
         Animation* getPlayerAnimation();
 
+        void updatePlayerPtr(const MWWorld::Ptr &ptr);
+
         void setupPlayer(const MWWorld::Ptr& player);
         void renderPlayer(const MWWorld::Ptr& player);
 
+        void rebuildPtr(const MWWorld::Ptr& ptr);
+
         void processChangedSettings(const Settings::CategorySettingVector& settings);
+
+        // camera stuff
+        bool vanityRotateCamera(const float *rot);
+        void setCameraDistance(float dist, bool adjust, bool override);
+        void resetCamera();
+        float getCameraDistance() const;
+        Camera* getCamera();
+        void togglePOV();
+        void togglePreviewMode(bool enable);
+        bool toggleVanityMode(bool enable);
+        void allowVanityMode(bool allow);
+        void togglePlayerLooking(bool enable);
+        void changeVanityModeScale(float factor);
 
     private:
         void updateProjectionMatrix();
@@ -114,6 +131,7 @@ namespace MWRender
         std::auto_ptr<EffectManager> mEffectManager;
         std::auto_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
+        std::auto_ptr<Camera> mCamera;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 

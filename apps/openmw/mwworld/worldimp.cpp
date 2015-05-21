@@ -37,6 +37,7 @@
 
 //#include "../mwrender/animation.hpp"
 #include "../mwrender/renderingmanager.hpp"
+#include "../mwrender/camera.hpp"
 
 #include "../mwscript/interpretercontext.hpp"
 #include "../mwscript/globalscripts.hpp"
@@ -211,7 +212,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
-        //mRendering->resetCamera();
+        mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
 
@@ -531,7 +532,6 @@ namespace MWWorld
 
     void World::useDeathCamera()
     {
-#if 0
         if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
         {
             mRendering->getCamera()->togglePreviewMode(false);
@@ -539,7 +539,6 @@ namespace MWWorld
         }
         if(mRendering->getCamera()->isFirstPerson())
             mRendering->getCamera()->toggleViewMode(true);
-#endif
     }
 
     MWWorld::Player& World::getPlayer()
@@ -1479,7 +1478,7 @@ namespace MWWorld
 
     bool World::toggleCollisionMode()
     {
-        return 0;//mPhysics->toggleCollisionMode();
+        return mPhysics->toggleCollisionMode();
     }
 
     bool World::toggleRenderMode (MWRender::RenderMode mode)
@@ -1607,7 +1606,16 @@ namespace MWWorld
         }
         */
 
-        //mWorldScene->playerMoved(mRendering->getEyePos());
+        // Sink the camera while sneaking
+        bool sneaking = getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool inair = !isOnGround(getPlayerPtr());
+        bool swimming = isSwimming(getPlayerPtr());
+
+        static const float i1stPersonSneakDelta = getStore().get<ESM::GameSetting>().find("i1stPersonSneakDelta")->getFloat();
+        if(!paused && sneaking && !(swimming || inair))
+            mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
+        else
+            mRendering->getCamera()->setSneakOffset(0.f);
     }
 
     void World::updateSoundListener()
@@ -2091,14 +2099,49 @@ namespace MWWorld
         */
     }
 
+    void World::togglePOV()
+    {
+        mRendering->togglePOV();
+    }
+
+    bool World::isFirstPerson() const
+    {
+        return mRendering->getCamera()->isFirstPerson();
+    }
+
+    void World::togglePreviewMode(bool enable)
+    {
+        mRendering->togglePreviewMode(enable);
+    }
+
+    bool World::toggleVanityMode(bool enable)
+    {
+        return mRendering->toggleVanityMode(enable);
+    }
+
+    void World::allowVanityMode(bool allow)
+    {
+        mRendering->allowVanityMode(allow);
+    }
+
+    void World::togglePlayerLooking(bool enable)
+    {
+        mRendering->togglePlayerLooking(enable);
+    }
+
+    void World::changeVanityModeScale(float factor)
+    {
+        mRendering->changeVanityModeScale(factor);
+    }
+
     bool World::vanityRotateCamera(float * rot)
     {
-        return 0;//mRendering->vanityRotateCamera(rot);
+        return mRendering->vanityRotateCamera(rot);
     }
 
     void World::setCameraDistance(float dist, bool adjust, bool override_)
     {
-        //mRendering->setCameraDistance(dist, adjust, override_);
+        mRendering->setCameraDistance(dist, adjust, override_);
     }
 
     void World::setupPlayer()
@@ -2509,7 +2552,7 @@ namespace MWWorld
 
     void World::reattachPlayerCamera()
     {
-        //mRendering->rebuildPtr(getPlayerPtr());
+        mRendering->rebuildPtr(getPlayerPtr());
     }
 
     void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
@@ -2542,7 +2585,7 @@ namespace MWWorld
 
         // NpcAnimation::updateParts will already rebuild the animation when it detects change of Npc type.
         // the following is just for reattaching the camera properly.
-        //mRendering->rebuildPtr(actor);
+        mRendering->rebuildPtr(actor);
 
         if(actor == getPlayerPtr())
         {

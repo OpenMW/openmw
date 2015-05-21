@@ -249,6 +249,11 @@ namespace MWRender
             mInsert->removeChild(mObjectRoot);
     }
 
+    MWWorld::Ptr Animation::getPtr()
+    {
+        return mPtr;
+    }
+
     void Animation::setActive(bool active)
     {
         if (SceneUtil::Skeleton* skel = dynamic_cast<SceneUtil::Skeleton*>(mObjectRoot.get()))

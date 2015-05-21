@@ -5,7 +5,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include <osgGA/TrackballManipulator>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/ReadFile>
 
@@ -592,8 +591,6 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
-    mViewer->setCameraManipulator(new osgGA::TrackballManipulator);
-
     osg::Timer frameTimer;
     while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
     {

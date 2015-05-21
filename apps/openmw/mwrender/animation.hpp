@@ -254,6 +254,8 @@ public:
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
     virtual ~Animation();
 
+    MWWorld::Ptr getPtr();
+
     /// Set active flag on the object skeleton, if one exists.
     /// @see SceneUtil::Skeleton::setActive
     void setActive(bool active);

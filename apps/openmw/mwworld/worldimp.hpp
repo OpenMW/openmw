@@ -467,33 +467,19 @@ namespace MWWorld
             virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
-            virtual void togglePOV() {
-                //mRendering->togglePOV();
-            }
+            virtual void togglePOV();
 
-            virtual bool isFirstPerson() const {
-                return 0;//mRendering->getCamera()->isFirstPerson();
-            }
+            virtual bool isFirstPerson() const;
 
-            virtual void togglePreviewMode(bool enable) {
-                //mRendering->togglePreviewMode(enable);
-            }
+            virtual void togglePreviewMode(bool enable);
 
-            virtual bool toggleVanityMode(bool enable) {
-                return 0;//mRendering->toggleVanityMode(enable);
-            }
+            virtual bool toggleVanityMode(bool enable);
 
-            virtual void allowVanityMode(bool allow) {
-                //mRendering->allowVanityMode(allow);
-            }
+            virtual void allowVanityMode(bool allow);
 
-            virtual void togglePlayerLooking(bool enable) {
-                //mRendering->togglePlayerLooking(enable);
-            }
+            virtual void togglePlayerLooking(bool enable);
 
-            virtual void changeVanityModeScale(float factor) {
-                //mRendering->changeVanityModeScale(factor);
-            }
+            virtual void changeVanityModeScale(float factor);
 
             virtual bool vanityRotateCamera(float * rot);
             virtual void setCameraDistance(float dist, bool adjust = false, bool override = true);
