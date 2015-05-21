@@ -799,7 +799,7 @@ void SkyManager::sunDisable()
     mSun->setVisible(false);
 }
 
-void SkyManager::setStormDirection(const Ogre::Vector3 &direction)
+void SkyManager::setStormDirection(const osg::Vec3f &direction)
 {
     mStormDirection = direction;
 }

@@ -63,9 +63,6 @@ public:
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
 
-    //Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
-    ///< get a bounding box that encloses all objects in the specified cell
-
     bool removeObject (const MWWorld::Ptr& ptr);
     ///< \return found?
 

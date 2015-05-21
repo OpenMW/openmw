@@ -1,8 +1,6 @@
 #ifndef MWRENDER_CHARACTERPREVIEW_H
 #define MWRENDER_CHARACTERPREVIEW_H
 
-#include <OgreVector3.h>
-
 #include <osg/ref_ptr>
 
 #include <components/esm/loadnpc.hpp>

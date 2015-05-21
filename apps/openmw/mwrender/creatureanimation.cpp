@@ -145,16 +145,6 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     */
 }
 
-/*
-void CreatureWeaponAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
-{
-    //Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
-
-    //setRenderProperties(object, RV_Actors, RQG_Main, RQG_Alpha, 0,
-    //                    !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
-}
-*/
-
 void CreatureWeaponAnimation::attachArrow()
 {
     //WeaponAnimation::attachArrow(mPtr);
@@ -167,14 +157,14 @@ void CreatureWeaponAnimation::releaseArrow()
 
 osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)
 {
-    /*
-    Ogre::Vector3 ret = Animation::runAnimation(duration);
+    osg::Vec3f ret = Animation::runAnimation(duration);
 
+    /*
     if (mSkelBase)
         pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
     */
 
-    return osg::Vec3f();
+    return ret;
 }
 
 }

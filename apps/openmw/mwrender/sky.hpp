@@ -59,7 +59,7 @@ namespace MWRender
 
         void setRainSpeed(float speed);
 
-        void setStormDirection(const Ogre::Vector3& direction);
+        void setStormDirection(const osg::Vec3f& direction);
 
         void setSunDirection(const osg::Vec3f& direction);
 
@@ -123,11 +123,11 @@ namespace MWRender
 
         float mRainTimer;
 
-        Ogre::Vector3 mStormDirection;
+        osg::Vec3f mStormDirection;
 
         // remember some settings so we don't have to apply them again if they didnt change
-        Ogre::String mClouds;
-        Ogre::String mNextClouds;
+        std::string mClouds;
+        std::string mNextClouds;
         float mCloudBlendFactor;
         float mCloudOpacity;
         float mCloudSpeed;

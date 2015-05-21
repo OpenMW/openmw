@@ -420,7 +420,7 @@ void WeatherManager::update(float duration, bool paused)
 
         mStormDirection = (playerPos - redMountainPos);
         mStormDirection.z() = 0;
-        //mRendering->getSkyManager()->setStormDirection(mStormDirection);
+        mRendering->getSkyManager()->setStormDirection(mStormDirection);
     }
 
     mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
