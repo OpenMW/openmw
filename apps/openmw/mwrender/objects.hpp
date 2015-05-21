@@ -66,7 +66,7 @@ public:
     //Ogre::AxisAlignedBox getDimensions(MWWorld::CellStore*);
     ///< get a bounding box that encloses all objects in the specified cell
 
-    bool deleteObject (const MWWorld::Ptr& ptr);
+    bool removeObject (const MWWorld::Ptr& ptr);
     ///< \return found?
 
     void removeCell(const MWWorld::CellStore* store);

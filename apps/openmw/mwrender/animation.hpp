@@ -54,6 +54,15 @@ public:
         Group_All = Group_LowerBody | Group_UpperBody
     };
 
+    class TextKeyListener
+    {
+    public:
+        virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                           const std::multimap<float, std::string>& map) = 0;
+    };
+
+    void setTextKeyListener(TextKeyListener* listener);
+
 protected:
     /* This is the number of *discrete* groups. */
     static const size_t sNumGroups = 4;
@@ -202,6 +211,8 @@ protected:
     };
 
     std::vector<EffectParams> mEffects;
+
+    TextKeyListener* mTextKeyListener;
 
     /* Sets the appropriate animations on the bone groups based on priority.
      */

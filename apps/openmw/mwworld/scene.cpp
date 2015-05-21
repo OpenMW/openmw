@@ -210,11 +210,11 @@ namespace MWWorld
                 mPhysics->removeHeightField ((*iter)->getCell()->getGridX(), (*iter)->getCell()->getGridY());
         }
 
+        MWBase::Environment::get().getMechanicsManager()->drop (*iter);
+
         mRendering.removeCell(*iter);
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
-
-        MWBase::Environment::get().getMechanicsManager()->drop (*iter);
 
         MWBase::Environment::get().getSoundManager()->stopSound (*iter);
         mActiveCells.erase(*iter);
@@ -563,7 +563,7 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->remove(ptr);
-        //mRendering.removeObject (ptr);
+        mRendering.removeObject (ptr);
     }
 
     bool Scene::isCellActive(const CellStore &cell)

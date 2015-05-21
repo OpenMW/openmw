@@ -238,6 +238,7 @@ namespace MWRender
         , mInsert(parentNode)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
+        , mTextKeyListener(NULL)
     {
         for(size_t i = 0;i < sNumGroups;i++)
             mAnimationTimePtr[i].reset(new AnimationTime(this));
@@ -426,7 +427,8 @@ namespace MWRender
         else if(evt.compare(off, len, "loop stop") == 0)
             state.mLoopStopTime = key->first;
 
-        // TODO: forward to listener?
+        if (mTextKeyListener)
+            mTextKeyListener->handleTextKey(groupname, key, map);
     }
 
     void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult,
@@ -588,6 +590,11 @@ namespace MWRender
         }
 
         return true;
+    }
+
+    void Animation::setTextKeyListener(Animation::TextKeyListener *listener)
+    {
+        mTextKeyListener = listener;
     }
 
     void Animation::resetActiveGroups()

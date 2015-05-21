@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "../mwrender/animation.hpp"
+
 namespace MWWorld
 {
     class ContainerStoreIterator;
@@ -134,7 +136,7 @@ enum JumpingState {
     JumpState_Landing
 };
 
-class CharacterController
+class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
@@ -204,6 +206,9 @@ class CharacterController
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
+
+    virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                       const std::multimap<float, std::string>& map);
 
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx();

@@ -648,6 +648,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
+    mAnimation->setTextKeyListener(this);
+
     const MWWorld::Class &cls = mPtr.getClass();
     if(cls.isActor())
     {
@@ -698,8 +700,147 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
 CharacterController::~CharacterController()
 {
+    if (mAnimation)
+        mAnimation->setTextKeyListener(NULL);
 }
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
+
+void CharacterController::handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key, const std::multimap<float, std::string> &map)
+{
+    const std::string &evt = key->second;
+
+    if(evt.compare(0, 7, "sound: ") == 0)
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+        return;
+    }
+    if(evt.compare(0, 10, "soundgen: ") == 0)
+    {
+        std::string soundgen = evt.substr(10);
+
+        // The event can optionally contain volume and pitch modifiers
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+                volume = Ogre::StringConverter::parseReal(tokens[1]);
+            if (tokens.size() >= 3)
+                pitch = Ogre::StringConverter::parseReal(tokens[2]);
+        }
+
+        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
+        if(!sound.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
+            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
+                type = MWBase::SoundManager::Play_TypeFoot;
+            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
+        }
+        return;
+    }
+
+    if(evt.compare(0, groupname.size(), groupname) != 0 ||
+       evt.compare(groupname.size(), 2, ": ") != 0)
+    {
+        // Not ours, skip it
+        return;
+    }
+    size_t off = groupname.size()+2;
+    size_t len = evt.size() - off;
+
+    if(evt.compare(off, len, "equip attach") == 0)
+        mAnimation->showWeapons(true);
+    else if(evt.compare(off, len, "unequip detach") == 0)
+        mAnimation->showWeapons(false);
+    else if(evt.compare(off, len, "chop hit") == 0)
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+    else if(evt.compare(off, len, "slash hit") == 0)
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+    else if(evt.compare(off, len, "thrust hit") == 0)
+        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+    else if(evt.compare(off, len, "hit") == 0)
+    {
+        if (groupname == "attack1")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+        else if (groupname == "attack2")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+        else if (groupname == "attack3")
+            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+        else
+            mPtr.getClass().hit(mPtr);
+    }
+    else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
+             && evt.compare(off, len, "start") == 0)
+    {
+        std::multimap<float, std::string>::const_iterator hitKey = key;
+
+        // Not all animations have a hit key defined. If there is none, the hit happens with the start key.
+        bool hasHitKey = false;
+        while (hitKey != map.end())
+        {
+            if (hitKey->second == groupname + ": hit")
+            {
+                hasHitKey = true;
+                break;
+            }
+            if (hitKey->second == groupname + ": stop")
+                break;
+            ++hitKey;
+        }
+        if (!hasHitKey)
+        {
+            if (groupname == "attack1")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+            else if (groupname == "attack2")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+            else if (groupname == "attack3")
+                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+        }
+    }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        mAnimation->attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        {;}//mAnimation->releaseArrow();
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        mAnimation->attachArrow();
+
+    else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release")
+    {
+        // Make sure this key is actually for the RangeType we are casting. The flame atronach has
+        // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
+        // FIXME: compare with mCurrentWeapon instead
+        const std::string& spellid = mPtr.getClass().getCreatureStats(mPtr).getSpells().getSelectedSpell();
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellid);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+        int range = 0;
+        if (evt.compare(off, len, "self release") == 0)
+            range = 0;
+        else if (evt.compare(off, len, "touch release") == 0)
+            range = 1;
+        else if (evt.compare(off, len, "target release") == 0)
+            range = 2;
+        if (effectentry.mRange == range)
+        {
+            MWBase::Environment::get().getWorld()->castSpell(mPtr);
+        }
+        std::cout << "current attack: " << mCurrentWeapon << std::endl;
+    }
+
+    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+        mPtr.getClass().block(mPtr);
+}
 
 void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 {

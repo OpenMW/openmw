@@ -285,6 +285,11 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setScale(scale);
     }
 
+    void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
+    {
+        mObjects->removeObject(ptr);
+    }
+
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         mObjects->updatePtr(old, updated);

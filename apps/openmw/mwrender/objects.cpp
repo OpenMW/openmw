@@ -158,7 +158,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
-bool Objects::deleteObject (const MWWorld::Ptr& ptr)
+bool Objects::removeObject (const MWWorld::Ptr& ptr)
 {
     if(!ptr.getRefData().getBaseNode())
         return true;
