@@ -10,6 +10,8 @@
 #include <OgreSceneNode.h>
 
 #include <osg/Group>
+#include <osg/ComputeBoundsVisitor>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/misc/rng.hpp>
 
@@ -1888,29 +1890,6 @@ namespace MWWorld
 
     Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
-#if 0
-        if (!object.getClass().isActor() && adjustPos)
-        {
-            // Adjust position so the location we wanted ends up in the middle of the object bounding box
-            Ogre::Vector3 min, max;
-            if (mPhysics->getObjectAABB(object, min, max)) {
-                Ogre::Quaternion xr(Ogre::Radian(-pos.rot[0]), Ogre::Vector3::UNIT_X);
-                Ogre::Quaternion yr(Ogre::Radian(-pos.rot[1]), Ogre::Vector3::UNIT_Y);
-                Ogre::Quaternion zr(Ogre::Radian(-pos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-                Ogre::Vector3 adjust (
-                             (min.x + max.x) / 2,
-                            (min.y + max.y) / 2,
-                            min.z
-                            );
-                adjust = (xr*yr*zr) * adjust;
-                pos.pos[0] -= adjust.x;
-                pos.pos[1] -= adjust.y;
-                pos.pos[2] -= adjust.z;
-            }
-        }
-#endif
-
         if (cell->isExterior())
         {
             int cellX, cellY;
@@ -1941,6 +1920,28 @@ namespace MWWorld
             addContainerScripts(dropped, cell);
         }
 
+        if (!object.getClass().isActor() && adjustPos && dropped.getRefData().getBaseNode())
+        {
+            // Adjust position so the location we wanted ends up in the middle of the object bounding box
+            osg::ComputeBoundsVisitor computeBounds;
+            dropped.getRefData().getBaseNode()->accept(computeBounds);
+            osg::BoundingBox bounds = computeBounds.getBoundingBox();
+            if (bounds.valid())
+            {
+                bounds.set(bounds._min - pos.asVec3(), bounds._max - pos.asVec3());
+
+                osg::Vec3f adjust (
+                            (bounds.xMin() + bounds.xMax()) / 2,
+                           (bounds.yMin() + bounds.yMax()) / 2,
+                           bounds.zMin()
+                           );
+                pos.pos[0] -= adjust.x();
+                pos.pos[1] -= adjust.y();
+                pos.pos[2] -= adjust.z();
+                moveObject(dropped, pos.pos[0], pos.pos[1], pos.pos[2]);
+            }
+        }
+
         return dropped;
     }
 
@@ -1954,17 +1955,15 @@ namespace MWWorld
         pos.rot[0] = 0;
         pos.rot[1] = 0;
 
-        Ogre::Vector3 orig =
-            Ogre::Vector3(pos.pos);
-        orig.z += 20;
-        //Ogre::Vector3 dir = Ogre::Vector3(0, 0, -1);
+        osg::Vec3f orig = pos.asVec3();
+        orig.z() += 20;
+        osg::Vec3f dir (0, 0, -1);
 
-        //float len = 100.0;
+        float len = 100.0;
 
-        std::pair<bool, Ogre::Vector3> hit;// =
-            //mPhysics->castRay(orig, dir, len);
+        std::pair<bool, osg::Vec3f> hit = mPhysics->castRay(orig, dir*len);
         if (hit.first)
-            pos.pos[2] = hit.second.z;
+            pos.pos[2] = hit.second.z();
 
         // copy the object and set its count
         int origCount = object.getRefData().getCount();
@@ -2069,14 +2068,12 @@ namespace MWWorld
     // TODO: There might be better places to update PhysicActor::mOnGround.
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
     {
-        return true;
-        /*
-        //RefData &refdata = ptr.getRefData();
-        OEngine::Physic::PhysicActor *physactor = 0;//mPhysEngine->getCharacter(refdata.getHandle());
+        MWPhysics::Actor* physactor = mPhysics->getActor(ptr);
 
         if(!physactor)
             return false;
-
+        return physactor->getOnGround();
+        /*
         if(physactor->getOnGround())
             return true;
         else

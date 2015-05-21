@@ -396,16 +396,16 @@ namespace MWPhysics
                 if(tracer.mFraction < 1.0f && getSlope(tracer.mPlaneNormal) <= sMaxSlope
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
-                    /*
                     const btCollisionObject* standingOn = tracer.mHitObject;
-
+                    /*
                     if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
                     {
                         standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
                     }
+                    */
+
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
-                    */
                     if (!isFlying)
                         newPosition.z() = tracer.mEndPos.z() + 1.0f;
 
@@ -698,23 +698,21 @@ namespace MWPhysics
         */
     }
 
-    std::pair<bool, Ogre::Vector3>
-    PhysicsSystem::castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len)
+    std::pair<bool, osg::Vec3f> PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to)
     {
-        return std::make_pair(false, Ogre::Vector3());
-        /*
-        Ogre::Ray ray = Ogre::Ray(orig, dir);
-        Ogre::Vector3 to = ray.getPoint(len);
+        btVector3 btFrom = toBullet(from);
+        btVector3 btTo = toBullet(to);
 
-        btVector3 btFrom = btVector3(orig.x, orig.y, orig.z);
-        btVector3 btTo = btVector3(to.x, to.y, to.z);
+        btCollisionWorld::ClosestRayResultCallback resultCallback(btFrom, btTo);
+        resultCallback.m_collisionFilterGroup = 0xff;
+        resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap;
 
-        std::pair<std::string, float> test = mEngine->rayTest(btFrom, btTo);
-        if (test.second == -1) {
-            return std::make_pair(false, Ogre::Vector3());
+        mDynamicsWorld->rayTest(btFrom, btTo, resultCallback);
+        if (resultCallback.hasHit())
+        {
+            return std::make_pair(true, toOsg(resultCallback.m_hitPointWorld));
         }
-        return std::make_pair(true, ray.getPoint(len * test.second));
-        */
+        return std::make_pair(false, osg::Vec3f());
     }
 
     std::vector<std::string> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)

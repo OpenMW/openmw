@@ -86,8 +86,8 @@ namespace MWPhysics
             // cast ray, return true if it hit something.
             bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to,bool ignoreHeightMap = false);
 
-            std::pair<bool, Ogre::Vector3>
-            castRay(const Ogre::Vector3 &orig, const Ogre::Vector3 &dir, float len);
+            /// @return <bool hit, world hit position>
+            std::pair<bool, osg::Vec3f> castRay(const osg::Vec3f &from, const osg::Vec3f &to);
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
