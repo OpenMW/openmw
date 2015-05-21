@@ -254,6 +254,7 @@ namespace MWRender
     {
         mEffectManager->update(dt);
         mSky->update(dt);
+        mCamera->update(dt, paused);
     }
 
     void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
