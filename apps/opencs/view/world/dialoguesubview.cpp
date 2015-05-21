@@ -461,7 +461,14 @@ void CSVWorld::EditWidget::remake(int row)
                 NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
                 // FIXME: does not work well when enum delegates are used
                 //table->resizeColumnsToContents();
-                table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+
+                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                {
+                    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+                    table->setEnabled(false);
+                }
+                else
+                    table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
@@ -473,6 +480,8 @@ void CSVWorld::EditWidget::remake(int row)
                     new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
 
                 label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                    label->setEnabled(false);
 
                 tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
@@ -502,6 +511,12 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget (label, unlocked, 0);
                         unlockedLayout->addWidget (editor, unlocked, 1);
                         ++unlocked;
+                    }
+
+                    if(mTable->index(row, i).data().type() == QVariant::UserType)
+                    {
+                        editor->setEnabled(false);
+                        label->setEnabled(false);
                     }
                 }
             }
@@ -550,6 +565,12 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget (label, unlocked, 0);
                         unlockedLayout->addWidget (editor, unlocked, 1);
                         ++unlocked;
+
+                        if(mNestedModels.back()->index(0, col).data().type() == QVariant::UserType)
+                        {
+                            editor->setEnabled(false);
+                            label->setEnabled(false);
+                        }
                     }
                 }
                 mNestedTableMapper->setCurrentModelIndex(mNestedModels.back()->index(0, 0));

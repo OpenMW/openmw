@@ -1069,19 +1069,25 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0: return isInterior;
-            case 1: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mAmbient : QVariant();
-            case 2: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mSunlight : QVariant();
-            case 3: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFog : QVariant();
-            case 4: return (isInterior && !behaveLikeExterior) ? cell.mAmbi.mFogDensity : QVariant();
+            case 1: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
+            case 2: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
+            case 3: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mFog : QVariant(QVariant::UserType);
+            case 4: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
             case 5:
             {
                 if (isInterior && !behaveLikeExterior && interiorWater)
                     return cell.mWater;
                 else
-                    return QVariant();
+                    return QVariant(QVariant::UserType);
             }
-            case 6: return isInterior ? QVariant() : cell.mMapColor; // TODO: how to select?
-            //case 7: return isInterior ? behaveLikeExterior : QVariant();
+            case 6: return isInterior ?
+                    QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+            //case 7: return isInterior ?
+                    //behaveLikeExterior : QVariant(QVariant::UserType);
             default: throw std::runtime_error("Cell subcolumn index out of range");
         }
     }

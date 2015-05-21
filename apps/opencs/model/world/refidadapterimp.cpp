@@ -502,7 +502,7 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mAttributes || column==mColumns.mSkills)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant();
+            return QVariant(QVariant::UserType);
         else
             return true;
     }
@@ -805,10 +805,10 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
         switch (subColIndex)
         {
             case 0: return static_cast<int>(record.get().mNpdt12.mLevel);
-            case 1: return QVariant();
-            case 2: return QVariant();
-            case 3: return QVariant();
-            case 4: return QVariant();
+            case 1: return QVariant(QVariant::UserType);
+            case 2: return QVariant(QVariant::UserType);
+            case 3: return QVariant(QVariant::UserType);
+            case 4: return QVariant(QVariant::UserType);
             case 5: return static_cast<int>(record.get().mNpdt12.mDisposition);
             case 6: return static_cast<int>(record.get().mNpdt12.mReputation);
             case 7: return static_cast<int>(record.get().mNpdt12.mRank);
