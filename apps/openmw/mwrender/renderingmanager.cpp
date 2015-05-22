@@ -315,6 +315,9 @@ namespace MWRender
 
     MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
     {
+        if (mPlayerAnimation.get() && ptr == mPlayerAnimation->getPtr())
+            return mPlayerAnimation.get();
+
         return mObjects->getAnimation(ptr);
     }
 

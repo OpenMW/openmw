@@ -37,7 +37,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
 
-//#include "../mwrender/animation.hpp"
+#include "../mwrender/animation.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/camera.hpp"
 
@@ -1052,32 +1052,32 @@ namespace MWWorld
         //return getPtrViaHandle(facedHandle);
     }
 
-    std::pair<MWWorld::Ptr,Ogre::Vector3> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
+    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
     {
-        /*
         const ESM::Position &posdata = ptr.getRefData().getPosition();
-        Ogre::Vector3 pos(posdata.pos);
-        Ogre::Quaternion rot = Ogre::Quaternion(Ogre::Radian(posdata.rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-                               Ogre::Quaternion(Ogre::Radian(posdata.rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
 
-        MWRender::Animation *anim = mRendering->getAnimation(ptr);
-        if(anim != NULL)
+        osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
+        osg::Vec3f pos (posdata.asVec3());
+
+        MWRender::Animation* anim = mRendering->getAnimation(ptr);
+        if (anim != NULL)
         {
-            Ogre::Node *node = anim->getNode("Head");
+            const osg::Node* node = anim->getNode("Head");
             if (node == NULL)
                 node = anim->getNode("Bip01 Head");
-            if(node != NULL)
-                pos += node->_getDerivedPosition();
+            if (node != NULL)
+            {
+                osg::MatrixList mats = node->getWorldMatrices();
+                if (mats.size())
+                    pos = mats[0].getTrans();
+            }
         }
 
-        std::pair<std::string,Ogre::Vector3> result;// = mPhysics->getHitContact(ptr.getRefData().getHandle(),
-                                                    //                          pos, rot, distance);
-        if(result.first.empty())
-            return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
+        std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance);
+        if(result.first.isEmpty())
+            return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
 
-        return std::make_pair(searchPtrViaHandle(result.first), result.second);
-        */
-        return std::make_pair(MWWorld::Ptr(), Ogre::Vector3(0.0f));
+        return std::make_pair(result.first, result.second);
     }
 
     void World::deleteObject (const Ptr& ptr)

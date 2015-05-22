@@ -11,6 +11,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include <osg/Quat>
+
 namespace osg
 {
     class Group;
@@ -78,9 +80,9 @@ namespace MWPhysics
             std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
-            std::pair<std::string,Ogre::Vector3> getHitContact(const std::string &name,
-                                                               const Ogre::Vector3 &origin,
-                                                               const Ogre::Quaternion &orientation,
+            std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor,
+                                                               const osg::Vec3f &origin,
+                                                               const osg::Quat &orientation,
                                                                float queryDistance);
 
             // cast ray, return true if it hit something.

@@ -491,9 +491,9 @@ namespace MWClass
                                store.find("fHandToHandReach")->getFloat());
 
         // TODO: Use second to work out the hit angle
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = world->getHitContact(ptr, dist);
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist);
         MWWorld::Ptr victim = result.first;
-        Ogre::Vector3 hitPosition = result.second;
+        Ogre::Vector3 hitPosition (result.second.x(), result.second.y(), result.second.z());
         if(victim.isEmpty()) // Didn't hit anything
             return;
 

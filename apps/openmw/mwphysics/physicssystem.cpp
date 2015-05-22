@@ -653,35 +653,78 @@ namespace MWPhysics
         return mDebugDrawEnabled;
     }
 
-    std::pair<std::string,Ogre::Vector3> PhysicsSystem::getHitContact(const std::string &name,
-                                                                      const Ogre::Vector3 &origin,
-                                                                      const Ogre::Quaternion &orient,
+    class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
+    {
+        const btCollisionObject* mMe;
+
+        // Store the real origin, since the shape's origin is its center
+        btVector3 mOrigin;
+
+    public:
+        const btCollisionObject *mObject;
+        btVector3 mContactPoint;
+        btScalar mLeastDistSqr;
+
+        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const btVector3 &origin)
+          : mMe(me), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+            mLeastDistSqr(std::numeric_limits<float>::max())
+        { }
+
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
+                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
+        {
+            if (col1Wrap->m_collisionObject != mMe)
+            {
+                btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
+                if(!mObject || distsqr < mLeastDistSqr)
+                {
+                    mObject = col1Wrap->m_collisionObject;
+                    mLeastDistSqr = distsqr;
+                    mContactPoint = cp.getPositionWorldOnA();
+                }
+            }
+
+            return 0.f;
+        }
+    };
+
+    std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::Ptr& actor,
+                                                                     const osg::Vec3f &origin,
+                                                                     const osg::Quat &orient,
                                                                       float queryDistance)
     {
-        return std::make_pair(std::string(), Ogre::Vector3());
-        /*
         const MWWorld::Store<ESM::GameSetting> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        btConeShape shape(Ogre::Degree(store.find("fCombatAngleXY")->getFloat()/2.0f).valueRadians(),
-                          queryDistance);
-        shape.setLocalScaling(btVector3(1, 1, Ogre::Degree(store.find("fCombatAngleZ")->getFloat()/2.0f).valueRadians() /
+        btConeShape shape (osg::DegreesToRadians(store.find("fCombatAngleXY")->getFloat()/2.0f), queryDistance);
+        shape.setLocalScaling(btVector3(1, 1, osg::DegreesToRadians(store.find("fCombatAngleZ")->getFloat()/2.0f) /
                                               shape.getRadius()));
 
         // The shape origin is its center, so we have to move it forward by half the length. The
         // real origin will be provided to getFilteredContact to find the closest.
-        Ogre::Vector3 center = origin + (orient * Ogre::Vector3(0.0f, queryDistance*0.5f, 0.0f));
+        osg::Vec3f center = origin + (orient * osg::Vec3f(0.0f, queryDistance*0.5f, 0.0f));
 
         btCollisionObject object;
         object.setCollisionShape(&shape);
-        object.setWorldTransform(btTransform(btQuaternion(orient.x, orient.y, orient.z, orient.w),
-                                             btVector3(center.x, center.y, center.z)));
+        object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
-        std::pair<const OEngine::Physic::RigidBody*,btVector3> result = mEngine->getFilteredContact(
-                name, btVector3(origin.x, origin.y, origin.z), &object);
-        if(!result.first)
-            return std::make_pair(std::string(), Ogre::Vector3(&result.second[0]));
-        return std::make_pair(result.first->mName, Ogre::Vector3(&result.second[0]));
-        */
+        const btCollisionObject* me = NULL;
+        Actor* physactor = getActor(actor);
+        if (physactor)
+            me = physactor->getCollisionObject();
+
+        DeepestNotMeContactTestResultCallback resultCallback(me, toBullet(origin));
+        resultCallback.m_collisionFilterGroup = CollisionType_Actor;
+        resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Actor;
+        mDynamicsWorld->contactTest(&object, resultCallback);
+
+        if (resultCallback.mObject)
+        {
+            const PtrHolder* holder = static_cast<const PtrHolder*>(resultCallback.mObject->getUserPointer());
+            if (holder)
+                return std::make_pair(holder->getPtr(), toOsg(resultCallback.mContactPoint));
+        }
+        return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
     }
 
 

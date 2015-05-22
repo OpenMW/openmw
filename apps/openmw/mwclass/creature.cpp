@@ -238,7 +238,7 @@ namespace MWClass
             const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
             dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
         }
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
@@ -247,7 +247,7 @@ namespace MWClass
         if (!victim.getClass().isActor())
             return; // Can't hit non-actors
 
-        Ogre::Vector3 hitPosition = result.second;
+        Ogre::Vector3 hitPosition (result.second.x(), result.second.y(), result.second.z());
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
