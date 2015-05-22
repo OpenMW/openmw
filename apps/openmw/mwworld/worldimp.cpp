@@ -2921,7 +2921,7 @@ namespace MWWorld
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
-        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition());
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
     
