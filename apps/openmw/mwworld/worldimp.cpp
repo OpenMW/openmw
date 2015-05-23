@@ -260,7 +260,11 @@ namespace MWWorld
         }
 
         if (!bypass)
-            MWBase::Environment::get().getWindowManager()->playVideo(mFallback.getFallbackString("Movies_New_Game"), true);
+        {
+            std::string video = mFallback.getFallbackString("Movies_New_Game");
+            if (!video.empty())
+                MWBase::Environment::get().getWindowManager()->playVideo(video, true);
+        }
 
         // enable collision
         //if (!mPhysics->toggleCollisionMode())
