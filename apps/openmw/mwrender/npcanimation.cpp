@@ -186,17 +186,16 @@ NpcAnimation::~NpcAnimation()
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 
-
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
   : Animation(ptr, parentNode, resourceSystem),
-    mVisibilityFlags(visibilityFlags),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
     //mFirstPersonOffset(0.f, 0.f, 0.f),
-    mAlpha(1.f),
     mNpcType(Type_Normal),
+    mVisibilityFlags(visibilityFlags),
+    mAlpha(1.f),
     mSoundsDisabled(disableSounds)
     //mHeadPitch(0.f),
     //mHeadYaw(0.f)

@@ -61,7 +61,7 @@ namespace NifOsg
         {
         }
         InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op = osg::CopyOp::SHALLOW_COPY)
-            : osg::NodeCallback(), osg::Object()
+            : osg::Object(), osg::NodeCallback()
         {
         }
 

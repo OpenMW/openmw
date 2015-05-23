@@ -47,9 +47,9 @@ namespace SceneUtil
     LightController::LightController()
         : mType(LT_Normal)
         , mPhase((Misc::Rng::rollClosedProbability() * 2.f - 1.f) * 500.f)
-        , mLastTime(0.0)
         , mDeltaCount(0.f)
         , mDirection(1.f)
+        , mLastTime(0.0)
     {
     }
 

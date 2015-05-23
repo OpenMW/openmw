@@ -34,8 +34,8 @@ private:
 Skeleton::Skeleton()
     : mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
-    , mLastFrameNumber(0)
     , mActive(true)
+    , mLastFrameNumber(0)
 {
 
 }
@@ -44,8 +44,8 @@ Skeleton::Skeleton(const Skeleton &copy, const osg::CopyOp &copyop)
     : osg::Group(copy, copyop)
     , mBoneCacheInit(false)
     , mNeedToUpdateBoneMatrices(true)
-    , mLastFrameNumber(0)
     , mActive(copy.mActive)
+    , mLastFrameNumber(0)
 {
 
 }

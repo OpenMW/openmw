@@ -11,8 +11,8 @@ namespace Nif
 NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     : ver(0)
     , filename(name)
-    , mStream(stream)
     , mUseSkinning(false)
+    , mStream(stream)
 {
     parse();
 }

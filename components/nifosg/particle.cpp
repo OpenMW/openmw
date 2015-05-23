@@ -155,9 +155,9 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
     : mForce(gravity->mForce)
     , mType(static_cast<ForceType>(gravity->mType))
-    , mDecay(gravity->mDecay)
     , mPosition(gravity->mPosition)
     , mDirection(gravity->mDirection)
+    , mDecay(gravity->mDecay)
 {
 }
 

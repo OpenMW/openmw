@@ -234,8 +234,8 @@ namespace MWRender
     };
 
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
-        : mPtr(ptr)
-        , mInsert(parentNode)
+        : mInsert(parentNode)
+        , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
         , mTextKeyListener(NULL)

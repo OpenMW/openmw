@@ -65,8 +65,8 @@ namespace MWRender
 {
 
 Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode)
-    : mResourceSystem(resourceSystem)
-    , mRootNode(rootNode)
+    : mRootNode(rootNode)
+    , mResourceSystem(resourceSystem)
 {
 }
 

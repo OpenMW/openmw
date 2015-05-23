@@ -125,10 +125,10 @@ osg::ref_ptr<osg::Geometry> Pathgrid::createPathgridPoints(const ESM::Pathgrid *
 }
 
 Pathgrid::Pathgrid(osg::ref_ptr<osg::Group> root)
-    : mRootNode(root)
-    , mPathgridEnabled(false)
-    , mInteriorPathgridNode(NULL)
+    : mPathgridEnabled(false)
+    , mRootNode(root)
     , mPathGridRoot(NULL)
+    , mInteriorPathgridNode(NULL)
 {
 }
 

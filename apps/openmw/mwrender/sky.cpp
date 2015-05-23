@@ -326,8 +326,8 @@ public:
 
     Moon(osg::Group* parentNode, Resource::SceneManager* sceneManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, sceneManager, scaleFactor, 2)
-        , mPhase(Phase_Unspecified)
         , mType(type)
+        , mPhase(Phase_Unspecified)
     {
         mUpdater = new MoonUpdater;
         mGeode->addUpdateCallback(mUpdater);
@@ -487,6 +487,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mMonth(0)
     , mCloudAnimationTimer(0.f)
     , mRainTimer(0.f)
+    , mStormDirection(0,-1,0)
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -503,7 +504,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mSunEnabled(true)
     , mMasserEnabled(true)
     , mSecundaEnabled(true)
-    , mStormDirection(0,-1,0)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     parentNode->addChild(skyroot);

@@ -204,8 +204,8 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
-  , mCfgMgr(configurationManager)
   , mSimulationTime(0.0)
+  , mCfgMgr(configurationManager)
 {
     Misc::Rng::init();
     MWClass::registerClasses();

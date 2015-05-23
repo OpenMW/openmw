@@ -131,8 +131,8 @@ namespace MWInput
         , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
         , mSneaking(false)
         , mAttemptJump(false)
-        , mFakeDeviceID(1)
         , mInvUiScalingFactor(1.f)
+        , mFakeDeviceID(1)
     {
         mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputManager->setMouseEventCallback (this);

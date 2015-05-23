@@ -590,10 +590,10 @@ namespace MWPhysics
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new NifBullet::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager()))
-        , mTimeAccum(0.0f)
-        , mWaterEnabled(false)
-        , mWaterHeight(0)
         , mDebugDrawEnabled(false)
+        , mTimeAccum(0.0f)
+        , mWaterHeight(0)
+        , mWaterEnabled(false)
         , mParentNode(parentNode)
     {
         mCollisionConfiguration = new btDefaultCollisionConfiguration();

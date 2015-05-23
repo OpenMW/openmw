@@ -54,8 +54,6 @@ namespace MWGui
 
     InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop, osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mViewer(viewer)
-        , mResourceSystem(resourceSystem)
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
         , mSortModel(NULL)
@@ -63,6 +61,8 @@ namespace MWGui
         , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
+        , mResourceSystem(resourceSystem)
+        , mViewer(viewer)
         , mPreview(new MWRender::InventoryPreview(viewer, resourceSystem, MWBase::Environment::get().getWorld()->getPlayerPtr()))
         , mTrading(false)
     {

@@ -349,7 +349,7 @@ AlphaController::AlphaController()
 }
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
-    : StateSetUpdater(copy, copyop), ValueInterpolator(), Controller(copy)
+    : StateSetUpdater(copy, copyop), Controller(copy), ValueInterpolator()
     , mData(copy.mData)
 {
 }
