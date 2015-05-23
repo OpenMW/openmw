@@ -1128,7 +1128,7 @@ namespace MWWorld
 
         ptr.getRefData().setPosition(pos);
 
-        Ogre::Vector3 vec(x, y, z);
+        osg::Vec3f vec(x, y, z);
 
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
@@ -1207,12 +1207,12 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(newPtr, osg::Vec3f(vec.x, vec.y, vec.z));
+            mRendering->moveObject(newPtr, vec);
             mPhysics->updatePosition(newPtr);
         }
         if (isPlayer)
         {
-            //mWorldScene->playerMoved (vec);
+            mWorldScene->playerMoved(vec);
         }
         return newPtr;
     }
