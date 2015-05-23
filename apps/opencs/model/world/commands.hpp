@@ -31,6 +31,10 @@ namespace CSMWorld
             QVariant mNew;
             QVariant mOld;
 
+            bool mHasRecordState;
+            QModelIndex mRecordStateIndex;
+            CSMWorld::RecordBase::State mOldRecordState;
+
         public:
 
             ModifyCommand (QAbstractItemModel& model, const QModelIndex& index, const QVariant& new_,

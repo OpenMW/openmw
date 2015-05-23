@@ -14,7 +14,7 @@
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_)
+: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false)
 {
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
     {
@@ -27,6 +27,15 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
     }
     else
         setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+
+    // Remember record state before the modification
+    if (CSMWorld::IdTable *table = dynamic_cast<IdTable *>(mModel))
+    {
+        mHasRecordState = true;
+        int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
+        mRecordStateIndex = table->index(mIndex.row(), stateColumnIndex);
+        mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
+    }
 }
 
 void CSMWorld::ModifyCommand::redo()
@@ -38,6 +47,10 @@ void CSMWorld::ModifyCommand::redo()
 void CSMWorld::ModifyCommand::undo()
 {
     mModel->setData (mIndex, mOld);
+    if (mHasRecordState)
+    {
+        mModel->setData(mRecordStateIndex, mOldRecordState);
+    }
 }
 
 
