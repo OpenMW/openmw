@@ -3,7 +3,7 @@
 #include "columns.hpp"
 
 CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags)
-    : mColumnId (columnId), mDisplayType (displayType), mFlags (flags)
+    : mColumnId (columnId), mFlags (flags), mDisplayType (displayType)
 {}
 
 CSMWorld::ColumnBase::~ColumnBase() {}

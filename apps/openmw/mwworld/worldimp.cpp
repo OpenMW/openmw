@@ -147,14 +147,12 @@ namespace MWWorld
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
-    : mPlayer (0), mLocalScripts (mStore),
+    : mFallback(fallbackMap), mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
-      mActivationDistanceOverride (activationDistanceOverride),
-      mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
-      mGodMode(false), mContentFiles (contentFiles),
-      mGoToJail(false), mDaysInPrison(0),
-      mStartCell (startCell), mStartupScript(startupScript),
-      mScriptsEnabled(true)
+      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
+      mStartCell (startCell), mTeleportEnabled(true),
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -2939,7 +2937,7 @@ namespace MWWorld
     struct AddDetectedReference
     {
         AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
-            : mOut(out), mDetector(detector), mType(type), mSquaredDist(squaredDist)
+            : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }
 

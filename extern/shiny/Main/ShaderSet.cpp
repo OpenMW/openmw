@@ -15,9 +15,9 @@ namespace sh
 	ShaderSet::ShaderSet (const std::string& type, const std::string& cgProfile, const std::string& hlslProfile, const std::string& sourceFile, const std::string& basePath,
 						  const std::string& name, PropertySetGet* globalSettingsPtr)
 		: mBasePath(basePath)
-		, mName(name)
 		, mCgProfile(cgProfile)
 		, mHlslProfile(hlslProfile)
+		, mName(name)
 	{
 		if (type == "vertex")
 			mType = GPT_Vertex;

@@ -50,17 +50,17 @@ namespace MWGui
 
     InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mTrading(false)
+        , mDragAndDrop(dragAndDrop)
+        , mPreviewDirty(true)
+        , mPreviewResize(true)
+        , mSelectedItem(-1)
+        , mSortModel(NULL)
+        , mTradeModel(NULL)
+        , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
-        , mPreviewDirty(true)
-        , mPreviewResize(true)
-        , mDragAndDrop(dragAndDrop)
-        , mSortModel(NULL)
-        , mTradeModel(NULL)
-        , mSelectedItem(-1)
-        , mGuiMode(GM_Inventory)
+        , mTrading(false)
     {
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 

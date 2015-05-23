@@ -42,13 +42,14 @@ bool CSVWorld::ScriptEdit::event (QEvent *event)
 CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
     QWidget* parent)
     : QPlainTextEdit (parent),
-    mDocument (document),
-    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive),
     mChangeLocked (0),
-    mLineNumberArea(0),
     mShowLineNum(false),
+    mLineNumberArea(0),
     mDefaultFont(font()),
-    mMonoFont(QFont("Monospace"))
+    mMonoFont(QFont("Monospace")),
+    mDocument (document),
+    mWhiteListQoutes("^[a-z|_]{1}[a-z|0-9|_]{0,}$", Qt::CaseInsensitive)
+
 {
 //    setAcceptRichText (false);
     setLineWrapMode (QPlainTextEdit::NoWrap);

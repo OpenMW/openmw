@@ -29,17 +29,17 @@ namespace sh
 	}
 
 	Factory::Factory (Platform* platform)
-		: mPlatform(platform)
-		, mShadersEnabled(true)
+		: mShadersEnabled(true)
 		, mShaderDebugOutputEnabled(false)
-		, mCurrentLanguage(Language_None)
-		, mListener(NULL)
-		, mCurrentConfiguration(NULL)
-		, mCurrentLodConfiguration(NULL)
 		, mReadMicrocodeCache(false)
 		, mWriteMicrocodeCache(false)
 		, mReadSourceCache(false)
 		, mWriteSourceCache(false)
+		, mCurrentConfiguration(NULL)
+		, mCurrentLodConfiguration(NULL)
+		, mCurrentLanguage(Language_None)
+		, mListener(NULL)
+		, mPlatform(platform)
 	{
 		assert (!sThis);
 		sThis = this;

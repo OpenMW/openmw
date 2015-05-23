@@ -356,15 +356,15 @@ CSVWorld::EditWidget::~EditWidget()
 CSVWorld::EditWidget::EditWidget(QWidget *parent,
         int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher,
         CSMDoc::Document& document, bool createAndDelete) :
-mDispatcher(this, table, commandDispatcher, document),
-mNestedTableDispatcher(NULL),
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mNestedTableMapper(NULL),
+mDispatcher(this, table, commandDispatcher, document),
+mNestedTableDispatcher(NULL),
 mMainWidget(NULL),
+mTable(table),
 mCommandDispatcher (commandDispatcher),
-mDocument (document),
-mTable(table)
+mDocument (document)
 {
     remake (row);
 
@@ -571,8 +571,8 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     SubView (id),
     mEditWidget(0),
     mMainLayout(NULL),
-    mUndoStack(document.getUndoStack()),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
+    mUndoStack(document.getUndoStack()),
     mLocked(false),
     mDocument(document),
     mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))

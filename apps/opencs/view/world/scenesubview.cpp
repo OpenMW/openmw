@@ -27,7 +27,7 @@
 #include "creator.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mLayout(new QHBoxLayout), mDocument(document), mScene(NULL), mToolbar(NULL)
+: SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
