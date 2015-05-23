@@ -7,8 +7,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <OgreVector3.h>
-
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/soundmanager.hpp"

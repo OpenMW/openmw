@@ -10,6 +10,7 @@
 #include <OgreViewport.h>
 
 #include <components/esm/fogstate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -18,30 +19,20 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "renderconst.hpp"
-#include "renderingmanager.hpp"
 
 using namespace MWRender;
 using namespace Ogre;
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
+LocalMap::LocalMap()
     : mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mAngle(0.f)
     , mInterior(false)
 {
-    mRendering = rend;
-    mRenderingManager = rendering;
-
-    mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
-    mCameraRotNode = mCameraPosNode->createChildSceneNode();
-    mCameraNode = mCameraRotNode->createChildSceneNode();
-
-    mCellCamera = mRendering->getScene()->createCamera("CellCamera");
+   // mCellCamera = mRendering->getScene()->createCamera("CellCamera");
     mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
 
     mCameraNode->attachObject(mCellCamera);
 
-    mLight = mRendering->getScene()->createLight();
     mLight->setType (Ogre::Light::LT_DIRECTIONAL);
     mLight->setDirection (Ogre::Vector3(0.3f, 0.3f, -0.7f));
     mLight->setVisible (false);
@@ -62,7 +53,6 @@ LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManag
     vp->setOverlaysEnabled(false);
     vp->setShadowsEnabled(false);
     vp->setBackgroundColour(ColourValue(0, 0, 0));
-    vp->setVisibilityMask(RV_Map);
     vp->setMaterialScheme("local_map");
 }
 
@@ -83,12 +73,11 @@ std::string LocalMap::coordStr(const int x, const int y)
 
 void LocalMap::clear()
 {
-    // Not actually removing the Textures here. That doesnt appear to work properly. It seems MyGUI still keeps some pointers.
-    mBuffers.clear();
 }
 
 void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 {
+    /*
     if (!mInterior)
     {
         std::string textureName = "Cell_"+coordStr(cell->getCell()->getGridX(), cell->getCell()->getGridY())+"_fog";
@@ -156,6 +145,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
         cell->setFog(fog.release());
     }
+    */
 }
 
 void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
@@ -177,6 +167,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
     // (and objects in a different cell can "bleed" into another cell's map if they cross the border)
     render((x+0.5f)*sSize, (y+0.5f)*sSize, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), name, true);
 
+    /*
     if (mBuffers.find(name) == mBuffers.end())
     {
         if (cell->getFog())
@@ -184,6 +175,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
         else
             createFogOfWar(name);
     }
+    */
 }
 
 void LocalMap::requestMap(MWWorld::CellStore* cell,
@@ -241,6 +233,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     // If they changed by too much (for bounds, < padding is considered acceptable) then parts of the interior might not
     // be covered by the map anymore.
     // The following code detects this, and discards the CellStore's fog state if it needs to.
+    /*
     if (cell->getFog())
     {
         ESM::FogState* fog = cell->getFog();
@@ -265,6 +258,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
             mAngle = fog->mNorthMarkerAngle;
         }
     }
+    */
 
     Vector2 center(mBounds.getCenter().x, mBounds.getCenter().y);
 
@@ -296,6 +290,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
 
             render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), texturePrefix);
 
+            /*
             if (!cell->getFog())
                 createFogOfWar(texturePrefix);
             else
@@ -309,6 +304,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
                 ESM::FogTexture& esm = fog->mFogTextures[i];
                 loadFogOfWar(texturePrefix, esm);
             }
+            */
             ++i;
         }
     }
@@ -316,6 +312,7 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
 
 void LocalMap::createFogOfWar(const std::string& texturePrefix)
 {
+    /*
     const std::string texName = texturePrefix + "_fog";
     TexturePtr tex = createFogOfWarTexture(texName);
 
@@ -331,12 +328,14 @@ void LocalMap::createFogOfWar(const std::string& texturePrefix)
     tex->getBuffer()->unlock();
 
     mBuffers[texturePrefix] = buffer;
+    */
 }
 
 Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
 {
-    TexturePtr tex = TextureManager::getSingleton().getByName(texName);
-    if (tex.isNull())
+    TexturePtr tex;// = TextureManager::getSingleton().getByName(texName);
+    /*
+     * if (tex.isNull())
     {
         tex = TextureManager::getSingleton().createManual(
                         texName,
@@ -349,12 +348,14 @@ Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
                     this // ManualResourceLoader required if the texture contents are lost (due to lost devices nonsense that can occur with D3D)
                     );
     }
+    */
 
     return tex;
 }
 
 void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& esm)
 {
+    /*
     std::vector<char>& data = esm.mImageData;
     Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
     Ogre::Image image;
@@ -376,6 +377,7 @@ void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& 
     memcpy(&buffer[0], image.getData(), image.getSize());
 
     mBuffers[texturePrefix] = buffer;
+    */
 }
 
 void LocalMap::render(const float x, const float y,
@@ -390,15 +392,12 @@ void LocalMap::render(const float x, const float y,
 
     // disable fog (only necessary for fixed function, the shader based
     // materials already do this through local_map material configuration)
-    float oldFogStart = mRendering->getScene()->getFogStart();
-    float oldFogEnd = mRendering->getScene()->getFogEnd();
-    Ogre::ColourValue oldFogColour = mRendering->getScene()->getFogColour();
-    mRendering->getScene()->setFog(FOG_NONE);
+    //mRendering->getScene()->setFog(FOG_NONE);
 
     // set up lighting
-    Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
-    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3f, 0.3f, 0.3f));
-    mRenderingManager->disableLights(true);
+    //Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
+    //mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3f, 0.3f, 0.3f));
+    //mRenderingManager->disableLights(true);
     mLight->setVisible(true);
 
     TexturePtr tex;
@@ -425,12 +424,12 @@ void LocalMap::render(const float x, const float y,
         tex->getBuffer()->blit(mRenderTexture->getBuffer());
     }
 
-    mRenderingManager->enableLights(true);
+    //mRenderingManager->enableLights(true);
     mLight->setVisible(false);
 
     // re-enable fog
-    mRendering->getScene()->setFog(FOG_LINEAR, oldFogColour, 0, oldFogStart, oldFogEnd);
-    mRendering->getScene()->setAmbientLight(oldAmbient);
+    //mRendering->getScene()->setFog(FOG_LINEAR, oldFogColour, 0, oldFogStart, oldFogEnd);
+    //mRendering->getScene()->setAmbientLight(oldAmbient);
 }
 
 void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
@@ -460,6 +459,8 @@ Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, i
 
 bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
+    return false;
+    /*
     std::string texName = (interior ? mInteriorName + "_" : "Cell_") + coordStr(x, y);
 
     if (mBuffers.find(texName) == mBuffers.end())
@@ -474,10 +475,12 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     Ogre::uint32 clr = mBuffers[texName][texV * sFogOfWarResolution + texU];
     uint8 alpha = (clr >> 24);
     return alpha < 200;
+    */
 }
 
 void LocalMap::loadResource(Ogre::Resource* resource)
 {
+    /*
     std::string resourceName = resource->getName();
     size_t pos = resourceName.find("_fog");
     if (pos != std::string::npos)
@@ -498,10 +501,12 @@ void LocalMap::loadResource(Ogre::Resource* resource)
     tex->createInternalResources();
     memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
     tex->getBuffer()->unlock();
+    */
 }
 
 void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
 {
+    /*
     if (sFogOfWarSkip != 0)
     {
         static int count=0;
@@ -607,4 +612,5 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
             }
         }
     }
+    */
 }

@@ -1,8 +1,6 @@
 #ifndef GAME_RENDER_LOCALMAP_H
 #define GAME_RENDER_LOCALMAP_H
 
-#include <openengine/ogre/renderer.hpp>
-
 #include <OgreAxisAlignedBox.h>
 #include <OgreColourValue.h>
 #include <OgreResource.h>
@@ -24,10 +22,10 @@ namespace MWRender
     ///
     /// \brief Local map rendering
     ///
-    class LocalMap : public Ogre::ManualResourceLoader
+    class LocalMap
     {
     public:
-        LocalMap(OEngine::Render::OgreRenderer*, MWRender::RenderingManager* rendering);
+        LocalMap();
         ~LocalMap();
 
         virtual void loadResource(Ogre::Resource* resource);
@@ -84,9 +82,6 @@ namespace MWRender
         bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
 
     private:
-        OEngine::Render::OgreRenderer* mRendering;
-        MWRender::RenderingManager* mRenderingManager;
-
         int mMapResolution;
 
         // the dynamic texture is a bottleneck, so don't set this too high
