@@ -22,6 +22,7 @@
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -131,6 +132,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
 {
     insertBegin(ptr);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     // CreatureAnimation
     std::auto_ptr<Animation> anim;
@@ -149,6 +151,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
     insertBegin(ptr);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
 

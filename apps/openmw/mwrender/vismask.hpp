@@ -12,6 +12,7 @@ namespace MWRender
         // child of Scene
         Mask_Effect = 0x2,
         Mask_Debug = 0x4,
+        Mask_Actor = 0x8,
 
         // top level masks
         Mask_Scene = 0x10,
