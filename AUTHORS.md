@@ -114,6 +114,7 @@ Manual
 ------
 
     Bodillium
+    Cramal
     sir_herrbatka
 
 Packagers
