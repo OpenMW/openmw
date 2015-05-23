@@ -351,12 +351,6 @@ namespace MWRender
 
     void Camera::setAnimation(NpcAnimation *anim)
     {
-        // If we're switching to a new NpcAnimation, ensure the old one is
-        // using a normal view mode
-        if(mAnimation && mAnimation != anim)
-        {
-            mAnimation->setViewMode(NpcAnimation::VM_Normal);
-        }
         mAnimation = anim;
 
         processViewChange();
