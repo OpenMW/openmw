@@ -267,8 +267,8 @@ namespace MWWorld
         }
 
         // enable collision
-        //if (!mPhysics->toggleCollisionMode())
-        //    mPhysics->toggleCollisionMode();
+        if (!mPhysics->toggleCollisionMode())
+            mPhysics->toggleCollisionMode();
 
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
@@ -972,7 +972,7 @@ namespace MWWorld
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
-        //mPhysics->clearQueuedMovement();
+        mPhysics->clearQueuedMovement();
 
         if (mCurrentWorldSpace != cellName)
         {
@@ -992,7 +992,7 @@ namespace MWWorld
 
     void World::changeToExteriorCell (const ESM::Position& position)
     {
-        //mPhysics->clearQueuedMovement();
+        mPhysics->clearQueuedMovement();
 
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
