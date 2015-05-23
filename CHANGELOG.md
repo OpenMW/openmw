@@ -28,6 +28,7 @@
     Bug #2521: NPCs don't react to stealing when inventory menu is open.
     Bug #2525: Can't click on red dialogue choice [rise of house telvanni][60fffec]
     Bug #2530: GetSpellEffects not working as in vanilla
+    Bug #2557: Crash on first launch after choosing "Run installation wizard"
     Feature #139: Editor: Global Search & Replace
     Feature #1219: Editor: Add dialogue mode only columns
     Feature #2024: Hotkey for hand to hand (i.e. unequip any weapon)
