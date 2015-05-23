@@ -88,10 +88,6 @@ namespace MWWorld
             /// Return base node (can be a null pointer).
             osg::PositionAttitudeTransform* getBaseNode();
 
-            /// Set OGRE base node (can be a null pointer).
-            /// obsolete
-            void setBaseNodeOld (Ogre::SceneNode* base);
-
             /// Set base node (can be a null pointer).
             void setBaseNode (osg::PositionAttitudeTransform* base);
 

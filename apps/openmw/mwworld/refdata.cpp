@@ -128,10 +128,6 @@ namespace MWWorld
         return mBaseNode;
     }
 
-    void RefData::setBaseNodeOld(Ogre::SceneNode* base)
-    {
-    }
-
     void RefData::setBaseNode(osg::PositionAttitudeTransform *base)
     {
         mBase = base;
