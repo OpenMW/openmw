@@ -96,10 +96,10 @@ void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIt
 }
 
 MWWorld::InventoryStore::InventoryStore()
- : mSelectedEnchantItem(end())
+ : mListener(NULL)
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
- , mListener(NULL)
+ , mSelectedEnchantItem(end())
  , mRechargingItemsUpToDate(false)
 {
     initSlots (mSlots);
@@ -107,12 +107,12 @@ MWWorld::InventoryStore::InventoryStore()
 
 MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  : ContainerStore (store)
- , mSelectedEnchantItem(end())
  , mMagicEffects(store.mMagicEffects)
- , mFirstAutoEquip(store.mFirstAutoEquip)
  , mListener(store.mListener)
  , mUpdatesEnabled(store.mUpdatesEnabled)
+ , mFirstAutoEquip(store.mFirstAutoEquip)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
+ , mSelectedEnchantItem(end())
  , mRechargingItemsUpToDate(false)
 {
     copySlots (store);

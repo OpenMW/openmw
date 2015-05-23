@@ -31,6 +31,15 @@
         </BasisSkin>
     </Resource>
 
+    <Resource type="ResourceLayout" name="CustomMarkerButton" version="3.2.0">
+        <Widget type="Widget" skin="" position="0 0 16 16" name="Root">
+            <Widget type="ImageBox" skin="ImageBox" position="0 0 16 16" align="Stretch">
+                <Property key="ImageTexture" value="icons\map_marker_red.dds"/>
+                <Property key="NeedMouse" value="false"/>
+            </Widget>
+        </Widget>
+    </Resource>
+
     <Resource type="ResourceLayout" name="TabControl" version="3.2.0">
         <Widget type="Widget" skin="" position="5 5 89 60" name="Root">
             <UserString key="ButtonSkin" value="MW_Button_RightPadding"/>

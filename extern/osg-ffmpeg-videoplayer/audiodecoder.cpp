@@ -60,21 +60,21 @@ struct AudioResampler
 MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     : mVideoState(videoState)
     , mAVStream(*videoState->audio_st)
-    , mFrame(av_frame_alloc())
+    , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
+    , mOutputChannelLayout(0)
+    , mOutputSampleRate(0)
     , mFramePos(0)
     , mFrameSize(0)
     , mAudioClock(0.0)
+    , mDataBuf(NULL)
+    , mFrameData(NULL)
+    , mDataBufLen(0)
+    , mFrame(av_frame_alloc())
     , mAudioDiffAccum(0.0)
     , mAudioDiffAvgCoef(exp(log(0.01 / AUDIO_DIFF_AVG_NB)))
     /* Correct audio only if larger error than this */
     , mAudioDiffThreshold(2.0 * 0.050/* 50 ms */)
     , mAudioDiffAvgCount(0)
-    , mOutputSampleFormat(AV_SAMPLE_FMT_NONE)
-    , mOutputSampleRate(0)
-    , mOutputChannelLayout(0)
-    , mDataBuf(NULL)
-    , mFrameData(NULL)
-    , mDataBufLen(0)
 {
     mAudioResampler.reset(new AudioResampler());
 }

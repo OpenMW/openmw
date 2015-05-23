@@ -32,6 +32,10 @@ namespace CSVTools
         private:
 
             void replace (bool selection);
+
+        protected:
+
+            void showEvent (QShowEvent *event);
             
         public:
 

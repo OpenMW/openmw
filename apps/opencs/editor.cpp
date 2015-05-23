@@ -14,10 +14,11 @@
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
+
 CS::Editor::Editor ()
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),
-  mViewManager (mDocumentManager),
-  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL), mPid(""), mLock()
+  mViewManager (mDocumentManager), mPid(""),
+  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 

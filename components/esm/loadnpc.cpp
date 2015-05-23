@@ -143,7 +143,7 @@ namespace ESM
 
     void NPC::blank()
     {
-        mNpdtType = 0;
+        mNpdtType = NPC_DEFAULT;
         mNpdt52.mLevel = 0;
         mNpdt52.mStrength = mNpdt52.mIntelligence = mNpdt52.mWillpower = mNpdt52.mAgility =
             mNpdt52.mSpeed = mNpdt52.mEndurance = mNpdt52.mPersonality = mNpdt52.mLuck = 0;

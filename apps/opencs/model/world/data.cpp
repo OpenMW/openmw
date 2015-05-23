@@ -242,6 +242,19 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mTopicInfos.addAdapter (std::make_pair(&mTopicInfos.getColumn(index), new InfoListAdapter ()));
     mTopicInfos.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_ScriptText, ColumnBase::Display_ScriptLines));
+    // Special conditions
+    mTopicInfos.addColumn (new NestedParentColumn<Info> (Columns::ColumnId_InfoCondition));
+    index = mTopicInfos.getColumns()-1;
+    mTopicInfos.addAdapter (std::make_pair(&mTopicInfos.getColumn(index), new InfoConditionAdapter ()));
+    mTopicInfos.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_InfoCondFunc, ColumnBase::Display_InfoCondFunc));
+    // FIXME: don't have dynamic value enum delegate, use Display_String for now
+    mTopicInfos.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_InfoCondVar, ColumnBase::Display_String));
+    mTopicInfos.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_InfoCondComp, ColumnBase::Display_InfoCondComp));
+    mTopicInfos.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Value, ColumnBase::Display_Var));
 
     mJournalInfos.addColumn (new StringIdColumn<Info> (true));
     mJournalInfos.addColumn (new RecordStateColumn<Info>);

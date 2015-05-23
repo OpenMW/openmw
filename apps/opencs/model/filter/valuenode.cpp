@@ -9,7 +9,7 @@
 
 CSMFilter::ValueNode::ValueNode (int columnId, Type lowerType, Type upperType,
     double lower, double upper)
-: mColumnId (columnId), mLowerType (lowerType), mUpperType (upperType), mLower (lower), mUpper (upper){}
+: mColumnId (columnId), mLower (lower), mUpper (upper), mLowerType (lowerType), mUpperType (upperType){}
 
 bool CSMFilter::ValueNode::test (const CSMWorld::IdTableBase& table, int row,
     const std::map<int, int>& columns) const
@@ -27,7 +27,7 @@ bool CSMFilter::ValueNode::test (const CSMWorld::IdTableBase& table, int row,
     QVariant data = table.data (index);
 
     if (data.type()!=QVariant::Double && data.type()!=QVariant::Bool && data.type()!=QVariant::Int &&
-        data.type()!=QVariant::UInt)
+        data.type()!=QVariant::UInt && data.type()!=static_cast<QVariant::Type> (QMetaType::Float))
         return false;
 
     double value = data.toDouble();

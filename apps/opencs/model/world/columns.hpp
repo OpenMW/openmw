@@ -264,8 +264,13 @@ namespace CSMWorld
             ColumnId_SkillImpact = 240, // impact from magic effects
 
             ColumnId_InfoList = 241,
+            ColumnId_InfoCondition = 242,
+            ColumnId_InfoCondFunc = 243,
+            ColumnId_InfoCondVar = 244,
+            ColumnId_InfoCondComp = 245,
+            ColumnId_InfoCondValue = 246,
 
-            ColumnId_OriginalCell = 242,
+            ColumnId_OriginalCell = 247,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

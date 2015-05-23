@@ -33,9 +33,9 @@ QString getAspect(int x, int y)
 }
 
 Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
-    : mCfgMgr(cfg)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
     , mGraphicsSettings(graphicsSetting)
-    , QWidget(parent)
 {
     setObjectName ("GraphicsPage");
     setupUi(this);

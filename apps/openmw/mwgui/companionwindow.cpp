@@ -37,11 +37,11 @@ namespace MWGui
 
 CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* manager)
     : WindowBase("openmw_companion_window.layout")
+    , mSortModel(NULL)
+    , mModel(NULL)
+    , mSelectedItem(-1)
     , mDragAndDrop(dragAndDrop)
     , mMessageBoxManager(manager)
-    , mSelectedItem(-1)
-    , mModel(NULL)
-    , mSortModel(NULL)
 {
     getWidget(mCloseButton, "CloseButton");
     getWidget(mProfitLabel, "ProfitLabel");

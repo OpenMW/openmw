@@ -370,18 +370,17 @@ namespace MWScript
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
-                    MWWorld::Ptr updated;
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     {
                         MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
-                        updated = MWWorld::Ptr(ptr.getBase(), cell);
+                        ptr = MWWorld::Ptr(ptr.getBase(), cell);
                     }
                     else
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
                     }
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
                     float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
                     float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
