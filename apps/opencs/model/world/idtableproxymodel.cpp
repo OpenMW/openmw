@@ -53,3 +53,9 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModel
 {
     return QSortFilterProxyModel::lessThan(left, right);
 }
+
+void CSMWorld::IdTableProxyModel::refreshFilter()
+{
+    updateColumnMap();
+    invalidateFilter();
+}
