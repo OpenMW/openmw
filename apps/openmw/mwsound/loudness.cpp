@@ -31,8 +31,8 @@ namespace MWSound
                     value = ((char)(data[sample*advance]^0x80))/128.f;
                 else if (type == SampleType_Int16)
                 {
-                    value = *reinterpret_cast<const uint16_t*>(&data[sample*advance]);
-                    value /= float(std::numeric_limits<uint16_t>::max());
+                    value = *reinterpret_cast<const int16_t*>(&data[sample*advance]);
+                    value /= float(std::numeric_limits<int16_t>::max());
                 }
                 else if (type == SampleType_Float32)
                 {
