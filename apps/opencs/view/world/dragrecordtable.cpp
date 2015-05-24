@@ -17,8 +17,8 @@ void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTa
 }
 
 CSVWorld::DragRecordTable::DragRecordTable (CSMDoc::Document& document, QWidget* parent) :
-mDocument(document),
 QTableView(parent),
+mDocument(document),
 mEditLock(false)
 {}
 

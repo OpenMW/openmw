@@ -13,7 +13,7 @@ CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const PotionColumns& columns,
     const RefIdColumn *autoCalc)
 : InventoryRefIdAdapter<ESM::Potion> (UniversalId::Type_Potion, columns),
-  mAutoCalc (autoCalc), mColumns(columns)
+  mColumns(columns), mAutoCalc (autoCalc)
 {}
 
 QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,

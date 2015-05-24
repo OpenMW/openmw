@@ -31,6 +31,13 @@ namespace Launcher
     class UnshieldThread;
     class SettingsPage;
 
+    enum FirstRunDialogResult
+    {
+        FirstRunDialogResultFailure,
+        FirstRunDialogResultContinue,
+        FirstRunDialogResultWizard
+    };
+
 #ifndef WIN32
     bool expansions(Launcher::UnshieldThread& cd);
 #endif
@@ -44,7 +51,7 @@ namespace Launcher
         ~MainDialog();
 
         bool setup();
-        bool showFirstRunDialog();
+        FirstRunDialogResult showFirstRunDialog();
 
         bool reloadSettings();
         bool writeSettings();

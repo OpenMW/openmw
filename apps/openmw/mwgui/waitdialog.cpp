@@ -50,13 +50,13 @@ namespace MWGui
 
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
-        , mProgressBar()
         , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)
         , mFadeTimeRemaining(0)
         , mInterruptAt(-1)
+        , mProgressBar()
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");

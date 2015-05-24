@@ -56,11 +56,11 @@ namespace CSVRender
     //
 
     MouseState::MouseState(WorldspaceWidget *parent)
-        : mParent(parent), mPhysics(parent->mDocument.getPhysics()), mSceneManager(parent->getSceneManager())
-        , mCurrentObj(""), mMouseState(Mouse_Default), mOldPos(0,0), mMouseEventTimer(0), mPlane(0)
-        , mGrabbedSceneNode(""), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
-        , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f)
-        , mColIndexPosX(0), mColIndexPosY(0), mColIndexPosZ(0), mIdTableModel(0)
+        : mMouseState(Mouse_Default), mParent(parent), mPhysics(parent->mDocument.getPhysics())
+        , mSceneManager(parent->getSceneManager()), mOldPos(0,0), mCurrentObj(""), mGrabbedSceneNode("")
+        , mMouseEventTimer(0), mPlane(0), mOrigObjPos(Ogre::Vector3()), mOrigMousePos(Ogre::Vector3())
+        , mCurrentMousePos(Ogre::Vector3()), mOffset(0.0f), mIdTableModel(0), mColIndexPosX(0)
+        , mColIndexPosY(0), mColIndexPosZ(0)
     {
         const CSMWorld::RefCollection& references = mParent->mDocument.getData().getReferences();
 

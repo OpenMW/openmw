@@ -23,8 +23,8 @@ namespace MWGui
 
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
-        , mCurrentY(0)
         , mLastPos(0)
+        , mCurrentY(0)
     {
         setCoord(0, 0, 450, 300);
 
