@@ -176,7 +176,7 @@ namespace CSMWorld
 
             { ColumnId_ContainerContent, "Content" },
             { ColumnId_ItemCount, "Count" },
-            { ColumnId_InventoryItemId, "ID"},
+            { ColumnId_InventoryItemId, "Item ID"},
 
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
@@ -188,10 +188,10 @@ namespace CSMWorld
 
             { ColumnId_ActorInventory, "Inventory" },
             { ColumnId_SpellList, "Spells" },
-            { ColumnId_SpellId, "ID"},
+            { ColumnId_SpellId, "Spell ID"},
 
             { ColumnId_NpcDestinations, "Destinations" },
-            { ColumnId_DestinationCell, "Cell"},
+            { ColumnId_DestinationCell, "Dest Cell"},
             { ColumnId_PosX, "Dest X"},
             { ColumnId_PosY, "Dest Y"},
             { ColumnId_PosZ, "Dest Z"},
@@ -224,17 +224,17 @@ namespace CSMWorld
             { ColumnId_BoltSound, "Bolt Sound" },
 
             { ColumnId_PathgridPoints, "Points" },
-            { ColumnId_PathgridIndex, "Index" },
+            { ColumnId_PathgridIndex, "pIndex" },
             { ColumnId_PathgridPosX, "X" },
             { ColumnId_PathgridPosY, "Y" },
             { ColumnId_PathgridPosZ, "Z" },
             { ColumnId_PathgridEdges, "Edges" },
-            { ColumnId_PathgridEdgeIndex, "Index" },
+            { ColumnId_PathgridEdgeIndex, "eIndex" },
             { ColumnId_PathgridEdge0, "Point 0" },
             { ColumnId_PathgridEdge1, "Point 1" },
 
             { ColumnId_RegionSounds, "Sounds" },
-            { ColumnId_SoundName, "Name" },
+            { ColumnId_SoundName, "Sound Name" },
             { ColumnId_SoundChance, "Chance" },
 
             { ColumnId_FactionReactions, "Reactions" },
@@ -250,7 +250,7 @@ namespace CSMWorld
             { ColumnId_AiPackageList, "Ai Packages" },
             { ColumnId_AiPackageType, "Package" },
             { ColumnId_AiWanderDist, "Wander Dist" },
-            { ColumnId_AiDuration, "Duration" },
+            { ColumnId_AiDuration, "Ai Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
             { ColumnId_AiWanderIdle, "Wander Idle" },
             { ColumnId_AiWanderRepeat, "Wander Repeat" },
@@ -260,11 +260,11 @@ namespace CSMWorld
 
             { ColumnId_PartRefList, "Part Reference" },
             { ColumnId_PartRefType, "Type" },
-            { ColumnId_PartRefMale, "Male" },
-            { ColumnId_PartRefFemale, "Female" },
+            { ColumnId_PartRefMale, "Male Part" },
+            { ColumnId_PartRefFemale, "Female Part" },
 
             { ColumnId_LevelledList,"Levelled List" },
-            { ColumnId_LevelledItemId,"Item ID" },
+            { ColumnId_LevelledItemId,"Levelled Item" },
             { ColumnId_LevelledItemLevel,"Level" },
             { ColumnId_LevelledItemType, "Calculate all levels <= player" },
             { ColumnId_LevelledItemTypeEach, "Select a new item each instance" },
@@ -278,7 +278,7 @@ namespace CSMWorld
             { ColumnId_InfoCondFunc, "Function" },
             { ColumnId_InfoCondVar, "Func/Variable" },
             { ColumnId_InfoCondComp, "Comp" },
-            { ColumnId_InfoCondValue, "Value" },
+            { ColumnId_InfoCondValue, "Values" },
             { ColumnId_OriginalCell, "Original Cell" },
 
             { ColumnId_NpcAttributes, "Attributes" },
