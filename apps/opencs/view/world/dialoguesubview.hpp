@@ -165,7 +165,7 @@ namespace CSVWorld
         Q_OBJECT
             QDataWidgetMapper *mWidgetMapper;
             QDataWidgetMapper *mNestedTableMapper;
-            DialogueDelegateDispatcher mDispatcher;
+            DialogueDelegateDispatcher *mDispatcher;
             DialogueDelegateDispatcher *mNestedTableDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;

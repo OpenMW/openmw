@@ -136,6 +136,24 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+    // Race attributes
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes));
+    index = mRaces.getColumns()-1;
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceAttributeAdapter()));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceAttributes, ColumnBase::Display_String, false));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceMaleValue, ColumnBase::Display_Integer));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceFemaleValue, ColumnBase::Display_Integer));
+    // Race skill bonus
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceSkillBonus));
+    index = mRaces.getColumns()-1;
+    mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceSkillsBonusAdapter()));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceSkill, ColumnBase::Display_RaceSkill));
+    mRaces.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_RaceBonus, ColumnBase::Display_Integer));
 
     mSounds.addColumn (new StringIdColumn<ESM::Sound>);
     mSounds.addColumn (new RecordStateColumn<ESM::Sound>);
@@ -273,6 +291,25 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorSky, ESM::Cell::QuasiEx));
     mCells.addColumn (new RegionColumn<Cell>);
     mCells.addColumn (new RefNumCounterColumn<Cell>);
+    // Misc Cell data
+    mCells.addColumn (new NestedParentColumn<Cell> (Columns::ColumnId_Cell,
+        ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
+    index = mCells.getColumns()-1;
+    mCells.addAdapter (std::make_pair(&mCells.getColumn(index), new CellListAdapter ()));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Interior, ColumnBase::Display_Boolean));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Ambient, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Sunlight, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_Fog, ColumnBase::Display_Integer));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_FogDensity, ColumnBase::Display_Float));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_WaterLevel, ColumnBase::Display_Float));
+    mCells.getNestableColumn(index)->addColumn(
+        new NestedChildColumn (Columns::ColumnId_MapColor, ColumnBase::Display_Integer));
 
     mEnchantments.addColumn (new StringIdColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new RecordStateColumn<ESM::Enchantment>);
@@ -447,7 +484,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new IdTree (&mTopicInfos, &mTopicInfos, IdTable::Feature_ReorderWithinTopic),
         UniversalId::Type_TopicInfo);
     addModel (new IdTable (&mJournalInfos, IdTable::Feature_ReorderWithinTopic), UniversalId::Type_JournalInfo);
-    addModel (new IdTable (&mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
+    addModel (new IdTree (&mCells, &mCells, IdTable::Feature_ViewId), UniversalId::Type_Cell);
     addModel (new IdTree (&mEnchantments, &mEnchantments), UniversalId::Type_Enchantment);
     addModel (new IdTable (&mBodyParts), UniversalId::Type_BodyPart);
     addModel (new IdTable (&mSoundGens), UniversalId::Type_SoundGen);

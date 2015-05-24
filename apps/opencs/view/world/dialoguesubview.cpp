@@ -20,6 +20,7 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QHeaderView>
+#include <QScrollBar>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -347,10 +348,13 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 CSVWorld::EditWidget::~EditWidget()
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
-    {
         delete mNestedModels[i];
-    }
-    delete mNestedTableDispatcher;
+
+    if (mDispatcher)
+        delete mDispatcher;
+
+    if (mNestedTableDispatcher)
+        delete mNestedTableDispatcher;
 }
 
 CSVWorld::EditWidget::EditWidget(QWidget *parent,
@@ -359,7 +363,7 @@ CSVWorld::EditWidget::EditWidget(QWidget *parent,
 QScrollArea(parent),
 mWidgetMapper(NULL),
 mNestedTableMapper(NULL),
-mDispatcher(this, table, commandDispatcher, document),
+mDispatcher(NULL),
 mNestedTableDispatcher(NULL),
 mMainWidget(NULL),
 mTable(table),
@@ -368,41 +372,41 @@ mDocument (document)
 {
     remake (row);
 
-    connect(&mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
+    connect(mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 }
 
 void CSVWorld::EditWidget::remake(int row)
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
-    {
         delete mNestedModels[i];
-    }
-    mNestedModels.clear();
-    delete mNestedTableDispatcher;
 
-    if (mMainWidget)
-    {
-        delete mMainWidget;
-        mMainWidget = 0;
-    }
-    mMainWidget = new QWidget (this);
+    mNestedModels.clear();
+
+    if (mDispatcher)
+        delete mDispatcher;
+    mDispatcher = new DialogueDelegateDispatcher(0/*this*/, mTable, mCommandDispatcher, mDocument);
+
+    if (mNestedTableDispatcher)
+        delete mNestedTableDispatcher;
 
     //not sure if widget mapper can handle deleting the widgets that were mapped
     if (mWidgetMapper)
-    {
         delete mWidgetMapper;
-        mWidgetMapper = 0;
-    }
-    if (mNestedTableMapper)
-    {
-        delete mNestedTableMapper;
-        mNestedTableMapper = 0;
-    }
-    mWidgetMapper = new QDataWidgetMapper (this);
 
+    mWidgetMapper = new QDataWidgetMapper (this);
     mWidgetMapper->setModel(mTable);
-    mWidgetMapper->setItemDelegate(&mDispatcher);
+    mWidgetMapper->setItemDelegate(mDispatcher);
+
+    if (mNestedTableMapper)
+        delete mNestedTableMapper;
+
+    if (mMainWidget)
+    {
+        QWidget *del = this->takeWidget();
+        del->deleteLater();
+    }
+    mMainWidget = new QWidget (this);
 
     QFrame* line = new QFrame(mMainWidget);
     line->setObjectName(QString::fromUtf8("line"));
@@ -457,7 +461,14 @@ void CSVWorld::EditWidget::remake(int row)
                 NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
                 // FIXME: does not work well when enum delegates are used
                 //table->resizeColumnsToContents();
-                table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+
+                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                {
+                    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+                    table->setEnabled(false);
+                }
+                else
+                    table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
@@ -469,14 +480,16 @@ void CSVWorld::EditWidget::remake(int row)
                     new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
 
                 label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
+                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                    label->setEnabled(false);
 
                 tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
-                mDispatcher.makeDelegate (display);
-                QWidget* editor = mDispatcher.makeEditor (display, (mTable->index (row, i)));
+                mDispatcher->makeDelegate (display);
+                QWidget* editor = mDispatcher->makeEditor (display, (mTable->index (row, i)));
 
                 if (editor)
                 {
@@ -499,6 +512,12 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget (editor, unlocked, 1);
                         ++unlocked;
                     }
+
+                    if(mTable->index(row, i).data().type() == QVariant::UserType)
+                    {
+                        editor->setEnabled(false);
+                        label->setEnabled(false);
+                    }
                 }
             }
             else
@@ -511,7 +530,7 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedTableMapper->setModel(mNestedModels.back());
                 // FIXME: lack MIME support?
                 mNestedTableDispatcher =
-                        new DialogueDelegateDispatcher (this, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
+                        new DialogueDelegateDispatcher (0/*this*/, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
                 mNestedTableMapper->setItemDelegate(mNestedTableDispatcher);
 
                 int columnCount =
@@ -546,6 +565,12 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget (label, unlocked, 0);
                         unlockedLayout->addWidget (editor, unlocked, 1);
                         ++unlocked;
+
+                        if(mNestedModels.back()->index(0, col).data().type() == QVariant::UserType)
+                        {
+                            editor->setEnabled(false);
+                            label->setEnabled(false);
+                        }
                     }
                 }
                 mNestedTableMapper->setCurrentModelIndex(mNestedModels.back()->index(0, 0));
@@ -763,6 +788,9 @@ void CSVWorld::DialogueSubView::dataChanged (const QModelIndex & index)
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
 
         mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
+        int y = mEditWidget->verticalScrollBar()->value();
+        mEditWidget->remake (index.row());
+        mEditWidget->verticalScrollBar()->setValue(y);
     }
 }
 
