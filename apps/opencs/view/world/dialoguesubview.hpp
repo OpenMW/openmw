@@ -235,6 +235,8 @@ namespace CSVWorld
                                       const CSMDoc::Document* document);
 
             void requestFocus (const std::string& id);
+
+            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
 }
 

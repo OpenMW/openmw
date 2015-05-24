@@ -578,6 +578,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
+    connect(mTable, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
 
     changeCurrentId(id.getId());
 
@@ -740,6 +741,9 @@ void CSVWorld::DialogueSubView::nextId ()
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
+    if (!mEditWidget) // hack to indicate that mCurrentId is no longer valid
+        return;
+
     mLocked = locked;
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
@@ -763,6 +767,21 @@ void CSVWorld::DialogueSubView::dataChanged (const QModelIndex & index)
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
 
         mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
+    }
+}
+
+void CSVWorld::DialogueSubView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
+{
+    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
+
+    if (currentIndex.isValid() && currentIndex.row() >= start && currentIndex.row() <= end)
+    {
+        if(mEditWidget)
+        {
+            delete mEditWidget;
+            mEditWidget = 0;
+        }
+        emit closeRequest(this);
     }
 }
 
