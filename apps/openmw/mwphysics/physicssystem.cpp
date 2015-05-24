@@ -758,9 +758,37 @@ namespace MWPhysics
         return std::make_pair(false, osg::Vec3f());
     }
 
-    std::vector<std::string> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)
+    class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
     {
-        return std::vector<std::string>();//mEngine->getCollisions(ptr.getRefData().getBaseNodeOld()->getName(), collisionGroup, collisionMask);
+    public:
+        std::vector<MWWorld::Ptr> mResult;
+
+        virtual	btScalar addSingleResult(btManifoldPoint& cp,
+                                            const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,
+                                            const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+        {
+            const PtrHolder* holder = static_cast<const PtrHolder*>(colObj0Wrap->m_collisionObject->getUserPointer());
+            if (holder)
+                mResult.push_back(holder->getPtr());
+            return 0.f;
+        }
+    };
+
+    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)
+    {
+        btCollisionObject* me = NULL;
+
+        ObjectMap::iterator found = mObjects.find(ptr);
+        if (found != mObjects.end())
+            me = found->second->getCollisionObject();
+        else
+            return std::vector<MWWorld::Ptr>();
+
+        ContactTestResultCallback resultCallback;
+        resultCallback.m_collisionFilterGroup = collisionGroup;
+        resultCallback.m_collisionFilterMask = collisionMask;
+        mDynamicsWorld->contactTest(me, resultCallback);
+        return resultCallback.mResult;
     }
 
     osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, float maxHeight)

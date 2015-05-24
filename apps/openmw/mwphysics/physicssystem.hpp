@@ -77,7 +77,7 @@ namespace MWPhysics
 
             void stepSimulation(float dt);
 
-            std::vector<std::string> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
+            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor,

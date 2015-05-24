@@ -48,6 +48,7 @@
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
+#include "../mwphysics/collisiontype.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -1420,7 +1421,6 @@ namespace MWWorld
 
     void World::processDoors(float duration)
     {
-#if 0
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
         while (it != mDoorStates.end())
         {
@@ -1433,19 +1433,18 @@ namespace MWWorld
             }
             else
             {
-                float oldRot = Ogre::Radian(it->first.getRefData().getLocalRotation().rot[2]).valueDegrees();
-                float diff = duration * 90;
+                float oldRot = osg::RadiansToDegrees(it->first.getRefData().getLocalRotation().rot[2]);
+                float diff = duration * 90.f;
                 float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second == 1 ? 1 : -1)), 90.f);
                 localRotateObject(it->first, 0, 0, targetRot);
 
                 bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
 
                 /// \todo should use convexSweepTest here
-                std::vector<std::string> collisions = mPhysics->getCollisions(it->first, OEngine::Physic::CollisionType_Actor
-                                                                              , OEngine::Physic::CollisionType_Actor);
-                for (std::vector<std::string>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Actor, MWPhysics::CollisionType_Actor);
+                for (std::vector<MWWorld::Ptr>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
-                    MWWorld::Ptr ptr = getPtrViaHandle(*cit);
+                    MWWorld::Ptr ptr = *cit;
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
@@ -1471,7 +1470,6 @@ namespace MWWorld
                     ++it;
             }
         }
-#endif
     }
 
     bool World::toggleCollisionMode()
