@@ -6,6 +6,9 @@
 #include <string>
 
 #include <osg/ref_ptr>
+#include <osg/Object>
+
+#include "../mwworld/ptr.hpp"
 
 namespace osg
 {
@@ -24,7 +27,6 @@ namespace Resource
 
 namespace MWWorld
 {
-    class Ptr;
     class CellStore;
 }
 
@@ -32,6 +34,27 @@ namespace MWRender{
 
 class Animation;
 
+class PtrHolder : public osg::Object
+{
+public:
+    PtrHolder(MWWorld::Ptr ptr)
+        : mPtr(ptr)
+    {
+    }
+
+    PtrHolder()
+    {
+    }
+
+    PtrHolder(const PtrHolder& copy, const osg::CopyOp& copyop)
+        : mPtr(copy.mPtr)
+    {
+    }
+
+    META_Object(MWRender, PtrHolder)
+
+    MWWorld::Ptr mPtr;
+};
 
 class Objects{
     typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;

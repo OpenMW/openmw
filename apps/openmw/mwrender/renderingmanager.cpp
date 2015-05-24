@@ -8,7 +8,10 @@
 #include <osg/Fog>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
+#include <osg/UserDataContainer>
+#include <osg/ComputeBoundsVisitor>
 
+#include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <osgViewer/Viewer>
@@ -292,6 +295,84 @@ namespace MWRender
         mObjects->removeObject(ptr);
     }
 
+    osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
+    {
+        if (!ptr.getRefData().getBaseNode())
+            return osg::Vec4f();
+
+        osg::ComputeBoundsVisitor computeBoundsVisitor;
+        ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
+
+        osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
+        float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
+        for (int i=0; i<8; ++i)
+        {
+            osg::Vec3f corner = computeBoundsVisitor.getBoundingBox().corner(i);
+            corner = corner * viewProj;
+
+            float x = (corner.x() + 1.f) * 0.5f;
+            float y = (corner.y() - 1.f) * (-0.5f);
+
+            if (x < min_x)
+            min_x = x;
+
+            if (x > max_x)
+            max_x = x;
+
+            if (y < min_y)
+            min_y = y;
+
+            if (y > max_y)
+            max_y = y;
+        }
+
+        return osg::Vec4f(min_x, min_y, max_x, max_y);
+    }
+
+    MWWorld::Ptr RenderingManager::getFacedObject(const float nX, const float nY, float maxDistance, bool ignorePlayer)
+    {
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::LineSegmentIntersector::PROJECTION,
+                                                                                                       nX * 2.f - 1.f, nY * (-2.f) + 1.f));
+
+        osg::Vec3d dist (0.f, 0.f, -maxDistance);
+
+        dist = dist * mViewer->getCamera()->getProjectionMatrix();
+
+        osg::Vec3d end = intersector->getEnd();
+        end.z() = dist.z();
+        intersector->setEnd(end);
+        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
+
+        osgUtil::IntersectionVisitor intersectionVisitor(intersector);
+        if (ignorePlayer)
+            intersectionVisitor.setTraversalMask(intersectionVisitor.getTraversalMask() & (~Mask_Player));
+
+        mViewer->getCamera()->accept(intersectionVisitor);
+
+        if (intersector->containsIntersections())
+        {
+            osgUtil::LineSegmentIntersector::Intersection intersection = intersector->getFirstIntersection();
+
+            PtrHolder* ptrHolder = NULL;
+            for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+            {
+                osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
+                if (!userDataContainer)
+                    continue;
+                for (unsigned int i=0; i<userDataContainer->getNumUserObjects(); ++i)
+                {
+                    if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
+                        ptrHolder = p;
+                }
+            }
+
+            if (ptrHolder)
+                return ptrHolder->mPtr;
+        }
+
+        return MWWorld::Ptr();
+    }
+
     void RenderingManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         mObjects->updatePtr(old, updated);
@@ -332,6 +413,7 @@ namespace MWRender
         if (!mPlayerNode)
         {
             mPlayerNode = new osg::PositionAttitudeTransform;
+            mPlayerNode->setNodeMask(Mask_Player);
             mLightRoot->addChild(mPlayerNode);
         }
 

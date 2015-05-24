@@ -6,6 +6,7 @@
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/PositionAttitudeTransform>
+#include <osg/UserDataContainer>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -102,6 +103,8 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 
     osg::ref_ptr<osg::PositionAttitudeTransform> insert (new osg::PositionAttitudeTransform);
     cellnode->addChild(insert);
+
+    insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
     const float *f = ptr.getRefData().getPosition().pos;
 
@@ -215,6 +218,14 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     }
 
     osg::Node* objectNode = cur.getRefData().getBaseNode();
+
+    osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
+    if (userDataContainer)
+        for (unsigned int i=0; i<userDataContainer->getNumUserObjects(); ++i)
+        {
+            if (dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
+                userDataContainer->setUserObject(i, new PtrHolder(cur));
+        }
 
     if (objectNode->getNumParents())
         objectNode->getParent(0)->removeChild(objectNode);

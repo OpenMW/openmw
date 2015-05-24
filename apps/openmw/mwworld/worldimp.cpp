@@ -1031,11 +1031,11 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject()
     {
-        std::string facedHandle;
+        MWWorld::Ptr facedObject;
 
         if (MWBase::Environment::get().getWindowManager()->isGuiMode() &&
                 MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            getFacedHandle(facedHandle, getMaxActivationDistance() * 50, false);
+            facedObject = getFacedObject(getMaxActivationDistance() * 50, false);
         else
         {
             float telekinesisRangeBonus =
@@ -1045,13 +1045,10 @@ namespace MWWorld
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
 
-            getFacedHandle(facedHandle, activationDistance);
+            facedObject = getFacedObject(activationDistance);
         }
 
-        //if (facedHandle.empty())
-            return MWWorld::Ptr();
-
-        //return getPtrViaHandle(facedHandle);
+        return facedObject;
     }
 
     std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
@@ -1593,11 +1590,8 @@ namespace MWWorld
 
         mWorldScene->update (duration, paused);
 
-        /*
-        performUpdateSceneQueries ();
-
         updateWindowManager ();
-        */
+
         updateSoundListener();
         /*
         if (!paused && mPlayer->getPlayer().getCell()->isExterior())
@@ -1648,57 +1642,27 @@ namespace MWWorld
         // retrieve object dimensions so we know where to place the floating label
         if (!object.isEmpty ())
         {
-            Ogre::SceneNode* node = object.getRefData().getBaseNodeOld();
-            Ogre::AxisAlignedBox bounds = node->_getWorldAABB();
-            if (bounds.isFinite())
-            {
-                Ogre::Vector4 screenCoords;// = mRendering->boundingBoxToScreen(bounds);
-                MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
-                    screenCoords[0], screenCoords[1], screenCoords[2], screenCoords[3]);
-            }
+            osg::Vec4f screenBounds = mRendering->getScreenBounds(object);
+
+            MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
+                screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
         }
     }
 
-    void World::performUpdateSceneQueries ()
+    MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
-#if 0
-        if (!mRendering->occlusionQuerySupported())
-        {
-            // cast a ray from player to sun to detect if the sun is visible
-            // this is temporary until we find a better place to put this code
-            // currently its here because we need to access the physics system
-            const float* p = mPlayer->getPlayer().getRefData().getPosition().pos;
-            Vector3 sun = mRendering->getSkyManager()->getRealSunPos();
-            mRendering->getSkyManager()->setGlare(!mPhysics->castRay(Ogre::Vector3(p[0], p[1], p[2]), sun));
-        }
-#endif
-    }
+        maxDistance += mRendering->getCameraDistance();
 
-    void World::getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer)
-    {
-        //maxDistance += mRendering->getCameraDistance();
-
-        std::vector < std::pair < float, std::string > > results;
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            //results = mPhysics->getFacedHandles(x, y, maxDistance);
+            return mRendering->getFacedObject(x, y, maxDistance, ignorePlayer);
         }
         else
         {
-            //results = mPhysics->getFacedHandles(maxDistance);
+            return mRendering->getFacedObject(0.5f, 0.5f, maxDistance, ignorePlayer);
         }
-
-        if (ignorePlayer &&
-                !results.empty() && results.front().second == "player")
-            results.erase(results.begin());
-
-        if (results.empty()
-                || results.front().second.find("HeightField") != std::string::npos) // Blocked by terrain
-            facedHandle = "";
-        else
-            facedHandle = results.front().second;
     }
 
     bool World::isCellExterior() const
@@ -2744,10 +2708,7 @@ namespace MWWorld
         if (actor == getPlayerPtr())
         {
             // For the player, use camera to aim
-            std::string facedHandle;
-            getFacedHandle(facedHandle, distance);
-            //if (!facedHandle.empty())
-            //    target = getPtrViaHandle(facedHandle);
+            target = getFacedObject(distance);
         }
         else
         {

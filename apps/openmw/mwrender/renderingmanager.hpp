@@ -73,6 +73,13 @@ namespace MWRender
 
         void removeObject(const MWWorld::Ptr& ptr);
 
+        /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
+        /// where (0,0) is the top left corner.
+        MWWorld::Ptr getFacedObject(const float nX, const float nY, float maxDistance, bool ignorePlayer);
+
+        /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
+        osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
+
         void setSkyEnabled(bool enabled);
 
         bool toggleRenderMode(RenderMode mode);

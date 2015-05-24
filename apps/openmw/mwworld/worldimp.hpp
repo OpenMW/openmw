@@ -121,8 +121,7 @@ namespace MWWorld
 
             void updateSoundListener();
             void updateWindowManager ();
-            void performUpdateSceneQueries ();
-            void getFacedHandle(std::string& facedHandle, float maxDistance, bool ignorePlayer=true);
+            MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
             void removeContainerScripts(const Ptr& reference);
             void addContainerScripts(const Ptr& reference, CellStore* cell);
