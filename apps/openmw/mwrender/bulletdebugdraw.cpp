@@ -28,19 +28,39 @@ DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btDynamicsWorld *w
     mParentNode->addChild(mGeode);
     mGeode->setNodeMask(Mask_Debug);
 
-    mGeometry = new osg::Geometry;
+    createGeometry();
 
-    mVertices = new osg::Vec3Array;
-
-    mDrawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
-
-    mGeometry->setUseDisplayList(false);
-    mGeometry->setVertexArray(mVertices);
-    mGeometry->setDataVariance(osg::Object::DYNAMIC);
-    mGeometry->addPrimitiveSet(mDrawArrays);
-
-    mGeode->addDrawable(mGeometry);
     mParentNode->addChild(mGeode);
+}
+
+void DebugDrawer::createGeometry()
+{
+    if (!mGeometry)
+    {
+        mGeometry = new osg::Geometry;
+
+        mVertices = new osg::Vec3Array;
+
+        mDrawArrays = new osg::DrawArrays(osg::PrimitiveSet::LINES);
+
+        mGeometry->setUseDisplayList(false);
+        mGeometry->setVertexArray(mVertices);
+        mGeometry->setDataVariance(osg::Object::DYNAMIC);
+        mGeometry->addPrimitiveSet(mDrawArrays);
+
+        mGeode->addDrawable(mGeometry);
+    }
+}
+
+void DebugDrawer::destroyGeometry()
+{
+    if (mGeometry)
+    {
+        mGeode->removeDrawable(mGeometry);
+        mGeometry = NULL;
+        mVertices = NULL;
+        mDrawArrays = NULL;
+    }
 }
 
 DebugDrawer::~DebugDrawer()
@@ -81,11 +101,9 @@ void DebugDrawer::setDebugMode(int isOn)
     mDebugOn = (isOn == 0) ? false : true;
 
     if (!mDebugOn)
-    {
-        mVertices->clear();
-        mVertices->releaseGLObjects(0);
-        mGeometry->releaseGLObjects(0);
-    }
+        destroyGeometry();
+    else
+        createGeometry();
 }
 
 int DebugDrawer::getDebugMode() const

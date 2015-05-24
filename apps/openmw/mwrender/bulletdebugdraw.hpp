@@ -29,6 +29,9 @@ protected:
 
     bool mDebugOn;
 
+    void createGeometry();
+    void destroyGeometry();
+
 public:
 
     DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btDynamicsWorld *world);
