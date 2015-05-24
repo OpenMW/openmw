@@ -27,8 +27,6 @@
 
 #include <components/esm/loadcell.hpp>
 
-#include "../mwbase/world.hpp"
-
 #include "sky.hpp"
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
@@ -417,9 +415,10 @@ namespace MWRender
             mLightRoot->addChild(mPlayerNode);
         }
 
-        player.getRefData().setBaseNode(mPlayerNode);
+        mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);
+        mPlayerNode->getUserDataContainer()->addUserObject(new PtrHolder(player));
 
-        //attachCameraTo(player);
+        player.getRefData().setBaseNode(mPlayerNode);
     }
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
