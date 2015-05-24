@@ -137,6 +137,7 @@ namespace MWRender
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
+        float mNearClip;
         float mViewDistance;
         float mFieldOfView;
 

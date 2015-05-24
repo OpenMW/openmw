@@ -132,7 +132,7 @@ namespace MWRender
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
-        if (!Settings::Manager::getBool("small feature culling", "Viewing distance"))
+        if (!Settings::Manager::getBool("small feature culling", "Camera"))
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
         else
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
@@ -144,7 +144,8 @@ namespace MWRender
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor));
 
-        mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
+        mNearClip = Settings::Manager::getFloat("near clip", "Camera");
+        mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
     }
@@ -372,7 +373,7 @@ namespace MWRender
         double fovy, aspect, zNear, zFar;
         mViewer->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
         fovy = mFieldOfView;
-        zNear = 5.f;
+        zNear = mNearClip;
         zFar = mViewDistance;
         mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
     }
@@ -401,9 +402,9 @@ namespace MWRender
                 mFieldOfView = Settings::Manager::getFloat("field of view", "General");
                 updateProjectionMatrix();
             }
-            else if (it->first == "Viewing distance" && it->second == "viewing distance")
+            else if (it->first == "Camera" && it->second == "viewing distance")
             {
-                mViewDistance = Settings::Manager::getFloat("viewing distance", "Viewing distance");
+                mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
                 mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
