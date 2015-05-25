@@ -378,6 +378,13 @@ mDocument (document)
 
 void CSVWorld::EditWidget::remake(int row)
 {
+    if (mMainWidget)
+    {
+        QWidget *del = this->takeWidget();
+        del->deleteLater();
+    }
+    mMainWidget = new QWidget (this);
+
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
         delete mNestedModels[i];
 
@@ -401,12 +408,6 @@ void CSVWorld::EditWidget::remake(int row)
     if (mNestedTableMapper)
         delete mNestedTableMapper;
 
-    if (mMainWidget)
-    {
-        QWidget *del = this->takeWidget();
-        del->deleteLater();
-    }
-    mMainWidget = new QWidget (this);
 
     QFrame* line = new QFrame(mMainWidget);
     line->setObjectName(QString::fromUtf8("line"));
