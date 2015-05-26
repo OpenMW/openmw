@@ -245,7 +245,8 @@ CSMWorld::RefIdCollection::RefIdCollection()
         actorsColumns.mServices.insert (std::make_pair (&mColumns.back(), sServiceTable[i].mFlag));
     }
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AutoCalc, ColumnBase::Display_Boolean));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AutoCalc, ColumnBase::Display_Boolean,
+            ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     const RefIdColumn *autoCalc = &mColumns.back();
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_ApparatusType,

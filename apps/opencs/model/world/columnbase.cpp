@@ -138,8 +138,8 @@ bool CSMWorld::NestableColumn::hasChildren() const
 }
 
 CSMWorld::NestedChildColumn::NestedChildColumn (int id,
-    CSMWorld::ColumnBase::Display display, bool isEditable)
-    : NestableColumn (id, display, CSMWorld::ColumnBase::Flag_Dialogue) , mIsEditable(isEditable)
+    CSMWorld::ColumnBase::Display display, int flags, bool isEditable)
+    : NestableColumn (id, display, flags) , mIsEditable(isEditable)
 {}
 
 bool CSMWorld::NestedChildColumn::isEditable () const
