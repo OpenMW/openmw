@@ -117,7 +117,7 @@ namespace MWRender
         float mMapWorldSize;
 
         float mAngle;
-        const osg::Vec2f rotatePoint(const osg::Vec2f& p, const osg::Vec2f& c, const float angle);
+        const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
 
         void requestExteriorMap(MWWorld::CellStore* cell);
         void requestInteriorMap(MWWorld::CellStore* cell);

@@ -73,10 +73,10 @@ LocalMap::~LocalMap()
         mRoot->removeChild(*it);
 }
 
-const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& p, const osg::Vec2f& c, const float angle)
+const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
 {
-    return osg::Vec2f( std::cos(angle) * (p.x() - c.x()) - std::sin(angle) * (p.y() - c.y()) + c.x(),
-                    std::sin(angle) * (p.x() - c.x()) + std::cos(angle) * (p.y() - c.y()) + c.y());
+    return osg::Vec2f( std::cos(angle) * (point.x() - center.x()) - std::sin(angle) * (point.y() - center.y()) + center.x(),
+                    std::sin(angle) * (point.x() - center.x()) + std::cos(angle) * (point.y() - center.y()) + center.y());
 }
 
 void LocalMap::clear()
@@ -330,12 +330,16 @@ void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
     mAngle = std::atan2(north.x(), north.y());
 
     // Rotate the cell and merge the rotated corners to the bounding box
-    osg::Vec2f _center(bounds.center().x(), bounds.center().y());
+    osg::Vec2f origCenter(bounds.center().x(), bounds.center().y());
+    osg::Vec3f origCorners[8];
+    for (int i=0; i<8; ++i)
+        origCorners[i] = mBounds.corner(i);
+
     for (int i=0; i<8; ++i)
     {
-        osg::Vec3f corner = mBounds.corner(i);
+        osg::Vec3f corner = origCorners[i];
         osg::Vec2f corner2d (corner.x(), corner.y());
-        corner2d = rotatePoint(corner2d, _center, mAngle);
+        corner2d = rotatePoint(corner2d, origCenter, mAngle);
         mBounds.expandBy(osg::Vec3f(corner2d.x(), corner2d.y(), 0));
     }
 
