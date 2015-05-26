@@ -59,7 +59,8 @@ public:
 };
 
 RigGeometry::RigGeometry()
-    : mFirstFrame(true)
+    : mSkeleton(NULL)
+    , mFirstFrame(true)
     , mBoundsFirstFrame(true)
 {
     setCullCallback(new UpdateRigGeometry);
@@ -69,6 +70,7 @@ RigGeometry::RigGeometry()
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : osg::Geometry(copy, copyop)
+    , mSkeleton(NULL)
     , mInfluenceMap(copy.mInfluenceMap)
     , mFirstFrame(copy.mFirstFrame)
     , mBoundsFirstFrame(copy.mBoundsFirstFrame)

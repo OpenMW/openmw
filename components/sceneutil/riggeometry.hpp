@@ -46,7 +46,7 @@ namespace SceneUtil
 
     private:
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
-        osg::ref_ptr<Skeleton> mSkeleton;
+        Skeleton* mSkeleton;
 
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
 
