@@ -17,6 +17,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -101,7 +102,7 @@ namespace MWRender
 
         mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
-        mObjects->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
+        mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
 

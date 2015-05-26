@@ -181,7 +181,8 @@ namespace MWGui
 
     void LoadingScreen::setProgress (size_t value)
     {
-        if (value - mProgress < mProgressBar->getScrollRange()/100.f)
+        // skip expensive update if there isn't enough visible progress
+        if (value - mProgress < mProgressBar->getScrollRange()/200.f)
             return;
         mProgress = value;
         mProgressBar->setScrollPosition(0);

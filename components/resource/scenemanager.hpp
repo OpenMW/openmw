@@ -24,6 +24,11 @@ namespace NifOsg
     class KeyframeHolder;
 }
 
+namespace osgUtil
+{
+    class IncrementalCompileOperation;
+}
+
 namespace Resource
 {
 
@@ -56,6 +61,9 @@ namespace Resource
         /// in cases where multiple contexts are used over the lifetime of the application.
         void releaseGLObjects(osg::State* state);
 
+        /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
+        void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
+
         const VFS::Manager* getVFS() const;
 
         Resource::TextureManager* getTextureManager();
@@ -63,6 +71,8 @@ namespace Resource
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
+
+        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         // observer_ptr?
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;

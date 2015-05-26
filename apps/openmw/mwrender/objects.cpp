@@ -7,8 +7,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
 
-#include <osgUtil/IncrementalCompileOperation>
-
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
 
@@ -81,11 +79,6 @@ Objects::~Objects()
     mCellSceneNodes.clear();
 }
 
-void Objects::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
-{
-    mIncrementalCompileOperation = ico;
-}
-
 void Objects::insertBegin(const MWWorld::Ptr& ptr)
 {
     osg::ref_ptr<osg::Group> cellnode;
@@ -118,9 +111,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 
     std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, allowLight));
 
-    if (mIncrementalCompileOperation && anim->getObjectRoot())
-        mIncrementalCompileOperation->add(anim->getObjectRoot());
-
     if (!allowLight)
     {
         RemoveParticlesVisitor visitor;
@@ -144,9 +134,6 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
 
-    if (mIncrementalCompileOperation && anim->getObjectRoot())
-        mIncrementalCompileOperation->add(anim->getObjectRoot());
-
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
@@ -156,9 +143,6 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
-
-    if (mIncrementalCompileOperation && anim->getObjectRoot())
-        mIncrementalCompileOperation->add(anim->getObjectRoot());
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }

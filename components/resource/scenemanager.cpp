@@ -6,6 +6,8 @@
 
 #include <osgParticle/ParticleSystem>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
 
@@ -88,7 +90,10 @@ namespace Resource
             // TODO: add support for non-NIF formats
 
             NifOsg::Loader loader;
-            osg::ref_ptr<const osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+            osg::ref_ptr<osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+
+            if (mIncrementalCompileOperation)
+                mIncrementalCompileOperation->add(loaded);
 
             mIndex[normalized] = loaded;
             return loaded;
@@ -145,6 +150,11 @@ namespace Resource
         {
             it->second->releaseGLObjects(state);
         }
+    }
+
+    void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
+    {
+        mIncrementalCompileOperation = ico;
     }
 
     const VFS::Manager* SceneManager::getVFS() const
