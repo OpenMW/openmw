@@ -74,8 +74,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
     {
         mIdCollection->setData (index.row(), index.column(), value);
 
-        emit dataChanged (CSMWorld::IdTable::index (index.row(), 0),
-            CSMWorld::IdTable::index (index.row(), mIdCollection->getColumns()-1));
+        emit dataChanged (index, index);
 
         return true;
     }

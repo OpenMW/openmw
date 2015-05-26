@@ -467,8 +467,8 @@ namespace CSMWorld
         int mMask;
         bool mInverted;
 
-        FlagColumn (int columnId, int mask, bool inverted = false)
-        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean), mMask (mask),
+        FlagColumn (int columnId, int mask, int flags = Flag_Table | Flag_Dialogue, bool inverted = false)
+        : Column<ESXRecordT> (columnId, ColumnBase::Display_Boolean, flags), mMask (mask),
           mInverted (inverted)
         {}
 

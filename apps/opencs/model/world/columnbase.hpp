@@ -25,7 +25,8 @@ namespace CSMWorld
         {
             Flag_Table = 1, // column should be displayed in table view
             Flag_Dialogue = 2, // column should be displayed in dialogue view
-            Flag_Dialogue_List = 4 // column should be diaplyed in dialogue view
+            Flag_Dialogue_List = 4, // column should be diaplyed in dialogue view
+            Flag_Dialogue_Refresh = 8 // refresh dialogue view if this column is modified
         };
 
         enum Display
@@ -183,7 +184,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
-        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
+        NestedParentColumn (int id, int flags = Flag_Dialogue) : Column<ESXRecordT> (id,
                 ColumnBase::Display_NestedHeader, flags)
         {}
 
@@ -200,7 +201,8 @@ namespace CSMWorld
 
     struct NestedChildColumn : public NestableColumn
     {
-        NestedChildColumn (int id, Display display, bool isEditable = true);
+        NestedChildColumn (int id,
+                Display display, int flags = Flag_Dialogue, bool isEditable = true);
 
         virtual bool isEditable() const;
 

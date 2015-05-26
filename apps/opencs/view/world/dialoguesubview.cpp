@@ -787,14 +787,32 @@ void CSVWorld::DialogueSubView::dataChanged (const QModelIndex & index)
 {
     QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
 
-    if (currentIndex.isValid() && index.row() == currentIndex.row())
+    if (currentIndex.isValid() &&
+            (index.parent().isValid() ? index.parent().row() : index.row()) == currentIndex.row())
     {
         CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State>(mTable->data (mTable->index (currentIndex.row(), 1)).toInt());
 
         mEditWidget->setDisabled (state==CSMWorld::RecordBase::State_Deleted || mLocked);
-        int y = mEditWidget->verticalScrollBar()->value();
-        mEditWidget->remake (index.row());
-        mEditWidget->verticalScrollBar()->setValue(y);
+
+        // Check if the changed data should force refresh (rebuild) the dialogue subview
+        int flags = 0;
+        if (index.parent().isValid()) // TODO: check that index is topLeft
+        {
+            flags = static_cast<CSMWorld::IdTree *>(mTable)->nestedHeaderData (index.parent().column(),
+                    index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
+        }
+        else
+        {
+            flags = mTable->headerData (index.column(),
+                    Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
+        }
+
+        if (flags & CSMWorld::ColumnBase::Flag_Dialogue_Refresh)
+        {
+            int y = mEditWidget->verticalScrollBar()->value();
+            mEditWidget->remake (index.parent().isValid() ? index.parent().row() : index.row());
+            mEditWidget->verticalScrollBar()->setValue(y);
+        }
     }
 }
 

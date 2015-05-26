@@ -1976,7 +1976,7 @@ namespace CSMWorld
             {
                 switch (subColIndex)
                 {
-                    case 0: return QVariant(QVariant::UserType); // disable the checkbox editor
+                    case 0: return QVariant(); // disable the checkbox editor
                     case 1: return record.get().mFlags & ESM::CreatureLevList::AllLevels;
                     case 2: return static_cast<int> (record.get().mChanceNone);
                     default:
