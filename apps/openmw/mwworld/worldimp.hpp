@@ -121,6 +121,7 @@ namespace MWWorld
 
             void updateSoundListener();
             void updateWindowManager ();
+            void updatePlayer(bool paused);
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
             void removeContainerScripts(const Ptr& reference);
@@ -218,20 +219,11 @@ namespace MWWorld
 
             virtual bool isCellQuasiExterior() const;
 
-            virtual Ogre::Vector2 getNorthVector (CellStore* cell);
+            virtual osg::Vec2f getNorthVector (CellStore* cell);
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
-
-            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-            ///< see MWRender::LocalMap::worldToInteriorMapPosition
-
-            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
-            ///< see MWRender::LocalMap::interiorMapToWorldPosition
-
-            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
-            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual void setGlobalInt (const std::string& name, int value);
             ///< Set value independently from real type.

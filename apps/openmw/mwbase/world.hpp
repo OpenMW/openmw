@@ -142,20 +142,11 @@ namespace MWBase
 
             virtual bool isCellQuasiExterior() const = 0;
 
-            virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
+            virtual osg::Vec2f getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
-
-            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
-            ///< see MWRender::LocalMap::worldToInteriorMapPosition
-
-            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y) = 0;
-            ///< see MWRender::LocalMap::interiorMapToWorldPosition
-
-            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
-            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual void setGlobalInt (const std::string& name, int value) = 0;
             ///< Set value independently from real type.

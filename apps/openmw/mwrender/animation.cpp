@@ -8,7 +8,6 @@
 #include <osg/TexEnvCombine>
 #include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
-#include <osg/io_utils>
 #include <osg/Geode>
 
 #include <components/nifosg/nifloader.hpp>

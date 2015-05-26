@@ -2,7 +2,6 @@
 
 #include <cmath>
 
-#include <osg/io_utils>
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/PositionAttitudeTransform>
@@ -206,6 +205,10 @@ void Objects::removeCell(const MWWorld::CellStore* store)
 
 void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
+    osg::Node* objectNode = cur.getRefData().getBaseNode();
+    if (!objectNode)
+        return;
+
     MWWorld::CellStore *newCell = cur.getCell();
 
     osg::Group* cellnode;
@@ -216,8 +219,6 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     } else {
         cellnode = mCellSceneNodes[newCell];
     }
-
-    osg::Node* objectNode = cur.getRefData().getBaseNode();
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)

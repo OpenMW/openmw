@@ -67,8 +67,6 @@ namespace MWGui
 
         std::vector<std::string> mSplashScreens;
 
-        bool mVSyncWasEnabled;
-
         void changeWallpaper();
 
         void draw();

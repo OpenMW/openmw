@@ -596,7 +596,7 @@ void OMW::Engine::go()
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
-        //dt = std::min(dt, 0.2);
+        dt = std::min(dt, 0.2);
 
         double simulationTime = frame(dt);
         mViewer->frame(simulationTime);

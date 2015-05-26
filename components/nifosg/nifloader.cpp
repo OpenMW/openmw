@@ -9,8 +9,6 @@
 #include <osg/ShapeDrawable>
 #include <osg/ComputeBoundsVisitor>
 
-#include <osg/io_utils>
-
 // resource
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>

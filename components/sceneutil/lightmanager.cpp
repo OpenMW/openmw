@@ -226,12 +226,19 @@ namespace SceneUtil
     LightSource::LightSource()
         : mRadius(0.f)
     {
+        setNodeMask(Mask_Lit);
         setUpdateCallback(new CollectLightCallback);
     }
 
     void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+        if (!(cv->getCurrentCamera()->getCullMask()&Mask_Lit))
+        {
+            traverse(node, nv);
+            return;
+        }
 
         if (!mLightManager)
         {

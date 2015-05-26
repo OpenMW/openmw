@@ -70,9 +70,9 @@ namespace MWGui
     };
 
 
-    HUD::HUD(CustomMarkerCollection &customMarkers, bool showFps, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, bool showFps, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : Layout("openmw_hud.layout")
-        , LocalMapBase(customMarkers)
+        , LocalMapBase(customMarkers, localMapRender)
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)

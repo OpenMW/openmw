@@ -178,12 +178,6 @@ namespace MWBase
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
 
-            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
-            ///< set player position in map space
-
-            virtual void setPlayerDir(const float x, const float y) = 0;
-            ///< set player view direction in map space
-
             virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
             virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) = 0;
 
@@ -358,6 +352,9 @@ namespace MWBase
             virtual std::string correctIconPath(const std::string& path) = 0;
             virtual std::string correctBookartPath(const std::string& path, int width, int height) = 0;
             virtual std::string correctTexturePath(const std::string& path) = 0;
+
+            virtual void requestMap(std::set<MWWorld::CellStore*> cells) = 0;
+            virtual void removeCell(MWWorld::CellStore* cell) = 0;
     };
 }
 

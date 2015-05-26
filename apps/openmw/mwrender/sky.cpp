@@ -8,10 +8,6 @@
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 
-#include <osg/io_utils>
-
-#include <osgUtil/CullVisitor>
-
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
 
@@ -34,7 +30,7 @@
 
 #include "../mwworld/fallback.hpp"
 
-#include "renderingmanager.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -506,6 +502,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mSecundaEnabled(true)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
+    skyroot->setNodeMask(Mask_Sky);
     parentNode->addChild(skyroot);
 
     mRootNode = skyroot;
@@ -652,7 +649,7 @@ void SkyManager::setEnabled(bool enabled)
     if (!enabled)
         clearRain();
 
-    mRootNode->setNodeMask(enabled ? ~((unsigned int)(0)) : 0);
+    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
 }

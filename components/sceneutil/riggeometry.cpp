@@ -6,7 +6,6 @@
 #include <cstdlib>
 
 #include <osg/MatrixTransform>
-#include <osg/io_utils>
 
 #include "skeleton.hpp"
 #include "util.hpp"

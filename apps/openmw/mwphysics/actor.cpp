@@ -1,5 +1,4 @@
 #include "actor.hpp"
-#include <osg/io_utils>
 
 #include <osg/PositionAttitudeTransform>
 

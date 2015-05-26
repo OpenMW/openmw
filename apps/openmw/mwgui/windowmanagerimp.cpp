@@ -53,6 +53,8 @@
 #include "../mwmechanics/stat.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
+#include "../mwrender/localmap.hpp"
+
 #include "../mwsound/soundmanagerimp.hpp"
 
 #include "console.hpp"
@@ -115,6 +117,7 @@ namespace MWGui
       , mCurrentModals()
       , mHud(NULL)
       , mMap(NULL)
+      , mLocalMapRender(NULL)
       , mMenu(NULL)
       , mToolTips(NULL)
       , mStatsWindow(NULL)
@@ -266,7 +269,8 @@ namespace MWGui
 
         mRecharge = new Recharge();
         mMenu = new MainMenu(w, h, mResourceSystem->getVFS());
-        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, "");
+        mLocalMapRender = new MWRender::LocalMap(mViewer);
+        mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         trackWindow(mMap, "map");
         mStatsWindow = new StatsWindow(mDragAndDrop);
         trackWindow(mStatsWindow, "stats");
@@ -284,7 +288,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop);
+        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop, mLocalMapRender);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -383,6 +387,7 @@ namespace MWGui
         delete mMessageBoxManager;
         delete mHud;
         delete mMap;
+        delete mLocalMapRender;
         delete mMenu;
         delete mStatsWindow;
         delete mJournal;
@@ -886,6 +891,31 @@ namespace MWGui
         return default_;
     }
 
+    void WindowManager::updateMap()
+    {
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+        osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();
+        osg::Quat playerOrientation (-player.getRefData().getPosition().rot[2], osg::Vec3(0,0,1));
+
+        osg::Vec3f playerdirection;
+        int x,y;
+        float u,v;
+        mLocalMapRender->updatePlayer(playerPosition, playerOrientation, u, v, x, y, playerdirection);
+
+        if (!player.getCell()->isExterior())
+        {
+            mMap->setActiveCell(x, y, true);
+            mHud->setActiveCell(x, y, true);
+        }
+        // else: need to know the current grid center, call setActiveCell from MWWorld::Scene
+
+        mMap->setPlayerDir(playerdirection.x(), playerdirection.y());
+        mMap->setPlayerPos(x, y, u, v);
+        mHud->setPlayerDir(playerdirection.x(), playerdirection.y());
+        mHud->setPlayerPos(x, y, u, v);
+    }
+
     void WindowManager::onFrame (float frameDuration)
     {
         mMessageBoxManager->onFrame(frameDuration);
@@ -893,6 +923,9 @@ namespace MWGui
         mToolTips->onFrame(frameDuration);
 
         mMenu->update(frameDuration);
+
+        if (mLocalMapRender)
+            mLocalMapRender->cleanupCameras();
 
         if (MWBase::Environment::get().getStateManager()->getState()==
             MWBase::StateManager::State_NoGame)
@@ -907,6 +940,8 @@ namespace MWGui
         mDialogueWindow->onFrame();
 
         mInventoryWindow->onFrame();
+
+        updateMap();
 
         mStatsWindow->onFrame(frameDuration);
         mMap->onFrame(frameDuration);
@@ -968,27 +1003,8 @@ namespace MWGui
 
     void WindowManager::setActiveMap(int x, int y, bool interior)
     {
-        if (!interior)
-        {
-            mMap->setCellPrefix("Cell");
-            mHud->setCellPrefix("Cell");
-        }
-
         mMap->setActiveCell(x,y, interior);
         mHud->setActiveCell(x,y, interior);
-    }
-
-    void WindowManager::setPlayerPos(int cellX, int cellY, const float x, const float y)
-    {
-        mMap->setPlayerPos(cellX, cellY, x, y);
-        mHud->setPlayerPos(cellX, cellY, x, y);
-    }
-
-    void WindowManager::setPlayerDir(const float x, const float y)
-    {
-        mMap->setPlayerDir(x,y);
-        mMap->setGlobalMapPlayerDir(x, y);
-        mHud->setPlayerDir(x,y);
     }
 
     void WindowManager::setDrowningBarVisibility(bool visible)
@@ -1988,6 +2004,16 @@ namespace MWGui
                 *(data++) = static_cast<unsigned char>(value*255);
             }
         tex->unlock();
+    }
+
+    void WindowManager::requestMap(std::set<MWWorld::CellStore*> cells)
+    {
+        mLocalMapRender->requestMap(cells);
+    }
+
+    void WindowManager::removeCell(MWWorld::CellStore *cell)
+    {
+        mLocalMapRender->removeCell(cell);
     }
 
 }

@@ -26,6 +26,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwrender/globalmap.hpp"
+#include "../mwrender/localmap.hpp"
 
 #include "widgets.hpp"
 #include "confirmationdialog.hpp"
@@ -142,8 +143,9 @@ namespace MWGui
 
     // ------------------------------------------------------
 
-    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers)
-        : mCurX(0)
+    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender)
+        : mLocalMapRender(localMapRender)
+        , mCurX(0)
         , mCurY(0)
         , mInterior(false)
         , mLocalMap(NULL)
@@ -260,8 +262,8 @@ namespace MWGui
         else
         {
             int cellX, cellY;
-            Ogre::Vector2 worldPos (worldX, worldY);
-            MWBase::Environment::get().getWorld ()->worldToInteriorMapPosition (worldPos, nX, nY, cellX, cellY);
+            osg::Vec2f worldPos (worldX, worldY);
+            mLocalMapRender->worldToInteriorMapPosition(worldPos, nX, nY, cellX, cellY);
 
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
@@ -301,7 +303,7 @@ namespace MWGui
                     continue;
             }
 
-            MarkerUserData markerPos;
+            MarkerUserData markerPos (mLocalMapRender);
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
 
             MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
@@ -342,24 +344,30 @@ namespace MWGui
         mDoorMarkerWidgets.clear();
 
         // Update the map textures
-#if 0
+        std::vector<boost::shared_ptr<MyGUI::ITexture> > textures;
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
             {
-                // map
-                std::string image = mPrefix+"_"+ MyGUI::utility::toString(x + (mx-1)) + "_"
-                        + MyGUI::utility::toString(y + (-1*(my-1)));
+                int mapX = x + (mx-1);
+                int mapY = y + (-1*(my-1));
 
                 MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
 
-                if (MyGUI::RenderManager::getInstance().getTexture(image) != 0)
-                    box->setImageTexture(image);
+                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mInterior, mapX, mapY);
+                if (texture)
+                {
+                    boost::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
+                    textures.push_back(guiTex);
+                    box->setRenderItemTexture(guiTex.get());
+                    box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+                }
                 else
-                    box->setImageTexture("black");
+                    box->setRenderItemTexture(NULL);
             }
         }
-#endif
+        mMapTextures.swap(textures);
+
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
         // Retrieve the door markers we want to show
@@ -394,7 +402,7 @@ namespace MWGui
                     destNotes.push_back(it->mNote);
             }
 
-            MarkerUserData data;
+            MarkerUserData data (mLocalMapRender);
             data.notes = destNotes;
             data.caption = marker.name;
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.x, marker.y, data);
@@ -490,7 +498,7 @@ namespace MWGui
         for (std::vector<MWWorld::Ptr>::iterator it = markers.begin(); it != markers.end(); ++it)
         {
             const ESM::Position& worldPos = it->getRefData().getPosition();
-            MarkerUserData markerPos;
+            MarkerUserData markerPos (mLocalMapRender);
             MyGUI::IntPoint widgetPos = getMarkerPosition(worldPos.pos[0], worldPos.pos[1], markerPos);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
@@ -535,7 +543,7 @@ namespace MWGui
         if (markedCell && markedCell->isExterior() == !mInterior
                 && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
         {
-            MarkerUserData markerPos;
+            MarkerUserData markerPos (mLocalMapRender);
             MyGUI::IntPoint widgetPos = getMarkerPosition(markedPosition.pos[0], markedPosition.pos[1], markerPos);
             MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
                                         widgetPos.top - 4,
@@ -553,9 +561,9 @@ namespace MWGui
 
     // ------------------------------------------------------------------------------------------
 
-    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, const std::string& cacheDir)
+    MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender)
         : WindowPinnableBase("openmw_map_window.layout")
-        , LocalMapBase(customMarkers)
+        , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
         , mGlobalMap(0)
         , mGlobalMapTexture(NULL)
@@ -662,19 +670,19 @@ namespace MWGui
         x += mCurX;
         y += mCurY;
 
-        Ogre::Vector2 worldPos;
+        osg::Vec2f worldPos;
         if (mInterior)
         {
-            worldPos = MWBase::Environment::get().getWorld()->interiorMapToWorldPosition(nX, nY, x, y);
+            worldPos = mLocalMapRender->interiorMapToWorldPosition(nX, nY, x, y);
         }
         else
         {
-            worldPos.x = (x + nX) * cellSize;
-            worldPos.y = (y + (1.0f-nY)) * cellSize;
+            worldPos.x() = (x + nX) * cellSize;
+            worldPos.y() = (y + (1.0f-nY)) * cellSize;
         }
 
-        mEditingMarker.mWorldX = worldPos.x;
-        mEditingMarker.mWorldY = worldPos.y;
+        mEditingMarker.mWorldX = worldPos.x();
+        mEditingMarker.mWorldY = worldPos.y();
 
         mEditingMarker.mCell.mPaged = !mInterior;
         if (mInterior)
@@ -991,6 +999,11 @@ namespace MWGui
     void EditNoteDialog::onDeleteButtonClicked(MyGUI::Widget *sender)
     {
         eventDeleteClicked();
+    }
+
+    bool LocalMapBase::MarkerUserData::isPositionExplored() const
+    {
+        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY, interior);
     }
 
 }

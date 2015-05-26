@@ -6,8 +6,6 @@
 
 #include <components/nif/controlled.hpp>
 
-#include <osg/io_utils>
-
 #include "userdata.hpp"
 
 namespace NifOsg

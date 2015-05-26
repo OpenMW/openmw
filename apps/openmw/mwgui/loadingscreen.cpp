@@ -35,7 +35,6 @@ namespace MWGui
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
         , mProgress(0)
-        , mVSyncWasEnabled(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 

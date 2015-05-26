@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 
-#include <osg/io_utils>
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
@@ -111,6 +110,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
+        source->setNodeMask(SceneUtil::Mask_Lit);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -123,6 +123,7 @@ namespace MWRender
         lightRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
         lightRoot->setNodeMask(Mask_Scene);
+        lightRoot->setName("Scene Root");
 
         mSky.reset(new SkyManager(lightRoot, resourceSystem->getSceneManager()));
 
@@ -342,8 +343,12 @@ namespace MWRender
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
         osgUtil::IntersectionVisitor intersectionVisitor(intersector);
+        int mask = intersectionVisitor.getTraversalMask();
+        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect);
         if (ignorePlayer)
-            intersectionVisitor.setTraversalMask(intersectionVisitor.getTraversalMask() & (~Mask_Player));
+            mask &= ~(Mask_Player);
+
+        intersectionVisitor.setTraversalMask(mask);
 
         mViewer->getCamera()->accept(intersectionVisitor);
 
@@ -451,12 +456,8 @@ namespace MWRender
 
     void RenderingManager::updateProjectionMatrix()
     {
-        double fovy, aspect, zNear, zFar;
-        mViewer->getCamera()->getProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
-        fovy = mFieldOfView;
-        zNear = mNearClip;
-        zFar = mViewDistance;
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(fovy, aspect, zNear, zFar);
+        double aspect = mViewer->getCamera()->getViewport()->aspectRatio();
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(mFieldOfView, aspect, mNearClip, mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()

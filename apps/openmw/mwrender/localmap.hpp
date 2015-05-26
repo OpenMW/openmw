@@ -1,9 +1,13 @@
 #ifndef GAME_RENDER_LOCALMAP_H
 #define GAME_RENDER_LOCALMAP_H
 
-#include <OgreAxisAlignedBox.h>
-#include <OgreColourValue.h>
-#include <OgreResource.h>
+#include <set>
+#include <vector>
+#include <map>
+
+#include <osg/BoundingBox>
+#include <osg/Quat>
+#include <osg/ref_ptr>
 
 namespace MWWorld
 {
@@ -15,52 +19,57 @@ namespace ESM
     struct FogTexture;
 }
 
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace osg
+{
+    class Texture2D;
+    class Camera;
+    class Group;
+    class Node;
+}
+
 namespace MWRender
 {
-    class RenderingManager;
-
     ///
     /// \brief Local map rendering
     ///
     class LocalMap
     {
     public:
-        LocalMap();
+        LocalMap(osgViewer::Viewer* viewer);
         ~LocalMap();
-
-        virtual void loadResource(Ogre::Resource* resource);
 
         /**
          * Clear all savegame-specific data (i.e. fog of war textures)
          */
         void clear();
 
-        /**
-         * Request the local map for an exterior cell.
-         * @remarks It will either be loaded from a disk cache,
-         * or rendered if it is not already cached.
-         * @param cell exterior cell
-         * @param zMin min height of objects or terrain in cell
-         * @param zMax max height of objects or terrain in cell
-         */
-        void requestMap (MWWorld::CellStore* cell, float zMin, float zMax);
+        void requestMap (std::set<MWWorld::CellStore*> cells);
+
+        void removeCell (MWWorld::CellStore* cell);
+
+        osg::ref_ptr<osg::Texture2D> getMapTexture (bool interior, int x, int y);
+
+        void markForRemoval(osg::Camera* cam);
 
         /**
-         * Request the local map for an interior cell.
-         * @remarks It will either be loaded from a disk cache,
-         * or rendered if it is not already cached.
-         * @param cell interior cell
-         * @param bounds bounding box of the cell
+         * Removes cameras that have already been rendered. Should be called every frame to ensure that
+         * we do not render the same map more than once. Note, this cleanup is difficult to implement in an
+         * automated fashion, since we can't alter the scene graph structure from within an update callback.
          */
-        void requestMap (MWWorld::CellStore* cell,
-                        Ogre::AxisAlignedBox bounds);
+        void cleanupCameras();
 
         /**
-         * Set the position & direction of the player.
+         * Set the position & direction of the player, and returns the position in map space through the reference parameters.
          * @remarks This is used to draw a "fog of war" effect
          * to hide areas on the map the player has not discovered yet.
          */
-        void updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation);
+        void updatePlayer (const osg::Vec3f& position, const osg::Quat& orientation,
+                           float& u, float& v, int& x, int& y, osg::Vec3f& direction);
 
         /**
          * Save the fog of war for this cell to its CellStore.
@@ -72,9 +81,9 @@ namespace MWRender
          * Get the interior map texture index and normalized position
          * on this texture, given a world position
          */
-        void worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y);
+        void worldToInteriorMapPosition (osg::Vec2f pos, float& nX, float& nY, int& x, int& y);
 
-        Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
+        osg::Vec2f interiorMapToWorldPosition (float nX, float nY, int x, int y);
 
         /**
          * Check if a given position is explored by the player (i.e. not obscured by fog of war)
@@ -82,6 +91,20 @@ namespace MWRender
         bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
 
     private:
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
+
+        osg::ref_ptr<osg::Group> mRoot;
+        osg::ref_ptr<osg::Node> mSceneRoot;
+
+        typedef std::vector< osg::ref_ptr<osg::Camera> > CameraVector;
+
+        CameraVector mActiveCameras;
+
+        CameraVector mCamerasPendingRemoval;
+
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Texture2D> > TextureMap;
+        TextureMap mTextures;
+
         int mMapResolution;
 
         // the dynamic texture is a bottleneck, so don't set this too high
@@ -91,46 +114,34 @@ namespace MWRender
         static const int sFogOfWarSkip = 2;
 
         // size of a map segment (for exteriors, 1 cell)
-        static const int sSize = 8192;
-
-        Ogre::Camera* mCellCamera;
-        Ogre::SceneNode* mCameraNode;
-        Ogre::SceneNode* mCameraPosNode;
-        Ogre::SceneNode* mCameraRotNode;
-
-        // directional light from a fixed angle
-        Ogre::Light* mLight;
+        float mMapWorldSize;
 
         float mAngle;
-        const Ogre::Vector2 rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle);
+        const osg::Vec2f rotatePoint(const osg::Vec2f& p, const osg::Vec2f& c, const float angle);
 
-        /// @param force Always render, even if we already have a cached map
-        void render(const float x, const float y,
-                    const float zlow, const float zhigh,
-                    const float xw, const float yw,
-                    const std::string& texture, bool force=false);
+        void requestExteriorMap(MWWorld::CellStore* cell);
+        void requestInteriorMap(MWWorld::CellStore* cell);
+
+        osg::ref_ptr<osg::Camera> createOrthographicCamera(float left, float top, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax);
+        void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
 
         // Creates a fog of war texture and initializes it to full black
-        void createFogOfWar(const std::string& texturePrefix);
+        //void createFogOfWar(const std::string& texturePrefix);
 
         // Loads a fog of war texture from its ESM struct
-        void loadFogOfWar(const std::string& texturePrefix, ESM::FogTexture& esm); // FogTexture not const because MemoryDataStream doesn't accept it
-
-        Ogre::TexturePtr createFogOfWarTexture(const std::string& name);
-
-        std::string coordStr(const int x, const int y);
+        //void loadFogOfWar(const std::string& texturePrefix, ESM::FogTexture& esm); // FogTexture not const because MemoryDataStream doesn't accept it
 
         // A buffer for the "fog of war" textures of the current cell.
         // Both interior and exterior maps are possibly divided into multiple textures.
-        std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
+        //std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
 
         // The render texture we will use to create the map images
-        Ogre::TexturePtr mRenderTexture;
-        Ogre::RenderTarget* mRenderTarget;
+        //Ogre::TexturePtr mRenderTexture;
+        //Ogre::RenderTarget* mRenderTarget;
 
         bool mInterior;
-        Ogre::AxisAlignedBox mBounds;
-        std::string mInteriorName;
+        osg::BoundingBox mBounds;
+        //std::string mInteriorName;
     };
 
 }

@@ -162,13 +162,10 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
-        //mPhysEngine = mPhysics->getEngine();
 #if 0
         mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
 #endif
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem);
-
-        //mPhysEngine->setSceneManager(renderer.getScene());
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
@@ -1591,24 +1588,38 @@ namespace MWWorld
         updateWindowManager ();
 
         updateSoundListener();
-        /*
-        if (!paused && mPlayer->getPlayer().getCell()->isExterior())
+
+        updatePlayer(paused);
+    }
+
+    void World::updatePlayer(bool paused)
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+
+        // TODO: move to MWWorld::Player
+
+        if (player.getCell()->isExterior())
         {
-            ESM::Position pos = mPlayer->getPlayer().getRefData().getPosition();
+            ESM::Position pos = player.getRefData().getPosition();
             mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
         }
-        */
+
+        if (player.getClass().getNpcStats(player).isWerewolf())
+            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(mRendering->getCamera()->isFirstPerson());
 
         // Sink the camera while sneaking
-        bool sneaking = getPlayerPtr().getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool inair = !isOnGround(getPlayerPtr());
-        bool swimming = isSwimming(getPlayerPtr());
+        bool sneaking = player.getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        bool inair = !isOnGround(player);
+        bool swimming = isSwimming(player);
 
         static const float i1stPersonSneakDelta = getStore().get<ESM::GameSetting>().find("i1stPersonSneakDelta")->getFloat();
         if(!paused && sneaking && !(swimming || inair))
             mRendering->getCamera()->setSneakOffset(i1stPersonSneakDelta);
         else
             mRendering->getCamera()->setSneakOffset(0.f);
+
+        int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
+        MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
     }
 
     void World::updateSoundListener()
@@ -1701,16 +1712,16 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    Ogre::Vector2 World::getNorthVector (CellStore* cell)
+    osg::Vec2f World::getNorthVector (CellStore* cell)
     {
         MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
-            return Ogre::Vector2(0, 1);
+            return osg::Vec2f(0, 1);
 
-        Ogre::Quaternion orient (Ogre::Radian(-ref->mData.getPosition().rot[2]), Ogre::Vector3::UNIT_Z);
-        Ogre::Vector3 dir = orient * Ogre::Vector3(0,1,0);
-        Ogre::Vector2 d = Ogre::Vector2(dir.x, dir.y);
+        osg::Quat orient (-ref->mData.getPosition().rot[2], osg::Vec3f(0,0,1));
+        osg::Vec3f dir = orient * osg::Vec3f(0,1,0);
+        osg::Vec2f d (dir.x(), dir.y());
         return d;
     }
 
@@ -1756,24 +1767,9 @@ namespace MWWorld
         }
     }
 
-    void World::worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y)
-    {
-        //mRendering->worldToInteriorMapPosition(position, nX, nY, x, y);
-    }
-
-    Ogre::Vector2 World::interiorMapToWorldPosition(float nX, float nY, int x, int y)
-    {
-        return Ogre::Vector2();//mRendering->interiorMapToWorldPosition(nX, nY, x, y);
-    }
-
-    bool World::isPositionExplored (float nX, float nY, int x, int y, bool interior)
-    {
-        return 0;//mRendering->isPositionExplored(nX, nY, x, y, interior);
-    }
-
     void World::setWaterHeight(const float height)
     {
-        //mPhysics->setWaterHeight(height);
+        mPhysics->setWaterHeight(height);
         //mRendering->setWaterHeight(height);
     }
 

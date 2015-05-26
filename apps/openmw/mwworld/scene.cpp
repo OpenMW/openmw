@@ -172,8 +172,13 @@ namespace MWWorld
         {
             // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
             // (and objects in a different cell can "bleed" into another cells map if they cross the border)
-            //for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
-                //mRendering.requestMap(*active);
+            std::set<MWWorld::CellStore*> cellsToUpdate;
+            for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
+            {
+                cellsToUpdate.insert(*active);
+            }
+            MWBase::Environment::get().getWindowManager()->requestMap(cellsToUpdate);
+
             mNeedMapUpdate = false;
 
             if (mCurrentCell->isExterior())
@@ -213,6 +218,7 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
 
         mRendering.removeCell(*iter);
+        MWBase::Environment::get().getWindowManager()->removeCell(*iter);
 
         MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
 

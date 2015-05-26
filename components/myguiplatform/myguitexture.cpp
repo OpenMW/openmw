@@ -86,7 +86,7 @@ namespace osgMyGUI
         if (!mTextureManager)
             throw std::runtime_error("No texturemanager set");
 
-        mTexture = mTextureManager->getTexture2D(fname, osg::Texture2D::REPEAT, osg::Texture2D::REPEAT);
+        mTexture = mTextureManager->getTexture2D(fname, osg::Texture2D::CLAMP_TO_EDGE, osg::Texture2D::CLAMP_TO_EDGE);
 
         // FIXME
         mFormat = MyGUI::PixelFormat::R8G8B8;

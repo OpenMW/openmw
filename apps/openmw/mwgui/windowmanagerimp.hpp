@@ -67,6 +67,11 @@ namespace Gui
     class FontLoader;
 }
 
+namespace MWRender
+{
+    class LocalMap;
+}
+
 namespace MWGui
 {
   class WindowBase;
@@ -191,8 +196,6 @@ namespace MWGui
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
-    virtual void setPlayerPos(int cellX, int cellY, const float x, const float y); ///< set player position in map space
-    virtual void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
@@ -363,6 +366,9 @@ namespace MWGui
     virtual std::string correctBookartPath(const std::string& path, int width, int height);
     virtual std::string correctTexturePath(const std::string& path);
 
+    void requestMap(std::set<MWWorld::CellStore*> cells);
+    void removeCell(MWWorld::CellStore* cell);
+
   private:
     Resource::ResourceSystem* mResourceSystem;
 
@@ -386,6 +392,7 @@ namespace MWGui
 
     HUD *mHud;
     MapWindow *mMap;
+    MWRender::LocalMap* mLocalMapRender;
     MainMenu *mMenu;
     ToolTips *mToolTips;
     StatsWindow *mStatsWindow;
@@ -472,6 +479,8 @@ namespace MWGui
     bool mRestAllowed;
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
+
+    void updateMap();
 
     float mFPS;
 

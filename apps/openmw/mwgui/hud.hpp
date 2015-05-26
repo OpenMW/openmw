@@ -19,7 +19,7 @@ namespace MWGui
     class HUD : public Layout, public LocalMapBase
     {
     public:
-        HUD(CustomMarkerCollection& customMarkers, bool fpsVisible, DragAndDrop* dragAndDrop);
+        HUD(CustomMarkerCollection& customMarkers, bool fpsVisible, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
         void setFPS(float fps);

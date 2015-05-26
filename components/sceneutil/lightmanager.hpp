@@ -9,6 +9,9 @@
 namespace SceneUtil
 {
 
+    // This mask should be included in the Cull and Update visitor's traversal mask if lighting is desired.
+    const int Mask_Lit = (1<<16);
+
     /// LightSource managed by a LightManager.
     class LightSource : public osg::Node
     {

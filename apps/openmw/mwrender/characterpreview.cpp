@@ -16,6 +16,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "npcanimation.hpp"
+#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -80,6 +81,8 @@ namespace MWRender
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
         mCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
+
+        mCamera->setNodeMask(Mask_RenderToTexture);
 
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager;
         lightManager->setStartLight(1);

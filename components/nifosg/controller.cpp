@@ -4,7 +4,6 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
-#include <osg/io_utils>
 #include <osg/UserDataContainer>
 
 #include <osgAnimation/MorphGeometry>

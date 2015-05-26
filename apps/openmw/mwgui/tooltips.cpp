@@ -169,7 +169,7 @@ namespace MWGui
                 {
                     LocalMapBase::MarkerUserData data = *focus->getUserData<LocalMapBase::MarkerUserData>();
 
-                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (data.nX, data.nY, data.cellX, data.cellY, data.interior))
+                    if (!data.isPositionExplored())
                         return;
 
                     ToolTipInfo info;
