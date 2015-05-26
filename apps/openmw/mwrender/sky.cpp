@@ -41,6 +41,7 @@ namespace
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         mat->setColorMode(osg::Material::DIFFUSE);
         return mat;
     }
@@ -51,6 +52,7 @@ namespace
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         mat->setColorMode(osg::Material::OFF);
         return mat;
     }
@@ -550,6 +552,7 @@ void SkyManager::create()
     depth->setWriteMask(false);
     mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
     mRootNode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+    mRootNode->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
     mCreated = true;
 }

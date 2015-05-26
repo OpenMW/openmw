@@ -50,6 +50,7 @@ namespace MWRender
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
             osg::Fog* fog = new osg::Fog;
             fog->setStart(1);
+            fog->setMode(osg::Fog::LINEAR);
             stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
         }
 
@@ -60,7 +61,6 @@ namespace MWRender
             osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
             fog->setColor(mFogColor);
             fog->setEnd(mFogEnd);
-            fog->setMode(osg::Fog::LINEAR);
         }
 
         void setAmbientColor(const osg::Vec4f& col)
@@ -115,6 +115,7 @@ namespace MWRender
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
         mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
+        mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
         mSunLight->setConstantAttenuation(1.f);
         lightRoot->addChild(source);
 
@@ -181,12 +182,14 @@ namespace MWRender
 
     void RenderingManager::setSunColour(const osg::Vec4f &colour)
     {
+        // need to wrap this in a StateUpdater?
         mSunLight->setDiffuse(colour);
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)
     {
         osg::Vec3 position = direction * -1;
+        // need to wrap this in a StateUpdater?
         mSunLight->setPosition(osg::Vec4(position.x(), position.y(), position.z(), 0));
 
         mSky->setSunDirection(position);
