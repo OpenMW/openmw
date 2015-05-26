@@ -184,7 +184,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
-        NestedParentColumn (int id, int flags = Flag_Dialogue) : Column<ESXRecordT> (id,
+        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
                 ColumnBase::Display_NestedHeader, flags)
         {}
 
@@ -202,7 +202,7 @@ namespace CSMWorld
     struct NestedChildColumn : public NestableColumn
     {
         NestedChildColumn (int id,
-                Display display, int flags = Flag_Dialogue, bool isEditable = true);
+                Display display, int flags = ColumnBase::Flag_Dialogue, bool isEditable = true);
 
         virtual bool isEditable() const;
 
