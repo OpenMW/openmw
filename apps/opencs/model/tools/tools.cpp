@@ -26,6 +26,7 @@
 #include "referencecheck.hpp"
 #include "startscriptcheck.hpp"
 #include "searchoperation.hpp"
+#include "pathgridcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -95,6 +96,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                 mData.getResources(
                     CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
                 mData.getRaces() ));
+
+        mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids()));
 
         mVerifier.setOperation (mVerifierOperation);
     }
