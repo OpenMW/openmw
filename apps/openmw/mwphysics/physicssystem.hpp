@@ -5,8 +5,6 @@
 
 #include <OgreVector3.h>
 
-#include <btBulletCollisionCommon.h>
-
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
@@ -35,6 +33,11 @@ namespace Resource
 
 class btSequentialImpulseConstraintSolver;
 class btDiscreteDynamicsWorld;
+class btBroadphaseInterface;
+class btDefaultCollisionConfiguration;
+class btCollisionDispatcher;
+class btCollisionObject;
+class btCollisionShape;
 
 namespace MWPhysics
 {

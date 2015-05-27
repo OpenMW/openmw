@@ -6,6 +6,15 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <BulletCollision/CollisionShapes/btConeShape.h>
+#include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+#include <BulletCollision/CollisionDispatch/btDefaultCollisionConfiguration.h>
+#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
+#include <BulletDynamics/Dynamics/btDiscreteDynamicsWorld.h>
+#include <BulletDynamics/ConstraintSolver/btSequentialImpulseConstraintSolver.h>
 
 #include <components/nifbullet/bulletshapemanager.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -600,6 +609,8 @@ namespace MWPhysics
         mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
         mSolver = new btSequentialImpulseConstraintSolver;
         mBroadphase = new btDbvtBroadphase();
+
+        // Note we don't use any Dynamics at the moment - a btCollisionWorld might be sufficient?
         mDynamicsWorld = new btDiscreteDynamicsWorld(mDispatcher,mBroadphase,mSolver,mCollisionConfiguration);
 
         // Don't update AABBs of all objects every frame. Most objects in MW are static, so we don't need this.

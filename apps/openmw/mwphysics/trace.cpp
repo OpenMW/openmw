@@ -2,8 +2,9 @@
 
 #include <map>
 
-#include <btBulletDynamicsCommon.h>
-#include <btBulletCollisionCommon.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/CollisionShapes/btConvexShape.h>
+#include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
 #include "collisiontype.hpp"
 #include "actor.hpp"

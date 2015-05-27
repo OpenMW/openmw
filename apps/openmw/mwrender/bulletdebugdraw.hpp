@@ -1,11 +1,13 @@
 #ifndef OPENMW_MWRENDER_BULLETDEBUGDRAW_H
 #define OPENMW_MWRENDER_BULLETDEBUGDRAW_H
 
-#include "btBulletDynamicsCommon.h"
-
 #include <osg/ref_ptr>
 #include <osg/Array>
 #include <osg/PrimitiveSet>
+
+#include <LinearMath/btIDebugDraw.h>
+
+class btDynamicsWorld;
 
 namespace osg
 {

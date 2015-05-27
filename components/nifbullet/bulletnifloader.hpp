@@ -6,10 +6,6 @@
 #include <set>
 #include <iostream>
 #include <map>
-#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
-#include <BulletCollision/CollisionShapes/btConvexTriangleMeshShape.h>
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
-#include <btBulletDynamicsCommon.h>
 
 #include <osg/Matrixf>
 #include <osg/BoundingBox>
@@ -17,6 +13,10 @@
 #include <osg/Referenced>
 
 #include <components/nif/niffile.hpp>
+
+class btTriangleMesh;
+class btCompoundShape;
+class btCollisionShape;
 
 namespace Nif
 {
@@ -69,22 +69,6 @@ public:
 private:
     osg::ref_ptr<BulletShape> mSource;
 };
-
-// Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
-struct TriangleMeshShape : public btBvhTriangleMeshShape
-{
-    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
-        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
-    {
-    }
-
-    virtual ~TriangleMeshShape()
-    {
-        delete getTriangleInfoMap();
-        delete m_meshInterface;
-    }
-};
-
 
 /**
 *Load bulletShape from NIF files.

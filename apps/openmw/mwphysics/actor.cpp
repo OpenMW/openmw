@@ -2,11 +2,13 @@
 
 #include <osg/PositionAttitudeTransform>
 
-#include <btBulletCollisionCommon.h>
-
-#include "../mwworld/class.hpp"
+#include <BulletCollision/CollisionShapes/btCylinderShape.h>
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
+
+#include "../mwworld/class.hpp"
 
 #include "convert.hpp"
 #include "collisiontype.hpp"

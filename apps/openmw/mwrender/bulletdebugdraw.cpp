@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Group>

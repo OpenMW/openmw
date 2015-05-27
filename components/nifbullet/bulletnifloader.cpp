@@ -6,6 +6,11 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
+#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
+#include <BulletCollision/CollisionShapes/btScaledBvhTriangleMeshShape.h>
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
+
 #include <components/misc/stringops.hpp>
 
 #include "../nif/niffile.hpp"
@@ -35,6 +40,21 @@ btVector3 getbtVector(const osg::Vec3f &v)
 
 namespace NifBullet
 {
+
+// Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
+struct TriangleMeshShape : public btBvhTriangleMeshShape
+{
+    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
+        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
+    {
+    }
+
+    virtual ~TriangleMeshShape()
+    {
+        delete getTriangleInfoMap();
+        delete m_meshInterface;
+    }
+};
 
 BulletNifLoader::BulletNifLoader()
     : mCompoundShape(NULL)
