@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <osg/Geode>
 #include <osg/Geometry>
@@ -21,7 +21,7 @@ namespace
 namespace MWRender
 {
 
-DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btDynamicsWorld *world)
+DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world)
     : mParentNode(parentNode),
       mWorld(world),
       mDebugOn(true)

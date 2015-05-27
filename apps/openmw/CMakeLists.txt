@@ -152,7 +152,6 @@ if (ANDROID)
         MyGUIEngineStatic
         cpufeatures
         BulletCollision
-        BulletDynamics
         LinearMath
     )
 endif (ANDROID)

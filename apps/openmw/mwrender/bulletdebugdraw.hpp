@@ -7,7 +7,7 @@
 
 #include <LinearMath/btIDebugDraw.h>
 
-class btDynamicsWorld;
+class btCollisionWorld;
 
 namespace osg
 {
@@ -23,7 +23,7 @@ class DebugDrawer : public btIDebugDraw
 {
 protected:
     osg::ref_ptr<osg::Group> mParentNode;
-    btDynamicsWorld *mWorld;
+    btCollisionWorld *mWorld;
     osg::ref_ptr<osg::Geode> mGeode;
     osg::ref_ptr<osg::Geometry> mGeometry;
     osg::ref_ptr<osg::Vec3Array> mVertices;
@@ -36,7 +36,7 @@ protected:
 
 public:
 
-    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btDynamicsWorld *world);
+    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world);
     ~DebugDrawer();
 
     void step();

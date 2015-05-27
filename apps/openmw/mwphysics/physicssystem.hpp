@@ -31,8 +31,7 @@ namespace Resource
     class ResourceSystem;
 }
 
-class btSequentialImpulseConstraintSolver;
-class btDiscreteDynamicsWorld;
+class btCollisionWorld;
 class btBroadphaseInterface;
 class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
@@ -127,9 +126,8 @@ namespace MWPhysics
 
             btBroadphaseInterface* mBroadphase;
             btDefaultCollisionConfiguration* mCollisionConfiguration;
-            btSequentialImpulseConstraintSolver* mSolver;
             btCollisionDispatcher* mDispatcher;
-            btDiscreteDynamicsWorld* mDynamicsWorld;
+            btCollisionWorld* mCollisionWorld;
 
             std::auto_ptr<NifBullet::BulletShapeManager> mShapeManager;
 

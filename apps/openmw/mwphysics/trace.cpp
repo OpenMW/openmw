@@ -2,7 +2,7 @@
 
 #include <map>
 
-#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 
@@ -50,7 +50,7 @@ protected:
 };
 
 
-void ActorTracer::doTrace(btCollisionObject *actor, const osg::Vec3f& start, const osg::Vec3f& end, btDynamicsWorld* world)
+void ActorTracer::doTrace(btCollisionObject *actor, const osg::Vec3f& start, const osg::Vec3f& end, btCollisionWorld* world)
 {
     const btVector3 btstart = toBullet(start);
     const btVector3 btend = toBullet(end);
@@ -89,7 +89,7 @@ void ActorTracer::doTrace(btCollisionObject *actor, const osg::Vec3f& start, con
     }
 }
 
-void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, btDynamicsWorld* world)
+void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, btCollisionWorld* world)
 {
     const btVector3 btstart(start.x(), start.y(), start.z()+1.0f);
     const btVector3 btend(end.x(), end.y(), end.z()+1.0f);

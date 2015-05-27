@@ -9,7 +9,7 @@
 #include <osg/Quat>
 #include <osg/ref_ptr>
 
-class btDynamicsWorld;
+class btCollisionWorld;
 class btCollisionShape;
 class btCollisionObject;
 
@@ -43,7 +43,7 @@ namespace MWPhysics
     class Actor : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btDynamicsWorld* world);
+        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btCollisionWorld* world);
         ~Actor();
 
         /**
@@ -125,7 +125,7 @@ namespace MWPhysics
         bool mInternalCollisionMode;
         bool mExternalCollisionMode;
 
-        btDynamicsWorld* mDynamicsWorld;
+        btCollisionWorld* mCollisionWorld;
 
         Actor(const Actor&);
         Actor& operator=(const Actor&);

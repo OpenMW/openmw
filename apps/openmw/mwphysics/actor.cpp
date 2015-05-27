@@ -4,7 +4,7 @@
 
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletDynamics/Dynamics/btDynamicsWorld.h>
+#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -17,12 +17,12 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btDynamicsWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
-  , mDynamicsWorld(world)
+  , mCollisionWorld(world)
 {
     mPtr = ptr;
 
@@ -55,7 +55,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstanc
 Actor::~Actor()
 {
     if (mCollisionObject.get())
-        mDynamicsWorld->removeCollisionObject(mCollisionObject.get());
+        mCollisionWorld->removeCollisionObject(mCollisionObject.get());
 }
 
 void Actor::enableCollisionMode(bool collision)
@@ -74,13 +74,13 @@ void Actor::enableCollisionBody(bool collision)
 
 void Actor::updateCollisionMask()
 {
-    mDynamicsWorld->removeCollisionObject(mCollisionObject.get());
+    mCollisionWorld->removeCollisionObject(mCollisionObject.get());
     int collisionMask = CollisionType_World | CollisionType_HeightMap;
     if (mExternalCollisionMode)
         collisionMask |= CollisionType_Actor | CollisionType_Projectile;
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
-    mDynamicsWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
+    mCollisionWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
 }
 
 void Actor::updatePosition()

@@ -4,7 +4,7 @@
 #include <osg/Vec3f>
 
 class btCollisionObject;
-class btDynamicsWorld;
+class btCollisionWorld;
 
 
 namespace MWPhysics
@@ -19,8 +19,8 @@ namespace MWPhysics
 
         float mFraction;
 
-        void doTrace(btCollisionObject *actor, const osg::Vec3f& start, const osg::Vec3f& end, btDynamicsWorld* world);
-        void findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, btDynamicsWorld* world);
+        void doTrace(btCollisionObject *actor, const osg::Vec3f& start, const osg::Vec3f& end, btCollisionWorld* world);
+        void findGround(const Actor* actor, const osg::Vec3f& start, const osg::Vec3f& end, btCollisionWorld* world);
     };
 }
 
