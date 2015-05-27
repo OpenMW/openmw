@@ -8,15 +8,7 @@
 #include "../world/subcellcollection.hpp"
 #include "../world/pathgrid.hpp"
 
-namespace
-{
-    struct Point
-    {
-        unsigned char mConnectionNum;
-        std::vector<int> mOtherIndex;
-        Point() : mConnectionNum(0), mOtherIndex(0) {}
-    };
-}
+#include "../settings/usersettings.hpp"
 
 CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
 : mPathgrids (pathgrids)
@@ -29,6 +21,12 @@ int CSMTools::PathgridCheckStage::setup()
 
 void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
+    // NOTE: This is horribly inefficient but in order to use signals the entire Stage class
+    // hierarchy needs to be braught under Qt which seems like an overkill for a small
+    // performance gain during verify operations
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    bool extraCheck = userSettings.setting ("verifier/pathgrid-extra-check", QString ("false"))=="true";
+
     const CSMWorld::Record<CSMWorld::Pathgrid>& record = mPathgrids.getRecord (stage);
 
     if (record.isDeleted())
@@ -44,7 +42,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
     else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
         messages.push_back (std::make_pair (id, pathgrid.mId + " has more points than expected"));
 
-    std::vector<Point> pointList(pathgrid.mPoints.size());
+    std::vector<CSMTools::Point> pointList(pathgrid.mPoints.size());
     std::vector<int> duplList;
 
     for (unsigned int i = 0; i < pathgrid.mEdges.size(); ++i)
@@ -115,6 +113,9 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             }
         }
 
+        if (!extraCheck)
+            continue;
+
         // check duplicate points
         // FIXME: how to do this efficiently?
         for (unsigned int j = 0; j < pathgrid.mPoints.size(); ++j)
@@ -142,6 +143,9 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             }
         }
     }
+
+    if (!extraCheck)
+        return;
 
     // check pathgrid points that are not connected to anything
     for (unsigned int i = 0; i < pointList.size(); ++i)

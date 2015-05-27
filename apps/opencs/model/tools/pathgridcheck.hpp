@@ -14,13 +14,23 @@ namespace CSMWorld
 
 namespace CSMTools
 {
+
+    struct Point
+    {
+        unsigned char mConnectionNum;
+        std::vector<int> mOtherIndex;
+        Point() : mConnectionNum(0), mOtherIndex(0) {}
+    };
+
     class PathgridCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::SubCellCollection<CSMWorld::Pathgrid, CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
+            const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
+                  CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
 
         public:
 
-            PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid, CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
+            PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
+                    CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
 
             virtual int setup();
 
