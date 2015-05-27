@@ -8,6 +8,15 @@
 #include "../world/subcellcollection.hpp"
 #include "../world/pathgrid.hpp"
 
+namespace
+{
+    struct Point
+    {
+        unsigned char mConnectionNum;
+        std::vector<int> mOtherIndex;
+        Point() : mConnectionNum(0), mOtherIndex(0) {}
+    };
+}
 
 CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
 : mPathgrids (pathgrids)
@@ -35,12 +44,6 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
     else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
         messages.push_back (std::make_pair (id, pathgrid.mId + " has more points than expected"));
 
-    struct Point
-    {
-        unsigned char mConnectionNum;
-        std::vector<int> mOtherIndex;
-        Point() : mConnectionNum(0), mOtherIndex(0) {}
-    };
     std::vector<Point> pointList(pathgrid.mPoints.size());
     std::vector<int> duplList;
 
