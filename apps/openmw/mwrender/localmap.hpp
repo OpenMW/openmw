@@ -101,6 +101,8 @@ namespace MWRender
          */
         bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
 
+        osg::Group* getRoot();
+
     private:
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 

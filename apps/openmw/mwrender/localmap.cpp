@@ -480,6 +480,11 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     return alpha < 200;
 }
 
+osg::Group* LocalMap::getRoot()
+{
+    return mRoot;
+}
+
 void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orientation,
                              float& u, float& v, int& x, int& y, osg::Vec3f& direction)
 {

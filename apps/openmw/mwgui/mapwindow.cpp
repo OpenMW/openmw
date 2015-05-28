@@ -587,7 +587,7 @@ namespace MWGui
         , mGlobal(false)
         , mEventBoxGlobal(NULL)
         , mEventBoxLocal(NULL)
-        , mGlobalMapRender(0)
+        , mGlobalMapRender(new MWRender::GlobalMap(localMapRender->getRoot()))
         , mEditNoteDialog()
     {
         static bool registered = false;
@@ -730,7 +730,6 @@ namespace MWGui
 
     void MapWindow::renderGlobalMap(Loading::Listener* loadingListener)
     {
-        mGlobalMapRender = new MWRender::GlobalMap();
         mGlobalMapRender->render(loadingListener);
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
@@ -794,9 +793,11 @@ namespace MWGui
     {
         LocalMapBase::onFrame(dt);
 
+        mGlobalMapRender->cleanupCameras();
+
         for (std::vector<CellId>::iterator it = mQueuedToExplore.begin(); it != mQueuedToExplore.end(); ++it)
         {
-            mGlobalMapRender->exploreCell(it->first, it->second);
+            mGlobalMapRender->exploreCell(it->first, it->second, mLocalMapRender->getMapTexture(it->first, it->second));
         }
 
         mQueuedToExplore.clear();
@@ -866,6 +867,8 @@ namespace MWGui
     void MapWindow::notifyPlayerUpdate ()
     {
         globalMapUpdatePlayer ();
+
+        setGlobalMapPlayerDir(mLastDirectionX, mLastDirectionY);
     }
 
     void MapWindow::setGlobalMapPlayerPosition(float worldX, float worldY)
