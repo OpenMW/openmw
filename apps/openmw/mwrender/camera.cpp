@@ -319,9 +319,9 @@ namespace MWRender
         if (dist >= mFurthest) {
             dist = mFurthest;
         } else if (!override && dist < 10.f) {
-            dist = -10.f;
+            dist = 10.f;
         } else if (override && dist <= mNearest) {
-            dist = -mNearest;
+            dist = mNearest;
             mIsNearest = true;
         }
         mCameraDistance = dist;
