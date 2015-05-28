@@ -16,17 +16,14 @@ CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollect
 
 int CSMTools::PathgridCheckStage::setup()
 {
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    mExtraCheck = userSettings.setting ("verifier/pathgrid-extra-check", QString ("false"))=="true";
+
     return mPathgrids.getSize();
 }
 
 void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& messages)
 {
-    // NOTE: This is horribly inefficient but in order to use signals the entire Stage class
-    // hierarchy needs to be braught under Qt which seems like an overkill for a small
-    // performance gain during verify operations
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-    bool extraCheck = userSettings.setting ("verifier/pathgrid-extra-check", QString ("false"))=="true";
-
     const CSMWorld::Record<CSMWorld::Pathgrid>& record = mPathgrids.getRecord (stage);
 
     if (record.isDeleted())
@@ -113,7 +110,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             }
         }
 
-        if (!extraCheck)
+        if (!mExtraCheck)
             continue;
 
         // check duplicate points
@@ -144,7 +141,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         }
     }
 
-    if (!extraCheck)
+    if (!mExtraCheck)
         return;
 
     // check pathgrid points that are not connected to anything

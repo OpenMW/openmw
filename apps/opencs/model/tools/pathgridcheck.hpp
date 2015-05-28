@@ -24,17 +24,18 @@ namespace CSMTools
 
     class PathgridCheckStage : public CSMDoc::Stage
     {
-            const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
-                  CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
+        bool mExtraCheck;
+        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
+              CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
 
-        public:
+    public:
 
-            PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
-                    CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
+        PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
+                CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
 
-            virtual int setup();
+        virtual int setup();
 
-            virtual void perform (int stage, CSMDoc::Messages& messages);
+        virtual void perform (int stage, CSMDoc::Messages& messages);
     };
 }
 
