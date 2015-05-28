@@ -84,8 +84,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                         mKeyboardListener->keyPressed(evt.key);
 
                     // temporary for the stats viewer
-                    if (evt.key.keysym.sym == SDLK_F9)
-                        mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F9);
+                    if (evt.key.keysym.sym == SDLK_F3)
+                        mViewer->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_F3);
 
                     break;
                 case SDL_KEYUP:
@@ -93,8 +93,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                         mKeyboardListener->keyReleased(evt.key);
 
                     // temporary for the stats viewer
-                    if (evt.key.keysym.sym == SDLK_F9)
-                        mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F9);
+                    if (evt.key.keysym.sym == SDLK_F3)
+                        mViewer->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_F3);
 
                     break;
                 case SDL_TEXTINPUT:
