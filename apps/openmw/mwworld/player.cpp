@@ -20,7 +20,6 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actors.hpp"
-#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"

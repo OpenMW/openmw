@@ -1875,7 +1875,7 @@ void CharacterController::update(float duration)
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
-        std::cerr<< "Animation "<<groupname<<" not found" <<std::endl;
+        std::cerr<< "Animation "<<groupname<<" not found for " << mPtr.getCellRef().getRefId() << std::endl;
     else
     {
         count = std::max(count, 1);

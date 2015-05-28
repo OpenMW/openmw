@@ -1176,12 +1176,14 @@ namespace MWRender
 
     // --------------------------------------------------------------------------------
 
-    ObjectAnimation::ObjectAnimation(const MWWorld::Ptr &ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool allowLight)
+    ObjectAnimation::ObjectAnimation(const MWWorld::Ptr &ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight)
         : Animation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
     {
         if (!model.empty())
         {
             setObjectRoot(model, false, false);
+            if (animated)
+                addAnimSource(model);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));

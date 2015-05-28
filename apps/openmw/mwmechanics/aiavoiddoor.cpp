@@ -2,11 +2,12 @@
 #include <iostream>
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "mechanicsmanagerimp.hpp"
+
 
 #include <OgreMath.h>
 

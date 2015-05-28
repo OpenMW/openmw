@@ -395,7 +395,7 @@ private:
 
 class ObjectAnimation : public Animation {
 public:
-    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool allowLight);
+    ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
 };
 
 }

@@ -109,7 +109,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 {
     insertBegin(ptr);
 
-    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, allowLight));
+    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
     if (!allowLight)
     {
