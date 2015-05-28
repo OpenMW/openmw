@@ -3,6 +3,7 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 
 #include <components/esm/quickkeys.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -19,8 +20,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwgui/inventorywindow.hpp"
-#include "../mwgui/bookwindow.hpp"
-#include "../mwgui/scrollwindow.hpp"
 
 #include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
