@@ -9,8 +9,6 @@
 #include <QMetaProperty>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPlainTextEdit>
@@ -19,7 +17,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
-
+#include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
@@ -174,7 +172,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
         case CSMWorld::ColumnBase::Display_Integer:
         {
-            QSpinBox *sb = new QSpinBox(parent);
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
             sb->setRange(INT_MIN, INT_MAX);
             return sb;
         }
@@ -185,7 +183,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
         case CSMWorld::ColumnBase::Display_Float:
         {
-            QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
+            DialogueDoubleSpinBox *dsb = new DialogueDoubleSpinBox(parent);
             dsb->setRange(-FLT_MAX, FLT_MAX);
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(3);
