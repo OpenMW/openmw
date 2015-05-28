@@ -782,6 +782,7 @@ namespace MWGui
             markerWidget->setDepth(Global_MarkerLayer);
             markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
             markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+            mGlobalMapMarkers.push_back(markerWidget);
         }
     }
 
@@ -899,8 +900,9 @@ namespace MWGui
         mGlobalMapRender->clear();
         mChanged = true;
 
-        while (mEventBoxGlobal->getChildCount())
-            MyGUI::Gui::getInstance().destroyWidget(mEventBoxGlobal->getChildAt(0));
+        for (std::vector<MyGUI::Widget*>::iterator it = mGlobalMapMarkers.begin(); it != mGlobalMapMarkers.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(*it);
+        mGlobalMapMarkers.clear();
     }
 
     void MapWindow::write(ESM::ESMWriter &writer, Loading::Listener& progress)

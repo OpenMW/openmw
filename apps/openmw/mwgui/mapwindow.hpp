@@ -236,6 +236,8 @@ namespace MWGui
 
         MWRender::GlobalMap* mGlobalMapRender;
 
+        std::vector<MyGUI::Widget*> mGlobalMapMarkers;
+
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
 
