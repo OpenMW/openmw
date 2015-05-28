@@ -297,10 +297,13 @@ void LocalMap::requestExteriorMap(MWWorld::CellStore* cell)
     setupRenderToTexture(camera, cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
     MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
-    if (cell->getFog())
-        segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
-    else
-        segment.initFogOfWar();
+    if (!segment.mFogOfWarImage)
+    {
+        if (cell->getFog())
+            segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
+        else
+            segment.initFogOfWar();
+    }
 }
 
 void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
@@ -414,20 +417,23 @@ void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
             setupRenderToTexture(camera, x, y);
 
             MapSegment& segment = mSegments[std::make_pair(x,y)];
-            if (!cell->getFog())
-                segment.initFogOfWar();
-            else
+            if (!segment.mFogOfWarImage)
             {
-                ESM::FogState* fog = cell->getFog();
-
-                // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
-                if (i >= int(fog->mFogTextures.size()))
+                if (!cell->getFog())
+                    segment.initFogOfWar();
+                else
                 {
-                    std::cout << "Warning: fog texture count mismatch" << std::endl;
-                    break;
-                }
+                    ESM::FogState* fog = cell->getFog();
 
-                segment.loadFogOfWar(fog->mFogTextures[i]);
+                    // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
+                    if (i >= int(fog->mFogTextures.size()))
+                    {
+                        std::cout << "Warning: fog texture count mismatch" << std::endl;
+                        break;
+                    }
+
+                    segment.loadFogOfWar(fog->mFogTextures[i]);
+                }
             }
             ++i;
         }
@@ -570,7 +576,8 @@ void LocalMap::MapSegment::createFogOfWarTexture()
     if (mFogOfWarTexture)
         return;
     mFogOfWarTexture = new osg::Texture2D;
-    mFogOfWarTexture->setDataVariance(osg::Object::DYNAMIC);
+    // TODO: synchronize access? for now, the worst that could happen is the draw thread jumping a frame ahead.
+    //mFogOfWarTexture->setDataVariance(osg::Object::DYNAMIC);
     mFogOfWarTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
     mFogOfWarTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
     mFogOfWarTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -581,6 +588,8 @@ void LocalMap::MapSegment::createFogOfWarTexture()
 void LocalMap::MapSegment::initFogOfWar()
 {
     mFogOfWarImage = new osg::Image;
+    // Assign a PixelBufferObject for asynchronous transfer of data to the GPU
+    mFogOfWarImage->setPixelBufferObject(new osg::PixelBufferObject);
     mFogOfWarImage->allocateImage(sFogOfWarResolution, sFogOfWarResolution, 1, GL_RGBA, GL_UNSIGNED_BYTE);
     assert(mFogOfWarImage->isDataContiguous());
     std::vector<uint32_t> data;
