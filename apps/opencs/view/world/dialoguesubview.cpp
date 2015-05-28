@@ -211,8 +211,17 @@ void CSVWorld::DialogueDelegateDispatcher::editorDataCommited(QWidget* editor,
 
 void CSVWorld::DialogueDelegateDispatcher::setEditorData (QWidget* editor, const QModelIndex& index) const
 {
-    CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-    (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+    CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None;
+    if (index.parent().isValid())
+    {
+        display = static_cast<CSMWorld::ColumnBase::Display>
+        (static_cast<CSMWorld::IdTree *>(mTable)->nestedHeaderData (index.parent().column(), index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+    }
+    else
+    {
+        display = static_cast<CSMWorld::ColumnBase::Display>
+        (mTable->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
+    }
 
     QLabel* label = qobject_cast<QLabel*>(editor);
     if(label)
@@ -523,22 +532,20 @@ void CSVWorld::EditWidget::remake(int row)
             }
             else
             {
-                mNestedModels.push_back(new CSMWorld::NestedTableProxyModel (
-                            static_cast<CSMWorld::IdTree *>(mTable)->index(row, i),
-                            display, static_cast<CSMWorld::IdTree *>(mTable)));
+                CSMWorld::IdTree *tree = static_cast<CSMWorld::IdTree *>(mTable);
                 mNestedTableMapper = new QDataWidgetMapper (this);
 
-                mNestedTableMapper->setModel(mNestedModels.back());
+                mNestedTableMapper->setModel(tree);
                 // FIXME: lack MIME support?
                 mNestedTableDispatcher =
-                        new DialogueDelegateDispatcher (0/*this*/, mTable, mCommandDispatcher, mDocument, mNestedModels.back());
+                        new DialogueDelegateDispatcher (0/*this*/, mTable, mCommandDispatcher, mDocument, tree);
+                mNestedTableMapper->setRootIndex (tree->index(row, i));
                 mNestedTableMapper->setItemDelegate(mNestedTableDispatcher);
 
-                int columnCount =
-                    mTable->columnCount(mTable->getModelIndex (mNestedModels.back()->getParentId(), i));
+                int columnCount = tree->columnCount(tree->index(row, i));
                 for (int col = 0; col < columnCount; ++col)
                 {
-                    int displayRole = mNestedModels.back()->headerData (col,
+                    int displayRole = tree->nestedHeaderData (i, col,
                             Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt();
 
                     CSMWorld::ColumnBase::Display display =
@@ -548,16 +555,16 @@ void CSVWorld::EditWidget::remake(int row)
 
                     // FIXME: assumed all columns are editable
                     QWidget* editor =
-                        mNestedTableDispatcher->makeEditor (display, mNestedModels.back()->index (0, col));
+                        mNestedTableDispatcher->makeEditor (display, tree->index (0, col, tree->index(row, i)));
                     if (editor)
                     {
                         mNestedTableMapper->addMapping (editor, col);
 
-                        std::string disString = mNestedModels.back()->headerData (col,
+                        std::string disString = tree->nestedHeaderData (i, col,
                                     Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
-                        // Need ot use Qt::DisplayRole in order to get the  correct string
+                        // Need to use Qt::DisplayRole in order to get the  correct string
                         // from CSMWorld::Columns
-                        QLabel* label = new QLabel (mNestedModels.back()->headerData (col,
+                        QLabel* label = new QLabel (tree->nestedHeaderData (i, col,
                                     Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
 
                         label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -567,14 +574,14 @@ void CSVWorld::EditWidget::remake(int row)
                         unlockedLayout->addWidget (editor, unlocked, 1);
                         ++unlocked;
 
-                        if(mNestedModels.back()->index(0, col).data().type() == QVariant::UserType)
+                        if(tree->index(0, col, tree->index(row, i)).data().type() == QVariant::UserType)
                         {
                             editor->setEnabled(false);
                             label->setEnabled(false);
                         }
                     }
                 }
-                mNestedTableMapper->setCurrentModelIndex(mNestedModels.back()->index(0, 0));
+                mNestedTableMapper->setCurrentModelIndex(tree->index(0, 0, tree->index(row, i)));
             }
         }
     }
