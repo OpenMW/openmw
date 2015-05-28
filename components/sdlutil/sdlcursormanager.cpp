@@ -119,7 +119,6 @@ namespace
         osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
         geom->drawImplementation(renderInfo);
 
-        // TODO: implement for GL ES
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, resultImage->data());
 
         geom->releaseGLObjects();
