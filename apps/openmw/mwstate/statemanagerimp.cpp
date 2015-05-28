@@ -179,12 +179,14 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 
+        /*
         int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
         Ogre::Image screenshot;
         world.screenshot(screenshot, screenshotW, screenshotH);
         Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
         profile.mScreenshot.resize(encoded->size());
         encoded->read(&profile.mScreenshot[0], encoded->size());
+        */
 
         if (!slot)
             slot = getCurrentCharacter()->createSlot (profile);

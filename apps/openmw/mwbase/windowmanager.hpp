@@ -355,6 +355,7 @@ namespace MWBase
 
             virtual void requestMap(std::set<MWWorld::CellStore*> cells) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
+            virtual void writeFog(MWWorld::CellStore* cell) = 0;
     };
 }
 

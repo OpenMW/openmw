@@ -2016,4 +2016,9 @@ namespace MWGui
         mLocalMapRender->removeCell(cell);
     }
 
+    void WindowManager::writeFog(MWWorld::CellStore *cell)
+    {
+        mLocalMapRender->saveFogOfWar(cell);
+    }
+
 }

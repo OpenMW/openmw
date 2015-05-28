@@ -216,21 +216,37 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
-#if 0
+        TextureVector fogTextures;
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
             {
-                std::string image = mPrefix+"_"+ MyGUI::utility::toString(mCurX + (mx-1)) + "_"
-                        + MyGUI::utility::toString(mCurY + (-1*(my-1)));
+                int x = mCurX + (mx-1);
+                int y = mCurY + (-1*(my-1));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
-                fog->setImageTexture(mFogOfWar ?
-                    ((MyGUI::RenderManager::getInstance().getTexture(image+"_fog") != 0) ? image+"_fog"
-                    : "black" )
-                   : "");
+
+                if (!mFogOfWar)
+                {
+                    fog->setImageTexture("");
+                    continue;
+                }
+
+                osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(x, y);
+                if (tex)
+                {
+                    boost::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
+                    fog->setRenderItemTexture(myguitex.get());
+                    fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+                    fogTextures.push_back(myguitex);
+                }
+                else
+                    fog->setImageTexture("black");
             }
         }
-#endif
+        // Move the textures we just set into mFogTextures, and move the previous textures into fogTextures, for deletion when this function ends.
+        // Note, above we need to ensure that all widgets are getting a new texture set, lest we delete textures that are still in use.
+        mFogTextures.swap(fogTextures);
+
         redraw();
     }
 
@@ -344,7 +360,7 @@ namespace MWGui
         mDoorMarkerWidgets.clear();
 
         // Update the map textures
-        std::vector<boost::shared_ptr<MyGUI::ITexture> > textures;
+        TextureVector textures;
         for (int mx=0; mx<3; ++mx)
         {
             for (int my=0; my<3; ++my)
@@ -354,7 +370,7 @@ namespace MWGui
 
                 MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
 
-                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mInterior, mapX, mapY);
+                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
                 if (texture)
                 {
                     boost::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));

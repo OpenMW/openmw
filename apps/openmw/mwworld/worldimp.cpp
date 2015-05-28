@@ -337,8 +337,8 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator iter (mWorldScene->getActiveCells().begin());
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
-            //CellStore* cellstore = *iter;
-            //mRendering->writeFog(cellstore);
+            CellStore* cellstore = *iter;
+            MWBase::Environment::get().getWindowManager()->writeFog(cellstore);
         }
 
         MWMechanics::CreatureStats::writeActorIdCounter(writer);

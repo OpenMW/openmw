@@ -368,6 +368,7 @@ namespace MWGui
 
     void requestMap(std::set<MWWorld::CellStore*> cells);
     void removeCell(MWWorld::CellStore* cell);
+    void writeFog(MWWorld::CellStore* cell);
 
   private:
     Resource::ResourceSystem* mResourceSystem;

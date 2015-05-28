@@ -27,6 +27,7 @@ namespace osgViewer
 namespace osg
 {
     class Texture2D;
+    class Image;
     class Camera;
     class Group;
     class Node;
@@ -48,12 +49,23 @@ namespace MWRender
          */
         void clear();
 
+        /**
+         * Request a map render for the given cells. Render textures will be immediately created and can be retrieved with the getMapTexture function.
+         */
         void requestMap (std::set<MWWorld::CellStore*> cells);
 
+        /**
+         * Remove map and fog textures for the given cell.
+         */
         void removeCell (MWWorld::CellStore* cell);
 
-        osg::ref_ptr<osg::Texture2D> getMapTexture (bool interior, int x, int y);
+        osg::ref_ptr<osg::Texture2D> getMapTexture (int x, int y);
 
+        osg::ref_ptr<osg::Texture2D> getFogOfWarTexture (int x, int y);
+
+        /**
+         * Indicates a camera has been queued for rendering and can be cleaned up in the next frame. For internal use only.
+         */
         void markForRemoval(osg::Camera* cam);
 
         /**
@@ -78,8 +90,7 @@ namespace MWRender
         void saveFogOfWar(MWWorld::CellStore* cell);
 
         /**
-         * Get the interior map texture index and normalized position
-         * on this texture, given a world position
+         * Get the interior map texture index and normalized position on this texture, given a world position
          */
         void worldToInteriorMapPosition (osg::Vec2f pos, float& nX, float& nY, int& x, int& y);
 
@@ -102,16 +113,30 @@ namespace MWRender
 
         CameraVector mCamerasPendingRemoval;
 
-        typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Texture2D> > TextureMap;
-        TextureMap mTextures;
+        struct MapSegment
+        {
+            MapSegment();
+            ~MapSegment();
+
+            void initFogOfWar();
+            void loadFogOfWar(const ESM::FogTexture& fog);
+            void saveFogOfWar(ESM::FogTexture& fog) const;
+            void createFogOfWarTexture();
+
+            osg::ref_ptr<osg::Texture2D> mMapTexture;
+            osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
+            osg::ref_ptr<osg::Image> mFogOfWarImage;
+
+            bool mHasFogState;
+        };
+
+        typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;
+        SegmentMap mSegments;
 
         int mMapResolution;
 
         // the dynamic texture is a bottleneck, so don't set this too high
         static const int sFogOfWarResolution = 32;
-
-        // frames to skip before rendering fog of war
-        static const int sFogOfWarSkip = 2;
 
         // size of a map segment (for exteriors, 1 cell)
         float mMapWorldSize;
@@ -125,23 +150,8 @@ namespace MWRender
         osg::ref_ptr<osg::Camera> createOrthographicCamera(float left, float top, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax);
         void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
 
-        // Creates a fog of war texture and initializes it to full black
-        //void createFogOfWar(const std::string& texturePrefix);
-
-        // Loads a fog of war texture from its ESM struct
-        //void loadFogOfWar(const std::string& texturePrefix, ESM::FogTexture& esm); // FogTexture not const because MemoryDataStream doesn't accept it
-
-        // A buffer for the "fog of war" textures of the current cell.
-        // Both interior and exterior maps are possibly divided into multiple textures.
-        //std::map <std::string, std::vector<Ogre::uint32> > mBuffers;
-
-        // The render texture we will use to create the map images
-        //Ogre::TexturePtr mRenderTexture;
-        //Ogre::RenderTarget* mRenderTarget;
-
         bool mInterior;
         osg::BoundingBox mBounds;
-        //std::string mInteriorName;
     };
 
 }

@@ -106,7 +106,9 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
-        std::vector<boost::shared_ptr<MyGUI::ITexture> > mMapTextures;
+        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        TextureVector mMapTextures;
+        TextureVector mFogTextures;
 
         // Keep track of created marker widgets, just to easily remove them later.
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
