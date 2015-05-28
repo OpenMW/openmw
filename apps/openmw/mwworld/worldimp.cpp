@@ -2107,6 +2107,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+            mPhysics->remove(getPlayerPtr());
 
             mPlayer->set(player);
         }
@@ -2128,6 +2129,7 @@ namespace MWWorld
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
         model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
+        mPhysics->remove(getPlayerPtr());
         mPhysics->addActor(getPlayerPtr(), model);
     }
 
