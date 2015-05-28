@@ -5,8 +5,11 @@
 #include <osg/Image>
 #include <osg/Texture2D>
 
+#include <osgDB/WriteFile>
+
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
+#include <components/files/memorystream.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -134,7 +137,12 @@ namespace MWRender
         }
 
         mBaseTexture = new osg::Texture2D;
+        mBaseTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mBaseTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mBaseTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        mBaseTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mBaseTexture->setImage(image);
+        mBaseTexture->setResizeNonPowerOfTwoHint(false);
 
         clear();
 
@@ -200,14 +208,25 @@ namespace MWRender
 
     void GlobalMap::clear()
     {
-        /*
-        Ogre::uchar* buffer =  OGRE_ALLOC_T(Ogre::uchar, mWidth * mHeight * 4, Ogre::MEMCATEGORY_GENERAL);
-        memset(buffer, 0, mWidth * mHeight * 4);
+        if (!mOverlayImage)
+        {
+            mOverlayImage = new osg::Image;
+            mOverlayImage->allocateImage(mWidth, mHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+            assert(mOverlayImage->isDataContiguous());
+        }
+        memset(mOverlayImage->data(), 0, mOverlayImage->getTotalSizeInBytes());
+        mOverlayImage->dirty();
 
-        mOverlayImage.loadDynamicImage(&buffer[0], mWidth, mHeight, 1, Ogre::PF_A8B8G8R8, true); // pass ownership of buffer to image
-
-        mOverlayTexture->load();
-        */
+        if (!mOverlayTexture)
+        {
+            mOverlayTexture = new osg::Texture2D;
+            mOverlayTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mOverlayTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            mOverlayTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+            mOverlayTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+            mOverlayTexture->setImage(mOverlayImage);
+            mOverlayTexture->setResizeNonPowerOfTwoHint(false);
+        }
     }
 
     void GlobalMap::write(ESM::GlobalMap& map)
@@ -217,12 +236,34 @@ namespace MWRender
         map.mBounds.mMinY = mMinY;
         map.mBounds.mMaxY = mMaxY;
 
-        /*
-        Ogre::DataStreamPtr encoded = mOverlayImage.encode("png");
-        map.mImageData.resize(encoded->size());
-        encoded->read(&map.mImageData[0], encoded->size());
-        */
+        std::ostringstream ostream;
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (!readerwriter)
+        {
+            std::cerr << "Can't write map overlay: no png readerwriter found" << std::endl;
+            return;
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
+        if (!result.success())
+        {
+            std::cerr << "Can't write map overlay: " << result.message() << std::endl;
+            return;
+        }
+
+        std::string data = ostream.str();
+        map.mImageData = std::vector<char>(data.begin(), data.end());
     }
+
+    struct Box
+    {
+        int mLeft, mRight, mTop, mBottom;
+
+        Box(int left, int right, int top, int bottom)
+            : mLeft(left), mRight(right), mTop(top), mBottom(bottom)
+        {
+        }
+    };
 
     void GlobalMap::read(ESM::GlobalMap& map)
     {
@@ -237,17 +278,35 @@ namespace MWRender
                 || bounds.mMinY > bounds.mMaxY)
             throw std::runtime_error("invalid map bounds");
 
-        /*
-        Ogre::Image image;
-        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&map.mImageData[0], map.mImageData.size()));
-        image.load(stream, "png");
+        if (!map.mImageData.size())
+            return;
+
+        Files::IMemStream istream(&map.mImageData[0], map.mImageData.size());
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (!readerwriter)
+        {
+            std::cerr << "Can't read map overlay: no png readerwriter found" << std::endl;
+            return;
+        }
+
+        osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(istream);
+        if (!result.success())
+        {
+            std::cerr << "Can't read map overlay: " << result.message() << std::endl;
+            return;
+        }
+
+        osg::ref_ptr<osg::Image> image = result.getImage();
+        int imageWidth = image->s();
+        int imageHeight = image->t();
 
         int xLength = (bounds.mMaxX-bounds.mMinX+1);
         int yLength = (bounds.mMaxY-bounds.mMinY+1);
 
         // Size of one cell in image space
-        int cellImageSizeSrc = image.getWidth() / xLength;
-        if (int(image.getHeight() / yLength) != cellImageSizeSrc)
+        int cellImageSizeSrc = imageWidth / xLength;
+        if (int(imageHeight / yLength) != cellImageSizeSrc)
             throw std::runtime_error("cell size must be quadratic");
 
         // If cell bounds of the currently loaded content and the loaded savegame do not match,
@@ -266,39 +325,40 @@ namespace MWRender
         int topDiff = (bounds.mMaxY - mMaxY);
         int rightDiff = (bounds.mMaxX - mMaxX);
         int bottomDiff =  (mMinY - bounds.mMinY);
-        Ogre::Image::Box srcBox ( std::max(0, leftDiff * cellImageSizeSrc),
+
+        Box srcBox ( std::max(0, leftDiff * cellImageSizeSrc),
                                   std::max(0, topDiff * cellImageSizeSrc),
-                                  std::min(image.getWidth(), image.getWidth() - rightDiff * cellImageSizeSrc),
-                                  std::min(image.getHeight(), image.getHeight() - bottomDiff * cellImageSizeSrc));
+                                  std::min(imageWidth, imageWidth - rightDiff * cellImageSizeSrc),
+                                  std::min(imageHeight, imageHeight - bottomDiff * cellImageSizeSrc));
 
-        Ogre::Image::Box destBox ( std::max(0, -leftDiff * cellImageSizeDst),
+        Box destBox ( std::max(0, -leftDiff * cellImageSizeDst),
                                    std::max(0, -topDiff * cellImageSizeDst),
-                                   std::min(mOverlayTexture->getWidth(), mOverlayTexture->getWidth() + rightDiff * cellImageSizeDst),
-                                   std::min(mOverlayTexture->getHeight(), mOverlayTexture->getHeight() + bottomDiff * cellImageSizeDst));
+                                   std::min(mWidth, mWidth + rightDiff * cellImageSizeDst),
+                                   std::min(mHeight, mHeight + bottomDiff * cellImageSizeDst));
 
-        // Looks like there is no interface for blitting from memory with src/dst boxes.
-        // So we create a temporary texture for blitting.
-        Ogre::TexturePtr tex = Ogre::TextureManager::getSingleton().createManual("@temp",
-            Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, image.getWidth(),
-                                                                                 image.getHeight(), 0, Ogre::PF_A8B8G8R8);
-        tex->loadImage(image);
-
-        mOverlayTexture->load();
-        mOverlayTexture->getBuffer()->blit(tex->getBuffer(), srcBox, destBox);
-
-        if (srcBox.left == destBox.left && srcBox.right == destBox.right
-                && srcBox.top == destBox.top && srcBox.bottom == destBox.bottom
-                && int(image.getWidth()) == mWidth && int(image.getHeight()) == mHeight)
-            mOverlayImage = image;
+        if (srcBox.mLeft == destBox.mLeft && srcBox.mRight == destBox.mRight
+                && srcBox.mTop == destBox.mTop && srcBox.mBottom == destBox.mBottom
+                && imageWidth == mWidth && imageHeight == mHeight)
+        {
+            mOverlayImage->copySubImage(0, 0, 0, image);
+        }
         else
-            mOverlayTexture->convertToImage(mOverlayImage);
-
-        Ogre::TextureManager::getSingleton().remove("@temp");
-        */
+        {
+            // TODO:
+            // Dimensions don't match. This could mean a changed map region, or a changed map resolution.
+            // In the latter case, we'll want to use filtering.
+            // Create a RTT Camera and draw the image onto mOverlayImage in the next frame?
+        }
+        mOverlayImage->dirty();
     }
 
     osg::ref_ptr<osg::Texture2D> GlobalMap::getBaseTexture()
     {
         return mBaseTexture;
+    }
+
+    osg::ref_ptr<osg::Texture2D> GlobalMap::getOverlayTexture()
+    {
+        return mOverlayTexture;
     }
 }

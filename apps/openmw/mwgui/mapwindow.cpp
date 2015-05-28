@@ -582,7 +582,6 @@ namespace MWGui
         , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
         , mGlobalMap(0)
-        , mGlobalMapTexture(NULL)
         , mGlobalMapImage(NULL)
         , mGlobalMapOverlay(NULL)
         , mGlobal(false)
@@ -736,17 +735,17 @@ namespace MWGui
         mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
         mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
 
-        mGlobalMapTexture = new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture());
-        mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture);
+        mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
+        mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
         mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
-        //mGlobalMapOverlay->setImageTexture("GlobalMapOverlay");
+        mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
+        mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
+        mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
     }
 
     MapWindow::~MapWindow()
     {
-        delete mGlobalMapTexture;
-
         delete mGlobalMapRender;
     }
 

@@ -9,6 +9,7 @@
 namespace osg
 {
     class Texture2D;
+    class Image;
 }
 
 namespace Loading
@@ -50,7 +51,7 @@ namespace MWRender
         void read (ESM::GlobalMap& map);
 
         osg::ref_ptr<osg::Texture2D> getBaseTexture();
-        //osg::ref_ptr<osg::Texture2D> getOverlayTexture();
+        osg::ref_ptr<osg::Texture2D> getOverlayTexture();
 
     private:
         int mCellSize;
@@ -58,6 +59,9 @@ namespace MWRender
         std::vector< std::pair<int,int> > mExploredCells;
 
         osg::ref_ptr<osg::Texture2D> mBaseTexture;
+        osg::ref_ptr<osg::Texture2D> mOverlayTexture;
+
+        osg::ref_ptr<osg::Image> mOverlayImage;
 
         int mWidth;
         int mHeight;

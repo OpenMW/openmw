@@ -212,7 +212,8 @@ namespace MWGui
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
-        MyGUI::ITexture* mGlobalMapTexture;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;
