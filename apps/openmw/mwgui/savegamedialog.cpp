@@ -1,17 +1,20 @@
 #include "savegamedialog.hpp"
-#include "widgets.hpp"
-
-#include <OgreImage.h>
-#include <OgreTextureManager.h>
 
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_InputManager.h>
 
+#include <osgDB/ReadFile>
+#include <osg/Texture2D>
+
+#include <components/myguiplatform/myguitexture.hpp>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
+
+#include <components/files/memorystream.hpp>
 
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -22,6 +25,7 @@
 #include "../mwstate/character.hpp"
 
 #include "confirmationdialog.hpp"
+#include "widgets.hpp"
 
 namespace MWGui
 {
@@ -358,30 +362,38 @@ namespace MWGui
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
         mInfoText->setCaptionWithReplacing(text.str());
-#if 0
+
+
         // Decode screenshot
-        std::vector<char> data = mCurrentSlot->mProfile.mScreenshot; // MemoryDataStream doesn't work with const data :(
-        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
-        Ogre::Image image;
-        image.load(stream, "jpg");
+        const std::vector<char>& data = mCurrentSlot->mProfile.mScreenshot;
+        Files::IMemStream instream (&data[0], data.size());
 
-        const std::string textureName = "@savegame_screenshot";
-        Ogre::TexturePtr texture;
-        texture = Ogre::TextureManager::getSingleton().getByName(textureName);
-        mScreenshot->setImageTexture("");
-        if (texture.isNull())
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
         {
-            texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                Ogre::TEX_TYPE_2D,
-                image.getWidth(), image.getHeight(), 0, Ogre::PF_BYTE_RGBA, Ogre::TU_DYNAMIC_WRITE_ONLY);
+            std::cerr << "Can't open savegame screenshot, no jpg readerwriter found" << std::endl;
+            return;
         }
-        texture->unload();
-        texture->setWidth(image.getWidth());
-        texture->setHeight(image.getHeight());
-        texture->loadImage(image);
 
-        mScreenshot->setImageTexture(textureName);
-#endif
+        osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
+        if (!result.success())
+        {
+            std::cerr << "Failed to read savegame screenshot: " << result.message() << std::endl;
+            return;
+        }
+
+        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        texture->setImage(result.getImage());
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setResizeNonPowerOfTwoHint(false);
+        texture->setUnRefImageDataAfterApply(true);
+
+        mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
+
+        mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
     }
 }
