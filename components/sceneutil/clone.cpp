@@ -51,7 +51,9 @@ namespace SceneUtil
         if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable)
                 || dynamic_cast<const osgAnimation::MorphGeometry*>(drawable))
         {
-            osg::Drawable* cloned = osg::clone(drawable, *this);
+            osg::CopyOp copyop = *this;
+            copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS);
+            osg::Drawable* cloned = osg::clone(drawable, copyop);
             if (cloned->getUpdateCallback())
                 cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));
             return cloned;
