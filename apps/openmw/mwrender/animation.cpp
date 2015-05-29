@@ -421,10 +421,14 @@ namespace MWRender
         size_t off = groupname.size()+2;
         size_t len = evt.size() - off;
 
-        if(evt.compare(off, len, "loop start") == 0)
-            state.mLoopStartTime = key->first;
-        else if(evt.compare(off, len, "loop stop") == 0)
-            state.mLoopStopTime = key->first;
+        if(evt.compare(0, groupname.size(), groupname) == 0 &&
+           evt.compare(groupname.size(), 2, ": ") == 0)
+        {
+            if(evt.compare(off, len, "loop start") == 0)
+                state.mLoopStartTime = key->first;
+            else if(evt.compare(off, len, "loop stop") == 0)
+                state.mLoopStopTime = key->first;
+        }
 
         if (mTextKeyListener)
             mTextKeyListener->handleTextKey(groupname, key, map);
