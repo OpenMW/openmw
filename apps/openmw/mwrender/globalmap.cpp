@@ -47,6 +47,10 @@ namespace
         texcoords->push_back(osg::Vec2f(rightTexCoord, 1.f-topTexCoord));
         texcoords->push_back(osg::Vec2f(rightTexCoord, 1.f-bottomTexCoord));
 
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+        colors->push_back(osg::Vec4(1.f, 1.f, 1.f, 1.f));
+        geom->setColorArray(colors, osg::Array::BIND_OVERALL);
+
         geom->setTexCoordArray(0, texcoords, osg::Array::BIND_PER_VERTEX);
 
         geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS,0,4));

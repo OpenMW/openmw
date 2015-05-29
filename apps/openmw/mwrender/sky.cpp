@@ -75,6 +75,10 @@ namespace
         texcoords->push_back(osg::Vec2f(1, 1));
         texcoords->push_back(osg::Vec2f(1, 0));
 
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
+        colors->push_back(osg::Vec4(1.f, 1.f, 1.f, 1.f));
+        geom->setColorArray(colors, osg::Array::BIND_OVERALL);
+
         for (int i=0; i<numUvSets; ++i)
             geom->setTexCoordArray(i, texcoords, osg::Array::BIND_PER_VERTEX);
 
