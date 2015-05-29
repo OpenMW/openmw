@@ -40,13 +40,13 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage
+    startscriptcheck search searchoperation searchstage pathgridcheck
     )
 
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview sizehint
     )
 
 
@@ -63,6 +63,7 @@ opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
+    dialoguespinbox
     )
 
 opencs_units_noqt (view/world

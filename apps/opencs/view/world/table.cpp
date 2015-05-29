@@ -253,8 +253,8 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
-: mCreateAction (0), mCloneAction(0), mRecordStatusDisplay (0),
-  DragRecordTable(document)
+: DragRecordTable(document), mCreateAction (0),
+  mCloneAction(0),mRecordStatusDisplay (0)
 {
     CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
     QString jumpSetting = settings.settingValue ("table-input/jump-to-added");
@@ -653,6 +653,10 @@ void CSVWorld::Table::tableSizeUpdate()
     }
 
     emit tableSizeChanged (size, deleted, modified);
+
+    // not really related to tableSizeUpdate() but placed here for convenience rather than
+    // creating a bunch of extra connections & slot
+    mProxyModel->refreshFilter();
 }
 
 void CSVWorld::Table::selectionSizeUpdate()

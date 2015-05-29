@@ -27,8 +27,8 @@ namespace CSVRender
 // http://www.ogre3d.org/tikiwiki/Creating+dynamic+textures
 // http://www.ogre3d.org/tikiwiki/ManualObject
 TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* camera, const  Ogre::String& id)
-    : mOverlay(0), mCaption(""), mDesc(""), mEnabled(true), mCamera(camera), mObj(obj), mId(id)
-    , mOnScreen(false) , mInstance(0), mFontHeight(16) // FIXME: make font height configurable
+    : mOverlay(0), mCaption(""), mDesc(""), mObj(obj), mCamera(camera), mFontHeight(16), mId(id)
+    , mEnabled(true), mOnScreen(false), mInstance(0) // FIXME: make font height configurable
 {
     if(id == "" || !camera || !obj)
         throw std::runtime_error("TextOverlay could not be created.");

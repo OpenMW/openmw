@@ -4,7 +4,7 @@
 
 CSMSettings::Connector::Connector(CSVSettings::View *master,
                                             QObject *parent)
-    : mMasterView (master), QObject(parent)
+    : QObject(parent), mMasterView (master)
 {}
 
 void CSMSettings::Connector::addSlaveView (CSVSettings::View *view,

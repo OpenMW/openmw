@@ -187,7 +187,7 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if (OEngine::Misc::Rng::rollProbability() >= getHitChance(attacker, victim, skillValue) / 100.0f)
+        if (OEngine::Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);

@@ -120,6 +120,7 @@ namespace MWWorld
 
             /// Call functor (ref) for each reference. functor must return a bool. Returning
             /// false will abort the iteration.
+            /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
             ///
             /// \note Creatures and NPCs are handled last.

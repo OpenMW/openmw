@@ -34,6 +34,8 @@ namespace CSMWorld
 
             void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
 
+            void refreshFilter();
+
         protected:
 
             bool lessThan(const QModelIndex &left, const QModelIndex &right) const;

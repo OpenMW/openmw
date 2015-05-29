@@ -143,6 +143,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue (325);
         minWidth->setRange (50, 10000);
         minWidth->setToolTip ("Minimum width of subviews.");
+
+        QString defaultScroll = "Scrollbar Only";
+        QStringList scrollValues = QStringList() << defaultScroll << "Grow Only" << "Grow then Scroll";
+
+        Setting *mainwinScroll = createSetting (Type_RadioButton, "mainwindow-scrollbar",
+            "Add a horizontal scrollbar to the main view window.");
+        mainwinScroll->setDefaultValue (defaultScroll);
+        mainwinScroll->setDeclaredValues (scrollValues);
+        mainwinScroll->setToolTip ("Scrollbar Only: Simple addition of scrollbars, the view window does not grow"
+            " automatically.\n"
+            "Grow Only: Original Editor behaviour. The view window grows as subviews are added. No scrollbars.\n"
+            "Grow then Scroll: The view window grows. The scrollbar appears once it cannot grow any further.");
+
+        Setting *grow = createSetting (Type_CheckBox, "grow-limit", "Grow Limit Screen");
+        grow->setDefaultValue ("false");
+        grow->setToolTip ("When \"Grow then Scroll\" option is selected, the window size grows to"
+            " the width of the virtual desktop. \nIf this option is selected the the window growth"
+            "is limited to the current screen.");
     }
 
     declareSection ("records", "Records");

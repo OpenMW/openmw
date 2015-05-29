@@ -53,6 +53,10 @@ namespace CSVWorld
             QFont mDefaultFont;
             QFont mMonoFont;
 
+        protected:
+
+            bool event (QEvent *event);
+            
         public:
 
             ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,

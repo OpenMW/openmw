@@ -83,7 +83,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
 
 CSMWorld::CommandDispatcher::CommandDispatcher (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, QObject *parent)
-: QObject (parent), mDocument (document), mId (id), mLocked (false)
+: QObject (parent), mLocked (false), mDocument (document), mId (id)
 {}
 
 void CSMWorld::CommandDispatcher::setEditLock (bool locked)

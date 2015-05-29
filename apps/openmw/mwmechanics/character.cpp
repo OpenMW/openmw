@@ -642,8 +642,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
     , mSkipAnim(false)
-    , mSecondsOfRunning(0)
     , mSecondsOfSwimming(0)
+    , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
 {
     if(!mAnimation)
