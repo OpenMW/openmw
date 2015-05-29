@@ -90,6 +90,8 @@ namespace SceneUtil
             if (Controller* ctrl = dynamic_cast<Controller*>(callback))
                 visit(geode, *ctrl);
         }
+
+        apply(static_cast<osg::Node&>(geode));
     }
 
     AssignControllerSourcesVisitor::AssignControllerSourcesVisitor()
