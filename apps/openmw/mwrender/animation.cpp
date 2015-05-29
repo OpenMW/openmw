@@ -1136,19 +1136,14 @@ namespace MWRender
         return true;
     }
 
-    bool Animation::hasNode(const std::string &name) const
-    {
-        std::string lowerName = Misc::StringUtils::lowerCase(name);
-        return (mNodeMap.find(lowerName) != mNodeMap.end());
-    }
-
     const osg::Node* Animation::getNode(const std::string &name) const
     {
         std::string lowerName = Misc::StringUtils::lowerCase(name);
         NodeMap::const_iterator found = mNodeMap.find(lowerName);
         if (found == mNodeMap.end())
-            throw std::runtime_error("Can't find node " + name);
-        return found->second;
+            return NULL;
+        else
+            return found->second;
     }
 
     float Animation::AnimationTime::getValue(osg::NodeVisitor*)

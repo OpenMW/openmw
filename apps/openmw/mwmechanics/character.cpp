@@ -1158,10 +1158,10 @@ bool CharacterController::updateWeaponState()
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
-                    if (mAnimation->hasNode("Bip01 L Hand"))
+                    if (mAnimation->getNode("Bip01 L Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    if (mAnimation->hasNode("Bip01 R Hand"))
+                    if (mAnimation->getNode("Bip01 R Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
 
                     switch(effectentry.mRange)

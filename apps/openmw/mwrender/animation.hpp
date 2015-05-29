@@ -367,11 +367,7 @@ public:
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
-    /// Is there a node with the specified name?
-    /// @note The matching is case-insensitive.
-    bool hasNode(const std::string& name) const;
-
-    /// Return a node with the specified name, throws an exception if the node is not found.
+    /// Return a node with the specified name, or NULL if not existing.
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 

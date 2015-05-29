@@ -363,8 +363,13 @@ namespace MWRender
             mCamera->removeUpdateCallback(mUpdateCameraCallback);
 
         const osg::Node* head = mAnimation->getNode("Bip01 Head");
-        mUpdateCameraCallback = new UpdateCameraCallback(head, mPosition, mLookAt);
-        mCamera->addUpdateCallback(mUpdateCameraCallback);
+        if (head)
+        {
+            mUpdateCameraCallback = new UpdateCameraCallback(head, mPosition, mLookAt);
+            mCamera->addUpdateCallback(mUpdateCameraCallback);
+        }
+        else
+            std::cerr << "Error: Bip01 Head node not found" << std::endl;
     }
 
 }
