@@ -435,7 +435,6 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->adjustSky();
     }
 
-    //We need the ogre renderer and a scene node.
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
     {
