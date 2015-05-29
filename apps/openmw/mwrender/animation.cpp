@@ -1042,11 +1042,11 @@ namespace MWRender
             parentNode = mObjectRoot->asGroup();
         else
         {
-            SceneUtil::FindByNameVisitor visitor(bonename);
-            mObjectRoot->accept(visitor);
-            if (!visitor.mFoundNode)
+            NodeMap::iterator found = mNodeMap.find(Misc::StringUtils::lowerCase(bonename));
+            if (found == mNodeMap.end())
                 throw std::runtime_error("Can't find bone " + bonename);
-            parentNode = visitor.mFoundNode;
+
+            parentNode = found->second;
         }
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model, parentNode);
         params.mObjects = PartHolderPtr(new PartHolder(node));
