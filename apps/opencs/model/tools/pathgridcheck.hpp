@@ -14,6 +14,7 @@ namespace CSMWorld
 
 namespace CSMTools
 {
+    class SignalHandler;
 
     struct Point
     {
@@ -25,13 +26,17 @@ namespace CSMTools
     class PathgridCheckStage : public CSMDoc::Stage
     {
         bool mExtraCheck;
+        CSMTools::SignalHandler *mSigHandler;
+
         const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
               CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
 
     public:
 
         PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
-                CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
+            CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids, CSMTools::SignalHandler *signallHandler);
+
+        ~PathgridCheckStage ();
 
         virtual int setup();
 

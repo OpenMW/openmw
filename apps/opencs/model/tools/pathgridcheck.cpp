@@ -10,14 +10,21 @@
 
 #include "../settings/usersettings.hpp"
 
-CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
-: mPathgrids (pathgrids)
+#include "signalhandler.hpp"
+
+CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids,
+        CSMTools::SignalHandler *signalHandler)
+: mPathgrids (pathgrids), mSigHandler(signalHandler)
 {}
+
+CSMTools::PathgridCheckStage::~PathgridCheckStage ()
+{
+    delete mSigHandler;
+}
 
 int CSMTools::PathgridCheckStage::setup()
 {
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-    mExtraCheck = userSettings.setting ("verifier/pathgrid-extra-check", QString ("false"))=="true";
+    mExtraCheck = mSigHandler->extraCheck();
 
     return mPathgrids.getSize();
 }
