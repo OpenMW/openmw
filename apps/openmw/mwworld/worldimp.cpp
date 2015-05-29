@@ -2200,27 +2200,27 @@ namespace MWWorld
 
     bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
     {
-        //MWWorld::Ptr player = getPlayerPtr();
-        return 0;//mPhysics->isActorStandingOn(player, object);
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorStandingOn(player, object);
     }
 
     bool World::getActorStandingOn (const MWWorld::Ptr& object)
     {
-        std::vector<std::string> actors;
-        //mPhysics->getActorsStandingOn(object, actors);
+        std::vector<MWWorld::Ptr> actors;
+        mPhysics->getActorsStandingOn(object, actors);
         return !actors.empty();
     }
 
     bool World::getPlayerCollidingWith (const MWWorld::Ptr& object)
     {
-        //MWWorld::Ptr player = getPlayerPtr();
-        return 0;//mPhysics->isActorCollidingWith(player, object);
+        MWWorld::Ptr player = getPlayerPtr();
+        return mPhysics->isActorCollidingWith(player, object);
     }
 
     bool World::getActorCollidingWith (const MWWorld::Ptr& object)
     {
-        std::vector<std::string> actors;
-        //mPhysics->getActorsCollidingWith(object, actors);
+        std::vector<MWWorld::Ptr> actors;
+        mPhysics->getActorsCollidingWith(object, actors);
         return !actors.empty();
     }
 
@@ -2229,15 +2229,11 @@ namespace MWWorld
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
-        /*
-        std::vector<std::string> actors;
+        std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsStandingOn(object, actors);
-        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        for (std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
         {
-            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
-            if (actor.isEmpty())
-                continue;
-
+            MWWorld::Ptr actor = *it;
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
@@ -2254,7 +2250,6 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
             }
         }
-        */
     }
 
     void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
@@ -2262,15 +2257,11 @@ namespace MWWorld
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
-        /*
-        std::vector<std::string> actors;
+        std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsCollidingWith(object, actors);
-        for (std::vector<std::string>::iterator it = actors.begin(); it != actors.end(); ++it)
+        for (std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it)
         {
-            MWWorld::Ptr actor = searchPtrViaHandle(*it); // Collision events are from the last frame, actor might no longer exist
-            if (actor.isEmpty())
-                continue;
-
+            MWWorld::Ptr actor = *it;
             MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
             if (stats.isDead())
                 continue;
@@ -2287,7 +2278,6 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->playSound3D(actor, "Health Damage", 1.0f, 1.0f);
             }
         }
-        */
     }
 
     float World::getWindSpeed()

@@ -231,8 +231,8 @@ namespace MWPhysics
 
         static osg::Vec3f move(const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
                                   bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld
-                                  , std::map<std::string, std::string>& collisionTracker
-                                  , std::map<std::string, std::string>& standingCollisionTracker)
+                                  , std::map<MWWorld::Ptr, MWWorld::Ptr>& collisionTracker
+                                  , std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
             osg::Vec3f position(refpos.asVec3());
@@ -333,13 +333,10 @@ namespace MWPhysics
                     }
                     else
                     {
-                        /*
                         const btCollisionObject* standingOn = tracer.mHitObject;
-                        if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
-                        {
-                            collisionTracker[ptr.getRefData().getHandle()] = body->mName;
-                        }
-                        */
+                        const PtrHolder* ptrHolder = static_cast<const PtrHolder*>(standingOn->getUserPointer());
+                        if (ptrHolder)
+                            collisionTracker[ptr] = ptrHolder->getPtr();
                     }
                 }
                 else
@@ -406,12 +403,9 @@ namespace MWPhysics
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
-                    /*
-                    if (const OEngine::Physic::RigidBody* body = dynamic_cast<const OEngine::Physic::RigidBody*>(standingOn))
-                    {
-                        standingCollisionTracker[ptr.getRefData().getHandle()] = body->mName;
-                    }
-                    */
+                    const PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
+                    if (ptrHolder)
+                        standingCollisionTracker[ptr] = ptrHolder->getPtr();
 
                     if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                         physicActor->setWalkingOnWater(true);
@@ -857,6 +851,22 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
+    {
+        CollisionMap::iterator found = map.find(old);
+        if (found != map.end())
+        {
+            map[updated] = found->second;
+            map.erase(found);
+        }
+
+        for (CollisionMap::iterator it = map.begin(); it != map.end(); ++it)
+        {
+            if (it->second == old)
+                it->second = updated;
+        }
+    }
+
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         ObjectMap::iterator found = mObjects.find(old);
@@ -876,6 +886,9 @@ namespace MWPhysics
             mActors.erase(foundActor);
             mActors.insert(std::make_pair(updated, actor));
         }
+
+        updateCollisionMapPtr(mCollisions, old, updated);
+        updateCollisionMapPtr(mStandingCollisions, old, updated);
     }
 
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
@@ -1058,62 +1071,40 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
-        /*
-        const std::string& actorHandle = actor.getRefData().getHandle();
-        const std::string& objectHandle = object.getRefData().getHandle();
-
-        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
-             it != mStandingCollisions.end(); ++it)
+        for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
         {
-            if (it->first == actorHandle && it->second == objectHandle)
+            if (it->first == actor && it->second == object)
                 return true;
         }
-        */
         return false;
     }
 
-    void PhysicsSystem::getActorsStandingOn(const MWWorld::Ptr &object, std::vector<std::string> &out) const
+    void PhysicsSystem::getActorsStandingOn(const MWWorld::Ptr &object, std::vector<MWWorld::Ptr> &out) const
     {
-        /*
-        const std::string& objectHandle = object.getRefData().getHandle();
-
-        for (std::map<std::string, std::string>::const_iterator it = mStandingCollisions.begin();
-             it != mStandingCollisions.end(); ++it)
+        for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
         {
-            if (it->second == objectHandle)
+            if (it->second == object)
                 out.push_back(it->first);
         }
-        */
     }
 
     bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
-        /*
-        const std::string& actorHandle = actor.getRefData().getHandle();
-        const std::string& objectHandle = object.getRefData().getHandle();
-
-        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
-             it != mCollisions.end(); ++it)
+        for (CollisionMap::const_iterator it = mCollisions.begin(); it != mCollisions.end(); ++it)
         {
-            if (it->first == actorHandle && it->second == objectHandle)
+            if (it->first == actor && it->second == object)
                 return true;
         }
-        */
         return false;
     }
 
-    void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<std::string> &out) const
+    void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<MWWorld::Ptr> &out) const
     {
-        /*
-        const std::string& objectHandle = object.getRefData().getHandle();
-
-        for (std::map<std::string, std::string>::const_iterator it = mCollisions.begin();
-             it != mCollisions.end(); ++it)
+        for (CollisionMap::const_iterator it = mCollisions.begin(); it != mCollisions.end(); ++it)
         {
-            if (it->second == objectHandle)
+            if (it->second == object)
                 out.push_back(it->first);
         }
-        */
     }
 
     void PhysicsSystem::disableWater()

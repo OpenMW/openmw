@@ -109,14 +109,14 @@ namespace MWPhysics
             bool isActorStandingOn(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
 
             /// Get the handle of all actors standing on \a object in this frame.
-            void getActorsStandingOn(const MWWorld::Ptr& object, std::vector<std::string>& out) const;
+            void getActorsStandingOn(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
 
             /// Return true if \a actor has collided with \a object in this frame.
             /// This will detect running into objects, but will not detect climbing stairs, stepping up a small object, etc.
             bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
 
             /// Get the handle of all actors colliding with \a object in this frame.
-            void getActorsCollidingWith(const MWWorld::Ptr& object, std::vector<std::string>& out) const;
+            void getActorsCollidingWith(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
 
             bool toggleDebugRendering();
 
@@ -142,14 +142,15 @@ namespace MWPhysics
 
             bool mDebugDrawEnabled;
 
-            std::map<std::string, std::string> handleToMesh;
-
             // Tracks all movement collisions happening during a single frame. <actor handle, collided handle>
             // This will detect e.g. running against a vertical wall. It will not detect climbing up stairs,
             // stepping up small objects, etc.
-            std::map<std::string, std::string> mCollisions; // FIXME: reimplement
+            typedef std::map<MWWorld::Ptr, MWWorld::Ptr> CollisionMap;
+            CollisionMap mCollisions;
+            CollisionMap mStandingCollisions;
 
-            std::map<std::string, std::string> mStandingCollisions;  // FIXME: reimplement
+            // replaces all occurences of 'old' in the map by 'updated', no matter if its a key or value
+            void updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated);
 
             PtrVelocityList mMovementQueue;
             PtrVelocityList mMovementResults;
