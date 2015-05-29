@@ -48,8 +48,7 @@ namespace SceneUtil
     {
         if (const osgParticle::ParticleSystem* partsys = dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
             return operator()(partsys);
-        if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable)
-                || dynamic_cast<const osgAnimation::MorphGeometry*>(drawable))
+        if (dynamic_cast<const osgAnimation::MorphGeometry*>(drawable))
         {
             osg::CopyOp copyop = *this;
             copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS);
@@ -58,6 +57,11 @@ namespace SceneUtil
                 cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));
             return cloned;
         }
+        if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
+        {
+            return osg::clone(drawable, *this);
+        }
+
 
         return osg::CopyOp::operator()(drawable);
     }
