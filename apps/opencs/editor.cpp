@@ -67,9 +67,11 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     connect (&mFileDialog, SIGNAL(signalCreateNewFile (const boost::filesystem::path&)),
              this, SLOT(createNewFile (const boost::filesystem::path&)));
+    connect (&mFileDialog, SIGNAL (rejected()), this, SLOT (cancelFileDialog ()));
 
     connect (&mNewGame, SIGNAL (createRequest (const boost::filesystem::path&)),
              this, SLOT (createNewGame (const boost::filesystem::path&)));
+    connect (&mNewGame, SIGNAL (cancelCreateGame()), this, SLOT (cancelCreateGame ()));
 }
 
 CS::Editor::~Editor ()
@@ -176,10 +178,38 @@ void CS::Editor::createGame()
     mNewGame.activateWindow();
 }
 
+void CS::Editor::cancelCreateGame()
+{
+    if (!mDocumentManager.isEmpty())
+        return;
+
+    mNewGame.hide();
+
+    if (mStartup.isHidden())
+        mStartup.show();
+
+    mStartup.raise();
+    mStartup.activateWindow();
+}
+
 void CS::Editor::createAddon()
 {
     mStartup.hide();
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
+}
+
+void CS::Editor::cancelFileDialog()
+{
+    if (!mDocumentManager.isEmpty())
+        return;
+
+    mFileDialog.hide();
+
+    if (mStartup.isHidden())
+        mStartup.show();
+
+    mStartup.raise();
+    mStartup.activateWindow();
 }
 
 void CS::Editor::loadDocument()
