@@ -12,7 +12,7 @@
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-//#include "../mwrender/animation.hpp"
+#include "../mwrender/animation.hpp"
 
 #include "creaturestats.hpp"
 #include "aifollow.hpp"
@@ -143,9 +143,8 @@ namespace MWMechanics
                     summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
                     int creatureActorId = summonedCreatureStats.getActorId();
 
-                    /*MWWorld::Ptr placed = */MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
 
-                    /*
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
                     if (anim)
                     {
@@ -154,7 +153,6 @@ namespace MWMechanics
                         if (fx)
                             anim->addEffect("meshes\\" + fx->mModel, -1, false);
                     }
-                    */
 
                     creatureMap.insert(std::make_pair(*it, creatureActorId));
                 }

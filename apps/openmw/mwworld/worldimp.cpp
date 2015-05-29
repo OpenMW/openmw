@@ -2385,7 +2385,7 @@ namespace MWWorld
         if(result.first == "") return true;
         */
 
-        return false;
+        return true;
     }
 
     float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)

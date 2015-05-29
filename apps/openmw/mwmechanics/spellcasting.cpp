@@ -19,7 +19,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
-//#include "../mwrender/animation.hpp"
+#include "../mwrender/animation.hpp"
 
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
@@ -418,9 +418,9 @@ namespace MWMechanics
             absorbed = (Misc::Rng::roll0to99() < absorb);
             if (absorbed)
             {
-                //const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                //MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                //            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
                 // Magicka is increased by cost of spell
                 DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
                 magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
@@ -466,9 +466,9 @@ namespace MWMechanics
                     bool isReflected = (Misc::Rng::roll0to99() < reflect);
                     if (isReflected)
                     {
-                        //const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
-                        //MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                        //            "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
+                        const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
+                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                                    "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
                         reflectedEffects.mList.push_back(*effectIt);
                         magnitudeMult = 0;
                     }
@@ -565,7 +565,7 @@ namespace MWMechanics
                     }
 
                     // Add VFX
-                    /*const ESM::Static* castStatic;
+                    const ESM::Static* castStatic;
                     if (!magicEffect->mHit.empty())
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
                     else
@@ -577,7 +577,6 @@ namespace MWMechanics
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
                     if (anim)
                         anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "");
-                    */
                 }
             }
         }

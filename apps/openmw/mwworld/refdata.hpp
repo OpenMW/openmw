@@ -7,11 +7,6 @@
 
 #include <osg/Vec3f>
 
-namespace Ogre
-{
-    class SceneNode;
-}
-
 namespace osg
 {
     class PositionAttitudeTransform;
@@ -34,8 +29,7 @@ namespace MWWorld
 
     class RefData
     {
-            Ogre::SceneNode* mBaseNode;
-            osg::PositionAttitudeTransform* mBase;
+            osg::PositionAttitudeTransform* mBaseNode;
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -80,10 +74,6 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
-
-            /// Return OGRE base node (can be a null pointer).
-            /// obsolete
-            Ogre::SceneNode* getBaseNodeOld();
 
             /// Return base node (can be a null pointer).
             osg::PositionAttitudeTransform* getBaseNode();

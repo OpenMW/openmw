@@ -36,6 +36,7 @@ namespace SceneUtil
     {
     public:
         Controller();
+        virtual ~Controller() {}
 
         bool hasInput() const;
 

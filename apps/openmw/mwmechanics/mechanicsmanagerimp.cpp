@@ -1,6 +1,8 @@
-
 #include "mechanicsmanagerimp.hpp"
-#include "npcstats.hpp"
+
+#include <limits.h>
+
+#include <osg/PositionAttitudeTransform>
 
 #include <components/misc/rng.hpp>
 
@@ -20,12 +22,9 @@
 #include "../mwmechanics/aicombat.hpp"
 #include "../mwmechanics/aipursue.hpp"
 
-#include <OgreSceneNode.h>
-
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
-
-#include <limits.h>
+#include "npcstats.hpp"
 
 namespace
 {
@@ -1332,8 +1331,6 @@ namespace MWMechanics
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
     {
-        return false;
-
         if (observer.getClass().getCreatureStats(observer).isDead() || !observer.getRefData().isEnabled())
             return false;
 
@@ -1369,9 +1366,9 @@ namespace MWMechanics
         static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
         static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
 
-        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
-        float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
+        osg::Vec3f pos1 (ptr.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (observer.getRefData().getPosition().asVec3());
+        float distTerm = fSneakDistBase + fSneakDistMult * (pos1 - pos2).length();
 
         float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
@@ -1388,12 +1385,15 @@ namespace MWMechanics
         static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
         static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
         float y = 0;
-        Ogre::Vector3 vec = pos1 - pos2;
-        Ogre::Radian angle = observer.getRefData().getBaseNodeOld()->getOrientation().yAxis().angleBetween(vec);
-        if (angle < Ogre::Degree(90))
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
-        else
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        osg::Vec3f vec = pos1 - pos2;
+        if (observer.getRefData().getBaseNode())
+        {
+            float angleRadians = std::acos((observer.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0)) * vec);
+            if (angleRadians < osg::DegreesToRadians(90.f))
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
+            else
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        }
 
         float target = x - y;
 

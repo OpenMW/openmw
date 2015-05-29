@@ -37,7 +37,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(0), mBase(0), mDeleted(false), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
+    : mBaseNode(0), mDeleted(false), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -48,7 +48,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mBase(0), mDeleted(false),  mHasLocals (false), mEnabled (true),
+    : mBaseNode(0), mDeleted(false),  mHasLocals (false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
       mChanged(false) // Loading from ESM/ESP files -> assume unchanged
@@ -59,7 +59,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode (0), mBase(0), mDeleted(false), mHasLocals (false),
+    : mBaseNode(0), mDeleted(false), mHasLocals (false),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
@@ -71,7 +71,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const RefData& refData)
-    : mBaseNode(0), mBase(0), mCustomData (0)
+    : mBaseNode(0), mCustomData (0)
     {
         try
         {
@@ -125,19 +125,14 @@ namespace MWWorld
         {}
     }
 
-    Ogre::SceneNode* RefData::getBaseNodeOld()
-    {
-        return mBaseNode;
-    }
-
     void RefData::setBaseNode(osg::PositionAttitudeTransform *base)
     {
-        mBase = base;
+        mBaseNode = base;
     }
 
     osg::PositionAttitudeTransform* RefData::getBaseNode()
     {
-        return mBase;
+        return mBaseNode;
     }
 
     int RefData::getCount() const

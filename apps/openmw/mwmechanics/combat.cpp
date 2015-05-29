@@ -1,6 +1,6 @@
 #include "combat.hpp"
 
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/misc/rng.hpp>
 
@@ -23,12 +23,9 @@
 namespace
 {
 
-Ogre::Radian signedAngle(Ogre::Vector3 v1, Ogre::Vector3 v2, Ogre::Vector3 normal)
+float signedAngleRadians (const osg::Vec3f& v1, const osg::Vec3f& v2, const osg::Vec3f& normal)
 {
-    return Ogre::Math::ATan2(
-                normal.dotProduct( v1.crossProduct(v2) ),
-                v1.dotProduct(v2)
-                );
+    return std::atan2((normal * (v1 ^ v2)), (v1 * v2));
 }
 
 bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
@@ -74,13 +71,19 @@ namespace MWMechanics
         if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
             return false;
 
-        Ogre::Degree angle = signedAngle (Ogre::Vector3(attacker.getRefData().getPosition().pos) - Ogre::Vector3(blocker.getRefData().getPosition().pos),
-                                          blocker.getRefData().getBaseNodeOld()->getOrientation().yAxis(), Ogre::Vector3(0,0,1));
+        if (!blocker.getRefData().getBaseNode())
+            return false; // shouldn't happen
+
+        float angleDegrees = osg::RadiansToDegrees(
+                    signedAngleRadians (
+                    (attacker.getRefData().getPosition().asVec3() - blocker.getRefData().getPosition().asVec3()),
+                    blocker.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0),
+                    osg::Vec3f(0,0,1)));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (angle.valueDegrees() < gmst.find("fCombatBlockLeftAngle")->getFloat())
+        if (angleDegrees < gmst.find("fCombatBlockLeftAngle")->getFloat())
             return false;
-        if (angle.valueDegrees() > gmst.find("fCombatBlockRightAngle")->getFloat())
+        if (angleDegrees > gmst.find("fCombatBlockRightAngle")->getFloat())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
