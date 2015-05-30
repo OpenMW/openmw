@@ -7,6 +7,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "../mwbase/world.hpp"
 
@@ -52,7 +53,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         updateParts();
     }
 
-    //mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 }
 
 void CreatureWeaponAnimation::showWeapons(bool showWeapon)
@@ -122,35 +123,52 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
         if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
             attachArrow();
-        //else
-        //    mAmmunition.setNull();
+        else
+            mAmmunition.reset();
     }
-    //else
-        //mAmmunition.setNull();
+    else
+        mAmmunition.reset();
 
-    /*
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(scene->mControllers.begin());
-    for(;ctrl != scene->mControllers.end();++ctrl)
-    {
-        if(ctrl->getSource().isNull())
-        {
-            if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-                ctrl->setSource(mWeaponAnimationTime);
-            else
-                ctrl->setSource(Ogre::SharedPtr<NullAnimationTime>(new NullAnimationTime()));
-        }
-    }
-    */
+    boost::shared_ptr<SceneUtil::ControllerSource> source;
+
+    if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
+        source = mWeaponAnimationTime;
+    else
+        source.reset(new NullAnimationTime);
+
+    SceneUtil::AssignControllerSourcesVisitor assignVisitor(source);
+    node->accept(assignVisitor);
 }
 
 void CreatureWeaponAnimation::attachArrow()
 {
-    //WeaponAnimation::attachArrow(mPtr);
+    WeaponAnimation::attachArrow(mPtr);
 }
 
 void CreatureWeaponAnimation::releaseArrow()
 {
-    //WeaponAnimation::releaseArrow(mPtr);
+    WeaponAnimation::releaseArrow(mPtr);
+}
+
+osg::Group *CreatureWeaponAnimation::getArrowBone()
+{
+    if (!mWeapon)
+        return NULL;
+
+    SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+    mWeapon->getNode()->accept(findVisitor);
+
+    return findVisitor.mFoundNode;
+}
+
+osg::Node *CreatureWeaponAnimation::getWeaponNode()
+{
+    return mWeapon ? mWeapon->getNode().get() : NULL;
+}
+
+Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()
+{
+    return mResourceSystem;
 }
 
 osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)

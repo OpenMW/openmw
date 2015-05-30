@@ -95,7 +95,7 @@ private:
     //Ogre::Vector3 mFirstPersonOffset;
 
     boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
-    //Ogre::SharedPtr<WeaponAnimationTime> mWeaponAnimationTime;
+    boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
     bool mSoundsDisabled;
@@ -156,6 +156,10 @@ public:
 
     virtual void attachArrow();
     virtual void releaseArrow();
+
+    virtual osg::Group* getArrowBone();
+    virtual osg::Node* getWeaponNode();
+    virtual Resource::ResourceSystem* getResourceSystem();
 
     // WeaponAnimation
     //virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }

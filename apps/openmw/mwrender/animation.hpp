@@ -39,6 +39,31 @@ public:
     EffectAnimationTime() : mTime(0) {  }
 };
 
+/// @brief Detaches the node from its parent when the object goes out of scope.
+class PartHolder
+{
+public:
+    PartHolder(osg::ref_ptr<osg::Node> node)
+        : mNode(node)
+    {
+    }
+
+    ~PartHolder()
+    {
+        if (mNode->getNumParents())
+            mNode->getParent(0)->removeChild(mNode);
+    }
+
+    osg::ref_ptr<osg::Node> getNode()
+    {
+        return mNode;
+    }
+
+private:
+    osg::ref_ptr<osg::Node> mNode;
+};
+typedef boost::shared_ptr<PartHolder> PartHolderPtr;
+
 class Animation
 {
 public:
@@ -173,31 +198,6 @@ protected:
     Resource::ResourceSystem* mResourceSystem;
 
     osg::Vec3f mAccumulate;
-
-    /// @brief Detaches the node from its parent when the object goes out of scope.
-    class PartHolder
-    {
-    public:
-        PartHolder(osg::ref_ptr<osg::Node> node)
-            : mNode(node)
-        {
-        }
-
-        ~PartHolder()
-        {
-            if (mNode->getNumParents())
-                mNode->getParent(0)->removeChild(mNode);
-        }
-
-        osg::ref_ptr<osg::Node> getNode()
-        {
-            return mNode;
-        }
-
-    private:
-        osg::ref_ptr<osg::Node> mNode;
-    };
-    typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
     struct EffectParams
     {
@@ -378,6 +378,7 @@ public:
     virtual void setAlpha(float alpha) {}
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
+    virtual void releaseArrow() {}
     virtual void enableHeadAnimation(bool enable) {}
     // TODO: move outside of this class
     /// Makes this object glow, by placing a Light in its center.

@@ -2,6 +2,9 @@
 
 #include <osg/UserDataContainer>
 
+
+#include <osg/MatrixTransform> // XXX
+
 #include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
@@ -9,6 +12,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
@@ -203,7 +207,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
     mHeadAnimationTime = boost::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
-    //mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -333,7 +337,7 @@ void NpcAnimation::updateNpcBase()
         removeIndividualPart((ESM::PartReferenceType)i);
     updateParts();
 
-    //mWeaponAnimationTime->updateStartTime();
+    mWeaponAnimationTime->updateStartTime();
 }
 
 void NpcAnimation::updateParts()
@@ -585,7 +589,7 @@ void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
     mFirstPersonOffset += offset;
 }*/
 
-Animation::PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
@@ -729,8 +733,8 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             }
         }
     }
-    //else if (type == ESM::PRT_Weapon)
-    //    src = mWeaponAnimationTime;
+    else if (type == ESM::PRT_Weapon)
+        src = mWeaponAnimationTime;
     else
         src.reset(new NullAnimationTime);
 
@@ -809,11 +813,11 @@ void NpcAnimation::showWeapons(bool showWeapon)
                 MWWorld::ContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
                 if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                     attachArrow();
-                //else
-                    //mAmmunition.setNull();
+                else
+                    mAmmunition.reset();
             }
-            //else
-                //mAmmunition.setNull();
+            else
+                mAmmunition.reset();
         }
     }
     else
@@ -851,6 +855,31 @@ void NpcAnimation::attachArrow()
 void NpcAnimation::releaseArrow()
 {
     WeaponAnimation::releaseArrow(mPtr);
+}
+
+osg::Group* NpcAnimation::getArrowBone()
+{
+    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
+    if (!part)
+        return NULL;
+
+    SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+    part->getNode()->accept(findVisitor);
+
+    return findVisitor.mFoundNode;
+}
+
+osg::Node* NpcAnimation::getWeaponNode()
+{
+    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
+    if (!part)
+        return NULL;
+    return part->getNode();
+}
+
+Resource::ResourceSystem* NpcAnimation::getResourceSystem()
+{
+    return mResourceSystem;
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
@@ -897,7 +926,7 @@ void NpcAnimation::enableHeadAnimation(bool enable)
 
 void NpcAnimation::setWeaponGroup(const std::string &group)
 {
-    //mWeaponAnimationTime->
+    mWeaponAnimationTime->setGroup(group);
 }
 
 void NpcAnimation::equipmentChanged()

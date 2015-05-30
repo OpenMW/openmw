@@ -38,6 +38,8 @@ enum RangeType
 struct Position
 {
     float pos[3];
+
+    // In radians
     float rot[3];
 
     osg::Vec3f asVec3() const

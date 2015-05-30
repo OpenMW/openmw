@@ -812,7 +812,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     else if (evt.compare(off, len, "shoot attach") == 0)
         mAnimation->attachArrow();
     else if (evt.compare(off, len, "shoot release") == 0)
-        {;}//mAnimation->releaseArrow();
+        mAnimation->releaseArrow();
     else if (evt.compare(off, len, "shoot follow attach") == 0)
         mAnimation->attachArrow();
 

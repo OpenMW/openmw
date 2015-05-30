@@ -1,15 +1,15 @@
 #ifndef OPENMW_MWRENDER_WEAPONANIMATION_H
 #define OPENMW_MWRENDER_WEAPONANIMATION_H
 
+#include <components/sceneutil/controller.hpp>
+
 #include "../mwworld/ptr.hpp"
+#include "animation.hpp"
 
 namespace MWRender
 {
 
-    class Animation;
-
-    /*
-    class WeaponAnimationTime : public Ogre::ControllerValue<Ogre::Real>
+    class WeaponAnimationTime : public SceneUtil::ControllerSource
     {
     private:
         Animation* mAnimation;
@@ -20,27 +20,29 @@ namespace MWRender
         void setGroup(const std::string& group);
         void updateStartTime();
 
-        virtual Ogre::Real getValue() const;
-        virtual void setValue(Ogre::Real value)
-        { }
+        virtual float getValue(osg::NodeVisitor* nv);
     };
-    */
 
     /// Handles attach & release of projectiles for ranged weapons
     class WeaponAnimation
     {
     public:
-        WeaponAnimation() : mPitchFactor(0) {}
+        WeaponAnimation();
         virtual ~WeaponAnimation() {}
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
-        void attachArrow(MWWorld::Ptr actor) {}
+        void attachArrow(MWWorld::Ptr actor);
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
-        void releaseArrow(MWWorld::Ptr actor) {}
+        void releaseArrow(MWWorld::Ptr actor);
 
     protected:
-        //NifOgre::ObjectScenePtr mAmmunition;
+        PartHolderPtr mAmmunition;
+
+        virtual osg::Group* getArrowBone() = 0;
+        virtual osg::Node* getWeaponNode() = 0;
+        virtual Resource::ResourceSystem* getResourceSystem() = 0;
+
 
         //virtual NifOgre::ObjectScenePtr getWeapon() = 0;
         virtual void showWeapon(bool show) = 0;

@@ -2757,7 +2757,7 @@ namespace MWWorld
     }
 
     void World::launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                   const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed)
+                                   const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed)
     {
 #if 0
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed);
