@@ -20,6 +20,10 @@ namespace CSMTools
         public slots:
 
             void updateUserSetting (const QString &name, const QStringList &list);
+
+        private slots:
+
+            void updateExtraCheck (bool extraCheck);
     };
 }
 
