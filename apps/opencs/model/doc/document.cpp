@@ -2257,7 +2257,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
+  mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()),
+  mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2487,4 +2488,9 @@ boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
         mPhysics = boost::shared_ptr<CSVWorld::PhysicsSystem> (new CSVWorld::PhysicsSystem());
 
     return mPhysics;
+}
+
+CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
+{
+    return mIdCompletionManager;
 }
