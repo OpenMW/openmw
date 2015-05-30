@@ -262,6 +262,42 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
         monoFont->setDefaultValue ("true");
         monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
+
+        QString tooltip =
+            "\n#RGB (each of R, G, and B is a single hex digit)"
+            "\n#RRGGBB"
+            "\n#RRRGGGBBB"
+            "\n#RRRRGGGGBBBB"
+            "\nA name from the list of colors defined in the list of SVG color keyword names."
+            "\nX11 color names may also work.";
+
+        Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
+        formatInt->setDefaultValues (QStringList() << "Dark magenta");
+        formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatFloat = createSetting (Type_LineEdit, "colour-float", "Highlight Colour: Float");
+        formatFloat->setDefaultValues (QStringList() << "Magenta");
+        formatFloat->setToolTip ("(Default: Magenta) Use one of the following formats:" + tooltip);
+
+        Setting *formatName = createSetting (Type_LineEdit, "colour-name", "Highlight Colour: Name");
+        formatName->setDefaultValues (QStringList() << "Gray");
+        formatName->setToolTip ("(Default: Gray) Use one of the following formats:" + tooltip);
+
+        Setting *formatKeyword = createSetting (Type_LineEdit, "colour-keyword", "Highlight Colour: Keyword");
+        formatKeyword->setDefaultValues (QStringList() << "Red");
+        formatKeyword->setToolTip ("(Default: Red) Use one of the following formats:" + tooltip);
+
+        Setting *formatSpecial = createSetting (Type_LineEdit, "colour-special", "Highlight Colour: Special");
+        formatSpecial->setDefaultValues (QStringList() << "Dark yellow");
+        formatSpecial->setToolTip ("(Default: Dark yellow) Use one of the following formats:" + tooltip);
+
+        Setting *formatComment = createSetting (Type_LineEdit, "colour-comment", "Highlight Colour: Comment");
+        formatComment->setDefaultValues (QStringList() << "Green");
+        formatComment->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatId = createSetting (Type_LineEdit, "colour-id", "Highlight Colour: Id");
+        formatId->setDefaultValues (QStringList() << "Blue");
+        formatId->setToolTip ("(Default: Blue) Use one of the following formats:" + tooltip);
     }
 
     {

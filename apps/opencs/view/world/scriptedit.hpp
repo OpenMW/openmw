@@ -56,7 +56,7 @@ namespace CSVWorld
         protected:
 
             bool event (QEvent *event);
-            
+
         public:
 
             ScriptEdit (const CSMDoc::Document& document, ScriptHighlighter::Mode mode,
@@ -96,7 +96,12 @@ namespace CSVWorld
             void updateHighlighting();
 
             void updateLineNumberAreaWidth(int newBlockCount);
+
             void updateLineNumberArea(const QRect &, int);
+
+        public slots:
+
+            void updateUserSetting (const QString &name, const QStringList &list);
     };
 
     class LineNumberArea : public QWidget
