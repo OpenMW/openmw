@@ -30,7 +30,7 @@ SDLWindowHelper::SDLWindowHelper (SDL_Window* window, int w, int h,
 
 	switch (wmInfo.subsystem)
 	{
-#ifdef WIN32
+#ifdef _WIN32
 	case SDL_SYSWM_WINDOWS:
 		// Windows code
 		winHandle = Ogre::StringConverter::toString((uintptr_t)wmInfo.info.win.window);
