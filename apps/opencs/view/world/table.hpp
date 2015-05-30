@@ -69,6 +69,7 @@ namespace CSVWorld
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
+            bool mAutoJump;
 
         private:
 
@@ -145,6 +146,8 @@ namespace CSVWorld
             void rowsInsertedEvent(const QModelIndex &parent, int start, int end);
 
             void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+            void jumpAfterModChanged(int state);
     };
 }
 

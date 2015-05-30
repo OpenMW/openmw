@@ -254,7 +254,7 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : DragRecordTable(document), mCreateAction (0),
-  mCloneAction(0),mRecordStatusDisplay (0)
+  mCloneAction(0),mRecordStatusDisplay (0), mAutoJump (false)
 {
     CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
     QString jumpSetting = settings.settingValue ("table-input/jump-to-added");
@@ -370,14 +370,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
 
-    if (id == CSMWorld::UniversalId::Type_References)
-        connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-            this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
-    else
-        /// \note This signal could instead be connected to a slot that filters out changes not affecting
-        /// the records status column (for permanence reasons)
-        connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-            this, SLOT (tableSizeUpdate()));
+    /// \note This signal could instead be connected to a slot that filters out changes not affecting
+    /// the records status column (for permanence reasons)
+    connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
@@ -765,8 +761,14 @@ void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelI
 {
     tableSizeUpdate();
 
-    // this event is assumed to be infreqent, don't bother keeping a member variable
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    if (settings.setting("table-input/jump-to-modified", "true") == "true")
+    if (mAutoJump)
         selectRow(bottomRight.row());
+}
+
+void CSVWorld::Table::jumpAfterModChanged(int state)
+{
+    if(state == Qt::Checked)
+        mAutoJump = true;
+    else
+        mAutoJump = false;
 }
