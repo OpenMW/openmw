@@ -1,6 +1,7 @@
 #include "signalhandler.hpp"
 
 #include <QMetaObject>
+#include <QThread>
 
 #include "../settings/usersettings.hpp"
 
@@ -23,6 +24,13 @@ void CSMTools::SignalHandler::updateUserSetting (const QString &name, const QStr
 // should be in the operations thread via an event message queue
 void CSMTools::SignalHandler::updateExtraCheck (bool extraCheck)
 {
+    if (thread()!=QThread::currentThread())
+    {
+        QMetaObject::invokeMethod(this,"updateExtraCheck", Qt::QueuedConnection, Q_ARG(bool, extraCheck));
+        return;
+    }
+
+    // extra safety
     mExtraCheck = extraCheck;
 }
 
