@@ -7,6 +7,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
+#include <QMetaObject>
 #include <QtCore/qnamespace.h>
 
 #include "../../model/doc/document.hpp"
@@ -744,6 +745,10 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
     return idToDrag;
 }
 
+// parent, start and end depend on the model sending the signal, in this case mProxyModel
+//
+// If, for example, mModel was used instead, then scrolTo() should use the index
+//   mProxyModel->mapFromSource(mModel->index(end, 0))
 void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)
 {
     tableSizeUpdate();
@@ -752,9 +757,17 @@ void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, in
     {
         selectRow(end);
 
+        // without this delay the scroll works but goes to top for add/clone
+        QMetaObject::invokeMethod(this, "queuedScrollTo", Qt::QueuedConnection, Q_ARG(int, end));
+
         if(mUnselectAfterJump)
             clearSelection();
     }
+}
+
+void CSVWorld::Table::queuedScrollTo(int row)
+{
+    scrollTo(mProxyModel->index(row, 0), QAbstractItemView::PositionAtCenter);
 }
 
 void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight)
@@ -762,7 +775,11 @@ void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelI
     tableSizeUpdate();
 
     if (mAutoJump)
+    {
         selectRow(bottomRight.row());
+        scrollTo(mProxyModel->index(bottomRight.row(), 0), QAbstractItemView::PositionAtCenter);
+        //scrollTo(bottomRight, QAbstractItemView::PositionAtCenter); // alternative
+    }
 }
 
 void CSVWorld::Table::jumpAfterModChanged(int state)

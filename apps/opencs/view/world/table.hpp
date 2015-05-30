@@ -148,6 +148,8 @@ namespace CSVWorld
             void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
 
             void jumpAfterModChanged(int state);
+
+            void queuedScrollTo(int state);
     };
 }
 
