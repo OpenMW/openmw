@@ -8,24 +8,12 @@
 #include "../world/subcellcollection.hpp"
 #include "../world/pathgrid.hpp"
 
-#include "../settings/usersettings.hpp"
-
-#include "signalhandler.hpp"
-
-CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids,
-        CSMTools::SignalHandler *signalHandler)
-: mPathgrids (pathgrids), mSigHandler(signalHandler)
+CSMTools::PathgridCheckStage::PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids)
+: mPathgrids (pathgrids)
 {}
-
-CSMTools::PathgridCheckStage::~PathgridCheckStage ()
-{
-    delete mSigHandler;
-}
 
 int CSMTools::PathgridCheckStage::setup()
 {
-    mExtraCheck = mSigHandler->extraCheck();
-
     return mPathgrids.getSize();
 }
 
@@ -117,9 +105,6 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             }
         }
 
-        if (!mExtraCheck)
-            continue;
-
         // check duplicate points
         // FIXME: how to do this efficiently?
         for (unsigned int j = 0; j < pathgrid.mPoints.size(); ++j)
@@ -147,9 +132,6 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             }
         }
     }
-
-    if (!mExtraCheck)
-        return;
 
     // check pathgrid points that are not connected to anything
     for (unsigned int i = 0; i < pointList.size(); ++i)

@@ -14,8 +14,6 @@ namespace CSMWorld
 
 namespace CSMTools
 {
-    class SignalHandler;
-
     struct Point
     {
         unsigned char mConnectionNum;
@@ -25,18 +23,13 @@ namespace CSMTools
 
     class PathgridCheckStage : public CSMDoc::Stage
     {
-        bool mExtraCheck;
-        CSMTools::SignalHandler *mSigHandler;
-
         const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
               CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& mPathgrids;
 
     public:
 
         PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
-            CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids, CSMTools::SignalHandler *signallHandler);
-
-        ~PathgridCheckStage ();
+            CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
 
         virtual int setup();
 

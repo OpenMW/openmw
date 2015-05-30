@@ -10,8 +10,6 @@
 #include "../world/data.hpp"
 #include "../world/universalid.hpp"
 
-#include "../settings/usersettings.hpp"
-
 #include "reportmodel.hpp"
 #include "mandatoryid.hpp"
 #include "skillcheck.hpp"
@@ -29,7 +27,6 @@
 #include "startscriptcheck.hpp"
 #include "searchoperation.hpp"
 #include "pathgridcheck.hpp"
-#include "signalhandler.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -58,8 +55,6 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         connect (&mVerifier,
             SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
             this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
-
-        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -102,8 +97,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                     CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
                 mData.getRaces() ));
 
-        mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids(),
-            new SignalHandler(userSettings.setting ("verifier/pathgrid-extra-check", QString ("false"))=="true")));
+        mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids()));
 
         mVerifier.setOperation (mVerifierOperation);
     }
@@ -219,3 +213,4 @@ void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const st
     if (iter!=mActiveReports.end())
         mReports[iter->second]->add (id, message, hint);
 }
+

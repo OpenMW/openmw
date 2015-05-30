@@ -264,13 +264,6 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
     }
 
-    declareSection ("verifier", "Verifier");
-    {
-        Setting *extraPathgrid = createSetting (Type_CheckBox, "pathgrid-extra-check", "Pathgrid: Extra Check");
-        extraPathgrid->setDefaultValue ("false");
-        extraPathgrid->setToolTip ("Additional checks for orphaned or duplicated pathgrid points");
-    }
-
     {
         /******************************************************************
         * There are three types of values:

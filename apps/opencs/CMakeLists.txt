@@ -34,7 +34,7 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel signalhandler
+    tools reportmodel
     )
 
 opencs_units_noqt (model/tools

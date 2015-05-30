@@ -64,7 +64,7 @@ namespace CSMTools
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
-
+            
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 
