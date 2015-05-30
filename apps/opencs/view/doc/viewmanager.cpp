@@ -16,6 +16,7 @@
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
+#include "../world/idcompletiondelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
@@ -59,6 +60,33 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
+
+    // Columns with QLineEdit editor
+    static const CSMWorld::ColumnBase::Display sIdCompletionColumns[] =
+    {
+        CSMWorld::ColumnBase::Display_Class,
+        CSMWorld::ColumnBase::Display_Faction,
+        CSMWorld::ColumnBase::Display_String,
+        CSMWorld::ColumnBase::Display_GlobalVariable,
+        CSMWorld::ColumnBase::Display_Icon,
+        CSMWorld::ColumnBase::Display_Mesh,
+        CSMWorld::ColumnBase::Display_Miscellaneous,
+        CSMWorld::ColumnBase::Display_Music,
+        CSMWorld::ColumnBase::Display_None,
+        CSMWorld::ColumnBase::Display_Race,
+        CSMWorld::ColumnBase::Display_Region,
+        CSMWorld::ColumnBase::Display_Script,
+        CSMWorld::ColumnBase::Display_Skill,
+        CSMWorld::ColumnBase::Display_Sound,
+        CSMWorld::ColumnBase::Display_SoundRes,
+        CSMWorld::ColumnBase::Display_Texture,
+        CSMWorld::ColumnBase::Display_Video
+    };
+
+    for (std::size_t i = 0; i < sizeof(sIdCompletionColumns) / sizeof(CSMWorld::ColumnBase::Display); ++i)
+    {
+        mDelegateFactories->add(sIdCompletionColumns[i], new CSVWorld::IdCompletionDelegateFactory());
+    }
 
     struct Mapping
     {
