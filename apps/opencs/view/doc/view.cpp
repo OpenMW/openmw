@@ -404,11 +404,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     width = std::max(width, 300);
     height = std::max(height, 300);
 
-    // trick to get the window decorations and their sizes
-    show();
-    hide();
-    resize (width - (frameGeometry().width() - geometry().width()),
-            height - (frameGeometry().height() - geometry().height()));
+    resize (width, height);
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
