@@ -1075,8 +1075,6 @@ namespace NifOsg
         static void handleProperty(const Nif::Property *property,
                             osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
-            osg::StateSet* stateset = node->getOrCreateStateSet();
-
             switch (property->recType)
             {
             case Nif::RC_NiStencilProperty:
@@ -1095,6 +1093,7 @@ namespace NifOsg
                     break;
                 }
 
+                osg::StateSet* stateset = node->getOrCreateStateSet();
                 stateset->setAttribute(frontFace, osg::StateAttribute::ON);
                 stateset->setMode(GL_CULL_FACE, stencilprop->data.drawMode == 3 ? osg::StateAttribute::OFF
                                                                                 : osg::StateAttribute::ON);
@@ -1117,7 +1116,7 @@ namespace NifOsg
                 osg::PolygonMode* mode = new osg::PolygonMode;
                 mode->setMode(osg::PolygonMode::FRONT_AND_BACK, wireprop->flags == 0 ? osg::PolygonMode::FILL
                                                                                      : osg::PolygonMode::LINE);
-                stateset->setAttributeAndModes(mode, osg::StateAttribute::ON);
+                node->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
                 break;
             }
             case Nif::RC_NiZBufferProperty:
@@ -1126,7 +1125,7 @@ namespace NifOsg
                 // VER_MW doesn't support a DepthFunction according to NifSkope
                 osg::Depth* depth = new osg::Depth;
                 depth->setWriteMask((zprop->flags>>1)&1);
-                stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                node->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
             }
             // OSG groups the material properties that NIFs have separate, so we have to parse them all again when one changed
@@ -1141,6 +1140,7 @@ namespace NifOsg
             {
                 const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
                 osg::BlendFunc* blendfunc = new osg::BlendFunc;
+                osg::StateSet* stateset = node->getOrCreateStateSet();
                 if (alphaprop->flags&1)
                 {
                     blendfunc->setFunction(getBlendMode((alphaprop->flags>>1)&0xf),
@@ -1174,6 +1174,7 @@ namespace NifOsg
             case Nif::RC_NiTexturingProperty:
             {
                 const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
+                osg::StateSet* stateset = node->getOrCreateStateSet();
                 for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
                 {
                     if (texprop->textures[i].inUse)
