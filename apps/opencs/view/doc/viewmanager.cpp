@@ -64,7 +64,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     // Columns with QLineEdit editor
     static const CSMWorld::ColumnBase::Display sIdCompletionColumns[] =
     {
+        CSMWorld::ColumnBase::Display_Cell,
         CSMWorld::ColumnBase::Display_Class,
+        CSMWorld::ColumnBase::Display_Creature,
         CSMWorld::ColumnBase::Display_Faction,
         CSMWorld::ColumnBase::Display_String,
         CSMWorld::ColumnBase::Display_GlobalVariable,
@@ -72,15 +74,20 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         CSMWorld::ColumnBase::Display_Mesh,
         CSMWorld::ColumnBase::Display_Miscellaneous,
         CSMWorld::ColumnBase::Display_Music,
-        CSMWorld::ColumnBase::Display_None,
+        CSMWorld::ColumnBase::Display_None, // Inplace editing (Table SubView) creates QLineEdit using Display_None
+        CSMWorld::ColumnBase::Display_Npc,
         CSMWorld::ColumnBase::Display_Race,
+        CSMWorld::ColumnBase::Display_Referenceable,
         CSMWorld::ColumnBase::Display_Region,
         CSMWorld::ColumnBase::Display_Script,
         CSMWorld::ColumnBase::Display_Skill,
         CSMWorld::ColumnBase::Display_Sound,
         CSMWorld::ColumnBase::Display_SoundRes,
+        CSMWorld::ColumnBase::Display_Static,
+        CSMWorld::ColumnBase::Display_String,
         CSMWorld::ColumnBase::Display_Texture,
-        CSMWorld::ColumnBase::Display_Video
+        CSMWorld::ColumnBase::Display_Video,
+        CSMWorld::ColumnBase::Display_Weapon
     };
 
     for (std::size_t i = 0; i < sizeof(sIdCompletionColumns) / sizeof(CSMWorld::ColumnBase::Display); ++i)
