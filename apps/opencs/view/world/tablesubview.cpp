@@ -54,7 +54,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     autoJump->setToolTip ("Whether to jump to the modified record."
                 "\nCan be useful in finding the moved or modified"
                 "\nobject instance while 3D editing.");
-    autoJump->setCheckState(Qt::Unchecked);
+    autoJump->setCheckState(
+            userSettings.settingValue ("table-input/jump-to-modified") == "true" ? Qt::Checked : Qt::Unchecked);
     connect(autoJump, SIGNAL (stateChanged(int)), mTable, SLOT (jumpAfterModChanged(int)));
     optHLayout->insertWidget(0, autoJump);
     optHLayout->insertWidget(1, added);

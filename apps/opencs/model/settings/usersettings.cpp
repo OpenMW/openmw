@@ -243,6 +243,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDefaultValue (defaultValue);
         jumpToAdded->setDeclaredValues (jumpValues);
 
+        Setting *jumpToModified = createSetting (Type_CheckBox, "jump-to-modified", "Jump to modified Record");
+        jumpToModified->setDefaultValue ("true");
+        jumpToModified->setToolTip ("Whether to jump to the modified record. This setting effects the instances table only."
+                "\nCan be useful in finding the moved or modified object instance while 3D editing.");
+
         Setting *extendedConfig = createSetting (Type_CheckBox, "extended-config",
             "Manually specify affected record types for an extended delete/revert");
         extendedConfig->setDefaultValue("false");
