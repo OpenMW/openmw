@@ -26,6 +26,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "camera.hpp"
+#include "rotatecontroller.hpp"
 
 namespace
 {
@@ -71,64 +72,6 @@ std::string getVampireHead(const std::string& race, bool female)
 
 namespace MWRender
 {
-
-/// @note Assumes that the node being rotated has its "original" orientation set every frame by a different controller.
-/// The rotation is then applied on top of that orientation.
-/// @note Must be set on a MatrixTransform.
-class RotateController : public osg::NodeCallback
-{
-public:
-    RotateController(osg::Node* relativeTo)
-        : mEnabled(true)
-        , mRelativeTo(relativeTo)
-    {
-
-    }
-
-    void setEnabled(bool enabled)
-    {
-        mEnabled = enabled;
-    }
-
-    void setRotate(const osg::Quat& rotate)
-    {
-        mRotate = rotate;
-    }
-
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        if (!mEnabled)
-            return;
-        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
-        osg::Matrix matrix = transform->getMatrix();
-        osg::Quat worldOrient = getWorldOrientation(node);
-
-        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
-        matrix.setRotate(orient);
-
-        transform->setMatrix(matrix);
-
-        traverse(node,nv);
-    }
-
-    osg::Quat getWorldOrientation(osg::Node* node)
-    {
-        // this could be optimized later, we just need the world orientation, not the full matrix
-        osg::MatrixList worldMats = node->getWorldMatrices(mRelativeTo);
-        osg::Quat worldOrient;
-        if (!worldMats.empty())
-        {
-            osg::Matrixf worldMat = worldMats[0];
-            worldOrient = worldMat.getRotate();
-        }
-        return worldOrient;
-    }
-
-protected:
-    bool mEnabled;
-    osg::Quat mRotate;
-    osg::ref_ptr<osg::Node> mRelativeTo;
-};
 
 /// Subclass RotateController to add a Z-offset for sneaking in first person mode.
 /// @note We use inheritance instead of adding another controller, so that we do not have to compute the worldOrient twice.
@@ -710,17 +653,7 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
             mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
     }
 
-    /*
-    if (mSkelBase)
-    {
-        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        if(mViewMode != VM_FirstPerson)
-        {
-            // In third person mode we may still need pitch for ranged weapon targeting
-            pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
-        }
-    }
-    */
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
 
     return ret;
 }
@@ -906,6 +839,8 @@ void NpcAnimation::addControllers()
 {
     mFirstPersonNeckController = NULL;
     mHeadController = NULL;
+    WeaponAnimation::deleteControllers();
+
     if (mViewMode == VM_FirstPerson)
     {
         NodeMap::iterator found = mNodeMap.find("bip01 neck");
@@ -927,6 +862,8 @@ void NpcAnimation::addControllers()
             node->addUpdateCallback(mHeadController);
             mActiveControllers.insert(std::make_pair(node, mHeadController));
         }
+
+        WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
     }
 }
 

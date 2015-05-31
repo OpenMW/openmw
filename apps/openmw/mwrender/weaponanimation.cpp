@@ -1,5 +1,7 @@
 #include "weaponanimation.hpp"
 
+#include <osg/MatrixTransform>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
@@ -15,6 +17,7 @@
 #include "../mwmechanics/combat.hpp"
 
 #include "animation.hpp"
+#include "rotatecontroller.hpp"
 
 namespace MWRender
 {
@@ -44,6 +47,11 @@ void WeaponAnimationTime::updateStartTime()
 WeaponAnimation::WeaponAnimation()
     : mPitchFactor(0)
 {
+}
+
+WeaponAnimation::~WeaponAnimation()
+{
+
 }
 
 void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
@@ -149,28 +157,49 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     }
 }
 
-/*
-void WeaponAnimation::pitchSkeleton(float xrot, Ogre::SkeletonInstance* skel)
+void WeaponAnimation::addControllers(const std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >& nodes,
+                                     std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > &map, osg::Node* objectRoot)
 {
-    if (mPitchFactor == 0)
+    for (int i=0; i<2; ++i)
+    {
+        mSpineControllers[i] = NULL;
+
+        std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >::const_iterator found = nodes.find(i == 0 ? "bip01 spine1" : "bip01 spine2");
+        if (found != nodes.end())
+        {
+            osg::Node* node = found->second;
+            mSpineControllers[i] = new RotateController(objectRoot);
+            node->addUpdateCallback(mSpineControllers[i]);
+            map.insert(std::make_pair(node, mSpineControllers[i]));
+        }
+    }
+}
+
+void WeaponAnimation::deleteControllers()
+{
+    for (int i=0; i<2; ++i)
+        mSpineControllers[i] = NULL;
+}
+
+void WeaponAnimation::configureControllers(float characterPitchRadians)
+{
+    if (!mSpineControllers[0])
         return;
 
-    float pitch = xrot * mPitchFactor;
-    Ogre::Node *node;
+    if (mPitchFactor == 0.f || characterPitchRadians == 0.f)
+    {
+        for (int i=0; i<2; ++i)
+            mSpineControllers[i]->setEnabled(false);
+        return;
+    }
 
-    // In spherearcher.nif, we have spine, not Spine. Not sure if all bone names should be case insensitive?
-    if (skel->hasBone("Bip01 spine2"))
-        node = skel->getBone("Bip01 spine2");
-    else
-        node = skel->getBone("Bip01 Spine2");
-    node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
-
-    if (skel->hasBone("Bip01 spine1")) // in spherearcher.nif
-        node = skel->getBone("Bip01 spine1");
-    else
-        node = skel->getBone("Bip01 Spine1");
-    node->pitch(Ogre::Radian(-pitch/2), Ogre::Node::TS_WORLD);
+    float pitch = characterPitchRadians * mPitchFactor;
+    osg::Quat rotate (pitch/2, osg::Vec3f(-1,0,0));
+    for (int i=0; i<2; ++i)
+    {
+        mSpineControllers[i]->setRotate(rotate);
+        mSpineControllers[i]->setEnabled(true);
+    }
 }
-*/
 
 }

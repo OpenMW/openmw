@@ -171,14 +171,16 @@ Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()
     return mResourceSystem;
 }
 
+void CreatureWeaponAnimation::addControllers()
+{
+    WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
+}
+
 osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)
 {
     osg::Vec3f ret = Animation::runAnimation(duration);
 
-    /*
-    if (mSkelBase)
-        pitchSkeleton(mPtr.getRefData().getPosition().rot[0], mSkelBase->getSkeleton());
-    */
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
 
     return ret;
 }

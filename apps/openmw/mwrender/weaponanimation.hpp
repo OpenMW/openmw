@@ -9,6 +9,8 @@
 namespace MWRender
 {
 
+    class RotateController;
+
     class WeaponAnimationTime : public SceneUtil::ControllerSource
     {
     private:
@@ -28,7 +30,7 @@ namespace MWRender
     {
     public:
         WeaponAnimation();
-        virtual ~WeaponAnimation() {}
+        virtual ~WeaponAnimation();
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void attachArrow(MWWorld::Ptr actor);
@@ -36,8 +38,19 @@ namespace MWRender
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void releaseArrow(MWWorld::Ptr actor);
 
+        /// Add WeaponAnimation-related controllers to \a nodes and store the added controllers in \a map.
+        void addControllers(const std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >& nodes,
+                std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> >& map, osg::Node* objectRoot);
+
+        void deleteControllers();
+
+        /// Configure controllers, should be called every animation frame.
+        void configureControllers(float characterPitchRadians);
+
     protected:
         PartHolderPtr mAmmunition;
+
+        osg::ref_ptr<RotateController> mSpineControllers[2];
 
         virtual osg::Group* getArrowBone() = 0;
         virtual osg::Node* getWeaponNode() = 0;

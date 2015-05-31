@@ -46,11 +46,13 @@ namespace MWRender
         virtual void showWeapon(bool show) { showWeapons(show); }
         virtual void setWeaponGroup(const std::string& group) { mWeaponAnimationTime->setGroup(group); }
 
+        virtual void addControllers();
+
         virtual osg::Vec3f runAnimation(float duration);
 
         /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
         /// to indicate the facing orientation of the character.
-        //virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
+        virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
 
     private:
