@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include <components/vfs/manager.hpp>
+
 #include <boost/thread.hpp>
 
 #include "openal_output.hpp"
@@ -782,17 +784,15 @@ const CachedSound& OpenAL_Output::getBuffer(const std::string &fname)
     int srate;
 
     DecoderPtr decoder = mManager.getDecoder();
-    try
+    // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+    std::string file = fname;
+    if (!decoder->mResourceMgr->exists(file))
     {
-        decoder->open(fname);
+        std::string::size_type pos = file.rfind('.');
+        if(pos != std::string::npos)
+            file = file.substr(0, pos)+".mp3";
     }
-    catch(std::exception&)
-    {
-        std::string::size_type pos = fname.rfind('.');
-        if(pos == std::string::npos)
-            throw;
-        decoder->open(fname.substr(0, pos)+".mp3");
-    }
+    decoder->open(file);
 
     decoder->getInfo(&srate, &chans, &type);
     format = getALFormat(chans, type);
