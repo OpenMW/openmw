@@ -182,10 +182,10 @@ protected:
     // Used to reset the position of the accumulation root every frame - the movement should be applied to the physics system
     osg::ref_ptr<ResetAccumRootCallback> mResetAccumRootCallback;
 
-    // Keep track of keyframe controllers from external files that we added to our scene graph.
+    // Keep track of controllers that we added to our scene graph.
     // We may need to rebuild these controllers when the active animation groups / sources change.
-    typedef std::map<osg::ref_ptr<osg::Node>, osg::ref_ptr<NifOsg::KeyframeController> > AnimSourceControllerMap;
-    AnimSourceControllerMap mAnimSourceControllers;
+    typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
+    ControllerMap mActiveControllers;
 
     boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumGroups];
 
@@ -255,6 +255,12 @@ protected:
     void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *light);
 
     void clearAnimSources();
+
+    /**
+     * Provided to allow derived classes adding their own controllers. Note, the controllers must be added to mActiveControllers
+     * so they get cleaned up properly on the next controller rebuild. A controller rebuild may be necessary to ensure correct ordering.
+     */
+    virtual void addControllers() {}
 
     osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
 

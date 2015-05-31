@@ -48,6 +48,8 @@ public:
     virtual float getValue(osg::NodeVisitor* nv);
 };
 
+class NeckController;
+
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
 public:
@@ -92,7 +94,7 @@ private:
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[ESM::PRT_Count];
 
-    //Ogre::Vector3 mFirstPersonOffset;
+    osg::Vec3f mFirstPersonOffset;
 
     boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
@@ -118,6 +120,11 @@ private:
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
 
     //void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
+
+    osg::ref_ptr<NeckController> mFirstPersonNeckController;
+
+protected:
+    virtual void addControllers();
 
 public:
     /**
@@ -185,6 +192,9 @@ public:
     virtual void setAlpha(float alpha);
 
     virtual void setVampire(bool vampire);
+
+    /// Set a translation offset (in object root space) to apply to meshes when in first person mode.
+    void setFirstPersonOffset(const osg::Vec3f& offset);
 
     virtual void updatePtr(const MWWorld::Ptr& updated);
 };

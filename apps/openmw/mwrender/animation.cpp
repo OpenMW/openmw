@@ -603,7 +603,7 @@ namespace MWRender
     void Animation::resetActiveGroups()
     {
         // remove all previous external controllers from the scene graph
-        for (AnimSourceControllerMap::iterator it = mAnimSourceControllers.begin(); it != mAnimSourceControllers.end(); ++it)
+        for (ControllerMap::iterator it = mActiveControllers.begin(); it != mActiveControllers.end(); ++it)
         {
             osg::Node* node = it->first;
             node->removeUpdateCallback(it->second);
@@ -611,13 +611,8 @@ namespace MWRender
             // Should be no longer needed with OSG 3.4
             it->second->setNestedCallback(NULL);
         }
-        if (mResetAccumRootCallback && mAccumRoot)
-        {
-            mAccumRoot->removeUpdateCallback(mResetAccumRootCallback);
-            // Should be no longer needed with OSG 3.4
-            mResetAccumRootCallback->setNestedCallback(NULL);
-        }
-        mAnimSourceControllers.clear();
+
+        mActiveControllers.clear();
 
         mAccumCtrl = NULL;
 
@@ -647,7 +642,7 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = mNodeMap.at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
                     node->addUpdateCallback(it->second);
-                    mAnimSourceControllers[node] = it->second;
+                    mActiveControllers.insert(std::make_pair(node, it->second));
 
                     if (grp == 0 && node == mAccumRoot)
                     {
@@ -660,10 +655,12 @@ namespace MWRender
                             mResetAccumRootCallback->setAccumulate(mAccumulate);
                         }
                         mAccumRoot->addUpdateCallback(mResetAccumRootCallback);
+                        mActiveControllers.insert(std::make_pair(mAccumRoot, mResetAccumRootCallback));
                     }
                 }
             }
         }
+        addControllers();
     }
 
     void Animation::changeGroups(const std::string &groupname, int groups)
@@ -893,7 +890,7 @@ namespace MWRender
         mObjectRoot = NULL;
 
         mNodeMap.clear();
-        mAnimSourceControllers.clear();
+        mActiveControllers.clear();
         mAccumRoot = NULL;
         mAccumCtrl = NULL;
 
