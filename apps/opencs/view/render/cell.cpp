@@ -120,9 +120,10 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
 CSVRender::Cell::Cell (CSMDoc::Document& document, Ogre::SceneManager *sceneManager,
     const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-    : mDocument (document), mId (Misc::StringUtils::lowerCase (id)), mSceneMgr(sceneManager)
-    , mPhysics(physics), mX(0), mY(0), mPgIndex(-1), mModel(0), mProxyModel(0)
-    , mHandler(new CSMWorld::SignalHandler(this))
+: mDocument (document), mId (Misc::StringUtils::lowerCase (id))
+, mProxyModel(0), mModel(0), mPgIndex(-1), mHandler(new CSMWorld::SignalHandler(this))
+, mPhysics(physics), mSceneMgr(sceneManager), mX(0), mY(0)
+
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);
