@@ -4,6 +4,8 @@
 
 #include <QCompleter>
 
+#include "../../view/widget/completerpopup.hpp"
+
 #include "data.hpp"
 #include "idtablebase.hpp"
 
@@ -121,6 +123,11 @@ void CSMWorld::IdCompletionManager::generateCompleters(CSMWorld::Data &data)
                 // The completion role must be Qt::DisplayRole to get the ID values from the model
                 completer->setCompletionRole(Qt::DisplayRole);
                 completer->setCaseSensitivity(Qt::CaseInsensitive);
+
+                QAbstractItemView *popup = new CSVWidget::CompleterPopup();
+                completer->setPopup(popup); // The completer takes ownership of the popup
+                completer->setMaxVisibleItems(10);
+                
                 mCompleters[current->first] = completer;
             }
         }

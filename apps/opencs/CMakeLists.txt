@@ -74,7 +74,7 @@ opencs_units_noqt (view/world
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2
+    scenetooltoggle2 completerpopup
     )
 
 opencs_units (view/render
