@@ -92,17 +92,17 @@ namespace MWRender
             return;
         const osg::Matrix& worldMat = mats[0];
 
-        osg::Vec3 position = worldMat.getTrans();
+        osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
             position.z() += mHeight;
 
-        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3(1,0,0)) * osg::Quat(getYaw(), osg::Vec3(0,0,1));
+        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
 
-        osg::Vec3 offset = orient * osg::Vec3(0, -mCameraDistance, 0);
+        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
         position += offset;
 
-        osg::Vec3 forward = orient * osg::Vec3(0,1,0);
-        osg::Vec3 up = orient * osg::Vec3(0,0,1);
+        osg::Vec3d forward = orient * osg::Vec3d(0,1,0);
+        osg::Vec3d up = orient * osg::Vec3d(0,0,1);
 
         cam->setViewMatrixAsLookAt(position, position + forward, up);
     }
