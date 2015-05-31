@@ -157,4 +157,8 @@ namespace Gui
         return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
     }
 
+    void MWList::scrollToFirstItem()
+    {
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
 }

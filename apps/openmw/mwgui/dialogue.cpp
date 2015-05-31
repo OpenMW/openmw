@@ -364,6 +364,7 @@ namespace MWGui
         bool sameActor = (mPtr == actor);
         mPtr = actor;
         mTopicsList->setEnabled(true);
+        mTopicsList->scrollToFirstItem();
         setTitle(npcName);
 
         clearChoices();
@@ -455,6 +456,7 @@ namespace MWGui
             mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
         }
         mTopicsList->adjustSize();
+        mTopicsList->scrollToFirstItem();
 
         updateHistory();
     }
