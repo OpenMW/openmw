@@ -7,7 +7,6 @@
 #else
 #include <tr1/unordered_map>
 #endif
-#include <OgreSceneNode.h>
 
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
@@ -20,8 +19,6 @@
 #include <components/esm/cellid.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
-
-#include <boost/math/special_functions/sign.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -1411,9 +1408,10 @@ namespace MWWorld
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
-        Ogre::Vector3 a(x1,y1,z1);
-        Ogre::Vector3 b(x2,y2,z2);
-        return 0;//mPhysics->castRay(a,b,false,true);
+        osg::Vec3f a(x1,y1,z1);
+        osg::Vec3f b(x2,y2,z2);
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), MWPhysics::CollisionType_World);
+        return result.mHit;
     }
 
     void World::processDoors(float duration)
@@ -1793,17 +1791,26 @@ namespace MWWorld
 
     MWWorld::Ptr World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
-        std::pair<bool, Ogre::Vector3> result;// = mPhysics->castRay(cursorX, cursorY);
+        osg::Vec3f origin, dest;
+        mRendering->getCameraToViewportRay(cursorX, cursorY, origin, dest);
 
-        if (!result.first)
-            return MWWorld::Ptr();
+        const float maxDist = 200.f;
+        osg::Vec3f dir = (dest - origin);
+        dir.normalize();
+        dest = origin + dir * maxDist;
+
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, MWWorld::Ptr(),
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
 
         CellStore* cell = getPlayerPtr().getCell();
 
         ESM::Position pos = getPlayerPtr().getRefData().getPosition();
-        pos.pos[0] = result.second[0];
-        pos.pos[1] = result.second[1];
-        pos.pos[2] = result.second[2];
+        if (result.mHit)
+        {
+            pos.pos[0] = result.mHitPos.x();
+            pos.pos[1] = result.mHitPos.y();
+            pos.pos[2] = result.mHitPos.z();
+        }
         // We want only the Z part of the player's rotation
         pos.rot[0] = 0;
         pos.rot[1] = 0;
@@ -1822,21 +1829,23 @@ namespace MWWorld
 
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
-        Ogre::Vector3 normal(0,0,0);
-        std::string handle;
-        std::pair<bool, Ogre::Vector3> result;// = mPhysics->castRay(cursorX, cursorY, &normal, &handle);
+        osg::Vec3f origin, dest;
+        mRendering->getCameraToViewportRay(cursorX, cursorY, origin, dest);
 
-        if (result.first)
+        const float maxDist = 200.f;
+        osg::Vec3f dir = (dest - origin);
+        dir.normalize();
+        dest = origin + dir * maxDist;
+
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, MWWorld::Ptr(),
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+
+        if (result.mHit)
         {
             // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
-            if (normal.angleBetween(Ogre::Vector3(0.f,0.f,1.f)).valueDegrees() >= 30)
+            if (std::acos(result.mHitNormal * osg::Vec3f(0,0,1)) >= osg::DegreesToRadians(30.f))
                 return false;
 
-            /*
-            MWWorld::Ptr hitObject = searchPtrViaHandle(handle);
-            if (!hitObject.isEmpty() && hitObject.getClass().isActor())
-                return false;
-            */
             return true;
         }
         else
@@ -1917,9 +1926,10 @@ namespace MWWorld
 
         float len = 100.0;
 
-        std::pair<bool, osg::Vec3f> hit = mPhysics->castRay(orig, dir*len);
-        if (hit.first)
-            pos.pos[2] = hit.second.z();
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(orig, orig+dir*len, MWWorld::Ptr(),
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+        if (result.mHit)
+            pos.pos[2] = result.mHitPos.z();
 
         // copy the object and set its count
         int origCount = object.getRefData().getCount();
@@ -2346,50 +2356,30 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor)
+    bool World::getLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor)
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
         if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
             return false; // not in active cell
 
-        // TODO: move to PhysicsSystem
-        /*
-        OEngine::Physic::PhysicActor* actor1 = mPhysEngine->getCharacter(actor.getRefData().getHandle());
-        OEngine::Physic::PhysicActor* actor2 = mPhysEngine->getCharacter(targetActor.getRefData().getHandle());
-
-        if (!actor1 || !actor2)
-            return false;
-
-        Ogre::Vector3 halfExt1 = actor1->getHalfExtents();
-        const float* pos1 = actor.getRefData().getPosition().pos;
-        Ogre::Vector3 halfExt2 = actor2->getHalfExtents();
-        const float* pos2 = targetActor.getRefData().getPosition().pos;
-
-        btVector3 from(pos1[0],pos1[1],pos1[2]+halfExt1.z*2*0.9f); // eye level
-        btVector3 to(pos2[0],pos2[1],pos2[2]+halfExt2.z*2*0.9f);
-
-        std::pair<std::string, float> result = mPhysEngine->rayTest(from, to,false);
-        if(result.first == "") return true;
-        */
-
-        return true;
+        return mPhysics->getLineOfSight(actor, targetActor);
     }
 
     float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)
     {
-        return 0;
-        /*
-        btVector3 btFrom(from.x, from.y, from.z);
-        btVector3 btTo = btVector3(dir.x, dir.y, dir.z);
-        btTo.normalize();
-        btTo = btFrom + btTo * maxDist;
+        osg::Vec3f from_ (from.x, from.y, from.z);
+        osg::Vec3f to_ (dir.x, dir.y, dir.z);
+        to_.normalize();
+        to_ = from_ + (to_ * maxDist);
 
-        std::pair<std::string, float> result = mPhysEngine->rayTest(btFrom, btTo, false);
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from_, to_, MWWorld::Ptr(),
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
 
-        if(result.second == -1) return maxDist;
-        else return result.second*(btTo-btFrom).length();
-        */
+        if (!result.mHit)
+            return maxDist;
+        else
+            return (result.mHitPos - from_).length();
     }
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
@@ -2697,37 +2687,30 @@ namespace MWWorld
         else
         {
             // For NPCs use facing direction from Head node
-            Ogre::Vector3 origin(actor.getRefData().getPosition().pos);
-#if 0
-            MWRender::Animation *anim = mRendering->getAnimation(actor);
-            if(anim != NULL)
+            osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
+
+            MWRender::Animation* anim = mRendering->getAnimation(actor);
+            if (anim != NULL)
             {
-                Ogre::Node *node = anim->getNode("Head");
+                const osg::Node* node = anim->getNode("Head");
                 if (node == NULL)
                     node = anim->getNode("Bip01 Head");
-                if(node != NULL)
-                    origin += node->_getDerivedPosition();
-            }
-#endif
-            /*
-
-            Ogre::Quaternion orient;
-            orient = Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-                    Ogre::Quaternion(Ogre::Radian(actor.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
-            Ogre::Vector3 direction = orient.yAxis();
-            Ogre::Vector3 dest = origin + direction * distance;
-
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine->rayTest2(btVector3(origin.x, origin.y, origin.z), btVector3(dest.x, dest.y, dest.z));
-            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end(); ++cIt)
-            {
-                MWWorld::Ptr collided = getPtrViaHandle(cIt->second);
-                if (collided != actor)
+                if (node != NULL)
                 {
-                    target = collided;
-                    break;
+                    osg::MatrixList mats = node->getWorldMatrices();
+                    if (mats.size())
+                        origin = mats[0].getTrans();
                 }
             }
-            */
+
+            osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
+
+            osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+            osg::Vec3f dest = origin + direction * distance;
+
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, actor);
+            target = result.mHitObject;
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();

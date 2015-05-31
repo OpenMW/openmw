@@ -298,6 +298,21 @@ namespace MWRender
         mObjects->removeObject(ptr);
     }
 
+    void RenderingManager::getCameraToViewportRay(float nX, float nY, osg::Vec3f &origin, osg::Vec3f &dest)
+    {
+        osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
+        osg::Matrix invViewProj = viewProj.inverse(viewProj);
+
+        nX = nX * 2 - 1;
+        nY = nY * -2 + 1;
+
+        osg::Vec3f start (nX, nY, -1.f);
+        osg::Vec3f end (nX, nY, 1.f);
+
+        origin = invViewProj.preMult(start);
+        dest = invViewProj.preMult(end);
+    }
+
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
     {
         if (!ptr.getRefData().getBaseNode())

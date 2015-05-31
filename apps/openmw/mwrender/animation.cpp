@@ -20,8 +20,6 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>

@@ -80,6 +80,9 @@ namespace MWRender
         /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
         osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
 
+        /// Get a camera to viewport ray for normalized screen coordinates nX and nY, with the top left corner being at (0,0)
+        void getCameraToViewportRay(float nX, float nY, osg::Vec3f& origin, osg::Vec3f& dest);
+
         void setSkyEnabled(bool enabled);
 
         bool toggleRenderMode(RenderMode mode);

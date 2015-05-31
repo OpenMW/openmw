@@ -838,14 +838,12 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 void CharacterController::updateIdleStormState()
 {
     bool inStormDirection = false;
-    /*
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
-        Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
-        Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
-        inStormDirection = stormDirection.angleBetween(characterDirection) > Ogre::Degree(120);
+        osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+        osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        inStormDirection = std::acos(stormDirection * characterDirection) > osg::DegreesToRadians(120.f);
     }
-    */
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
         float complete = 0;

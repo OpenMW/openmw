@@ -11,6 +11,8 @@
 
 #include <osg/Quat>
 
+#include "collisiontype.hpp"
+
 namespace osg
 {
     class Group;
@@ -87,11 +89,20 @@ namespace MWPhysics
                                                                const osg::Quat &orientation,
                                                                float queryDistance);
 
-            // cast ray, return true if it hit something.
-            bool castRay(const Ogre::Vector3& from, const Ogre::Vector3& to,bool ignoreHeightMap = false);
+            struct RayResult
+            {
+                bool mHit;
+                osg::Vec3f mHitPos;
+                osg::Vec3f mHitNormal;
+                MWWorld::Ptr mHitObject;
+            };
 
-            /// @return <bool hit, world hit position>
-            std::pair<bool, osg::Vec3f> castRay(const osg::Vec3f &from, const osg::Vec3f &to);
+            /// @param me Optional, a Ptr to ignore in the list of results
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore = MWWorld::Ptr(), int mask =
+                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor);
+
+            /// Return true if actor1 can see actor2.
+            bool getLineOfSight(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.

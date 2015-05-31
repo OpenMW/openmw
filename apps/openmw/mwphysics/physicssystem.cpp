@@ -728,35 +728,74 @@ namespace MWPhysics
         return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
     }
 
-
-    bool PhysicsSystem::castRay(const Ogre::Vector3& from, const Ogre::Vector3& to, bool ignoreHeightMap)
+    class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
-        return false;
-        /*
-        btVector3 _from, _to;
-        _from = btVector3(from.x, from.y, from.z);
-        _to = btVector3(to.x, to.y, to.z);
+    public:
+        ClosestNotMeRayResultCallback(const btCollisionObject* me, const btVector3& from, const btVector3& to)
+            : btCollisionWorld::ClosestRayResultCallback(from, to)
+            , mMe(me)
+        {
+        }
 
-        std::pair<std::string, float> result = mEngine->rayTest(_from, _to,ignoreHeightMap);
-        return !(result.first == "");
-        */
-    }
+        virtual	btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
+        {
+            if (rayResult.m_collisionObject == mMe)
+                return 1.f;
+            return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
+        }
+    private:
+        const btCollisionObject* mMe;
+    };
 
-    std::pair<bool, osg::Vec3f> PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to)
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask)
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
-        btCollisionWorld::ClosestRayResultCallback resultCallback(btFrom, btTo);
+        const btCollisionObject* me = NULL;
+        if (!ignore.isEmpty())
+        {
+            Actor* actor = getActor(ignore);
+            if (actor)
+                me = actor->getCollisionObject();
+        }
+
+        ClosestNotMeRayResultCallback resultCallback(me, btFrom, btTo);
         resultCallback.m_collisionFilterGroup = 0xff;
-        resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap;
+        resultCallback.m_collisionFilterMask = mask;
 
         mCollisionWorld->rayTest(btFrom, btTo, resultCallback);
+
+        RayResult result;
+        result.mHit = resultCallback.hasHit();
         if (resultCallback.hasHit())
         {
-            return std::make_pair(true, toOsg(resultCallback.m_hitPointWorld));
+            result.mHitPos = toOsg(resultCallback.m_hitPointWorld);
+            result.mHitNormal = toOsg(resultCallback.m_hitNormalWorld);
+            if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
+                result.mHitObject = ptrHolder->getPtr();
         }
-        return std::make_pair(false, osg::Vec3f());
+        return result;
+    }
+
+    bool PhysicsSystem::getLineOfSight(const MWWorld::Ptr &actor1, const MWWorld::Ptr &actor2)
+    {
+        Actor* physactor1 = getActor(actor1);
+        Actor* physactor2 = getActor(actor2);
+
+        if (!physactor1 || !physactor2)
+            return false;
+
+        osg::Vec3f halfExt1 = physactor1->getHalfExtents();
+        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
+        pos1.z() += halfExt1.z()*2*0.9f; // eye level
+        osg::Vec3f halfExt2 = physactor2->getHalfExtents();
+        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
+        pos2.z() += halfExt2.z()*2*0.9f;
+
+        RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap);
+
+        return !result.mHit;
     }
 
     class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback

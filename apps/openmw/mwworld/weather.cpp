@@ -419,6 +419,7 @@ void WeatherManager::update(float duration, bool paused)
 
         mStormDirection = (playerPos - redMountainPos);
         mStormDirection.z() = 0;
+        mStormDirection.normalize();
         mRendering->getSkyManager()->setStormDirection(mStormDirection);
     }
 

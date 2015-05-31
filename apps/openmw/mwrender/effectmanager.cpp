@@ -2,8 +2,6 @@
 
 #include <osg/PositionAttitudeTransform>
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
