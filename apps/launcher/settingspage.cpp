@@ -18,10 +18,10 @@ using namespace Process;
 Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
                                      Config::GameSettings &gameSettings,
                                      Config::LauncherSettings &launcherSettings, MainDialog *parent)
-    : mCfgMgr(cfg)
+    : QWidget(parent)
+    , mCfgMgr(cfg)
     , mGameSettings(gameSettings)
     , mLauncherSettings(launcherSettings)
-    , QWidget(parent)
     , mMain(parent)
 {
     setupUi(this);

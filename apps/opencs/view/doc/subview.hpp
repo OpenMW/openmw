@@ -34,6 +34,8 @@ namespace CSVDoc
 
             void setUniversalId(const CSMWorld::UniversalId& id);
 
+            bool event (QEvent *event);
+
         public:
 
             SubView (const CSMWorld::UniversalId& id);

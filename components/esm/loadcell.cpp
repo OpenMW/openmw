@@ -18,9 +18,11 @@ namespace
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
     void adjustRefNum (ESM::RefNum& refNum, ESM::ESMReader& reader)
     {
-        int local = (refNum.mIndex & 0xff000000) >> 24;
+        unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
-        if (local)
+        // If we have an index value that does not make sense, assume that it was an addition
+        // by the present plugin (but a faulty one)
+        if (local && local <= reader.getGameFiles().size())
         {
             // If the most significant 8 bits are used, then this reference already exists.
             // In this case, do not spawn a new reference, but overwrite the old one.
@@ -168,7 +170,7 @@ std::string Cell::getDescription() const
     }
 }
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
+bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves, MovedCellRef *mref)
 {
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
@@ -176,10 +178,20 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted)
 
     // NOTE: We should not need this check. It is a safety check until we have checked
     // more plugins, and how they treat these moved references.
-    if (esm.isNextSub("MVRF")) {
-        // skip rest of cell record (moved references), they are handled elsewhere
-        esm.skipRecord(); // skip MVRF, CNDT
-        return false;
+    if (esm.isNextSub("MVRF"))
+    {
+        if (ignoreMoves)
+        {
+            esm.getHT (mref->mRefNum.mIndex);
+            esm.getHNOT (mref->mTarget, "CNDT");
+            adjustRefNum (mref->mRefNum, esm);
+        }
+        else
+        {
+            // skip rest of cell record (moved references), they are handled elsewhere
+            esm.skipRecord(); // skip MVRF, CNDT
+            return false;
+        }
     }
 
     ref.load (esm);

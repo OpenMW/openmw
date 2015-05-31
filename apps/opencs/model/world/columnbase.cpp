@@ -3,7 +3,7 @@
 #include "columns.hpp"
 
 CSMWorld::ColumnBase::ColumnBase (int columnId, Display displayType, int flags)
-    : mColumnId (columnId), mDisplayType (displayType), mFlags (flags)
+    : mColumnId (columnId), mFlags (flags), mDisplayType (displayType)
 {}
 
 CSMWorld::ColumnBase::~ColumnBase() {}
@@ -81,6 +81,10 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_PartRefType,
         Display_AiPackageType,
         Display_YesNo,
+        Display_InfoCondFunc,
+        Display_InfoCondVar,
+        Display_InfoCondComp,
+        Display_RaceSkill,
 
         Display_None
     };
@@ -134,8 +138,8 @@ bool CSMWorld::NestableColumn::hasChildren() const
 }
 
 CSMWorld::NestedChildColumn::NestedChildColumn (int id,
-    CSMWorld::ColumnBase::Display display, bool isEditable)
-    : NestableColumn (id, display, CSMWorld::ColumnBase::Flag_Dialogue) , mIsEditable(isEditable)
+    CSMWorld::ColumnBase::Display display, int flags, bool isEditable)
+    : NestableColumn (id, display, flags) , mIsEditable(isEditable)
 {}
 
 bool CSMWorld::NestedChildColumn::isEditable () const

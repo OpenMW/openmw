@@ -25,7 +25,12 @@ namespace MWRender
 
     CharacterPreview::CharacterPreview(MWWorld::Ptr character, int sizeX, int sizeY, const std::string& name,
                                        Ogre::Vector3 position, Ogre::Vector3 lookAt)
-        : mSceneMgr (0)
+        : mRecover(false)
+        , mRenderTarget(NULL)
+        , mViewport(NULL)
+        , mCamera(NULL)
+        , mSceneMgr (0)
+        , mNode(NULL)
         , mPosition(position)
         , mLookAt(lookAt)
         , mCharacter(character)
@@ -33,11 +38,6 @@ namespace MWRender
         , mName(name)
         , mSizeX(sizeX)
         , mSizeY(sizeY)
-        , mRenderTarget(NULL)
-        , mViewport(NULL)
-        , mCamera(NULL)
-        , mNode(NULL)
-        , mRecover(false)
     {
         mCharacter.mCell = NULL;
     }
@@ -161,9 +161,9 @@ namespace MWRender
 
     InventoryPreview::InventoryPreview(MWWorld::Ptr character)
         : CharacterPreview(character, 512, 1024, "CharacterPreview", Ogre::Vector3(0, 71, -700), Ogre::Vector3(0,71,0))
-        , mSelectionBuffer(NULL)
         , mSizeX(0)
         , mSizeY(0)
+        , mSelectionBuffer(NULL)
     {
     }
 

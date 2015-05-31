@@ -28,7 +28,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
 
     // Check for empty reference id
     if (cellRef.mRefID.empty()) {
-        messages.push_back(std::make_pair(id, " is an empty reference"));
+        messages.push_back(std::make_pair(id, " is an empty instance (not based on an object)"));
     } else {
         // Check for non existing referenced object
         if (mReferencables.searchId(cellRef.mRefID) == -1) {

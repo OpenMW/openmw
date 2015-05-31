@@ -130,7 +130,7 @@ namespace CSMWorld
     template<typename RecordT>
     void RefIdDataContainer<RecordT>::erase (int index, int count)
     {
-        if (index<0 || index+count>=getSize())
+        if (index<0 || index+count>getSize())
             throw std::runtime_error ("invalid RefIdDataContainer index");
 
         mContainer.erase (mContainer.begin()+index, mContainer.begin()+index+count);

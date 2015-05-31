@@ -36,11 +36,15 @@ namespace CSVDoc
 
             void createRequest (const boost::filesystem::path& file);
 
+            void cancelCreateGame ();
+
         private slots:
 
             void stateChanged (bool valid);
 
             void create();
+
+            void reject();
     };
 }
 

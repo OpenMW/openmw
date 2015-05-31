@@ -7,9 +7,11 @@
 #include <components/esm/loadmgef.hpp> // for converting magic effect id to string & back
 #include <components/esm/loadskil.hpp> // for converting skill names
 #include <components/esm/attr.hpp>     // for converting attributes
+#include <components/esm/loadrace.hpp>
 
 #include "nestedcolumnadapter.hpp"
 #include "nestedtablewrapper.hpp"
+#include "cell.hpp"
 
 namespace ESM
 {
@@ -295,7 +297,7 @@ namespace CSMWorld
                 case 0:
                 {
                     if (effect.mEffectID >=0 && effect.mEffectID < ESM::MagicEffect::Length)
-                        return effect.mRange;
+                        return effect.mEffectID;
                     else
                         throw std::runtime_error("Magic effects ID unexpected value");
                 }
@@ -395,6 +397,106 @@ namespace CSMWorld
         virtual int getColumnsCount(const Record<Info>& record) const;
 
         virtual int getRowsCount(const Record<Info>& record) const;
+    };
+
+    class InfoConditionAdapter : public NestedColumnAdapter<Info>
+    {
+    public:
+        InfoConditionAdapter ();
+
+        virtual void addRow(Record<Info>& record, int position) const;
+
+        virtual void removeRow(Record<Info>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<Info>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<Info>& record) const;
+
+        virtual QVariant getData(const Record<Info>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<Info>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<Info>& record) const;
+
+        virtual int getRowsCount(const Record<Info>& record) const;
+    };
+
+    class RaceAttributeAdapter : public NestedColumnAdapter<ESM::Race>
+    {
+    public:
+        RaceAttributeAdapter ();
+
+        virtual void addRow(Record<ESM::Race>& record, int position) const;
+
+        virtual void removeRow(Record<ESM::Race>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<ESM::Race>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<ESM::Race>& record) const;
+
+        virtual QVariant getData(const Record<ESM::Race>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<ESM::Race>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<ESM::Race>& record) const;
+
+        virtual int getRowsCount(const Record<ESM::Race>& record) const;
+    };
+
+    class RaceSkillsBonusAdapter : public NestedColumnAdapter<ESM::Race>
+    {
+    public:
+        RaceSkillsBonusAdapter ();
+
+        virtual void addRow(Record<ESM::Race>& record, int position) const;
+
+        virtual void removeRow(Record<ESM::Race>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<ESM::Race>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<ESM::Race>& record) const;
+
+        virtual QVariant getData(const Record<ESM::Race>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<ESM::Race>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<ESM::Race>& record) const;
+
+        virtual int getRowsCount(const Record<ESM::Race>& record) const;
+    };
+
+    class CellListAdapter : public NestedColumnAdapter<CSMWorld::Cell>
+    {
+    public:
+        CellListAdapter ();
+
+        virtual void addRow(Record<CSMWorld::Cell>& record, int position) const;
+
+        virtual void removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const;
+
+        virtual void setTable(Record<CSMWorld::Cell>& record,
+                const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* table(const Record<CSMWorld::Cell>& record) const;
+
+        virtual QVariant getData(const Record<CSMWorld::Cell>& record,
+                int subRowIndex, int subColIndex) const;
+
+        virtual void setData(Record<CSMWorld::Cell>& record,
+                const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getColumnsCount(const Record<CSMWorld::Cell>& record) const;
+
+        virtual int getRowsCount(const Record<CSMWorld::Cell>& record) const;
     };
 }
 

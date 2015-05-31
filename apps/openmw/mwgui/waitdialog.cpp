@@ -50,13 +50,13 @@ namespace MWGui
 
     WaitDialog::WaitDialog()
         : WindowBase("openmw_wait_dialog.layout")
-        , mProgressBar()
         , mTimeAdvancer(0.05f)
         , mSleeping(false)
         , mHours(1)
         , mManualHours(1)
         , mFadeTimeRemaining(0)
         , mInterruptAt(-1)
+        , mProgressBar()
     {
         getWidget(mDateTimeText, "DateTimeText");
         getWidget(mRestText, "RestText");
@@ -155,8 +155,9 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
+                    int x = OEngine::Misc::Rng::rollDice(hoursToWait);
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    if (OEngine::Misc::Rng::rollProbability() > fSleepRandMod)
+                    if (x < fSleepRandMod * hoursToWait)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
                         mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);

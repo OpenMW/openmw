@@ -87,6 +87,8 @@ namespace CS
 
             void createGame();
             void createAddon();
+            void cancelCreateGame();
+            void cancelFileDialog();
 
             void loadDocument();
             void openFiles (const boost::filesystem::path &path);

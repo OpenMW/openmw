@@ -70,9 +70,9 @@ namespace MWGui
 
     SortFilterItemModel::SortFilterItemModel(ItemModel *sourceModel)
         : mCategory(Category_All)
+        , mFilter(0)
         , mShowEquipped(true)
         , mSortByType(true)
-        , mFilter(0)
     {
         mSourceModel = sourceModel;
     }

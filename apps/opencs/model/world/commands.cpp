@@ -1,5 +1,8 @@
 #include "commands.hpp"
 
+#include <cmath>
+#include <sstream>
+
 #include <components/misc/stringops.hpp>
 
 #include <QAbstractItemModel>
@@ -11,16 +14,28 @@
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_)
+: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false)
 {
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
     {
         // Replace proxy with actual model
         mIndex = proxy->mapToSource (index);
         mModel = proxy->sourceModel();
-    }
 
-    setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+        setText ("Modify " + dynamic_cast<CSMWorld::IdTree*>(mModel)->nestedHeaderData (
+                    mIndex.parent().column(), mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+    }
+    else
+        setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+
+    // Remember record state before the modification
+    if (CSMWorld::IdTable *table = dynamic_cast<IdTable *>(mModel))
+    {
+        mHasRecordState = true;
+        int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
+        mRecordStateIndex = table->index(mIndex.row(), stateColumnIndex);
+        mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
+    }
 }
 
 void CSMWorld::ModifyCommand::redo()
@@ -32,6 +47,10 @@ void CSMWorld::ModifyCommand::redo()
 void CSMWorld::ModifyCommand::undo()
 {
     mModel->setData (mIndex, mOld);
+    if (mHasRecordState)
+    {
+        mModel->setData(mRecordStateIndex, mOldRecordState);
+    }
 }
 
 
@@ -103,8 +122,9 @@ void CSMWorld::RevertCommand::undo()
     mModel.setRecord (mId, *mOld);
 }
 
-CSMWorld::DeleteCommand::DeleteCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+CSMWorld::DeleteCommand::DeleteCommand (IdTable& model,
+        const std::string& id, CSMWorld::UniversalId::Type type, QUndoCommand* parent)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (0), mType(type)
 {
     setText (("Delete record " + id).c_str());
 
@@ -135,7 +155,7 @@ void CSMWorld::DeleteCommand::redo()
 
 void CSMWorld::DeleteCommand::undo()
 {
-    mModel.setRecord (mId, *mOld);
+    mModel.setRecord (mId, *mOld, mType);
 }
 
 
@@ -182,17 +202,58 @@ void CSMWorld::CloneCommand::undo()
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
 }
 
+
+CSMWorld::UpdateCellCommand::UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent)
+: QUndoCommand (parent), mModel (model), mRow (row)
+{
+    setText ("Update cell ID");
+}
+
+void CSMWorld::UpdateCellCommand::redo()
+{
+    if (!mNew.isValid())
+    {
+        int cellColumn = mModel.searchColumnIndex (Columns::ColumnId_Cell);
+        mIndex = mModel.index (mRow, cellColumn);
+
+        const int cellSize = 8192;
+
+        QModelIndex xIndex = mModel.index (
+            mRow, mModel.findColumnIndex (Columns::ColumnId_PositionXPos));
+
+        QModelIndex yIndex = mModel.index (
+            mRow, mModel.findColumnIndex (Columns::ColumnId_PositionYPos));
+
+        int x = std::floor (mModel.data (xIndex).toFloat() / cellSize);
+        int y = std::floor (mModel.data (yIndex).toFloat() / cellSize);
+
+        std::ostringstream stream;
+
+        stream << "#" << x << " " << y;
+
+        mNew = QString::fromUtf8 (stream.str().c_str());
+    }
+
+    mModel.setData (mIndex, mNew);
+}
+
+void CSMWorld::UpdateCellCommand::undo()
+{
+    mModel.setData (mIndex, mOld);
+}
+
+
 CSMWorld::DeleteNestedCommand::DeleteNestedCommand (IdTree& model,
                                                     const std::string& id,
                                                     int nestedRow,
                                                     int parentColumn,
                                                     QUndoCommand* parent) :
-    mId(id),
-    mModel(model),
-    mParentColumn(parentColumn),
     QUndoCommand(parent),
-    mNestedRow(nestedRow),
-    NestedTableStoring(model, id, parentColumn)
+    NestedTableStoring(model, id, parentColumn),
+    mModel(model),
+    mId(id),
+    mParentColumn(parentColumn),
+    mNestedRow(nestedRow)
 {
     std::string title =
         model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();
@@ -215,12 +276,12 @@ void CSMWorld::DeleteNestedCommand::undo()
 }
 
 CSMWorld::AddNestedCommand::AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent)
-    : mModel(model),
+    : QUndoCommand(parent),
+      NestedTableStoring(model, id, parentColumn),
+      mModel(model),
       mId(id),
       mNewRow(nestedRow),
-      mParentColumn(parentColumn),
-      QUndoCommand(parent),
-      NestedTableStoring(model, id, parentColumn)
+      mParentColumn(parentColumn)
 {
     std::string title =
         model.headerData(parentColumn, Qt::Horizontal, Qt::DisplayRole).toString().toUtf8().constData();

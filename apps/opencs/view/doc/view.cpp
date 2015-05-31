@@ -9,6 +9,10 @@
 #include <QDockWidget>
 #include <QtGui/QApplication>
 #include <QDesktopWidget>
+#include <QScrollArea>
+#include <QHBoxLayout>
+#include <QDesktopWidget>
+#include <QScrollBar>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -16,6 +20,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
+#include "../world/tablesubview.hpp"
 
 #include "../tools/subviews.hpp"
 
@@ -131,11 +136,11 @@ void CSVDoc::View::setupWorldMenu()
     connect (cells, SIGNAL (triggered()), this, SLOT (addCellsSubView()));
     world->addAction (cells);
 
-    QAction *referenceables = new QAction (tr ("Referenceables"), this);
+    QAction *referenceables = new QAction (tr ("Objects"), this);
     connect (referenceables, SIGNAL (triggered()), this, SLOT (addReferenceablesSubView()));
     world->addAction (referenceables);
 
-    QAction *references = new QAction (tr ("References"), this);
+    QAction *references = new QAction (tr ("Instances"), this);
     connect (references, SIGNAL (triggered()), this, SLOT (addReferencesSubView()));
     world->addAction (references);
 
@@ -334,7 +339,14 @@ void CSVDoc::View::updateTitle()
 void CSVDoc::View::updateSubViewIndicies(SubView *view)
 {
     if(view && mSubViews.contains(view))
+    {
         mSubViews.removeOne(view);
+
+        // adjust (reduce) the scroll area (even floating), except when it is "Scrollbar Only"
+        CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+        if(settings.settingValue ("window/mainwindow-scrollbar") == "Grow then Scroll")
+            updateScrollbar();
+    }
 
     CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
 
@@ -381,7 +393,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews)
+      mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false)
 {
     int width = CSMSettings::UserSettings::instance().settingValue
                                     ("window/default-width").toInt();
@@ -392,15 +404,22 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     width = std::max(width, 300);
     height = std::max(height, 300);
 
-    // trick to get the window decorations and their sizes
-    show();
-    hide();
-    resize (width - (frameGeometry().width() - geometry().width()),
-            height - (frameGeometry().height() - geometry().height()));
+    resize (width, height);
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
-    setCentralWidget (&mSubViewWindow);
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    if(settings.settingValue ("window/mainwindow-scrollbar") == "Grow Only")
+    {
+        setCentralWidget (&mSubViewWindow);
+    }
+    else
+    {
+        mScroll = new QScrollArea(this);
+        mScroll->setWidgetResizable(true);
+        mScroll->setWidget(&mSubViewWindow);
+        setCentralWidget(mScroll);
+    }
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
@@ -526,6 +545,54 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     view->setMinimumWidth(minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());
+
+    // Work out how to deal with additional subviews
+    //
+    // Policy for "Grow then Scroll":
+    //
+    // - Increase the horizontal width of the mainwindow until it becomes greater than or equal
+    //   to the screen (monitor) width.
+    // - Move the mainwindow position sideways if necessary to fit within the screen.
+    // - Any more additions increases the size of the mSubViewWindow (horizontal scrollbar
+    //   should become visible)
+    // - Move the scroll bar to the newly added subview
+    //
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString mainwinScroll = settings.settingValue ("window/mainwindow-scrollbar");
+    mScrollbarOnly = mainwinScroll.isEmpty() || mainwinScroll == "Scrollbar Only";
+
+    QDesktopWidget *dw = QApplication::desktop();
+    QRect rect;
+    if(settings.settingValue ("window/grow-limit") == "true")
+        rect = dw->screenGeometry(this);
+    else
+        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
+
+    if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
+    {
+        int newWidth = width()+minWidth;
+        int frameWidth = frameGeometry().width() - width();
+        if (newWidth+frameWidth <= rect.width())
+        {
+            resize(newWidth, height());
+            // WARNING: below code assumes that new subviews are added to the right
+            if (x() > rect.width()-(newWidth+frameWidth))
+                move(rect.width()-(newWidth+frameWidth), y()); // shift left to stay within the screen
+        }
+        else
+        {
+            // full width
+            resize(rect.width()-frameWidth, height());
+            mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minWidth);
+            move(0, y());
+        }
+
+        // Make the new subview visible, setFocus() or raise() don't seem to work
+        // On Ubuntu the scrollbar does not go right to the end, even if using
+        // mScroll->horizontalScrollBar()->setValue(mScroll->horizontalScrollBar()->maximum());
+        if (mSubViewWindow.width() > rect.width())
+            mScroll->horizontalScrollBar()->setValue(mSubViewWindow.width());
+    }
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
@@ -774,6 +841,48 @@ void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &li
     {
         subView->updateUserSetting (name, list);
     }
+
+    if (name=="window/mainwindow-scrollbar")
+    {
+        if(list.at(0) != "Grow Only")
+        {
+            if (mScroll)
+            {
+                if (list.at(0).isEmpty() || list.at(0) == "Scrollbar Only")
+                {
+                    mScrollbarOnly = true;
+                    mSubViewWindow.setMinimumWidth(0);
+                }
+                else
+                {
+                    if(!mScrollbarOnly)
+                        return;
+
+                    mScrollbarOnly = false;
+                    updateScrollbar();
+                }
+            }
+            else
+            {
+                mScroll = new QScrollArea(this);
+                mScroll->setWidgetResizable(true);
+                mScroll->setWidget(&mSubViewWindow);
+                setCentralWidget(mScroll);
+            }
+        }
+        else
+        {
+            if (mScroll)
+            {
+                mScroll->takeWidget();
+                setCentralWidget (&mSubViewWindow);
+                mScroll->deleteLater();
+                mScroll = 0;
+            }
+            else
+                return;
+        }
+    }
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
@@ -811,7 +920,33 @@ void CSVDoc::View::closeRequest (SubView *subView)
 
     if (mSubViews.size()>1 || mViewTotal<=1 ||
         userSettings.setting ("window/hide-subview", QString ("false"))!="true")
+    {
         subView->deleteLater();
+        mSubViews.removeOne (subView);
+    }
     else if (mViewManager.closeRequest (this))
         mViewManager.removeDocAndView (mDocument);
+}
+
+void CSVDoc::View::updateScrollbar()
+{
+    QRect rect;
+    QWidget *topLevel = QApplication::topLevelAt(pos());
+    if (topLevel)
+        rect = topLevel->rect();
+    else
+        rect = this->rect();
+
+    int newWidth = 0;
+    for (int i = 0; i < mSubViews.size(); ++i)
+    {
+        newWidth += mSubViews[i]->width();
+    }
+
+    int frameWidth = frameGeometry().width() - width();
+
+    if ((newWidth+frameWidth) >= rect.width())
+        mSubViewWindow.setMinimumWidth(newWidth);
+    else
+        mSubViewWindow.setMinimumWidth(0);
 }

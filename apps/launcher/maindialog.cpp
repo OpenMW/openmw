@@ -25,7 +25,7 @@
 using namespace Process;
 
 Launcher::MainDialog::MainDialog(QWidget *parent)
-    : mGameSettings(mCfgMgr), QMainWindow (parent)
+    : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
     setupUi(this);
 
@@ -148,10 +148,10 @@ void Launcher::MainDialog::createPages()
 
 }
 
-bool Launcher::MainDialog::showFirstRunDialog()
+Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 {
     if (!setupLauncherSettings())
-        return false;
+        return FirstRunDialogResultFailure;
 
     if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
     {
@@ -176,14 +176,14 @@ bool Launcher::MainDialog::showFirstRunDialog()
         if (msgBox.clickedButton() == wizardButton)
         {
             if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
-                return false;
+                return FirstRunDialogResultFailure;
             } else {
-                return true;
+                return FirstRunDialogResultWizard;
             }
         }
     }
 
-    return setup();
+    return setup() ? FirstRunDialogResultContinue : FirstRunDialogResultFailure;
 }
 
 bool Launcher::MainDialog::setup()

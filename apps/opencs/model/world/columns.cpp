@@ -172,11 +172,11 @@ namespace CSMWorld
             { ColumnId_Rank, "Rank" },
             { ColumnId_Gender, "Gender" },
             { ColumnId_PcRank, "PC Rank" },
-            { ColumnId_ReferenceableId, "Referenceable ID" },
+            { ColumnId_ReferenceableId, "Object ID" },
 
             { ColumnId_ContainerContent, "Content" },
             { ColumnId_ItemCount, "Count" },
-            { ColumnId_InventoryItemId, "ID"},
+            { ColumnId_InventoryItemId, "Item ID"},
 
             { ColumnId_CombatState, "Combat" },
             { ColumnId_MagicState, "Magic" },
@@ -188,10 +188,10 @@ namespace CSMWorld
 
             { ColumnId_ActorInventory, "Inventory" },
             { ColumnId_SpellList, "Spells" },
-            { ColumnId_SpellId, "ID"},
+            { ColumnId_SpellId, "Spell ID"},
 
             { ColumnId_NpcDestinations, "Destinations" },
-            { ColumnId_DestinationCell, "Cell"},
+            { ColumnId_DestinationCell, "Dest Cell"},
             { ColumnId_PosX, "Dest X"},
             { ColumnId_PosY, "Dest Y"},
             { ColumnId_PosZ, "Dest Z"},
@@ -224,17 +224,17 @@ namespace CSMWorld
             { ColumnId_BoltSound, "Bolt Sound" },
 
             { ColumnId_PathgridPoints, "Points" },
-            { ColumnId_PathgridIndex, "Index" },
+            { ColumnId_PathgridIndex, "pIndex" },
             { ColumnId_PathgridPosX, "X" },
             { ColumnId_PathgridPosY, "Y" },
             { ColumnId_PathgridPosZ, "Z" },
             { ColumnId_PathgridEdges, "Edges" },
-            { ColumnId_PathgridEdgeIndex, "Index" },
+            { ColumnId_PathgridEdgeIndex, "eIndex" },
             { ColumnId_PathgridEdge0, "Point 0" },
             { ColumnId_PathgridEdge1, "Point 1" },
 
             { ColumnId_RegionSounds, "Sounds" },
-            { ColumnId_SoundName, "Name" },
+            { ColumnId_SoundName, "Sound Name" },
             { ColumnId_SoundChance, "Chance" },
 
             { ColumnId_FactionReactions, "Reactions" },
@@ -250,7 +250,7 @@ namespace CSMWorld
             { ColumnId_AiPackageList, "Ai Packages" },
             { ColumnId_AiPackageType, "Package" },
             { ColumnId_AiWanderDist, "Wander Dist" },
-            { ColumnId_AiDuration, "Duration" },
+            { ColumnId_AiDuration, "Ai Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
             { ColumnId_AiWanderIdle, "Wander Idle" },
             { ColumnId_AiWanderRepeat, "Wander Repeat" },
@@ -260,19 +260,56 @@ namespace CSMWorld
 
             { ColumnId_PartRefList, "Part Reference" },
             { ColumnId_PartRefType, "Type" },
-            { ColumnId_PartRefMale, "Male" },
-            { ColumnId_PartRefFemale, "Female" },
+            { ColumnId_PartRefMale, "Male Part" },
+            { ColumnId_PartRefFemale, "Female Part" },
 
             { ColumnId_LevelledList,"Levelled List" },
-            { ColumnId_LevelledItemId,"Item ID" },
+            { ColumnId_LevelledItemId,"Levelled Item" },
             { ColumnId_LevelledItemLevel,"Level" },
-            { ColumnId_LevelledItemType, "Type" },
+            { ColumnId_LevelledItemType, "Calculate all levels <= player" },
+            { ColumnId_LevelledItemTypeEach, "Select a new item each instance" },
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
             { ColumnId_SkillImpact, "Skills" },
 
             { ColumnId_InfoList, "Info List" },
+            { ColumnId_InfoCondition, "Info Conditions" },
+            { ColumnId_InfoCondFunc, "Function" },
+            { ColumnId_InfoCondVar, "Func/Variable" },
+            { ColumnId_InfoCondComp, "Comp" },
+            { ColumnId_InfoCondValue, "Values" },
+            { ColumnId_OriginalCell, "Original Cell" },
+
+            { ColumnId_NpcAttributes, "Attributes" },
+            { ColumnId_NpcSkills, "Skills" },
+            { ColumnId_UChar, "Value [0..255]" },
+            { ColumnId_NpcMisc, "Misc" },
+            { ColumnId_NpcLevel, "Level" },
+            { ColumnId_NpcFactionID, "Faction ID" },
+            { ColumnId_NpcHealth, "Health" },
+            { ColumnId_NpcMana, "Mana" },
+            { ColumnId_NpcFatigue, "Fatigue" },
+            { ColumnId_NpcDisposition, "Disposition" },
+            { ColumnId_NpcReputation, "Reputation" },
+            { ColumnId_NpcRank, "Rank" },
+            { ColumnId_NpcGold, "Gold" },
+            { ColumnId_NpcPersistence, "Persistent" },
+
+            { ColumnId_RaceAttributes, "Attributes" },
+            { ColumnId_RaceMaleValue, "Male" },
+            { ColumnId_RaceFemaleValue, "Female" },
+            { ColumnId_RaceSkillBonus, "Skill Bonus" },
+            { ColumnId_RaceSkill, "Skills" },
+            { ColumnId_RaceBonus, "Bonus" },
+
+            { ColumnId_Interior, "Interior" },
+            { ColumnId_Ambient, "Ambient" },
+            { ColumnId_Sunlight, "Sunlight" },
+            { ColumnId_Fog, "Fog" },
+            { ColumnId_FogDensity, "Fog Density" },
+            { ColumnId_WaterLevel, "Water Level" },
+            { ColumnId_MapColor, "Map Color" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -500,6 +537,18 @@ namespace
         "No", "Yes", 0
     };
 
+    static const char *sInfoCondFunc[] =
+    {
+        " ", "Function", "Global", "Local", "Journal",
+        "Item", "Dead", "Not ID", "Not Faction", "Not Class",
+        "Not Race", "Not Cell", "Not Local", 0
+    };
+
+    static const char *sInfoCondComp[] =
+    {
+        "!=", "<", "<=", "=", ">", ">=", 0
+    };
+
     const char **getEnumNames (CSMWorld::Columns::ColumnId column)
     {
         switch (column)
@@ -528,6 +577,11 @@ namespace
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
             case CSMWorld::Columns::ColumnId_AiWanderRepeat: return sAiWanderRepeat;
+            case CSMWorld::Columns::ColumnId_InfoCondFunc: return sInfoCondFunc;
+            // FIXME: don't have dynamic value enum delegate, use Display_String for now
+            //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
+            case CSMWorld::Columns::ColumnId_InfoCondComp: return sInfoCondComp;
+            case CSMWorld::Columns::ColumnId_RaceSkill: return sSkills;
 
             default: return 0;
         }

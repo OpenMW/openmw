@@ -56,14 +56,14 @@ namespace MWRender {
 RenderingManager::RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
                                    const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,
                                    MWWorld::Fallback* fallback)
-    : mRendering(_rend)
+    : mSunEnabled(0)
     , mFallback(fallback)
+    , mTerrain(NULL)
+    , mRendering(_rend)
+    , mEffectManager(NULL)
     , mPlayerAnimation(NULL)
     , mAmbientMode(0)
-    , mSunEnabled(0)
     , mPhysicsEngine(engine)
-    , mTerrain(NULL)
-    , mEffectManager(NULL)
     , mRenderWorld(true)
 {
     mActors = new MWRender::Actors(mRendering, this);

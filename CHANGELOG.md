@@ -1,3 +1,49 @@
+0.36.0
+------
+
+    Bug #923: Editor: Operations-Multithreading is broken
+    Bug #1317: Erene Llenim in Seyda Neen does not walk around
+    Bug #1405: Water rendering glitch near Seyda Neen lighthouse
+    Bug #1621: "Error Detecting Morrowind Installation" in the default directory
+    Bug #2216: Creating a clone of the player stops you moving.
+    Bug #2387: Casting bound weapon spell doesn't switch to "ready weapon" mode
+    Bug #2407: Default to (0, 0) when "unknown cell" is encountered.
+    Bug #2411: enchanted item charges don't update/refresh if spell list window is pinned open
+    Bug #2428: Editor: cloning / creating new container class results in invalid omwaddon file - openmw-0.35
+    Bug #2429: Editor - cloning omits some values or sets different values than the original has
+    Bug #2430: NPC with negative fatigue don't fall (LGNPC Vivec, Foreign Quarter v2.21)
+    Bug #2432: Error on startup with Uvirith's Legacy enabled
+    Bug #2435: Editor: changed entries in the objects window are not shown as such
+    Bug #2437: Editor: changing an entry of a container/NPC/clothing/ingredient/globals will not be saved in the omwaddon file
+    Bug #2447: Editor doesn't save terrain information
+    Bug #2451: Editor not listing files with accented characters
+    Bug #2453: Chargen: sex, race and hair sliders not initialized properly
+    Bug #2459: Minor terrain clipping through statics due to difference in triangle alignment
+    Bug #2461: Invisible sound mark has collision in Sandus Ancestral Tomb
+    Bug #2465: tainted gold stack
+    Bug #2475: cumulative stacks of 100 point fortify skill speechcraft boosts do not apply correctly
+    Bug #2498: Editor: crash when issuing undo command after the table subview is closed
+    Bug #2500: Editor: object table - can't undo delete record
+    Bug #2518: OpenMW detect spell returns false positives
+    Bug #2521: NPCs don't react to stealing when inventory menu is open.
+    Bug #2525: Can't click on red dialogue choice [rise of house telvanni][60fffec]
+    Bug #2530: GetSpellEffects not working as in vanilla
+    Bug #2557: Crash on first launch after choosing "Run installation wizard"
+    Feature #139: Editor: Global Search & Replace
+    Feature #1219: Editor: Add dialogue mode only columns
+    Feature #2024: Hotkey for hand to hand (i.e. unequip any weapon)
+    Feature #2119: "Always Sneak" key bind
+    Feature #2262: Editor: Handle moved instances
+    Feature #2425: Editor: Add start script table
+    Feature #2426: Editor: start script record verifier
+    Feature #2480: Launcher: Multiselect entries in the Data Files list
+    Feature #2505: Editor: optionally show a line number column in the script editor
+    Feature #2512: Editor: Offer use of monospace fonts in the script editor as an option
+    Feature #2514: Editor: focus on ID input field on clone/add
+    Feature #2519: it is not possible to change icons that appear on the map after casting the Detect <animal | enchantment | key> spells
+    Task #2460: OS X: Use Application Support directory as user data path
+    Task #2516: Editor: Change References / Referenceables terminology
+
 0.35.1
 ------
 

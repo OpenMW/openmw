@@ -74,7 +74,7 @@ QVariant CSMWorld::IdTree::nestedHeaderData(int section, int subSection, Qt::Ori
         return tr(parentColumn->nestedColumn(subSection).getTitle().c_str());
 
     if (role==ColumnBase::Role_Flags)
-        return idCollection()->getColumn (section).mFlags;
+        return parentColumn->nestedColumn(subSection).mFlags;
 
     if (role==ColumnBase::Role_Display)
         return parentColumn->nestedColumn(subSection).mDisplayType;
@@ -92,8 +92,8 @@ bool CSMWorld::IdTree::setData (const QModelIndex &index, const QVariant &value,
 
             mNestedCollection->setNestedData(parentAddress.first, parentAddress.second, value, index.row(), index.column());
 
-            emit dataChanged (CSMWorld::IdTree::index (parentAddress.first, 0),
-                              CSMWorld::IdTree::index (parentAddress.first, idCollection()->getColumns()-1));
+            emit dataChanged (index, index);
+
             return true;
         }
         else

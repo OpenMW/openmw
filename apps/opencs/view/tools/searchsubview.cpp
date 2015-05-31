@@ -7,6 +7,7 @@
 #include "../../model/tools/search.hpp"
 #include "../../model/tools/reportmodel.hpp"
 #include "../../model/world/idtablebase.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "reporttable.hpp"
 #include "searchbox.hpp"
@@ -22,7 +23,13 @@ void CSVTools::SearchSubView::replace (bool selection)
 
     const CSMTools::ReportModel& model =
         dynamic_cast<const CSMTools::ReportModel&> (*mTable->model());
-    
+
+    bool autoDelete = CSMSettings::UserSettings::instance().setting (
+        "search/auto-delete", QString ("true"))=="true";
+
+    CSMTools::Search search (mSearch);
+    CSMWorld::IdTableBase *currentTable = 0;
+        
     // We are running through the indices in reverse order to avoid messing up multiple results
     // in a single string.
     for (std::vector<int>::const_reverse_iterator iter (indices.rbegin()); iter!=indices.rend(); ++iter)
@@ -33,17 +40,34 @@ void CSVTools::SearchSubView::replace (bool selection)
 
         CSMWorld::IdTableBase *table = &dynamic_cast<CSMWorld::IdTableBase&> (
             *mDocument.getData().getTableModel (type));
-    
+
+        if (table!=currentTable)
+        {
+            search.configure (table);
+            currentTable = table;
+        }
+            
         std::string hint = model.getHint (*iter);
-        
-        mSearch.replace (mDocument, table, id, hint, replace);
-        mTable->flagAsReplaced (*iter);
+
+        if (search.verify (mDocument, table, id, hint))
+        {
+            search.replace (mDocument, table, id, hint, replace);
+            mTable->flagAsReplaced (*iter);
+
+            if (autoDelete)
+                mTable->model()->removeRows (*iter, 1);
+        }
     }
 }
 
+void CSVTools::SearchSubView::showEvent (QShowEvent *event)
+{
+    CSVDoc::SubView::showEvent (event);
+    mSearchBox.focus();    
+}
+
 CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id), mDocument (document), mPaddingBefore (10), mPaddingAfter (10),
-  mLocked (false)
+: CSVDoc::SubView (id), mDocument (document), mLocked (false)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -65,7 +89,7 @@ CSVTools::SearchSubView::SearchSubView (const CSMWorld::UniversalId& id, CSMDoc:
         SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
 
     connect (mTable, SIGNAL (replaceRequest()), this, SLOT (replaceRequest()));
-        
+       
     connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
         this, SLOT (stateChanged (int, CSMDoc::Document *)));
 
@@ -84,14 +108,6 @@ void CSVTools::SearchSubView::setEditLock (bool locked)
 void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting (name, list);
-
-    if (!list.empty())
-    {
-        if (name=="search/char-before")
-            mPaddingBefore = list.at (0).toInt();
-        else if (name=="search/char-after")
-            mPaddingAfter = list.at (0).toInt();
-    }
 }
 
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
@@ -101,8 +117,13 @@ void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *documen
 
 void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 {
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    int paddingBefore = userSettings.setting ("search/char-before", QString ("5")).toInt();
+    int paddingAfter = userSettings.setting ("search/char-after", QString ("5")).toInt();
+
     mSearch = search;
-    mSearch.setPadding (mPaddingBefore, mPaddingAfter);
+    mSearch.setPadding (paddingBefore, paddingAfter);
     
     mTable->clear();
     mDocument.runSearch (getUniversalId(), mSearch);

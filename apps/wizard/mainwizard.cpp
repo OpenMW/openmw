@@ -25,10 +25,10 @@
 using namespace Process;
 
 Wizard::MainWizard::MainWizard(QWidget *parent) :
-    mGameSettings(mCfgMgr),
     QWizard(parent),
+    mInstallations(),
     mError(false),
-    mInstallations()
+    mGameSettings(mCfgMgr)
 {
 #ifndef Q_OS_MAC
     setWizardStyle(QWizard::ModernStyle);

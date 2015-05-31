@@ -51,12 +51,12 @@ namespace MWMechanics
 {
     PathgridGraph::PathgridGraph()
         : mCell(NULL)
-        , mIsGraphConstructed(false)
         , mPathgrid(NULL)
+        , mIsExterior(0)
         , mGraph(0)
+        , mIsGraphConstructed(false)
         , mSCCId(0)
         , mSCCIndex(0)
-        , mIsExterior(0)
     {
     }
 

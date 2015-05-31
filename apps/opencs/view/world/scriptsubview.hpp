@@ -4,6 +4,7 @@
 #include "../doc/subview.hpp"
 
 class QModelIndex;
+class QLabel;
 
 namespace CSMDoc
 {
@@ -27,6 +28,8 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             CSMWorld::IdTable *mModel;
             int mColumn;
+            QWidget *mBottom;
+            QLabel *mStatus;
 
         public:
 
@@ -36,6 +39,8 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+
         public slots:
 
             void textChanged();
@@ -43,6 +48,10 @@ namespace CSVWorld
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+
+        private slots:
+
+            void updateStatusBar();
     };
 }
 

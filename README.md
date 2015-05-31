@@ -1,12 +1,12 @@
 OpenMW
 ======
 
-[![Build Status](https://img.shields.io/travis/OpenMW/openmw.svg?style=plastic)](https://travis-ci.org/OpenMW/openmw) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
+[![Build Status](https://img.shields.io/travis/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
 
 OpenMW is an attempt at recreating the engine for the popular role-playing game
 Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-* Version: 0.35.1
+* Version: 0.36.0
 * License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net

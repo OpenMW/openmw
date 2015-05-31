@@ -74,6 +74,15 @@ namespace CSMWorld
         {
             ESXRecordT record;
 
+            // Sometimes id (i.e. NAME of the cell) may be different to the id we stored
+            // earlier.  e.g. NAME == "Vivec, Arena" but id == "#-4 11".  Sometime NAME is
+            // missing altogether for scripts or cells.
+            //
+            // In such cases the returned index will be -1.  We then try updating the
+            // IdAccessor's id manually (e.g. set mId of the record to "Vivec, Arena")
+            // and try getting the index once more after loading the record.  The mId of the
+            // record would have changed to "#-4 11" after the load, and searchId() should find
+            // it (if this is a modify)
             int index = this->searchId (id);
 
             if (index==-1)

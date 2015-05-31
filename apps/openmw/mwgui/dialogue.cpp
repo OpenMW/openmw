@@ -248,10 +248,10 @@ namespace MWGui
 
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
-        , mPersuasionDialog()
-        , mEnabled(false)
         , mServices(0)
+        , mEnabled(false)
         , mGoodbye(false)
+        , mPersuasionDialog()
     {
         // Centre dialog
         center();

@@ -30,14 +30,14 @@ namespace Terrain
 
 World::World(Ogre::SceneManager* sceneMgr,
                  Storage* storage, int visibilityFlags, bool shaders, Alignment align)
-    : mStorage(storage)
-    , mSceneMgr(sceneMgr)
-    , mVisibilityFlags(visibilityFlags)
-    , mShaders(shaders)
-    , mAlign(align)
-    , mCache(storage->getCellVertices())
+    : mShaders(shaders)
     , mShadows(false)
     , mSplitShadows(false)
+    , mAlign(align)
+    , mStorage(storage)
+    , mVisibilityFlags(visibilityFlags)
+    , mSceneMgr(sceneMgr)
+    , mCache(storage->getCellVertices())
 {
 }
 
