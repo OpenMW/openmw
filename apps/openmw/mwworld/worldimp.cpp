@@ -1542,8 +1542,7 @@ namespace MWWorld
         }
         const ESM::NPC *ret = mStore.insert(record);
         if (update) {
-            mRendering->renderPlayer(getPlayerPtr());
-            scaleObject(getPlayerPtr(), 1.f); // apply race height
+            renderPlayer();
         }
         return ret;
     }
@@ -2118,13 +2117,12 @@ namespace MWWorld
 
     void World::renderPlayer()
     {
+        MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
+
         mRendering->renderPlayer(getPlayerPtr());
 
         scaleObject(getPlayerPtr(), 1.f); // apply race height
 
-        // At this point the Animation object is live, and the CharacterController associated with it must be created.
-        // It has to be done at this point: resetCamera below does animation->setViewMode -> CharacterController::forceStateUpdate
-        // so we should make sure not to use a "stale" controller for that.
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
