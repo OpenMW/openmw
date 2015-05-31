@@ -5,7 +5,6 @@
 #include <MyGUI_Gui.h>
 
 #include <components/esm/records.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

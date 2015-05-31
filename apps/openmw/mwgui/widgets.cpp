@@ -7,8 +7,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

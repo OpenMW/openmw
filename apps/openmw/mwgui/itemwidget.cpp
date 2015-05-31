@@ -4,8 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_TextBox.h>
 
-#include <components/misc/resourcehelpers.hpp>
-
 // correctIconPath
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

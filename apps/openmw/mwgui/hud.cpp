@@ -9,7 +9,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -14,7 +14,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <components/interpreter/defines.hpp>
-#include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../mwscript/interpretercontext.hpp"

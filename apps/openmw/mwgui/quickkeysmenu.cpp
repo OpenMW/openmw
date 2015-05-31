@@ -6,7 +6,6 @@
 #include <MyGUI_ImageBox.h>
 
 #include <components/esm/quickkeys.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"

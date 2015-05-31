@@ -7,7 +7,6 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ImageBox.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
@@ -782,7 +781,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        //icon = Misc::ResourceHelpers::correctIconPath(icon);
+        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
