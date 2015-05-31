@@ -49,6 +49,7 @@ public:
 };
 
 class NeckController;
+class RotateController;
 
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
@@ -102,8 +103,8 @@ private:
     float mAlpha;
     bool mSoundsDisabled;
 
-    //Ogre::Radian mHeadYaw;
-    //Ogre::Radian mHeadPitch;
+    float mHeadYawRadians;
+    float mHeadPitchRadians;
 
     void updateNpcBase();
 
@@ -122,6 +123,7 @@ private:
     //void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
+    osg::ref_ptr<RotateController> mHeadController;
 
 protected:
     virtual void addControllers();
@@ -153,10 +155,10 @@ public:
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
-    //virtual void setHeadPitch(Ogre::Radian pitch);
-    //virtual void setHeadYaw(Ogre::Radian yaw);
-    //virtual Ogre::Radian getHeadPitch() const;
-    //virtual Ogre::Radian getHeadYaw() const;
+    virtual void setHeadPitch(float pitchRadians);
+    virtual void setHeadYaw(float yawRadians);
+    virtual float getHeadPitch() const;
+    virtual float getHeadYaw() const;
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show);

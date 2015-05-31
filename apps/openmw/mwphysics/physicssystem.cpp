@@ -59,8 +59,9 @@ namespace MWPhysics
     class MovementSolver
     {
     private:
-        static float getSlope(const osg::Vec3f &normal)
+        static float getSlope(osg::Vec3f normal)
         {
+            normal.normalize();
             return osg::RadiansToDegrees(std::acos(normal * osg::Vec3f(0.f, 0.f, 1.f)));
         }
 

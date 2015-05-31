@@ -21,6 +21,8 @@
 
 #include <OgreStringConverter.h>
 
+#include <osg/PositionAttitudeTransform>
+
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
@@ -46,12 +48,12 @@ namespace
 {
 
 // Wraps a value to (-PI, PI]
-void wrap(Ogre::Radian& rad)
+void wrap(float& rad)
 {
-    if (rad.valueRadians()>0)
-        rad = Ogre::Radian(std::fmod(rad.valueRadians()+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI);
+    if (rad>0)
+        rad = std::fmod(rad+osg::PI, 2.0f*osg::PI)-osg::PI;
     else
-        rad = Ogre::Radian(std::fmod(rad.valueRadians()-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI);
+        rad = std::fmod(rad-osg::PI, 2.0f*osg::PI)+osg::PI;
 }
 
 std::string getBestAttack (const ESM::Weapon* weapon)
@@ -2034,50 +2036,61 @@ void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
 
 void CharacterController::updateHeadTracking(float duration)
 {
-    /*
-    Ogre::Node* head = mAnimation->getNode("Bip01 Head");
+    const osg::Node* head = mAnimation->getNode("Bip01 Head");
     if (!head)
         return;
-    Ogre::Radian zAngle (0.f);
-    Ogre::Radian xAngle (0.f);
+
+    float zAngleRadians = 0.f;
+    float xAngleRadians = 0.f;
+
     if (!mHeadTrackTarget.isEmpty())
     {
-        Ogre::Vector3 headPos = mPtr.getRefData().getBaseNode()->convertLocalToWorldPosition(head->_getDerivedPosition());
-        Ogre::Vector3 targetPos (mHeadTrackTarget.getRefData().getPosition().pos);
+        osg::MatrixList mats = head->getWorldMatrices();
+        if (mats.empty())
+            return;
+        osg::Matrixf mat = mats[0];
+        osg::Vec3f headPos = mat.getTrans();
+
+        osg::Vec3f targetPos (mHeadTrackTarget.getRefData().getPosition().asVec3());
         if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
-            Ogre::Node* targetHead = anim->getNode("Head");
-            if (!targetHead)
-                targetHead = anim->getNode("Bip01 Head");
-            if (targetHead)
-                targetPos = mHeadTrackTarget.getRefData().getBaseNode()->convertLocalToWorldPosition(
-                        targetHead->_getDerivedPosition());
+            const osg::Node* node = anim->getNode("Head");
+            if (node == NULL)
+                node = anim->getNode("Bip01 Head");
+            if (node != NULL)
+            {
+                osg::MatrixList mats = node->getWorldMatrices();
+                if (mats.size())
+                    targetPos = mats[0].getTrans();
+            }
         }
 
-        Ogre::Vector3 direction = targetPos - headPos;
-        direction.normalise();
+        osg::Vec3f direction = targetPos - headPos;
+        direction.normalize();
 
-        const Ogre::Vector3 actorDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+        if (!mPtr.getRefData().getBaseNode())
+            return;
+        const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
-        zAngle = Ogre::Math::ATan2(direction.x,direction.y) -
-                Ogre::Math::ATan2(actorDirection.x, actorDirection.y);
-        xAngle = -Ogre::Math::ASin(direction.z);
-        wrap(zAngle);
-        wrap(xAngle);
-        xAngle = Ogre::Degree(std::min(xAngle.valueDegrees(), 40.f));
-        xAngle = Ogre::Degree(std::max(xAngle.valueDegrees(), -40.f));
-        zAngle = Ogre::Degree(std::min(zAngle.valueDegrees(), 30.f));
-        zAngle = Ogre::Degree(std::max(zAngle.valueDegrees(), -30.f));
+        zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
+        xAngleRadians = -std::asin(direction.z());
 
+        wrap(zAngleRadians);
+        wrap(xAngleRadians);
+
+        xAngleRadians = std::min(xAngleRadians, osg::DegreesToRadians(40.f));
+        xAngleRadians = std::max(xAngleRadians, osg::DegreesToRadians(-40.f));
+        zAngleRadians = std::min(zAngleRadians, osg::DegreesToRadians(30.f));
+        zAngleRadians = std::max(zAngleRadians, osg::DegreesToRadians(-30.f));
     }
+
     float factor = duration*5;
     factor = std::min(factor, 1.f);
-    xAngle = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngle);
-    zAngle = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngle);
+    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
+    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
 
-    mAnimation->setHeadPitch(xAngle);
-    mAnimation->setHeadYaw(zAngle);
-    */
+    mAnimation->setHeadPitch(xAngleRadians);
+    mAnimation->setHeadYaw(zAngleRadians);
 }
 
 }

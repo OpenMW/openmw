@@ -1,15 +1,12 @@
-
 #include "actors.hpp"
 
 #include <typeinfo>
 
-#include <OgreVector3.h>
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -20,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -27,14 +25,9 @@
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "character.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-
 #include "aicombat.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
-
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "combat.hpp"
@@ -274,7 +267,6 @@ namespace MWMechanics
     void Actors::updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                     MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance)
     {
-        /*
         static const float fMaxHeadTrackDistance = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("fMaxHeadTrackDistance")->getFloat();
         static const float fInteriorHeadTrackMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
@@ -286,7 +278,7 @@ namespace MWMechanics
 
         const ESM::Position& actor1Pos = actor.getRefData().getPosition();
         const ESM::Position& actor2Pos = targetActor.getRefData().getPosition();
-        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+        float sqrDist = (actor1Pos.asVec3() - actor2Pos.asVec3()).length2();
 
         if (sqrDist > maxDistance*maxDistance)
             return;
@@ -294,12 +286,17 @@ namespace MWMechanics
         if (targetActor.getClass().getCreatureStats(targetActor).isDead())
             return;
 
+        if (!actor.getRefData().getBaseNode())
+            return;
+
         // stop tracking when target is behind the actor
-        Ogre::Vector3 actorDirection (actor.getRefData().getBaseNode()->getOrientation().yAxis());
-        Ogre::Vector3 targetDirection (Ogre::Vector3(actor2Pos.pos) - Ogre::Vector3(actor1Pos.pos));
-        actorDirection.z = 0;
-        targetDirection.z = 0;
-        if (actorDirection.angleBetween(targetDirection) < Ogre::Degree(90)
+        osg::Vec3f actorDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        osg::Vec3f targetDirection (actor2Pos.asVec3() - actor1Pos.asVec3());
+        actorDirection.z() = 0;
+        targetDirection.z() = 0;
+        actorDirection.normalize();
+        targetDirection.normalize();
+        if (std::acos(actorDirection * targetDirection) < osg::DegreesToRadians(90.f)
             && sqrDist <= sqrHeadTrackDistance
             && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
             && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
@@ -307,7 +304,6 @@ namespace MWMechanics
             sqrHeadTrackDistance = sqrDist;
             headTrackTarget = targetActor;
         }
-        */
     }
 
     void Actors::engageCombat (const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, bool againstPlayer)

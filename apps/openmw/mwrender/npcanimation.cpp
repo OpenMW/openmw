@@ -73,34 +73,37 @@ namespace MWRender
 {
 
 /// @note Assumes that the node being rotated has its "original" orientation set every frame by a different controller.
-/// The pitch is then applied on top of that orientation.
+/// The rotation is then applied on top of that orientation.
 /// @note Must be set on a MatrixTransform.
 class RotateController : public osg::NodeCallback
 {
 public:
-    RotateController(osg::Node* relativeTo, osg::Vec3f axis)
-        : mRotate(0.f)
-        , mAxis(axis)
+    RotateController(osg::Node* relativeTo)
+        : mEnabled(true)
         , mRelativeTo(relativeTo)
     {
 
     }
 
-    void setRotate(float rotate)
+    void setEnabled(bool enabled)
+    {
+        mEnabled = enabled;
+    }
+
+    void setRotate(const osg::Quat& rotate)
     {
         mRotate = rotate;
     }
 
     virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
-        if (mRotate == 0.f)
+        if (!mEnabled)
             return;
         osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
         osg::Matrix matrix = transform->getMatrix();
         osg::Quat worldOrient = getWorldOrientation(node);
 
-        osg::Quat rotate (mRotate, mAxis);
-        osg::Quat orient = worldOrient * rotate * worldOrient.inverse() * matrix.getRotate();
+        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
         matrix.setRotate(orient);
 
         transform->setMatrix(matrix);
@@ -113,7 +116,7 @@ public:
         // this could be optimized later, we just need the world orientation, not the full matrix
         osg::MatrixList worldMats = node->getWorldMatrices(mRelativeTo);
         osg::Quat worldOrient;
-        if (worldMats.size())
+        if (!worldMats.empty())
         {
             osg::Matrixf worldMat = worldMats[0];
             worldOrient = worldMat.getRotate();
@@ -122,8 +125,8 @@ public:
     }
 
 protected:
-    float mRotate;
-    osg::Vec3f mAxis;
+    bool mEnabled;
+    osg::Quat mRotate;
     osg::ref_ptr<osg::Node> mRelativeTo;
 };
 
@@ -134,7 +137,7 @@ class NeckController : public RotateController
 {
 public:
     NeckController(osg::Node* relativeTo)
-        : RotateController(relativeTo, osg::Vec3f(-1,0,0))
+        : RotateController(relativeTo)
     {
     }
 
@@ -149,8 +152,7 @@ public:
         osg::Matrix matrix = transform->getMatrix();
 
         osg::Quat worldOrient = getWorldOrientation(node);
-        osg::Quat rotate (mRotate, mAxis);
-        osg::Quat orient = worldOrient * rotate * worldOrient.inverse() * matrix.getRotate();
+        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
 
         matrix.setRotate(orient);
         matrix.setTrans(matrix.getTrans() + worldOrient.inverse() * mOffset);
@@ -293,9 +295,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mNpcType(Type_Normal),
     mVisibilityFlags(visibilityFlags),
     mAlpha(1.f),
-    mSoundsDisabled(disableSounds)
-    //mHeadPitch(0.f),
-    //mHeadYaw(0.f)
+    mSoundsDisabled(disableSounds),
+    mHeadYawRadians(0.f),
+    mHeadPitchRadians(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -695,8 +697,17 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
 
     if (mFirstPersonNeckController)
     {
-        mFirstPersonNeckController->setRotate(mPtr.getRefData().getPosition().rot[0]);
+        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0)));
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
+    }
+
+    if (mHeadController)
+    {
+        const float epsilon = 0.001f;
+        bool enable = (std::abs(mHeadPitchRadians) > epsilon || std::abs(mHeadYawRadians) > epsilon);
+        mHeadController->setEnabled(enable);
+        if (enable)
+            mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
     }
 
     /*
@@ -707,15 +718,31 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
         {
             // In third person mode we may still need pitch for ranged weapon targeting
             pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
-
-            Ogre::Node* node = baseinst->getBone("Bip01 Head");
-            if (node)
-                node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
         }
     }
     */
 
     return ret;
+}
+
+void NpcAnimation::setHeadPitch(float pitchRadians)
+{
+    mHeadPitchRadians = pitchRadians;
+}
+
+void NpcAnimation::setHeadYaw(float yawRadians)
+{
+    mHeadYawRadians = yawRadians;
+}
+
+float NpcAnimation::getHeadPitch() const
+{
+    return mHeadPitchRadians;
+}
+
+float NpcAnimation::getHeadYaw() const
+{
+    return mHeadYawRadians;
 }
 
 void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
@@ -878,6 +905,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 void NpcAnimation::addControllers()
 {
     mFirstPersonNeckController = NULL;
+    mHeadController = NULL;
     if (mViewMode == VM_FirstPerson)
     {
         NodeMap::iterator found = mNodeMap.find("bip01 neck");
@@ -887,6 +915,17 @@ void NpcAnimation::addControllers()
             mFirstPersonNeckController = new NeckController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
             mActiveControllers.insert(std::make_pair(node, mFirstPersonNeckController));
+        }
+    }
+    else if (mViewMode == VM_Normal)
+    {
+        NodeMap::iterator found = mNodeMap.find("bip01 head");
+        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+        {
+            osg::Node* node = found->second;
+            mHeadController = new RotateController(mObjectRoot.get());
+            node->addUpdateCallback(mHeadController);
+            mActiveControllers.insert(std::make_pair(node, mHeadController));
         }
     }
 }

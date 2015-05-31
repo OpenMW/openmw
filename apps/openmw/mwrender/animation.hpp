@@ -391,6 +391,11 @@ public:
     /// @param effect Controls the radius and intensity of the light.
     virtual void setLightEffect(float effect) {}
 
+    virtual void setHeadPitch(float pitchRadians) {}
+    virtual void setHeadYaw(float yawRadians) {}
+    virtual float getHeadPitch() const {return 0.f;}
+    virtual float getHeadYaw() const {return 0.f;}
+
 private:
     Animation(const Animation&);
     void operator=(Animation&);
