@@ -362,6 +362,8 @@ namespace MWRender
         {
             mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
             mTrackingNode = mAnimation->getNode("Camera");
+            if (!mTrackingNode)
+                mTrackingNode = mAnimation->getNode("Head");
         }
         else
         {
