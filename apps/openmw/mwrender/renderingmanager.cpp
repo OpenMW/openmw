@@ -5,6 +5,7 @@
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
+#include <osg/PolygonMode>
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
@@ -42,6 +43,7 @@ namespace MWRender
     public:
         StateUpdater()
             : mFogEnd(0.f)
+            , mWireframe(false)
         {
         }
 
@@ -53,6 +55,14 @@ namespace MWRender
             fog->setStart(1);
             fog->setMode(osg::Fog::LINEAR);
             stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
+            if (mWireframe)
+            {
+                osg::PolygonMode* polygonmode = new osg::PolygonMode;
+                polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+                stateset->setAttributeAndModes(polygonmode, osg::StateAttribute::ON);
+            }
+            else
+                stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
         }
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
@@ -79,10 +89,25 @@ namespace MWRender
             mFogEnd = end;
         }
 
+        void setWireframe(bool wireframe)
+        {
+            if (mWireframe != wireframe)
+            {
+                mWireframe = wireframe;
+                reset();
+            }
+        }
+
+        bool getWireframe() const
+        {
+            return mWireframe;
+        }
+
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
         float mFogEnd;
+        bool mWireframe;
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem)
@@ -224,7 +249,9 @@ namespace MWRender
             return mPathgrid->toggleRenderMode(mode);
         else if (mode == Render_Wireframe)
         {
-            return false;
+            bool wireframe = !mStateUpdater->getWireframe();
+            mStateUpdater->setWireframe(wireframe);
+            return wireframe;
         }
         /*
         else //if (mode == Render_BoundingBoxes)

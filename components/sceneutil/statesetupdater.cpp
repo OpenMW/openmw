@@ -28,6 +28,12 @@ namespace SceneUtil
         traverse(node, nv);
     }
 
+    void StateSetUpdater::reset()
+    {
+        mStateSets[0] = NULL;
+        mStateSets[1] = NULL;
+    }
+
     StateSetUpdater::StateSetUpdater()
     {
     }
