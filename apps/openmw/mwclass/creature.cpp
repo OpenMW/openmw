@@ -247,7 +247,7 @@ namespace MWClass
         if (!victim.getClass().isActor())
             return; // Can't hit non-actors
 
-        Ogre::Vector3 hitPosition (result.second.x(), result.second.y(), result.second.z());
+        osg::Vec3f hitPosition (result.second);
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
@@ -319,7 +319,7 @@ namespace MWClass
             damage = 0;
 
         if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, osg::Vec3f(hitPosition.x, hitPosition.y, hitPosition.z));
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         MWMechanics::diseaseContact(victim, ptr);
 
@@ -726,7 +726,7 @@ namespace MWClass
         if(name == "left")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 2;
             if(world->isOnGround(ptr))
@@ -736,7 +736,7 @@ namespace MWClass
         if(name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 3;
             if(world->isOnGround(ptr))

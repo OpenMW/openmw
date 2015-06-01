@@ -779,7 +779,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
                                                                false, enchantment->mEffects, mCaster, mSourceName,
                                                                    // Not needed, enchantments can only be cast by actors
-                                                                   Ogre::Vector3(1,0,0));
+                                                                   osg::Vec3f(1,0,0));
 
         return true;
     }
@@ -861,13 +861,13 @@ namespace MWMechanics
         getProjectileInfo(spell->mEffects, projectileModel, sound, speed);
         if (!projectileModel.empty())
         {
-            Ogre::Vector3 fallbackDirection (0,1,0);
+            osg::Vec3f fallbackDirection (0,1,0);
             // Fall back to a "caster to target" direction if we have no other means of determining it
             // (e.g. when cast by a non-actor)
             if (!mTarget.isEmpty())
                 fallbackDirection =
-                   Ogre::Vector3(mTarget.getRefData().getPosition().pos)-
-                   Ogre::Vector3(mCaster.getRefData().getPosition().pos);
+                   osg::Vec3f(mTarget.getRefData().getPosition().asVec3())-
+                   osg::Vec3f(mCaster.getRefData().getPosition().asVec3());
 
             MWBase::Environment::get().getWorld()->launchMagicBolt(projectileModel, sound, mId, speed,
                        false, spell->mEffects, mCaster, mSourceName, fallbackDirection);

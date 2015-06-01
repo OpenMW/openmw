@@ -54,7 +54,7 @@
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
 #include "actionteleport.hpp"
-//#include "projectilemanager.hpp"
+#include "projectilemanager.hpp"
 #include "weather.hpp"
 
 #include "contentloader.hpp"
@@ -159,9 +159,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
-#if 0
-        mProjectileManager.reset(new ProjectileManager(renderer.getScene(), *mPhysEngine));
-#endif
+        mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem);
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
@@ -276,9 +274,7 @@ namespace MWWorld
     {
         mWeatherManager->clear();
         mRendering->clear();
-#if 0
         mProjectileManager->clear();
-#endif
         mLocalScripts.clear();
 
         mWorldScene->changeToVoid();
@@ -313,9 +309,7 @@ namespace MWWorld
             mCells.countSavedGameRecords()
             +mStore.countSavedGameRecords()
             +mGlobalVariables.countSavedGameRecords()
-        #if 0
             +mProjectileManager->countSavedGameRecords()
-        #endif
             +1 // player record
             +1 // weather record
             +1 // actorId counter
@@ -346,9 +340,8 @@ namespace MWWorld
         mGlobalVariables.write (writer, progress);
         mPlayer->write (writer, progress);
         mWeatherManager->write (writer, progress);
-#if 0
         mProjectileManager->write (writer, progress);
-#endif
+
         writer.startRecord(ESM::REC_ENAB);
         writer.writeHNT("TELE", mTeleportEnabled);
         writer.writeHNT("LEVT", mLevitationEnabled);
@@ -377,9 +370,7 @@ namespace MWWorld
                     !mPlayer->readRecord (reader, type) &&
                     !mWeatherManager->readRecord (reader, type) &&
                     !mCells.readRecord (reader, type, contentFileMap)
-        #if 0
                      && !mProjectileManager->readRecord (reader, type)
-        #endif
                         )
                 {
                     throw std::runtime_error ("unknown record in saved game");
@@ -472,10 +463,8 @@ namespace MWWorld
 
     World::~World()
     {
-#if 0
         // Must be cleared before mRendering is destroyed
         mProjectileManager->clear();
-#endif
         delete mWeatherManager;
         delete mWorldScene;
         delete mRendering;
@@ -970,9 +959,7 @@ namespace MWWorld
         if (mCurrentWorldSpace != cellName)
         {
             // changed worldspace
-#if 0
             mProjectileManager->clear();
-#endif
             mRendering->notifyWorldSpaceChanged();
 
             mCurrentWorldSpace = cellName;
@@ -990,9 +977,7 @@ namespace MWWorld
         if (mCurrentWorldSpace != "sys::default") // FIXME
         {
             // changed worldspace
-#if 0
             mProjectileManager->clear();
-#endif
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
@@ -1388,7 +1373,7 @@ namespace MWWorld
         mPhysics->stepSimulation(duration);
         processDoors(duration);
 
-        //mProjectileManager->update(duration);
+        mProjectileManager->update(duration);
 
         const MWPhysics::PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
         MWPhysics::PtrVelocityList::const_iterator player(results.end());
@@ -1637,9 +1622,7 @@ namespace MWWorld
         const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
         osg::Vec3f playerPos = refpos.asVec3();
 
-        const MWPhysics::Actor* actor = mPhysics->getActor(getPlayerPtr());
-        if (actor)
-            playerPos.z() += 1.85f * actor->getHalfExtents().z();
+        playerPos.z() += 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z();
 
         osg::Quat playerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0,-1,0)) *
                 osg::Quat(refpos.rot[0], osg::Vec3f(-1,0,0)) *
@@ -2015,24 +1998,19 @@ namespace MWWorld
 
     bool World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
     {
-        const float *fpos = object.getRefData().getPosition().pos;
-        Ogre::Vector3 pos(fpos[0], fpos[1], fpos[2]);
+        osg::Vec3f pos (object.getRefData().getPosition().asVec3());
 
-        const MWPhysics::Actor* actor = mPhysics->getActor(object);
-        if (actor)
-        {
-            pos.z += heightRatio*2*actor->getHalfExtents().z();
-        }
+        pos.z() += heightRatio*2*mPhysics->getHalfExtents(object).z();
 
         return isUnderwater(object.getCell(), pos);
     }
 
-    bool World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
+    bool World::isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const
     {
         if (!(cell->getCell()->mData.mFlags & ESM::Cell::HasWater)) {
             return false;
         }
-        return pos.z < cell->getWaterLevel();
+        return pos.z() < cell->getWaterLevel();
     }
 
     bool World::isOnGround(const MWWorld::Ptr &ptr) const
@@ -2125,7 +2103,7 @@ namespace MWWorld
 
         Ptr player = mPlayer->getPlayer();
         RefData &refdata = player.getRefData();
-        Ogre::Vector3 playerPos(refdata.getPosition().pos);
+        osg::Vec3f playerPos(refdata.getPosition().asVec3());
 
         const MWPhysics::Actor* actor = mPhysics->getActor(player);
         if (!actor)
@@ -2519,7 +2497,7 @@ namespace MWWorld
 
             // Witnesses of the player's transformation will make them a globally known werewolf
             std::vector<MWWorld::Ptr> closeActors;
-            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(actor.getRefData().getPosition().pos),
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(actor.getRefData().getPosition().asVec3(),
                                                                                getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
                                                                                closeActors);
 
@@ -2695,7 +2673,7 @@ namespace MWWorld
 
         MWMechanics::CastSpell cast(actor, target);
         if (!target.isEmpty())
-            cast.mHitPosition = Ogre::Vector3(target.getRefData().getPosition().pos);
+            cast.mHitPosition = target.getRefData().getPosition().asVec3();
 
         if (!selectedSpell.empty())
         {
@@ -2718,18 +2696,14 @@ namespace MWWorld
     void World::launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                    const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed)
     {
-#if 0
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed);
-#endif
     }
 
     void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                  float speed, bool stack, const ESM::EffectList& effects,
-                                   const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection)
+                                   const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection)
     {
-#if 0
         mProjectileManager->launchMagicBolt(model, sound, spellId, speed, stack, effects, caster, sourceName, fallbackDirection);
-#endif
     }
 
     const std::vector<std::string>& World::getContentFiles() const
@@ -3181,7 +3155,7 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const Ogre::Vector3 &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
+    void World::explodeSpell(const osg::Vec3f &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
                              const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
@@ -3200,7 +3174,7 @@ namespace MWWorld
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
 
-            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", osg::Vec3f(origin.x, origin.y, origin.z), static_cast<float>(effectIt->mArea));
+            mRendering->spawnEffect("meshes\\" + areaStatic->mModel, "", origin, static_cast<float>(effectIt->mArea));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
@@ -3209,9 +3183,9 @@ namespace MWWorld
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                 if(!effect->mAreaSound.empty())
-                    sndMgr->playManualSound3D(osg::Vec3f(origin.x, origin.y, origin.z), effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playManualSound3D(origin, effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
                 else
-                    sndMgr->playManualSound3D(osg::Vec3f(origin.x, origin.y, origin.z), schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playManualSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
             }
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;

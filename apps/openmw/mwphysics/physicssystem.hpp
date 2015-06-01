@@ -99,7 +99,7 @@ namespace MWPhysics
 
             /// @param me Optional, a Ptr to ignore in the list of results
             RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore = MWWorld::Ptr(), int mask =
-                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor);
+                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor, int group=0xff);
 
             RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
 
@@ -107,6 +107,8 @@ namespace MWPhysics
             bool getLineOfSight(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 
             bool isOnGround (const MWWorld::Ptr& actor);
+
+            osg::Vec3f getHalfExtents(const MWWorld::Ptr& actor);
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.

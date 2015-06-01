@@ -937,7 +937,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target);
-                cast.mHitPosition = Ogre::Vector3(target.getRefData().getPosition().pos);
+                cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }
@@ -955,7 +955,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWMechanics::CastSpell cast(ptr, ptr);
-                cast.mHitPosition = Ogre::Vector3(ptr.getRefData().getPosition().pos);
+                cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }

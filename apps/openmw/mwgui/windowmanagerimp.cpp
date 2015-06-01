@@ -1623,6 +1623,9 @@ namespace MWGui
 
     void WindowManager::clear()
     {
+        if (mLocalMapRender)
+            mLocalMapRender->clear();
+
         mMap->clear();
         mQuickKeysMenu->clear();
         mMessageBoxManager->clear();

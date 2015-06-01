@@ -15,7 +15,7 @@ void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker
 /// @note for a thrown weapon, \a weapon == \a projectile, for bows/crossbows, \a projectile is the arrow/bolt
 /// @note \a victim may be empty (e.g. for a hit on terrain), a non-actor (environment objects) or an actor
 void projectileHit (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
-                    const Ogre::Vector3& hitPosition);
+                    const osg::Vec3f& hitPosition);
 
 /// Get the chance (in percent) for \a attacker to successfully hit \a victim with a given weapon skill value
 float getHitChance (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, int skillValue);

@@ -493,7 +493,7 @@ namespace MWClass
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist);
         MWWorld::Ptr victim = result.first;
-        Ogre::Vector3 hitPosition (result.second.x(), result.second.y(), result.second.z());
+        osg::Vec3f hitPosition (result.second);
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
@@ -583,7 +583,7 @@ namespace MWClass
             damage = 0;
 
         if (healthdmg && damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, osg::Vec3f(hitPosition.x, hitPosition.y, hitPosition.z));
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         MWMechanics::diseaseContact(victim, ptr);
 
@@ -1138,7 +1138,7 @@ namespace MWClass
         if(name == "left" || name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isSwimming(ptr))
                 return (name == "left") ? "Swim Left" : "Swim Right";
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
@@ -1175,7 +1175,7 @@ namespace MWClass
         if(name == "land")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
             if(world->isOnGround(ptr))

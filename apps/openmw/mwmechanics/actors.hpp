@@ -114,7 +114,7 @@ namespace MWMechanics
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
-            void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+            void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
 
             ///Returns the list of actors which are following the given actor
             /**ie AiFollow is active and the target is the actor **/

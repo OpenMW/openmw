@@ -23,9 +23,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap
-#    occlusionquery water shadows
-#    ripplesimulation refraction
-#    terrainstorage weaponanimation
+#    occlusionquery water shadows ripplesimulation refraction terrainstorage
     )
 
 add_openmw_dir (mwinput
@@ -68,8 +66,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist cellref physicssystem weather
-#  projectilemanager
+    contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
     )
 
 add_openmw_dir (mwphysics

@@ -145,8 +145,8 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
 
-            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
-            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects);
+            virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects);
+            virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects);
 
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);

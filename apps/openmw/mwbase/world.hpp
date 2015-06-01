@@ -378,7 +378,7 @@ namespace MWBase
             virtual bool isWading(const MWWorld::Ptr &object) const = 0;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
-            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
@@ -485,7 +485,7 @@ namespace MWBase
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection) = 0;
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed) = 0;
 
@@ -532,7 +532,7 @@ namespace MWBase
 
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) = 0;
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
+            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;

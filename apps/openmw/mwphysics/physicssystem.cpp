@@ -748,7 +748,7 @@ namespace MWPhysics
         const btCollisionObject* mMe;
     };
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask)
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask, int group)
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
@@ -762,7 +762,7 @@ namespace MWPhysics
         }
 
         ClosestNotMeRayResultCallback resultCallback(me, btFrom, btTo);
-        resultCallback.m_collisionFilterGroup = 0xff;
+        resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
         mCollisionWorld->rayTest(btFrom, btTo, resultCallback);
@@ -858,6 +858,15 @@ namespace MWPhysics
             else
                 return false;
         }
+    }
+
+    osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::Ptr &actor)
+    {
+        Actor* physactor = getActor(actor);
+        if (physactor)
+            return physactor->getHalfExtents();
+        else
+            return osg::Vec3f();
     }
 
     class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
@@ -1128,7 +1137,7 @@ namespace MWPhysics
                 if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
                         && cell->getCell()->hasWater()
                         && !world->isUnderwater(iter->first.getCell(),
-                                               Ogre::Vector3(iter->first.getRefData().getPosition().pos)))
+                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
                     waterCollision = true;
 
                 ActorMap::iterator foundActor = mActors.find(iter->first);

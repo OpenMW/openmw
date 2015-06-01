@@ -28,7 +28,7 @@ float signedAngleRadians (const osg::Vec3f& v1, const osg::Vec3f& v2, const osg:
     return std::atan2((normal * (v1 ^ v2)), (v1 * v2));
 }
 
-bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
+bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition)
 {
     std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
     if (!enchantmentName.empty())
@@ -166,7 +166,7 @@ namespace MWMechanics
     }
 
     void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
-                       const Ogre::Vector3& hitPosition)
+                       const osg::Vec3f& hitPosition)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -221,7 +221,7 @@ namespace MWMechanics
             appliedEnchantment = applyEnchantment(attacker, victim, projectile, hitPosition);
 
         if (damage > 0)
-            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, osg::Vec3f(hitPosition.x, hitPosition.y, hitPosition.z));
+            MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
         if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr()

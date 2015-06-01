@@ -809,7 +809,7 @@ namespace MWMechanics
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), Ogre::Vector3(ptr.getRefData().getPosition().pos)));
+        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
@@ -1385,11 +1385,11 @@ namespace MWMechanics
         return false;
     }
 
-    void Actors::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+    void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
     {
         for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
         {
-            if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+            if ((iter->first.getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
                 out.push_back(iter->first);
         }
     }
@@ -1457,7 +1457,7 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
-        Ogre::Vector3 position = Ogre::Vector3(actor.getRefData().getPosition().pos);
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position,
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
             neighbors); //only care about those within the alarm disance

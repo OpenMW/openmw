@@ -1059,14 +1059,14 @@ namespace MWMechanics
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
         // Did anyone see it?
@@ -1149,13 +1149,13 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
@@ -1430,13 +1430,13 @@ namespace MWMechanics
             MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
-    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
         mObjects.getObjectsInRange(position, radius, objects);
     }
 
-    void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
     }
