@@ -52,7 +52,10 @@ namespace
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {
-            osg::Matrix worldMat = node->getWorldMatrices()[0];
+            osg::MatrixList mats = node->getWorldMatrices();
+            if (mats.empty())
+                return;
+            osg::Matrix worldMat = mats[0];
             worldMat.orthoNormalize(worldMat); // scale is already applied on the particle node
             for (int i=0; i<partsys->numParticles(); ++i)
             {
@@ -140,8 +143,7 @@ namespace Resource
     void SceneManager::attachTo(osg::Node *instance, osg::Group *parentNode) const
     {
         parentNode->addChild(instance);
-        InitWorldSpaceParticlesVisitor visitor;
-        instance->accept(visitor);
+        notifyAttached(instance);
     }
 
     void SceneManager::releaseGLObjects(osg::State *state)
@@ -155,6 +157,12 @@ namespace Resource
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
     {
         mIncrementalCompileOperation = ico;
+    }
+
+    void SceneManager::notifyAttached(osg::Node *node) const
+    {
+        InitWorldSpaceParticlesVisitor visitor;
+        node->accept(visitor);
     }
 
     const VFS::Manager* SceneManager::getVFS() const

@@ -107,12 +107,13 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         bonename = "Shield Bone";
 
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(item.getClass().getModel(item));
-    SceneUtil::attach(node, mObjectRoot, bonename, bonename);
+    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(node, mObjectRoot, bonename, bonename);
+    mResourceSystem->getSceneManager()->notifyAttached(attached);
 
-    scene.reset(new PartHolder(node));
+    scene.reset(new PartHolder(attached));
 
     if (!item.getClass().getEnchantment(item).empty())
-        addGlow(node, getEnchantmentColor(item));
+        addGlow(attached, getEnchantmentColor(item));
 
     // Crossbows start out with a bolt attached
     // FIXME: code duplicated from NpcAnimation
@@ -137,7 +138,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         source.reset(new NullAnimationTime);
 
     SceneUtil::AssignControllerSourcesVisitor assignVisitor(source);
-    node->accept(assignVisitor);
+    attached->accept(assignVisitor);
 }
 
 void CreatureWeaponAnimation::attachArrow()

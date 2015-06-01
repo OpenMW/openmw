@@ -64,6 +64,9 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
+        /// @note If you used SceneManager::attachTo, this was called automatically.
+        void notifyAttached(osg::Node* node) const;
+
         const VFS::Manager* getVFS() const;
 
         Resource::TextureManager* getTextureManager();
