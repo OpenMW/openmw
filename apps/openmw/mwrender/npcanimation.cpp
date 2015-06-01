@@ -2,6 +2,8 @@
 
 #include <osg/UserDataContainer>
 #include <osg/MatrixTransform>
+#include <osg/BlendFunc>
+#include <osg/Material>
 
 #include <components/misc/rng.hpp>
 
@@ -991,7 +993,29 @@ void NpcAnimation::setAlpha(float alpha)
         return;
     mAlpha = alpha;
 
-    // TODO
+    if (alpha != 1.f)
+    {
+        osg::StateSet* stateset (new osg::StateSet);
+
+        osg::BlendFunc* blendfunc (new osg::BlendFunc);
+        stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+        // FIXME: overriding diffuse/ambient/emissive colors
+        osg::Material* material (new osg::Material);
+        material->setColorMode(osg::Material::DIFFUSE);
+        material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+        material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+        stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+        stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        stateset->setNestRenderBins(false);
+        mObjectRoot->setStateSet(stateset);
+    }
+    else
+    {
+        mObjectRoot->setStateSet(NULL);
+    }
 }
 
 void NpcAnimation::enableHeadAnimation(bool enable)
