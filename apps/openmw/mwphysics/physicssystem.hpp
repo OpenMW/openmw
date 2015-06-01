@@ -104,6 +104,8 @@ namespace MWPhysics
             /// Return true if actor1 can see actor2.
             bool getLineOfSight(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 
+            bool isOnGround (const MWWorld::Ptr& actor);
+
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
