@@ -30,7 +30,7 @@ namespace CSMWorld
         public:
             IdCompletionManager(CSMWorld::Data &data);
 
-            bool isCompleterExistFor(CSMWorld::Columns::ColumnId id) const;
+            bool hasCompleterFor(CSMWorld::Columns::ColumnId id) const;
             boost::shared_ptr<QCompleter> getCompleter(CSMWorld::Columns::ColumnId id);
     };
 }

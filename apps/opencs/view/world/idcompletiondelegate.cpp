@@ -26,7 +26,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
 
     QWidget *editor = CSVWorld::CommandDelegate::createEditor(parent, option, index, display);
     QLineEdit *lineEditor = qobject_cast<QLineEdit *>(editor);
-    if (lineEditor != NULL && completionManager.isCompleterExistFor(columnId))
+    if (lineEditor != NULL && completionManager.hasCompleterFor(columnId))
     {
         lineEditor->setCompleter(completionManager.getCompleter(columnId).get());
     }

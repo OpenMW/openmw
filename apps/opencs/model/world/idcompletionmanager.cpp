@@ -89,14 +89,14 @@ CSMWorld::IdCompletionManager::IdCompletionManager(CSMWorld::Data &data)
     generateCompleters(data);
 }
 
-bool CSMWorld::IdCompletionManager::isCompleterExistFor(CSMWorld::Columns::ColumnId id) const
+bool CSMWorld::IdCompletionManager::hasCompleterFor(CSMWorld::Columns::ColumnId id) const
 {
     return mCompleters.find(id) != mCompleters.end();
 }
 
 boost::shared_ptr<QCompleter> CSMWorld::IdCompletionManager::getCompleter(CSMWorld::Columns::ColumnId id)
 {
-    if (!isCompleterExistFor(id))
+    if (!hasCompleterFor(id))
     {
         throw std::logic_error("This column doesn't have an ID completer");
     }
