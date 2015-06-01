@@ -291,7 +291,10 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
         else
+        {
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+            mTopicsList->scrollToTop();
+        }
     }
 
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)
@@ -364,7 +367,6 @@ namespace MWGui
         bool sameActor = (mPtr == actor);
         mPtr = actor;
         mTopicsList->setEnabled(true);
-        mTopicsList->scrollToFirstItem();
         setTitle(npcName);
 
         clearChoices();
@@ -456,7 +458,6 @@ namespace MWGui
             mKeywordSearch.seed(Misc::StringUtils::lowerCase(*it), intptr_t(t));
         }
         mTopicsList->adjustSize();
-        mTopicsList->scrollToFirstItem();
 
         updateHistory();
     }

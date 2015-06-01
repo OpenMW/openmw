@@ -46,7 +46,7 @@ namespace Gui
         MyGUI::Button* getItemWidget(const std::string& name);
         ///< get widget for an item name, useful to set up tooltip
 
-        void scrollToFirstItem();
+        void scrollToTop();
 
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
 
