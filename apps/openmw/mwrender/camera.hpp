@@ -5,6 +5,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Vec3>
+#include <osg/Vec3d>
 
 #include "../mwworld/ptr.hpp"
 
@@ -113,8 +114,10 @@ namespace MWRender
 
         void setAnimation(NpcAnimation *anim);
 
+        osg::Vec3d getFocalPoint();
+
         /// Stores focal and camera world positions in passed arguments
-        void getPosition(osg::Vec3 &focal, osg::Vec3 &camera);
+        void getPosition(osg::Vec3f &focal, osg::Vec3f &camera);
 
         void togglePlayerLooking(bool enable);
 

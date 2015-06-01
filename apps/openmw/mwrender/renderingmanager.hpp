@@ -113,6 +113,8 @@ namespace MWRender
 
         void processChangedSettings(const Settings::CategorySettingVector& settings);
 
+        float getNearClipDistance() const;
+
         // camera stuff
         bool vanityRotateCamera(const float *rot);
         void setCameraDistance(float dist, bool adjust, bool override);

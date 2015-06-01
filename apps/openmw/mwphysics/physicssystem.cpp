@@ -7,6 +7,7 @@
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
+#include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -774,6 +775,30 @@ namespace MWPhysics
             result.mHitNormal = toOsg(resultCallback.m_hitNormalWorld);
             if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
                 result.mHitObject = ptrHolder->getPtr();
+        }
+        return result;
+    }
+
+    PhysicsSystem::RayResult PhysicsSystem::castSphere(const osg::Vec3f &from, const osg::Vec3f &to, float radius)
+    {
+        btCollisionWorld::ClosestConvexResultCallback callback(toBullet(from), toBullet(to));
+        callback.m_collisionFilterGroup = 0xff;
+        callback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
+
+        btSphereShape shape(radius);
+        const btQuaternion btrot = btQuaternion::getIdentity();
+
+        btTransform from_ (btrot, toBullet(from));
+        btTransform to_ (btrot, toBullet(to));
+
+        mCollisionWorld->convexSweepTest(&shape, from_, to_, callback);
+
+        RayResult result;
+        result.mHit = callback.hasHit();
+        if (result.mHit)
+        {
+            result.mHitPos = toOsg(callback.m_hitPointWorld);
+            result.mHitNormal = toOsg(callback.m_hitNormalWorld);
         }
         return result;
     }

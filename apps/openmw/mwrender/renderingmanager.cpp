@@ -514,6 +514,11 @@ namespace MWRender
         }
     }
 
+    float RenderingManager::getNearClipDistance() const
+    {
+        return mNearClip;
+    }
+
     bool RenderingManager::vanityRotateCamera(const float *rot)
     {
         if(!mCamera->isVanityOrPreviewModeEnabled())

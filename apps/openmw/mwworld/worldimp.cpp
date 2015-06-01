@@ -1617,6 +1617,19 @@ namespace MWWorld
 
         int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
+
+
+        mRendering->getCamera()->setCameraDistance();
+        if(!mRendering->getCamera()->isFirstPerson())
+        {
+            osg::Vec3f focal, camera;
+            mRendering->getCamera()->getPosition(focal, camera);
+            float radius = mRendering->getNearClipDistance()*2.5f;
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal, camera, radius);
+            if (result.mHit)
+                mRendering->getCamera()->setCameraDistance((result.mHitPos - focal).length() - radius, false, false);
+        }
+
     }
 
     void World::updateSoundListener()

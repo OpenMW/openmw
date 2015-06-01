@@ -101,6 +101,8 @@ namespace MWPhysics
             RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore = MWWorld::Ptr(), int mask =
                     CollisionType_World|CollisionType_HeightMap|CollisionType_Actor);
 
+            RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
+
             /// Return true if actor1 can see actor2.
             bool getLineOfSight(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
 

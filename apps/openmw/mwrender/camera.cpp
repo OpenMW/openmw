@@ -80,21 +80,28 @@ namespace MWRender
         return mTrackingPtr;
     }
 
-    void Camera::updateCamera(osg::Camera *cam)
+    osg::Vec3d Camera::getFocalPoint()
     {
-        if (mTrackingPtr.isEmpty())
-            return;
         const osg::Node* trackNode = mTrackingNode;
         if (!trackNode)
-            return;
+            return osg::Vec3d();
         osg::MatrixList mats = trackNode->getWorldMatrices();
         if (!mats.size())
-            return;
+            return osg::Vec3d();
         const osg::Matrix& worldMat = mats[0];
 
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
             position.z() += mHeight;
+        return position;
+    }
+
+    void Camera::updateCamera(osg::Camera *cam)
+    {
+        if (mTrackingPtr.isEmpty())
+            return;
+
+        osg::Vec3d position = getFocalPoint();
 
         osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
 
@@ -373,12 +380,14 @@ namespace MWRender
         rotateCamera(getPitch(), getYaw(), false);
     }
 
-    void Camera::getPosition(osg::Vec3 &focal, osg::Vec3 &camera)
+    void Camera::getPosition(osg::Vec3f &focal, osg::Vec3f &camera)
     {
-        //mCamera->getParentSceneNode()->needUpdate(true);
+        focal = getFocalPoint();
 
-        //camera = mCamera->getRealPosition();
-        //focal = mCameraNode->_getDerivedPosition();
+        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
+
+        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
+        camera = focal + offset;
     }
 
     void Camera::togglePlayerLooking(bool enable)
