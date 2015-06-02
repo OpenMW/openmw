@@ -22,7 +22,7 @@ if [ -z $APPVEYOR ]; then
 	echo "Running prebuild outside of Appveyor."
 
 	DIR=$(echo "$0" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
-	cd $(dirname "$DIR")
+	cd $(dirname "$DIR")/..
 else
 	echo "Running prebuild in Appveyor."
 
@@ -99,12 +99,12 @@ add_cmake_opts() {
 	CMAKE_OPTS="$CMAKE_OPTS $@"
 }
 
-if [ -z "$ARCH" ]; then
-	if [ -z "$PLATFORM" ]; then
-		ARCH=`uname -m`
-	else
-		ARCH="$PLATFORM"
-	fi
+if [ -z $PLATFORM ]; then
+	PLATFORM=`uname -m`
+fi
+
+if [ -z $CONFIGURATION ]; then
+	CONFIGURATION="Debug"
 fi
 
 case $PLATFORM in
@@ -206,7 +206,7 @@ if [ -z $APPVEYOR ]; then
 
 	BOOST_SDK="`real_pwd`/Boost"
 
-	$DEPS/boost-1.58.0-win$BITS.exe //dir="$BOOST_SDK" //verysilent
+	$DEPS/boost-1.58.0-win$BITS.exe //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
 
 	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
