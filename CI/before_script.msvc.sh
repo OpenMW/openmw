@@ -8,14 +8,9 @@ while [ $# -gt 0 ]; do
 		-v )
 			VERBOSE=true ;;
 
-		x86|i686|win32 )
-			platform=i686 ;;
-
-		x64_64|x64|win64 )
-			platform=x86_64 ;;
-
 		* )
-			echo "Unknown arg $ARG." ;;
+			echo "Unknown arg $ARG."
+			exit 1 ;;
 	esac
 done
 
@@ -23,9 +18,14 @@ if [ -z $VERBOSE ]; then
 	STRIP="> /dev/null 2>&1"
 fi
 
-cd $(dirname $0)/..
-which appveyor > /dev/null
-if [ $? -eq 0 ]; then
+if [ -z $APPVEYOR ]; then
+	echo "Running prebuild outside of Appveyor."
+
+	cd $(dirname $0)/..
+else
+	echo "Running prebuild in Appveyor."
+
+	cd $APPVEYOR_BUILD_FOLDER
 	VERSION="$(cat README.md | grep Version: | awk '{ print $3; }')-$(git rev-parse --short HEAD)"
 	appveyor UpdateBuild -Version "$VERSION"
 fi
@@ -70,28 +70,43 @@ add_cmake_opts() {
 }
 
 if [ -z "$ARCH" ]; then
-	if [ -z "$platform" ]; then
+	if [ -z "$PLATFORM" ]; then
 		ARCH=`uname -m`
 	else
-		ARCH="$platform"
+		ARCH="$PLATFORM"
 	fi
 fi
 
-if [ $ARCH == x86_64 ]; then
-	ARCHNAME=x86-64
-	ARCHSUFFIX=64
-	BITS=64
+case $PLATFORM in
+	x64|x86_64|x86-64|win64|Win64 )
+		ARCHNAME=x86-64
+		ARCHSUFFIX=64
+		BITS=64
 
-	BASE_OPTS="-G\"Visual Studio 12 2013 Win64\""
-	add_cmake_opts "-G\"Visual Studio 12 2013 Win64\""
-else
-	ARCHNAME=x86
-	ARCHSUFFIX=86
-	BITS=32
+		BASE_OPTS="-G\"Visual Studio 12 2013 Win64\""
+		add_cmake_opts "-G\"Visual Studio 12 2013 Win64\""
+		;;
 
-	BASE_OPTS="-G\"Visual Studio 12 2013\" -Tv120_xp"
-	add_cmake_opts "-G\"Visual Studio 12 2013\"" -Tv120_xp
-fi
+	x32|x86|i686|i386|win32|Win32 )
+		ARCHNAME=x86
+		ARCHSUFFIX=86
+		BITS=32
+
+		BASE_OPTS="-G\"Visual Studio 12 2013\" -Tv120_xp"
+		add_cmake_opts "-G\"Visual Studio 12 2013\"" -Tv120_xp
+		;;
+
+	* )
+		echo "Unknown platform $PLATFORM."
+		exit 1
+		;;
+esac
+
+echo
+echo "=========================="
+echo "Starting prebuild on win$BITS"
+echo "=========================="
+echo
 
 mkdir -p deps
 cd deps
@@ -108,7 +123,7 @@ echo
 
 # Bullet
 echo "Bullet 2.83.4..."
-download https://gist.github.com/ace13/dc6aad628d48338d590e/raw/Bullet-2.83.4-win$BITS.7z Bullet-2.83.4-win$BITS.zip
+download https://gist.github.com/ace13/dc6aad628d48338d590e/raw/Bullet-2.83.4-win$BITS.7z Bullet-2.83.4-win$BITS.7z
 echo
 
 # FFmpeg

@@ -11,14 +11,30 @@ configuration:
 matrix:
     fast_finish: true
 
+cache:
+    - C:\projects\openmw\deps\Bullet-2.83.4-win32.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\Bullet-2.83.4-win64.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\MyGUI-3.2.2-win32.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\MyGUI-3.2.2-win64.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\Ogre-1.9-win32.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\Ogre-1.9-win64.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\ffmpeg32-2.5.2.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2-dev.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2-dev.7z -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\OpenAL-Soft-1.16.0.zip -> CI/before_script.msvc.sh
+    - C:\projects\openmw\deps\SDL2-2.0.3.zip -> CI/before_script.msvc.sh
+
 init:
+    - cmd: bash --version
     - cmd: cmake --version
     - cmd: msbuild /version
+    - cmd: echo.
 
 clone_folder: C:\projects\openmw
 
 build_script:
-    - cmd: sh C:\projects\openmw\CI\build.msvc.sh %platform% %configuration%
+    - cmd: sh C:\projects\openmw\CI\build.msvc.sh
 
 before_build:
-    - cmd: sh C:\projects\openmw\CI\before_script.msvc.sh %platform%
+    - cmd: sh C:\projects\openmw\CI\before_script.msvc.sh
