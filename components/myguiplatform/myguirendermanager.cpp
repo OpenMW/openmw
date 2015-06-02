@@ -195,7 +195,9 @@ public:
     META_Object(osgMyGUI, Drawable)
 
 private:
+    // double buffering approach, to avoid the need for synchronization with the draw thread
     std::vector<Batch> mBatchVector[2];
+
     int mWriteTo;
     mutable int mReadFrom;
 };
