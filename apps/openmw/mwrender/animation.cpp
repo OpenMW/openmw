@@ -1022,7 +1022,10 @@ namespace MWRender
 
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(esmLight->mData.mColor);
         if (esmLight->mData.mFlags & ESM::Light::Negative)
+        {
             diffuse *= -1;
+            diffuse.a() = 1;
+        }
         light->setDiffuse(diffuse);
         light->setAmbient(osg::Vec4f(0,0,0,1));
         light->setSpecular(osg::Vec4f(0,0,0,0));
@@ -1197,10 +1200,9 @@ namespace MWRender
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
                 addGlow(mObjectRoot, getEnchantmentColor(ptr));
-
-            if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
-                addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
         }
+        if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
+            addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
     }
 
 }
