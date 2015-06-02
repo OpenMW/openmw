@@ -44,8 +44,10 @@ run_cmd() {
 				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
 				exit $RET
 			else
-				appveyor PushArtifact output.log -DeploymentName $CMD-output.log
-				appveyor AddMessage "Command $CMD failed ($RET), output has been pushed as an artifact." -Category Error
+				7z a output.7z output.log > /dev/null 2>&1
+
+				appveyor PushArtifact output.7z -DeploymentName $CMD-output.7z
+				appveyor AddMessage "Command $CMD failed (code $RET), output has been pushed as an artifact." -Category Error
 			fi
 		else
 			rm output.log
@@ -153,7 +155,7 @@ fi
 
 # Bullet
 echo "Bullet 2.83.4..."
-download https://gist.github.com/ace13/dc6aad628d48338d590e/raw/Bullet-2.83.4-win$BITS.7z Bullet-2.83.4-win$BITS.7z
+download http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.83.4-win$BITS.7z Bullet-2.83.4-win$BITS.7z
 echo
 
 # FFmpeg
@@ -164,12 +166,12 @@ echo
 
 # MyGUI
 echo "MyGUI 3.2.2..."
-download https://gist.github.com/ace13/dc6aad628d48338d590e/raw/MyGUI-3.2.2-win$BITS.7z MyGUI-3.2.2-win$BITS.7z
+download http://www.lysator.liu.se/~ace/OpenMW/deps/MyGUI-3.2.2-win$BITS.7z MyGUI-3.2.2-win$BITS.7z
 echo
 
 # Ogre
 echo "Ogre 1.9..."
-download https://gist.github.com/ace13/dc6aad628d48338d590e/raw/Ogre-1.9-win$BITS.7z Ogre-1.9-win$BITS.7z
+download http://www.lysator.liu.se/~ace/OpenMW/deps/Ogre-1.9-win$BITS.7z Ogre-1.9-win$BITS.7z
 echo
 
 # OpenAL
@@ -196,7 +198,6 @@ cd deps
 
 echo
 echo "Extracting dependencies..."
-echo
 
 # Boost
 if [ -z $APPVEYOR ]; then
@@ -213,7 +214,6 @@ if [ -z $APPVEYOR ]; then
 	cd $DEPS
 
 	echo Done.
-	echo
 else
 	# Appveyor unstable has all the boost we need already
 	BOOST_SDK="c:/Libraries/boost"
@@ -240,7 +240,6 @@ add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include" \
 cd $DEPS
 
 echo Done.
-echo
 
 # FFmpeg
 printf "FFmpeg 2.5.2... "
@@ -276,7 +275,6 @@ fi
 cd $DEPS
 
 echo Done.
-echo
 
 # Ogre
 printf "Ogre 1.9... "
@@ -292,7 +290,6 @@ add_cmake_opts -DOGRE_SDK="$OGRE_SDK"
 cd $DEPS
 
 echo Done.
-echo
 
 # MyGUI
 printf "MyGUI 3.2.2... "
@@ -311,7 +308,6 @@ add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
 cd $DEPS
 
 echo Done.
-echo
 
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
@@ -323,10 +319,9 @@ add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include" \
 	-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
 
 echo Done.
-echo
 
 # Qt
-printf "Qt 4.8.6 binaries... "
+printf "Qt 4.8.6... "
 cd ../build_$BITS/deps
 
 eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
@@ -342,10 +337,9 @@ add_cmake_opts -DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 cd $DEPS
 
 echo Done.
-echo
 
 # SDL2
-printf "SDL 2.0.3 binaries... "
+printf "SDL 2.0.3... "
 eval 7z x -y SDL2-2.0.3.zip $STRIP
 
 SDL_SDK="`real_pwd`/SDL2-2.0.3"
@@ -361,7 +355,7 @@ echo
 
 cd ../build_$BITS
 
-echo "Building OpenMW."
+echo "Building OpenMW..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
@@ -377,8 +371,8 @@ run_cmd cmake .. $CMAKE_OPTS
 RET=$?
 
 if [ -z $VERBOSE ]; then
-	if [ $RET -eq 0 ]; then echo Done.; fi
-	else echo Failed!; fi
+	if [ $RET -eq 0 ]; then echo Done.
+	else echo Failed.; fi
 fi
 
 echo
