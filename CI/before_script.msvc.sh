@@ -21,7 +21,8 @@ fi
 if [ -z $APPVEYOR ]; then
 	echo "Running prebuild outside of Appveyor."
 
-	cd $(dirname $0)/..
+	DIR=$(echo "$0" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+	cd $(dirname "$DIR")
 else
 	echo "Running prebuild in Appveyor."
 
@@ -29,6 +30,33 @@ else
 	VERSION="$(cat README.md | grep Version: | awk '{ print $3; }')-$(git rev-parse --short HEAD)"
 	appveyor UpdateBuild -Version "$VERSION"
 fi
+
+run_cmd() {
+	CMD="$1"
+	shift
+
+	if [ -z $VERBOSE ]; then
+		eval $CMD $@ > output.log 2>&1
+		RET=$?
+
+		if [ $RET -ne 0 ]; then
+			if [ -z $APPVEYOR ]; then
+				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
+				exit $RET
+			else
+				appveyor PushArtifact output.log -DeploymentName $CMD-output.log
+				appveyor AddMessage "Command $CMD failed ($RET), output has been pushed as an artifact." -Category Error
+			fi
+		else
+			rm output.log
+		fi
+
+		return $RET
+	else
+		eval $CMD $@
+		return $?
+	fi
+}
 
 download() {
 	if ! [ -f $2 ]; then
@@ -117,9 +145,11 @@ echo "Downloading dependency packages."
 echo
 
 # Boost
-echo "Boost 1.58.0..."
-download http://sourceforge.net/projects/boost/files/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-$BITS.exe boost-1.58.0-win$BITS.exe
-echo
+if [ -z $APPVEYOR ]; then
+	echo "Boost 1.58.0..."
+	download http://sourceforge.net/projects/boost/files/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-$BITS.exe boost-1.58.0-win$BITS.exe
+	echo
+fi
 
 # Bullet
 echo "Bullet 2.83.4..."
@@ -169,20 +199,27 @@ echo "Extracting dependencies..."
 echo
 
 # Boost
-printf "Boost 1.58.0... "
-cd ../build_$BITS/deps
+if [ -z $APPVEYOR ]; then
+	printf "Boost 1.58.0... "
+	cd ../build_$BITS/deps
 
-BOOST_SDK="`real_pwd`/Boost"
+	BOOST_SDK="`real_pwd`/Boost"
 
-$DEPS/boost-1.58.0-win$BITS.exe //dir="$BOOST_SDK" //verysilent
+	$DEPS/boost-1.58.0-win$BITS.exe //dir="$BOOST_SDK" //verysilent
 
-add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-	-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
+	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
+		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
 
-cd $DEPS
+	cd $DEPS
 
-echo Done.
-echo
+	echo Done.
+	echo
+else
+	# Appveyor unstable has all the boost we need already
+	BOOST_SDK="c:/Libraries/boost"
+	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
+		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
+fi
 
 # Bullet
 printf "Bullet 2.83.4... "
@@ -269,7 +306,7 @@ MYGUI_SDK="`real_pwd`/MyGUI"
 add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
 	-DMYGUI_PLATFORM_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
 	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include" \
-	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.hpp"
+	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
 
 cd $DEPS
 
@@ -336,10 +373,13 @@ else
 	echo "  cmake .. $CMAKE_OPTS"
 fi
 
-eval cmake .. $CMAKE_OPTS $STRIP
+run_cmd cmake .. $CMAKE_OPTS
 RET=$?
 
-if [ -z $VERBOSE ]; then echo Done.; fi
+if [ -z $VERBOSE ]; then
+	if [ $RET -eq 0 ]; then echo Done.; fi
+	else echo Failed!; fi
+fi
 
 echo
 

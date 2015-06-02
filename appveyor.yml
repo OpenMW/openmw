@@ -11,6 +11,8 @@ configuration:
 matrix:
     fast_finish: true
 
+os: unstable
+
 cache:
     - C:\projects\openmw\deps\Bullet-2.83.4-win32.7z -> CI/before_script.msvc.sh
     - C:\projects\openmw\deps\Bullet-2.83.4-win64.7z -> CI/before_script.msvc.sh
@@ -34,7 +36,7 @@ init:
 clone_folder: C:\projects\openmw
 
 build_script:
-    - cmd: sh C:\projects\openmw\CI\build.msvc.sh
+    - cmd: bash --login C:\projects\openmw\CI\build.msvc.sh
 
 before_build:
-    - cmd: sh C:\projects\openmw\CI\before_script.msvc.sh
+    - cmd: bash --login C:\projects\openmw\CI\before_script.msvc.sh
