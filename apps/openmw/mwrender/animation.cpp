@@ -31,6 +31,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/fallback.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
@@ -1000,14 +1002,28 @@ namespace MWRender
         osg::Light* light = new osg::Light;
         lightSource->setLight(light);
 
-        float realRadius = esmLight->mData.mRadius;
+        const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
 
-        lightSource->setRadius(realRadius);
-        light->setLinearAttenuation(10.f/(esmLight->mData.mRadius*2.f));
-        //light->setLinearAttenuation(0.05);
-        light->setConstantAttenuation(0.f);
+        float radius = esmLight->mData.mRadius;
+        lightSource->setRadius(radius);
 
-        light->setDiffuse(SceneUtil::colourFromRGB(esmLight->mData.mColor));
+        static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
+        static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
+        static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
+        static float quadraticRadiusMult = fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
+        static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
+        static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
+        static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
+
+        bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
+
+        SceneUtil::configureLight(light, radius, exterior, outQuadInLin, useQuadratic, quadraticValue,
+                                  quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
+
+        osg::Vec4f diffuse = SceneUtil::colourFromRGB(esmLight->mData.mColor);
+        if (esmLight->mData.mFlags & ESM::Light::Negative)
+            diffuse *= -1;
+        light->setDiffuse(diffuse);
         light->setAmbient(osg::Vec4f(0,0,0,1));
         light->setSpecular(osg::Vec4f(0,0,0,0));
 
