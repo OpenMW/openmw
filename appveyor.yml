@@ -4,6 +4,10 @@ platform:
     - Win32
     - x64
 
+configuration:
+    - Debug
+    - Release
+
 matrix:
     fast_finish: true
 
@@ -13,8 +17,8 @@ init:
 
 clone_folder: C:\projects\openmw
 
-build:
-    - cmd: sh C:\projects\openmw\CI\build.msvc.sh %platform%
+build_script:
+    - cmd: sh C:\projects\openmw\CI\build.msvc.sh %platform% %configuration%
 
 before_build:
     - cmd: sh C:\projects\openmw\CI\before_script.msvc.sh %platform%
