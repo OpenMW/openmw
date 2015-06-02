@@ -239,7 +239,6 @@ namespace MWMechanics
             if(smoothTurn(actor, Ogre::Degree(movement.mRotation[0]), 0)) movement.mRotation[0] = 0;
         }
 
-        //TODO: Some skills affect period of strikes.For berserk-like style period ~ 0.25f
         float attacksPeriod = 1.0f;
 
         ESM::Weapon::AttackType attackType;
@@ -260,7 +259,7 @@ namespace MWMechanics
             if (!minMaxAttackDurationInitialised)
             {
                 // TODO: this must be updated when a different weapon is equipped
-                // FIXME: attack durations would be easier to control if we interact more closely with the CharacterController
+                // TODO: it would be much easier to ask the CharacterController about the current % completion of the weapon wind-up animation
                 getMinMaxAttackDuration(actor, minMaxAttackDuration);
                 minMaxAttackDurationInitialised = true;
             }
@@ -319,6 +318,10 @@ namespace MWMechanics
         float rangeAttack = 0;
         float rangeFollow = 0;
         boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        // TODO: upperBodyReady() works fine for checking if we can start an attack,
+        // but doesn't work properly for checking if the attack is finished (as things like hit recovery or knockdown also play on the upper body)
+        // Only a minor problem, but can mess with the actionCooldown timer.
+        // To fix this the AI needs to be brought closer to the CharacterController, so we can simply check if a weapon animation is playing.
         if (anim->upperBodyReady())
         {
             currentAction = prepareNextAction(actor, target);
@@ -654,9 +657,6 @@ namespace MWMechanics
             }
         }
 
-        // NOTE: This section gets updated every tReaction, which is currently hard
-        //       coded at 250ms or 1/4 second
-        //
         // TODO: Add a parameter to vary DURATION_SAME_SPOT?
         if((distToTarget > rangeAttack || followTarget) &&
             mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
