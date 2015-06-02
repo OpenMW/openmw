@@ -308,7 +308,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // windex is set to 0 initially
     vp = &this->pictq[this->pictq_windex];
 
-    // Convert the image into RGBA format for Ogre
+    // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
     if(this->sws_context == NULL)
