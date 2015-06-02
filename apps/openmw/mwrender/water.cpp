@@ -9,6 +9,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Depth>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
 
@@ -105,7 +107,7 @@ namespace MWRender
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem)
+Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico)
     : mParent(parent)
     , mResourceSystem(resourceSystem)
     , mEnabled(true)
@@ -117,6 +119,9 @@ Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem)
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);
     geode->addDrawable(waterGeom);
     geode->setNodeMask(Mask_Water);
+
+    if (ico)
+        ico->add(geode);
 
     createWaterStateSet(mResourceSystem, geode);
 

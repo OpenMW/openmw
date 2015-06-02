@@ -11,6 +11,11 @@ namespace osg
     class PositionAttitudeTransform;
 }
 
+namespace osgUtil
+{
+    class IncrementalCompileOperation;
+}
+
 namespace Resource
 {
     class ResourceSystem;
@@ -27,6 +32,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
         Resource::ResourceSystem* mResourceSystem;
+        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         bool mEnabled;
         bool mToggled;
@@ -36,7 +42,7 @@ namespace MWRender
         void updateVisible();
 
     public:
-        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem);
+        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico);
         ~Water();
 
         void setEnabled(bool enabled);

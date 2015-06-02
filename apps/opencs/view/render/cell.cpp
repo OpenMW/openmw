@@ -64,7 +64,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
     addObjects (0, rows-1);
 
-    /*
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
     if (landIndex != -1)
@@ -72,27 +71,18 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
         const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
         if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
         {
-            mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
-                                                    Terrain::Align_XY));
+            mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
             mTerrain->loadCell(esmLand->mX,
                                esmLand->mY);
 
-            //float verts = ESM::Land::LAND_SIZE;
-            //float worldsize = ESM::Land::REAL_SIZE;
             mX = esmLand->mX;
             mY = esmLand->mY;
-            //mPhysics->addHeightField(sceneManager,
-            //        esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
-    */
 }
 
 CSVRender::Cell::~Cell()
 {
-    //if (mTerrain.get())
-    //    mPhysics->removeHeightField(mSceneMgr, mX, mY);
-
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
         delete iter->second;
@@ -220,12 +210,4 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
-}
-
-float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
-{
-    if(mTerrain.get() != NULL)
-        return mTerrain->getHeightAt(pos);
-    else
-        return -std::numeric_limits<float>::max();
 }

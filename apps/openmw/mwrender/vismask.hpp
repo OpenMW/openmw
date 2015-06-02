@@ -16,13 +16,14 @@ namespace MWRender
         Mask_Player = (1<<4),
         Mask_Sky = (1<<5),
         Mask_Water = (1<<6),
+        Mask_Terrain = (1<<7),
 
         // top level masks
-        Mask_Scene = (1<<7),
-        Mask_GUI = (1<<8),
+        Mask_Scene = (1<<8),
+        Mask_GUI = (1<<9),
 
         // Set on cameras within the main scene graph
-        Mask_RenderToTexture = (1<<9)
+        Mask_RenderToTexture = (1<<10)
 
         // reserved: (1<<16) for SceneUtil::Mask_Lit
     };

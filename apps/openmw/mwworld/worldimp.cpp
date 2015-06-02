@@ -1298,7 +1298,9 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = -FLT_MAX;//mRendering->getTerrainHeightAt(Ogre::Vector3(pos.pos));
+        float terrainHeight = -std::numeric_limits<float>::max();
+        if (isCellExterior())
+            terrainHeight = mRendering->getTerrainHeightAt(pos.asVec3());
 
         if (pos.pos[2] < terrainHeight)
             pos.pos[2] = terrainHeight;

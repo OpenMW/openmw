@@ -488,6 +488,11 @@ Resource::ResourceSystem* CSMWorld::Data::getResourceSystem()
     return &mResourceSystem;
 }
 
+const Resource::ResourceSystem* CSMWorld::Data::getResourceSystem() const
+{
+    return &mResourceSystem;
+}
+
 const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const
 {
     return mGlobals;

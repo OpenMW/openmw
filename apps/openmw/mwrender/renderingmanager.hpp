@@ -32,6 +32,11 @@ namespace ESM
     struct Cell;
 }
 
+namespace Terrain
+{
+    class World;
+}
+
 namespace MWRender
 {
 
@@ -119,6 +124,8 @@ namespace MWRender
 
         float getNearClipDistance() const;
 
+        float getTerrainHeightAt(const osg::Vec3f& pos);
+
         // camera stuff
         bool vanityRotateCamera(const float *rot);
         void setCameraDistance(float dist, bool adjust, bool override);
@@ -147,6 +154,7 @@ namespace MWRender
         std::auto_ptr<Pathgrid> mPathgrid;
         std::auto_ptr<Objects> mObjects;
         std::auto_ptr<Water> mWater;
+        std::auto_ptr<Terrain::World> mTerrain;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         std::auto_ptr<NpcAnimation> mPlayerAnimation;

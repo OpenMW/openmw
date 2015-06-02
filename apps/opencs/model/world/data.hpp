@@ -140,6 +140,8 @@ namespace CSMWorld
 
             Resource::ResourceSystem* getResourceSystem();
 
+            const Resource::ResourceSystem* getResourceSystem() const;
+
             const IdCollection<ESM::Global>& getGlobals() const;
 
             IdCollection<ESM::Global>& getGlobals();

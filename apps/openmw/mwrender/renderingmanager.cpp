@@ -26,6 +26,8 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
+#include <components/terrain/terraingrid.hpp>
+
 #include <components/esm/loadcell.hpp>
 
 #include "sky.hpp"
@@ -35,6 +37,7 @@
 #include "pathgrid.hpp"
 #include "camera.hpp"
 #include "water.hpp"
+#include "terrainstorage.hpp"
 
 namespace MWRender
 {
@@ -132,7 +135,10 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
 
-        mWater.reset(new Water(lightRoot, mResourceSystem));
+        mWater.reset(new Water(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation()));
+
+        mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
+                                                new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -236,12 +242,18 @@ namespace MWRender
         mPathgrid->addCell(store);
 
         mWater->changeCell(store);
+
+        if (store->getCell()->isExterior())
+            mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
     }
 
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
     {
         mPathgrid->removeCell(store);
         mObjects->removeCell(store);
+
+        if (store->getCell()->isExterior())
+            mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
     }
 
     void RenderingManager::setSkyEnabled(bool enabled)
@@ -482,7 +494,6 @@ namespace MWRender
 
     void RenderingManager::clear()
     {
-        //mLocalMap->clear();
         notifyWorldSpaceChanged();
     }
 
@@ -593,6 +604,11 @@ namespace MWRender
     float RenderingManager::getNearClipDistance() const
     {
         return mNearClip;
+    }
+
+    float RenderingManager::getTerrainHeightAt(const osg::Vec3f &pos)
+    {
+        return mTerrain->getHeightAt(pos);
     }
 
     bool RenderingManager::vanityRotateCamera(const float *rot)
