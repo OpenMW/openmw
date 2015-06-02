@@ -174,7 +174,7 @@ cd ../build_$BITS/deps
 
 BOOST_SDK="`real_pwd`/Boost"
 
-$DEPS/boost_1_58_0-msvc-12.0-$BITS.exe //dir="$BOOST_SDK" //verysilent
+$DEPS/boost-1.58.0-win$BITS.exe //dir="$BOOST_SDK" //verysilent
 
 add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 	-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
