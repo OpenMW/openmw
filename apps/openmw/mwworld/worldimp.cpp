@@ -1763,17 +1763,17 @@ namespace MWWorld
     void World::setWaterHeight(const float height)
     {
         mPhysics->setWaterHeight(height);
-        //mRendering->setWaterHeight(height);
+        mRendering->setWaterHeight(height);
     }
 
     bool World::toggleWater()
     {
-        return 0;//mRendering->toggleWater();
+        return mRendering->toggleRenderMode(MWRender::Render_Water);
     }
 
     bool World::toggleWorld()
     {
-        return 0;//mRendering->toggleWorld();
+        return mRendering->toggleRenderMode(MWRender::Render_Scene);
     }
 
     void World::PCDropped (const Ptr& item)

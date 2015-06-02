@@ -34,6 +34,7 @@
 #include "vismask.hpp"
 #include "pathgrid.hpp"
 #include "camera.hpp"
+#include "water.hpp"
 
 namespace MWRender
 {
@@ -129,7 +130,9 @@ namespace MWRender
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
-        mEffectManager.reset(new EffectManager(mRootNode, mResourceSystem));
+        mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
+
+        mWater.reset(new Water(lightRoot, mResourceSystem));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -177,6 +180,7 @@ namespace MWRender
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
+        mStateUpdater->setFogEnd(mViewDistance);
     }
 
     RenderingManager::~RenderingManager()
@@ -230,6 +234,8 @@ namespace MWRender
     void RenderingManager::addCell(const MWWorld::CellStore *store)
     {
         mPathgrid->addCell(store);
+
+        mWater->changeCell(store);
     }
 
     void RenderingManager::removeCell(const MWWorld::CellStore *store)
@@ -253,6 +259,22 @@ namespace MWRender
             mStateUpdater->setWireframe(wireframe);
             return wireframe;
         }
+        else if (mode == Render_Water)
+        {
+            return mWater->toggle();
+        }
+        else if (mode == Render_Scene)
+        {
+            int mask = mViewer->getCamera()->getCullMask();
+            bool enabled = mask&Mask_Scene;
+            enabled = !enabled;
+            if (enabled)
+                mask |= Mask_Scene;
+            else
+                mask &= ~Mask_Scene;
+            mViewer->getCamera()->setCullMask(mask);
+            return enabled;
+        }
         /*
         else //if (mode == Render_BoundingBoxes)
         {
@@ -271,12 +293,9 @@ namespace MWRender
         configureFog (cell->mAmbi.mFogDensity, color);
     }
 
-    void RenderingManager::configureFog(float /* fogDepth */, const osg::Vec4f &colour)
+    void RenderingManager::configureFog(float /* fogDepth */, const osg::Vec4f &color)
     {
-        mViewer->getCamera()->setClearColor(colour);
-
-        mStateUpdater->setFogColor(colour);
-        mStateUpdater->setFogEnd(mViewDistance);
+        mFogColor = color;
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -289,6 +308,19 @@ namespace MWRender
         mEffectManager->update(dt);
         mSky->update(dt);
         mCamera->update(dt, paused);
+
+        osg::Vec3f focal, cameraPos;
+        mCamera->getPosition(focal, cameraPos);
+        if (mWater->isUnderwater(cameraPos))
+        {
+            setFogColor(osg::Vec4f(0.090195f, 0.115685f, 0.12745f, 1.f));
+            mStateUpdater->setFogEnd(1000);
+        }
+        else
+        {
+            setFogColor(mFogColor);
+            mStateUpdater->setFogEnd(mViewDistance);
+        }
     }
 
     void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
@@ -323,6 +355,16 @@ namespace MWRender
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
     {
         mObjects->removeObject(ptr);
+    }
+
+    void RenderingManager::setWaterEnabled(bool enabled)
+    {
+        mWater->setEnabled(enabled);
+    }
+
+    void RenderingManager::setWaterHeight(float height)
+    {
+        mWater->setHeight(height);
     }
 
     void RenderingManager::getCameraToViewportRay(float nX, float nY, osg::Vec3f &origin, osg::Vec3f &dest)
@@ -390,7 +432,7 @@ namespace MWRender
 
         osgUtil::IntersectionVisitor intersectionVisitor(intersector);
         int mask = intersectionVisitor.getTraversalMask();
-        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect);
+        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water);
         if (ignorePlayer)
             mask &= ~(Mask_Player);
 
@@ -519,6 +561,13 @@ namespace MWRender
         mViewer->stopThreading();
         mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
         mViewer->startThreading();
+    }
+
+    void RenderingManager::setFogColor(const osg::Vec4f &color)
+    {
+        mViewer->getCamera()->setClearColor(color);
+
+        mStateUpdater->setFogColor(color);
     }
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)

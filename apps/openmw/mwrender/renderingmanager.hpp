@@ -42,6 +42,7 @@ namespace MWRender
     class NpcAnimation;
     class Pathgrid;
     class Camera;
+    class Water;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -72,6 +73,9 @@ namespace MWRender
         void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
 
         void removeObject(const MWWorld::Ptr& ptr);
+
+        void setWaterEnabled(bool enabled);
+        void setWaterHeight(float level);
 
         /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
         /// where (0,0) is the top left corner.
@@ -131,6 +135,7 @@ namespace MWRender
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
+        void setFogColor(const osg::Vec4f& color);
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osg::Group> mRootNode;
@@ -141,6 +146,7 @@ namespace MWRender
 
         std::auto_ptr<Pathgrid> mPathgrid;
         std::auto_ptr<Objects> mObjects;
+        std::auto_ptr<Water> mWater;
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         std::auto_ptr<NpcAnimation> mPlayerAnimation;
@@ -148,6 +154,8 @@ namespace MWRender
         std::auto_ptr<Camera> mCamera;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
+
+        osg::Vec4f mFogColor;
 
         float mNearClip;
         float mViewDistance;

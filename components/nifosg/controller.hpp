@@ -218,6 +218,7 @@ namespace NifOsg
 
     public:
         FlipController(const Nif::NiFlipController* ctrl, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
+        FlipController(int texSlot, float delta, std::vector<osg::ref_ptr<osg::Texture2D> > textures);
         FlipController();
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 

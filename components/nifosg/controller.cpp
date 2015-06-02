@@ -399,6 +399,13 @@ FlipController::FlipController(const Nif::NiFlipController *ctrl, std::vector<os
 {
 }
 
+FlipController::FlipController(int texSlot, float delta, std::vector<osg::ref_ptr<osg::Texture2D> > textures)
+    : mTexSlot(texSlot)
+    , mDelta(delta)
+    , mTextures(textures)
+{
+}
+
 FlipController::FlipController()
 {
 }

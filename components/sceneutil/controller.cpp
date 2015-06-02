@@ -20,7 +20,10 @@ namespace SceneUtil
 
     float Controller::getInputValue(osg::NodeVisitor* nv)
     {
-        return mFunction->calculate(mSource->getValue(nv));
+        if (mFunction)
+            return mFunction->calculate(mSource->getValue(nv));
+        else
+            return mSource->getValue(nv);
     }
 
     void Controller::setSource(boost::shared_ptr<ControllerSource> source)
