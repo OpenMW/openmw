@@ -1,0 +1,20 @@
+version: "{build}"
+
+platform:
+	- Win32
+	- x64
+
+matrix:
+	fast_finish: true
+
+init:
+	- cmd: cmake --version
+	- cmd: msbuild /version
+
+clone_folder: C:\projects\openmw
+
+build:
+	- cmd: sh C:\projects\openmw\CI\build.msvc.sh %platform%
+
+before_build:
+	- cmd: sh C:\projects\openmw\CI\before_script.msvc.sh %platform%
