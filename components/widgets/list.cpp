@@ -48,7 +48,7 @@ namespace Gui
         const int _scrollBarWidth = 20; // fetch this from skin?
         const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
         const int spacing = 3;
-        size_t viewPosition = -mScrollView->getViewOffset().top;
+        int viewPosition = -mScrollView->getViewOffset().top;
 
         while (mScrollView->getChildCount())
         {
@@ -99,10 +99,10 @@ namespace Gui
         if (!scrollbarShown && mItemHeight > mClient->getSize().height)
             redraw(true);
 
-        size_t viewRange = mScrollView->getCanvasSize().height;
+        int viewRange = mScrollView->getCanvasSize().height;
         if(viewPosition > viewRange)
             viewPosition = viewRange;
-        mScrollView->setViewOffset(MyGUI::IntPoint(0, viewPosition * -1));
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, -viewPosition));
     }
 
     void MWList::setPropertyOverride(const std::string &_key, const std::string &_value)
@@ -157,4 +157,8 @@ namespace Gui
         return mScrollView->findWidget (getName() + "_item_" + name)->castType<MyGUI::Button>();
     }
 
+    void MWList::scrollToTop()
+    {
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
 }
