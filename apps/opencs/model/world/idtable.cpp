@@ -33,6 +33,9 @@ QVariant CSMWorld::IdTable::data (const QModelIndex & index, int role) const
     if (index.row() < 0 || index.column() < 0)
         return QVariant();
 
+    if (role==ColumnBase::Role_Display)
+        return QVariant(mIdCollection->getColumn(index.column()).mDisplayType);
+
     if (role==ColumnBase::Role_ColumnId)
         return QVariant (getColumnId (index.column()));
 

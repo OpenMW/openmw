@@ -111,6 +111,12 @@ CSMDoc::Document& CSVWorld::CommandDelegate::getDocument() const
     return mDocument;
 }
 
+CSMWorld::ColumnBase::Display CSVWorld::CommandDelegate::getDisplayTypeFromIndex(const QModelIndex &index) const
+{
+    int rawDisplay = index.data(CSMWorld::ColumnBase::Role_Display).toInt();
+    return static_cast<CSMWorld::ColumnBase::Display>(rawDisplay);
+}
+
 void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const
 {
@@ -146,7 +152,7 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
-    return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_None);
+    return createEditor (parent, option, index, getDisplayTypeFromIndex(index));
 }
 
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
