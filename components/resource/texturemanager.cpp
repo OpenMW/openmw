@@ -107,6 +107,12 @@ namespace Resource
             if (extPos != std::string::npos && extPos+1 < normalized.size())
                 ext = normalized.substr(extPos+1);
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
+            if (!reader)
+            {
+                std::cerr << "Error loading " << filename << ": no readerwriter for '" << ext << "' found" << std::endl;
+                return mWarningTexture;
+            }
+
             osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
             if (!result.success())
             {
