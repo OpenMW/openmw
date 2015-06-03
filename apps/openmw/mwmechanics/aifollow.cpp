@@ -76,7 +76,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
 
         if (storage.mTimer < 0)
         {
-            if (Ogre::Vector3(actor.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(target.getRefData().getPosition().pos))
+            if ((actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length2()
                     < 500*500
                     && MWBase::Environment::get().getWorld()->getLOS(actor, target))
                 mActive = true;
@@ -137,7 +137,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
         // turn towards target anyway
         float directionX = target.getRefData().getPosition().pos[0] - actor.getRefData().getPosition().pos[0];
         float directionY = target.getRefData().getPosition().pos[1] - actor.getRefData().getPosition().pos[1];
-        zTurn(actor, Ogre::Math::ATan2(directionX,directionY), Ogre::Degree(5));
+        zTurn(actor, std::atan2(directionX,directionY), osg::DegreesToRadians(5.f));
     }
     else
     {

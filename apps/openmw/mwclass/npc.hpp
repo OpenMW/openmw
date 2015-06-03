@@ -105,7 +105,7 @@ namespace MWClass
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
 
-            virtual Ogre::Vector3 getRotationVector (const MWWorld::Ptr& ptr) const;
+            virtual osg::Vec3f getRotationVector (const MWWorld::Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;

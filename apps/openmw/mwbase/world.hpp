@@ -11,14 +11,6 @@
 
 #include "../mwrender/rendermode.hpp"
 
-namespace Ogre
-{
-    class Vector2;
-    class Vector3;
-    class Quaternion;
-    class Image;
-}
-
 namespace osg
 {
     class Vec3f;
@@ -423,7 +415,7 @@ namespace MWBase
             virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
-            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
+            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist) = 0;
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
@@ -497,7 +489,7 @@ namespace MWBase
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const = 0;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result) = 0;
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case

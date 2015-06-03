@@ -192,7 +192,7 @@ namespace MWWorld
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.
 
-            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            virtual osg::Vec3f getRotationVector (const Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;

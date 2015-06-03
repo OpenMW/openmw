@@ -961,10 +961,10 @@ namespace MWClass
         return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
+    osg::Vec3f Npc::getRotationVector (const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mRotation);
+        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
         movement.mRotation[0] = 0.0f;
         movement.mRotation[1] = 0.0f;
         movement.mRotation[2] = 0.0f;

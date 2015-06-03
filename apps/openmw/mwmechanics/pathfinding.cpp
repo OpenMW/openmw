@@ -15,9 +15,9 @@ namespace
     // Caller needs to be careful for very short distances (i.e. less than 1)
     // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
     //
-    float distanceSquared(ESM::Pathgrid::Point point, Ogre::Vector3 pos)
+    float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
     {
-        return MWMechanics::PathFinder::MakeOgreVector3(point).squaredDistance(pos);
+        return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
     }
 
     // Return the closest pathgrid point index from the specified position co
@@ -26,7 +26,7 @@ namespace
     //
     // NOTE: pos is expected to be in local co-ordinates, as is grid->mPoints
     //
-    int getClosestPoint(const ESM::Pathgrid* grid, Ogre::Vector3 pos)
+    int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
     {
         if(!grid || grid->mPoints.empty())
             return -1;
@@ -52,7 +52,7 @@ namespace
     // Chooses a reachable end pathgrid point.  start is assumed reachable.
     std::pair<int, bool> getClosestReachablePoint(const ESM::Pathgrid* grid,
                                                   const MWWorld::CellStore *cell,
-                                                  Ogre::Vector3 pos, int start)
+                                                  const osg::Vec3f pos, int start)
     {
         if(!grid || grid->mPoints.empty())
             return std::pair<int, bool> (-1, false);
@@ -216,12 +216,12 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         int startNode = getClosestPoint(mPathgrid,
-                Ogre::Vector3(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
+                osg::Vec3f(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
         // Some cells don't have any pathgrids at all
         if(startNode != -1)
         {
             std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
-                Ogre::Vector3(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
+                osg::Vec3f(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
                     startNode);
 
             // this shouldn't really happen, but just in case
@@ -279,7 +279,7 @@ namespace MWMechanics
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
 
-        return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
+        return osg::RadiansToDegrees(std::atan2(directionX, directionY));
     }
 
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)

@@ -394,7 +394,7 @@ namespace MWGui
         }
 
         if (mIsDrowning)
-            mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
+            mDrowningFlashTheta += dt * osg::PI*2;
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)

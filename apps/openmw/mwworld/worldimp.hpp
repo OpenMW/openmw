@@ -156,7 +156,7 @@ namespace MWWorld
             float feetToGameUnits(float feet);
 
             MWWorld::Ptr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
-            MWWorld::Ptr getClosestMarkerFromExteriorPosition( const Ogre::Vector3 worldPos, const std::string &id );
+            MWWorld::Ptr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
 
         public:
 
@@ -508,7 +508,7 @@ namespace MWWorld
             virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor);
             ///< get Line of Sight (morrowind stupid implementation)
 
-            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist);
+            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist);
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable);
 
@@ -583,7 +583,7 @@ namespace MWWorld
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result);
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result);
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case

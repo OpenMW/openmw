@@ -54,7 +54,7 @@ namespace MWMechanics
 
             /// Set the position to return to for a stationary (non-wandering) actor
             /** In case another AI package moved the actor elsewhere **/
-            void setReturnPosition (const Ogre::Vector3& position);
+            void setReturnPosition (const osg::Vec3f& position);
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
@@ -83,9 +83,9 @@ namespace MWMechanics
 
             bool mHasReturnPosition; // NOTE: Could be removed if mReturnPosition was initialized to actor position,
                                     // if we had the actor in the AiWander constructor...
-            Ogre::Vector3 mReturnPosition;
+            osg::Vec3f mReturnPosition;
 
-            Ogre::Vector3 mInitialActorPosition;
+            osg::Vec3f mInitialActorPosition;
             bool mStoredInitialActorPosition;
 
            

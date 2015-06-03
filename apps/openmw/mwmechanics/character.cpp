@@ -1531,7 +1531,7 @@ void CharacterController::update(float duration)
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
             vec = osg::Vec3f(0.f, 0.f, 0.f);
-        Ogre::Vector3 rot = cls.getRotationVector(mPtr);
+        osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         mMovementSpeed = cls.getSpeed(mPtr);
 
@@ -1728,11 +1728,11 @@ void CharacterController::update(float duration)
             // Don't play turning animations during attack. It would break positioning of the arrow bone when releasing a shot.
             // Actually, in vanilla the turning animation is not even played when merely having equipped the weapon,
             // but I don't think we need to go as far as that.
-            else if(rot.z != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
+            else if(rot.z() != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
             {
-                if(rot.z > 0.0f)
+                if(rot.z() > 0.0f)
                     movestate = CharState_TurnRight;
-                else if(rot.z < 0.0f)
+                else if(rot.z() < 0.0f)
                     movestate = CharState_TurnLeft;
             }
         }
@@ -1782,18 +1782,18 @@ void CharacterController::update(float duration)
         if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
         {
             if (duration > 0)
-                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z) / duration / Ogre::Math::PI));
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / Ogre::Math::PI));
         }
 
         if (!mSkipAnim)
         {
-            rot *= Ogre::Math::RadiansToDegrees(1.0f);
+            rot *= osg::RadiansToDegrees(1.0f);
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
-                world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+                world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
             }
             else //avoid z-rotating for knockdown
-                world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
+                world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
 
             if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);

@@ -169,8 +169,7 @@ namespace MWGui
         if (!interior)
         {
             ESM::Position playerPos = player.getRefData().getPosition();
-            float d = Ogre::Vector3(pos.pos[0], pos.pos[1], 0).distance(
-                        Ogre::Vector3(playerPos.pos[0], playerPos.pos[1], 0));
+            float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
             int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->getFloat());
             for(int i = 0;i < hours;i++)
             {

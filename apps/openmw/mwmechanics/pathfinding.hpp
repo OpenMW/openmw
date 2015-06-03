@@ -44,6 +44,7 @@ namespace MWMechanics
             bool checkPathCompleted(float x, float y, float tolerance=32.f);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
+            /// In degrees
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
@@ -78,6 +79,12 @@ namespace MWMechanics
 
             /// utility function to convert a Ogre::Vector3 to a Pathgrid::Point
             static ESM::Pathgrid::Point MakePathgridPoint(const Ogre::Vector3& v)
+            {
+                return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
+            }
+
+            /// utility function to convert a osg::Vec3f to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const osg::Vec3f& v)
             {
                 return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
             }

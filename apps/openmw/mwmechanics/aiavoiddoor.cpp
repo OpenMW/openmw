@@ -56,7 +56,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& stat
     actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     // Turn away from the door and move when turn completed
-    if (zTurn(actor, Ogre::Radian(std::atan2(x,y) + mAdjAngle), Ogre::Degree(5)))
+    if (zTurn(actor, std::atan2(x,y) + mAdjAngle, osg::DegreesToRadians(5.f)))
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     else
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;

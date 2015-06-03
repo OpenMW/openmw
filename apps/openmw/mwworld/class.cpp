@@ -186,9 +186,9 @@ namespace MWWorld
         throw std::runtime_error ("movement settings not supported by class");
     }
 
-    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
+    osg::Vec3f Class::getRotationVector (const Ptr& ptr) const
     {
-        return Ogre::Vector3 (0, 0, 0);
+        return osg::Vec3f (0, 0, 0);
     }
 
     std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const

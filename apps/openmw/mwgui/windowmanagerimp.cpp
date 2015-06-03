@@ -992,12 +992,12 @@ namespace MWGui
             mMap->setCellPrefix (cell->getCell()->mName );
             mHud->setCellPrefix (cell->getCell()->mName );
 
-            Ogre::Vector3 worldPos;
+            osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
                 worldPos = MWBase::Environment::get().getWorld()->getPlayer().getLastKnownExteriorPosition();
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
-            mMap->setGlobalMapPlayerPosition(worldPos.x, worldPos.y);
+            mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
         }
     }
 

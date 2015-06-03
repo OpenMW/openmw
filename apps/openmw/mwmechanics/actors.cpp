@@ -316,7 +316,7 @@ namespace MWMechanics
 
         const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
         const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
-        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+        float sqrDist = (actor1Pos.asVec3() - actor2Pos.asVec3()).length2();
         if (sqrDist > 7168*7168)
             return;
 
@@ -1081,7 +1081,7 @@ namespace MWMechanics
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
-                bool inProcessingRange = Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
                         <= sqrProcessingDistance;
 
                 iter->second->getCharacterController()->setActive(inProcessingRange);
@@ -1151,7 +1151,7 @@ namespace MWMechanics
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first != player &&
-                        Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                        (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
                         > sqrProcessingDistance)
                     continue;
 
@@ -1236,7 +1236,7 @@ namespace MWMechanics
                             continue;
 
                         // is the player in range and can they be detected
-                        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius
+                        if ((iter->first.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
                             && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
                         {
                             if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first))

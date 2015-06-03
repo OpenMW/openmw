@@ -1585,7 +1585,7 @@ namespace MWWorld
         if (player.getCell()->isExterior())
         {
             ESM::Position pos = player.getRefData().getPosition();
-            mPlayer->setLastKnownExteriorPosition(Ogre::Vector3(pos.pos));
+            mPlayer->setLastKnownExteriorPosition(pos.asVec3());
         }
 
         if (player.getClass().getNpcStats(player).isWerewolf())
@@ -2324,20 +2324,19 @@ namespace MWWorld
         return mPhysics->getLineOfSight(actor, targetActor);
     }
 
-    float World::getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist)
+    float World::getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist)
     {
-        osg::Vec3f from_ (from.x, from.y, from.z);
-        osg::Vec3f to_ (dir.x, dir.y, dir.z);
-        to_.normalize();
-        to_ = from_ + (to_ * maxDist);
+        osg::Vec3f to (dir);
+        to.normalize();
+        to = from + (to * maxDist);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from_, to_, MWWorld::Ptr(),
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(),
             MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
 
         if (!result.mHit)
             return maxDist;
         else
-            return (result.mHitPos - from_).length();
+            return (result.mHitPos - from).length();
     }
 
     void World::enableActorCollision(const MWWorld::Ptr& actor, bool enable)
@@ -2731,7 +2730,7 @@ namespace MWWorld
         }
     }
 
-    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result)
+    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result)
     {
         if (cell->isExterior())
             return false;
@@ -2762,7 +2761,7 @@ namespace MWWorld
                     if (ref.mRef.getDestCell().empty())
                     {
                         ESM::Position pos = ref.mRef.getDoorDest();
-                        result = Ogre::Vector3(pos.pos);
+                        result = pos.asVec3();
                         return true;
                     }
                     else
@@ -2822,7 +2821,7 @@ namespace MWWorld
 
                     if (ref.mRef.getDestCell().empty())
                     {
-                        Ogre::Vector3 worldPos = Ogre::Vector3(ref.mRef.getDoorDest().pos);
+                        osg::Vec3f worldPos = ref.mRef.getDoorDest().asVec3();
                         return getClosestMarkerFromExteriorPosition(worldPos, id);
                     }
                     else
@@ -2838,7 +2837,7 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const Ogre::Vector3 worldPos, const std::string &id ) {
+    MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
         MWWorld::Ptr closestMarker;
         float closestDistance = FLT_MAX;
 
@@ -2847,8 +2846,8 @@ namespace MWWorld
         for (std::vector<MWWorld::Ptr>::iterator it2 = markers.begin(); it2 != markers.end(); ++it2)
         {
             ESM::Position pos = it2->getRefData().getPosition();
-            Ogre::Vector3 markerPos = Ogre::Vector3(pos.pos);
-            float distance = worldPos.squaredDistance(markerPos);
+            osg::Vec3f markerPos = pos.asVec3();
+            float distance = (worldPos - markerPos).length2();
             if (distance < closestDistance)
             {
                 closestDistance = distance;
