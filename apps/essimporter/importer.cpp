@@ -1,7 +1,8 @@
 #include "importer.hpp"
 #include <boost/shared_ptr.hpp>
 
-#include <OgreRoot.h>
+#include <osgDB/ReadFile>
+#include <osg/ImageUtils>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -32,13 +33,48 @@ namespace
 
     void writeScreenshot(const ESM::Header& fileHeader, ESM::SavedGame& out)
     {
-        Ogre::Image screenshot;
-        std::vector<unsigned char> screenshotData = fileHeader.mSCRS; // MemoryDataStream doesn't work with const data :(
-        Ogre::DataStreamPtr screenshotStream (new Ogre::MemoryDataStream(&screenshotData[0], screenshotData.size()));
-        screenshot.loadRawData(screenshotStream, 128, 128, 1, Ogre::PF_BYTE_BGRA);
-        Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
-        out.mScreenshot.resize(encoded->size());
-        encoded->read(&out.mScreenshot[0], encoded->size());
+        if (fileHeader.mSCRS.size() != 128*128*4)
+        {
+            std::cerr << "unexpected screenshot size " << std::endl;
+            return;
+        }
+
+        osg::ref_ptr<osg::Image> image (new osg::Image);
+        image->allocateImage(128, 128, 1, GL_RGB, GL_UNSIGNED_BYTE);
+
+        // need to convert pixel format from BGRA to RGB as the jpg readerwriter doesn't support it otherwise
+        std::vector<unsigned char>::const_iterator it = fileHeader.mSCRS.begin();
+        for (int y=0; y<128; ++y)
+        {
+            for (int x=0; x<128; ++x)
+            {
+                *(image->data(x,y)+2) = *it++;
+                *(image->data(x,y)+1) = *it++;
+                *image->data(x,y) = *it++;
+                it++; // skip alpha
+            }
+        }
+
+        image->flipVertical();
+
+        std::stringstream ostream;
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
+        {
+            std::cerr << "can't write screenshot: no jpg readerwriter found" << std::endl;
+            return;
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image, ostream);
+        if (!result.success())
+        {
+            std::cerr << "can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            return;
+        }
+
+        std::string data = ostream.str();
+        out.mScreenshot = std::vector<char>(data.begin(), data.end());
     }
 
 }
@@ -203,10 +239,6 @@ namespace ESSImport
 
     void Importer::run()
     {
-        // construct Ogre::Root to gain access to image codecs
-        Ogre::LogManager logman;
-        Ogre::Root root;
-
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding));
         ESM::ESMReader esm;
         esm.open(mEssFile);
