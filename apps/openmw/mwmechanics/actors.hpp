@@ -10,11 +10,6 @@
 #include "movement.hpp"
 #include "../mwbase/world.hpp"
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWWorld
 {
     class Ptr;

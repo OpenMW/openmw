@@ -1,4 +1,7 @@
 #include "importer.hpp"
+
+#include <iomanip>
+
 #include <boost/shared_ptr.hpp>
 
 #include <osgDB/ReadFile>

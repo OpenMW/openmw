@@ -126,7 +126,6 @@ endif ()
 include_directories(${SOUND_INPUT_INCLUDES})
 
 target_link_libraries(openmw
-    ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}

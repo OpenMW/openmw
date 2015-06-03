@@ -1,7 +1,5 @@
 #include "hud.hpp"
 
-#include <OgreMath.h>
-
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_Button.h>

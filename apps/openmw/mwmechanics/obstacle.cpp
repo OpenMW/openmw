@@ -1,7 +1,5 @@
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"

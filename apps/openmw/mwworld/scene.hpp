@@ -13,11 +13,6 @@ namespace osg
     class Vec3f;
 }
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace ESM
 {
     struct Position;

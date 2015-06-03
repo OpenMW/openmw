@@ -6,8 +6,6 @@
 
 #include "../mwmechanics/drawstate.hpp"
 
-#include <OgreVector3.h>
-
 namespace ESM
 {
     struct NPC;

@@ -1,8 +1,6 @@
 
 #include "refdata.hpp"
 
-#include <OgreSceneNode.h>
-
 #include <components/esm/objectstate.hpp>
 
 #include "customdata.hpp"

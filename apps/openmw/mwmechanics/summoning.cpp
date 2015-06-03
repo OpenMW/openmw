@@ -1,7 +1,5 @@
 #include "summoning.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

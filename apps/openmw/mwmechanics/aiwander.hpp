@@ -5,8 +5,6 @@
 
 #include <vector>
 
-#include <OgreVector3.h>
-
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
 

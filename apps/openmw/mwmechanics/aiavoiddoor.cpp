@@ -9,8 +9,6 @@
 #include "movement.hpp"
 
 
-#include <OgreMath.h>
-
 #include "steering.hpp"
 
 MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::Ptr& doorPtr)

@@ -1,7 +1,5 @@
 #include "aitravel.hpp"
 
-#include <OgreVector3.h>
-
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/world.hpp"

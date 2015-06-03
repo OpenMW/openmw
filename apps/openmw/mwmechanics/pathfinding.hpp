@@ -5,9 +5,6 @@
 #include <components/esm/loadpgrd.hpp>
 #include <list>
 
-#include <OgreMath.h>
-#include <OgreVector3.h>
-
 namespace MWWorld
 {
     class CellStore;

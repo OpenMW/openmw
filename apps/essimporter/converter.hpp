@@ -1,6 +1,8 @@
 #ifndef OPENMW_ESSIMPORT_CONVERTER_H
 #define OPENMW_ESSIMPORT_CONVERTER_H
 
+#include <limits>
+
 #include <osg/Image>
 #include <osg/ref_ptr>
 

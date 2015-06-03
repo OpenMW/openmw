@@ -1,6 +1,6 @@
 #include "scene.hpp"
 
-#include <OgreSceneNode.h>
+#include <limits>
 
 #include <components/nif/niffile.hpp>
 #include <components/misc/resourcehelpers.hpp>

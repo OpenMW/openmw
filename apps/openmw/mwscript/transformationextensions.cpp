@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadcell.hpp>

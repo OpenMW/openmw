@@ -10,8 +10,6 @@
 #include "movement.hpp"
 #include "../mwworld/action.hpp"
 
-#include <OgreMath.h>
-
 #include "steering.hpp"
 
 MWMechanics::AiPackage::~AiPackage() {}

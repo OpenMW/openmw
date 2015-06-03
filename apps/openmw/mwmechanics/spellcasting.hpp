@@ -3,8 +3,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <OgreVector3.h>
-
 #include <components/esm/loadskil.hpp>
 
 namespace ESM

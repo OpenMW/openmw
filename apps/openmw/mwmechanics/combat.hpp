@@ -2,7 +2,6 @@
 #define OPENMW_MECHANICS_COMBAT_H
 
 #include "../mwworld/ptr.hpp"
-#include <OgreVector3.h>
 
 namespace MWMechanics
 {

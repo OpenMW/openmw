@@ -14,11 +14,6 @@ namespace ESM
     struct ObjectState;
 }
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWRender
 {
     class RenderingInterface;

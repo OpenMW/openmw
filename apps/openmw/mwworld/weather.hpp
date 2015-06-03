@@ -3,9 +3,8 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
 
-#include <OgreColourValue.h>
-#include <OgreVector3.h>
 #include <osg/Vec4f>
 
 #include "../mwbase/soundmanager.hpp"

@@ -1,9 +1,6 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
-#include <OgreVector3.h>
-#include <OgreQuaternion.h>
-
 #include <osg/Vec3f>
 #include <osg/Quat>
 

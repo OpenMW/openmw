@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include <OgreVector3.h>
-
 #include <components/esm/defs.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -10,11 +10,6 @@
 #include "objects.hpp"
 #include "actors.hpp"
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWWorld
 {
     class CellStore;

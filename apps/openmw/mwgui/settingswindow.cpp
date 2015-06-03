@@ -1,7 +1,5 @@
 #include "settingswindow.hpp"
 
-#include <OgreRoot.h>
-
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>

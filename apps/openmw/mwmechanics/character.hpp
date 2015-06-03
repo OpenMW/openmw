@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
-#include <OgreVector3.h>
+#include <deque>
 
 #include <components/esm/loadmgef.hpp>
 

@@ -1,8 +1,5 @@
 #include "pathfinding.hpp"
 
-#include "OgreMath.h"
-#include "OgreVector3.h"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 

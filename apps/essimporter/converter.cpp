@@ -2,9 +2,6 @@
 
 #include <stdexcept>
 
-#include <OgreImage.h>
-#include <OgreColourValue.h>
-
 #include <osgDB/WriteFile>
 
 #include <components/esm/creaturestate.hpp>

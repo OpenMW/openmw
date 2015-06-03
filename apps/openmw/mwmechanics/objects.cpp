@@ -1,7 +1,5 @@
 #include "objects.hpp"
 
-#include <OgreVector3.h>
-
 #include "movement.hpp"
 
 #include "../mwbase/environment.hpp"

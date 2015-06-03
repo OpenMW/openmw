@@ -19,8 +19,6 @@
 
 #include "character.hpp"
 
-#include <OgreStringConverter.h>
-
 #include <osg/PositionAttitudeTransform>
 
 #include "movement.hpp"

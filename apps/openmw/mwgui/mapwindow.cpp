@@ -1,7 +1,5 @@
 #include "mapwindow.hpp"
 
-#include <OgreVector2.h>
-
 #include <osg/Texture2D>
 
 #include <MyGUI_ScrollView.h>

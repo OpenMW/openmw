@@ -1,7 +1,5 @@
 #include "aicombat.hpp"
 
-#include <OgreMath.h>
-
 #include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>

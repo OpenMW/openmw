@@ -1,5 +1,6 @@
-
 #include "cellextensions.hpp"
+
+#include <limits>
 
 #include "../mwworld/esmstore.hpp"
 

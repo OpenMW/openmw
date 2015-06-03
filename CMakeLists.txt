@@ -171,11 +171,6 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-find_package(OGRE REQUIRED)
-if (${OGRE_VERSION} VERSION_LESS "1.9")
-    message(FATAL_ERROR "OpenMW requires Ogre 1.9 or later, please install the latest stable version from http://ogre3d.org")
-endif()
-
 find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
@@ -191,7 +186,6 @@ find_package(Bullet REQUIRED)
 
 include_directories("."
     SYSTEM
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${PLATFORM_INCLUDE_DIR}
@@ -200,7 +194,7 @@ include_directories("."
     ${BULLET_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${MYGUI_LIB_DIR})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)

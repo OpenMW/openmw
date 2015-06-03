@@ -35,11 +35,6 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace ESM
 {
     struct Position;

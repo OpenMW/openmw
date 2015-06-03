@@ -4,8 +4,6 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 
-#include <OgreVector3.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

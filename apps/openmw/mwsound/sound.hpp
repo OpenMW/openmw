@@ -1,8 +1,6 @@
 #ifndef GAME_SOUND_SOUND_H
 #define GAME_SOUND_SOUND_H
 
-#include <OgreVector3.h>
-
 #include "soundmanagerimp.hpp"
 
 namespace MWSound

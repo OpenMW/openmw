@@ -2,14 +2,12 @@
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
 #include <memory>
+#include <map>
 
-#include <OgreVector3.h>
-
+#include <osg/Quat>
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
-
-#include <osg/Quat>
 
 #include "collisiontype.hpp"
 

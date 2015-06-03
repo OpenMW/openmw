@@ -12,9 +12,6 @@
 #include "creaturestats.hpp"
 #include "movement.hpp"
 
-#include <OgreMath.h>
-#include <OgreVector3.h>
-
 #include "steering.hpp"
 
 namespace MWMechanics

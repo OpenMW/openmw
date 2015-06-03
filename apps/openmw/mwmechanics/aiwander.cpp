@@ -1,8 +1,5 @@
 #include "aiwander.hpp"
 
-#include <OgreVector3.h>
-#include <OgreSceneNode.h>
-
 #include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>

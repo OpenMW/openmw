@@ -174,7 +174,6 @@ add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
     ${Boost_LIBRARIES} 
-    ${OGRE_LIBRARIES}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${BULLET_LIBRARIES}
     ${SDL2_LIBRARY}
