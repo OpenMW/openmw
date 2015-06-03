@@ -1,6 +1,8 @@
 #ifndef VIDEOPLAYER_VIDEOSTATE_H
 #define VIDEOPLAYER_VIDEOSTATE_H
 
+#include <stdint.h>
+
 #include <boost/thread.hpp>
 
 #include <osg/ref_ptr>

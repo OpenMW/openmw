@@ -1,5 +1,7 @@
 #include "videoplayer.hpp"
 
+#include <iostream>
+
 #include <osg/Texture2D>
 
 #include "audiofactory.hpp"
