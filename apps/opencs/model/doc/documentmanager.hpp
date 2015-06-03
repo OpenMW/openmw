@@ -64,6 +64,8 @@ namespace CSMDoc
 
             void setVFS(const VFS::Manager* vfs);
 
+            bool isEmpty();
+
         private:
 
             boost::filesystem::path mResDir;

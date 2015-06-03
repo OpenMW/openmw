@@ -87,6 +87,8 @@ namespace CSVWorld
             virtual void highlightBlock (const QString& text);
 
             void invalidateIds();
+
+            bool updateUserSetting (const QString &name, const QStringList &list);
     };
 }
 

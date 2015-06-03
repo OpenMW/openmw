@@ -1,6 +1,6 @@
 #include "worldimp.hpp"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
@@ -2876,7 +2876,7 @@ namespace MWWorld
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
-        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition());
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
     

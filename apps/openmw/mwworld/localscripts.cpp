@@ -93,7 +93,7 @@ std::pair<std::string, MWWorld::Ptr> MWWorld::LocalScripts::getNext()
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
-    if (const ESM::Script *script = mStore.get<ESM::Script>().find (scriptName))
+    if (const ESM::Script *script = mStore.get<ESM::Script>().search (scriptName))
     {
         try
         {
@@ -108,6 +108,10 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
                 << " because an exception has been thrown: " << exception.what() << std::endl;
         }
     }
+    else
+        std::cerr
+            << "failed to add local script " << scriptName
+            << " because the script does not exist." << std::endl;
 }
 
 void MWWorld::LocalScripts::addCell (CellStore *cell)
