@@ -11,7 +11,6 @@
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
-#include <osg/io_utils>
 
 #include <components/resource/scenemanager.hpp>
 

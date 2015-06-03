@@ -30,8 +30,6 @@
 #include <osg/Material>
 #include <osg/TexEnvCombine>
 
-#include <osg/io_utils>
-
 namespace Terrain
 {
 
