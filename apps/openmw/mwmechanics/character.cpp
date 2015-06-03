@@ -56,6 +56,13 @@ void wrap(float& rad)
         rad = std::fmod(rad-osg::PI, 2.0f*osg::PI)+osg::PI;
 }
 
+std::string toString(int num)
+{
+    std::ostringstream stream;
+    stream << num;
+    return stream.str();
+}
+
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
     int slash = (weapon->mData.mSlash[0] + weapon->mData.mSlash[1])/2;
@@ -220,13 +227,13 @@ public:
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num)
 {
     int numAnims=0;
-    while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
+    while (mAnimation->hasAnimation(prefix + toString(numAnims+1)))
         ++numAnims;
 
     int roll = Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
-    return prefix + Ogre::StringConverter::toString(roll);
+    return prefix + toString(roll);
 }
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
@@ -569,7 +576,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
         mCurrentDeath = "deathknockout";
         break;
     default:
-        mCurrentDeath = "death" + Ogre::StringConverter::toString(death - CharState_Death1 + 1);
+        mCurrentDeath = "death" + toString(death - CharState_Death1 + 1);
     }
     mDeathState = death;
 
@@ -736,9 +743,17 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             split(soundgen, ' ', tokens);
             soundgen = tokens[0];
             if (tokens.size() >= 2)
-                volume = Ogre::StringConverter::parseReal(tokens[1]);
+            {
+                std::stringstream stream;
+                stream << tokens[1];
+                stream >> volume;
+            }
             if (tokens.size() >= 3)
-                pitch = Ogre::StringConverter::parseReal(tokens[2]);
+            {
+                std::stringstream stream;
+                stream << tokens[2];
+                stream >> pitch;
+            }
         }
 
         std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
