@@ -355,7 +355,12 @@ echo "Building OpenMW..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
-	-DBUILD_MYGUI_PLUGIN=no
+	-DBUILD_MYGUI_PLUGIN=no \
+	-DBUILD_OPENCS=no \
+	-DBUILD_WIZARD=no \
+	-DBUILD_ESSIMPORTER=no \
+	-DBUILD_LAUNCHER=no \
+	-DBUILD_MWINIIMPORTER=no
 
 if [ -z $VERBOSE ]; then
 	printf "  Configuring... "
