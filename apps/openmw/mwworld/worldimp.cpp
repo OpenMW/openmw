@@ -2092,6 +2092,7 @@ namespace MWWorld
         scaleObject(getPlayerPtr(), 1.f); // apply race height
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
+        MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
         model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
