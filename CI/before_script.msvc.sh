@@ -225,7 +225,7 @@ eval 7z x -y $DEPS/Bullet-2.83.4-win$BITS.7z $STRIP
 mv Bullet-2.83.4-win$BITS Bullet
 
 BULLET_SDK="`real_pwd`/Bullet"
-add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include" \
+add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
 	-DBULLET_COLLISION_LIBRARY="$BULLET_SDK/lib/BulletCollision.lib" \
 	-DBULLET_COLLISION_LIBRARY_DEBUG="$BULLET_SDK/lib/BulletCollision_Debug.lib" \
 	-DBULLET_DYNAMICS_LIBRARY="$BULLET_SDK/lib/BulletDynamics.lib" \

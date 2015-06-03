@@ -13,7 +13,7 @@ matrix:
 
 os: unstable
 
-shallow_clone: true
+clone_depth: 5
 
 cache:
     - C:\projects\openmw\deps\Bullet-2.83.4-win32.7z -> CI/before_script.msvc.sh
