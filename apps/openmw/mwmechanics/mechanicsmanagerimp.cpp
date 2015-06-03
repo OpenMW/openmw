@@ -31,10 +31,10 @@ namespace
 
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
     {
-        Ogre::Vector3 pos1 (actor1.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (actor2.getRefData().getPosition().pos);
+        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
 
-        float d = pos1.distance(pos2);
+        float d = (pos1 - pos2).length();
 
         static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->getInt();

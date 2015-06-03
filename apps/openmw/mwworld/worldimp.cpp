@@ -66,10 +66,11 @@ namespace
 // Wraps a value to (-PI, PI]
 void wrap(float& rad)
 {
+    const float pi = static_cast<float>(osg::PI);
     if (rad>0)
-        rad = std::fmod(rad+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI;
+        rad = std::fmod(rad+pi, 2.0f*pi)-pi;
     else
-        rad = std::fmod(rad-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI;
+        rad = std::fmod(rad-pi, 2.0f*pi)+pi;
 }
 
 }
@@ -1220,24 +1221,24 @@ namespace MWWorld
         mWorldScene->updateObjectScale(ptr);
     }
 
-    void World::rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust)
+    void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
     {
-        const float two_pi = Ogre::Math::TWO_PI;
-        const float pi = Ogre::Math::PI;
+        const float pi = static_cast<float>(osg::PI);
+        const float two_pi = pi*2.f;
 
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
         if(adjust)
         {
-            objRot[0] += rot.x;
-            objRot[1] += rot.y;
-            objRot[2] += rot.z;
+            objRot[0] += rot.x();
+            objRot[1] += rot.y();
+            objRot[2] += rot.z();
         }
         else
         {
-            objRot[0] = rot.x;
-            objRot[1] = rot.y;
-            objRot[2] = rot.z;
+            objRot[0] = rot.x();
+            objRot[1] = rot.y();
+            objRot[2] = rot.z();
         }
 
         if(ptr.getClass().isActor())
@@ -1246,7 +1247,7 @@ namespace MWWorld
              * currently it's done so for rotating the camera, which needs
              * clamping.
              */
-            const float half_pi = Ogre::Math::HALF_PI;
+            const float half_pi = pi/2.f;
 
             if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
             else if(objRot[0] > half_pi) objRot[0] =  half_pi;
@@ -1272,9 +1273,9 @@ namespace MWWorld
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
     {
         LocalRotation rot = ptr.getRefData().getLocalRotation();
-        rot.rot[0]=Ogre::Degree(x).valueRadians();
-        rot.rot[1]=Ogre::Degree(y).valueRadians();
-        rot.rot[2]=Ogre::Degree(z).valueRadians();
+        rot.rot[0]=osg::DegreesToRadians(x);
+        rot.rot[1]=osg::DegreesToRadians(y);
+        rot.rot[2]=osg::DegreesToRadians(z);
 
         wrap(rot.rot[0]);
         wrap(rot.rot[1]);
@@ -1332,9 +1333,9 @@ namespace MWWorld
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
     {
-        rotateObjectImp(ptr, Ogre::Vector3(Ogre::Degree(x).valueRadians(),
-                                           Ogre::Degree(y).valueRadians(),
-                                           Ogre::Degree(z).valueRadians()),
+        rotateObjectImp(ptr, osg::Vec3f(osg::DegreesToRadians(x),
+                                           osg::DegreesToRadians(y),
+                                           osg::DegreesToRadians(z)),
                         adjust);
     }
 
@@ -2904,8 +2905,7 @@ namespace MWWorld
         World::DetectionType mType;
         bool operator() (MWWorld::Ptr ptr)
         {
-            if (Ogre::Vector3(ptr.getRefData().getPosition().pos).squaredDistance(
-                        Ogre::Vector3(mDetector.getRefData().getPosition().pos)) >= mSquaredDist)
+            if ((ptr.getRefData().getPosition().asVec3() - mDetector.getRefData().getPosition().asVec3()).length2() >= mSquaredDist)
                 return true;
 
             if (!ptr.getRefData().isEnabled() || ptr.getRefData().isDeleted())
@@ -3096,13 +3096,13 @@ namespace MWWorld
                 return;
 
             ESM::Position ipos = mPlayer->getPlayer().getRefData().getPosition();
-            Ogre::Vector3 pos(ipos.pos);
-            Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+            osg::Vec3f pos(ipos.asVec3());
+            osg::Quat rot(-ipos.rot[2], osg::Vec3f(0,0,1));
             const float distance = 50;
-            pos = pos + distance*rot.yAxis();
-            ipos.pos[0] = pos.x;
-            ipos.pos[1] = pos.y;
-            ipos.pos[2] = pos.z;
+            pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
+            ipos.pos[0] = pos.x();
+            ipos.pos[1] = pos.y();
+            ipos.pos[2] = pos.z();
             ipos.rot[0] = 0;
             ipos.rot[1] = 0;
             ipos.rot[2] = 0;

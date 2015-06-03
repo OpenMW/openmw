@@ -56,16 +56,11 @@ namespace MWRender
         virtual osg::Node* getWeaponNode() = 0;
         virtual Resource::ResourceSystem* getResourceSystem() = 0;
 
-
-        //virtual NifOgre::ObjectScenePtr getWeapon() = 0;
         virtual void showWeapon(bool show) = 0;
-        //virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot) = 0;
 
         /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
         /// to indicate the facing orientation of the character, for ranged weapon aiming.
         float mPitchFactor;
-
-        //void pitchSkeleton(float xrot, Ogre::SkeletonInstance* skel);
     };
 
 }

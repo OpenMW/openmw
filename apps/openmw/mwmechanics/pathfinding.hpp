@@ -22,9 +22,9 @@ namespace MWMechanics
         public:
             PathFinder();
 
-            static float sgn(Ogre::Radian a)
+            static float sgn(float val)
             {
-                if(a.valueRadians() > 0)
+                if(val > 0)
                     return 1.0;
                 return -1.0;
             }
@@ -77,12 +77,6 @@ namespace MWMechanics
                 mPath.push_back(point);
             }
 
-            /// utility function to convert a Ogre::Vector3 to a Pathgrid::Point
-            static ESM::Pathgrid::Point MakePathgridPoint(const Ogre::Vector3& v)
-            {
-                return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
-            }
-
             /// utility function to convert a osg::Vec3f to a Pathgrid::Point
             static ESM::Pathgrid::Point MakePathgridPoint(const osg::Vec3f& v)
             {
@@ -98,12 +92,6 @@ namespace MWMechanics
             static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
             {
                 return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
-            }
-
-            /// utility function to convert a Pathgrid::Point to a Ogre::Vector3
-            static Ogre::Vector3 MakeOgreVector3(const ESM::Pathgrid::Point& p)
-            {
-                return Ogre::Vector3(static_cast<Ogre::Real>(p.mX), static_cast<Ogre::Real>(p.mY), static_cast<Ogre::Real>(p.mZ));
             }
 
         private:

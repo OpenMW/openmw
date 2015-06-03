@@ -1045,8 +1045,8 @@ namespace MWScript
                     msg << "Cell: " << MWBase::Environment::get().getWorld()->getCellName(cell) << std::endl;
                     if (cell->getCell()->isExterior())
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
-                    Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
-                    msg << "Coordinates: " << pos << std::endl;
+                    osg::Vec3f pos (ptr.getRefData().getPosition().asVec3());
+                    msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
                     if (!ptr.getClass().getScript(ptr).empty())
                         msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;

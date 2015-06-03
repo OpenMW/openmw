@@ -84,9 +84,9 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                    float az = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]);
 
                     MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
 
@@ -127,15 +127,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[0]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]));
                     }
                     else if (axis == "y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[1]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]));
                     }
                     else if (axis == "z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[2]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]));
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -156,15 +156,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]));
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]));
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -326,8 +326,8 @@ namespace MWScript
                         ptr = MWWorld::Ptr(ptr.getBase(), store);
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
-                        float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                        float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                        float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                        float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
                         // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -382,8 +382,8 @@ namespace MWScript
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -567,9 +567,9 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[1]);
+                    float az = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[2]);
 
                     if (axis == "x")
                     {
@@ -604,9 +604,9 @@ namespace MWScript
 
                     const float *objRot = ptr.getRefData().getPosition().rot;
 
-                    float ax = Ogre::Radian(objRot[0]).valueDegrees();
-                    float ay = Ogre::Radian(objRot[1]).valueDegrees();
-                    float az = Ogre::Radian(objRot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(objRot[0]);
+                    float ay = osg::RadiansToDegrees(objRot[1]);
+                    float az = osg::RadiansToDegrees(objRot[2]);
 
                     if (axis == "x")
                     {

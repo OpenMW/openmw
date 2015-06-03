@@ -1062,26 +1062,4 @@ void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
     mHeadAnimationTime->updatePtr(updated);
 }
 
-/*
-void NpcAnimation::setHeadPitch(Ogre::Radian pitch)
-{
-    mHeadPitch = pitch;
-}
-
-void NpcAnimation::setHeadYaw(Ogre::Radian yaw)
-{
-    mHeadYaw = yaw;
-}
-
-Ogre::Radian NpcAnimation::getHeadPitch() const
-{
-    return mHeadPitch;
-}
-
-Ogre::Radian NpcAnimation::getHeadYaw() const
-{
-    return mHeadYaw;
-}
-*/
-
 }

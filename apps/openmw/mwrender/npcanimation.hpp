@@ -120,8 +120,6 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
 
-    //void applyAlpha(float alpha, Ogre::Entity* ent, NifOgre::ObjectScenePtr scene);
-
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
     osg::ref_ptr<RotateController> mHeadController;
 
@@ -171,18 +169,11 @@ public:
     virtual Resource::ResourceSystem* getResourceSystem();
 
     // WeaponAnimation
-    //virtual NifOgre::ObjectScenePtr getWeapon() { return mObjectParts[ESM::PRT_Weapon]; }
     virtual void showWeapon(bool show) { showWeapons(show); }
-    //virtual void configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot);
 
     void setViewMode(ViewMode viewMode);
 
     void updateParts();
-
-    /// \brief Applies a translation to the arms and hands.
-    /// This may be called multiple times before the animation
-    /// is updated to add additional offsets.
-    //void addFirstPersonOffset(const Ogre::Vector3 &offset);
 
     /// Rebuilds the NPC, updating their root model, animation sources, and equipment.
     void rebuild();

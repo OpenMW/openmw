@@ -1797,7 +1797,7 @@ void CharacterController::update(float duration)
         if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
         {
             if (duration > 0)
-                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / Ogre::Math::PI));
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
         }
 
         if (!mSkipAnim)

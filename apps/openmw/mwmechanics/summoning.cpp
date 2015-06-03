@@ -115,13 +115,14 @@ namespace MWMechanics
             if (!found)
             {
                 ESM::Position ipos = mActor.getRefData().getPosition();
-                Ogre::Vector3 pos(ipos.pos);
-                Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
+                osg::Vec3f pos(ipos.asVec3());
+
+                osg::Quat rot (-ipos.rot[2], osg::Vec3f(0,0,1));
                 const float distance = 50;
-                pos = pos + distance*rot.yAxis();
-                ipos.pos[0] = pos.x;
-                ipos.pos[1] = pos.y;
-                ipos.pos[2] = pos.z;
+                pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
+                ipos.pos[0] = pos.x();
+                ipos.pos[1] = pos.y();
+                ipos.pos[2] = pos.z();
                 ipos.rot[0] = 0;
                 ipos.rot[1] = 0;
                 ipos.rot[2] = 0;

@@ -111,7 +111,7 @@ namespace MWWorld
             void updateWeather(float duration, bool paused = false);
             int getDaysPerMonth (int month) const;
 
-            void rotateObjectImp (const Ptr& ptr, Ogre::Vector3 rot, bool adjust);
+            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust);
 
             Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return an updated Ptr in case the Ptr's cell changes
