@@ -46,7 +46,7 @@ run_cmd() {
 			else
 				7z a output.7z output.log > /dev/null 2>&1
 
-				appveyor PushArtifact output.7z -DeploymentName $CMD-output.7z
+				appveyor PushArtifact output.7z -FileName $CMD-output.7z
 				appveyor AddMessage "Command $CMD failed (code $RET), output has been pushed as an artifact." -Category Error
 			fi
 		else
@@ -88,10 +88,6 @@ download() {
 
 real_pwd() {
 	pwd | sed "s,/\(.\),\1:,"
-}
-
-msbuild() {
-	/c/Program\ Files\ \(x86\)/MSBuild/12.0/Bin/MSBuild.exe $@
 }
 
 CMAKE_OPTS=""

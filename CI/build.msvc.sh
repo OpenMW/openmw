@@ -33,4 +33,11 @@ fi
 
 cd build_$BITS
 
+which msbuild > /dev/null
+if [ $? -ne 0 ]; then
+	msbuild() {
+		/c/Program\ Files\ \(x86\)/MSBuild/12.0/Bin/MSBuild.exe "$@"
+	}
+fi
+
 msbuild OpenMW.sln //t:Build //p:Configuration=$CONFIGURATION //m:8 //logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
