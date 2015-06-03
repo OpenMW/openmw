@@ -2636,11 +2636,14 @@ namespace MWWorld
         // Get the target to use for "on touch" effects
         MWWorld::Ptr target;
         float distance = 192.f; // ??
+        osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
 
         if (actor == getPlayerPtr())
         {
             // For the player, use camera to aim
             target = getFacedObject(distance);
+            if (!target.isEmpty())
+                hitPosition = target.getRefData().getPosition().asVec3();
         }
         else
         {
@@ -2669,13 +2672,13 @@ namespace MWWorld
 
             MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, actor);
             target = result.mHitObject;
+            hitPosition = result.mHitPos;
         }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
         MWMechanics::CastSpell cast(actor, target);
-        if (!target.isEmpty())
-            cast.mHitPosition = target.getRefData().getPosition().asVec3();
+        cast.mHitPosition = hitPosition;
 
         if (!selectedSpell.empty())
         {
