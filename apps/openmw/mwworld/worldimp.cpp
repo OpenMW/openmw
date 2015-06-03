@@ -2128,9 +2128,9 @@ namespace MWWorld
         return mRendering->getAnimation(ptr);
     }
 
-    void World::screenshot(Ogre::Image &image, int w, int h)
+    void World::screenshot(osg::Image* image, int w, int h)
     {
-        //mRendering->screenshot(image, w, h);
+        mRendering->screenshot(image, w, h);
     }
 
     void World::activateDoor(const MWWorld::Ptr& door)

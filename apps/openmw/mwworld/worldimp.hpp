@@ -524,7 +524,7 @@ namespace MWWorld
             virtual void reattachPlayerCamera();
 
             /// \todo this does not belong here
-            virtual void screenshot (Ogre::Image& image, int w, int h);
+            virtual void screenshot (osg::Image* image, int w, int h);
 
             /// Find center of exterior cell above land surface
             /// \return false if exterior with given name not exists, true otherwise

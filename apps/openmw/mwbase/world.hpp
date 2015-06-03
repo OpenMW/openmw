@@ -23,6 +23,7 @@ namespace osg
 {
     class Vec3f;
     class Quat;
+    class Image;
 }
 
 namespace Loading
@@ -438,7 +439,7 @@ namespace MWBase
             virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
-            virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
+            virtual void screenshot (osg::Image* image, int w, int h) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise

@@ -379,6 +379,65 @@ namespace MWRender
         mWater->setHeight(height);
     }
 
+    class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
+    {
+    public:
+        virtual void operator () (osg::RenderInfo& renderInfo) const
+        {
+            mCondition.signal();
+        }
+
+        mutable OpenThreads::Condition mCondition;
+    };
+
+    void RenderingManager::screenshot(osg::Image *image, int w, int h)
+    {
+        int oldCullMask = mViewer->getCamera()->getCullMask();
+        mViewer->getCamera()->setCullMask(oldCullMask & (~Mask_GUI));
+
+        osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
+        rttCamera->setNodeMask(Mask_RenderToTexture);
+        rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
+        rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
+        rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+        rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
+        rttCamera->setClearColor(mViewer->getCamera()->getClearColor());
+        rttCamera->setClearMask(mViewer->getCamera()->getClearMask());
+        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
+        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
+        rttCamera->setViewport(0, 0, w, h);
+        rttCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
+
+        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+        texture->setInternalFormat(GL_RGB);
+        texture->setTextureSize(w, h);
+        texture->setResizeNonPowerOfTwoHint(false);
+        rttCamera->attach(osg::Camera::COLOR_BUFFER, texture);
+
+        image->setDataType(GL_UNSIGNED_BYTE);
+        image->setPixelFormat(texture->getInternalFormat());
+
+        rttCamera->addChild(mLightRoot);
+
+        mRootNode->addChild(rttCamera);
+
+        mViewer->frame();
+
+        // The draw needs to complete before we can copy back our image.
+        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
+        rttCamera->setFinalDrawCallback(callback);
+        OpenThreads::Mutex m;
+        m.lock();
+        callback->mCondition.wait(&m);
+        m.unlock();
+
+        rttCamera->removeChildren(0, rttCamera->getNumChildren());
+        rttCamera->setGraphicsContext(NULL);
+        mRootNode->removeChild(rttCamera);
+
+        mViewer->getCamera()->setCullMask(oldCullMask);
+    }
+
     void RenderingManager::getCameraToViewportRay(float nX, float nY, osg::Vec3f &origin, osg::Vec3f &dest)
     {
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();

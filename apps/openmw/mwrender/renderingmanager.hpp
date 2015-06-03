@@ -82,6 +82,9 @@ namespace MWRender
         void setWaterEnabled(bool enabled);
         void setWaterHeight(float level);
 
+        /// Take a screenshot of w*h onto the given image, not including the GUI.
+        void screenshot(osg::Image* image, int w, int h);
+
         /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
         /// where (0,0) is the top left corner.
         MWWorld::Ptr getFacedObject(const float nX, const float nY, float maxDistance, bool ignorePlayer);
