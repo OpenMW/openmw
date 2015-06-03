@@ -1,6 +1,7 @@
 
 #include "viewmanager.hpp"
 
+#include <vector>
 #include <map>
 
 #include <QApplication>
@@ -10,6 +11,7 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
@@ -61,38 +63,12 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
 
-    // Columns with QLineEdit editor
-    static const CSMWorld::ColumnBase::Display sIdCompletionColumns[] =
+    std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
+    for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
+         current != idCompletionColumns.end();
+         ++current)
     {
-        CSMWorld::ColumnBase::Display_Cell,
-        CSMWorld::ColumnBase::Display_Class,
-        CSMWorld::ColumnBase::Display_Creature,
-        CSMWorld::ColumnBase::Display_Faction,
-        CSMWorld::ColumnBase::Display_String,
-        CSMWorld::ColumnBase::Display_GlobalVariable,
-        CSMWorld::ColumnBase::Display_Icon,
-        CSMWorld::ColumnBase::Display_Mesh,
-        CSMWorld::ColumnBase::Display_Miscellaneous,
-        CSMWorld::ColumnBase::Display_Music,
-        CSMWorld::ColumnBase::Display_None, // Inplace editing (Table SubView) creates QLineEdit using Display_None
-        CSMWorld::ColumnBase::Display_Npc,
-        CSMWorld::ColumnBase::Display_Race,
-        CSMWorld::ColumnBase::Display_Referenceable,
-        CSMWorld::ColumnBase::Display_Region,
-        CSMWorld::ColumnBase::Display_Script,
-        CSMWorld::ColumnBase::Display_Skill,
-        CSMWorld::ColumnBase::Display_Sound,
-        CSMWorld::ColumnBase::Display_SoundRes,
-        CSMWorld::ColumnBase::Display_Static,
-        CSMWorld::ColumnBase::Display_String,
-        CSMWorld::ColumnBase::Display_Texture,
-        CSMWorld::ColumnBase::Display_Video,
-        CSMWorld::ColumnBase::Display_Weapon
-    };
-
-    for (std::size_t i = 0; i < sizeof(sIdCompletionColumns) / sizeof(CSMWorld::ColumnBase::Display); ++i)
-    {
-        mDelegateFactories->add(sIdCompletionColumns[i], new CSVWorld::IdCompletionDelegateFactory());
+        mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
     }
 
     struct Mapping

@@ -12,7 +12,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
                                                       const QStyleOptionViewItem &option,
                                                       const QModelIndex &index) const
 {
-    return createEditor(parent, option, index, CSMWorld::ColumnBase::Display_None);
+    return createEditor(parent, option, index, getDisplayTypeFromIndex(index));
 }
 
 QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
@@ -20,16 +20,14 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
                                                       const QModelIndex &index,
                                                       CSMWorld::ColumnBase::Display display) const
 {
-    int columnIdData = index.data(CSMWorld::ColumnBase::Role_ColumnId).toInt();
-    CSMWorld::Columns::ColumnId columnId = static_cast<CSMWorld::Columns::ColumnId>(columnIdData);
-    CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();
-
-    QWidget *editor = CSVWorld::CommandDelegate::createEditor(parent, option, index, display);
-    QLineEdit *lineEditor = qobject_cast<QLineEdit *>(editor);
-    if (lineEditor != NULL && completionManager.hasCompleterFor(columnId))
+    if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
     {
-        lineEditor->setCompleter(completionManager.getCompleter(columnId).get());
+        return NULL;
     }
+
+    CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();
+    DropLineEdit *editor = new DropLineEdit(parent);
+    editor->setCompleter(completionManager.getCompleter(display).get());
     return editor;
 }
 
