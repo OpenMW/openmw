@@ -73,17 +73,20 @@ namespace MWMechanics
         float mTimerAttack;
         float mTimerReact;
         float mTimerCombatMove;
+
         bool mReadyToAttack;
         bool mAttack;
         bool mFollowTarget;
         bool mCombatMove;
+
         Ogre::Vector3 mLastTargetPos;
         const MWWorld::CellStore* mCell;
         boost::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
+
+        std::string mLastWeapon;
         float mMinMaxAttackDuration[3][2];
-        bool mMinMaxAttackDurationInitialised;
         bool mForceNoShortcut;
         ESM::Position mShortcutFailPos;
         Ogre::Vector3 mLastActorPos;
@@ -102,7 +105,8 @@ namespace MWMechanics
             mCurrentAction(),
             mActionCooldown(0),
             mStrength(),
-            mMinMaxAttackDurationInitialised(false),
+            mLastWeapon(),
+            mMinMaxAttackDuration(),
             mLastTargetPos(0,0,0),
             mLastActorPos(0,0,0),
             mMovement()
@@ -224,7 +228,6 @@ namespace MWMechanics
         bool& readyToAttack = storage.mReadyToAttack;
         
         // update attack state
-        storage.updateWeaponAttackDurations(actor);
         storage.updateAttack(duration, attacksPeriod);
         actorClass.getCreatureStats(actor).setAttackingOrSpell(storage.mAttack);
 
@@ -278,62 +281,27 @@ namespace MWMechanics
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
-        // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
         const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weaptype = WeapType_None;
-        float weapRange = 1.0f;
 
-        // Get weapon characteristics
-        if (actorClass.hasInventoryStore(actor))
+        if (dynamic_cast<ActionWeapon*>(currentAction.get()))
         {
-            // TODO: Check equipped weapon and equip a different one if we can't attack with it
-            // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
+            weapon = dynamic_cast<ActionWeapon*>(currentAction.get())->getWeapon();
 
-            //Get weapon speed and range
-            MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
-
-            if (weaptype == WeapType_HandToHand)
+            if ((weapon == NULL && storage.mLastWeapon != "handToHand") 
+                || (weapon != NULL && weapon->mModel != storage.mLastWeapon))
             {
-                static float fHandToHandReach =
-                    world->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
-                weapRange = fHandToHandReach;
-            }
-            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell && weaptype != WeapType_None)
-            {
-                // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
-                weapon = weaponSlot->get<ESM::Weapon>()->mBase;
-                weapRange = weapon->mData.mReach;
-            }
-            weapRange *= 100.0f;
-        }
-        else //is creature
-        {
-            weaptype = actorClass.getCreatureStats(actor).getDrawState() == DrawState_Spell ? WeapType_Spell : WeapType_HandToHand;
-            weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
-        }
-
-        bool distantCombat = false;
-        if (weaptype != WeapType_Spell)
-        {
-            // TODO: move to ActionWeapon
-            if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
-            {
-                rangeAttack = 1000;
-                rangeFollow = 0; // not needed in ranged combat
-                distantCombat = true;
-            }
-            else
-            {
-                rangeAttack = weapRange;
-                rangeFollow = 300;
+                storage.updateWeaponAttackDurations(actor);
+                if (weapon == NULL) storage.mLastWeapon = "handToHand"; // for local use
             }
         }
-        else
+        else if (dynamic_cast<ActionSpell*>(currentAction.get())
+            && storage.mLastWeapon != dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId())
         {
-            distantCombat = (rangeAttack > 500);
-            weapRange = 150.f;
+            storage.updateWeaponAttackDurations(actor);
+            storage.mLastWeapon = dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId(); // for local use
         }
+
+        bool distantCombat = (rangeAttack > 500);
 
         // start new attack
         bool newAttack = storage.startAttack(distantCombat, weapon, attacksPeriod);
@@ -426,7 +394,7 @@ namespace MWMechanics
             if (distantCombat)
             {
                 Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
-                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weaptype, storage.mStrength);
+                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weapon ? weapon->mData.mType : 0, storage.mStrength);
                 lastTargetPos = vTargetPos;
                 movement.mRotation[0] = getXAngleToDir(vAimDir);
                 movement.mRotation[2] = getZAngleToDir(vAimDir);
@@ -442,12 +410,12 @@ namespace MWMechanics
             {
                 //Close-up combat: just run up on target
                 storage.stopCombatMove();
+                readyToAttack = false;
                 movement.mPosition[1] = 1;
             }
             else // (within attack dist)
             {
                 storage.startCombatMove(actorClass.isNpc(), distantCombat, distToTarget, rangeAttack);
-
                 readyToAttack = true;
                 //only once got in melee combat, actor is allowed to use close-up shortcutting
                 followTarget = true;
@@ -496,7 +464,7 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1]);
+                mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], 64);
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)
@@ -538,7 +506,7 @@ namespace MWMechanics
             // special run attack; it shouldn't affect melee combat tactics
             if (actorClass.getMovementSettings(actor).mPosition[1] == 1)
             {
-                storage.startRunAttack(actor, target, attacksPeriod, distToTarget, weapRange);
+                storage.startRunAttack(actor, target, attacksPeriod, distToTarget, rangeAttack);
             }
         }
 
@@ -682,12 +650,7 @@ namespace MWMechanics
     
     void AiCombatStorage::updateWeaponAttackDurations(const MWWorld::Ptr& actor)
     {
-        if (mReadyToAttack && !mMinMaxAttackDurationInitialised)
-        {
-            // TODO: this must be updated when a different weapon is equipped
-            getMinMaxAttackDuration(actor, mMinMaxAttackDuration);
-            mMinMaxAttackDurationInitialised = true;
-        }
+        getMinMaxAttackDuration(actor, mMinMaxAttackDuration);
     }
 
     void AiCombatStorage::updateAttack(float duration, float attacksPeriod)

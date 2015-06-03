@@ -401,6 +401,11 @@ namespace MWMechanics
         suggestCombatRange(types, rangeAttack, rangeFollow);
     }
 
+    const std::string& ActionSpell::getSpellId() const
+    {
+        return mSpellId;
+    }
+
     void ActionEnchantedItem::prepare(const MWWorld::Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(std::string());
@@ -432,6 +437,8 @@ namespace MWMechanics
     {
         if (actor.getClass().hasInventoryStore(actor))
         {
+            mIsNpc = true;
+
             if (mWeapon.isEmpty())
                 actor.getClass().getInventoryStore(actor).unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, actor);
             else
@@ -446,12 +453,50 @@ namespace MWMechanics
                 equip.execute(actor);
             }
         }
+        else
+        {
+            mIsNpc = false;
+        }
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Weapon);
     }
 
     void ActionWeapon::getCombatRange(float& rangeAttack, float& rangeFollow)
     {
-        // Already done in AiCombat itself
+        rangeFollow = 300.f;
+
+        if (mWeapon.isEmpty()) 
+        {
+            if (!mIsNpc) 
+                rangeAttack = 200.f; // TODO: use true attack range (the same problem in Creature::hit)
+            else
+            {
+                static float fHandToHandReach =
+                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
+
+                rangeAttack = fHandToHandReach;
+            }
+            return;
+        }
+
+        const ESM::Weapon* weapon = mWeapon.get<ESM::Weapon>()->mBase;
+
+        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        {
+            rangeAttack = 1000.f;
+            rangeFollow = 0.f; // not needed here
+        }
+        else
+        {
+            rangeAttack = weapon->mData.mReach;
+            rangeAttack *= 100.0f;
+        }
+    }
+
+    const ESM::Weapon* ActionWeapon::getWeapon() const
+    {
+        if (mWeapon.isEmpty())
+            return NULL;
+        return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
     boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
