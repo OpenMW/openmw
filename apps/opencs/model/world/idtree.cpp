@@ -41,7 +41,7 @@ QVariant CSMWorld::IdTree::data  (const QModelIndex & index, int role) const
         const NestableColumn *parentColumn = mNestedCollection->getNestableColumn(parentAddress.second);
 
         if (role == ColumnBase::Role_Display)
-            return parentColumn->nestedColumn(index.column()).mColumnId;
+            return parentColumn->nestedColumn(index.column()).mDisplayType;
 
         if (role == ColumnBase::Role_ColumnId)
             return parentColumn->nestedColumn(index.column()).mColumnId;
