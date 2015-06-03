@@ -41,6 +41,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
     void InputWrapper::capture(bool windowEventsOnly)
     {
+        mViewer->getEventQueue()->frame(0.f);
+
         SDL_PumpEvents();
 
         SDL_Event evt;

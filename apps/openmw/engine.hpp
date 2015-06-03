@@ -53,6 +53,11 @@ namespace Files
     struct ConfigurationManager;
 }
 
+namespace osgViewer
+{
+    class ScreenCaptureHandler;
+}
+
 struct SDL_Window;
 
 namespace OMW
@@ -70,6 +75,7 @@ namespace OMW
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             bool mVerboseScripts;

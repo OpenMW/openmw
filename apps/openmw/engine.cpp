@@ -7,6 +7,7 @@
 
 #include <osgViewer/ViewerEventHandlers>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 
 #include <SDL.h>
 
@@ -532,6 +533,54 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     }
 }
 
+class WriteScreenshotToFileOperation : public osgViewer::ScreenCaptureHandler::CaptureOperation
+{
+public:
+    WriteScreenshotToFileOperation(const std::string& screenshotPath, const std::string& screenshotFormat)
+        : mScreenshotPath(screenshotPath)
+        , mScreenshotFormat(screenshotFormat)
+    {
+    }
+
+    virtual void operator()(const osg::Image& image, const unsigned int context_id)
+    {
+        // Count screenshots.
+        int shotCount = 0;
+
+        // Find the first unused filename with a do-while
+        std::ostringstream stream;
+        do
+        {
+            // Reset the stream
+            stream.str("");
+            stream.clear();
+
+            stream << mScreenshotPath << "/screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << mScreenshotFormat;
+
+        } while (boost::filesystem::exists(stream.str()));
+
+        boost::filesystem::ofstream outStream;
+        outStream.open(boost::filesystem::path(stream.str()), std::ios::binary);
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension(mScreenshotFormat);
+        if (!readerwriter)
+        {
+            std::cerr << "Can't write screenshot, no '" << mScreenshotFormat << "' readerwriter found" << std::endl;
+            return;
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
+        if (!result.success())
+        {
+            std::cerr << "Can't write screenshot: " << result.message() << std::endl;
+        }
+    }
+
+private:
+    std::string mScreenshotPath;
+    std::string mScreenshotFormat;
+};
+
 // Initialise and enter main loop.
 
 void OMW::Engine::go()
@@ -556,6 +605,10 @@ void OMW::Engine::go()
     std::string settingspath;
 
     settingspath = loadSettings (settings);
+
+    mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
+        Settings::Manager::getString("screenshot format", "General")));
+    mViewer->addEventHandler(mScreenCaptureHandler);
 
     // Create encoder
     ToUTF8::Utf8Encoder encoder (mEncoding);
@@ -639,24 +692,8 @@ void OMW::Engine::activate()
 
 void OMW::Engine::screenshot()
 {
-    // Count screenshots.
-    int shotCount = 0;
-
-    const std::string& screenshotPath = mCfgMgr.getUserDataPath().string();
-    std::string format = Settings::Manager::getString("screenshot format", "General");
-    // Find the first unused filename with a do-while
-    std::ostringstream stream;
-    do
-    {
-        // Reset the stream
-        stream.str("");
-        stream.clear();
-
-        stream << screenshotPath << "screenshot" << std::setw(3) << std::setfill('0') << shotCount++ << "." << format;
-
-    } while (boost::filesystem::exists(stream.str()));
-
-    //mOgre->screenshot(stream.str(), format);
+    mScreenCaptureHandler->setFramesToCapture(1);
+    mScreenCaptureHandler->captureNextFrame(*mViewer);
 }
 
 void OMW::Engine::setCompileAll (bool all)
