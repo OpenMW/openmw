@@ -104,6 +104,11 @@ void TerrainGrid::loadCell(int x, int y)
     osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array);
 
+    osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
+    positions->setVertexBufferObject(vbo);
+    normals->setVertexBufferObject(vbo);
+    colors->setVertexBufferObject(vbo);
+
     mStorage->fillVertexBuffers(0, 1, center, positions, normals, colors);
 
     osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);

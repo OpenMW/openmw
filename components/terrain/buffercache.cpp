@@ -218,6 +218,9 @@ namespace Terrain
             }
         }
 
+        // Assign a VBO here to enable state sharing between different Geometries.
+        uvs->setVertexBufferObject(new osg::VertexBufferObject);
+
         mUvBufferMap[mNumVerts] = uvs;
         return uvs;
     }
@@ -237,6 +240,9 @@ namespace Terrain
             buffer = createIndexBuffer<osg::DrawElementsUShort>(flags, verts);
         else
             buffer = createIndexBuffer<osg::DrawElementsUInt>(flags, verts);
+
+        // Assign a EBO here to enable state sharing between different Geometries.
+        buffer->setElementBufferObject(new osg::ElementBufferObject);
 
         mIndexBufferMap[flags] = buffer;
         return buffer;
