@@ -2638,42 +2638,32 @@ namespace MWWorld
         float distance = 192.f; // ??
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
 
-        if (actor == getPlayerPtr())
-        {
-            // For the player, use camera to aim
-            target = getFacedObject(distance);
-            if (!target.isEmpty())
-                hitPosition = target.getRefData().getPosition().asVec3();
-        }
-        else
-        {
-            // For NPCs use facing direction from Head node
-            osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
+        // For NPCs use facing direction from Head node
+        osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
 
-            MWRender::Animation* anim = mRendering->getAnimation(actor);
-            if (anim != NULL)
+        MWRender::Animation* anim = mRendering->getAnimation(actor);
+        if (anim != NULL)
+        {
+            const osg::Node* node = anim->getNode("Head");
+            if (node == NULL)
+                node = anim->getNode("Bip01 Head");
+            if (node != NULL)
             {
-                const osg::Node* node = anim->getNode("Head");
-                if (node == NULL)
-                    node = anim->getNode("Bip01 Head");
-                if (node != NULL)
-                {
-                    osg::MatrixList mats = node->getWorldMatrices();
-                    if (mats.size())
-                        origin = mats[0].getTrans();
-                }
+                osg::MatrixList mats = node->getWorldMatrices();
+                if (mats.size())
+                    origin = mats[0].getTrans();
             }
-
-            osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
-                    * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
-
-            osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
-            osg::Vec3f dest = origin + direction * distance;
-
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, actor);
-            target = result.mHitObject;
-            hitPosition = result.mHitPos;
         }
+
+        osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
+
+        osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+        osg::Vec3f dest = origin + direction * distance;
+
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, actor);
+        target = result.mHitObject;
+        hitPosition = result.mHitPos;
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
