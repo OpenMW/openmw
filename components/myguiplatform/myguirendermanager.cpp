@@ -453,8 +453,12 @@ bool RenderManager::isFormatSupported(MyGUI::PixelFormat /*format*/, MyGUI::Text
 
 MyGUI::ITexture* RenderManager::createTexture(const std::string &name)
 {
-    MapTexture::const_iterator item = mTextures.find(name);
-    MYGUI_PLATFORM_ASSERT(item == mTextures.end(), "Texture '"<<name<<"' already exist");
+    MapTexture::iterator item = mTextures.find(name);
+    if (item != mTextures.end())
+    {
+        delete item->second;
+        mTextures.erase(item);
+    }
 
     OSGTexture* texture = new OSGTexture(name, mTextureManager);
     mTextures.insert(std::make_pair(name, texture));

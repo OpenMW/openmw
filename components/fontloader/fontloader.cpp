@@ -12,6 +12,7 @@
 #include <MyGUI_ResourceManualFont.h>
 #include <MyGUI_XmlDocument.h>
 #include <MyGUI_FactoryManager.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/vfs/manager.hpp>
 
@@ -275,18 +276,13 @@ namespace Gui
 
         std::string textureName = name;
 
-        osg::ref_ptr<osg::Image> image = new osg::Image;
-
-        image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
-        assert (image->isDataContiguous());
-
-        memcpy(image->data(), &textureData[0], textureData.size());
-
-        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
-        texture->setImage(image);
-
         if (exportToFile)
         {
+            osg::ref_ptr<osg::Image> image = new osg::Image;
+            image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+            assert (image->isDataContiguous());
+            memcpy(image->data(), &textureData[0], textureData.size());
+
             std::cout << "Writing " << resourceName + ".png" << std::endl;
             osgDB::writeImageFile(*image, resourceName + ".png");
         }
@@ -295,9 +291,23 @@ namespace Gui
         MyGUI::ResourceManualFont* font = static_cast<MyGUI::ResourceManualFont*>(
                     MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceManualFont"));
         mFonts.push_back(font);
+
+        MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture(bitmapFilename);
+        tex->createManual(width, height, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
+        unsigned char* texData = reinterpret_cast<unsigned char*>(tex->lock(MyGUI::TextureUsage::Write));
+        memcpy(texData, &textureData[0], textureData.size());
+        tex->unlock();
+
+        font->setSource(bitmapFilename);
+
+        // Using ResourceManualFont::setTexture, enable for MyGUI 3.2.3
+        /*
+        osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
+        texture->setImage(image);
         osgMyGUI::OSGTexture* myguiTex = new osgMyGUI::OSGTexture(texture);
         mTextures.push_back(myguiTex);
         font->setTexture(myguiTex);
+        */
 
         // We need to emulate loading from XML because the data members are private as of mygui 3.2.0
         MyGUI::xml::Document xmlDocument;
