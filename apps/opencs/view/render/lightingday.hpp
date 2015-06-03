@@ -3,11 +3,6 @@
 
 #include "lighting.hpp"
 
-namespace Ogre
-{
-    class Light;
-}
-
 namespace CSVRender
 {
     class LightingDay : public Lighting

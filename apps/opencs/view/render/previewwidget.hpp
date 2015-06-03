@@ -3,7 +3,6 @@
 
 #include "scenewidget.hpp"
 
-#include "navigationorbit.hpp"
 #include "object.hpp"
 
 class QModelIndex;
@@ -25,7 +24,6 @@ namespace CSVRender
             Q_OBJECT
 
             CSMWorld::Data& mData;
-            CSVRender::NavigationOrbit mOrbit;
             CSVRender::Object mObject;
 
         public:

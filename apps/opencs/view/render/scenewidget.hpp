@@ -29,7 +29,6 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-    class Navigation;
     class Lighting;
 
     class RenderWidget : public QWidget

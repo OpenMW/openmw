@@ -17,7 +17,6 @@
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
-#include "navigation.hpp"
 #include "lighting.hpp"
 
 namespace CSVRender
