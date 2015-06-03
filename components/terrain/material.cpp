@@ -28,6 +28,7 @@
 #include <osg/Texture2D>
 #include <osg/TexMat>
 #include <osg/Material>
+#include <osg/TexEnvCombine>
 
 #include <osg/io_utils>
 
@@ -66,6 +67,12 @@ namespace Terrain
                 texMat.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
 
                 stateset->setTextureAttributeAndModes(texunit, new osg::TexMat(texMat));
+
+                osg::ref_ptr<osg::TexEnvCombine> texEnvCombine (new osg::TexEnvCombine);
+                texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+                texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+
+                stateset->setTextureAttributeAndModes(texunit, texEnvCombine, osg::StateAttribute::ON);
 
                 ++texunit;
             }
