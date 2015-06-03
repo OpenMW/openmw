@@ -99,12 +99,15 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
     {
         const MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
 
-        std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
-        fog->mFogTextures.push_back(ESM::FogTexture());
+        if (segment.mFogOfWarImage && segment.mHasFogState)
+        {
+            std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
+            fog->mFogTextures.push_back(ESM::FogTexture());
 
-        segment.saveFogOfWar(fog->mFogTextures.back());
+            segment.saveFogOfWar(fog->mFogTextures.back());
 
-        cell->setFog(fog.release());
+            cell->setFog(fog.release());
+        }
     }
     else
     {
@@ -133,6 +136,8 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
 
+                // saving even if !segment.mHasFogState so we don't mess up the segmenting
+                // plus, older openmw versions can't deal with empty images
                 segment.saveFogOfWar(fog->mFogTextures.back());
 
                 fog->mFogTextures.back().mX = x;
@@ -644,7 +649,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
 
 void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
 {
-    if (!mFogOfWarImage || !mHasFogState)
+    if (!mFogOfWarImage)
         return;
 
     std::ostringstream ostream;
