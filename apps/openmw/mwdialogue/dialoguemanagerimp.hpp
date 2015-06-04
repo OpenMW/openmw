@@ -45,7 +45,6 @@ namespace MWDialogue
 
             float mTemporaryDispositionChange;
             float mPermanentDispositionChange;
-            bool mScriptVerbose;
 
             void parseText (const std::string& text);
 
