@@ -906,7 +906,7 @@ namespace CSMWorld
 
     NestedTableWrapperBase* RaceAttributeAdapter::table(const Record<ESM::Race>& record) const
     {
-        std::vector<typename ESM::Race::RADTstruct> wrap;
+        std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
@@ -983,7 +983,7 @@ namespace CSMWorld
 
     NestedTableWrapperBase* RaceSkillsBonusAdapter::table(const Record<ESM::Race>& record) const
     {
-        std::vector<typename ESM::Race::RADTstruct> wrap;
+        std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
