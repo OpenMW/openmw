@@ -114,6 +114,7 @@ void CompanionWindow::open(const MWWorld::Ptr& npc)
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
     mItemView->setModel(mSortModel);
+    mItemView->resetScrollBars();
 
     setTitle(npc.getClass().getName(npc));
 }

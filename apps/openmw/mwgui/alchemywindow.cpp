@@ -130,6 +130,7 @@ namespace MWGui
         mSortModel = new SortFilterItemModel(model);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         mNameEdit->setCaption("");
 
