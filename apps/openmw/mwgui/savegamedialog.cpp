@@ -73,7 +73,7 @@ namespace MWGui
     void SaveGameDialog::confirmDeleteSave()
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sMessage3}");
+        dialog->askForConfirmation("#{sMessage3}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
         dialog->eventCancelClicked.clear();
@@ -232,7 +232,7 @@ namespace MWGui
             if (mCurrentSlot != NULL && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sMessage4}");
+                dialog->askForConfirmation("#{sMessage4}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();

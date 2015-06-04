@@ -271,7 +271,7 @@ namespace MWGui
             return;
 
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sNotifyMessage67}");
+        dialog->askForConfirmation("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
@@ -540,7 +540,7 @@ namespace MWGui
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sNotifyMessage66}");
+        dialog->askForConfirmation("#{sNotifyMessage66}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);
         dialog->eventCancelClicked.clear();

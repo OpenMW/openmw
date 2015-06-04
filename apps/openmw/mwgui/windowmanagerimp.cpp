@@ -1524,7 +1524,7 @@ namespace MWGui
     void WindowManager::showCompanionWindow(MWWorld::Ptr actor)
     {
         pushGuiMode(MWGui::GM_Companion);
-        mCompanionWindow->open(actor);
+        mCompanionWindow->openCompanion(actor);
     }
 
     void WindowManager::changePointer(const std::string &name)
@@ -1927,19 +1927,19 @@ namespace MWGui
     void WindowManager::openContainer(const MWWorld::Ptr &container, bool loot)
     {
         pushGuiMode(GM_Container);
-        mContainerWindow->open(container, loot);
+        mContainerWindow->openContainer(container, loot);
     }
 
     void WindowManager::showBook(const MWWorld::Ptr &item, bool showTakeButton)
     {
         pushGuiMode(GM_Book);
-        mBookWindow->open(item, showTakeButton);
+        mBookWindow->openBook(item, showTakeButton);
     }
 
     void WindowManager::showScroll(const MWWorld::Ptr &item, bool showTakeButton)
     {
         pushGuiMode(GM_Scroll);
-        mScrollWindow->open(item, showTakeButton);
+        mScrollWindow->openScroll(item, showTakeButton);
     }
 
     std::string WindowManager::correctIconPath(const std::string& path)

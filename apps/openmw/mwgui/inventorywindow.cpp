@@ -237,7 +237,7 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
-            dialog->open(object.getClass().getName(object), message, count);
+            dialog->openCountDialog(object.getClass().getName(object), message, count);
             dialog->eventOkClicked.clear();
             if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
