@@ -162,7 +162,8 @@ void TerrainGrid::loadCell(int x, int y)
         textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(0, layerTextures.back());
     }
 
-    for (unsigned int i=0; i<blendmapTextures.size()+1; ++i)
+    // use texture coordinates for both texture units, the layer texture and blend texture
+    for (unsigned int i=0; i<2; ++i)
         geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
     osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(layerTextures, blendmapTextures));
