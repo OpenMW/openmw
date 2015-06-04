@@ -30,13 +30,22 @@ namespace
     {
     public:
         CameraUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
-            : mCamera(cam), mParent(parent)
+            : mRendered(false)
+            , mCamera(cam)
+            , mParent(parent)
         {
         }
 
         virtual void operator()(osg::Node*, osg::NodeVisitor*)
         {
-            mParent->markForRemoval(mCamera);
+            if (mRendered)
+                mCamera->setNodeMask(0);
+
+            if (!mRendered)
+            {
+                mRendered = true;
+                mParent->markForRemoval(mCamera);
+            }
 
             // Note, we intentionally do not traverse children here. The map camera's scene data is the same as the master camera's,
             // so it has been updated already.
@@ -44,6 +53,7 @@ namespace
         }
 
     private:
+        bool mRendered;
         osg::ref_ptr<osg::Camera> mCamera;
         MWRender::LocalMap* mParent;
     };

@@ -63,17 +63,31 @@ namespace
     {
     public:
         CameraUpdateCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
-            : mCamera(cam), mParent(parent)
+            : mRendered(false)
+            , mCamera(cam)
+            , mParent(parent)
         {
         }
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
-            mParent->markForRemoval(mCamera);
+            if (mRendered)
+            {
+                mCamera->setNodeMask(0);
+                return;
+            }
+
             traverse(node, nv);
+
+            if (!mRendered)
+            {
+                mRendered = true;
+                mParent->markForRemoval(mCamera);
+            }
         }
 
     private:
+        bool mRendered;
         osg::ref_ptr<osg::Camera> mCamera;
         MWRender::GlobalMap* mParent;
     };
