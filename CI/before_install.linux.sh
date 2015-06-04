@@ -15,6 +15,7 @@ sudo apt-get install -qq libgtest-dev google-mock
 sudo apt-get install -qq libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-thread-dev
 sudo apt-get install -qq libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
 sudo apt-get install -qq libbullet-dev libopenscenegraph-dev libmygui-dev libsdl2-dev libunshield-dev libtinyxml-dev libopenal-dev libqt4-dev
+sudo apt-get install -qq cmake-data #workaround for broken osgqt cmake script in ubuntu 12.04
 if [ "${ANALYZE}" ]; then sudo apt-get install -qq clang-3.6; fi
 sudo mkdir /usr/src/gtest/build
 cd /usr/src/gtest/build
