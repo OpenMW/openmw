@@ -119,7 +119,10 @@ private:
 class CloudUpdater : public SceneUtil::StateSetUpdater
 {
 public:
-    void setAnimationTimer(float timer);
+    void setAnimationTimer(float timer)
+    {
+        mAnimationTimer = timer;
+    }
 
     void setTexture(osg::ref_ptr<osg::Texture2D> texture)
     {
@@ -143,9 +146,8 @@ protected:
 
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
-        mAnimationTimer = nv->getFrameStamp()->getSimulationTime()*0.05;
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
-        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(mAnimationTimer, mAnimationTimer, 0.f)));
+        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, mAnimationTimer, 0.f)));
 
         stateset->setTextureAttributeAndModes(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
@@ -604,7 +606,8 @@ void SkyManager::update(float duration)
     updateRain(duration);
 
     // UV Scroll the clouds
-    mCloudAnimationTimer += duration * mCloudSpeed;
+    mCloudAnimationTimer += duration * mCloudSpeed * 0.003;
+    mCloudUpdater->setAnimationTimer(mCloudAnimationTimer);
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
