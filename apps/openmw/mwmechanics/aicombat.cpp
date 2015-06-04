@@ -79,9 +79,6 @@ namespace
 
 namespace MWMechanics
 {
-    static const float DOOR_CHECK_INTERVAL = 1.5f; // same as AiWander
-    // NOTE: MIN_DIST_TO_DOOR_SQUARED is defined in obstacle.hpp
-
     
     /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
     struct AiCombatStorage : AiTemporaryBase
