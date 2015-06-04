@@ -274,8 +274,6 @@ namespace Gui
         else if (name.size() >= 7 && Misc::StringUtils::ciEqual(name.substr(0, 7), "daedric"))
             resourceName = "Daedric";
 
-        std::string textureName = name;
-
         if (exportToFile)
         {
             osg::ref_ptr<osg::Image> image = new osg::Image;
@@ -298,8 +296,6 @@ namespace Gui
         memcpy(texData, &textureData[0], textureData.size());
         tex->unlock();
 
-        font->setSource(bitmapFilename);
-
         // Using ResourceManualFont::setTexture, enable for MyGUI 3.2.3
         /*
         osg::ref_ptr<osg::Texture2D> texture = new osg::Texture2D;
@@ -319,7 +315,7 @@ namespace Gui
         defaultHeight->addAttribute("value", fontSize);
         MyGUI::xml::ElementPtr source = root->createChild("Property");
         source->addAttribute("key", "Source");
-        source->addAttribute("value", std::string(textureName));
+        source->addAttribute("value", std::string(bitmapFilename));
         MyGUI::xml::ElementPtr codes = root->createChild("Codes");
 
         for(int i = 0; i < 256; i++)
