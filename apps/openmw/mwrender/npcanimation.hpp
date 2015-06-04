@@ -90,8 +90,6 @@ private:
     };
     NpcType mNpcType;
 
-    int mVisibilityFlags;
-
     int mPartslots[ESM::PRT_Count];  //Each part slot is taken by clothing, armor, or is empty
     int mPartPriorities[ESM::PRT_Count];
 

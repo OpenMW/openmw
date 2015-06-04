@@ -95,13 +95,9 @@ protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
     private:
-        Animation *mAnimation;
         boost::shared_ptr<float> mTimePtr;
 
     public:
-        AnimationTime(Animation *anim)
-          : mAnimation(anim)
-        { }
 
         void setTimePtr(boost::shared_ptr<float> time)
         { mTimePtr = time; }

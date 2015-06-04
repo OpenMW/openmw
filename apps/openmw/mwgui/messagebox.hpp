@@ -88,7 +88,6 @@ namespace MWGui
             MyGUI::Widget* mButtonsWidget;
             std::vector<MyGUI::Button*> mButtons;
 
-            int mTextButtonPadding;
             int mButtonPressed;
     };
 

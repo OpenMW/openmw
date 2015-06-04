@@ -99,9 +99,6 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
-            Resource::ResourceSystem* mResourceSystem;
-            osgViewer::Viewer* mViewer;
-
             std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
             std::auto_ptr<MWRender::InventoryPreview> mPreview;
 

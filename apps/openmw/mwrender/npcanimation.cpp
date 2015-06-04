@@ -242,7 +242,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
-    mVisibilityFlags(visibilityFlags),
     mAlpha(1.f),
     mSoundsDisabled(disableSounds),
     mHeadYawRadians(0.f),

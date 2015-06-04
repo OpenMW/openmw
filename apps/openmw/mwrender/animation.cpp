@@ -240,7 +240,7 @@ namespace MWRender
         , mTextKeyListener(NULL)
     {
         for(size_t i = 0;i < sNumGroups;i++)
-            mAnimationTimePtr[i].reset(new AnimationTime(this));
+            mAnimationTimePtr[i].reset(new AnimationTime);
     }
 
     Animation::~Animation()

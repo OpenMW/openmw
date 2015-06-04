@@ -61,8 +61,6 @@ namespace MWGui
         , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
-        , mResourceSystem(resourceSystem)
-        , mViewer(viewer)
         , mPreview(new MWRender::InventoryPreview(viewer, resourceSystem, MWBase::Environment::get().getWorld()->getPlayerPtr()))
         , mTrading(false)
     {
