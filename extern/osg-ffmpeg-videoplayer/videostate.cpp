@@ -2,11 +2,6 @@
 
 #include <iostream>
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-#include <stdint.h>
-
 #include <osg/Texture2D>
 
 extern "C"
