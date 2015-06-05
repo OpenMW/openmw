@@ -1827,7 +1827,7 @@ namespace MWWorld
         if (result.mHit)
         {
             // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
-            if (std::acos(result.mHitNormalWorld * osg::Vec3f(0,0,1)) >= osg::DegreesToRadians(30.f))
+            if (std::acos((result.mHitNormalWorld/result.mHitNormalWorld.length()) * osg::Vec3f(0,0,1)) >= osg::DegreesToRadians(30.f))
                 return false;
 
             return true;

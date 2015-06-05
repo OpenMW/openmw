@@ -855,7 +855,8 @@ void CharacterController::updateIdleStormState()
     {
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
-        inStormDirection = std::acos(stormDirection * characterDirection) > osg::DegreesToRadians(120.f);
+        inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
+                > osg::DegreesToRadians(120.f);
     }
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
