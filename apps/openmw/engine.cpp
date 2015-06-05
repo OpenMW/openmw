@@ -350,11 +350,28 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
             std::cerr << "SDL error: " << SDL_GetError() << std::endl;
     }
 
-    mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
-    if (mWindow == NULL)
+    while (!mWindow)
     {
-        std::cerr << "Failed to create SDL window: " << SDL_GetError() << std::endl;
-        return;
+        mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
+        if (!mWindow)
+        {
+            // Try with a lower AA
+            if (antialiasing > 0)
+            {
+                std::cout << "Note: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2 << std::endl;
+                antialiasing /= 2;
+                Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+                if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing) != 0)
+                    std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+                continue;
+            }
+            else
+            {
+                std::stringstream error;
+                error << "Failed to create SDL window: " << SDL_GetError() << std::endl;
+                throw std::runtime_error(error.str());
+            }
+        }
     }
 
     setWindowIcon();
