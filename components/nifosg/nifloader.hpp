@@ -59,7 +59,7 @@ namespace NifOsg
         static void loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target);
 
         /// Set whether or not nodes marked as "MRK" should be shown.
-        /// These should be hidden ingame, but visible in the editior.
+        /// These should be hidden ingame, but visible in the editor.
         /// Default: false.
         static void setShowMarkers(bool show);
 
