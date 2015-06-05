@@ -296,8 +296,8 @@ namespace MWGui
         mEditString.clear();
 
         // Reset the command line before the command execution.
-        // It prevents re-triggering the acceptCommand() event during
-        // the actual command execution.
+        // It prevents the re-triggering of the acceptCommand() event for the same command 
+        // during the actual command execution
         mCommandLine->setCaption("");
 
         execute (cm);
