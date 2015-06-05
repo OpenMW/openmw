@@ -28,8 +28,8 @@ namespace ESMTerrain
 
         osg::Vec2f origin = center - osg::Vec2f(size/2.f, size/2.f);
 
-        assert(origin.x == (int) origin.x());
-        assert(origin.y == (int) origin.y());
+        assert(origin.x() == (int) origin.x());
+        assert(origin.y() == (int) origin.y());
 
         int cellX = static_cast<int>(origin.x());
         int cellY = static_cast<int>(origin.y());
