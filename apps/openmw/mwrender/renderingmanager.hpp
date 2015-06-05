@@ -85,15 +85,22 @@ namespace MWRender
         /// Take a screenshot of w*h onto the given image, not including the GUI.
         void screenshot(osg::Image* image, int w, int h);
 
+        struct RayResult
+        {
+            bool mHit;
+            osg::Vec3f mHitNormalWorld;
+            osg::Vec3f mHitPointWorld;
+            MWWorld::Ptr mHitObject;
+        };
+
+        RayResult castRay(const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors=false);
+
         /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
         /// where (0,0) is the top left corner.
-        MWWorld::Ptr getFacedObject(const float nX, const float nY, float maxDistance, bool ignorePlayer);
+        RayResult castCameraToViewportRay(const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors=false);
 
         /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
         osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
-
-        /// Get a camera to viewport ray for normalized screen coordinates nX and nY, with the top left corner being at (0,0)
-        void getCameraToViewportRay(float nX, float nY, osg::Vec3f& origin, osg::Vec3f& dest);
 
         void setSkyEnabled(bool enabled);
 

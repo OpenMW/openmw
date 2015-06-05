@@ -1662,11 +1662,11 @@ namespace MWWorld
         {
             float x, y;
             MWBase::Environment::get().getWindowManager()->getMousePosition(x, y);
-            return mRendering->getFacedObject(x, y, maxDistance, ignorePlayer);
+            return mRendering->castCameraToViewportRay(x, y, maxDistance, ignorePlayer).mHitObject;
         }
         else
         {
-            return mRendering->getFacedObject(0.5f, 0.5f, maxDistance, ignorePlayer);
+            return mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer).mHitObject;
         }
     }
 
@@ -1790,25 +1790,18 @@ namespace MWWorld
 
     MWWorld::Ptr World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
     {
-        osg::Vec3f origin, dest;
-        mRendering->getCameraToViewportRay(cursorX, cursorY, origin, dest);
-
         const float maxDist = 200.f;
-        osg::Vec3f dir = (dest - origin);
-        dir.normalize();
-        dest = origin + dir * maxDist;
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, MWWorld::Ptr(),
-            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+        MWRender::RenderingManager::RayResult result = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
 
         CellStore* cell = getPlayerPtr().getCell();
 
         ESM::Position pos = getPlayerPtr().getRefData().getPosition();
         if (result.mHit)
         {
-            pos.pos[0] = result.mHitPos.x();
-            pos.pos[1] = result.mHitPos.y();
-            pos.pos[2] = result.mHitPos.z();
+            pos.pos[0] = result.mHitPointWorld.x();
+            pos.pos[1] = result.mHitPointWorld.y();
+            pos.pos[2] = result.mHitPointWorld.z();
         }
         // We want only the Z part of the player's rotation
         pos.rot[0] = 0;
@@ -1828,21 +1821,13 @@ namespace MWWorld
 
     bool World::canPlaceObject(float cursorX, float cursorY)
     {
-        osg::Vec3f origin, dest;
-        mRendering->getCameraToViewportRay(cursorX, cursorY, origin, dest);
-
         const float maxDist = 200.f;
-        osg::Vec3f dir = (dest - origin);
-        dir.normalize();
-        dest = origin + dir * maxDist;
-
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, MWWorld::Ptr(),
-            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+        MWRender::RenderingManager::RayResult result = mRendering->castCameraToViewportRay(cursorX, cursorY, maxDist, true, true);
 
         if (result.mHit)
         {
             // check if the wanted position is on a flat surface, and not e.g. against a vertical wall
-            if (std::acos(result.mHitNormal * osg::Vec3f(0,0,1)) >= osg::DegreesToRadians(30.f))
+            if (std::acos(result.mHitNormalWorld * osg::Vec3f(0,0,1)) >= osg::DegreesToRadians(30.f))
                 return false;
 
             return true;
@@ -1925,10 +1910,9 @@ namespace MWWorld
 
         float len = 100.0;
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(orig, orig+dir*len, MWWorld::Ptr(),
-            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+        MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig+dir*len, true, true);
         if (result.mHit)
-            pos.pos[2] = result.mHitPos.z();
+            pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
         int origCount = object.getRefData().getCount();
