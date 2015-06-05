@@ -294,10 +294,9 @@ namespace MWGui
             mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
+        mCommandLine->setCaption("");
 
         execute (cm);
-
-        mCommandLine->setCaption("");
     }
 
     std::string Console::complete( std::string input, std::vector<std::string> &matches )
