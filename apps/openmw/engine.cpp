@@ -411,6 +411,11 @@ void OMW::Engine::setWindowIcon()
     if (windowIconStream.fail())
         std::cerr << "Failed to open " << windowIcon << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+    if (!reader)
+    {
+        std::cerr << "Failed to read window icon, no png readerwriter found" << std::endl;
+        return;
+    }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
     if (!result.success())
         std::cerr << "Failed to read " << windowIcon << ": " << result.message() << std::endl;
