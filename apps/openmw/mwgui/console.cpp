@@ -294,6 +294,10 @@ namespace MWGui
             mCommandHistory.push_back(cm);
         mCurrent = mCommandHistory.end();
         mEditString.clear();
+
+        // Reset the command line before the command execution.
+        // It prevents re-triggering the acceptCommand() event during
+        // the actual command execution.
         mCommandLine->setCaption("");
 
         execute (cm);
