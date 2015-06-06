@@ -180,7 +180,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 //
 // - If a line in file exists with matching key and first part of value (before ',',
 //   '\n', etc) also matches, then replace the line with that of mUserSettings.
-// - else remove line (maybe replace the line with '#' in front instead?)
+// - else remove line (TODO: maybe replace the line with '#' in front instead?)
 //
 // - If there is no corresponding line in file, add at the end
 //
@@ -224,10 +224,10 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     }
 
     QString keyVal;
-	for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
     {
         // skip empty or comment lines
-        if ((*iter).isEmpty() || (*iter).startsWith("#"))
+        if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
             continue;
 
         // look for a key in the line
@@ -257,12 +257,14 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     // write the new config file
     QString key;
     QString value;
-	for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
     {
         if ((*iter).isNull())
             continue;
 
-        if ((*iter).isEmpty() || (*iter).startsWith("#"))
+        // Below is based on readFile() code, if that changes corresponding change may be
+        // required (for example duplicates may be inserted if the rules don't match)
+        if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
             stream << *iter << "\n";
 
         if (settingRegex.indexIn(*iter) == -1 || settingRegex.captureCount() < 2)
