@@ -35,6 +35,7 @@ namespace VFS
         if (useLooseFiles)
             for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
             {
+                std::cout << "Adding data directory " << iter->string() << std::endl;
                 // Last data dir has the highest priority
                 vfs->addArchive(new FileSystemArchive(iter->string()));
             }
