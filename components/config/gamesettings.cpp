@@ -265,7 +265,10 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
         // Below is based on readFile() code, if that changes corresponding change may be
         // required (for example duplicates may be inserted if the rules don't match)
         if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
+        {
             stream << *iter << "\n";
+            continue;
+        }
 
         if (settingRegex.indexIn(*iter) == -1 || settingRegex.captureCount() < 2)
             continue;
