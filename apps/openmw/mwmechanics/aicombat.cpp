@@ -22,7 +22,7 @@
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
-#include "character.hpp" // fixme: for getActiveWeapon
+#include "character.hpp" // fixme: for getWeaponGroup, getWeaponType, WeaponType
 
 #include "aicombataction.hpp"
 #include "combat.hpp"
@@ -33,11 +33,11 @@ namespace
     /// Choose an attack depending on probability to avoid uniformity
     ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
     /// Get an attack min/max attack duration for current actor's weapon
-    void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations)[2]);
+    void getMinMaxAttackDuration(const MWWorld::Ptr& actor, MWMechanics::WeaponType weaptype, float weapSpeed, ESM::RangeType spellRangeType, float (*fMinMaxDurations)[2]);
 
     /// Calculate direction to aim at the moving target
     Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
-        float duration, int weapType, float strength);
+        float duration, MWMechanics::WeaponType weapType, float strength);
 
     float getZAngleToDir(const Ogre::Vector3& dir)
     {
@@ -106,17 +106,20 @@ namespace MWMechanics
             mActionCooldown(0),
             mStrength(),
             mLastWeapon(),
-            mMinMaxAttackDuration(),
             mLastTargetPos(0,0,0),
             mLastActorPos(0,0,0),
             mMovement()
-        {}
+        {
+            mMinMaxAttackDuration[0][0] = mMinMaxAttackDuration[0][1] = 0;
+            mMinMaxAttackDuration[1][0] = mMinMaxAttackDuration[1][1] = 0;
+            mMinMaxAttackDuration[2][0] = mMinMaxAttackDuration[2][1] = 0;
+        }
 
         void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
         void updateCombatMove(float duration);
         void stopCombatMove();
 
-        void updateWeaponAttackDurations(const MWWorld::Ptr& actor);
+        void updateWeaponAttackDurations(const MWWorld::Ptr& actor, MWMechanics::WeaponType weaptype, float weapSpeed, ESM::RangeType spellRangeType);
         void updateAttack(float duration, float attacksPeriod);
         bool startAttack(bool isDistantCombat, const ESM::Weapon* weapon, float attacksPeriod);
 
@@ -282,23 +285,41 @@ namespace MWMechanics
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
         const ESM::Weapon *weapon = NULL;
+        MWMechanics::WeaponType weapType = MWMechanics::WeaponType::WeapType_None;
+        float spellSpeed = 1.f;
 
         if (dynamic_cast<ActionWeapon*>(currentAction.get()))
         {
             weapon = dynamic_cast<ActionWeapon*>(currentAction.get())->getWeapon();
 
+            if (weapon != NULL)
+                weapType = getWeaponType(static_cast<ESM::Weapon::Type>(weapon->mData.mType));
+            else
+                weapType = WeapType_HandToHand;
+
             if ((weapon == NULL && storage.mLastWeapon != "handToHand") 
                 || (weapon != NULL && weapon->mModel != storage.mLastWeapon))
             {
-                storage.updateWeaponAttackDurations(actor);
-                if (weapon == NULL) storage.mLastWeapon = "handToHand"; // for local use
+                storage.updateWeaponAttackDurations(actor, weapType, weapon == NULL ? 1.f : weapon->mData.mSpeed, ESM::RT_Self);
+                if (weapon == NULL) 
+                    storage.mLastWeapon = "handToHand"; // for local use
+                else 
+                    storage.mLastWeapon = weapon->mModel;
             }
         }
-        else if (dynamic_cast<ActionSpell*>(currentAction.get())
-            && storage.mLastWeapon != dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId())
+        else if (dynamic_cast<ActionSpell*>(currentAction.get()))
         {
-            storage.updateWeaponAttackDurations(actor);
-            storage.mLastWeapon = dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId(); // for local use
+            weapType = WeapType_Spell;
+            spellSpeed = dynamic_cast<ActionSpell*>(currentAction.get())->getSpellSpeed();
+
+            if (storage.mLastWeapon != dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId())
+            {
+                ESM::RangeType rangeType;
+                rangeType = dynamic_cast<ActionSpell*>(currentAction.get())->getSpellRangeType();
+
+                storage.updateWeaponAttackDurations(actor, weapType, 1, rangeType);
+                storage.mLastWeapon = dynamic_cast<ActionSpell*>(currentAction.get())->getSpellId(); // for local use
+            }
         }
 
         bool distantCombat = (rangeAttack > 500);
@@ -306,14 +327,20 @@ namespace MWMechanics
         // start new attack
         bool newAttack = storage.startAttack(distantCombat, weapon, attacksPeriod);
 
-        if (newAttack && actor.getClass().isNpc())
+        if (newAttack)
         {
-            //say a provoking combat phrase
-            const MWWorld::ESMStore &store = world->getStore();
-            int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
-            if (OEngine::Misc::Rng::roll0to99() < chance)
+            if (weapType == WeapType_Spell && distantCombat)
+                storage.mStrength = spellSpeed;
+
+            if (actor.getClass().isNpc())
             {
-                MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                //say a provoking combat phrase
+                const MWWorld::ESMStore &store = world->getStore();
+                int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                if (OEngine::Misc::Rng::roll0to99() < chance)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                }
             }
         }
 
@@ -394,7 +421,7 @@ namespace MWMechanics
             if (distantCombat)
             {
                 Ogre::Vector3& lastTargetPos = storage.mLastTargetPos;
-                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weapon ? weapon->mData.mType : 0, storage.mStrength);
+                Ogre::Vector3 vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weapType, storage.mStrength);
                 lastTargetPos = vTargetPos;
                 movement.mRotation[0] = getXAngleToDir(vAimDir);
                 movement.mRotation[2] = getZAngleToDir(vAimDir);
@@ -648,9 +675,9 @@ namespace MWMechanics
         mMovement.mPosition[1] = mMovement.mPosition[0] = 0;
     }
     
-    void AiCombatStorage::updateWeaponAttackDurations(const MWWorld::Ptr& actor)
+    void AiCombatStorage::updateWeaponAttackDurations(const MWWorld::Ptr& actor, MWMechanics::WeaponType weaptype, float weapSpeed, ESM::RangeType spellRangeType)
     {
-        getMinMaxAttackDuration(actor, mMinMaxAttackDuration);
+        getMinMaxAttackDuration(actor, weaptype, weapSpeed, spellRangeType, mMinMaxAttackDuration);
     }
 
     void AiCombatStorage::updateAttack(float duration, float attacksPeriod)
@@ -777,33 +804,25 @@ namespace
         return attackType;
     }
 
-    void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations)[2])
+    void getMinMaxAttackDuration(const MWWorld::Ptr& actor, MWMechanics::WeaponType weaptype, float weapSpeed, ESM::RangeType spellRangeType, float (*fMinMaxDurations)[2])
     {
+        fMinMaxDurations[0][0] = fMinMaxDurations[0][1] = 0.1f;
+        fMinMaxDurations[1][0] = fMinMaxDurations[1][1] = 0.1f;
+        fMinMaxDurations[2][0] = fMinMaxDurations[2][1] = 0.1f;
+
         if (!actor.getClass().hasInventoryStore(actor)) // creatures
         {
-            fMinMaxDurations[0][0] = fMinMaxDurations[0][1] = 0.1f;
-            fMinMaxDurations[1][0] = fMinMaxDurations[1][1] = 0.1f;
-            fMinMaxDurations[2][0] = fMinMaxDurations[2][1] = 0.1f;
-
             return;
         }
 
-        // get weapon information: type and speed
-        const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weaptype = MWMechanics::WeapType_None;
-
-        MWWorld::ContainerStoreIterator weaponSlot =
-            MWMechanics::getActiveWeapon(actor.getClass().getCreatureStats(actor), actor.getClass().getInventoryStore(actor), &weaptype);
-
-        float weapSpeed;
         if (weaptype != MWMechanics::WeapType_HandToHand
-                && weaptype != MWMechanics::WeapType_Spell
-                && weaptype != MWMechanics::WeapType_None)
+            && weaptype != MWMechanics::WeapType_Spell
+            && weaptype != MWMechanics::WeapType_None)
         {
-            weapon = weaponSlot->get<ESM::Weapon>()->mBase;
-            weapSpeed = weapon->mData.mSpeed;
+            weapSpeed = weapSpeed;
         }
-        else  weapSpeed = 1.0f;
+        else
+            weapSpeed = 1.f;
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
 
@@ -811,44 +830,66 @@ namespace
         MWMechanics::getWeaponGroup(weaptype, weapGroup);
         weapGroup = weapGroup + ": ";
 
-        bool bRangedWeap = (weaptype >= MWMechanics::WeapType_BowAndArrow && weaptype <= MWMechanics::WeapType_Thrown);
+        const char *attackTypes[] =      {"chop ", "slash ", "thrust ", "shoot "};
+        const char *spellAttackTypes[] = {"self ", "touch ", "target "};
+        bool bOneType = false;
+        bool isSpell = false;
 
-        const char *attackType[] = {"chop ", "slash ", "thrust ", "shoot "};
+        const char *curAttackType;
 
-        std::string textKey = "start";
-        std::string textKey2;
-
-        // get durations for each attack type
-        for (int i = 0; i < (bRangedWeap ? 1 : 3); i++)
+        if (weaptype == MWMechanics::WeapType_Spell)
         {
-            float start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey);
+            if (spellRangeType < 0)
+                return;
 
-            if (start1 < 0) 
-            {
-                fMinMaxDurations[i][0] = fMinMaxDurations[i][1] = 0.1f;
-                continue;
-            }
-
-            textKey2 = "min attack";
-            float start2 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
-
-            fMinMaxDurations[i][0] = (start2 - start1) / weapSpeed;
-
-            textKey2 = "max attack";
-            start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
-
-            fMinMaxDurations[i][1] = fMinMaxDurations[i][0] + (start1 - start2) / weapSpeed;
+            curAttackType = spellAttackTypes[spellRangeType];
+            bOneType = true;
+            isSpell = true;
+        }
+        else if (weaptype >= MWMechanics::WeapType_BowAndArrow && weaptype <= MWMechanics::WeapType_Thrown)
+        {
+            curAttackType = attackTypes[3];
+            bOneType = true;
         }
 
+        // get durations for each attack type
+        for (int i = 0; i < 3; i++)
+        {
+            if (bOneType)
+            {
+                if (i > 0) break;
+            }
+            else
+                curAttackType = attackTypes[i];
+
+            // get min duration
+            float fStart = anim->getTextKeyTime(weapGroup + curAttackType + "start");
+            if (fStart < 0) continue;
+            float fFinish = anim->getTextKeyTime(weapGroup + curAttackType + (isSpell ? "release" : "min attack"));
+
+            fMinMaxDurations[i][0] = (fFinish - fStart) / weapSpeed;
+
+            // get max duration
+            fStart = fFinish;
+            fFinish = anim->getTextKeyTime(weapGroup + curAttackType + (isSpell ? "release" : "max attack"));
+
+            fMinMaxDurations[i][1] = fMinMaxDurations[i][0] + (fFinish - fStart) / weapSpeed;
+        }
+
+        if (isSpell)
+        {
+            fMinMaxDurations[1][0] = fMinMaxDurations[2][0] = fMinMaxDurations[0][0];
+            fMinMaxDurations[1][1] = fMinMaxDurations[2][1] = fMinMaxDurations[0][1];
+        }
     }
 
     Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
-        float duration, int weapType, float strength)
+        float duration, MWMechanics::WeaponType weapType, float strength)
     {
         float projSpeed;
 
         // get projectile speed (depending on weapon type)
-        if (weapType == ESM::Weapon::MarksmanThrown)
+        if (weapType == MWMechanics::WeaponType::WeapType_Thrown)
         {
             static float fThrownWeaponMinSpeed = 
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
@@ -857,6 +898,11 @@ namespace
 
             projSpeed = 
                 fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
+        }
+        else if (weapType == MWMechanics::WeaponType::WeapType_Spell)
+        {
+            static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->getFloat();
+            projSpeed = fTargetSpellMaxSpeed * strength;
         }
         else
         {

@@ -3,7 +3,7 @@
 
 #include <OgreVector3.h>
 
-#include <components/esm/loadmgef.hpp>
+#include <components/esm/loadweap.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -234,6 +234,7 @@ public:
 
     void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
+    WeaponType getWeaponType(ESM::Weapon::Type type);
 }
 
 #endif /* GAME_MWMECHANICS_CHARACTER_HPP */

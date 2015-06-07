@@ -406,6 +406,34 @@ namespace MWMechanics
         return mSpellId;
     }
 
+    ESM::RangeType ActionSpell::getSpellRangeType() const
+    {
+        if (mSpellId.empty()) 
+            return static_cast<ESM::RangeType>(-1);
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Spell *spell = store.get<ESM::Spell>().find(mSpellId);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
+        return static_cast<ESM::RangeType>(effectentry.mRange);
+    }
+
+    float ActionSpell::getSpellSpeed() const
+    {
+        if (mSpellId.empty()) 
+            return 1.f;
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Spell *spell = store.get<ESM::Spell>().find(mSpellId);
+        const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
+
+        const ESM::MagicEffect *magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (effectentry.mEffectID);
+
+        return magicEffect->mData.mSpeed;
+    }
+
     void ActionEnchantedItem::prepare(const MWWorld::Ptr &actor)
     {
         actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(std::string());
