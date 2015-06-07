@@ -192,7 +192,7 @@ namespace MWGui
         if (visible)
         {
             getWidget(mFpsBox, "FPSBox");
-            mFpsBox->setVisible(true);
+            //mFpsBox->setVisible(true);
             getWidget(mFpsCounter, "FPSCounter");
         }
     }
