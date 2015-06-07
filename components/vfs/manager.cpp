@@ -1,6 +1,7 @@
 #include "manager.hpp"
 
 #include <stdexcept>
+#include <locale>
 
 #include "archive.hpp"
 
