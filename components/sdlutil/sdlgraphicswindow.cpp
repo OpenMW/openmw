@@ -3,6 +3,7 @@
 #include <SDL_video.h>
 
 #include <osg/DeleteHandler>
+#include <osg/Version>
 
 namespace SDLUtil
 {
@@ -108,7 +109,11 @@ void GraphicsWindowSDL2::init()
 
     mValid = true;
 
+#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
+#else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
+#endif
 }
 
 
@@ -125,7 +130,11 @@ bool GraphicsWindowSDL2::realizeImplementation()
 
     SDL_ShowWindow(mWindow);
 
+#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+    getEventQueue()->syncWindowRectangleWithGraphicsContext();
+#else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
+#endif
 
     mRealized = true;
 

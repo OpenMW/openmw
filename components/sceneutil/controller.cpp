@@ -4,6 +4,8 @@
 
 #include <osg/Drawable>
 #include <osg/Geode>
+#include <osg/NodeCallback>
+#include <osg/Version>
 
 namespace SceneUtil
 {
@@ -63,7 +65,11 @@ namespace SceneUtil
 
     void ControllerVisitor::apply(osg::Node &node)
     {
+#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+        osg::Callback* callback = node.getUpdateCallback();
+#else
         osg::NodeCallback* callback = node.getUpdateCallback();
+#endif
         while (callback)
         {
             if (Controller* ctrl = dynamic_cast<Controller*>(callback))
@@ -89,7 +95,13 @@ namespace SceneUtil
         for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
         {
             osg::Drawable* drw = geode.getDrawable(i);
+
+#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+            osg::Callback* callback = drw->getUpdateCallback();
+#else
             osg::Drawable::UpdateCallback* callback = drw->getUpdateCallback();
+#endif
+
             if (Controller* ctrl = dynamic_cast<Controller*>(callback))
                 visit(geode, *ctrl);
         }
