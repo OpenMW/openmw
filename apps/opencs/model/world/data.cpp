@@ -115,7 +115,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
     mFactions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_Faction));
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
@@ -135,7 +135,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
     // Race attributes
     mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes));
     index = mRaces.getColumns()-1;
@@ -180,7 +180,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
 
@@ -196,7 +196,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
         new SpellListAdapter<ESM::BirthSign> ()));
     mBirthsigns.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);

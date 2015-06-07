@@ -65,6 +65,8 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_JournalInfo,
         Display_Scene,
         Display_GlobalVariable,
+        Display_BodyPart,
+        Display_Enchantment,
         Display_Script,
 
         Display_Mesh,

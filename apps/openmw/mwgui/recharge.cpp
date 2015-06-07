@@ -44,6 +44,8 @@ Recharge::Recharge()
 void Recharge::open()
 {
     center();
+    // Reset scrollbars
+    mView->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void Recharge::exit()

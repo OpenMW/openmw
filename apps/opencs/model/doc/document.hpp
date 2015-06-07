@@ -13,6 +13,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../world/data.hpp"
+#include "../world/idcompletionmanager.hpp"
 
 #include "../tools/tools.hpp"
 
@@ -67,6 +68,8 @@ namespace CSMDoc
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
+
+            CSMWorld::IdCompletionManager mIdCompletionManager;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
             // using other member variables.  Unfortunately this connection is cut only in the QObject destructor, which is way too late.
@@ -144,6 +147,8 @@ namespace CSMDoc
             void stopRunning();
 
             QTextDocument *getRunLog();
+
+            CSMWorld::IdCompletionManager &getIdCompletionManager();
 
         signals:
 

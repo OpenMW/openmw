@@ -151,6 +151,7 @@ namespace MWGui
         mSortModel = new SortFilterItemModel(mModel);
 
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 

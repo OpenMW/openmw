@@ -124,6 +124,8 @@ namespace CSVWorld
 
             CSMDoc::Document& getDocument() const;
 
+            CSMWorld::ColumnBase::Display getDisplayTypeFromIndex(const QModelIndex &index) const;
+
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 

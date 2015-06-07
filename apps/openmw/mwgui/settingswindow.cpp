@@ -6,6 +6,7 @@
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
@@ -159,6 +160,7 @@ namespace MWGui
 
         setTitle("#{sOptions}");
 
+        getWidget(mSettingsTab, "SettingsTab");
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
@@ -196,6 +198,7 @@ namespace MWGui
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
+        mSettingsTab->eventTabChangeSelect += MyGUI::newDelegate(this, &SettingsWindow::onTabChanged);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
@@ -258,6 +261,11 @@ namespace MWGui
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
+    }
+
+    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
+    {
+        resetScrollbars();
     }
 
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
@@ -454,6 +462,7 @@ namespace MWGui
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
         updateControlsBox();
+        resetScrollbars();
     }
 
     void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
@@ -464,6 +473,7 @@ namespace MWGui
         mKeyboardSwitch->setStateSelected(false);
         mControllerSwitch->setStateSelected(true);
         updateControlsBox();
+        resetScrollbars();
     }
 
     void SettingsWindow::updateControlsBox()
@@ -558,6 +568,7 @@ namespace MWGui
     void SettingsWindow::open()
     {
         updateControlsBox ();
+        resetScrollbars();
     }
 
     void SettingsWindow::exit()
@@ -568,5 +579,11 @@ namespace MWGui
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         updateControlsBox();
+    }
+
+    void SettingsWindow::resetScrollbars()
+    {
+        mResolutionList->setScrollPosition(0);
+        mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
     }
 }

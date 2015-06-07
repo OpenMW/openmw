@@ -311,4 +311,8 @@ namespace MWGui
             mScrollView->setViewOffset(MyGUI::IntPoint(0, static_cast<int>(mScrollView->getViewOffset().top + _rel*0.3f)));
     }
 
+    void SpellView::resetScrollbars()
+    {
+        mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+    }
 }

@@ -2256,7 +2256,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath)
+  mRunner (mProjectPath), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2483,4 +2483,9 @@ void CSMDoc::Document::runStateChanged()
 void CSMDoc::Document::progress (int current, int max, int type)
 {
     emit progress (current, max, type, 1, this);
+}
+
+CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
+{
+    return mIdCompletionManager;
 }
