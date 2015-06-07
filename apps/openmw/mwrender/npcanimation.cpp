@@ -231,7 +231,7 @@ NpcAnimation::~NpcAnimation()
             // No need to getInventoryStore() to reset, if none exists
             // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
             // all from within this destructor. ouch!
-           && mPtr.getRefData().getCustomData())
+           && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getListener() == this)
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 

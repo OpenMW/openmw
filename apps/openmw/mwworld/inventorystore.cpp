@@ -573,6 +573,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
 }
 
+MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getListener()
+{
+    return mListener;
+}
+
 void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, const Ptr& actor)
 {
     mListener = listener;
