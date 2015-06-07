@@ -6,9 +6,6 @@
 #include <osg/Geometry>
 #include <osg/Array>
 
-#include <osg/ShapeDrawable>
-#include <osg/ComputeBoundsVisitor>
-
 // resource
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -862,7 +859,15 @@ namespace NifOsg
             collectMaterialProperties(nifNode, materialProps);
             applyMaterialProperties(geode, materialProps, true, animflags);
 
-            partsys->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            // Particles don't have normals, so can't be diffuse lit.
+            osg::Material* mat = static_cast<osg::Material*>(geode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            if (mat)
+            {
+                osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,diffuse.a()));
+                mat->setColorMode(osg::Material::AMBIENT);
+            }
+
             partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
             // particle system updater (after the emitters and affectors in the scene graph)

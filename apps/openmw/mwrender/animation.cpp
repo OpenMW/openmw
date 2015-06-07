@@ -1067,6 +1067,9 @@ namespace MWRender
             parentNode = found->second;
         }
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->createInstance(model, parentNode);
+
+        node->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
         params.mObjects = PartHolderPtr(new PartHolder(node));
 
         SceneUtil::FindMaxControllerLengthVisitor findMaxLengthVisitor;
