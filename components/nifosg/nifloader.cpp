@@ -1237,12 +1237,12 @@ namespace NifOsg
                             texEnv->setCombine_Alpha(GL_MODULATE);
                             texEnv->setOperand0_Alpha(GL_SRC_ALPHA);
                             texEnv->setOperand1_Alpha(GL_SRC_ALPHA);
-                            texEnv->setSource0_Alpha(GL_PREVIOUS);
+                            texEnv->setSource0_Alpha(GL_PREVIOUS_ARB);
                             texEnv->setSource1_Alpha(GL_TEXTURE);
                             texEnv->setCombine_RGB(GL_MODULATE);
                             texEnv->setOperand0_RGB(GL_SRC_COLOR);
                             texEnv->setOperand1_RGB(GL_SRC_COLOR);
-                            texEnv->setSource0_RGB(GL_PREVIOUS);
+                            texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
                             texEnv->setSource1_RGB(GL_TEXTURE);
                             stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
                         }
