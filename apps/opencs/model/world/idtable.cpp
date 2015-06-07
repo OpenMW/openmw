@@ -33,6 +33,9 @@ QVariant CSMWorld::IdTable::data (const QModelIndex & index, int role) const
     if (index.row() < 0 || index.column() < 0)
         return QVariant();
 
+    if (role==ColumnBase::Role_Display)
+        return QVariant(mIdCollection->getColumn(index.column()).mDisplayType);
+
     if (role==ColumnBase::Role_ColumnId)
         return QVariant (getColumnId (index.column()));
 
@@ -84,6 +87,9 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
 
 Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 {
+    if (!index.isValid())
+        return 0;
+
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     if (mIdCollection->getColumn (index.column()).isUserEditable())

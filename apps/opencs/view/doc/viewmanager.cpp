@@ -1,6 +1,7 @@
 
 #include "viewmanager.hpp"
 
+#include <vector>
 #include <map>
 
 #include <QApplication>
@@ -10,12 +11,14 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
+#include "../world/idcompletiondelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
@@ -59,6 +62,14 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
+
+    std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
+    for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
+         current != idCompletionColumns.end();
+         ++current)
+    {
+        mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
+    }
 
     struct Mapping
     {
