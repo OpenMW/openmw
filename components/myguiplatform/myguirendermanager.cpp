@@ -209,9 +209,16 @@ class OSGVertexBuffer : public MyGUI::IVertexBuffer
 
     size_t mNeedVertexCount;
 
+    bool mQueuedForDrawing;
+
+    void destroy();
+    void create();
+
 public:
     OSGVertexBuffer();
     virtual ~OSGVertexBuffer();
+
+    void markAsQueuedForDrawing();
 
     virtual void setVertexCount(size_t count);
     virtual size_t getVertexCount();
@@ -220,8 +227,6 @@ public:
     virtual void unlock();
 
 /*internal:*/
-    void destroy();
-    void create();
 
     osg::VertexBufferObject *getBuffer() const { return mBuffer.get(); }
     osg::UByteArray *getArray() const { return mVertexArray.get(); }
@@ -229,6 +234,7 @@ public:
 
 OSGVertexBuffer::OSGVertexBuffer()
   : mNeedVertexCount(0)
+  , mQueuedForDrawing(false)
 {
 }
 
@@ -237,14 +243,17 @@ OSGVertexBuffer::~OSGVertexBuffer()
     destroy();
 }
 
+void OSGVertexBuffer::markAsQueuedForDrawing()
+{
+    mQueuedForDrawing = true;
+}
+
 void OSGVertexBuffer::setVertexCount(size_t count)
 {
     if(count == mNeedVertexCount)
         return;
 
     mNeedVertexCount = count;
-    destroy();
-    create();
 }
 
 size_t OSGVertexBuffer::getVertexCount()
@@ -254,15 +263,22 @@ size_t OSGVertexBuffer::getVertexCount()
 
 MyGUI::Vertex *OSGVertexBuffer::lock()
 {
-    // Force recreating the buffer, to make sure we are not modifying a buffer currently
-    // queued for rendering in the last frame's draw thread.
-    // a more efficient solution might be double buffering
-    destroy();
-    create();
+    if (mQueuedForDrawing || !mVertexArray)
+    {
+        // Force recreating the buffer, to make sure we are not modifying a buffer currently
+        // queued for rendering in the last frame's draw thread.
+        // a more efficient solution might be double buffering
+        destroy();
+        create();
+        mQueuedForDrawing = false;
+    }
+    else
+    {
+        mVertexArray->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
+    }
 
     MYGUI_PLATFORM_ASSERT(mBuffer.valid(), "Vertex buffer is not created");
 
-    mVertexArray->resize(mNeedVertexCount * sizeof(MyGUI::Vertex));
     return (MyGUI::Vertex*)&(*mVertexArray)[0];
 }
 
@@ -389,6 +405,7 @@ void RenderManager::doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *text
     Drawable::Batch batch;
     batch.mVertexCount = count;
     batch.mVertexBuffer = static_cast<OSGVertexBuffer*>(buffer)->getBuffer();
+    static_cast<OSGVertexBuffer*>(buffer)->markAsQueuedForDrawing();
     batch.mArray = static_cast<OSGVertexBuffer*>(buffer)->getArray();
     if (texture)
     {
