@@ -2,6 +2,7 @@
 #define CSM_WOLRD_IDCOLLECTION_H
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/loadscpt.hpp>
 
 #include "collection.hpp"
 
@@ -37,6 +38,9 @@ namespace CSMWorld
     {
         record.load (reader);
     }
+
+    template<>
+    int IdCollection<ESM::Script, IdAccessor<ESM::Script> >::load (ESM::ESMReader& reader, bool base);
 
     template<typename ESXRecordT, typename IdAccessorT>
     int IdCollection<ESXRecordT, IdAccessorT>::load (ESM::ESMReader& reader, bool base)

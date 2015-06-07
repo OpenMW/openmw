@@ -54,6 +54,9 @@ public:
     void blank();
     ///< Set record to default state (does not touch the ID/index).
 
+    std::string loadData(ESMReader &esm);
+    void loadScript(ESMReader &esm);
+
 private:
     void loadSCVR(ESMReader &esm);
 };
