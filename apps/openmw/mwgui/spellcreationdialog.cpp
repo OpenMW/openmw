@@ -551,6 +551,7 @@ namespace MWGui
             ++i;
         }
         mAvailableEffectsList->adjustSize ();
+        mAvailableEffectsList->scrollToTop();
 
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {

@@ -679,7 +679,7 @@ namespace MWMechanics
                 if (markedCell)
                 {
                     MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
-                                            markedPosition);
+                                            markedPosition, false);
                     action.execute(target);
                 }
             }

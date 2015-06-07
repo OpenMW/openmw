@@ -1,6 +1,7 @@
 #include "gamesettings.hpp"
 #include "launchersettings.hpp"
 
+#include <QTextCodec>
 #include <QTextStream>
 #include <QDir>
 #include <QString>
@@ -169,6 +170,138 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
         stream << i.key() << "=" << i.value() << "\n";
 
     }
+
+    return true;
+}
+
+// Policy:
+//
+// - Always ignore a line beginning with '#' or empty lines
+//
+// - If a line in file exists with matching key and first part of value (before ',',
+//   '\n', etc) also matches, then replace the line with that of mUserSettings.
+// - else remove line (TODO: maybe replace the line with '#' in front instead?)
+//
+// - If there is no corresponding line in file, add at the end
+//
+bool Config::GameSettings::writeFileWithComments(QFile &file)
+{
+    QTextStream stream(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    // slurp
+    std::vector<QString> fileCopy;
+    QString line = stream.readLine();
+    while (!line.isNull())
+    {
+        fileCopy.push_back(line);
+        line = stream.readLine();
+    }
+    stream.seek(0);
+
+    // empty file, no comments to keep
+    if (fileCopy.empty())
+        return writeFile(stream);
+
+    // Temp copy of settings to save, but with the keys appended with the first part of the value
+    //
+    // ATTENTION!
+    //
+    // A hack to avoid looping through each line, makes use of the fact that fallbacks values
+    // are comma separated.
+    QMap<QString, QString> userSettingsCopy;
+    QRegExp settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
+    QString settingLine;
+    QMap<QString, QString>::const_iterator settingsIter = mUserSettings.begin();
+    for (; settingsIter != mUserSettings.end(); ++settingsIter)
+    {
+        settingLine = settingsIter.key()+"="+settingsIter.value();
+        if (settingRegex.indexIn(settingLine) != -1)
+        {
+            userSettingsCopy[settingRegex.cap(1)+"="+settingRegex.cap(2)] =
+                (settingRegex.captureCount() < 3) ? "" : settingRegex.cap(3);
+        }
+    }
+
+    QString keyVal;
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    {
+        // skip empty or comment lines
+        if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
+            continue;
+
+        // look for a key in the line
+        if (settingRegex.indexIn(*iter) == -1 || settingRegex.captureCount() < 2)
+        {
+            // no key or first part of value found in line, replace with a null string which
+            // will be remved later
+            *iter = QString();
+            continue;
+        }
+
+        // look for a matching key in user settings
+        keyVal = settingRegex.cap(1)+"="+settingRegex.cap(2);
+        QMap<QString, QString>::iterator it = userSettingsCopy.find(keyVal);
+        if (it == userSettingsCopy.end())
+        {
+            // no such key+valStart, replace with a null string which will be remved later
+            *iter = QString();
+        }
+        else
+        {
+            *iter = QString(it.key()+it.value());
+            userSettingsCopy.erase(it);
+        }
+    }
+
+    // write the new config file
+    QString key;
+    QString value;
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    {
+        if ((*iter).isNull())
+            continue;
+
+        // Below is based on readFile() code, if that changes corresponding change may be
+        // required (for example duplicates may be inserted if the rules don't match)
+        if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
+        {
+            stream << *iter << "\n";
+            continue;
+        }
+
+        if (settingRegex.indexIn(*iter) == -1 || settingRegex.captureCount() < 2)
+            continue;
+
+        // Quote paths with spaces
+        key = settingRegex.cap(1);
+        value = settingRegex.cap(2)+settingRegex.cap(3);
+        if (key == QLatin1String("data")
+            || key == QLatin1String("data-local")
+            || key == QLatin1String("resources"))
+        {
+            if (value.contains(QChar(' ')))
+            {
+                value.remove(QChar('\"')); // Remove quotes
+
+                stream << key << "=\"" << value << "\"\n";
+                continue;
+            }
+        }
+        stream << key << "=" << value << "\n";
+    }
+
+    if (!userSettingsCopy.empty())
+    {
+        stream << "# new entries" << "\n";
+        QMap<QString, QString>::const_iterator it = userSettingsCopy.begin();
+        for (; it != userSettingsCopy.end(); ++it)
+        {
+            stream << it.key() << it.value() << "\n";
+        }
+    }
+
+    file.resize(file.pos());
 
     return true;
 }
