@@ -1048,6 +1048,9 @@ namespace MWRender
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
     {
+        if (!mObjectRoot.get())
+            return;
+
         // Early out if we already have this effect
         for (std::vector<EffectParams>::iterator it = mEffects.begin(); it != mEffects.end(); ++it)
             if (it->mLoop && loop && it->mEffectId == effectId && it->mBoneName == bonename)
