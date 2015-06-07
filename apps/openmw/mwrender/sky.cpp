@@ -506,8 +506,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRainFrequency(1)
     , mEnabled(true)
     , mSunEnabled(true)
-    , mMasserEnabled(true)
-    , mSecundaEnabled(true)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     skyroot->setNodeMask(Mask_Sky);
@@ -641,11 +639,6 @@ void SkyManager::update(float duration)
         mSunGlare->setSize(val * mGlareFade);
         */
     }
-
-    //mSunGlare->setVisible(mSunEnabled);
-    mSun->setVisible(mSunEnabled);
-    mMasser->setVisible(mMasserEnabled);
-    mSecunda->setVisible(mSecundaEnabled);
 
     // rotate the stars by 360 degrees every 4 days
     //mAtmosphereNight->roll(Degree(MWBase::Environment::get().getWorld()->getTimeScaleFactor()*duration*360 / (3600*96.f)));

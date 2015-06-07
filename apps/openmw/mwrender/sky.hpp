@@ -150,8 +150,6 @@ namespace MWRender
 
         bool mEnabled;
         bool mSunEnabled;
-        bool mMasserEnabled;
-        bool mSecundaEnabled;
     };
 }
 
