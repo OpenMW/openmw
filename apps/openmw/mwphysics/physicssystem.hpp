@@ -78,6 +78,7 @@ namespace MWPhysics
             bool toggleCollisionMode();
 
             void stepSimulation(float dt);
+            void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);

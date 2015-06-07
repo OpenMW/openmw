@@ -1175,7 +1175,10 @@ namespace MWPhysics
 
         CProfileManager::Reset();
         CProfileManager::Increment_Frame_Counter();
+    }
 
+    void PhysicsSystem::debugDraw()
+    {
         if (mDebugDrawer.get())
             mDebugDrawer->step();
     }
