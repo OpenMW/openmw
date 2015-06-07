@@ -76,7 +76,7 @@ namespace NifOsg
         ParticleShooter(float minSpeed, float maxSpeed, float horizontalDir, float horizontalAngle, float verticalDir, float verticalAngle,
                         float lifetime, float lifetimeRandom);
         ParticleShooter();
-        ParticleShooter(const Shooter& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+        ParticleShooter(const ParticleShooter& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
         META_Object(NifOsg, ParticleShooter)
 

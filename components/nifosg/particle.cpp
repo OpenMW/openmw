@@ -69,7 +69,7 @@ ParticleShooter::ParticleShooter()
 {
 }
 
-ParticleShooter::ParticleShooter(const osgParticle::Shooter &copy, const osg::CopyOp &copyop)
+ParticleShooter::ParticleShooter(const ParticleShooter &copy, const osg::CopyOp &copyop)
     : osgParticle::Shooter(copy, copyop)
 {
     *this = copy;
