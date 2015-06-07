@@ -2,12 +2,16 @@
 
 #include <osgViewer/Viewer>
 
+#include <osg/Texture2D>
+
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TextBox.h>
 
 #include <components/misc/rng.hpp>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
@@ -96,6 +100,28 @@ namespace MWGui
         mBackgroundImage->setVisible(visible);
     }
 
+    class CopyFramebufferToTextureCallback : public osg::Camera::DrawCallback
+    {
+    public:
+        CopyFramebufferToTextureCallback(osg::Texture2D* texture, int w, int h)
+            : mTexture(texture), mWidth(w), mHeight(h)
+        {
+        }
+
+        virtual void operator () (osg::RenderInfo& renderInfo) const
+        {
+            mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, mWidth, mHeight);
+
+            // Callback removes itself when done
+            if (renderInfo.getCurrentCamera())
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+        }
+
+    private:
+        osg::ref_ptr<osg::Texture2D> mTexture;
+        int mWidth, mHeight;
+    };
+
     void LoadingScreen::loadingOn()
     {
         mLoadingOnTime = mTimer.time_m();
@@ -114,29 +140,30 @@ namespace MWGui
 
         if (!showWallpaper)
         {
-            // TODO
-            /*
-            mBackgroundImage->setImageTexture("");
-            int width = mWindow->getWidth();
-            int height = mWindow->getHeight();
-            const std::string textureName = "@loading_background";
-            Ogre::TexturePtr texture;
-            texture = Ogre::TextureManager::getSingleton().getByName(textureName);
-            if (texture.isNull())
+            // Copy the current framebuffer onto a texture and display that texture as the background image
+            // Note, we could also set the camera to disable clearing and have the background image transparent,
+            // but then we get shaking effects on buffer swaps.
+
+            if (!mTexture)
             {
-                texture = Ogre::TextureManager::getSingleton().createManual(textureName,
-                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    Ogre::TEX_TYPE_2D,
-                    width, height, 0, mWindow->suggestPixelFormat(), Ogre::TU_DYNAMIC_WRITE_ONLY);
+                mTexture = new osg::Texture2D;
+                mTexture->setInternalFormat(GL_RGB);
+                mTexture->setResizeNonPowerOfTwoHint(false);
             }
-            texture->unload();
-            texture->setWidth(width);
-            texture->setHeight(height);
-            texture->createInternalResources();
-            mWindow->copyContentsToMemory(texture->getBuffer()->lock(Ogre::Image::Box(0,0,width,height), Ogre::HardwareBuffer::HBL_DISCARD));
-            texture->getBuffer()->unlock();
-            mBackgroundImage->setBackgroundImage(texture->getName(), false, false);
-            */
+
+            int width = mViewer->getCamera()->getViewport()->width();
+            int height = mViewer->getCamera()->getViewport()->height();
+            mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture, width, height));
+
+            if (!mGuiTexture.get())
+            {
+                mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
+            }
+
+            mBackgroundImage->setBackgroundImage("");
+
+            mBackgroundImage->setRenderItemTexture(mGuiTexture.get());
+            mBackgroundImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
         }
 
         setVisible(true);
