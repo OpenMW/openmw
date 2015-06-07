@@ -709,7 +709,7 @@ namespace CSMWorld
     struct SleepListColumn : public Column<ESXRecordT>
     {
         SleepListColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_SleepEncounter, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_SleepEncounter, ColumnBase::Display_CreatureLevelledList)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -735,7 +735,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TextureColumn : public Column<ESXRecordT>
     {
-        TextureColumn() : Column<ESXRecordT> (Columns::ColumnId_Texture, ColumnBase::Display_String) {}
+        TextureColumn() : Column<ESXRecordT> (Columns::ColumnId_Texture, ColumnBase::Display_Texture) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1269,7 +1269,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TrapColumn : public Column<ESXRecordT>
     {
-        TrapColumn() : Column<ESXRecordT> (Columns::ColumnId_Trap, ColumnBase::Display_String) {}
+        TrapColumn() : Column<ESXRecordT> (Columns::ColumnId_Trap, ColumnBase::Display_Spell) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1294,7 +1294,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct FilterColumn : public Column<ESXRecordT>
     {
-        FilterColumn() : Column<ESXRecordT> (Columns::ColumnId_Filter, ColumnBase::Display_String) {}
+        FilterColumn() : Column<ESXRecordT> (Columns::ColumnId_Filter, ColumnBase::Display_Filter) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1497,7 +1497,10 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct TopicColumn : public Column<ESXRecordT>
     {
-        TopicColumn (bool journal) : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic, ColumnBase::Display_String) {}
+        TopicColumn (bool journal) 
+        : Column<ESXRecordT> (journal ? Columns::ColumnId_Journal : Columns::ColumnId_Topic,
+                              journal ? ColumnBase::Display_Journal : ColumnBase::Display_Topic) 
+        {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1527,7 +1530,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ActorColumn : public Column<ESXRecordT>
     {
-        ActorColumn() : Column<ESXRecordT> (Columns::ColumnId_Actor, ColumnBase::Display_String) {}
+        ActorColumn() : Column<ESXRecordT> (Columns::ColumnId_Actor, ColumnBase::Display_Npc) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -1830,7 +1833,7 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct ModelColumn : public Column<ESXRecordT>
     {
-        ModelColumn() : Column<ESXRecordT> (Columns::ColumnId_Model, ColumnBase::Display_String) {}
+        ModelColumn() : Column<ESXRecordT> (Columns::ColumnId_Model, ColumnBase::Display_Mesh) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
@@ -2158,7 +2161,9 @@ namespace CSMWorld
     struct EffectTextureColumn : public Column<ESXRecordT>
     {
         EffectTextureColumn (Columns::ColumnId columnId)
-        : Column<ESXRecordT> (columnId, ColumnBase::Display_Texture)
+        : Column<ESXRecordT> (columnId, 
+                              columnId == Columns::ColumnId_Particle ? ColumnBase::Display_Texture 
+                                                                     : ColumnBase::Display_Icon)
         {
             assert (this->mColumnId==Columns::ColumnId_Icon ||
                 this->mColumnId==Columns::ColumnId_Particle);

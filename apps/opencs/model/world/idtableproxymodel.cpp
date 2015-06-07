@@ -21,6 +21,18 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
     }
 }
 
+bool CSMWorld::IdTableProxyModel::filterAcceptsColumn (int sourceColumn, const QModelIndex& sourceParent)
+    const
+{
+    int flags =
+        sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
+
+    if (flags & CSMWorld::ColumnBase::Flag_Table)
+        return true;
+    else
+        return false;
+}
+
 bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent)
     const
 {
