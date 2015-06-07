@@ -68,7 +68,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     if(mTimer > 0.25)
     {
         if (doesPathNeedRecalc(dest, cell)) { //Only rebuild path if it's moved
-            mPathFinder.buildPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
+            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
             mPrevDest = dest;
         }
 
