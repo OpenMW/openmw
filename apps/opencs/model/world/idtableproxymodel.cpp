@@ -21,21 +21,17 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
     }
 }
 
-bool CSMWorld::IdTableProxyModel::filterAcceptsColumn (int sourceColumn, const QModelIndex& sourceParent)
-    const
-{
-    int flags =
-        sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
-
-    if (flags & CSMWorld::ColumnBase::Flag_Table)
-        return true;
-    else
-        return false;
-}
-
 bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent)
     const
 {
+    // It is not possible to use filterAcceptsColumn() and check for
+    // sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags)
+    // because the sourceColumn parameter excludes the hidden columns, i.e. wrong columns can
+    // be rejected.  Workaround by disallowing tree branches (nested columns), which are not meant
+    // to be visible, from the filter.
+    if (sourceParent.isValid())
+        return false;
+
     if (!mFilter)
         return true;
 
