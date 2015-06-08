@@ -8,6 +8,15 @@ while [ $# -gt 0 ]; do
 		-v )
 			VERBOSE=true ;;
 
+		-d )
+			SKIP_DOWNLOAD=true ;;
+
+		-e )
+			SKIP_EXTRACT=true ;;
+
+		-k )
+			KEEP=true ;;
+
 		* )
 			echo "Unknown arg $ARG."
 			exit 1 ;;
@@ -61,29 +70,46 @@ run_cmd() {
 }
 
 download() {
-	if ! [ -f $2 ]; then
-		printf "  Downloading $2... "
-
-		if [ -z $VERBOSE ]; then
-			curl --silent --retry 10 -kLy 5 -o $2 $1
-			RET=$?
-		else
-			curl --retry 10 -kLy 5 -o $2 $1
-			RET=$?
-		fi
-
-		if [ $RET -ne 0 ]; then
-			echo "Failed!"
-		else
-			echo "Done"
-		fi
-
-		return $RET
-	else
-		echo "  $2 exists, skipping."
+	if [ $# -lt 3 ]; then
+		echo "Invalid parameters to download."
+		return 1
 	fi
 
-	return 0
+	NAME=$1
+	shift
+
+	echo "$NAME..."
+
+	while [ $# -gt 1 ]; do
+		URL=$1
+		FILE=$2
+		shift
+		shift
+
+		if ! [ -f $FILE ]; then
+			printf "  Downloading $FILE... "
+
+			if [ -z $VERBOSE ]; then
+				curl --silent --retry 10 -kLy 5 -o $FILE $URL
+				RET=$?
+			else
+				curl --retry 10 -kLy 5 -o $FILE $URL
+				RET=$?
+			fi
+
+			if [ $RET -ne 0 ]; then
+				echo "Failed!"
+			else
+				echo "Done."
+			fi
+		else
+			echo "  $FILE exists, skipping."
+		fi
+	done
+
+	if [ $# -ne 0 ]; then
+		echo "Missing parameter."
+	fi
 }
 
 real_pwd() {
@@ -134,63 +160,71 @@ echo "Starting prebuild on win$BITS"
 echo "=========================="
 echo
 
+# cd OpenMW/AppVeyor-test
 mkdir -p deps
 cd deps
 
 DEPS="`pwd`"
 
-echo "Downloading dependency packages."
-echo
-
-# Boost
-if [ -z $APPVEYOR ]; then
-	echo "Boost 1.58.0..."
-	download http://sourceforge.net/projects/boost/files/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-$BITS.exe boost-1.58.0-win$BITS.exe
+if [ -z $SKIP_DOWNLOAD ]; then
+	echo "Downloading dependency packages."
 	echo
+
+	# Boost
+	if [ -z $APPVEYOR ]; then
+		download "Boost 1.58.0" \
+			http://sourceforge.net/projects/boost/files/boost-binaries/1.58.0/boost_1_58_0-msvc-12.0-$BITS.exe \
+			boost-1.58.0-win$BITS.exe
+	fi
+
+	# Bullet
+	download "Bullet 2.83.4" \
+		http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.83.4-win$BITS.7z \
+		Bullet-2.83.4-win$BITS.7z
+
+	# FFmpeg
+	download "FFmpeg 2.5.2" \
+		http://ffmpeg.zeranoe.com/builds/win$BITS/shared/ffmpeg-2.5.2-win$BITS-shared.7z \
+		ffmpeg$BITS-2.5.2.7z \
+		http://ffmpeg.zeranoe.com/builds/win$BITS/dev/ffmpeg-2.5.2-win$BITS-dev.7z \
+		ffmpeg$BITS-2.5.2-dev.7z
+
+	# MyGUI
+	download "MyGUI 3.2.2" \
+		http://www.lysator.liu.se/~ace/OpenMW/deps/MyGUI-3.2.2-win$BITS.7z \
+		MyGUI-3.2.2-win$BITS.7z
+
+	# OpenAL
+	download "OpenAL-Soft 1.16.0" \
+		http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip \
+		OpenAL-Soft-1.16.0.zip
+
+	# OSG
+	download "OpenSceneGraph 3.3.8" \
+		http://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.3.8-win$BITS.7z \
+		OSG-3.3.8-win$BITS.7z
+
+	# Qt
+	download "Qt 4.8.6" \
+		http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
+		qt$BITS-4.8.6.7z
+
+	# SDL2
+	download "SDL 2.0.3" \
+		https://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip \
+		SDL2-2.0.3.zip
 fi
 
-# Bullet
-echo "Bullet 2.83.4..."
-download http://www.lysator.liu.se/~ace/OpenMW/deps/Bullet-2.83.4-win$BITS.7z Bullet-2.83.4-win$BITS.7z
-echo
-
-# FFmpeg
-echo "FFmpeg 2.5.2..."
-download http://ffmpeg.zeranoe.com/builds/win$BITS/shared/ffmpeg-2.5.2-win$BITS-shared.7z ffmpeg$BITS-2.5.2.7z
-download http://ffmpeg.zeranoe.com/builds/win$BITS/dev/ffmpeg-2.5.2-win$BITS-dev.7z ffmpeg$BITS-2.5.2-dev.7z
-echo
-
-# MyGUI
-echo "MyGUI 3.2.2..."
-download http://www.lysator.liu.se/~ace/OpenMW/deps/MyGUI-3.2.2-win$BITS.7z MyGUI-3.2.2-win$BITS.7z
-echo
-
-# Ogre
-echo "Ogre 1.9..."
-download http://www.lysator.liu.se/~ace/OpenMW/deps/Ogre-1.9-win$BITS.7z Ogre-1.9-win$BITS.7z
-echo
-
-# OpenAL
-echo "OpenAL-Soft 1.16.0..."
-download http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip OpenAL-Soft-1.16.0.zip
-echo
-
-# Qt
-echo "Qt 4.8.6..."
-download http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z qt$BITS-4.8.6.7z
-echo
-
-# SDL2
-echo "SDL 2.0.3 binaries..."
-download https://www.libsdl.org/release/SDL2-devel-2.0.3-VC.zip SDL2-2.0.3.zip
-echo
-
-cd ..
+cd .. #/..
 
 # Set up dependencies
-rm -rf build_$BITS
-mkdir -p build_$BITS/deps
-cd deps
+if [ -z $KEEP ]; then
+	rm -rf OSG_$BITS
+	mkdir -p OSG_$BITS/deps
+fi
+cd OSG_$BITS/deps
+
+DEPS_INSTALL=`pwd`
 
 echo
 echo "Extracting dependencies..."
@@ -198,11 +232,13 @@ echo "Extracting dependencies..."
 # Boost
 if [ -z $APPVEYOR ]; then
 	printf "Boost 1.58.0... "
-	cd ../build_$BITS/deps
+	cd $DEPS_INSTALL
 
 	BOOST_SDK="`real_pwd`/Boost"
 
-	$DEPS/boost-1.58.0-win$BITS.exe //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
+	if [ -z $SKIP_EXTRACT ]; then
+		$DEPS/boost-1.58.0-win$BITS.exe //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
+	fi
 
 	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
 		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
@@ -219,10 +255,12 @@ fi
 
 # Bullet
 printf "Bullet 2.83.4... "
-cd ../build_$BITS/deps
+cd $DEPS_INSTALL
 
-eval 7z x -y $DEPS/Bullet-2.83.4-win$BITS.7z $STRIP
-mv Bullet-2.83.4-win$BITS Bullet
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y $DEPS/Bullet-2.83.4-win$BITS.7z $STRIP
+	mv Bullet-2.83.4-win$BITS Bullet
+fi
 
 BULLET_SDK="`real_pwd`/Bullet"
 add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
@@ -239,14 +277,16 @@ echo Done.
 
 # FFmpeg
 printf "FFmpeg 2.5.2... "
-cd ../build_$BITS/deps
+cd $DEPS_INSTALL
 
-eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2.7z $STRIP
-eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2-dev.7z $STRIP
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2.7z $STRIP
+	eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2-dev.7z $STRIP
 
-mv ffmpeg-2.5.2-win$BITS-shared FFmpeg
-cp -r ffmpeg-2.5.2-win$BITS-dev/* FFmpeg/
-rm -rf ffmpeg-2.5.2-win$BITS-dev
+	mv ffmpeg-2.5.2-win$BITS-shared FFmpeg
+	cp -r ffmpeg-2.5.2-win$BITS-dev/* FFmpeg/
+	rm -rf ffmpeg-2.5.2-win$BITS-dev
+fi
 
 FFMPEG_SDK="`real_pwd`/FFmpeg"
 add_cmake_opts -DAVCODEC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
@@ -272,33 +312,19 @@ cd $DEPS
 
 echo Done.
 
-# Ogre
-printf "Ogre 1.9... "
-cd ../build_$BITS/deps
-
-eval 7z x -y $DEPS/Ogre-1.9-win$BITS.7z $STRIP
-mv Ogre-1.9-win$BITS Ogre
-
-OGRE_SDK="`real_pwd`/Ogre"
-
-add_cmake_opts -DOGRE_SDK="$OGRE_SDK"
-
-cd $DEPS
-
-echo Done.
-
 # MyGUI
 printf "MyGUI 3.2.2... "
-cd ../build_$BITS/deps
+cd $DEPS_INSTALL
 
-eval 7z x -y $DEPS/MyGUI-3.2.2-win$BITS.7z $STRIP
-mv MyGUI-3.2.2-win$BITS MyGUI
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y $DEPS/MyGUI-3.2.2-win$BITS.7z $STRIP
+	mv MyGUI-3.2.2-win$BITS MyGUI
+fi
 
 MYGUI_SDK="`real_pwd`/MyGUI"
 
 add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
-	-DMYGUI_PLATFORM_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
-	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include" \
+	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
 	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
 
 cd $DEPS
@@ -307,7 +333,9 @@ echo Done.
 
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
-eval 7z x -y OpenAL-Soft-1.16.0.zip $STRIP
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y OpenAL-Soft-1.16.0.zip $STRIP
+fi
 
 OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
 
@@ -316,12 +344,31 @@ add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include" \
 
 echo Done.
 
+# OSG
+printf "OSG 3.3.8... "
+cd $DEPS_INSTALL
+
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y $DEPS/OSG-3.3.8-win$BITS.7z $STRIP
+	mv OSG-3.3.8-win$BITS OSG
+fi
+
+OSG_SDK="`real_pwd`/OSG"
+
+add_cmake_opts -DOSG_DIR="$OSG_SDK"
+
+cd $DEPS
+
+echo Done.
+
 # Qt
 printf "Qt 4.8.6... "
-cd ../build_$BITS/deps
+cd $DEPS_INSTALL
 
-eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
-mv qt-4.8.6-* Qt
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
+	mv qt-4.8.6-* Qt
+fi
 
 QT_SDK="`real_pwd`/Qt"
 
@@ -336,7 +383,10 @@ echo Done.
 
 # SDL2
 printf "SDL 2.0.3... "
-eval 7z x -y SDL2-2.0.3.zip $STRIP
+
+if [ -z $SKIP_EXTRACT ]; then
+	eval 7z x -y SDL2-2.0.3.zip $STRIP
+fi
 
 SDL_SDK="`real_pwd`/SDL2-2.0.3"
 add_cmake_opts  -DSDL2_INCLUDE_DIR="$SDL_SDK/include" \
@@ -349,7 +399,7 @@ cd $DEPS
 echo Done.
 echo
 
-cd ../build_$BITS
+cd $DEPS_INSTALL/..
 
 echo "Building OpenMW..."
 
