@@ -672,16 +672,24 @@ namespace MWPhysics
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
+#if BT_BULLET_VERSION >= 281
         virtual btScalar addSingleResult(btManifoldPoint& cp,
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
-            if (col1Wrap->m_collisionObject != mMe)
+            const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const btCollisionObject* collisionObject = col1;
+#endif
+            if (collisionObject != mMe)
             {
                 btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
                 if(!mObject || distsqr < mLeastDistSqr)
                 {
-                    mObject = col1Wrap->m_collisionObject;
+                    mObject = collisionObject;
                     mLeastDistSqr = distsqr;
                     mContactPoint = cp.getPositionWorldOnA();
                 }
@@ -874,11 +882,19 @@ namespace MWPhysics
     public:
         std::vector<MWWorld::Ptr> mResult;
 
-        virtual	btScalar addSingleResult(btManifoldPoint& cp,
-                                            const btCollisionObjectWrapper* colObj0Wrap,int partId0,int index0,
-                                            const btCollisionObjectWrapper* colObj1Wrap,int partId1,int index1)
+#if BT_BULLET_VERSION >= 281
+        virtual btScalar addSingleResult(btManifoldPoint& cp,
+                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
+                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
-            const PtrHolder* holder = static_cast<const PtrHolder*>(colObj0Wrap->m_collisionObject->getUserPointer());
+            const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
+#else
+        virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
+                                         const btCollisionObject* col1, int partId1, int index1)
+        {
+            const btCollisionObject* collisionObject = col1;
+#endif
+            const PtrHolder* holder = static_cast<const PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
                 mResult.push_back(holder->getPtr());
             return 0.f;
