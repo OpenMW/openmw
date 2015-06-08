@@ -458,6 +458,25 @@ namespace MWMechanics
         if(movement.mPosition[1] && (lastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * tReaction / 2)
             isStuck = true;
 
+        // Prevent "running around in circles" around a nav point
+        // Symptom: NPC is heading for a NavPoint and overshot
+        float stopCirclingTolerance = 0.0f;
+        if (2 <= mPathFinder.getPathSize())
+        {
+            std::list<ESM::Pathgrid::Point>::const_iterator p = mPathFinder.getPath().begin();
+            Ogre::Vector3 navPoint(PathFinder::MakeOgreVector3(*p));
+            Ogre::Vector3 vecLast(lastActorPos - navPoint);
+            Ogre::Vector3 vecNow(vActorPos - navPoint);
+
+            // if we overshot, but were sufficently close we probably would have it it
+            // set tolerance so later on when check path, will decide we reached nav point
+            // From experiment, sufficently close is < 80 units.
+            if ((vecLast.squaredLength() < vecNow.squaredLength()) && (vecLast.length() < 80.0f))
+            {
+                stopCirclingTolerance = vecNow.length() + 10.0f;
+            }
+        }
+
         lastActorPos = vActorPos;
 
         // check if actor can move along z-axis
@@ -581,7 +600,14 @@ namespace MWMechanics
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
                 //delete visited path node
-                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1]);
+                if (stopCirclingTolerance == 0.0f)
+                {
+                    mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]);
+                }
+                else
+                {
+                    mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], stopCirclingTolerance);
+                }
 
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)
