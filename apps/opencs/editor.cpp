@@ -14,6 +14,9 @@
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 CS::Editor::Editor ()
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),

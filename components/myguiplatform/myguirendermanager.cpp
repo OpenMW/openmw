@@ -107,7 +107,7 @@ class Drawable : public osg::Drawable {
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        mReadFrom = (mReadFrom+1)%2;
+        mReadFrom = (mReadFrom+1)%sNumBuffers;
         const std::vector<Batch>& vec = mBatchVector[mReadFrom];
         for (std::vector<Batch>::const_iterator it = vec.begin(); it != vec.end(); ++it)
         {
@@ -188,15 +188,18 @@ public:
 
     void clear()
     {
-        mWriteTo = (mWriteTo+1)%2;
+        mWriteTo = (mWriteTo+1)%sNumBuffers;
         mBatchVector[mWriteTo].clear();
     }
 
     META_Object(osgMyGUI, Drawable)
 
 private:
+    // 2 would be enough in most cases, use 4 to get stereo working
+    static const int sNumBuffers = 4;
+
     // double buffering approach, to avoid the need for synchronization with the draw thread
-    std::vector<Batch> mBatchVector[2];
+    std::vector<Batch> mBatchVector[sNumBuffers];
 
     int mWriteTo;
     mutable int mReadFrom;
