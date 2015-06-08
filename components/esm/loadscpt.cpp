@@ -58,11 +58,22 @@ namespace ESM
 
     void Script::load(ESMReader &esm)
     {
+        loadData(esm);
+        loadScript(esm);
+    }
+
+    std::string Script::loadData(ESMReader &esm)
+    {
         SCHD data;
         esm.getHNT(data, "SCHD", 52);
         mData = data.mData;
         mId = data.mName.toString();
 
+        return mId;
+    }
+
+    void Script::loadScript(ESMReader &esm)
+    {
         mVarNames.clear();
 
         while (esm.hasMoreSubs())
@@ -78,10 +89,13 @@ namespace ESM
                 case ESM::FourCC<'S','C','D','T'>::value:
                     // compiled script
                     mScriptData.resize(mData.mScriptDataSize);
-                    esm.getHExact(&mScriptData[0], mScriptData.size());
+                    esm.getHExact(&mScriptData[0], (int)mScriptData.size());
                     break;
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
                     break;
                 default:
                     esm.fail("Unknown subrecord");
