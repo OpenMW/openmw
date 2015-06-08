@@ -199,7 +199,7 @@ bool Launcher::MainDialog::setup()
     // Now create the pages as they need the settings
     createPages();
 
-    // Call this so we can exit on Ogre/SDL errors before mainwindow is shown
+    // Call this so we can exit on SDL errors before mainwindow is shown
     if (!mGraphicsPage->loadSettings())
         return false;
 
@@ -490,7 +490,7 @@ bool Launcher::MainDialog::writeSettings()
     // Game settings
     QFile file(userPath + QString("openmw.cfg"));
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
@@ -503,10 +503,8 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-    mGameSettings.writeFile(stream);
+    mGameSettings.writeFileWithComments(file);
     file.close();
 
     // Graphics settings
@@ -525,6 +523,7 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
+    QTextStream stream(&file);
     stream.setDevice(&file);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 

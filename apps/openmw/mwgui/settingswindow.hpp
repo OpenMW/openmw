@@ -22,6 +22,7 @@ namespace MWGui
             void updateControlsBox();
 
     protected:
+            MyGUI::TabControl* mSettingsTab;
             MyGUI::Button* mOkButton;
 
             // graphics
@@ -37,7 +38,6 @@ namespace MWGui
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mShadersButton;
-            MyGUI::Button* mShaderModeButton;
             MyGUI::Button* mRefractionButton;
 
             MyGUI::Button* mShadowsEnabledButton;
@@ -50,6 +50,7 @@ namespace MWGui
             MyGUI::Button* mControllerSwitch;
             bool mKeyboardMode; //if true, setting up the keyboard. Otherwise, it's controller
 
+            void onTabChanged(MyGUI::TabControl* _sender, size_t index);
             void onOkButtonClicked(MyGUI::Widget* _sender);
             void onFpsToggled(MyGUI::Widget* _sender);
             void onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos);
@@ -59,7 +60,6 @@ namespace MWGui
             void onResolutionAccept();
             void onResolutionCancel();
 
-            void onShaderModeToggled(MyGUI::Widget* _sender);
             void onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
@@ -74,6 +74,9 @@ namespace MWGui
             void apply();
 
             void configureWidgets(MyGUI::Widget* widget);
+        
+        private:
+            void resetScrollbars();
     };
 }
 

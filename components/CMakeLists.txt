@@ -20,34 +20,40 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
 endif (GIT_CHECKOUT)
 
+find_package(OpenGL REQUIRED)
+
 # source files
 
 add_component_dir (settings
     settings
     )
 
-add_component_dir (nifoverrides
-    nifoverrides
+add_component_dir (bsa
+    bsa_file
     )
 
-add_component_dir (bsa
-    bsa_archive bsa_file resources
+add_component_dir (vfs
+    manager archive bsaarchive filesystemarchive registerarchives
+    )
+
+add_component_dir (resource
+    scenemanager texturemanager resourcesystem
+    )
+
+add_component_dir (sceneutil
+    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller
     )
 
 add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
     )
 
-add_component_dir (nifcache
-    nifcache
-    )
-
-add_component_dir (nifogre
-    ogrenifloader skeleton material mesh particles controller
+add_component_dir (nifosg
+    nifloader controller particle userdata
     )
 
 add_component_dir (nifbullet
-    bulletnifloader
+    bulletnifloader bulletshapemanager
     )
 
 add_component_dir (to_utf8
@@ -70,7 +76,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers
+    utf8stream stringops resourcehelpers rng
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -79,7 +85,7 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
-    constrainedfiledatastream lowlevelfile
+    lowlevelfile constrainedfilestream memorystream
     )
 
 add_component_dir (compiler
@@ -98,17 +104,16 @@ add_component_dir (translation
     translation
     )
 
-add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world defaultworld terraingrid storage material buffercache defs
+    storage world buffercache defs terraingrid material
     )
 
 add_component_dir (loadinglistener
     loadinglistener
     )
 
-add_component_dir (ogreinit
-    ogreinit ogreplugin
+add_component_dir (myguiplatform
+    myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener
     )
 
 add_component_dir (widgets
@@ -117,6 +122,10 @@ add_component_dir (widgets
 
 add_component_dir (fontloader
     fontloader
+    )
+
+add_component_dir (sdlutil
+    sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper OISCompat events sdlcursormanager
     )
 
 add_component_dir (version
@@ -165,8 +174,11 @@ add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
     ${Boost_LIBRARIES} 
-    ${OGRE_LIBRARIES}
-    ${OENGINE_LIBRARY}    
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARY}
+    # For MyGUI platform
+    ${OPENGL_gl_LIBRARY}
 )
 
 if (GIT_CHECKOUT)

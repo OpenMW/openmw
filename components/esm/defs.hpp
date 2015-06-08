@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <osg/Vec3f>
+
 namespace ESM
 {
 
@@ -13,7 +15,7 @@ struct TimeStamp
 };
 
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
-typedef int32_t Color;
+typedef uint32_t Color;
 
 enum Specialization
 {
@@ -36,7 +38,14 @@ enum RangeType
 struct Position
 {
     float pos[3];
+
+    // In radians
     float rot[3];
+
+    osg::Vec3f asVec3() const
+    {
+        return osg::Vec3f(pos[0], pos[1], pos[2]);
+    }
 };
 #pragma pack(pop)
 

@@ -192,6 +192,8 @@ namespace MWWorld
             void setListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 
+            InventoryStoreListener* getListener();
+
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
             void rechargeItems (float duration);

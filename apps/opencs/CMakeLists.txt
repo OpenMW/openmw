@@ -26,6 +26,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    idcompletionmanager
     )
 
 opencs_hdrs_noqt (model/world
@@ -68,12 +69,12 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem
+    scripthighlighter idvalidator dialoguecreator idcompletiondelegate
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2
+    scenetooltoggle2 completerpopup
     )
 
 opencs_units (view/render
@@ -82,8 +83,8 @@ opencs_units (view/render
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem mousestate
+    lighting lightingday lightingnight
+    lightingbright object cell terrainstorage
     )
 
 opencs_hdrs_noqt (view/render
@@ -152,14 +153,14 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+set(BOOST_COMPONENTS system filesystem program_options thread)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
+find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtOpenGL REQUIRED)
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
@@ -200,13 +201,8 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OENGINE_LIBRARY}
-    ${OGRE_LIBRARIES}
-    ${OGRE_Overlay_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
-    ${SHINY_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${BULLET_LIBRARIES}
     ${QT_LIBRARIES}
     components
 )

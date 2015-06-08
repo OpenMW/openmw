@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include <OgreVector3.h>
-
 #include <components/esm/defs.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -43,7 +41,7 @@ namespace MWWorld
 
     }
 
-    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const
     {
 
     }
@@ -186,14 +184,9 @@ namespace MWWorld
         throw std::runtime_error ("movement settings not supported by class");
     }
 
-    Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    osg::Vec3f Class::getRotationVector (const Ptr& ptr) const
     {
-        return Ogre::Vector3 (0, 0, 0);
-    }
-
-    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
-    {
-        return Ogre::Vector3 (0, 0, 0);
+        return osg::Vec3f (0, 0, 0);
     }
 
     std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
@@ -295,7 +288,7 @@ namespace MWWorld
         return "";
     }
 
-    void Class::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    void Class::adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const
     {
     }
 

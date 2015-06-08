@@ -2,14 +2,13 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
-
-#include "../../view/world/physicssystem.hpp"
 
 void CSMDoc::Document::addGmsts()
 {
@@ -2245,19 +2244,19 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
+: mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
   mTools (*this),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
+  mRunner (mProjectPath), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2311,6 +2310,11 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
 CSMDoc::Document::~Document()
 {
+}
+
+const VFS::Manager *CSMDoc::Document::getVFS() const
+{
+    return mVFS;
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
@@ -2481,10 +2485,7 @@ void CSMDoc::Document::progress (int current, int max, int type)
     emit progress (current, max, type, 1, this);
 }
 
-boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
+CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
-    if(!mPhysics)
-        mPhysics = boost::shared_ptr<CSVWorld::PhysicsSystem> (new CSVWorld::PhysicsSystem());
-
-    return mPhysics;
+    return mIdCompletionManager;
 }

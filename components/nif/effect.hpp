@@ -38,67 +38,23 @@ struct NiLight : Effect
     struct SLight
     {
         float dimmer;
-        Ogre::Vector3 ambient;
-        Ogre::Vector3 diffuse;
-        Ogre::Vector3 specular;
+        osg::Vec3f ambient;
+        osg::Vec3f diffuse;
+        osg::Vec3f specular;
 
-        void read(NIFStream *nif)
-        {
-            dimmer = nif->getFloat();
-            ambient = nif->getVector3();
-            diffuse = nif->getVector3();
-            specular = nif->getVector3();
-        }
+        void read(NIFStream *nif);
     };
     SLight light;
 
-    void read(NIFStream *nif)
-    {
-        Effect::read(nif);
-
-        nif->getInt(); // 1
-        nif->getInt(); // 1?
-        light.read(nif);
-    }
+    void read(NIFStream *nif);
 };
 
 struct NiTextureEffect : Effect
 {
     NiSourceTexturePtr texture;
 
-    void read(NIFStream *nif)
-    {
-        Effect::read(nif);
-
-        int tmp = nif->getInt();
-        if(tmp) nif->getInt(); // always 1?
-
-        /*
-           3 x Vector4 = [1,0,0,0]
-           int = 2
-           int = 0 or 3
-           int = 2
-           int = 2
-        */
-        nif->skip(16*4);
-
-        texture.read(nif);
-
-        /*
-           byte = 0
-           vector4 = [1,0,0,0]
-           short = 0
-           short = -75
-           short = 0
-        */
-        nif->skip(23);
-    }
-
-    void post(NIFFile *nif)
-    {
-        Effect::post(nif);
-        texture.post(nif);
-    }
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 } // Namespace

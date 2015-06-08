@@ -15,6 +15,11 @@
 
 #include "loader.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace Files
 {
     struct ConfigurationManager;
@@ -35,6 +40,7 @@ namespace CSMDoc
             ToUTF8::FromType mEncoding;
             CSMWorld::ResourcesManager mResourcesManager;
             std::vector<std::string> mBlacklistedScripts;
+            const VFS::Manager* mVFS;
 
             DocumentManager (const DocumentManager&);
             DocumentManager& operator= (const DocumentManager&);
@@ -56,8 +62,7 @@ namespace CSMDoc
 
             void setBlacklistedScripts (const std::vector<std::string>& scriptIds);
 
-            /// Ask OGRE for a list of available resources.
-            void listResources();
+            void setVFS(const VFS::Manager* vfs);
 
             bool isEmpty();
 

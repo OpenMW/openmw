@@ -576,7 +576,7 @@ void CSMWorld::NpcAttributesRefIdAdapter::setNestedTable (const RefIdColumn* col
 
     // store the whole struct
     npc.mNpdt52 =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::NPC::NPDTstruct52> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::NPC::NPDTstruct52> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (npc);
 }
@@ -588,10 +588,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::NpcAttributesRefIdAdapter::nestedTab
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
     // return the whole struct
-    std::vector<typename ESM::NPC::NPDTstruct52> wrap;
+    std::vector<ESM::NPC::NPDTstruct52> wrap;
     wrap.push_back(record.get().mNpdt52);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::NPC::NPDTstruct52> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::NPC::NPDTstruct52> >(wrap);
 }
 
 QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *column,
@@ -694,7 +694,7 @@ void CSMWorld::NpcSkillsRefIdAdapter::setNestedTable (const RefIdColumn* column,
 
     // store the whole struct
     npc.mNpdt52 =
-        static_cast<const NestedTableWrapper<std::vector<typename ESM::NPC::NPDTstruct52> > &>(nestedTable).mNestedTable.at(0);
+        static_cast<const NestedTableWrapper<std::vector<ESM::NPC::NPDTstruct52> > &>(nestedTable).mNestedTable.at(0);
 
     record.setModified (npc);
 }
@@ -706,10 +706,10 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::NpcSkillsRefIdAdapter::nestedTable (
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
     // return the whole struct
-    std::vector<typename ESM::NPC::NPDTstruct52> wrap;
+    std::vector<ESM::NPC::NPDTstruct52> wrap;
     wrap.push_back(record.get().mNpdt52);
     // deleted by dtor of NestedTableStoring
-    return new NestedTableWrapper<std::vector<typename ESM::NPC::NPDTstruct52> >(wrap);
+    return new NestedTableWrapper<std::vector<ESM::NPC::NPDTstruct52> >(wrap);
 }
 
 QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *column,

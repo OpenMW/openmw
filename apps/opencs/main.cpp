@@ -9,10 +9,6 @@
 #include <QIcon>
 #include <QMetaType>
 
-#include <extern/shiny/Main/Factory.hpp>
-
-#include <components/ogreinit/ogreinit.hpp>
-
 #include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
@@ -48,14 +44,13 @@ int main(int argc, char *argv[])
 {
     try
     {
+        // To allow background thread drawing in OSG
+        QApplication::setAttribute(Qt::AA_X11InitThreads, true);
+
         Q_INIT_RESOURCE (resources);
 
         qRegisterMetaType<std::string> ("std::string");
         qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
-
-        OgreInit::OgreInit ogreInit;
-
-        std::auto_ptr<sh::Factory> shinyFactory;
 
         Application application (argc, argv);
 
@@ -80,15 +75,13 @@ int main(int argc, char *argv[])
 
         application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
-        CS::Editor editor (ogreInit);
+        CS::Editor editor;
 
         if(!editor.makeIPCServer())
         {
             editor.connectToIPCServer();
             return 0;
         }
-
-        shinyFactory = editor.setupGraphics();
         return editor.run();
     }
     catch (std::exception& e)

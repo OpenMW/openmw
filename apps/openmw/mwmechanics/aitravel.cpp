@@ -1,7 +1,5 @@
 #include "aitravel.hpp"
 
-#include <OgreVector3.h>
-
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/world.hpp"
@@ -17,12 +15,12 @@
 namespace
 {
 
-bool isWithinMaxRange(const Ogre::Vector3& pos1, const Ogre::Vector3& pos2)
+bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 {
     // Maximum travel distance for vanilla compatibility.
     // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
     // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
-    return (pos1.squaredDistance(pos2) <= 7168*7168);
+    return (pos1 - pos2).length2() <= 7168*7168;
 }
 
 }
@@ -84,7 +82,7 @@ namespace MWMechanics
             }
         }
 
-        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(pos.pos)))
+        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), pos.asVec3()))
             return false;
 
         bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
@@ -106,7 +104,7 @@ namespace MWMechanics
             return true;
         }
 
-        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+        zTurn(actor, osg::DegreesToRadians(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
         movement.mPosition[1] = 1;
 
         return false;
@@ -119,7 +117,7 @@ namespace MWMechanics
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
-        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(actor.getRefData().getPosition().pos)))
+        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
             return;
         // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
         // that is the user's responsibility

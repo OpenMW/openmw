@@ -7,12 +7,14 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <OgreVector3.h>
-#include <OgreResourceGroupManager.h>
-
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/soundmanager.hpp"
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace MWSound
 {
@@ -27,12 +29,12 @@ namespace MWSound
 
     class SoundManager : public MWBase::SoundManager
     {
-        Ogre::ResourceGroupManager& mResourceMgr;
+        const VFS::Manager* mVFS;
 
         std::auto_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
-        std::map<std::string, Ogre::StringVector> mMusicFiles;
+        std::map<std::string, std::vector<std::string> > mMusicFiles;
         std::string mLastPlayedMusic; // The music file that was last played
 
         float mMasterVolume;
@@ -51,9 +53,9 @@ namespace MWSound
         MWBase::SoundPtr mUnderwaterSound;
 
         bool mListenerUnderwater;
-        Ogre::Vector3 mListenerPos;
-        Ogre::Vector3 mListenerDir;
-        Ogre::Vector3 mListenerUp;
+        osg::Vec3f mListenerPos;
+        osg::Vec3f mListenerDir;
+        osg::Vec3f mListenerUp;
 
         int mPausedSoundTypes;
 
@@ -74,7 +76,7 @@ namespace MWSound
         friend class OpenAL_Output;
 
     public:
-        SoundManager(bool useSound);
+        SoundManager(const VFS::Manager* vfs, bool useSound);
         virtual ~SoundManager();
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
@@ -128,7 +130,7 @@ namespace MWSound
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
         ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
-        virtual MWBase::SoundPtr playManualSound3D(const Ogre::Vector3& initialPos, const std::string& soundId,
+        virtual MWBase::SoundPtr playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                                          float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
 
@@ -167,7 +169,7 @@ namespace MWSound
 
         virtual void update(float duration);
 
-        virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up);
+        virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up);
 
         virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 

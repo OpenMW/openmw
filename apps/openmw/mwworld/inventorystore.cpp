@@ -367,7 +367,7 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 // Roll some dice, one for each effect
                 params.resize(enchantment.mEffects.mList.size());
                 for (unsigned int i=0; i<params.size();++i)
-                    params[i].mRandom = OEngine::Misc::Rng::rollClosedProbability();
+                    params[i].mRandom = Misc::Rng::rollClosedProbability();
 
                 // Try resisting each effect
                 int i=0;
@@ -573,6 +573,11 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
 }
 
+MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getListener()
+{
+    return mListener;
+}
+
 void MWWorld::InventoryStore::setListener(InventoryStoreListener *listener, const Ptr& actor)
 {
     mListener = listener;
@@ -587,10 +592,12 @@ void MWWorld::InventoryStore::fireEquipmentChangedEvent(const Ptr& actor)
         mListener->equipmentChanged();
 
     // if player, update inventory window
+    /*
     if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
         MWBase::Environment::get().getWindowManager()->getInventoryWindow()->updateItemView();
     }
+    */
 }
 
 void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisitor &visitor)

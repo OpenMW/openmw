@@ -175,7 +175,7 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 4 137 24" align="Left Top" name="KeyboardButton">
                     <Property key="Caption" value="Mouse/Keyboard"/>
                 </Widget>
-                <Widget type="AutoSizedButton" skin="MW_Button" position="141 4 137 24" align="Lept Top" name="ControllerButton">
+                <Widget type="AutoSizedButton" skin="MW_Button" position="145 4 137 24" align="Left Top" name="ControllerButton">
                     <Property key="Caption" value="Controller"/>
                 </Widget>
                 <Widget type="Widget" skin="MW_Box" position="4 34 352 154" align="Stretch">
@@ -271,12 +271,6 @@
                                 <Property key="Caption" value="Object shaders"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 154 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShaderModeButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 93 16" align="Left Top">
-                                <Property key="Caption" value="Shader mode"/>
-                            </Widget>
-                        </Widget>
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                             <Property key="Caption" value="Field of View"/>
                         </Widget>
@@ -305,7 +299,7 @@
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingCategory" value="Video"/>
                             <UserString key="SettingName" value="gamma"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="0.1"/>
@@ -328,7 +322,6 @@
                         <Widget type="ComboBox" skin="MW_ComboBox" position="14 28 110 24" align="Left Top" name="TextureFilteringButton">
                             <Property key="AddItem" value="Bilinear"/>
                             <Property key="AddItem" value="Trilinear"/>
-                            <Property key="AddItem" value="Anisotropic"/>
                         </Widget>
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
                             <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
@@ -348,11 +341,11 @@
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="Viewing distance"/>
+                            <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="2000"/>
-                            <UserString key="SettingMax" value="4600"/>
+                            <UserString key="SettingMax" value="6666"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>

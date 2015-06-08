@@ -213,7 +213,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_CollisionDebug);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_CollisionDebug);
 
                     runtime.getContext().report (enabled ?
                         "Collision Mesh Rendering -> On" : "Collision Mesh Rendering -> Off");
@@ -228,7 +228,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_BoundingBoxes);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_BoundingBoxes);
 
                     runtime.getContext().report (enabled ?
                         "Bounding Box Rendering -> On" : "Bounding Box Rendering -> Off");
@@ -242,7 +242,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     bool enabled =
-                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Wireframe);
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_Wireframe);
 
                     runtime.getContext().report (enabled ?
                         "Wireframe Rendering -> On" : "Wireframe Rendering -> Off");
@@ -255,7 +255,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 bool enabled =
-                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWBase::World::Render_Pathgrid);
+                    MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_Pathgrid);
 
                 runtime.getContext().report (enabled ?
                     "Path Grid rendering -> On" : "Path Grid Rendering -> Off");
@@ -812,10 +812,10 @@ namespace MWScript
 
                 const std::string script = ptr.getClass().getScript(ptr);
                 if(script.empty())
-                    str<< ptr.getCellRef().getRefId()<<" ("<<ptr.getRefData().getHandle()<<") does not have a script.";
+                    str<< ptr.getCellRef().getRefId()<<"  does not have a script.";
                 else
                 {
-                    str<< "Local variables for "<<ptr.getCellRef().getRefId()<<" ("<<ptr.getRefData().getHandle()<<")";
+                    str<< "Local variables for "<<ptr.getCellRef().getRefId();
 
                     const Locals &locals = ptr.getRefData().getLocals();
                     const Compiler::Locals &complocals = MWBase::Environment::get().getScriptManager()->getLocals(script);
@@ -937,7 +937,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target);
-                cast.mHitPosition = Ogre::Vector3(target.getRefData().getPosition().pos);
+                cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }
@@ -955,7 +955,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWMechanics::CastSpell cast(ptr, ptr);
-                cast.mHitPosition = Ogre::Vector3(ptr.getRefData().getPosition().pos);
+                cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);
             }
@@ -1045,8 +1045,8 @@ namespace MWScript
                     msg << "Cell: " << MWBase::Environment::get().getWorld()->getCellName(cell) << std::endl;
                     if (cell->getCell()->isExterior())
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
-                    Ogre::Vector3 pos (ptr.getRefData().getPosition().pos);
-                    msg << "Coordinates: " << pos << std::endl;
+                    osg::Vec3f pos (ptr.getRefData().getPosition().asVec3());
+                    msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
                     msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
                     if (!ptr.getClass().getScript(ptr).empty())
                         msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;

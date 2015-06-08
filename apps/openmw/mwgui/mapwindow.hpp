@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <boost/shared_ptr.hpp>
+
 #include "windowpinnablebase.hpp"
 
 #include <components/esm/cellid.hpp>
@@ -12,6 +14,7 @@
 namespace MWRender
 {
     class GlobalMap;
+    class LocalMap;
 }
 
 namespace ESM
@@ -52,7 +55,7 @@ namespace MWGui
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender);
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
 
@@ -67,6 +70,14 @@ namespace MWGui
 
         struct MarkerUserData
         {
+            MarkerUserData(MWRender::LocalMap* map)
+                : mLocalMapRender(map)
+            {
+            }
+
+            bool isPositionExplored() const;
+
+            MWRender::LocalMap* mLocalMapRender;
             bool interior;
             int cellX;
             int cellY;
@@ -77,6 +88,8 @@ namespace MWGui
         };
 
     protected:
+        MWRender::LocalMap* mLocalMapRender;
+
         int mCurX, mCurY;
         bool mInterior;
         MyGUI::ScrollView* mLocalMap;
@@ -92,6 +105,10 @@ namespace MWGui
 
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
+
+        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        TextureVector mMapTextures;
+        TextureVector mFogTextures;
 
         // Keep track of created marker widgets, just to easily remove them later.
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
@@ -153,7 +170,7 @@ namespace MWGui
     class MapWindow : public MWGui::WindowPinnableBase, public LocalMapBase, public NoDrop
     {
     public:
-        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, const std::string& cacheDir);
+        MapWindow(CustomMarkerCollection& customMarkers, DragAndDrop* drag, MWRender::LocalMap* localMapRender);
         virtual ~MapWindow();
 
         void setCellName(const std::string& cellName);
@@ -195,6 +212,8 @@ namespace MWGui
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
+        std::auto_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;
@@ -217,6 +236,8 @@ namespace MWGui
         MyGUI::Button* mEventBoxLocal;
 
         MWRender::GlobalMap* mGlobalMapRender;
+
+        std::vector<MyGUI::Widget*> mGlobalMapMarkers;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;

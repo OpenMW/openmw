@@ -1,15 +1,12 @@
-
 #include "actors.hpp"
 
 #include <typeinfo>
 
-#include <OgreVector3.h>
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadnpc.hpp>
 
 #include "../mwworld/esmstore.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -20,6 +17,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
@@ -27,14 +25,9 @@
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "character.hpp"
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
-
 #include "aicombat.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
-
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "combat.hpp"
@@ -252,7 +245,7 @@ namespace MWMechanics
                     .search("VFX_Soul_Trap");
             if (fx)
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                    "", Ogre::Vector3(mCreature.getRefData().getPosition().pos));
+                    "", mCreature.getRefData().getPosition().asVec3());
 
             MWBase::Environment::get().getSoundManager()->playSound3D(mCreature, "conjuration hit", 1.f, 1.f,
                                                                       MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
@@ -285,7 +278,7 @@ namespace MWMechanics
 
         const ESM::Position& actor1Pos = actor.getRefData().getPosition();
         const ESM::Position& actor2Pos = targetActor.getRefData().getPosition();
-        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+        float sqrDist = (actor1Pos.asVec3() - actor2Pos.asVec3()).length2();
 
         if (sqrDist > maxDistance*maxDistance)
             return;
@@ -293,12 +286,17 @@ namespace MWMechanics
         if (targetActor.getClass().getCreatureStats(targetActor).isDead())
             return;
 
+        if (!actor.getRefData().getBaseNode())
+            return;
+
         // stop tracking when target is behind the actor
-        Ogre::Vector3 actorDirection (actor.getRefData().getBaseNode()->getOrientation().yAxis());
-        Ogre::Vector3 targetDirection (Ogre::Vector3(actor2Pos.pos) - Ogre::Vector3(actor1Pos.pos));
-        actorDirection.z = 0;
-        targetDirection.z = 0;
-        if (actorDirection.angleBetween(targetDirection) < Ogre::Degree(90)
+        osg::Vec3f actorDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        osg::Vec3f targetDirection (actor2Pos.asVec3() - actor1Pos.asVec3());
+        actorDirection.z() = 0;
+        targetDirection.z() = 0;
+        actorDirection.normalize();
+        targetDirection.normalize();
+        if (std::acos(actorDirection * targetDirection) < osg::DegreesToRadians(90.f)
             && sqrDist <= sqrHeadTrackDistance
             && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
             && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
@@ -318,7 +316,7 @@ namespace MWMechanics
 
         const ESM::Position& actor1Pos = actor1.getRefData().getPosition();
         const ESM::Position& actor2Pos = actor2.getRefData().getPosition();
-        float sqrDist = Ogre::Vector3(actor1Pos.pos).squaredDistance(Ogre::Vector3(actor2Pos.pos));
+        float sqrDist = (actor1Pos.asVec3() - actor2Pos.asVec3()).length2();
         if (sqrDist > 7168*7168)
             return;
 
@@ -811,7 +809,7 @@ namespace MWMechanics
 
         NpcStats &stats = ptr.getClass().getNpcStats(ptr);
         MWBase::World *world = MWBase::Environment::get().getWorld();
-        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), Ogre::Vector3(ptr.getRefData().getPosition().pos)));
+        bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
@@ -1012,6 +1010,8 @@ namespace MWMechanics
         removeActor(ptr);
 
         MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+        if (!anim)
+            return;
         mActors.insert(std::make_pair(ptr, new Actor(ptr, anim)));
         if (updateImmediately)
             mActors[ptr]->getCharacterController()->update(0);
@@ -1081,12 +1081,15 @@ namespace MWMechanics
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
+                bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
+                        <= sqrProcessingDistance;
+
+                iter->second->getCharacterController()->setActive(inProcessingRange);
+
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
                     updateActor(iter->first, duration);
-                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() &&
-                            Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
-                                    <= sqrProcessingDistance)
+                    if (MWBase::Environment::get().getMechanicsManager()->isAIActive() && inProcessingRange)
                     {
                         if (timerUpdateAITargets == 0)
                         {
@@ -1148,7 +1151,7 @@ namespace MWMechanics
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first != player &&
-                        Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(iter->first.getRefData().getPosition().pos))
+                        (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
                         > sqrProcessingDistance)
                     continue;
 
@@ -1233,7 +1236,7 @@ namespace MWMechanics
                             continue;
 
                         // is the player in range and can they be detected
-                        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(player.getRefData().getPosition().pos)) <= radius*radius
+                        if ((iter->first.getRefData().getPosition().asVec3() - player.getRefData().getPosition().asVec3()).length2() <= radius*radius
                             && MWBase::Environment::get().getWorld()->getLOS(player, iter->first))
                         {
                             if (MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, iter->first))
@@ -1382,11 +1385,11 @@ namespace MWMechanics
         return false;
     }
 
-    void Actors::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+    void Actors::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
     {
         for (PtrActorMap::iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
         {
-            if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+            if ((iter->first.getRefData().getPosition().asVec3() - position).length2() <= radius*radius)
                 out.push_back(iter->first);
         }
     }
@@ -1454,7 +1457,7 @@ namespace MWMechanics
     std::list<MWWorld::Ptr> Actors::getActorsFighting(const MWWorld::Ptr& actor) {
         std::list<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
-        Ogre::Vector3 position = Ogre::Vector3(actor.getRefData().getPosition().pos);
+        osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position,
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fAlarmRadius")->getFloat(),
             neighbors); //only care about those within the alarm disance

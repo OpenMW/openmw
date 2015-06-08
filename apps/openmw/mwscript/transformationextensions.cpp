@@ -1,4 +1,6 @@
-#include <OgreSceneNode.h>
+#include <iostream>
+
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadcell.hpp>
 
@@ -84,9 +86,9 @@ namespace MWScript
                     Interpreter::Type_Float angle = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
+                    float az = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]);
 
                     MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
 
@@ -127,15 +129,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[0]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[0]));
                     }
                     else if (axis == "y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[1]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[1]));
                     }
                     else if (axis == "z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getCellRef().getPosition().rot[2]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]));
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -156,15 +158,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]));
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]));
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(Ogre::Radian(ptr.getRefData().getPosition().rot[2]).valueDegrees());
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -326,8 +328,8 @@ namespace MWScript
                         ptr = MWWorld::Ptr(ptr.getBase(), store);
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
-                        float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                        float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                        float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                        float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
                         // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                         // except for when you position the player, then degrees must be used.
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -382,8 +384,8 @@ namespace MWScript
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
-                    float ax = Ogre::Radian(ptr.getRefData().getPosition().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getPosition().rot[1]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
                     // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south = 10800, west = 16200)
                     // except for when you position the player, then degrees must be used.
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
@@ -518,17 +520,17 @@ namespace MWScript
                     for (int i=0; i<count; ++i)
                     {
                         ESM::Position ipos = actor.getRefData().getPosition();
-                        Ogre::Vector3 pos(ipos.pos[0],ipos.pos[1],ipos.pos[2]);
-                        Ogre::Quaternion rot(Ogre::Radian(-ipos.rot[2]), Ogre::Vector3::UNIT_Z);
-                        if(direction == 0) pos = pos + distance*rot.yAxis();
-                        else if(direction == 1) pos = pos - distance*rot.yAxis();
-                        else if(direction == 2) pos = pos - distance*rot.xAxis();
-                        else if(direction == 3) pos = pos + distance*rot.xAxis();
+                        osg::Vec3f pos(ipos.asVec3());
+                        osg::Quat rot(ipos.rot[2], osg::Vec3f(0,0,-1));
+                        if(direction == 0) pos = pos + (rot * osg::Vec3f(0,1,0)) * distance;
+                        else if(direction == 1) pos = pos - (rot * osg::Vec3f(0,1,0)) * distance;
+                        else if(direction == 2) pos = pos - (rot * osg::Vec3f(1,0,0)) * distance;
+                        else if(direction == 3) pos = pos + (rot * osg::Vec3f(1,0,0)) * distance;
                         else throw std::runtime_error ("direction must be 0,1,2 or 3");
 
-                        ipos.pos[0] = pos.x;
-                        ipos.pos[1] = pos.y;
-                        ipos.pos[2] = pos.z;
+                        ipos.pos[0] = pos.x();
+                        ipos.pos[1] = pos.y();
+                        ipos.pos[2] = pos.z();
 
                         if (actor.getClass().isActor())
                         {
@@ -567,9 +569,9 @@ namespace MWScript
                     Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float ax = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[0]).valueDegrees();
-                    float ay = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[1]).valueDegrees();
-                    float az = Ogre::Radian(ptr.getRefData().getLocalRotation().rot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[0]);
+                    float ay = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[1]);
+                    float az = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[2]);
 
                     if (axis == "x")
                     {
@@ -604,9 +606,9 @@ namespace MWScript
 
                     const float *objRot = ptr.getRefData().getPosition().rot;
 
-                    float ax = Ogre::Radian(objRot[0]).valueDegrees();
-                    float ay = Ogre::Radian(objRot[1]).valueDegrees();
-                    float az = Ogre::Radian(objRot[2]).valueDegrees();
+                    float ax = osg::RadiansToDegrees(objRot[0]);
+                    float ay = osg::RadiansToDegrees(objRot[1]);
+                    float az = osg::RadiansToDegrees(objRot[2]);
 
                     if (axis == "x")
                     {
@@ -669,29 +671,30 @@ namespace MWScript
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    Ogre::Vector3 posChange;
+                    osg::Vec3f posChange;
                     if (axis == "x")
                     {
-                        posChange=Ogre::Vector3(movement, 0, 0);
+                        posChange=osg::Vec3f(movement, 0, 0);
                     }
                     else if (axis == "y")
                     {
-                        posChange=Ogre::Vector3(0, movement, 0);
+                        posChange=osg::Vec3f(0, movement, 0);
                     }
                     else if (axis == "z")
                     {
-                        posChange=Ogre::Vector3(0, 0, movement);
+                        posChange=osg::Vec3f(0, 0, movement);
                     }
                     else
                         throw std::runtime_error ("invalid movement axis: " + axis);
 
+                    // is it correct that disabled objects can't be Move-d?
                     if (!ptr.getRefData().getBaseNode())
                         return;
 
-                    Ogre::Vector3 diff = ptr.getRefData().getBaseNode()->getOrientation() * posChange;
-                    Ogre::Vector3 worldPos(ptr.getRefData().getPosition().pos);
+                    osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
+                    osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x, worldPos.y, worldPos.z);
+                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
                 }
         };
 

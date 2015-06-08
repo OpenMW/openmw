@@ -4,8 +4,6 @@ set(SDIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(DDIR ${OpenMW_BINARY_DIR}/resources/mygui)
 
 set(MYGUI_FILES
-    black.png
-    white.png
     core.skin
     core.xml
     core_layouteditor.xml

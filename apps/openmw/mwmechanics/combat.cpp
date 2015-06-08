@@ -1,8 +1,8 @@
 #include "combat.hpp"
 
-#include <OgreSceneNode.h>
+#include <osg/PositionAttitudeTransform>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -23,15 +23,12 @@
 namespace
 {
 
-Ogre::Radian signedAngle(Ogre::Vector3 v1, Ogre::Vector3 v2, Ogre::Vector3 normal)
+float signedAngleRadians (const osg::Vec3f& v1, const osg::Vec3f& v2, const osg::Vec3f& normal)
 {
-    return Ogre::Math::ATan2(
-                normal.dotProduct( v1.crossProduct(v2) ),
-                v1.dotProduct(v2)
-                );
+    return std::atan2((normal * (v1 ^ v2)), (v1 * v2));
 }
 
-bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const Ogre::Vector3& hitPosition)
+bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object, const osg::Vec3f& hitPosition)
 {
     std::string enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : "";
     if (!enchantmentName.empty())
@@ -74,13 +71,19 @@ namespace MWMechanics
         if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
             return false;
 
-        Ogre::Degree angle = signedAngle (Ogre::Vector3(attacker.getRefData().getPosition().pos) - Ogre::Vector3(blocker.getRefData().getPosition().pos),
-                                          blocker.getRefData().getBaseNode()->getOrientation().yAxis(), Ogre::Vector3(0,0,1));
+        if (!blocker.getRefData().getBaseNode())
+            return false; // shouldn't happen
+
+        float angleDegrees = osg::RadiansToDegrees(
+                    signedAngleRadians (
+                    (attacker.getRefData().getPosition().asVec3() - blocker.getRefData().getPosition().asVec3()),
+                    blocker.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0),
+                    osg::Vec3f(0,0,1)));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-        if (angle.valueDegrees() < gmst.find("fCombatBlockLeftAngle")->getFloat())
+        if (angleDegrees < gmst.find("fCombatBlockLeftAngle")->getFloat())
             return false;
-        if (angle.valueDegrees() > gmst.find("fCombatBlockRightAngle")->getFloat())
+        if (angleDegrees > gmst.find("fCombatBlockRightAngle")->getFloat())
             return false;
 
         MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
@@ -109,7 +112,7 @@ namespace MWMechanics
         int iBlockMinChance = gmst.find("iBlockMinChance")->getInt();
         x = std::min(iBlockMaxChance, std::max(iBlockMinChance, x));
 
-        if (OEngine::Misc::Rng::roll0to99() < x)
+        if (Misc::Rng::roll0to99() < x)
         {
             // Reduce shield durability by incoming damage
             int shieldhealth = shield->getClass().getItemHealth(*shield);
@@ -163,7 +166,7 @@ namespace MWMechanics
     }
 
     void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
-                       const Ogre::Vector3& hitPosition)
+                       const osg::Vec3f& hitPosition)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
@@ -187,7 +190,7 @@ namespace MWMechanics
         int skillValue = attacker.getClass().getSkill(attacker,
                                            weapon.getClass().getEquipmentSkill(weapon));
 
-        if (OEngine::Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
+        if (Misc::Rng::roll0to99() >= getHitChance(attacker, victim, skillValue))
         {
             victim.getClass().onHit(victim, 0.0f, false, projectile, attacker, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, attacker);
@@ -225,7 +228,7 @@ namespace MWMechanics
                 && !appliedEnchantment)
         {
             float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
-            if (OEngine::Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
+            if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
                 victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
         }
 
@@ -292,7 +295,7 @@ namespace MWMechanics
 
             saveTerm *= 1.25f * normalisedFatigue;
 
-            float x = std::max(0.f, saveTerm - OEngine::Misc::Rng::roll0to99());
+            float x = std::max(0.f, saveTerm - Misc::Rng::roll0to99());
 
             int element = ESM::MagicEffect::FireDamage;
             if (i == 1)

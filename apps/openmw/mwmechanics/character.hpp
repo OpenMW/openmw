@@ -1,11 +1,13 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
-#include <OgreVector3.h>
+#include <deque>
 
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+
+#include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
@@ -134,7 +136,7 @@ enum JumpingState {
     JumpState_Landing
 };
 
-class CharacterController
+class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
@@ -205,6 +207,9 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
+    virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                       const std::multimap<float, std::string>& map);
+
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx();
 
@@ -227,6 +232,9 @@ public:
     
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+
+    /// @see Animation::setActive
+    void setActive(bool active);
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::Ptr& target);

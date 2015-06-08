@@ -1,8 +1,10 @@
-
 #include "mechanicsmanagerimp.hpp"
-#include "npcstats.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <limits.h>
+
+#include <osg/PositionAttitudeTransform>
+
+#include <components/misc/rng.hpp>
 
 #include <components/esm/stolenitems.hpp>
 
@@ -20,22 +22,19 @@
 #include "../mwmechanics/aicombat.hpp"
 #include "../mwmechanics/aipursue.hpp"
 
-#include <OgreSceneNode.h>
-
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
-
-#include <limits.h>
+#include "npcstats.hpp"
 
 namespace
 {
 
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
     {
-        Ogre::Vector3 pos1 (actor1.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (actor2.getRefData().getPosition().pos);
+        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
 
-        float d = pos1.distance(pos2);
+        float d = (pos1 - pos2).length();
 
         static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->getInt();
@@ -294,7 +293,7 @@ namespace MWMechanics
             creatureStats.getSpells().add(*it);
 
         // forced update and current value adjustments
-        mActors.updateActor (ptr, 0);
+        //mActors.updateActor (ptr, 0);
 
         for (int i=0; i<3; ++i)
         {
@@ -737,7 +736,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        int roll = Misc::Rng::roll0to99();
 
         if (type == PT_Admire)
         {
@@ -1060,14 +1059,14 @@ namespace MWMechanics
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
         // Did anyone see it?
@@ -1150,13 +1149,13 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
@@ -1367,9 +1366,9 @@ namespace MWMechanics
         static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
         static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
 
-        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
-        float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
+        osg::Vec3f pos1 (ptr.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (observer.getRefData().getPosition().asVec3());
+        float distTerm = fSneakDistBase + fSneakDistMult * (pos1 - pos2).length();
 
         float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
@@ -1386,16 +1385,21 @@ namespace MWMechanics
         static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
         static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
         float y = 0;
-        Ogre::Vector3 vec = pos1 - pos2;
-        Ogre::Radian angle = observer.getRefData().getBaseNode()->getOrientation().yAxis().angleBetween(vec);
-        if (angle < Ogre::Degree(90))
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
-        else
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        osg::Vec3f vec = pos1 - pos2;
+        if (observer.getRefData().getBaseNode())
+        {
+            osg::Vec3f observerDir = (observer.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
+
+            float angleRadians = std::acos(observerDir * vec / (observerDir.length() * vec.length()));
+            if (angleRadians < osg::DegreesToRadians(90.f))
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
+            else
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        }
 
         float target = x - y;
 
-        return (OEngine::Misc::Rng::roll0to99() >= target);
+        return (Misc::Rng::roll0to99() >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
@@ -1428,13 +1432,13 @@ namespace MWMechanics
             MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
-    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
         mObjects.getObjectsInRange(position, radius, objects);
     }
 
-    void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
     }

@@ -7,8 +7,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -474,7 +472,7 @@ namespace MWGui
             mTextWidget->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
-            mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
+            mImageWidget->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(magicEffect->mIcon));
         }
 
         MWSpellEffect::~MWSpellEffect()

@@ -8,8 +8,6 @@
 #include "movement.hpp"
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"

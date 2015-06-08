@@ -1,28 +1,30 @@
 #ifndef OPENCS_VIEW_OBJECT_H
 #define OPENCS_VIEW_OBJECT_H
 
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
-#ifndef Q_MOC_RUN
-#include <components/nifogre/ogrenifloader.hpp>
-#endif
+#include <osg/ref_ptr>
 
 class QModelIndex;
 
-namespace Ogre
+
+namespace osg
 {
-    class SceneNode;
+    class PositionAttitudeTransform;
+    class Group;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace CSMWorld
 {
     class Data;
     struct CellRef;
-}
-
-namespace CSVWorld
-{
-    class PhysicsSystem;
 }
 
 namespace CSVRender
@@ -32,10 +34,10 @@ namespace CSVRender
             const CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
-            Ogre::SceneNode *mBase;
-            NifOgre::ObjectScenePtr mObject;
+            osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+            osg::Group* mParentNode;
+            Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
 
             /// Not implemented
             Object (const Object&);
@@ -43,26 +45,23 @@ namespace CSVRender
             /// Not implemented
             Object& operator= (const Object&);
 
-            /// Destroy all scene nodes and movable objects attached to node.
-            static void clearSceneNode (Ogre::SceneNode *node);
-
             /// Remove object from node (includes deleting)
             void clear();
 
             /// Update model
+            /// @note Make sure adjustTransform() was called first so world space particles get positioned correctly
             void update();
 
             /// Adjust position, orientation and scale
-            void adjust();
+            void adjustTransform();
 
             /// Throws an exception if *this was constructed with referenceable
             const CSMWorld::CellRef& getReference() const;
 
         public:
 
-            Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
+            Object (CSMWorld::Data& data, osg::Group *cellNode,
                 const std::string& id, bool referenceable,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics = boost::shared_ptr<CSVWorld::PhysicsSystem> (),
                 bool forceBaseToZero = false);
             /// \param forceBaseToZero If this is a reference ignore the coordinates and place
             /// it at 0, 0, 0 instead.

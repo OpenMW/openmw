@@ -14,14 +14,14 @@ namespace ESM
     struct ObjectState;
 }
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWRender
 {
     class RenderingInterface;
+}
+
+namespace MWPhysics
+{
+    class PhysicsSystem;
 }
 
 namespace MWMechanics
@@ -45,7 +45,6 @@ namespace MWWorld
 {
     class ContainerStore;
     class InventoryStore;
-    class PhysicsSystem;
     class CellStore;
     class Action;
 
@@ -84,7 +83,7 @@ namespace MWWorld
             ///       Leaving it here for now in case we want to optimize later.
 
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
-            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const Ptr& ptr) const = 0;
@@ -188,11 +187,7 @@ namespace MWWorld
             virtual MWMechanics::Movement& getMovementSettings (const Ptr& ptr) const;
             ///< Return desired movement.
 
-            virtual Ogre::Vector3 getMovementVector (const Ptr& ptr) const;
-            ///< Return desired movement vector (determined based on movement settings,
-            /// stance and stats).
-
-            virtual Ogre::Vector3 getRotationVector (const Ptr& ptr) const;
+            virtual osg::Vec3f getRotationVector (const Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
@@ -266,7 +261,7 @@ namespace MWWorld
             virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
             ///< @return the number of enchantment points available for possible enchanting
 
-            virtual void adjustScale(const MWWorld::Ptr& ptr,float& scale) const;
+            virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices

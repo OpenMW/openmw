@@ -2,163 +2,152 @@
 
 #include <cmath>
 
-#include <OgreSceneNode.h>
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
-#include <OgreLight.h>
-#include <OgreSubEntity.h>
-#include <OgreParticleSystem.h>
-#include <OgreParticleEmitter.h>
-#include <OgreStaticGeometry.h>
+#include <osg/Group>
+#include <osg/Geode>
+#include <osg/PositionAttitudeTransform>
+#include <osg/UserDataContainer>
 
-#include <components/esm/loadligh.hpp>
-#include <components/esm/loadstat.hpp>
+#include <osgParticle/ParticleSystem>
+#include <osgParticle/ParticleProcessor>
 
-#include <components/nifogre/ogrenifloader.hpp>
-#include <components/settings/settings.hpp>
+#include <components/resource/scenemanager.hpp>
+
+#include <components/sceneutil/visitor.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
 
-#include "renderconst.hpp"
 #include "animation.hpp"
+#include "npcanimation.hpp"
+#include "creatureanimation.hpp"
+#include "vismask.hpp"
 
-using namespace MWRender;
-
-int Objects::uniqueID = 0;
-
-void Objects::setRootNode(Ogre::SceneNode* root)
+namespace
 {
-    mRootNode = root;
+
+    /// Removes all particle systems and related nodes in a subgraph.
+    class RemoveParticlesVisitor : public osg::NodeVisitor
+    {
+    public:
+        RemoveParticlesVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        { }
+
+        virtual void apply(osg::Node &node)
+        {
+            if (dynamic_cast<osgParticle::ParticleSystem*>(&node) || dynamic_cast<osgParticle::ParticleProcessor*>(&node))
+                mToRemove.push_back(&node);
+
+            traverse(node);
+        }
+
+        void remove()
+        {
+            for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            {
+                osg::Node* node = *it;
+                if (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+            }
+            mToRemove.clear();
+        }
+
+    private:
+        std::vector<osg::ref_ptr<osg::Node> > mToRemove;
+    };
+
+}
+
+
+namespace MWRender
+{
+
+Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode)
+    : mRootNode(rootNode)
+    , mResourceSystem(resourceSystem)
+{
+}
+
+Objects::~Objects()
+{
+    for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();++iter)
+        delete iter->second;
+    mObjects.clear();
+
+    for (CellMap::iterator iter = mCellSceneNodes.begin(); iter != mCellSceneNodes.end(); ++iter)
+        iter->second->getParent(0)->removeChild(iter->second);
+    mCellSceneNodes.clear();
 }
 
 void Objects::insertBegin(const MWWorld::Ptr& ptr)
 {
-    Ogre::SceneNode* root = mRootNode;
-    Ogre::SceneNode* cellnode;
-    if(mCellSceneNodes.find(ptr.getCell()) == mCellSceneNodes.end())
+    osg::ref_ptr<osg::Group> cellnode;
+
+    CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
+    if (found == mCellSceneNodes.end())
     {
-        //Create the scenenode and put it in the map
-        cellnode = root->createChildSceneNode();
+        cellnode = new osg::Group;
+        mRootNode->addChild(cellnode);
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }
     else
-    {
-        cellnode = mCellSceneNodes[ptr.getCell()];
-    }
+        cellnode = found->second;
 
-    Ogre::SceneNode* insert = cellnode->createChildSceneNode();
+    osg::ref_ptr<osg::PositionAttitudeTransform> insert (new osg::PositionAttitudeTransform);
+    cellnode->addChild(insert);
+
+    insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
+
     const float *f = ptr.getRefData().getPosition().pos;
 
-    insert->setPosition(f[0], f[1], f[2]);
-    insert->setScale(ptr.getCellRef().getScale(), ptr.getCellRef().getScale(), ptr.getCellRef().getScale());
-
-
-    // Convert MW rotation to a quaternion:
-    f = ptr.getCellRef().getPosition().rot;
-
-    // Rotate around X axis
-    Ogre::Quaternion xr(Ogre::Radian(-f[0]), Ogre::Vector3::UNIT_X);
-
-    // Rotate around Y axis
-    Ogre::Quaternion yr(Ogre::Radian(-f[1]), Ogre::Vector3::UNIT_Y);
-
-    // Rotate around Z axis
-    Ogre::Quaternion zr(Ogre::Radian(-f[2]), Ogre::Vector3::UNIT_Z);
-
-    // Rotates first around z, then y, then x
-    insert->setOrientation(xr*yr*zr);
+    insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
 
     ptr.getRefData().setBaseNode(insert);
 }
 
-void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool batch)
+void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
     insertBegin(ptr);
 
-    std::auto_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh));
+    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
-    if (!mesh.empty())
+    if (!allowLight)
     {
-        Ogre::AxisAlignedBox bounds = anim->getWorldBounds();
-        Ogre::Vector3 extents = bounds.getSize();
-        extents *= ptr.getRefData().getBaseNode()->getScale();
-        float size = std::max(std::max(extents.x, extents.y), extents.z);
-
-        bool small = (size < Settings::Manager::getInt("small object size", "Viewing distance")) &&
-                     Settings::Manager::getBool("limit small object distance", "Viewing distance");
-        // do not fade out doors. that will cause holes and look stupid
-        if(ptr.getTypeName().find("Door") != std::string::npos)
-            small = false;
-
-        if (mBounds.find(ptr.getCell()) == mBounds.end())
-            mBounds[ptr.getCell()] = Ogre::AxisAlignedBox::BOX_NULL;
-        mBounds[ptr.getCell()].merge(bounds);
-
-        if(batch &&
-           Settings::Manager::getBool("use static geometry", "Objects") &&
-           anim->canBatch())
-        {
-            Ogre::StaticGeometry* sg = 0;
-
-            if (small)
-            {
-                if(mStaticGeometrySmall.find(ptr.getCell()) == mStaticGeometrySmall.end())
-                {
-                    uniqueID = uniqueID+1;
-                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                    mStaticGeometrySmall[ptr.getCell()] = sg;
-
-                    sg->setRenderingDistance(static_cast<Ogre::Real>(Settings::Manager::getInt("small object distance", "Viewing distance")));
-                }
-                else
-                    sg = mStaticGeometrySmall[ptr.getCell()];
-            }
-            else
-            {
-                if(mStaticGeometry.find(ptr.getCell()) == mStaticGeometry.end())
-                {
-                    uniqueID = uniqueID+1;
-                    sg = mRenderer.getScene()->createStaticGeometry("sg" + Ogre::StringConverter::toString(uniqueID));
-                    sg->setOrigin(ptr.getRefData().getBaseNode()->getPosition());
-                    mStaticGeometry[ptr.getCell()] = sg;
-                }
-                else
-                    sg = mStaticGeometry[ptr.getCell()];
-            }
-
-            // This specifies the size of a single batch region.
-            // If it is set too high:
-            //  - there will be problems choosing the correct lights
-            //  - the culling will be more inefficient
-            // If it is set too low:
-            //  - there will be too many batches.
-            if(ptr.getCell()->isExterior())
-                sg->setRegionDimensions(Ogre::Vector3(2048,2048,2048));
-            else
-                sg->setRegionDimensions(Ogre::Vector3(1024,1024,1024));
-
-            sg->setVisibilityFlags(small ? RV_StaticsSmall : RV_Statics);
-
-            sg->setCastShadows(true);
-
-            sg->setRenderQueueGroup(RQG_Main);
-
-            anim->fillBatch(sg);
-            /* TODO: We could hold on to this and just detach it from the scene graph, so if the Ptr
-             * ever needs to modify we can reattach it and rebuild the StaticGeometry object without
-             * it. Would require associating the Ptr with the StaticGeometry. */
-            anim.reset();
-        }
+        RemoveParticlesVisitor visitor;
+        anim->getObjectRoot()->accept(visitor);
+        visitor.remove();
     }
 
-    if(anim.get() != NULL)
-        mObjects.insert(std::make_pair(ptr, anim.release()));
+    mObjects.insert(std::make_pair(ptr, anim.release()));
 }
 
-bool Objects::deleteObject (const MWWorld::Ptr& ptr)
+void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
+{
+    insertBegin(ptr);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
+
+    // CreatureAnimation
+    std::auto_ptr<Animation> anim;
+
+    if (weaponsShields)
+        anim.reset(new CreatureWeaponAnimation(ptr, mesh, mResourceSystem));
+    else
+        anim.reset(new CreatureAnimation(ptr, mesh, mResourceSystem));
+
+    mObjects.insert(std::make_pair(ptr, anim.release()));
+}
+
+void Objects::insertNPC(const MWWorld::Ptr &ptr)
+{
+    insertBegin(ptr);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
+
+    std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
+
+    mObjects.insert(std::make_pair(ptr, anim.release()));
+}
+
+bool Objects::removeObject (const MWWorld::Ptr& ptr)
 {
     if(!ptr.getRefData().getBaseNode())
         return true;
@@ -169,16 +158,15 @@ bool Objects::deleteObject (const MWWorld::Ptr& ptr)
         delete iter->second;
         mObjects.erase(iter);
 
-        mRenderer.getScene()->destroySceneNode(ptr.getRefData().getBaseNode());
-        ptr.getRefData().setBaseNode(0);
+        ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
+        ptr.getRefData().setBaseNode(NULL);
         return true;
     }
-
     return false;
 }
 
 
-void Objects::removeCell(MWWorld::CellStore* store)
+void Objects::removeCell(const MWWorld::CellStore* store)
 {
     for(PtrAnimationMap::iterator iter = mObjects.begin();iter != mObjects.end();)
     {
@@ -191,108 +179,60 @@ void Objects::removeCell(MWWorld::CellStore* store)
             ++iter;
     }
 
-    std::map<MWWorld::CellStore*,Ogre::StaticGeometry*>::iterator geom = mStaticGeometry.find(store);
-    if(geom != mStaticGeometry.end())
-    {
-        Ogre::StaticGeometry *sg = geom->second;
-        mStaticGeometry.erase(geom);
-        mRenderer.getScene()->destroyStaticGeometry(sg);
-    }
-
-    geom = mStaticGeometrySmall.find(store);
-    if(geom != mStaticGeometrySmall.end())
-    {
-        Ogre::StaticGeometry *sg = geom->second;
-        mStaticGeometrySmall.erase(store);
-        mRenderer.getScene()->destroyStaticGeometry(sg);
-    }
-
-    mBounds.erase(store);
-
-    std::map<MWWorld::CellStore*,Ogre::SceneNode*>::iterator cell = mCellSceneNodes.find(store);
+    CellMap::iterator cell = mCellSceneNodes.find(store);
     if(cell != mCellSceneNodes.end())
     {
-        cell->second->removeAndDestroyAllChildren();
-        mRenderer.getScene()->destroySceneNode(cell->second);
+        cell->second->getParent(0)->removeChild(cell->second);
         mCellSceneNodes.erase(cell);
     }
 }
 
-void Objects::buildStaticGeometry(MWWorld::CellStore& cell)
+void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    if(mStaticGeometry.find(&cell) != mStaticGeometry.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometry[&cell];
-        sg->build();
-    }
-    if(mStaticGeometrySmall.find(&cell) != mStaticGeometrySmall.end())
-    {
-        Ogre::StaticGeometry* sg = mStaticGeometrySmall[&cell];
-        sg->build();
-    }
-}
+    osg::Node* objectNode = cur.getRefData().getBaseNode();
+    if (!objectNode)
+        return;
 
-Ogre::AxisAlignedBox Objects::getDimensions(MWWorld::CellStore* cell)
-{
-    return mBounds[cell];
-}
-
-void Objects::update(float dt, Ogre::Camera* camera)
-{
-    PtrAnimationMap::const_iterator it = mObjects.begin();
-    for(;it != mObjects.end();++it)
-        it->second->runAnimation(dt);
-
-    it = mObjects.begin();
-    for(;it != mObjects.end();++it)
-        it->second->preRender(camera);
-
-}
-
-void Objects::rebuildStaticGeometry()
-{
-    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometry.begin(); it != mStaticGeometry.end(); ++it)
-    {
-        it->second->destroy();
-        it->second->build();
-    }
-
-    for (std::map<MWWorld::CellStore *, Ogre::StaticGeometry*>::iterator it = mStaticGeometrySmall.begin(); it != mStaticGeometrySmall.end(); ++it)
-    {
-        it->second->destroy();
-        it->second->build();
-    }
-}
-
-void Objects::updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
-{
-    Ogre::SceneNode *node;
     MWWorld::CellStore *newCell = cur.getCell();
 
+    osg::Group* cellnode;
     if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        node = mRootNode->createChildSceneNode();
-        mCellSceneNodes[newCell] = node;
+        cellnode = new osg::Group;
+        mRootNode->addChild(cellnode);
+        mCellSceneNodes[newCell] = cellnode;
     } else {
-        node = mCellSceneNodes[newCell];
+        cellnode = mCellSceneNodes[newCell];
     }
 
-    node->addChild(cur.getRefData().getBaseNode());
+    osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
+    if (userDataContainer)
+        for (unsigned int i=0; i<userDataContainer->getNumUserObjects(); ++i)
+        {
+            if (dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
+                userDataContainer->setUserObject(i, new PtrHolder(cur));
+        }
+
+    if (objectNode->getNumParents())
+        objectNode->getParent(0)->removeChild(objectNode);
+    cellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {
-        ObjectAnimation *anim = iter->second;
+        Animation *anim = iter->second;
         mObjects.erase(iter);
         anim->updatePtr(cur);
         mObjects[cur] = anim;
     }
 }
 
-ObjectAnimation* Objects::getAnimation(const MWWorld::Ptr &ptr)
+Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)
 {
     PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
         return iter->second;
+
     return NULL;
 }
 
+}

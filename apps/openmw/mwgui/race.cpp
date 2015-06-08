@@ -5,7 +5,11 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Gui.h>
 
+#include <osg/Texture2D>
+
 #include <boost/format.hpp>
+
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwbase/environment.hpp"
@@ -37,8 +41,10 @@ namespace
 namespace MWGui
 {
 
-    RaceDialog::RaceDialog()
+    RaceDialog::RaceDialog(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
       : WindowModal("openmw_chargen_race.layout")
+      , mViewer(viewer)
+      , mResourceSystem(resourceSystem)
       , mGenderIndex(0)
       , mFaceIndex(0)
       , mHairIndex(0)
@@ -125,18 +131,20 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
+        mPreviewImage->setRenderItemTexture(NULL);
+
         mPreview.reset(NULL);
+        mPreviewTexture.reset(NULL);
 
-        mPreviewImage->setImageTexture("");
+        mPreview.reset(new MWRender::RaceSelectionPreview(mViewer, mResourceSystem));
+        mPreview->rebuild();
+        mPreview->setAngle (mCurrentAngle);
 
-        const std::string textureName = "CharacterHeadPreview";
-        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
+        mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
+        mPreviewImage->setRenderItemTexture(mPreviewTexture.get());
+        mPreviewImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
-        mPreview.reset(new MWRender::RaceSelectionPreview());
-        mPreview->setup();
-        mPreview->update (mCurrentAngle);
-
-        const ESM::NPC proto = mPreview->getPrototype();
+        const ESM::NPC& proto = mPreview->getPrototype();
         setRaceId(proto.mRace);
         recountParts();
 
@@ -151,8 +159,6 @@ namespace MWGui
             if (Misc::StringUtils::ciEqual(mAvailableHairs[i], proto.mHair))
                 mHairIndex = i;
         }
-
-        mPreviewImage->setImageTexture (textureName);
 
         mPreviewDirty = true;
 
@@ -181,9 +187,9 @@ namespace MWGui
 
     void RaceDialog::close()
     {
-        mPreviewImage->setImageTexture("");
-        const std::string textureName = "CharacterHeadPreview";
-        MyGUI::RenderManager::getInstance().destroyTexture(MyGUI::RenderManager::getInstance().getTexture(textureName));
+        mPreviewImage->setRenderItemTexture(NULL);
+
+        mPreviewTexture.reset(NULL);
         mPreview.reset(NULL);
     }
 
@@ -204,8 +210,8 @@ namespace MWGui
     void RaceDialog::onHeadRotate(MyGUI::ScrollBar* scroll, size_t _position)
     {
         float angle = (float(_position) / (scroll->getScrollRange()-1) - 0.5f) * 3.14f * 2;
-        mPreview->update (angle);
-        mPreviewDirty = true;
+        mPreview->setAngle (angle);
+
         mCurrentAngle = angle;
     }
 
@@ -330,21 +336,6 @@ namespace MWGui
         catch (std::exception& e)
         {
             std::cerr << "Error creating preview: " << e.what() << std::endl;
-        }
-
-        mPreviewDirty = true;
-    }
-
-    void RaceDialog::doRenderUpdate()
-    {
-        if (!mPreview.get())
-            return;
-
-        mPreview->onFrame();
-        if (mPreviewDirty)
-        {
-            mPreview->render();
-            mPreviewDirty = false;
         }
     }
 

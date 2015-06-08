@@ -51,7 +51,7 @@ namespace MWClass
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const;
+            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
             virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
@@ -105,11 +105,7 @@ namespace MWClass
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
 
-            virtual Ogre::Vector3 getMovementVector (const MWWorld::Ptr& ptr) const;
-            ///< Return desired movement vector (determined based on movement settings,
-            /// stance and stats).
-
-            virtual Ogre::Vector3 getRotationVector (const MWWorld::Ptr& ptr) const;
+            virtual osg::Vec3f getRotationVector (const MWWorld::Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;
@@ -129,7 +125,7 @@ namespace MWClass
             /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
 
-            virtual void adjustScale (const MWWorld::Ptr &ptr, float &scale) const;
+            virtual void adjustScale (const MWWorld::Ptr &ptr, osg::Vec3f &scale) const;
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.

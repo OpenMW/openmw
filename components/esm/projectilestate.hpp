@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <OgreVector3.h>
-#include <OgreQuaternion.h>
+#include <osg/Quat>
+#include <osg/Vec3f>
 
 #include "effectlist.hpp"
 

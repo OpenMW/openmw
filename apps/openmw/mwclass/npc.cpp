@@ -3,9 +3,7 @@
 
 #include <memory>
 
-#include <OgreSceneNode.h>
-
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
@@ -34,10 +32,10 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/customdata.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -411,10 +409,10 @@ namespace MWClass
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        renderingInterface.getActors().insertNPC(ptr);
+        renderingInterface.getObjects().insertNPC(ptr);
     }
 
-    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         physics.addActor(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
@@ -493,9 +491,9 @@ namespace MWClass
                                store.find("fHandToHandReach")->getFloat());
 
         // TODO: Use second to work out the hit angle
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = world->getHitContact(ptr, dist);
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist);
         MWWorld::Ptr victim = result.first;
-        Ogre::Vector3 hitPosition = result.second;
+        osg::Vec3f hitPosition (result.second);
         if(victim.isEmpty()) // Didn't hit anything
             return;
 
@@ -515,7 +513,7 @@ namespace MWClass
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ptr.getClass().getSkill(ptr, weapskill));
 
-        if (OEngine::Misc::Rng::roll0to99() >= hitchance)
+        if (Misc::Rng::roll0to99() >= hitchance)
         {
             othercls.onHit(victim, 0.0f, false, weapon, ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -645,7 +643,7 @@ namespace MWClass
             const GMST& gmst = getGmst();
 
             int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->getInt();
-            if (OEngine::Misc::Rng::roll0to99() < chance)
+            if (Misc::Rng::roll0to99() < chance)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
             }
@@ -654,7 +652,7 @@ namespace MWClass
             float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * gmst.fKnockDownMult->getFloat();
             float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
                     * gmst.iKnockDownOddsMult->getInt() * 0.01f + gmst.iKnockDownOddsBase->getInt();
-            if (ishealth && agilityTerm <= damage && knockdownTerm <= OEngine::Misc::Rng::roll0to99())
+            if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
             {
                 getCreatureStats(ptr).setKnockedDown(true);
 
@@ -680,7 +678,7 @@ namespace MWClass
                     MWWorld::InventoryStore::Slot_RightPauldron, MWWorld::InventoryStore::Slot_RightPauldron,
                     MWWorld::InventoryStore::Slot_LeftGauntlet, MWWorld::InventoryStore::Slot_RightGauntlet
                 };
-                int hitslot = hitslots[OEngine::Misc::Rng::rollDice(20)];
+                int hitslot = hitslots[Misc::Rng::rollDice(20)];
 
                 float unmitigatedDamage = damage;
                 float x = damage / (damage + getArmorRating(ptr));
@@ -963,20 +961,10 @@ namespace MWClass
         return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    Ogre::Vector3 Npc::getMovementVector (const MWWorld::Ptr& ptr) const
+    osg::Vec3f Npc::getRotationVector (const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mPosition);
-        movement.mPosition[0] = 0.0f;
-        movement.mPosition[1] = 0.0f;
-        movement.mPosition[2] = 0.0f;
-        return vec;
-    }
-
-    Ogre::Vector3 Npc::getRotationVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mRotation);
+        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
         movement.mRotation[0] = 0.0f;
         movement.mRotation[1] = 0.0f;
         movement.mRotation[2] = 0.0f;
@@ -1112,7 +1100,7 @@ namespace MWClass
                 + shield;
     }
 
-    void Npc::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f&scale) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
@@ -1121,9 +1109,18 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
 
         if (ref->mBase->isMale())
-            scale *= race->mData.mHeight.mMale;
+        {
+            scale.x() *= race->mData.mWeight.mMale;
+            scale.y() *= race->mData.mWeight.mMale;
+            scale.z() *= race->mData.mHeight.mMale;
+        }
         else
-            scale *= race->mData.mHeight.mFemale;
+        {
+            scale.x() *= race->mData.mWeight.mFemale;
+            scale.y() *= race->mData.mWeight.mFemale;
+            scale.z() *= race->mData.mHeight.mFemale;
+        }
+
     }
 
     int Npc::getServices(const MWWorld::Ptr &actor) const
@@ -1141,7 +1138,7 @@ namespace MWClass
         if(name == "left" || name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isSwimming(ptr))
                 return (name == "left") ? "Swim Left" : "Swim Right";
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
@@ -1178,7 +1175,7 @@ namespace MWClass
         if(name == "land")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
             if(world->isOnGround(ptr))

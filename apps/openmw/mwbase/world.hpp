@@ -9,11 +9,12 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace Ogre
+#include "../mwrender/rendermode.hpp"
+
+namespace osg
 {
-    class Vector2;
-    class Vector3;
-    class Quaternion;
+    class Vec3f;
+    class Quat;
     class Image;
 }
 
@@ -78,14 +79,6 @@ namespace MWBase
 
         public:
 
-            enum RenderMode
-            {
-                Render_CollisionDebug,
-                Render_Wireframe,
-                Render_Pathgrid,
-                Render_BoundingBoxes
-            };
-
             struct DoorMarker
             {
                 std::string name;
@@ -125,8 +118,6 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches) = 0;
-
             virtual const MWWorld::Fallback *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
@@ -145,20 +136,11 @@ namespace MWBase
 
             virtual bool isCellQuasiExterior() const = 0;
 
-            virtual Ogre::Vector2 getNorthVector (MWWorld::CellStore* cell) = 0;
+            virtual osg::Vec2f getNorthVector (MWWorld::CellStore* cell) = 0;
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
             ///< get a list of teleport door markers for a given cell, to be displayed on the local map
-
-            virtual void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y) = 0;
-            ///< see MWRender::LocalMap::worldToInteriorMapPosition
-
-            virtual Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y) = 0;
-            ///< see MWRender::LocalMap::interiorMapToWorldPosition
-
-            virtual bool isPositionExplored (float nX, float nY, int x, int y, bool interior) = 0;
-            ///< see MWRender::LocalMap::isPositionExplored
 
             virtual void setGlobalInt (const std::string& name, int value) = 0;
             ///< Set value independently from real type.
@@ -191,12 +173,6 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
-
-            virtual MWWorld::Ptr getPtrViaHandle (const std::string& handle) = 0;
-            ///< Return a pointer to a liveCellRef with the given Ogre handle.
-
-            virtual MWWorld::Ptr searchPtrViaHandle (const std::string& handle) = 0;
-            ///< Return a pointer to a liveCellRef with the given Ogre handle or Ptr() if not found
 
             virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
             ///< Search is limited to the active cells.
@@ -271,7 +247,7 @@ namespace MWBase
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
-            virtual std::pair<MWWorld::Ptr,Ogre::Vector3> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
+            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -305,7 +281,7 @@ namespace MWBase
             virtual void positionToIndex (float x, float y, int &cellX, int &cellY) const = 0;
             ///< Convert position to cell numbers
 
-            virtual void queueMovement(const MWWorld::Ptr &ptr, const Ogre::Vector3 &velocity) = 0;
+            virtual void queueMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity) = 0;
             ///< Queues movement for \a ptr (in local space), to be applied in the next call to
             /// doPhysics.
 
@@ -317,7 +293,7 @@ namespace MWBase
             /// collisions and gravity.
             /// \return Resulting mode
 
-            virtual bool toggleRenderMode (RenderMode mode) = 0;
+            virtual bool toggleRenderMode (MWRender::RenderMode mode) = 0;
             ///< Toggle a render mode.
             ///< \return Resulting mode
 
@@ -395,7 +371,7 @@ namespace MWBase
             virtual bool isWading(const MWWorld::Ptr &object) const = 0;
             ///Is the head of the creature underwater?
             virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
-            virtual bool isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const = 0;
+            virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
             virtual void togglePOV() = 0;
@@ -439,7 +415,7 @@ namespace MWBase
             virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
-            virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
+            virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist) = 0;
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
 
@@ -455,8 +431,7 @@ namespace MWBase
             virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
-            virtual void frameStarted (float dt, bool paused) = 0;
-            virtual void screenshot (Ogre::Image& image, int w, int h) = 0;
+            virtual void screenshot (osg::Image* image, int w, int h) = 0;
 
             /// Find default position inside exterior cell specified by name
             /// \return false if exterior with given name not exists, true otherwise
@@ -503,9 +478,9 @@ namespace MWBase
 
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
-                                           const MWWorld::Ptr& caster, const std::string& sourceName, const Ogre::Vector3& fallbackDirection) = 0;
+                                           const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                           const Ogre::Vector3& worldPos, const Ogre::Quaternion& orient, MWWorld::Ptr bow, float speed) = 0;
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 
@@ -514,7 +489,7 @@ namespace MWBase
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const = 0;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, Ogre::Vector3& result) = 0;
+            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
@@ -546,11 +521,11 @@ namespace MWBase
             virtual void spawnRandomCreature(const std::string& creatureList) = 0;
 
             /// Spawn a blood effect for \a ptr at \a worldPosition
-            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const Ogre::Vector3& worldPosition) = 0;
+            virtual void spawnBloodEffect (const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
 
-            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const Ogre::Vector3& worldPos) = 0;
+            virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos) = 0;
 
-            virtual void explodeSpell (const Ogre::Vector3& origin, const ESM::EffectList& effects,
+            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName) = 0;
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
@@ -559,7 +534,7 @@ namespace MWBase
             virtual bool isInStorm() const = 0;
 
             /// @see MWWorld::WeatherManager::getStormDirection
-            virtual Ogre::Vector3 getStormDirection() const = 0;
+            virtual osg::Vec3f getStormDirection() const = 0;
 
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors() = 0;

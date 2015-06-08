@@ -1,7 +1,7 @@
 
 #include "creature.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
@@ -25,11 +25,11 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
-#include "../mwrender/actors.hpp"
+#include "../mwrender/objects.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -165,11 +165,11 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
-        MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
+        MWRender::Objects& objects = renderingInterface.getObjects();
+        objects.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
     }
 
-    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
         {
@@ -238,7 +238,7 @@ namespace MWClass
             const float fCombatDistance = gmst.find("fCombatDistance")->getFloat();
             dist = fCombatDistance * weapon.get<ESM::Weapon>()->mBase->mData.mReach;
         }
-        std::pair<MWWorld::Ptr, Ogre::Vector3> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
+        std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist);
         if (result.first.isEmpty())
             return; // Didn't hit anything
 
@@ -247,11 +247,11 @@ namespace MWClass
         if (!victim.getClass().isActor())
             return; // Can't hit non-actors
 
-        Ogre::Vector3 hitPosition = result.second;
+        osg::Vec3f hitPosition (result.second);
 
         float hitchance = MWMechanics::getHitChance(ptr, victim, ref->mBase->mData.mCombat);
 
-        if(OEngine::Misc::Rng::roll0to99() >= hitchance)
+        if(Misc::Rng::roll0to99() >= hitchance)
         {
             victim.getClass().onHit(victim, 0.0f, false, MWWorld::Ptr(), ptr, false);
             MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
@@ -377,7 +377,7 @@ namespace MWClass
                 float agilityTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified() * getGmst().fKnockDownMult->getFloat();
                 float knockdownTerm = getCreatureStats(ptr).getAttribute(ESM::Attribute::Agility).getModified()
                         * getGmst().iKnockDownOddsMult->getInt() * 0.01f + getGmst().iKnockDownOddsBase->getInt();
-                if (ishealth && agilityTerm <= damage && knockdownTerm <= OEngine::Misc::Rng::roll0to99())
+                if (ishealth && agilityTerm <= damage && knockdownTerm <= Misc::Rng::roll0to99())
                 {
                     getCreatureStats(ptr).setKnockedDown(true);
 
@@ -580,20 +580,10 @@ namespace MWClass
         return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    Ogre::Vector3 Creature::getMovementVector (const MWWorld::Ptr& ptr) const
+    osg::Vec3f Creature::getRotationVector (const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mPosition);
-        movement.mPosition[0] = 0.0f;
-        movement.mPosition[1] = 0.0f;
-        movement.mPosition[2] = 0.0f;
-        return vec;
-    }
-
-    Ogre::Vector3 Creature::getRotationVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        Ogre::Vector3 vec(movement.mRotation);
+        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
         movement.mRotation[0] = 0.0f;
         movement.mRotation[1] = 0.0f;
         movement.mRotation[2] = 0.0f;
@@ -681,7 +671,7 @@ namespace MWClass
                 ++sound;
             }
             if(!sounds.empty())
-                return sounds[OEngine::Misc::Rng::rollDice(sounds.size())]->mSound;
+                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
         }
 
         if (type == ESM::SoundGenerator::Land)
@@ -736,7 +726,7 @@ namespace MWClass
         if(name == "left")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 2;
             if(world->isOnGround(ptr))
@@ -746,7 +736,7 @@ namespace MWClass
         if(name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            Ogre::Vector3 pos(ptr.getRefData().getPosition().pos);
+            osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return 3;
             if(world->isOnGround(ptr))
@@ -893,7 +883,7 @@ namespace MWClass
         return ref->mBase->mAiData.mFight;
     }
 
-    void Creature::adjustScale(const MWWorld::Ptr &ptr, float &scale) const
+    void Creature::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f &scale) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
