@@ -19,6 +19,7 @@
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
 #include "../world/idcompletiondelegate.hpp"
+#include "../world/colorpickerdelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
@@ -62,6 +63,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Colour,
+        new CSVWorld::ColorPickerDelegateFactory());
 
     std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
     for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
