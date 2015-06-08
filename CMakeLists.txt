@@ -138,9 +138,6 @@ if (WIN32)
 
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
-
-    # Get rid of useless crud from windows.h
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
 # Dependencies
