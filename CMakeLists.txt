@@ -75,6 +75,11 @@ option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
+if (MSVC)
+    option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
+    option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
+endif()
+
 # Location of morrowind data files
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
@@ -138,6 +143,9 @@ if (WIN32)
 
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
+
+    # Get rid of useless crud from windows.h
+    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
 # Dependencies
@@ -268,10 +276,14 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
-    set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+    if (OPENMW_LTO_BUILD)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+        set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+    endif()
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -380,6 +392,8 @@ if(WIN32)
     ENDIF(BUILD_MYGUI_PLUGIN)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
+    FILE(GLOB plugin_dir "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
+    INSTALL(DIRECTORY ${plugin_dir} DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
     SET(CPACK_PACKAGE_NAME "OpenMW")
@@ -492,9 +506,9 @@ endif()
 
 if (WIN32)
   if (MSVC)
-    if (MULTITHREADED_BUILD)
+    if (OPENMW_MP_BUILD)
         set( MT_BUILD "/MP")
-    endif (MULTITHREADED_BUILD)
+    endif()
 
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
@@ -502,20 +516,22 @@ if (WIN32)
         set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(ProjectDir)$(Configuration)" )
     endforeach( OUTPUTCONFIG )
 
-    if (USE_DEBUG_CONSOLE)
+    if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-    else()
+    elseif (BUILD_OPENMW)
       # Turn off debug console, debug output will be written to visual studio output instead
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
 
-    # Release builds use the debug console
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+    if (BUILD_OPENMW)
+        # Release builds use the debug console
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+    endif()
 
     # Play a bit with the warning levels
 
@@ -524,8 +540,8 @@ if (WIN32)
     set(WARNINGS_DISABLE
         # Warnings that aren't enabled normally and don't need to be enabled
         # They're unneeded and sometimes completely retarded warnings that /Wall enables
-        # Not going to bother commenting them as they tend to warn on every standard library files
-        4061 4263 4264 4266 4350 4371 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
+        # Not going to bother commenting them as they tend to warn on every standard library file
+        4061 4263 4264 4266 4350 4371 4435 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
@@ -547,6 +563,7 @@ if (WIN32)
         4127 # Conditional expression is constant
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
+        4245 # Signed/unsigned mismatch
         4267 # Conversion from 'size_t' to 'int', possible loss of data
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
@@ -562,17 +579,42 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} ${MT_BUILD}")
-
+    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     # oics uses tinyxml, which has an initialized but unused variable
-    set(OICS_WARNINGS "${WARNINGS} /wd4189")
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${OICS_WARNINGS} ${MT_BUILD}")
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${WARNINGS} /wd4189 ${MT_BUILD}")
+    set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+
+    if (BUILD_BSATOOL)
+        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_ESMTOOL)
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_ESSIMPORTER)
+        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_LAUNCHER)
+        set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_MWINIIMPORTER)
+        set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
 
     if (BUILD_OPENCS)
-        # QT triggers an informational warning that the object layout may differ when compiled with /vd2
-        set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
-        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
-    endif (BUILD_OPENCS)
+        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_OPENMW)
+        set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_WIZARD)
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
   endif(MSVC)
 
   # TODO: At some point release builds should not use the console but rather write to a log file
