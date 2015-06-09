@@ -193,9 +193,9 @@ void NIFFile::parse()
     for(size_t i = 0;i < rootNum;i++)
     {
         int idx = nif.getInt();
-        if (idx >= 0)
+        if (idx >= 0 && idx < int(records.size()))
         {
-            roots[i] = records.at(idx);
+            roots[i] = records[idx];
         }
         else
         {
