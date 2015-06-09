@@ -170,6 +170,7 @@ namespace MWMechanics
                                const MWWorld::CellStore* cell,
                                bool allowShortcuts)
     {
+        mLastDistanceSquared = FLT_MAX;
         mPath.clear();
 
         if(allowShortcuts)
@@ -288,8 +289,10 @@ namespace MWMechanics
             return true;
 
         ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
+        float sqrDistance = sqrDistanceIgnoreZ(nextPoint, x, y);
+        if ((sqrDistance < tolerance*tolerance) || isRunningInCircles(sqrDistance))
         {
+            mLastDistanceSquared = FLT_MAX;
             mPath.pop_front();
             if(mPath.empty())
             {
@@ -297,7 +300,10 @@ namespace MWMechanics
                 return true;
             }
         }
-
+        else
+        {
+            mLastDistanceSquared = sqrDistance;
+        }
         return false;
     }
 

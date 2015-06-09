@@ -102,6 +102,19 @@ namespace MWMechanics
 
             const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
+
+            // Distance to current waypoint last time we checked.
+            // Used to detect "running in circles".
+            float mLastDistanceSquared;
+
+            // Assume NPC is running in circles if moving away from waypoint
+            // and previous distance was sufficiently close to waypoint.
+            inline bool isRunningInCircles(float currentDistanceSquared)
+            {
+                const float stopCirclingTolerance = 100.0f * 100.f;
+                return (mLastDistanceSquared < currentDistanceSquared) &&
+                    (mLastDistanceSquared <= stopCirclingTolerance);
+            }
     };
 }
 
