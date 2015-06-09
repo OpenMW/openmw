@@ -3,6 +3,8 @@
 #include <QPainter>
 #include <QPushButton>
 
+#include "../widget/coloreditbutton.hpp"
+
 CSVWorld::ColorPickerDelegate::ColorPickerDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                                    CSMDoc::Document& document, 
                                                    QObject *parent)
@@ -26,20 +28,24 @@ QWidget *CSVWorld::ColorPickerDelegate::createEditor(QWidget *parent,
         throw std::logic_error("Wrong column for ColorPickerDelegate");
     }
 
-    return CommandDelegate::createEditor(parent, option, index, display);
+    return new CSVWidget::ColorEditButton(index.data().value<QColor>(), 
+                                          getColoredRect(option).size(),
+                                          parent);
 }
 
 void CSVWorld::ColorPickerDelegate::paint(QPainter *painter, 
                                           const QStyleOptionViewItem &option,
                                           const QModelIndex &index) const
 {
-    QColor color = index.data().value<QColor>();
-    QRect rect(option.rect.x() + option.rect.width() / 4,
-               option.rect.y() + option.rect.height() / 4,
-               option.rect.width() / 2,
-               option.rect.height() / 2);
-    
-    painter->fillRect(rect, color);
+    painter->fillRect(getColoredRect(option), index.data().value<QColor>());
+}
+
+QRect CSVWorld::ColorPickerDelegate::getColoredRect(const QStyleOptionViewItem &option) const
+{
+    return QRect(option.rect.x() + option.rect.width() / 4,
+                 option.rect.y() + option.rect.height() / 4,
+                 option.rect.width() / 2,
+                 option.rect.height() / 2);
 }
 
 CSVWorld::CommandDelegate *CSVWorld::ColorPickerDelegateFactory::makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
@@ -48,3 +54,5 @@ CSVWorld::CommandDelegate *CSVWorld::ColorPickerDelegateFactory::makeDelegate(CS
 {
     return new ColorPickerDelegate(dispatcher, document, parent);
 }
+
+

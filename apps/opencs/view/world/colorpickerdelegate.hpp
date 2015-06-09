@@ -3,10 +3,19 @@
 
 #include "util.hpp"
 
+class QRect;
+
+namespace CSVWidget
+{
+    class ColorEditButton;
+}
+
 namespace CSVWorld
 {
     class ColorPickerDelegate : public CommandDelegate
     {
+            QRect getColoredRect(const QStyleOptionViewItem &option) const;
+
         public:
             ColorPickerDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                 CSMDoc::Document& document, 
@@ -23,13 +32,7 @@ namespace CSVWorld
 
             virtual void paint(QPainter *painter, 
                                const QStyleOptionViewItem &option,
-                               const QModelIndex &index) const;/*
-
-            virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-
-            virtual void setModelData(QWidget *editor, 
-                                      QAbstractItemModel &model, 
-                                      const QModelIndex &index) const;*/
+                               const QModelIndex &index) const;
     };
 
     class ColorPickerDelegateFactory : public CommandDelegateFactory
