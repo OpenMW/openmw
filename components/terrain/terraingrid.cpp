@@ -136,6 +136,7 @@ void TerrainGrid::loadCell(int x, int y)
     geode->addDrawable(geometry);
 
     // build a kdtree to speed up intersection tests with the terrain
+    // Note, the build could be optimized using a custom kdtree builder, since we know that the terrain can be represented by a quadtree
     geode->accept(*mKdTreeBuilder);
 
     std::vector<LayerInfo> layerList;
