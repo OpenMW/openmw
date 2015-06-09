@@ -32,6 +32,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>
 #include <osg/Geode>
+#include <osg/KdTree>
 
 #include <osgFX/Effect>
 
@@ -66,6 +67,7 @@ namespace Terrain
 TerrainGrid::TerrainGrid(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
                          Storage* storage, int nodeMask)
     : Terrain::World(parent, resourceSystem, ico, storage, nodeMask)
+    , mKdTreeBuilder(new osg::KdTreeBuilder)
 {
 }
 
@@ -132,6 +134,9 @@ void TerrainGrid::loadCell(int x, int y)
 
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);
     geode->addDrawable(geometry);
+
+    // build a kdtree to speed up intersection tests with the terrain
+    geode->accept(*mKdTreeBuilder);
 
     std::vector<LayerInfo> layerList;
     std::vector<osg::ref_ptr<osg::Image> > blendmaps;

@@ -25,6 +25,11 @@
 #include "world.hpp"
 #include "material.hpp"
 
+namespace osg
+{
+    class KdTreeBuilder;
+}
+
 namespace Terrain
 {
 
@@ -44,6 +49,8 @@ namespace Terrain
     private:
         typedef std::map<std::pair<int, int>, GridElement*> Grid;
         Grid mGrid;
+
+        osg::ref_ptr<osg::KdTreeBuilder> mKdTreeBuilder;
     };
 
 }
