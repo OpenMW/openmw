@@ -30,15 +30,15 @@ namespace MWGui
 
     ToolTips::ToolTips() :
         Layout("openmw_tooltips.layout")
-        , mFullHelp(false)
-        , mEnabled(true)
         , mFocusToolTipX(0.0)
         , mFocusToolTipY(0.0)
+        , mHorizontalScrollIndex(0)
         , mDelay(0.0)
         , mRemainingDelay(0.0)
         , mLastMouseX(0)
         , mLastMouseY(0)
-        , mHorizontalScrollIndex(0)
+        , mEnabled(true)
+        , mFullHelp(false)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 

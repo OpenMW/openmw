@@ -50,17 +50,17 @@ namespace MWGui
 
     InventoryWindow::InventoryWindow(DragAndDrop* dragAndDrop)
         : WindowPinnableBase("openmw_inventory_window.layout")
-        , mTrading(false)
+        , mDragAndDrop(dragAndDrop)
+        , mPreviewDirty(true)
+        , mPreviewResize(true)
+        , mSelectedItem(-1)
+        , mSortModel(NULL)
+        , mTradeModel(NULL)
+        , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
         , mPreview(new MWRender::InventoryPreview(MWBase::Environment::get().getWorld ()->getPlayerPtr()))
-        , mPreviewDirty(true)
-        , mPreviewResize(true)
-        , mDragAndDrop(dragAndDrop)
-        , mSortModel(NULL)
-        , mTradeModel(NULL)
-        , mSelectedItem(-1)
-        , mGuiMode(GM_Inventory)
+        , mTrading(false)
     {
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &InventoryWindow::onWindowResize);
 
@@ -594,6 +594,8 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
 
+        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
+
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
@@ -611,8 +613,6 @@ namespace MWGui
         if (i == mTradeModel->getItemCount())
             throw std::runtime_error("Added item not found");
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
-
-        MWBase::Environment::get().getMechanicsManager()->itemTaken(player, newObject, MWWorld::Ptr(), count);
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
     }

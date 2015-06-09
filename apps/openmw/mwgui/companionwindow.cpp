@@ -37,11 +37,11 @@ namespace MWGui
 
 CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* manager)
     : WindowBase("openmw_companion_window.layout")
+    , mSortModel(NULL)
+    , mModel(NULL)
+    , mSelectedItem(-1)
     , mDragAndDrop(dragAndDrop)
     , mMessageBoxManager(manager)
-    , mSelectedItem(-1)
-    , mModel(NULL)
-    , mSortModel(NULL)
 {
     getWidget(mCloseButton, "CloseButton");
     getWidget(mProfitLabel, "ProfitLabel");
@@ -114,6 +114,7 @@ void CompanionWindow::open(const MWWorld::Ptr& npc)
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
     mItemView->setModel(mSortModel);
+    mItemView->resetScrollBars();
 
     setTitle(npc.getClass().getName(npc));
 }

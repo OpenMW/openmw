@@ -22,7 +22,7 @@
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mDocument(document), mSceneElements(0), mRun(0), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
+: SceneWidget (parent), mSceneElements(0), mRun(0), mDocument(document), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
   mInteractionMask (0)
 {
     setAcceptDrops(true);

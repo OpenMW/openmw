@@ -30,6 +30,8 @@ namespace MWGui
 
         void update();
 
+        void resetScrollBars();
+
     private:
         virtual void initialiseOverride();
 

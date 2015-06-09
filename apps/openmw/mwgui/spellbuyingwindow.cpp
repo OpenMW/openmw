@@ -23,8 +23,8 @@ namespace MWGui
 
     SpellBuyingWindow::SpellBuyingWindow() :
         WindowBase("openmw_spell_buying_window.layout")
-        , mCurrentY(0)
         , mLastPos(0)
+        , mCurrentY(0)
     {
         setCoord(0, 0, 450, 300);
 
@@ -127,13 +127,7 @@ namespace MWGui
     bool SpellBuyingWindow::playerHasSpell(const std::string &id)
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        MWMechanics::Spells& playerSpells = player.getClass().getCreatureStats (player).getSpells();
-        for (MWMechanics::Spells::TIterator it = playerSpells.begin(); it != playerSpells.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(id, it->first))
-                return true;
-        }
-        return false;
+        return player.getClass().getCreatureStats(player).getSpells().hasSpell(id);
     }
 
     void SpellBuyingWindow::onSpellButtonClick(MyGUI::Widget* _sender)

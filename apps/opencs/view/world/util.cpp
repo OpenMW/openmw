@@ -9,8 +9,6 @@
 #include <QMetaProperty>
 #include <QStyledItemDelegate>
 #include <QLineEdit>
-#include <QSpinBox>
-#include <QDoubleSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPlainTextEdit>
@@ -19,7 +17,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
-
+#include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
 CSVWorld::NastyTableModelHack::NastyTableModelHack (QAbstractItemModel& model)
@@ -113,6 +111,12 @@ CSMDoc::Document& CSVWorld::CommandDelegate::getDocument() const
     return mDocument;
 }
 
+CSMWorld::ColumnBase::Display CSVWorld::CommandDelegate::getDisplayTypeFromIndex(const QModelIndex &index) const
+{
+    int rawDisplay = index.data(CSMWorld::ColumnBase::Role_Display).toInt();
+    return static_cast<CSMWorld::ColumnBase::Display>(rawDisplay);
+}
+
 void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const
 {
@@ -148,7 +152,17 @@ void CSVWorld::CommandDelegate::setModelData (QWidget *editor, QAbstractItemMode
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
-    return createEditor (parent, option, index, CSMWorld::ColumnBase::Display_None);
+    CSMWorld::ColumnBase::Display display = getDisplayTypeFromIndex(index);
+    
+    // This createEditor() method is called implicitly from tables.
+    // For boolean values in tables use the default editor (combobox).
+    // Checkboxes is looking ugly in the table view.
+    // TODO: Find a better solution?
+    if (display == CSMWorld::ColumnBase::Display_Boolean)
+    {
+        return QStyledItemDelegate::createEditor(parent, option, index);
+    }
+    return createEditor (parent, option, index, display);
 }
 
 QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleOptionViewItem& option,
@@ -174,7 +188,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
         case CSMWorld::ColumnBase::Display_Integer:
         {
-            QSpinBox *sb = new QSpinBox(parent);
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
             sb->setRange(INT_MIN, INT_MAX);
             return sb;
         }
@@ -185,7 +199,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
         case CSMWorld::ColumnBase::Display_Float:
         {
-            QDoubleSpinBox *dsb = new QDoubleSpinBox(parent);
+            DialogueDoubleSpinBox *dsb = new DialogueDoubleSpinBox(parent);
             dsb->setRange(-FLT_MAX, FLT_MAX);
             dsb->setSingleStep(0.01f);
             dsb->setDecimals(3);

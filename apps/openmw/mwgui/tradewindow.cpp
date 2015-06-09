@@ -136,6 +136,7 @@ namespace MWGui
         mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources, worldItems), mPtr);
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         updateLabels();
 

@@ -67,6 +67,8 @@ namespace CSVWorld
             CSMWorld::CommandDispatcher *mDispatcher;
             CSMWorld::UniversalId mEditCellId;
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
+            bool mJumpToAddedRecord;
+            bool mUnselectAfterJump;
 
             boost::shared_ptr<CSMFilter::Node> mFilter;
             boost::shared_ptr<CSMFilter::Node> mAdded;
@@ -145,7 +147,10 @@ namespace CSVWorld
             void updateUserSetting (const QString &name, const QStringList &list);
 
             void globalFilterAddedChanged (int state);
+
             void globalFilterModifiedChanged (int state);
+
+            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
     };
 }
 

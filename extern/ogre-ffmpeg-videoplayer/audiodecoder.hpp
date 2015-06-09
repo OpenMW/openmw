@@ -21,8 +21,8 @@ extern "C"
     #endif
 }
 
-#ifdef _WIN32
-#include <BaseTsd.h>
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <basetsd.h>
 
 typedef SSIZE_T ssize_t;
 #endif

@@ -18,9 +18,11 @@ namespace
     ///< Translate 8bit/24bit code (stored in refNum.mIndex) into a proper refNum
     void adjustRefNum (ESM::RefNum& refNum, ESM::ESMReader& reader)
     {
-        int local = (refNum.mIndex & 0xff000000) >> 24;
+        unsigned int local = (refNum.mIndex & 0xff000000) >> 24;
 
-        if (local)
+        // If we have an index value that does not make sense, assume that it was an addition
+        // by the present plugin (but a faulty one)
+        if (local && local <= reader.getGameFiles().size())
         {
             // If the most significant 8 bits are used, then this reference already exists.
             // In this case, do not spawn a new reference, but overwrite the old one.

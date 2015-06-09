@@ -256,12 +256,13 @@ namespace MWWorld
             insertCell (*cell, true, loadingListener);
 
             mRendering.cellAdded (cell);
-            bool waterEnabled = cell->getCell()->hasWater();
+            bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
             mRendering.setWaterEnabled(waterEnabled);
+            float waterLevel = cell->isExterior() ? -1.f : cell->getWaterLevel();
             if (waterEnabled)
             {
-                mPhysics->enableWater(cell->getWaterLevel());
-                mRendering.setWaterHeight(cell->getWaterLevel());
+                mPhysics->enableWater(waterLevel);
+                mRendering.setWaterHeight(waterLevel);
             }
             else
                 mPhysics->disableWater();

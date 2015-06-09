@@ -68,8 +68,8 @@ namespace
         AddJournalEntry (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
                             MWGui::BookTypesetter::Style* header_style, bool add_header) :
             AddEntry (typesetter, body_style),
-            mHeaderStyle (header_style),
-            mAddHeader (add_header)
+            mAddHeader (add_header),
+            mHeaderStyle (header_style)
         {
         }
 
@@ -94,7 +94,7 @@ namespace
 
         AddTopicEntry (MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
                         MWGui::BookTypesetter::Style* header_style, intptr_t contentId) :
-            AddEntry (typesetter, body_style), mHeaderStyle (header_style), mContentId (contentId)
+            AddEntry (typesetter, body_style), mContentId (contentId), mHeaderStyle (header_style)
         {
         }
 

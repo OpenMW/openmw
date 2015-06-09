@@ -24,6 +24,14 @@ void CSMWorld::IdTableProxyModel::updateColumnMap()
 bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent)
     const
 {
+    // It is not possible to use filterAcceptsColumn() and check for
+    // sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags)
+    // because the sourceColumn parameter excludes the hidden columns, i.e. wrong columns can
+    // be rejected.  Workaround by disallowing tree branches (nested columns), which are not meant
+    // to be visible, from the filter.
+    if (sourceParent.isValid())
+        return false;
+
     if (!mFilter)
         return true;
 
@@ -46,10 +54,16 @@ void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::
 {
     mFilter = filter;
     updateColumnMap();
-    invalidateFilter();
+    reset();
 }
 
 bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     return QSortFilterProxyModel::lessThan(left, right);
+}
+
+void CSMWorld::IdTableProxyModel::refreshFilter()
+{
+    updateColumnMap();
+    invalidateFilter();
 }
