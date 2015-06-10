@@ -35,65 +35,6 @@
 
 using namespace ICS;
 
-namespace
-{
-    std::vector<unsigned long> utf8ToUnicode(const std::string& utf8)
-    {
-        std::vector<unsigned long> unicode;
-        size_t i = 0;
-        while (i < utf8.size())
-        {
-            unsigned long uni;
-            size_t todo;
-            unsigned char ch = utf8[i++];
-            if (ch <= 0x7F)
-            {
-                uni = ch;
-                todo = 0;
-            }
-            else if (ch <= 0xBF)
-            {
-                throw std::logic_error("not a UTF-8 string");
-            }
-            else if (ch <= 0xDF)
-            {
-                uni = ch&0x1F;
-                todo = 1;
-            }
-            else if (ch <= 0xEF)
-            {
-                uni = ch&0x0F;
-                todo = 2;
-            }
-            else if (ch <= 0xF7)
-            {
-                uni = ch&0x07;
-                todo = 3;
-            }
-            else
-            {
-                throw std::logic_error("not a UTF-8 string");
-            }
-            for (size_t j = 0; j < todo; ++j)
-            {
-                if (i == utf8.size())
-                    throw std::logic_error("not a UTF-8 string");
-                unsigned char ch = utf8[i++];
-                if (ch < 0x80 || ch > 0xBF)
-                    throw std::logic_error("not a UTF-8 string");
-                uni <<= 6;
-                uni += ch & 0x3F;
-            }
-            if (uni >= 0xD800 && uni <= 0xDFFF)
-                throw std::logic_error("not a UTF-8 string");
-            if (uni > 0x10FFFF)
-                throw std::logic_error("not a UTF-8 string");
-            unicode.push_back(uni);
-        }
-        return unicode;
-    }
-}
-
 namespace MWInput
 {
     InputManager::InputManager(
@@ -723,9 +664,9 @@ namespace MWInput
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
     {
-        const char* text = &arg.text[0];
-        std::vector<unsigned long> unicode = utf8ToUnicode(std::string(text));
-        for (std::vector<unsigned long>::iterator it = unicode.begin(); it != unicode.end(); ++it)
+        MyGUI::UString ustring(&arg.text[0]);
+        MyGUI::UString::utf32string utf32string = ustring.asUTF32();
+        for (MyGUI::UString::utf32string::const_iterator it = utf32string.begin(); it != utf32string.end(); ++it)
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
     }
 
