@@ -25,6 +25,7 @@ void WorkTicket::signalDone()
 WorkItem::WorkItem()
     : mTicket(new WorkTicket)
 {
+    mTicket->setThreadSafeRefUnref(true);
 }
 
 WorkItem::~WorkItem()
@@ -73,9 +74,9 @@ WorkQueue::~WorkQueue()
     }
 }
 
-WorkTicket* WorkQueue::addWorkItem(WorkItem *item)
+osg::ref_ptr<WorkTicket> WorkQueue::addWorkItem(WorkItem *item)
 {
-    WorkTicket* ticket = item->getTicket().get();
+    osg::ref_ptr<WorkTicket> ticket = item->getTicket();
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
     mQueue.push(item);
     mCondition.signal();

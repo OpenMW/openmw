@@ -65,7 +65,7 @@ namespace SceneUtil
 
         /// Add a new work item to the back of the queue.
         /// @par The returned WorkTicket may be used by the caller to wait until the work is complete.
-        WorkTicket* addWorkItem(WorkItem* item);
+        osg::ref_ptr<WorkTicket> addWorkItem(WorkItem* item);
 
         /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
         /// If the workqueue is in the process of being destroyed, may return NULL.
