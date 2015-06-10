@@ -1,6 +1,7 @@
 #include "sdlcursormanager.hpp"
 
 #include <cassert>
+#include <stdexcept>
 
 #include <SDL_mouse.h>
 #include <SDL_endian.h>
@@ -48,6 +49,8 @@ namespace
 
                     traits->pbuffer = false;
                     _gc = osg::GraphicsContext::createGraphicsContext(traits.get());
+                    if (!_gc)
+                        throw std::runtime_error("Failed to create graphics context for image decompression");
                 }
 
                 if (_gc.valid())
