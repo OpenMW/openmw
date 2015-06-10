@@ -5,6 +5,8 @@
 
 #include <cstdlib>
 
+#include <components/sceneutil/workqueue.hpp>
+
 #include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
@@ -63,6 +65,8 @@ RigGeometry::RigGeometry()
     , mFirstFrame(true)
     , mBoundsFirstFrame(true)
 {
+    initWorkQueue();
+
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
@@ -75,7 +79,19 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mFirstFrame(copy.mFirstFrame)
     , mBoundsFirstFrame(copy.mBoundsFirstFrame)
 {
+    initWorkQueue();
+
     setSourceGeometry(copy.mSourceGeometry);
+}
+
+void RigGeometry::initWorkQueue()
+{
+    static int numCpu = OpenThreads::GetNumberOfProcessors();
+    if (numCpu > 1)
+    {
+        static WorkQueue sWorkQueue(1);
+        mWorkQueue = &sWorkQueue;
+    }
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
@@ -198,22 +214,31 @@ void accummulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& ma
     ptrresult[14] += ptr[14] * weight;
 }
 
-void RigGeometry::update(osg::NodeVisitor* nv)
+class UpdateSkinningWorkItem : public WorkItem
 {
-    if (!mSkeleton)
+public:
+    UpdateSkinningWorkItem(RigGeometry* rig, const osg::Matrixf& geomToSkelMatrix, RigGeometry::BoneMatrixMap boneMatrices)
+        : mRig(rig)
+        , mGeomToSkelMatrix(geomToSkelMatrix)
+        , mBoneMatrices(boneMatrices)
     {
-        if (!initFromParentSkeleton(nv))
-            return;
     }
 
-    if (!mSkeleton->getActive() && !mFirstFrame)
-        return;
-    mFirstFrame = false;
+    virtual void doWork()
+    {
+        mRig->updateSkinning(mGeomToSkelMatrix, mBoneMatrices);
 
-    mSkeleton->updateBoneMatrices(nv);
+        mTicket->signalDone();
+    }
 
-    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
+private:
+    RigGeometry* mRig;
+    osg::Matrixf mGeomToSkelMatrix;
+    RigGeometry::BoneMatrixMap mBoneMatrices;
+};
 
+void RigGeometry::updateSkinning(const osg::Matrixf& geomToSkel, RigGeometry::BoneMatrixMap boneMatrices)
+{
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
     osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
@@ -233,7 +258,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             Bone* bone = weightIt->first.first;
             const osg::Matrix& invBindMatrix = weightIt->first.second;
             float weight = weightIt->second;
-            const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
+            const osg::Matrixf& boneMatrix = boneMatrices.at(bone);
             accummulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
         }
         resultMat = resultMat * geomToSkel;
@@ -248,6 +273,45 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 
     positionDst->dirty();
     normalDst->dirty();
+}
+
+void RigGeometry::update(osg::NodeVisitor* nv)
+{
+    if (!mSkeleton)
+    {
+        if (!initFromParentSkeleton(nv))
+            return;
+    }
+
+    if (!mSkeleton->getActive() && !mFirstFrame)
+        return;
+    mFirstFrame = false;
+
+    mSkeleton->updateBoneMatrices(nv);
+
+    BoneMatrixMap boneMatrices;
+    for (BoneSphereMap::const_iterator it = mBoneSphereMap.begin(); it != mBoneSphereMap.end(); ++it)
+        boneMatrices[it->first] = it->first->mMatrixInSkeletonSpace;
+
+    if (mWorkQueue)
+    {
+        // shouldn't happen, unless the CullCallback was a false positive, i.e. the Drawable's parent wasn't culled, but the Drawable *is* culled
+        if (mWorkTicket)
+            mWorkTicket->waitTillDone();
+
+        osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
+
+        // actual skinning update moved to a background thread
+        WorkItem* item = new UpdateSkinningWorkItem(this, geomToSkel, boneMatrices);
+        // keep the work ticket so we can synchronize in drawImplementation()
+        mWorkTicket = item->getTicket();
+
+        mWorkQueue->addWorkItem(item);
+    }
+    else
+    {
+        updateSkinning(getGeomToSkelMatrix(nv), boneMatrices);
+    }
 }
 
 void RigGeometry::updateBounds(osg::NodeVisitor *nv)
@@ -277,6 +341,46 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
     _boundingBox = box;
     for (unsigned int i=0; i<getNumParents(); ++i)
         getParent(i)->dirtyBound();
+}
+
+void RigGeometry::drawImplementation(osg::RenderInfo &renderInfo) const
+{
+    if (mWorkTicket)
+    {
+        mWorkTicket->waitTillDone();
+        mWorkTicket = NULL;
+    }
+    osg::Geometry::drawImplementation(renderInfo);
+}
+
+void RigGeometry::compileGLObjects(osg::RenderInfo &renderInfo) const
+{
+    if (mWorkTicket)
+    {
+        mWorkTicket->waitTillDone();
+        mWorkTicket = NULL;
+    }
+    osg::Geometry::compileGLObjects(renderInfo);
+}
+
+void RigGeometry::accept(osg::PrimitiveFunctor &pf) const
+{
+    if (mWorkTicket)
+    {
+        mWorkTicket->waitTillDone();
+        mWorkTicket = NULL;
+    }
+    osg::Geometry::accept(pf);
+}
+
+void RigGeometry::accept(osg::PrimitiveIndexFunctor &pf) const
+{
+    if (mWorkTicket)
+    {
+        mWorkTicket->waitTillDone();
+        mWorkTicket = NULL;
+    }
+    osg::Geometry::accept(pf);
 }
 
 osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)

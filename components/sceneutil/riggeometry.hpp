@@ -7,12 +7,16 @@
 namespace SceneUtil
 {
 
+    class WorkQueue;
+    class WorkTicket;
+
     class Skeleton;
     class Bone;
 
     /// @brief Mesh skinning implementation.
     /// @note A RigGeometry may be attached directly to a Skeleton, or somewhere below a Skeleton.
     /// Note though that the RigGeometry ignores any transforms below the Skeleton, so the attachment point is not that important.
+    /// @note You must use a double buffering scheme for queuing the drawing of RigGeometries, see FrameSwitch, or set their DataVariance to DYNAMIC
     class RigGeometry : public osg::Geometry
     {
     public:
@@ -41,10 +45,23 @@ namespace SceneUtil
         // Called automatically by our CullCallback
         void update(osg::NodeVisitor* nv);
 
+        // Called by the worker thread
+        typedef std::map<Bone*, osg::Matrixf> BoneMatrixMap;
+        void updateSkinning(const osg::Matrixf& geomToSkelMatrix, BoneMatrixMap boneMatrices);
+
         // Called automatically by our UpdateCallback
         void updateBounds(osg::NodeVisitor* nv);
 
+        // Overriding a bunch of Drawable methods to synchronize access to our vertex array
+        virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
+        virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
+        virtual void accept(osg::PrimitiveFunctor& pf) const;
+        virtual void accept(osg::PrimitiveIndexFunctor& pf) const;
+
     private:
+        mutable osg::ref_ptr<WorkTicket> mWorkTicket;
+        WorkQueue* mWorkQueue;
+
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
         Skeleton* mSkeleton;
 
@@ -70,6 +87,8 @@ namespace SceneUtil
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
         osg::Matrixf getGeomToSkelMatrix(osg::NodeVisitor* nv);
+
+        void initWorkQueue();
     };
 
 }
