@@ -30,17 +30,6 @@ ContentSelectorModel::ContentModel::~ContentModel()
 void ContentSelectorModel::ContentModel::setEncoding(const QString &encoding)
 {
     mEncoding = encoding;
-    if (encoding == QLatin1String("win1252"))
-        mCodec = QTextCodec::codecForName("windows-1252");
-
-    else if (encoding == QLatin1String("win1251"))
-        mCodec = QTextCodec::codecForName("windows-1251");
-
-    else if (encoding == QLatin1String("win1250"))
-        mCodec = QTextCodec::codecForName("windows-1250");
-
-    else
-        return; // This should never happen;
 }
 
 int ContentSelectorModel::ContentModel::columnCount(const QModelIndex &parent) const

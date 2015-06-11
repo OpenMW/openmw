@@ -81,7 +81,6 @@ namespace ContentSelectorModel
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
         QSet<QString> mPluginsWithLoadOrderError;
-        QTextCodec *mCodec;
         QString mEncoding;
         QIcon mWarningIcon;
 
