@@ -40,10 +40,12 @@ namespace MWWorld
 
     }
 
-    void ProjectileManager::createModel(State &state, const std::string &model)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
+        state.mNode->setPosition(pos);
+        state.mNode->setAttitude(orient);
         mParent->addChild(state.mNode);
 
         mResourceSystem->getSceneManager()->createInstance(model, state.mNode);
@@ -105,9 +107,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), model);
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr));
-        state.mNode->setPosition(pos);
-        state.mNode->setAttitude(orient);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         state.mSound = sndMgr->playManualSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
@@ -127,9 +127,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr));
-        state.mNode->setPosition(pos);
-        state.mNode->setAttitude(orient);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
 
         mProjectiles.push_back(state);
     }
@@ -342,9 +340,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model);
-            state.mNode->setPosition(osg::Vec3f(esm.mPosition));
-            state.mNode->setAttitude(osg::Quat(esm.mOrientation));
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
 
             mProjectiles.push_back(state);
             return true;
@@ -375,9 +371,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model);
-            state.mNode->setPosition(osg::Vec3f(esm.mPosition));
-            state.mNode->setAttitude(osg::Quat(esm.mOrientation));
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,

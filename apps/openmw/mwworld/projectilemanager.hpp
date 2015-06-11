@@ -116,7 +116,7 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model);
+        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient);
         void update (State& state, float duration);
     };
 
