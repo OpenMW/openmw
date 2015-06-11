@@ -34,20 +34,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
 
         // TODO: add support for non-NIF formats
 
-        std::string kfname = normalized;
-        if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
-            kfname.replace(kfname.size()-4, 4, ".kf");
-        std::set<std::string> animatedNodes;
-        if (mVFS->exists(kfname))
-        {
-            osg::ref_ptr<const NifOsg::KeyframeHolder> keyframes = mSceneManager->getKeyframes(kfname);
-            for (NifOsg::KeyframeHolder::KeyframeControllerMap::const_iterator it = keyframes->mKeyframeControllers.begin();
-                 it != keyframes->mKeyframeControllers.end(); ++it)
-                animatedNodes.insert(it->first);
-        }
-
         BulletNifLoader loader;
-        loader.setAnimatedNodes(animatedNodes);
         // might be worth sharing NIFFiles with SceneManager in some way
         shape = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)));
 
