@@ -87,7 +87,6 @@ add_executable(openmw-launcher
 )
 
 target_link_libraries(openmw-launcher
-    ${Boost_LIBRARIES}
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SDL2_LIBRARY_ONLY}

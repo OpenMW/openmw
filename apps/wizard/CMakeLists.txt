@@ -111,7 +111,6 @@ add_executable(openmw-wizard
 )
 
 target_link_libraries(openmw-wizard
-    ${Boost_LIBRARIES}
     ${QT_QTGUI_LIBRARY}
     ${QT_QTCORE_LIBRARY}
     components

@@ -153,13 +153,6 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
@@ -205,13 +198,21 @@ target_link_libraries(openmw-cs
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${BULLET_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_WAVE_LIBRARY}
     ${QT_QTGUI_LIBRARY}
     ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
+    ${BULLET_LIBRARIES}
     components
 )
+
+if (WIN32)
+    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+endif()
+
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
