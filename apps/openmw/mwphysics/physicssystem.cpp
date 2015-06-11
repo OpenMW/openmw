@@ -594,7 +594,7 @@ namespace MWPhysics
     // ---------------------------------------------------------------
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(new NifBullet::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager()))
+        : mShapeManager(new NifBullet::BulletShapeManager(resourceSystem->getVFS()))
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)

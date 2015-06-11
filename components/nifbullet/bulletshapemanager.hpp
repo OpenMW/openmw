@@ -25,15 +25,13 @@ namespace NifBullet
     class BulletShapeManager
     {
     public:
-        BulletShapeManager(const VFS::Manager* vfs, Resource::SceneManager* sceneManager);
+        BulletShapeManager(const VFS::Manager* vfs);
         ~BulletShapeManager();
 
         osg::ref_ptr<BulletShapeInstance> createInstance(const std::string& name);
 
     private:
         const VFS::Manager* mVFS;
-        // need to load keyframes to know what nodes are going to be animated
-        Resource::SceneManager* mSceneManager;
 
         typedef std::map<std::string, osg::ref_ptr<BulletShape> > Index;
         Index mIndex;

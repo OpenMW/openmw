@@ -4,14 +4,11 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
-#include <components/resource/scenemanager.hpp>
-
 namespace NifBullet
 {
 
-BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, Resource::SceneManager* sceneManager)
+BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs)
     : mVFS(vfs)
-    , mSceneManager(sceneManager)
 {
 
 }
