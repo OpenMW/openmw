@@ -14,6 +14,7 @@
 #include <components/vfs/manager.hpp>
 
 #include <components/sceneutil/clone.hpp>
+#include <components/sceneutil/util.hpp>
 
 namespace
 {
@@ -61,6 +62,13 @@ namespace
             {
                 partsys->getParticle(i)->transformPositionVelocity(worldMat);
             }
+
+            // transform initial bounds to worldspace
+            osg::BoundingSphere sphere(partsys->getInitialBound());
+            SceneUtil::transformBoundingSphere(worldMat, sphere);
+            osg::BoundingBox box;
+            box.expandBy(sphere);
+            partsys->setInitialBound(box);
         }
     };
 

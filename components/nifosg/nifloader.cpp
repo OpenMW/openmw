@@ -749,6 +749,10 @@ namespace NifOsg
 
                 created->setSizeRange(osgParticle::rangef(size, size));
             }
+
+            osg::BoundingBox box;
+            box.expandBy(osg::BoundingSphere(osg::Vec3(0,0,0), particledata->radius));
+            partsys->setInitialBound(box);
         }
 
         static osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
