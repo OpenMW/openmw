@@ -118,6 +118,7 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mNightEyeFactor(0.f)
     {
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
         mLightRoot = lightRoot;
@@ -203,9 +204,19 @@ namespace MWRender
         return mResourceSystem;
     }
 
+    void RenderingManager::setNightEyeFactor(float factor)
+    {
+        if (factor != mNightEyeFactor)
+        {
+            mNightEyeFactor = factor;
+            updateAmbient();
+        }
+    }
+
     void RenderingManager::setAmbientColour(const osg::Vec4f &colour)
     {
-        mStateUpdater->setAmbientColor(colour);
+        mAmbientColor = colour;
+        updateAmbient();
     }
 
     void RenderingManager::configureAmbient(const ESM::Cell *cell)
@@ -651,6 +662,16 @@ namespace MWRender
         mViewer->stopThreading();
         mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
         mViewer->startThreading();
+    }
+
+    void RenderingManager::updateAmbient()
+    {
+        osg::Vec4f color = mAmbientColor;
+
+        if (mNightEyeFactor > 0.f)
+            color += osg::Vec4f(0.7, 0.7, 0.7, 0.0) * mNightEyeFactor;
+
+        mStateUpdater->setAmbientColor(color);
     }
 
     void RenderingManager::setFogColor(const osg::Vec4f &color)

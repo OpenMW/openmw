@@ -59,6 +59,8 @@ namespace MWRender
 
         Resource::ResourceSystem* getResourceSystem();
 
+        void setNightEyeFactor(float factor);
+
         void setAmbientColour(const osg::Vec4f& colour);
 
         void setSunDirection(const osg::Vec3f& direction);
@@ -152,6 +154,7 @@ namespace MWRender
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
+        void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
 
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -174,6 +177,9 @@ namespace MWRender
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
         osg::Vec4f mFogColor;
+
+        osg::Vec4f mAmbientColor;
+        float mNightEyeFactor;
 
         float mNearClip;
         float mViewDistance;
