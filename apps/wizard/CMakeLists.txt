@@ -81,7 +81,6 @@ endif (OPENMW_USE_UNSHIELD)
 
 source_group(wizard FILES ${WIZARD} ${WIZARD_HEADER})
 
-find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
 # Set some platform specific settings
@@ -113,7 +112,8 @@ add_executable(openmw-wizard
 
 target_link_libraries(openmw-wizard
     ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
     components
 )
 

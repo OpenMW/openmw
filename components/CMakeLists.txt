@@ -126,11 +126,6 @@ add_component_dir (version
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
-find_package(Qt4 COMPONENTS QtCore QtGui)
-if(MINGW)
-find_package(Bullet REQUIRED COMPONENTS Collision)
-endif()
-
 if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
@@ -167,15 +162,14 @@ target_link_libraries(components
     ${Boost_LIBRARIES} 
     ${OGRE_LIBRARIES}
     ${OENGINE_LIBRARY}    
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTGUI_LIBRARY}
+    ${BULLET_LIBRARIES}
 )
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
-
-if(MINGW)
-target_link_libraries(components ${QT_LIBRARIES} ${BULLET_LIBRARIES})
-endif()
 
 if (WIN32)
 target_link_libraries(components shlwapi)

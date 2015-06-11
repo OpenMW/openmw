@@ -160,7 +160,6 @@ endif(WIN32)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 include(${QT_USE_FILE})
 
 qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
@@ -208,7 +207,9 @@ target_link_libraries(openmw-cs
     ${SHINY_LIBRARIES}
     ${Boost_LIBRARIES}
     ${BULLET_LIBRARIES}
-    ${QT_LIBRARIES}
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
     components
 )
 

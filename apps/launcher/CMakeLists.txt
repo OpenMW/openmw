@@ -57,7 +57,6 @@ set(LAUNCHER_UI
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
 
-find_package(Qt4 REQUIRED)
 set(QT_USE_QTGUI 1)
 
 # Set some platform specific settings
@@ -92,7 +91,8 @@ target_link_libraries(openmw-launcher
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SDL2_LIBRARY_ONLY}
-    ${QT_LIBRARIES}
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
     components
 )
 
