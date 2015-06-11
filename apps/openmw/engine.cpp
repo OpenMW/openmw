@@ -55,6 +55,15 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+namespace
+{
+    void checkSDLError(int ret)
+    {
+        if (ret != 0)
+            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+    }
+}
+
 void OMW::Engine::executeLocalScripts()
 {
     MWWorld::LocalScripts& localScripts = MWBase::Environment::get().getWorld()->getLocalScripts();
@@ -342,18 +351,16 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
                 settings.getBool("minimize on focus loss", "Video") ? "1" : "0");
 
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
 
     if (antialiasing > 0)
     {
-        if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1) != 0)
-            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
-        if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing) != 0)
-            std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1));
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
     }
 
     while (!mWindow)
@@ -367,8 +374,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
                 std::cout << "Note: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2 << std::endl;
                 antialiasing /= 2;
                 Settings::Manager::setInt("antialiasing", "Video", antialiasing);
-                if (SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing) != 0)
-                    std::cerr << "SDL error: " << SDL_GetError() << std::endl;
+                checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
                 continue;
             }
             else
