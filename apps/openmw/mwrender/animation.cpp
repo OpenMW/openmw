@@ -1060,7 +1060,7 @@ namespace MWRender
         params.mModelName = model;
         osg::ref_ptr<osg::Group> parentNode;
         if (bonename.empty())
-            parentNode = mObjectRoot->asGroup();
+            parentNode = mInsert;
         else
         {
             NodeMap::iterator found = mNodeMap.find(Misc::StringUtils::lowerCase(bonename));
