@@ -492,6 +492,9 @@ namespace MWMechanics
     {
         rangeFollow = 300.f;
 
+        static float fCombatDistance =
+            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCombatDistance")->getFloat();
+
         if (mWeapon.isEmpty()) 
         {
             if (!mIsNpc) 
@@ -501,7 +504,7 @@ namespace MWMechanics
                 static float fHandToHandReach =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
 
-                rangeAttack = fHandToHandReach;
+                rangeAttack = fHandToHandReach * fCombatDistance;
             }
             return;
         }
@@ -516,7 +519,7 @@ namespace MWMechanics
         else
         {
             rangeAttack = weapon->mData.mReach;
-            rangeAttack *= 100.0f;
+            rangeAttack *= fCombatDistance;
         }
     }
 

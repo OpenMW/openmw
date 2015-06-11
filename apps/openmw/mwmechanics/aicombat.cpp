@@ -375,10 +375,13 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
         Ogre::Vector3 vActorPos(pos.pos);
+        float actorHalfHeight = MWBase::Environment::get().getWorld()->getHalfExtents(actor).z;
+        float targetHalfHeight = MWBase::Environment::get().getWorld()->getHalfExtents(target).z;
         Ogre::Vector3 vTargetPos(target.getRefData().getPosition().pos);
-        Ogre::Vector3 vDirToTarget = vTargetPos - vActorPos;
+        // take into account actor & target heights (to allow tall actors fight low ones and vice versa)
+        Ogre::Vector3 vDirToTarget = (vTargetPos + Ogre::Vector3(0,0,targetHalfHeight)) - (vActorPos + Ogre::Vector3(0,0,actorHalfHeight));
         float distToTarget = vDirToTarget.length();
-        
+
         Ogre::Vector3& lastActorPos = storage.mLastActorPos;
         bool& followTarget = storage.mFollowTarget;
 
