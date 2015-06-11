@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <QPushButton>
 
-#include "../widget/coloreditbutton.hpp"
+#include "../widget/coloreditor.hpp"
 
 CSVWorld::ColorPickerDelegate::ColorPickerDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                                    CSMDoc::Document& document, 
@@ -28,9 +28,9 @@ QWidget *CSVWorld::ColorPickerDelegate::createEditor(QWidget *parent,
         throw std::logic_error("Wrong column for ColorPickerDelegate");
     }
 
-    return new CSVWidget::ColorEditButton(index.data().value<QColor>(), 
-                                          getColoredRect(option).size(),
-                                          parent);
+    return new CSVWidget::ColorEditor(index.data().value<QColor>(), 
+                                      getColoredRect(option).size(),
+                                      parent);
 }
 
 void CSVWorld::ColorPickerDelegate::paint(QPainter *painter, 
