@@ -1,5 +1,5 @@
-#ifndef CSV_WORLD_COLORPICKERDELEGATE_HPP
-#define CSV_WORLD_COLORPICKERDELEGATE_HPP
+#ifndef CSV_WORLD_COLORDELEGATE_HPP
+#define CSV_WORLD_COLORDELEGATE_HPP
 
 #include "util.hpp"
 
@@ -12,19 +12,19 @@ namespace CSVWidget
 
 namespace CSVWorld
 {
-    class ColorPickerDelegate : public CommandDelegate
+    class ColorDelegate : public CommandDelegate
     {
         public:
-            ColorPickerDelegate(CSMWorld::CommandDispatcher *dispatcher, 
-                                CSMDoc::Document& document, 
-                                QObject *parent);
+            ColorDelegate(CSMWorld::CommandDispatcher *dispatcher, 
+                          CSMDoc::Document& document, 
+                          QObject *parent);
 
             virtual void paint(QPainter *painter, 
                                const QStyleOptionViewItem &option,
                                const QModelIndex &index) const;
     };
 
-    class ColorPickerDelegateFactory : public CommandDelegateFactory
+    class ColorDelegateFactory : public CommandDelegateFactory
     {
         public:
             virtual CommandDelegate *makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
