@@ -172,6 +172,11 @@ target_link_libraries(components
     ${BULLET_LIBRARIES}
 )
 
+if (WIN32)
+    target_link_libraries(components
+    ${Boost_LOCALE_LIBRARY})
+endif()
+
 if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(components
     ${QT_QTCORE_LIBRARY}
