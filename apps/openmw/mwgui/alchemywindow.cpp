@@ -26,10 +26,10 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
-        , mApparatus (4)
-        , mIngredients (4)
         , mSortModel(NULL)
         , mAlchemy(new MWMechanics::Alchemy())
+        , mApparatus (4)
+        , mIngredients (4)
     {
         getWidget(mCreateButton, "CreateButton");
         getWidget(mCancelButton, "CancelButton");
@@ -130,6 +130,7 @@ namespace MWGui
         mSortModel = new SortFilterItemModel(model);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         mNameEdit->setCaption("");
 

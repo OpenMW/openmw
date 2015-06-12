@@ -59,6 +59,8 @@ namespace CSMDoc
             /// Ask OGRE for a list of available resources.
             void listResources();
 
+            bool isEmpty();
+
         private:
 
             boost::filesystem::path mResDir;

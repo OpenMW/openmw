@@ -63,10 +63,10 @@ namespace MWMechanics
     ObstacleCheck::ObstacleCheck():
         mPrevX(0) // to see if the moved since last time
       , mPrevY(0)
-      , mDistSameSpot(-1) // avoid calculating it each time
       , mWalkState(State_Norm)
       , mStuckDuration(0)
       , mEvadeDuration(0)
+      , mDistSameSpot(-1) // avoid calculating it each time
     {
     }
 

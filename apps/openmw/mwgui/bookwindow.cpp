@@ -18,9 +18,9 @@ namespace MWGui
 
     BookWindow::BookWindow ()
         : WindowBase("openmw_book.layout")
+        , mCurrentPage(0)
         , mTakeButtonShow(true)
         , mTakeButtonAllowed(true)
-        , mCurrentPage(0)
     {
         getWidget(mCloseButton, "CloseButton");
         mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &BookWindow::onCloseButtonClicked);

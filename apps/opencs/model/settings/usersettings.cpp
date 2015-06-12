@@ -143,6 +143,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         minWidth->setDefaultValue (325);
         minWidth->setRange (50, 10000);
         minWidth->setToolTip ("Minimum width of subviews.");
+
+        QString defaultScroll = "Scrollbar Only";
+        QStringList scrollValues = QStringList() << defaultScroll << "Grow Only" << "Grow then Scroll";
+
+        Setting *mainwinScroll = createSetting (Type_RadioButton, "mainwindow-scrollbar",
+            "Add a horizontal scrollbar to the main view window.");
+        mainwinScroll->setDefaultValue (defaultScroll);
+        mainwinScroll->setDeclaredValues (scrollValues);
+        mainwinScroll->setToolTip ("Scrollbar Only: Simple addition of scrollbars, the view window does not grow"
+            " automatically.\n"
+            "Grow Only: Original Editor behaviour. The view window grows as subviews are added. No scrollbars.\n"
+            "Grow then Scroll: The view window grows. The scrollbar appears once it cannot grow any further.");
+
+        Setting *grow = createSetting (Type_CheckBox, "grow-limit", "Grow Limit Screen");
+        grow->setDefaultValue ("false");
+        grow->setToolTip ("When \"Grow then Scroll\" option is selected, the window size grows to"
+            " the width of the virtual desktop. \nIf this option is selected the the window growth"
+            "is limited to the current screen.");
     }
 
     declareSection ("records", "Records");
@@ -244,6 +262,42 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
         monoFont->setDefaultValue ("true");
         monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
+
+        QString tooltip =
+            "\n#RGB (each of R, G, and B is a single hex digit)"
+            "\n#RRGGBB"
+            "\n#RRRGGGBBB"
+            "\n#RRRRGGGGBBBB"
+            "\nA name from the list of colors defined in the list of SVG color keyword names."
+            "\nX11 color names may also work.";
+
+        Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
+        formatInt->setDefaultValues (QStringList() << "Dark magenta");
+        formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatFloat = createSetting (Type_LineEdit, "colour-float", "Highlight Colour: Float");
+        formatFloat->setDefaultValues (QStringList() << "Magenta");
+        formatFloat->setToolTip ("(Default: Magenta) Use one of the following formats:" + tooltip);
+
+        Setting *formatName = createSetting (Type_LineEdit, "colour-name", "Highlight Colour: Name");
+        formatName->setDefaultValues (QStringList() << "Gray");
+        formatName->setToolTip ("(Default: Gray) Use one of the following formats:" + tooltip);
+
+        Setting *formatKeyword = createSetting (Type_LineEdit, "colour-keyword", "Highlight Colour: Keyword");
+        formatKeyword->setDefaultValues (QStringList() << "Red");
+        formatKeyword->setToolTip ("(Default: Red) Use one of the following formats:" + tooltip);
+
+        Setting *formatSpecial = createSetting (Type_LineEdit, "colour-special", "Highlight Colour: Special");
+        formatSpecial->setDefaultValues (QStringList() << "Dark yellow");
+        formatSpecial->setToolTip ("(Default: Dark yellow) Use one of the following formats:" + tooltip);
+
+        Setting *formatComment = createSetting (Type_LineEdit, "colour-comment", "Highlight Colour: Comment");
+        formatComment->setDefaultValues (QStringList() << "Green");
+        formatComment->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatId = createSetting (Type_LineEdit, "colour-id", "Highlight Colour: Id");
+        formatId->setDefaultValues (QStringList() << "Blue");
+        formatId->setToolTip ("(Default: Blue) Use one of the following formats:" + tooltip);
     }
 
     {

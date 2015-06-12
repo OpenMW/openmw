@@ -176,7 +176,6 @@ void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)
 {
     std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (index.second);
-
     if (iter==mRecordContainers.end())
         throw std::logic_error ("invalid local index type");
 
@@ -187,6 +186,20 @@ void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)
 
         if (result!=mIndex.end())
             mIndex.erase (result);
+    }
+
+    // Adjust the local indexes to avoid gaps between them after removal of records
+    int recordIndex = index.first + count;
+    int recordCount = iter->second->getSize();
+    while (recordIndex < recordCount)
+    {
+        std::map<std::string, LocalIndex>::iterator recordIndexFound =
+            mIndex.find(Misc::StringUtils::lowerCase(iter->second->getId(recordIndex)));
+        if (recordIndexFound != mIndex.end())
+        {
+            recordIndexFound->second.first -= count;
+        }
+        ++recordIndex;
     }
 
     iter->second->erase (index.first, count);

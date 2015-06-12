@@ -33,10 +33,10 @@ namespace MWGui
     ContainerWindow::ContainerWindow(DragAndDrop* dragAndDrop)
         : WindowBase("openmw_container_window.layout")
         , mDragAndDrop(dragAndDrop)
-        , mSelectedItem(-1)
-        , mModel(NULL)
-        , mSortModel(NULL)
         , mPickpocketDetected(false)
+        , mSortModel(NULL)
+        , mModel(NULL)
+        , mSelectedItem(-1)
     {
         getWidget(mDisposeCorpseButton, "DisposeCorpseButton");
         getWidget(mTakeButton, "TakeButton");
@@ -151,6 +151,7 @@ namespace MWGui
         mSortModel = new SortFilterItemModel(mModel);
 
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 

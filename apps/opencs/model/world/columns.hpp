@@ -272,6 +272,36 @@ namespace CSMWorld
 
             ColumnId_OriginalCell = 247,
 
+            ColumnId_NpcAttributes = 248,
+            ColumnId_NpcSkills = 249,
+            ColumnId_UChar = 250,
+            ColumnId_NpcMisc = 251,
+            ColumnId_NpcLevel = 252,
+            ColumnId_NpcFactionID = 253,
+            ColumnId_NpcHealth = 254,
+            ColumnId_NpcMana = 255,
+            ColumnId_NpcFatigue = 256,
+            ColumnId_NpcDisposition = 257,
+            ColumnId_NpcReputation = 258,
+            ColumnId_NpcRank = 259,
+            ColumnId_NpcGold = 260,
+            ColumnId_NpcPersistence = 261,
+
+            ColumnId_RaceAttributes = 262,
+            ColumnId_RaceMaleValue = 263,
+            ColumnId_RaceFemaleValue = 264,
+            ColumnId_RaceSkillBonus = 265,
+            ColumnId_RaceSkill = 266,
+            ColumnId_RaceBonus = 267,
+
+            ColumnId_Interior = 268,
+            ColumnId_Ambient = 269,
+            ColumnId_Sunlight = 270,
+            ColumnId_Fog = 271,
+            ColumnId_FogDensity = 272,
+            ColumnId_WaterLevel = 273,
+            ColumnId_MapColor = 274,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

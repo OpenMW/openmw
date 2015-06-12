@@ -165,7 +165,7 @@ namespace CSVWorld
         Q_OBJECT
             QDataWidgetMapper *mWidgetMapper;
             QDataWidgetMapper *mNestedTableMapper;
-            DialogueDelegateDispatcher mDispatcher;
+            DialogueDelegateDispatcher *mDispatcher;
             DialogueDelegateDispatcher *mNestedTableDispatcher;
             QWidget* mMainWidget;
             CSMWorld::IdTable* mTable;
@@ -235,6 +235,8 @@ namespace CSVWorld
                                       const CSMDoc::Document* document);
 
             void requestFocus (const std::string& id);
+
+            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
 }
 

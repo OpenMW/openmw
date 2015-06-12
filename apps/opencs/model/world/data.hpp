@@ -88,7 +88,7 @@ namespace CSMWorld
             IdCollection<ESM::StartScript> mStartScripts;
             NestedInfoCollection mTopicInfos;
             InfoCollection mJournalInfos;
-            IdCollection<Cell> mCells;
+            NestedIdCollection<Cell> mCells;
             IdCollection<LandTexture> mLandTextures;
             IdCollection<Land> mLand;
             RefIdCollection mReferenceables;
