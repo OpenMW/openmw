@@ -792,7 +792,7 @@ namespace
                 movement.mPosition[1] = 0;
                 attackType = ESM::Weapon::AT_Slash;
             }
-            else if(roll <= (slash + (thrust/total)))
+            else if(roll <= (slash + thrust)/total)
             {
                 movement.mPosition[1] = 1;
                 attackType = ESM::Weapon::AT_Thrust;
