@@ -15,9 +15,6 @@
 
 #include "controllers.hpp"
 
-#undef min
-#undef max
-
 namespace MWGui
 {
     namespace Widgets

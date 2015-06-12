@@ -13,9 +13,6 @@
 
 #include "tooltips.hpp"
 
-#undef min
-#undef max
-
 namespace
 {
     void adjustButtonSize(MyGUI::Button *button)
