@@ -43,6 +43,7 @@ QColor CSVWidget::ColorEditor::color() const
 void CSVWidget::ColorEditor::setColor(const QColor &color)
 {
     mColor = color;
+    update();
 }
 
 void CSVWidget::ColorEditor::showPicker()
