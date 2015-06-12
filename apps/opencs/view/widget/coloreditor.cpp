@@ -9,12 +9,9 @@
 
 #include "colorpickerpopup.hpp"
 
-CSVWidget::ColorEditor::ColorEditor(const QColor &color,
-                                    const QSize &coloredRectSize,
-                                    QWidget *parent)
+CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent)
     : QPushButton(parent),
       mColor(color),
-      mColoredRectSize(coloredRectSize),
       mColorPicker(new ColorPickerPopup(this))
 {
     setCheckable(true);
@@ -28,10 +25,10 @@ void CSVWidget::ColorEditor::paintEvent(QPaintEvent *event)
     QPushButton::paintEvent(event);
 
     QRect buttonRect = rect();
-    QRect coloredRect(buttonRect.x() + (buttonRect.width() - mColoredRectSize.width()) / 2,
-                      buttonRect.y() + (buttonRect.height() - mColoredRectSize.height()) / 2,
-                      mColoredRectSize.width(),
-                      mColoredRectSize.height());
+    QRect coloredRect(qRound(buttonRect.x() + buttonRect.width() / 4.0),
+                      qRound(buttonRect.y() + buttonRect.height() / 4.0),
+                      qRound(buttonRect.width() / 2.0),
+                      qRound(buttonRect.height() / 2.0));
     QPainter painter(this);
     painter.fillRect(coloredRect, mColor);
 }
@@ -44,11 +41,6 @@ QColor CSVWidget::ColorEditor::color() const
 void CSVWidget::ColorEditor::setColor(const QColor &color)
 {
     mColor = color;
-}
-
-void CSVWidget::ColorEditor::setColoredRectSize(const QSize &size)
-{
-    mColoredRectSize = size;
 }
 
 void CSVWidget::ColorEditor::showPicker()
@@ -73,6 +65,7 @@ void CSVWidget::ColorEditor::pickerHid()
     {
         setChecked(false);
     }
+    emit pickingFinished();
 }
 
 void CSVWidget::ColorEditor::pickerColorChanged(const QColor &color)

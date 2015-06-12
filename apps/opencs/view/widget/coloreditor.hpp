@@ -16,19 +16,15 @@ namespace CSVWidget
             Q_OBJECT
 
             QColor mColor;
-            QSize mColoredRectSize;
             ColorPickerPopup *mColorPicker;
 
             QPoint calculatePopupPosition();
 
         public:
-            ColorEditor(const QColor &color,
-                        const QSize &coloredRectSize,
-                        QWidget *parent = 0);
+            ColorEditor(const QColor &color, QWidget *parent = 0);
 
             QColor color() const;
             void setColor(const QColor &color);
-            void setColoredRectSize(const QSize &size);
 
         protected:
             void paintEvent(QPaintEvent *event);
@@ -37,6 +33,9 @@ namespace CSVWidget
             void showPicker();
             void pickerHid();
             void pickerColorChanged(const QColor &color);
+
+        signals:
+            void pickingFinished();
     };
 }
 

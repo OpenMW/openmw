@@ -21,15 +21,6 @@ namespace CSVWorld
                                 CSMDoc::Document& document, 
                                 QObject *parent);
 
-            virtual QWidget *createEditor(QWidget *parent,
-                                          const QStyleOptionViewItem &option,
-                                          const QModelIndex &index) const;
-
-            virtual QWidget *createEditor(QWidget *parent,
-                                          const QStyleOptionViewItem &option,
-                                          const QModelIndex &index,
-                                          CSMWorld::ColumnBase::Display display) const;
-
             virtual void paint(QPainter *painter, 
                                const QStyleOptionViewItem &option,
                                const QModelIndex &index) const;
