@@ -31,6 +31,8 @@ void CSVWidget::ColorEditor::paintEvent(QPaintEvent *event)
                       qRound(buttonRect.height() / 2.0));
     QPainter painter(this);
     painter.fillRect(coloredRect, mColor);
+    painter.setPen(Qt::black);
+    painter.drawRect(coloredRect);
 }
 
 QColor CSVWidget::ColorEditor::color() const

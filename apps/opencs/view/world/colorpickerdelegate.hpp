@@ -14,8 +14,6 @@ namespace CSVWorld
 {
     class ColorPickerDelegate : public CommandDelegate
     {
-            QRect getColoredRect(const QStyleOptionViewItem &option) const;
-
         public:
             ColorPickerDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                 CSMDoc::Document& document, 
