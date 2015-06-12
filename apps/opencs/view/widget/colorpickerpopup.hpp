@@ -19,6 +19,7 @@ namespace CSVWidget
         void showPicker(const QPoint &position, const QColor &initialColor);
 
     protected:
+        virtual void mousePressEvent(QMouseEvent *event);
         virtual void hideEvent(QHideEvent *event);
         virtual bool eventFilter(QObject *object, QEvent *event);
 

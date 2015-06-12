@@ -1,9 +1,12 @@
 #include "colorpickerpopup.hpp"
 
 #include <QColorDialog>
+#include <QPushButton>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QMouseEvent>
 #include <QLayout>
+#include <QStyleOption>
 
 CSVWidget::ColorPickerPopup::ColorPickerPopup(QWidget *parent) 
     : QFrame(parent)
@@ -38,6 +41,26 @@ void CSVWidget::ColorPickerPopup::showPicker(const QPoint &position, const QColo
 
     mColorPicker->setCurrentColor(initialColor);
     show();
+}
+
+void CSVWidget::ColorPickerPopup::mousePressEvent(QMouseEvent *event)
+{
+    QPushButton *button = qobject_cast<QPushButton *>(parentWidget());
+    if (button != NULL)
+    {
+        QStyleOptionButton option;
+        option.init(button);
+        QRect buttonRect = option.rect;
+        buttonRect.moveTo(button->mapToGlobal(buttonRect.topLeft()));
+
+        // If the mouse is pressed above the pop-up parent,
+        // the pop-up will be hidden and the pressed signal won't be repeated for the parent
+        if (buttonRect.contains(event->globalPos()) || buttonRect.contains(event->pos()))
+        {
+            setAttribute(Qt::WA_NoMouseReplay);
+        }
+    }
+    QFrame::mousePressEvent(event);
 }
 
 void CSVWidget::ColorPickerPopup::hideEvent(QHideEvent *event)

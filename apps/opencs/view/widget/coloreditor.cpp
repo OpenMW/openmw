@@ -60,14 +60,7 @@ void CSVWidget::ColorEditor::showPicker()
 
 void CSVWidget::ColorEditor::pickerHid()
 {
-    // If the popup is hidden and mouse isn't above the editor,
-    // reset the editor checked state manually
-    QPoint globalEditorPosition = mapToGlobal(QPoint(0, 0));
-    QRect globalEditorRect(globalEditorPosition, geometry().size());
-    if (!globalEditorRect.contains(QCursor::pos()))
-    {
-        setChecked(false);
-    }
+    setChecked(false);
     emit pickingFinished();
 }
 
