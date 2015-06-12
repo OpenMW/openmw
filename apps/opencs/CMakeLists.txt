@@ -153,11 +153,16 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-include(${QT_USE_FILE})
-
-qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
-qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+else()
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+endif()
 
 # for compiled .ui files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -202,12 +207,18 @@ target_link_libraries(openmw-cs
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_WAVE_LIBRARY}
-    ${QT_QTGUI_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY}
     ${BULLET_LIBRARIES}
     components
 )
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-cs
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY})
+else()
+    qt5_use_modules(openmw-cs Widgets Core Network)
+endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})

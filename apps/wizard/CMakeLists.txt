@@ -89,12 +89,17 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-QT4_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
-QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+    QT4_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
+    QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
+else()
+    QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+    QT5_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
+    QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
+endif()
 
-
-include(${QT_USE_FILE})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 if (OPENMW_USE_UNSHIELD)
@@ -111,10 +116,16 @@ add_executable(openmw-wizard
 )
 
 target_link_libraries(openmw-wizard
-    ${QT_QTGUI_LIBRARY}
-    ${QT_QTCORE_LIBRARY}
     components
 )
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-wizard
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY})
+else()
+    qt5_use_modules(openmw-wizard Widgets Core)
+endif()
 
 if (OPENMW_USE_UNSHIELD)
     target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARY})

@@ -104,7 +104,6 @@ find_package(FFmpeg REQUIRED)
 
 set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY})
 
-message(STATUS ${FFMPEG_LIBRARIES})
 if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND )
     message(FATAL_ERROR "FFmpeg component required, but not found!")
 endif()
@@ -156,7 +155,18 @@ endif()
 
 # Dependencies
 
-find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork)
+set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+message(STATUS "Using Qt${DESIRED_QT_VERSION}")
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork)
+else()
+    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5Core REQUIRED)
+    find_package(Qt5Network REQUIRED)
+    # Instruct CMake to run moc automatically when needed.
+    #set(CMAKE_AUTOMOC ON)
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)

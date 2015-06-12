@@ -6,6 +6,8 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
@@ -23,10 +25,6 @@
 #include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
-
-#include <QMessageBox>
-#include <QPushButton>
-#include <QtGui/QApplication>
 
 void CSVDoc::ViewManager::updateIndices()
 {

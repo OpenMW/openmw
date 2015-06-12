@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QDesktopWidget>
 #include <QScrollArea>
 #include <QHBoxLayout>
