@@ -546,6 +546,10 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
                 record.get().mFlags |= iter->second;
             else
                 record.get().mFlags &= ~iter->second;
+
+            if (iter->second == ESM::NPC::Autocalc)
+                record.get().mNpdtType = (value.toInt() != 0) ? ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS
+                                                              : ESM::NPC::NPC_DEFAULT;
         }
         else
             ActorRefIdAdapter<ESM::NPC>::setData (column, data, index, value);
