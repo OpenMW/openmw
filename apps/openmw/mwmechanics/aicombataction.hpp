@@ -30,7 +30,7 @@ namespace MWMechanics
         virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
 
         const std::string& getSpellId() const;
-        ESM::RangeType ActionSpell::getSpellRangeType() const;
+        ESM::RangeType getSpellRangeType() const;
         float getSpellSpeed() const;
     };
 

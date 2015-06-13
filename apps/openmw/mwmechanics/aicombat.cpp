@@ -285,7 +285,7 @@ namespace MWMechanics
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
         const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weapType = MWMechanics::WeaponType::WeapType_None;
+        MWMechanics::WeaponType weapType = WeapType_None;
         float spellSpeed = 1.f;
 
         if (dynamic_cast<ActionWeapon*>(currentAction.get()))
@@ -892,7 +892,7 @@ namespace
         float projSpeed;
 
         // get projectile speed (depending on weapon type)
-        if (weapType == MWMechanics::WeaponType::WeapType_Thrown)
+        if (weapType == MWMechanics::WeapType_Thrown)
         {
             static float fThrownWeaponMinSpeed = 
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fThrownWeaponMinSpeed")->getFloat();
@@ -902,7 +902,7 @@ namespace
             projSpeed = 
                 fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * strength;
         }
-        else if (weapType == MWMechanics::WeaponType::WeapType_Spell)
+        else if (weapType == MWMechanics::WeapType_Spell)
         {
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTargetSpellMaxSpeed")->getFloat();
             projSpeed = fTargetSpellMaxSpeed * strength;
