@@ -153,19 +153,16 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork QtOpenGL REQUIRED)
-include(${QT_USE_FILE})
-
-qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
-qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+else()
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+endif()
 
 # for compiled .ui files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -202,10 +199,26 @@ endif(APPLE)
 
 target_link_libraries(openmw-cs
     ${OPENSCENEGRAPH_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${QT_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     components
 )
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-cs
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTOPENGL_LIBRARY})
+else()
+    qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
+endif()
+
+if (WIN32)
+    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+endif()
+
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

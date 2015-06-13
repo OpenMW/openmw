@@ -291,9 +291,9 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
         stream << key << "=" << value << "\n";
     }
 
+    // new entries
     if (!userSettingsCopy.empty())
     {
-        stream << "# new entries" << "\n";
         QMap<QString, QString>::const_iterator it = userSettingsCopy.begin();
         for (; it != userSettingsCopy.end(); ++it)
         {

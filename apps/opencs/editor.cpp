@@ -298,12 +298,12 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toStdString().c_str()))
+            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
                 std::cout << "Detected unclean shutdown." << std::endl;
                 // delete the stale file
-                if(remove(fullPath.toStdString().c_str()))
+                if(remove(fullPath.toUtf8().constData()))
                     std::cerr << "ERROR removing stale connection file" << std::endl;
             }
         }

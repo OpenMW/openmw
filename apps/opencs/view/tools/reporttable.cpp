@@ -9,6 +9,8 @@
 #include <QStyledItemDelegate>
 #include <QTextDocument>
 #include <QPainter>
+#include <QContextMenuEvent>
+#include <QMouseEvent>
 
 #include "../../model/tools/reportmodel.hpp"
 
@@ -121,7 +123,11 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, bool richTextDescription, QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
+#else
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
+#endif
     horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
     setSortingEnabled (true);

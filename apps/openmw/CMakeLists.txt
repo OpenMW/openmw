@@ -95,17 +95,6 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
-if (ANDROID)
-    set(BOOST_COMPONENTS system filesystem program_options thread atomic)
-else ()
-    set(BOOST_COMPONENTS system filesystem program_options thread)
-endif ()
-
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 if (NOT ANDROID)
     add_executable(openmw
@@ -127,7 +116,10 @@ include_directories(${SOUND_INPUT_INCLUDES})
 
 target_link_libraries(openmw
     ${OPENSCENEGRAPH_LIBRARIES}
-    ${Boost_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}

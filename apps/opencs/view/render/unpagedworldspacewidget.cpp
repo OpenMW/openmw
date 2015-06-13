@@ -5,7 +5,7 @@
 
 #include <osgGA/TrackballManipulator>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 #include <components/sceneutil/util.hpp>
 

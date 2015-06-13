@@ -3,7 +3,12 @@
 
 #include <algorithm>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
