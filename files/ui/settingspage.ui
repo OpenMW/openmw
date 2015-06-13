@@ -40,16 +40,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="saveCommentsCheckBox">
-        <property name="text">
-         <string>Keep comments in openmw.cfg</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
