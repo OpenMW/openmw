@@ -260,6 +260,10 @@ void Launcher::SettingsPage::saveSettings()
     }  else {
         mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
     }
+
+    QString keepComments(saveCommentsCheckBox->isChecked() ? "true" : "false");
+
+    mLauncherSettings.setValue(QLatin1String("Settings/keep-comments"), keepComments);
 }
 
 bool Launcher::SettingsPage::loadSettings()
@@ -270,6 +274,10 @@ bool Launcher::SettingsPage::loadSettings()
 
     if (index != -1)
         languageComboBox->setCurrentIndex(index);
+
+    QString keepComments(mLauncherSettings.value(QLatin1String("Settings/keep-comments")));
+
+    saveCommentsCheckBox->setChecked(keepComments == "true");
 
     return true;
 }
