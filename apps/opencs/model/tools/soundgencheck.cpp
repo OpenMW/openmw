@@ -29,7 +29,7 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
     const ESM::SoundGenerator soundGen = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_SoundGen, soundGen.mId);
 
-    if (soundGen.mCreature != "")
+    if (!soundGen.mCreature.empty())
     {
         CSMWorld::RefIdData::LocalIndex creatureIndex = mReferenceables.getDataSet().searchId(soundGen.mCreature);
         if (creatureIndex.first == -1)
@@ -42,7 +42,11 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
         }
     }
 
-    if (mSounds.searchId(soundGen.mSound) == -1)
+    if (soundGen.mSound.empty())
+    {
+        messages.push_back(std::make_pair(id, "Sound is not specified"));
+    }
+    else if (mSounds.searchId(soundGen.mSound) == -1)
     {
         messages.push_back(std::make_pair(id, "No such sound '" + soundGen.mSound + "'"));
     }
