@@ -1,6 +1,7 @@
 #include "camera.hpp"
 
 #include <osg/PositionAttitudeTransform>
+#include <osg/Camera>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

@@ -3,7 +3,7 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <components/nifosg/controller.hpp>
+#include <components/sceneutil/controller.hpp>
 
 namespace ESM
 {
@@ -18,6 +18,7 @@ namespace Resource
 namespace NifOsg
 {
     class KeyframeHolder;
+    class KeyframeController;
 }
 
 namespace MWRender
@@ -43,16 +44,9 @@ public:
 class PartHolder
 {
 public:
-    PartHolder(osg::ref_ptr<osg::Node> node)
-        : mNode(node)
-    {
-    }
+    PartHolder(osg::ref_ptr<osg::Node> node);
 
-    ~PartHolder()
-    {
-        if (mNode->getNumParents())
-            mNode->getParent(0)->removeChild(mNode);
-    }
+    ~PartHolder();
 
     osg::ref_ptr<osg::Node> getNode()
     {
@@ -116,16 +110,7 @@ protected:
         }
     };
 
-    struct AnimSource
-    {
-        osg::ref_ptr<const NifOsg::KeyframeHolder> mKeyframes;
-
-        typedef std::map<std::string, osg::ref_ptr<NifOsg::KeyframeController> > ControllerMap;
-
-        ControllerMap mControllerMap[sNumGroups];
-
-        const std::multimap<float, std::string>& getTextKeys();
-    };
+    struct AnimSource;
 
     struct AnimState {
         boost::shared_ptr<AnimSource> mSource;
@@ -150,6 +135,8 @@ protected:
                       mPriority(0), mGroups(0), mAutoDisable(true)
         {
         }
+        ~AnimState();
+
         float getTime() const
         {
             return *mTime;

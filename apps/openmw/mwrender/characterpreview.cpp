@@ -1,5 +1,7 @@
 #include "characterpreview.hpp"
 
+#include <iostream>
+
 #include <osg/Texture2D>
 #include <osg/Camera>
 #include <osg/PositionAttitudeTransform>

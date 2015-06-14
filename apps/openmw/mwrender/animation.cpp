@@ -17,6 +17,7 @@
 #include <components/resource/texturemanager.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
+#include <components/nifosg/controller.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -203,6 +204,17 @@ namespace
 
 namespace MWRender
 {
+
+    struct Animation::AnimSource
+    {
+        osg::ref_ptr<const NifOsg::KeyframeHolder> mKeyframes;
+
+        typedef std::map<std::string, osg::ref_ptr<NifOsg::KeyframeController> > ControllerMap;
+
+        ControllerMap mControllerMap[Animation::sNumGroups];
+
+        const std::multimap<float, std::string>& getTextKeys();
+    };
 
     class ResetAccumRootCallback : public osg::NodeCallback
     {
@@ -1209,6 +1221,24 @@ namespace MWRender
         }
         if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
+    }
+
+    Animation::AnimState::~AnimState()
+    {
+
+    }
+
+    // ------------------------------
+
+    PartHolder::PartHolder(osg::ref_ptr<osg::Node> node)
+        : mNode(node)
+    {
+    }
+
+    PartHolder::~PartHolder()
+    {
+        if (mNode->getNumParents())
+            mNode->getParent(0)->removeChild(mNode);
     }
 
 }

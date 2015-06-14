@@ -19,6 +19,8 @@
 
 #include "character.hpp"
 
+#include <iostream>
+
 #include <osg/PositionAttitudeTransform>
 
 #include "movement.hpp"
