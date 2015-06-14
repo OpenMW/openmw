@@ -182,7 +182,12 @@ namespace
         virtual void apply(osg::Geode &node)
         {
             // Not safe to remove in apply(), since the visitor is still iterating the child list
-            mToRemove.push_back(&node);
+            osg::Group* parent = node.getParent(0);
+            // prune nodes that would be empty after the removal
+            if (parent->getNumChildren() == 1 && parent->getDataVariance() == osg::Object::STATIC)
+                mToRemove.push_back(parent);
+            else
+                mToRemove.push_back(&node);
             traverse(node);
         }
 

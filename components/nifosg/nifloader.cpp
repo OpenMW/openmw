@@ -451,6 +451,22 @@ namespace NifOsg
                 transformNode->addCullCallback(new BillboardCallback);
             }
 
+            // Set a default DataVariance (used as hint by optimization routines).
+            switch (nifNode->recType)
+            {
+            case Nif::RC_NiTriShape:
+            case Nif::RC_NiAutoNormalParticles:
+            case Nif::RC_NiRotatingParticles:
+                // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
+                // No support for keyframe controllers (just crashes in the original engine).
+                transformNode->setDataVariance(osg::Object::STATIC);
+                break;
+            default:
+                // could have new children attached at any time, or added external keyframe controllers from .kf files
+                transformNode->setDataVariance(osg::Object::DYNAMIC);
+                break;
+            }
+
             transformNode->setName(nifNode->name);
 
             if (parentNode)
