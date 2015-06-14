@@ -46,6 +46,8 @@ struct LevelledListBase
 struct CreatureLevList: LevelledListBase
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "CreatureLevList"; }
 
     enum Flags
     {
@@ -64,6 +66,8 @@ struct CreatureLevList: LevelledListBase
 struct ItemLevList: LevelledListBase
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "ItemLevList"; }
 
     enum Flags
     {
