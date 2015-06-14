@@ -82,7 +82,7 @@ void OMW::Engine::executeLocalScripts()
     localScripts.setIgnore (MWWorld::Ptr());
 }
 
-double OMW::Engine::frame(float frametime)
+void OMW::Engine::frame(float frametime)
 {
     try
     {
@@ -101,16 +101,13 @@ double OMW::Engine::frame(float frametime)
         if (mUseSound)
             MWBase::Environment::get().getSoundManager()->update(frametime);
 
-        // GUI active? Most game processing will be paused, but scripts still run.
-        bool guiActive = MWBase::Environment::get().getWindowManager()->isGuiMode();
-        if (!guiActive)
-            mSimulationTime += frametime;
-
         // Main menu opened? Then scripts are also paused.
         bool paused = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu);
 
         // update game state
         MWBase::Environment::get().getStateManager()->update (frametime);
+
+        bool guiActive = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
         if (MWBase::Environment::get().getStateManager()->getState()==
@@ -193,7 +190,6 @@ double OMW::Engine::frame(float frametime)
     {
         std::cerr << "Error in framelistener: " << e.what() << std::endl;
     }
-    return mSimulationTime;
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
@@ -214,7 +210,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
   , mNewGame (false)
-  , mSimulationTime(0.0)
   , mCfgMgr(configurationManager)
 {
     Misc::Rng::init();
@@ -679,14 +674,24 @@ void OMW::Engine::go()
 
     // Start the main rendering loop
     osg::Timer frameTimer;
+    double simulationTime = 0.0;
     while (!mViewer->done() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
     {
         double dt = frameTimer.time_s();
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        double simulationTime = frame(dt);
-        mViewer->frame(simulationTime);
+        bool guiActive = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        if (!guiActive)
+            simulationTime += dt;
+
+        mViewer->advance(simulationTime);
+
+        frame(dt);
+
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
     }
 
     // Save user settings
