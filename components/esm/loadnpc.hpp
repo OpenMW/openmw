@@ -54,12 +54,12 @@ struct NPC
 
   enum Flags
     {
-      Female    = 0x0001,
-      Essential = 0x0002,
-      Respawn   = 0x0004,
-      Autocalc  = 0x0008,
-      Skeleton  = 0x0400, // Skeleton blood effect (white)
-      Metal     = 0x0800  // Metal blood effect (golden?)
+      Female        = 0x0001,
+      Essential     = 0x0002,
+      Respawn       = 0x0004,
+      Autocalc      = 0x0010,
+      Skeleton      = 0x0400, // Skeleton blood effect (white)
+      Metal         = 0x0800  // Metal blood effect (golden?)
     };
 
   enum NpcType
