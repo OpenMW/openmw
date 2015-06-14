@@ -14,6 +14,8 @@ class ESMWriter;
 struct Spell
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Spell"; }
 
     enum SpellType
     {

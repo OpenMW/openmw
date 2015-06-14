@@ -673,44 +673,32 @@ namespace MWMechanics
         return false;
     }
 
+    bool AiCombat::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
+    {
+        if (!mPathFinder.getPath().empty())
+        {
+            osg::Vec3f currPathTarget(PathFinder::MakeOsgVec3(mPathFinder.getPath().back()));
+            osg::Vec3f newPathTarget = PathFinder::MakeOsgVec3(dest);
+            float dist = (newPathTarget - currPathTarget).length();
+            float targetPosThreshold = (cell->isExterior()) ? 300.0f : 100.0f;
+            return dist > targetPosThreshold;
+        }
+        else
+        {
+            // necessarily construct a new path
+            return true;
+        }
+    }
+
     void AiCombat::buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
     {
-        osg::Vec3f newPathTarget = target.getRefData().getPosition().asVec3();
-
-        float dist;
-
-        if(!mPathFinder.getPath().empty())
-        {
-            ESM::Pathgrid::Point lastPt = mPathFinder.getPath().back();
-            osg::Vec3f currPathTarget(PathFinder::MakeOsgVec3(lastPt));
-            dist = (newPathTarget - currPathTarget).length();
-        }
-        else dist = 1e+38F; // necessarily construct a new path
-
-        float targetPosThreshold = (actor.getCell()->getCell()->isExterior())? 300.0f : 100.0f;
+        ESM::Pathgrid::Point newPathTarget = PathFinder::MakePathgridPoint(target.getRefData().getPosition());
 
         //construct new path only if target has moved away more than on [targetPosThreshold]
-        if(dist > targetPosThreshold)
+        if (doesPathNeedRecalc(newPathTarget, actor.getCell()->getCell()))
         {
-            ESM::Position pos = actor.getRefData().getPosition();
-
-            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(newPathTarget));
-
-            if(!mPathFinder.isPathConstructed())
-                mPathFinder.buildPath(start, dest, actor.getCell(), false);
-            else
-            {
-                PathFinder newPathFinder;
-                newPathFinder.buildPath(start, dest, actor.getCell(), false);
-
-                if(!mPathFinder.getPath().empty())
-                {
-                    newPathFinder.syncStart(mPathFinder.getPath());
-                    mPathFinder = newPathFinder;
-                }
-            }
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actor.getRefData().getPosition()));
+            mPathFinder.buildSyncedPath(start, newPathTarget, actor.getCell(), false);
         }
     }
 

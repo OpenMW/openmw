@@ -51,6 +51,9 @@ namespace MWMechanics
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
+        protected:
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
+
         private:
 
             int mTargetActorId;

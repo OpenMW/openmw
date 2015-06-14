@@ -648,7 +648,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
 
     if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
-        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
+        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
         {
             messages.push_back (std::make_pair (id, npc.mId + " mNpdtType or flags mismatch!")); //should not happend?
             return;

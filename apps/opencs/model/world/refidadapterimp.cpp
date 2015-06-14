@@ -37,10 +37,18 @@ void CSMWorld::PotionRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     Record<ESM::Potion>& record = static_cast<Record<ESM::Potion>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Potion)));
 
+    ESM::Potion potion = record.get();
+
     if (column==mAutoCalc)
-        record.get().mData.mAutoCalc = value.toInt();
+        potion.mData.mAutoCalc = value.toInt();
     else
+    {
         InventoryRefIdAdapter<ESM::Potion>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(potion);
 }
 
 
@@ -71,12 +79,19 @@ void CSMWorld::ApparatusRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     Record<ESM::Apparatus>& record = static_cast<Record<ESM::Apparatus>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Apparatus)));
 
+    ESM::Apparatus apparatus = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        apparatus.mData.mType = value.toInt();
     else if (column==mQuality)
-        record.get().mData.mQuality = value.toFloat();
+        apparatus.mData.mQuality = value.toFloat();
     else
+    {
         InventoryRefIdAdapter<ESM::Apparatus>::setData (column, data, index, value);
+
+        return;
+    }
+    record.setModified(apparatus);
 }
 
 
@@ -114,14 +129,22 @@ void CSMWorld::ArmorRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
     Record<ESM::Armor>& record = static_cast<Record<ESM::Armor>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Armor)));
 
+    ESM::Armor armor = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        armor.mData.mType = value.toInt();
     else if (column==mHealth)
-        record.get().mData.mHealth = value.toInt();
+        armor.mData.mHealth = value.toInt();
     else if (column==mArmor)
-        record.get().mData.mArmor = value.toInt();
+        armor.mData.mArmor = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Armor>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(armor);
 }
 
 CSMWorld::BookRefIdAdapter::BookRefIdAdapter (const EnchantableColumns& columns,
@@ -151,12 +174,20 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Book>& record = static_cast<Record<ESM::Book>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Book)));
 
+    ESM::Book book = record.get();
+
     if (column==mScroll)
-        record.get().mData.mIsScroll = value.toInt();
+        book.mData.mIsScroll = value.toInt();
     else if (column==mSkill)
-        record.get().mData.mSkillID = value.toInt();
+        book.mData.mSkillID = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Book>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(book);
 }
 
 CSMWorld::ClothingRefIdAdapter::ClothingRefIdAdapter (const EnchantableColumns& columns,
@@ -186,10 +217,18 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     Record<ESM::Clothing>& record = static_cast<Record<ESM::Clothing>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Clothing)));
 
+    ESM::Clothing clothing = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        clothing.mData.mType = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Clothing>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(clothing);
 }
 
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
@@ -226,24 +265,32 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
+    ESM::Container container = record.get();
+
     if (column==mWeight)
-        record.get().mWeight = value.toFloat();
+        container.mWeight = value.toFloat();
     else if (column==mOrganic)
     {
         if (value.toInt())
-            record.get().mFlags |= ESM::Container::Organic;
+            container.mFlags |= ESM::Container::Organic;
         else
-            record.get().mFlags &= ~ESM::Container::Organic;
+            container.mFlags &= ~ESM::Container::Organic;
     }
     else if (column==mRespawn)
     {
         if (value.toInt())
-            record.get().mFlags |= ESM::Container::Respawn;
+            container.mFlags |= ESM::Container::Respawn;
         else
-            record.get().mFlags &= ~ESM::Container::Respawn;
+            container.mFlags &= ~ESM::Container::Respawn;
     }
     else
+    {
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(container);
 }
 
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
@@ -303,20 +350,22 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     Record<ESM::Creature>& record = static_cast<Record<ESM::Creature>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
+    ESM::Creature creature = record.get();
+
     if (column==mColumns.mType)
-        record.get().mData.mType = value.toInt();
+        creature.mData.mType = value.toInt();
     else if (column==mColumns.mSoul)
-        record.get().mData.mSoul = value.toInt();
+        creature.mData.mSoul = value.toInt();
     else if (column==mColumns.mScale)
-        record.get().mScale = value.toFloat();
+        creature.mScale = value.toFloat();
     else if (column==mColumns.mOriginal)
-        record.get().mOriginal = value.toString().toUtf8().constData();
+        creature.mOriginal = value.toString().toUtf8().constData();
     else if (column==mColumns.mCombat)
-        record.get().mData.mCombat = value.toInt();
+        creature.mData.mCombat = value.toInt();
     else if (column==mColumns.mMagic)
-        record.get().mData.mMagic = value.toInt();
+        creature.mData.mMagic = value.toInt();
     else if (column==mColumns.mStealth)
-        record.get().mData.mStealth = value.toInt();
+        creature.mData.mStealth = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -325,13 +374,19 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mFlags |= iter->second;
+                creature.mFlags |= iter->second;
             else
-                record.get().mFlags &= ~iter->second;
+                creature.mFlags &= ~iter->second;
         }
         else
+        {
             ActorRefIdAdapter<ESM::Creature>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified(creature);
 }
 
 CSMWorld::DoorRefIdAdapter::DoorRefIdAdapter (const NameColumns& columns,
@@ -361,12 +416,20 @@ void CSMWorld::DoorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Door>& record = static_cast<Record<ESM::Door>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Door)));
 
+    ESM::Door door = record.get();
+
     if (column==mOpenSound)
-        record.get().mOpenSound = value.toString().toUtf8().constData();
+        door.mOpenSound = value.toString().toUtf8().constData();
     else if (column==mCloseSound)
-        record.get().mCloseSound = value.toString().toUtf8().constData();
+        door.mCloseSound = value.toString().toUtf8().constData();
     else
+    {
         NameRefIdAdapter<ESM::Door>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(door);
 }
 
 CSMWorld::LightColumns::LightColumns (const InventoryColumns& columns)
@@ -409,14 +472,16 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
     Record<ESM::Light>& record = static_cast<Record<ESM::Light>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Light)));
 
+    ESM::Light light = record.get();
+
     if (column==mColumns.mTime)
-        record.get().mData.mTime = value.toInt();
+        light.mData.mTime = value.toInt();
     else if (column==mColumns.mRadius)
-        record.get().mData.mRadius = value.toInt();
+        light.mData.mRadius = value.toInt();
     else if (column==mColumns.mColor)
-        record.get().mData.mColor = value.toInt();
+        light.mData.mColor = value.toInt();
     else if (column==mColumns.mSound)
-        record.get().mSound = value.toString().toUtf8().constData();
+        light.mSound = value.toString().toUtf8().constData();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -425,13 +490,19 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mData.mFlags |= iter->second;
+                light.mData.mFlags |= iter->second;
             else
-                record.get().mData.mFlags &= ~iter->second;
+                light.mData.mFlags &= ~iter->second;
         }
         else
+        {
             InventoryRefIdAdapter<ESM::Light>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified (light);
 }
 
 CSMWorld::MiscRefIdAdapter::MiscRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *key)
@@ -456,10 +527,18 @@ void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Miscellaneous>& record = static_cast<Record<ESM::Miscellaneous>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Miscellaneous)));
 
+    ESM::Miscellaneous misc = record.get();
+
     if (column==mKey)
-        record.get().mData.mIsKey = value.toInt();
+        misc.mData.mIsKey = value.toInt();
     else
+    {
         InventoryRefIdAdapter<ESM::Miscellaneous>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(misc);
 }
 
 CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
@@ -525,16 +604,18 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
     Record<ESM::NPC>& record = static_cast<Record<ESM::NPC>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
+    ESM::NPC npc = record.get();
+
     if (column==mColumns.mRace)
-        record.get().mRace = value.toString().toUtf8().constData();
+        npc.mRace = value.toString().toUtf8().constData();
     else if (column==mColumns.mClass)
-        record.get().mClass = value.toString().toUtf8().constData();
+        npc.mClass = value.toString().toUtf8().constData();
     else if (column==mColumns.mFaction)
-        record.get().mFaction = value.toString().toUtf8().constData();
+        npc.mFaction = value.toString().toUtf8().constData();
     else if (column==mColumns.mHair)
-        record.get().mHair = value.toString().toUtf8().constData();
+        npc.mHair = value.toString().toUtf8().constData();
     else if (column==mColumns.mHead)
-        record.get().mHead = value.toString().toUtf8().constData();
+        npc.mHead = value.toString().toUtf8().constData();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -543,13 +624,23 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mFlags |= iter->second;
+                npc.mFlags |= iter->second;
             else
-                record.get().mFlags &= ~iter->second;
+                npc.mFlags &= ~iter->second;
+
+            if (iter->second == ESM::NPC::Autocalc)
+                npc.mNpdtType = (value.toInt() != 0) ? ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS
+                                                     : ESM::NPC::NPC_DEFAULT;
         }
         else
+        {
             ActorRefIdAdapter<ESM::NPC>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified (npc);
 }
 
 CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter ()
