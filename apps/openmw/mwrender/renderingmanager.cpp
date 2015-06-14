@@ -432,7 +432,7 @@ namespace MWRender
 
         mRootNode->addChild(rttCamera);
 
-        mViewer->frame();
+        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
 
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);

@@ -259,7 +259,7 @@ namespace MWGui
             MWBase::Environment::get().getInputManager()->update(0, true, true);
 
             //osg::Timer timer;
-            mViewer->frame();
+            mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
             //std::cout << "frame took " << timer.time_m() << std::endl;
 
             //if (mViewer->getIncrementalCompileOperation())

@@ -851,7 +851,7 @@ namespace MWGui
                 mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-                mViewer->frame();
+                mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
             }
         }
     }
@@ -1744,7 +1744,7 @@ namespace MWGui
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-            mViewer->frame();
+            mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
         }
         mVideoWidget->stop();
 
