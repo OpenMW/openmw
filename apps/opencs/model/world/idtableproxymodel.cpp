@@ -65,6 +65,9 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModel
 
 void CSMWorld::IdTableProxyModel::refreshFilter()
 {
-    updateColumnMap();
-    invalidateFilter();
+    if (mFilter)
+    {
+        updateColumnMap();
+        invalidateFilter();
+    }
 }
