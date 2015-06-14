@@ -622,7 +622,7 @@ namespace NifOsg
             }
         }
 
-        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
+        static void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -1324,7 +1324,7 @@ namespace NifOsg
                     mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                     if (!matprop->controller.empty())
-                        handleMaterialControllers(matprop, node, composite, animflags);
+                        handleMaterialControllers(matprop, composite, animflags);
 
                     break;
                 }
