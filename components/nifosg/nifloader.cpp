@@ -525,19 +525,19 @@ namespace NifOsg
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 if (triShape->skin.empty())
-                    handleTriShape(triShape, transformNode, boundTextures, animflags);
+                    handleTriShape(triShape, transformNode, composite, boundTextures, animflags);
                 else
-                    handleSkinnedTriShape(triShape, transformNode, boundTextures, animflags);
+                    handleSkinnedTriShape(triShape, transformNode, composite, boundTextures, animflags);
 
                 if (!nifNode->controller.empty())
                     handleMeshControllers(nifNode, composite, boundTextures, animflags);
             }
 
+            if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
+                handleParticleSystem(nifNode, transformNode, composite, animflags, particleflags, rootNode);
+
             if (composite->getNumControllers() > 0)
                 transformNode->addUpdateCallback(composite);
-
-            if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
-                handleParticleSystem(nifNode, transformNode, animflags, particleflags, rootNode);
 
             if (!nifNode->controller.empty())
                 handleNodeControllers(nifNode, transformNode, animflags);
@@ -606,9 +606,8 @@ namespace NifOsg
             }
         }
 
-        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, int animflags)
+        static void handleMaterialControllers(const Nif::Property *materialProperty, osg::Node* node, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
-            osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -630,8 +629,6 @@ namespace NifOsg
                 else
                     std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
             }
-            if (composite->getNumControllers() > 0)
-                node->addUpdateCallback(composite);
         }
 
         static void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
@@ -789,7 +786,7 @@ namespace NifOsg
             return emitter;
         }
 
-        static void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, int animflags, int particleflags, osg::Node* rootNode)
+        static void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, int particleflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
@@ -863,10 +860,10 @@ namespace NifOsg
 
             std::vector<const Nif::Property*> materialProps;
             collectMaterialProperties(nifNode, materialProps);
-            applyMaterialProperties(geode, materialProps, true, animflags);
+            applyMaterialProperties(parentNode, materialProps, composite, true, animflags);
 
             // Particles don't have normals, so can't be diffuse lit.
-            osg::Material* mat = static_cast<osg::Material*>(geode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
+            osg::Material* mat = static_cast<osg::Material*>(parentNode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
             if (mat)
             {
                 osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
@@ -891,7 +888,7 @@ namespace NifOsg
             }
         }
 
-        static void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Geode* parentGeode, const std::map<int, int>& boundTextures, int animflags)
+        static void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -928,10 +925,10 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> materialProps;
             collectMaterialProperties(triShape, materialProps);
-            applyMaterialProperties(parentGeode, materialProps, !data->colors.empty(), animflags);
+            applyMaterialProperties(parentNode, materialProps, composite, !data->colors.empty(), animflags);
         }
 
-        static void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, const std::map<int, int>& boundTextures, int animflags)
+        static void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geometry> geometry;
             if(!triShape->controller.empty())
@@ -955,7 +952,7 @@ namespace NifOsg
                 geometry = new osg::Geometry;
 
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
+            triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
             geode->addDrawable(geometry);
 
@@ -1029,12 +1026,13 @@ namespace NifOsg
             return morphGeom;
         }
 
-        static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, const std::map<int, int>& boundTextures, int animflags)
+        static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+                                          const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
 
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-            triShapeToGeometry(triShape, geometry, geode, boundTextures, animflags);
+            triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
@@ -1275,7 +1273,7 @@ namespace NifOsg
             }
         }
 
-        static void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
+        static void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -1310,7 +1308,7 @@ namespace NifOsg
                     mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
 
                     if (!matprop->controller.empty())
-                        handleMaterialControllers(matprop, node, animflags);
+                        handleMaterialControllers(matprop, node, composite, animflags);
 
                     break;
                 }
