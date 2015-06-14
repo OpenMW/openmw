@@ -30,9 +30,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
+    const ESM::Cell *cell = actor.getCell()->getCell();
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const ESM::Cell *cell = actor.getCell()->getCell();
         Movement &movement = actor.getClass().getMovementSettings(actor);
 
         //Ensure pursuer doesn't leave loaded cells
@@ -67,8 +67,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //***********************
     if(mTimer > 0.25)
     {
-        if(distance(mPrevDest, dest) > 10) { //Only rebuild path if it's moved
-            mPathFinder.buildPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
+        if (doesPathNeedRecalc(dest, cell)) { //Only rebuild path if it's moved
+            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
             mPrevDest = dest;
         }
 
@@ -122,4 +122,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
 
     return false;
+}
+
+bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
+{
+    return distance(mPrevDest, dest) > 10;
 }

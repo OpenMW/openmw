@@ -51,64 +51,31 @@ namespace MWMechanics
 
     bool AiTravel::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
     {
-        MWBase::World *world = MWBase::Environment::get().getWorld();
         ESM::Position pos = actor.getRefData().getPosition();
-        Movement &movement = actor.getClass().getMovementSettings(actor);
-        const ESM::Cell *cell = actor.getCell()->getCell();
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
-
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
-
-        MWWorld::Ptr player = world->getPlayerPtr();
-        if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
-        {
-            int sideX = PathFinder::sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) >
-               sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
-        if(cell->mData.mY != player.getCell()->getCell()->mData.mY)
-        {
-            int sideY = PathFinder::sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) >
-               sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
 
         if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(pos.pos)))
             return false;
 
+        if (pathTo(actor, ESM::Pathgrid::Point(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ)), duration))
+        {
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+            return true;
+        }
+        return false;
+    }
+
+    bool AiTravel::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
+    {
         bool cellChange = cell->mData.mX != mCellX || cell->mData.mY != mCellY;
-        if(!mPathFinder.isPathConstructed() || cellChange)
+        if (!mPathFinder.isPathConstructed() || cellChange)
         {
             mCellX = cell->mData.mX;
             mCellY = cell->mData.mY;
-
-            ESM::Pathgrid::Point dest(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ));
-
-            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-            mPathFinder.buildPath(start, dest, actor.getCell(), true);
-        }
-
-        if(mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
-        {
-            movement.mPosition[1] = 0;
             return true;
         }
-
-        zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
-        movement.mPosition[1] = 1;
-
         return false;
     }
 
