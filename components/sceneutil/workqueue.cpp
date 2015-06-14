@@ -17,8 +17,10 @@ void WorkTicket::waitTillDone()
 
 void WorkTicket::signalDone()
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-    mDone.exchange(1);
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        mDone.exchange(1);
+    }
     mCondition.broadcast();
 }
 
