@@ -560,7 +560,7 @@ namespace MWWorld
         }
         catch (std::exception& e)
         {
-            std::cerr << "error during rendering: " << e.what() << std::endl;
+            std::cerr << "error during rendering '" << ptr.getCellRef().getRefId() << "': " << e.what() << std::endl;
         }
     }
 
