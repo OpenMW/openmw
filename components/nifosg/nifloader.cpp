@@ -57,79 +57,6 @@ namespace
         }
     }
 
-    osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
-    {
-        switch(mode)
-        {
-        case 0: return osg::BlendFunc::ONE;
-        case 1: return osg::BlendFunc::ZERO;
-        case 2: return osg::BlendFunc::SRC_COLOR;
-        case 3: return osg::BlendFunc::ONE_MINUS_SRC_COLOR;
-        case 4: return osg::BlendFunc::DST_COLOR;
-        case 5: return osg::BlendFunc::ONE_MINUS_DST_COLOR;
-        case 6: return osg::BlendFunc::SRC_ALPHA;
-        case 7: return osg::BlendFunc::ONE_MINUS_SRC_ALPHA;
-        case 8: return osg::BlendFunc::DST_ALPHA;
-        case 9: return osg::BlendFunc::ONE_MINUS_DST_ALPHA;
-        case 10: return osg::BlendFunc::SRC_ALPHA_SATURATE;
-        default:
-            std::cerr<< "Unexpected blend mode: "<< mode << std::endl;
-            return osg::BlendFunc::SRC_ALPHA;
-        }
-    }
-
-    osg::AlphaFunc::ComparisonFunction getTestMode(int mode)
-    {
-        switch (mode)
-        {
-        case 0: return osg::AlphaFunc::ALWAYS;
-        case 1: return osg::AlphaFunc::LESS;
-        case 2: return osg::AlphaFunc::EQUAL;
-        case 3: return osg::AlphaFunc::LEQUAL;
-        case 4: return osg::AlphaFunc::GREATER;
-        case 5: return osg::AlphaFunc::NOTEQUAL;
-        case 6: return osg::AlphaFunc::GEQUAL;
-        case 7: return osg::AlphaFunc::NEVER;
-        default:
-            std::cerr << "Unexpected blend mode: " << mode << std::endl;
-            return osg::AlphaFunc::LEQUAL;
-        }
-    }
-
-    osg::Stencil::Function getStencilFunction(int func)
-    {
-        switch (func)
-        {
-        case 0: return osg::Stencil::NEVER;
-        case 1: return osg::Stencil::LESS;
-        case 2: return osg::Stencil::EQUAL;
-        case 3: return osg::Stencil::LEQUAL;
-        case 4: return osg::Stencil::GREATER;
-        case 5: return osg::Stencil::NOTEQUAL;
-        case 6: return osg::Stencil::GEQUAL;
-        case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
-        default:
-            std::cerr << "Unexpected stencil function: " << func << std::endl;
-            return osg::Stencil::NEVER;
-        }
-    }
-
-    osg::Stencil::Operation getStencilOperation(int op)
-    {
-        switch (op)
-        {
-        case 0: return osg::Stencil::KEEP;
-        case 1: return osg::Stencil::ZERO;
-        case 2: return osg::Stencil::REPLACE;
-        case 3: return osg::Stencil::INCR;
-        case 4: return osg::Stencil::DECR;
-        case 5: return osg::Stencil::INVERT;
-        default:
-            std::cerr << "Unexpected stencil operation: " << op << std::endl;
-            return osg::Stencil::KEEP;
-        }
-    }
-
     // Collect all properties affecting the given node that should be applied to an osg::Material.
     void collectMaterialProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
     {
@@ -341,6 +268,14 @@ namespace NifOsg
     class LoaderImpl
     {
     public:
+        /// @param filename used for warning messages.
+        LoaderImpl(const std::string& filename)
+            : mFilename(filename)
+        {
+
+        }
+        std::string mFilename;
+
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
             if(nif->numRoots() < 1)
@@ -396,7 +331,7 @@ namespace NifOsg
             }
         }
 
-        static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
+        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::TextureManager* textureManager)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -422,7 +357,7 @@ namespace NifOsg
             return created;
         }
 
-        static void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
@@ -432,7 +367,7 @@ namespace NifOsg
             }
         }
 
-        static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
+        void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
@@ -441,7 +376,7 @@ namespace NifOsg
             toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
-        static osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform(nifNode->trafo.toMatrix());
@@ -574,7 +509,7 @@ namespace NifOsg
             return transformNode;
         }
 
-        static void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int> &boundTextures, int animflags)
+        void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -594,7 +529,7 @@ namespace NifOsg
             }
         }
 
-        static void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
+        void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -622,7 +557,7 @@ namespace NifOsg
             }
         }
 
-        static void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
+        void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -643,11 +578,11 @@ namespace NifOsg
                     composite->addController(ctrl);
                 }
                 else
-                    std::cerr << "Unexpected material controller " << ctrl->recType << std::endl;
+                    std::cerr << "Unexpected material controller " << ctrl->recType << " in " << mFilename << std::endl;
             }
         }
 
-        static void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
+        void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -682,11 +617,11 @@ namespace NifOsg
                     composite->addController(callback);
                 }
                 else
-                    std::cerr << "Unexpected texture controller " << ctrl->recName << std::endl;
+                    std::cerr << "Unexpected texture controller " << ctrl->recName << " in " << mFilename << std::endl;
             }
         }
 
-        static void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
+        void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
             osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
             attachTo->addChild(program);
@@ -715,7 +650,7 @@ namespace NifOsg
                     // unused
                 }
                 else
-                    std::cerr << "Unhandled particle modifier " << affectors->recName << std::endl;
+                    std::cerr << "Unhandled particle modifier " << affectors->recName << " in " << mFilename << std::endl;
             }
             for (; !colliders.empty(); colliders = colliders->extra)
             {
@@ -728,7 +663,7 @@ namespace NifOsg
         }
 
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
-        static void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
+        void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
             const Nif::NiAutoNormalParticlesData *particledata = NULL;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
@@ -768,7 +703,7 @@ namespace NifOsg
             partsys->setInitialBound(box);
         }
 
-        static osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
+        osg::ref_ptr<Emitter> handleParticleEmitter(const Nif::NiParticleSystemController* partctrl)
         {
             std::vector<int> targets;
             if (partctrl->recType == Nif::RC_NiBSPArrayController)
@@ -802,7 +737,7 @@ namespace NifOsg
             return emitter;
         }
 
-        static void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, int particleflags, osg::Node* rootNode)
+        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, int particleflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
@@ -817,7 +752,7 @@ namespace NifOsg
             }
             if (!partctrl)
             {
-                std::cerr << "No particle controller found " << std::endl;
+                std::cerr << "No particle controller found in " << mFilename << std::endl;
                 return;
             }
 
@@ -853,7 +788,7 @@ namespace NifOsg
             rootNode->accept(find);
             if (!find.mFound)
             {
-                std::cerr << "can't find emitter node, wrong node order?" << std::endl;
+                std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
                 return;
             }
             osg::Group* emitterNode = find.mFound;
@@ -904,7 +839,7 @@ namespace NifOsg
             }
         }
 
-        static void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
+        void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -944,7 +879,7 @@ namespace NifOsg
             applyMaterialProperties(parentNode, materialProps, composite, !data->colors.empty(), animflags);
         }
 
-        static void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
+        void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geometry> geometry;
             if(!triShape->controller.empty())
@@ -987,7 +922,7 @@ namespace NifOsg
                 parentNode->addChild(geode);
         }
 
-        static osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
+        osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
         {
             osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
             morphGeom->setMethod(osgAnimation::MorphGeometry::RELATIVE);
@@ -1042,7 +977,7 @@ namespace NifOsg
             return morphGeom;
         }
 
-        static void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+        void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::map<int, int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
@@ -1094,8 +1029,80 @@ namespace NifOsg
             parentNode->addChild(frameswitch);
         }
 
+        osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
+        {
+            switch(mode)
+            {
+            case 0: return osg::BlendFunc::ONE;
+            case 1: return osg::BlendFunc::ZERO;
+            case 2: return osg::BlendFunc::SRC_COLOR;
+            case 3: return osg::BlendFunc::ONE_MINUS_SRC_COLOR;
+            case 4: return osg::BlendFunc::DST_COLOR;
+            case 5: return osg::BlendFunc::ONE_MINUS_DST_COLOR;
+            case 6: return osg::BlendFunc::SRC_ALPHA;
+            case 7: return osg::BlendFunc::ONE_MINUS_SRC_ALPHA;
+            case 8: return osg::BlendFunc::DST_ALPHA;
+            case 9: return osg::BlendFunc::ONE_MINUS_DST_ALPHA;
+            case 10: return osg::BlendFunc::SRC_ALPHA_SATURATE;
+            default:
+                std::cerr<< "Unexpected blend mode: "<< mode << " in " << mFilename << std::endl;
+                return osg::BlendFunc::SRC_ALPHA;
+            }
+        }
 
-        static void handleProperty(const Nif::Property *property,
+        osg::AlphaFunc::ComparisonFunction getTestMode(int mode)
+        {
+            switch (mode)
+            {
+            case 0: return osg::AlphaFunc::ALWAYS;
+            case 1: return osg::AlphaFunc::LESS;
+            case 2: return osg::AlphaFunc::EQUAL;
+            case 3: return osg::AlphaFunc::LEQUAL;
+            case 4: return osg::AlphaFunc::GREATER;
+            case 5: return osg::AlphaFunc::NOTEQUAL;
+            case 6: return osg::AlphaFunc::GEQUAL;
+            case 7: return osg::AlphaFunc::NEVER;
+            default:
+                std::cerr << "Unexpected blend mode: " << mode << " in " << mFilename << std::endl;
+                return osg::AlphaFunc::LEQUAL;
+            }
+        }
+
+        osg::Stencil::Function getStencilFunction(int func)
+        {
+            switch (func)
+            {
+            case 0: return osg::Stencil::NEVER;
+            case 1: return osg::Stencil::LESS;
+            case 2: return osg::Stencil::EQUAL;
+            case 3: return osg::Stencil::LEQUAL;
+            case 4: return osg::Stencil::GREATER;
+            case 5: return osg::Stencil::NOTEQUAL;
+            case 6: return osg::Stencil::GEQUAL;
+            case 7: return osg::Stencil::NEVER; // NifSkope says this is GL_ALWAYS, but in MW it's GL_NEVER
+            default:
+                std::cerr << "Unexpected stencil function: " << func << " in " << mFilename << std::endl;
+                return osg::Stencil::NEVER;
+            }
+        }
+
+        osg::Stencil::Operation getStencilOperation(int op)
+        {
+            switch (op)
+            {
+            case 0: return osg::Stencil::KEEP;
+            case 1: return osg::Stencil::ZERO;
+            case 2: return osg::Stencil::REPLACE;
+            case 3: return osg::Stencil::INCR;
+            case 4: return osg::Stencil::DECR;
+            case 5: return osg::Stencil::INVERT;
+            default:
+                std::cerr << "Unexpected stencil operation: " << op << " in " << mFilename << std::endl;
+                return osg::Stencil::KEEP;
+            }
+        }
+
+        void handleProperty(const Nif::Property *property,
                             osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
         {
             switch (property->recType)
@@ -1207,20 +1214,20 @@ namespace NifOsg
                                 && i != Nif::NiTexturingProperty::DarkTexture
                                 && i != Nif::NiTexturingProperty::DetailTexture)
                         {
-                            std::cerr << "Warning: unhandled texture stage " << i << std::endl;
+                            std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
                             continue;
                         }
 
                         const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
                         if(tex.texture.empty())
                         {
-                            std::cerr << "Warning: texture layer " << i << " is in use but empty " << std::endl;
+                            std::cerr << "Warning: texture layer " << i << " is in use but empty in " << mFilename << std::endl;
                             continue;
                         }
                         const Nif::NiSourceTexture *st = tex.texture.getPtr();
                         if (!st->external)
                         {
-                            std::cerr << "Warning: unhandled internal texture " << std::endl;
+                            std::cerr << "Warning: unhandled internal texture in " << mFilename << std::endl;
                             continue;
                         }
 
@@ -1284,12 +1291,12 @@ namespace NifOsg
                 break;
             }
             default:
-                std::cerr << "Unhandled " << property->recName << std::endl;
+                std::cerr << "Unhandled " << property->recName << " in " << mFilename << std::endl;
                 break;
             }
         }
 
-        static void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
+        void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -1359,12 +1366,14 @@ namespace NifOsg
 
     osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager)
     {
-        return LoaderImpl::load(file, textureManager);
+        LoaderImpl impl(file->getFilename());
+        return impl.load(file, textureManager);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)
     {
-        LoaderImpl::loadKf(kf, target);
+        LoaderImpl impl(kf->getFilename());
+        impl.loadKf(kf, target);
     }
 
 }
