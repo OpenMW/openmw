@@ -195,6 +195,9 @@ bool Config::GameSettings::isOrderedLine(const QString& line) const
 //
 // - If there is no corresponding line in file, add at the end
 //
+// - Removed content items are saved as comments if the item had any comments.
+//   Content items prepended with '##' are considered previously removed.
+//
 bool Config::GameSettings::writeFileWithComments(QFile &file)
 {
     QTextStream stream(&file);
@@ -227,7 +230,8 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     //   v              |                                                |
     // blank or comment line, save in temp buffer <--------+             |
     //        |                |                           |             |
-    //        v                +------- comment line ------+             |
+    //        |                +------- comment line ------+             |
+    //        v                    (special processing '##')             |
     //  "ordered" line                                                   |
     //        |                                                          |
     //        v                                                          |
@@ -263,7 +267,20 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             // comment line, save in temp buffer
             if (comments.empty())
                 commentStart = iter;
-            comments.push_back(*iter);
+
+            // special removed content processing
+            if ((*iter).contains(QRegExp("^##content\\s*=")))
+            {
+                if (!comments.empty())
+                {
+                    commentsMap[*iter] = comments;
+                    comments.clear();
+                    commentStart = fileCopy.end();
+                }
+            }
+            else
+                comments.push_back(*iter);
+
             *iter = QString(); // assume to be deleted later
         }
         else
@@ -359,15 +376,41 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             std::map<QString, std::vector<QString> >::const_iterator i =
                 commentsMap.find(settingRegex.cap(1)+"="+settingRegex.cap(2));
 
+            // check if previous removed content item with comments
+            if (i == commentsMap.end())
+                i = commentsMap.find("##"+settingRegex.cap(1)+"="+settingRegex.cap(2));
+
             if (i != commentsMap.end())
             {
                 std::vector<QString> cLines = i->second;
                 for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
                     stream << *ci << "\n";
+
+                commentsMap.erase(i);
             }
         }
 
         stream << settingLine << "\n";
+    }
+
+    // flush any removed settings
+    if (!commentsMap.empty())
+    {
+        std::map<QString, std::vector<QString> >::const_iterator i = commentsMap.begin();
+        for (; i != commentsMap.end(); ++i)
+        {
+            if (i->first.contains(QRegExp("^\\s*content\\s*=")))
+            {
+                std::vector<QString> cLines = i->second;
+                for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
+                    stream << *ci << "\n";
+
+                // mark the content line entry for future preocessing
+                stream << "##" << i->first << "\n";
+
+                //commentsMap.erase(i);
+            }
+        }
     }
 
     // flush any end comments
