@@ -100,6 +100,10 @@ namespace CSVRender
 
         QTimer mTimer;
 
+    private:
+        osg::Timer mFrameTimer;
+        double mSimulationTime;
+
     public slots:
         void update();
     };

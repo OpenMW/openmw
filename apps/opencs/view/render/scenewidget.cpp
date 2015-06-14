@@ -95,6 +95,7 @@ void RenderWidget::setVisibilityMask(int mask)
 // --------------------------------------------------
 
 CompositeViewer::CompositeViewer()
+    : mSimulationTime(0.0)
 {
 #if QT_VERSION >= 0x050000
     // Qt5 is currently crashing and reporting "Cannot make QOpenGLContext current in a different thread" when the viewer is run multi-threaded, this is regression from Qt4
@@ -124,7 +125,9 @@ CompositeViewer &CompositeViewer::get()
 
 void CompositeViewer::update()
 {
-    frame();
+    mSimulationTime += mFrameTimer.time_s();
+    mFrameTimer.setStartTick();
+    frame(mSimulationTime);
 }
 
 // ---------------------------------------------------
