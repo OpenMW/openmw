@@ -393,7 +393,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     traits->red = 8;
     traits->green = 8;
     traits->blue = 8;
-    traits->alpha = 8;
+    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
     traits->depth = 24;
     traits->stencil = 8;
     traits->vsync = vsync;
