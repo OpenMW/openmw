@@ -414,12 +414,7 @@ namespace NifOsg
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
-            osg::ref_ptr<osg::MatrixTransform> transformNode = new osg::MatrixTransform(nifNode->trafo.toMatrix());
-
-            if (nifNode->recType == Nif::RC_NiBillboardNode)
-            {
-                transformNode->addCullCallback(new BillboardCallback);
-            }
+            osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
             // Set a default DataVariance (used as hint by optimization routines).
             switch (nifNode->recType)
@@ -429,21 +424,34 @@ namespace NifOsg
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
                 // No support for keyframe controllers (just crashes in the original engine).
-                transformNode->setDataVariance(osg::Object::STATIC);
+                node->setDataVariance(osg::Object::STATIC);
                 break;
             default:
                 // could have new children attached at any time, or added external keyframe controllers from .kf files
-                transformNode->setDataVariance(osg::Object::DYNAMIC);
+                node->setDataVariance(osg::Object::DYNAMIC);
                 break;
             }
 
-            transformNode->setName(nifNode->name);
+            if (nifNode->recType == Nif::RC_NiBillboardNode)
+            {
+                node->addCullCallback(new BillboardCallback);
+            }
+            else if (!rootNode && nifNode->controller.empty() && nifNode->trafo.isIdentity())
+            {
+                // The Root node can be created as a Group if no transformation is required.
+                // This takes advantage of the fact root nodes can't have additional controllers
+                // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
+                node = new osg::Group;
+                node->setDataVariance(osg::Object::STATIC);
+            }
+
+            node->setName(nifNode->name);
 
             if (parentNode)
-                parentNode->addChild(transformNode);
+                parentNode->addChild(node);
 
             if (!rootNode)
-                rootNode = transformNode;
+                rootNode = node;
 
             // UserData used for a variety of features:
             // - finding the correct emitter node for a particle system
@@ -451,7 +459,7 @@ namespace NifOsg
             // - finding a random child NiNode in NiBspArrayController
             // - storing the previous 3x3 rotation and scale values for when a KeyframeController wants to
             //   change only certain elements of the 4x4 transform
-            transformNode->getOrCreateUserDataContainer()->addUserObject(
+            node->getOrCreateUserDataContainer()->addUserObject(
                 new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->extra)
@@ -485,7 +493,7 @@ namespace NifOsg
             {
                 skipMeshes = true;
                 // Leave mask for UpdateVisitor enabled
-                transformNode->setNodeMask(0x1);
+                node->setNodeMask(0x1);
             }
 
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
@@ -500,39 +508,39 @@ namespace NifOsg
                     skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
 
                 // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
-                transformNode->setNodeMask(0x1);
+                node->setNodeMask(0x1);
             }
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, transformNode, composite, textureManager, boundTextures, animflags);
+            applyNodeProperties(nifNode, node, composite, textureManager, boundTextures, animflags);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 if (triShape->skin.empty())
-                    handleTriShape(triShape, transformNode, composite, boundTextures, animflags);
+                    handleTriShape(triShape, node, composite, boundTextures, animflags);
                 else
-                    handleSkinnedTriShape(triShape, transformNode, composite, boundTextures, animflags);
+                    handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
 
                 if (!nifNode->controller.empty())
                     handleMeshControllers(nifNode, composite, boundTextures, animflags);
             }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
-                handleParticleSystem(nifNode, transformNode, composite, animflags, particleflags, rootNode);
+                handleParticleSystem(nifNode, node, composite, animflags, particleflags, rootNode);
 
             if (composite->getNumControllers() > 0)
-                transformNode->addUpdateCallback(composite);
+                node->addUpdateCallback(composite);
 
 
             // Note: NiTriShapes are not allowed to have KeyframeControllers (the vanilla engine just crashes when there is one).
             // We can take advantage of this constraint for optimizations later.
-            if (!nifNode->controller.empty())
-                handleNodeControllers(nifNode, transformNode, animflags);
+            if (!nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
+                handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
 
             // Optimization pass
-            optimize(nifNode, transformNode, skipMeshes);
+            optimize(nifNode, node, skipMeshes);
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
@@ -542,12 +550,12 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        handleNode(children[i].getPtr(), transformNode, textureManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, textureManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
                     }
                 }
             }
 
-            return transformNode;
+            return node;
         }
 
         void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int> &boundTextures, int animflags)
