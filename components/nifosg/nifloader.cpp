@@ -394,7 +394,7 @@ namespace NifOsg
                         osg::Node* child = node->getChild(i);
                         if (i == node->getNumChildren()-1) // FIXME: some nicer way to determine where our actual Drawable resides...
                         {
-                            child->setUpdateCallback(node->getUpdateCallback());
+                            child->addUpdateCallback(node->getUpdateCallback());
                             child->setStateSet(node->getStateSet());
                             child->setName(node->getName());
                             // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
