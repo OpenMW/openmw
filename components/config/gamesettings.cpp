@@ -373,7 +373,7 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
 
         if (settingRegex.indexIn(settingLine) != -1)
         {
-            std::map<QString, std::vector<QString> >::const_iterator i =
+            std::map<QString, std::vector<QString> >::iterator i =
                 commentsMap.find(settingRegex.cap(1)+"="+settingRegex.cap(2));
 
             // check if previous removed content item with comments
