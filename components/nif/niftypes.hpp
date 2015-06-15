@@ -42,6 +42,15 @@ struct Matrix3
             for (int j=0;j<3;++j)
                 mValues[i][j] = (i==j) ? 1.f : 0.f;
     }
+
+    bool isIdentity() const
+    {
+        for (int i=0;i<3;++i)
+            for (int j=0;j<3;++j)
+                if ((i==j) != (mValues[i][j] == 1))
+                    return false;
+        return true;
+    }
 };
 
 struct Transformation
@@ -60,6 +69,12 @@ struct Transformation
                 transform(j,i) = rotation.mValues[i][j] * scale; // NB column/row major difference
 
         return transform;
+    }
+
+    bool isIdentity() const
+    {
+        return pos == osg::Vec3f(0,0,0)
+                && rotation.isIdentity() && scale == 1.f;
     }
 
     static const Transformation& getIdentity()

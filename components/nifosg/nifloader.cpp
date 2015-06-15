@@ -376,6 +376,32 @@ namespace NifOsg
             toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
+        void optimize (const Nif::Node* nifNode, osg::Group* node, bool skipMeshes)
+        {
+            // For nodes with an identity transform, remove the redundant Transform node
+            if (node->getDataVariance() == osg::Object::STATIC
+                    // For TriShapes, we can only collapse the node, but not completely remove it,
+                    // if the link to animated collision shapes is supposed to stay intact.
+                    && (nifNode->recType != Nif::RC_NiTriShape || !skipMeshes))
+            {
+                if (node->getNumParents() && nifNode->trafo.isIdentity())
+                {
+                    osg::Group* parent = node->getParent(0);
+                    osg::Node* child = node->getChild(0);
+                    child->setUpdateCallback(node->getUpdateCallback());
+                    child->setStateSet(node->getStateSet());
+                    child->setName(node->getName());
+                    // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
+                    child->setUserDataContainer(node->getUserDataContainer());
+                    parent->addChild(child);
+                    node->removeChild(child);
+                    parent->removeChild(node);
+                }
+            }
+            // For NiTriShapes *with* a valid transform, perhaps we could apply the transform to the vertices.
+            // Need to make sure that won't break transparency sorting. Check what the original engine is doing?
+        }
+
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
@@ -490,8 +516,14 @@ namespace NifOsg
             if (composite->getNumControllers() > 0)
                 transformNode->addUpdateCallback(composite);
 
+
+            // Note: NiTriShapes are not allowed to have KeyframeControllers (the vanilla engine just crashes when there is one).
+            // We can take advantage of this constraint for optimizations later.
             if (!nifNode->controller.empty())
                 handleNodeControllers(nifNode, transformNode, animflags);
+
+            // Optimization pass
+            optimize(nifNode, transformNode, skipMeshes);
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
