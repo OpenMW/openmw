@@ -387,14 +387,23 @@ namespace NifOsg
                 if (node->getNumParents() && nifNode->trafo.isIdentity())
                 {
                     osg::Group* parent = node->getParent(0);
-                    osg::Node* child = node->getChild(0);
-                    child->setUpdateCallback(node->getUpdateCallback());
-                    child->setStateSet(node->getStateSet());
-                    child->setName(node->getName());
-                    // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
-                    child->setUserDataContainer(node->getUserDataContainer());
-                    parent->addChild(child);
-                    node->removeChild(child);
+
+                     // can be multiple children in case of ParticleSystems, with the extra ParticleSystemUpdater node
+                    for (unsigned int i=0; i<node->getNumChildren(); ++i)
+                    {
+                        osg::Node* child = node->getChild(i);
+                        if (i == node->getNumChildren()-1) // FIXME: some nicer way to determine where our actual Drawable resides...
+                        {
+                            child->setUpdateCallback(node->getUpdateCallback());
+                            child->setStateSet(node->getStateSet());
+                            child->setName(node->getName());
+                            // make sure to copy the UserDataContainer with the record index, so that connections to an animated collision shape don't break
+                            child->setUserDataContainer(node->getUserDataContainer());
+                        }
+                        parent->addChild(child);
+                    }
+
+                    node->removeChildren(0, node->getNumChildren());
                     parent->removeChild(node);
                 }
             }
