@@ -85,7 +85,7 @@ namespace SceneUtil
 
         const std::vector<LightSourceTransform>& getLights() const;
 
-        typedef std::vector<LightSource*> LightList;
+        typedef std::vector<const LightSourceTransform*> LightList;
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList);
 

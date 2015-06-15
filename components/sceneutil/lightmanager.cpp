@@ -179,7 +179,7 @@ namespace SceneUtil
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
-            boost::hash_combine(hash, lightList[i]->getId());
+            boost::hash_combine(hash, lightList[i]->mLightSource->getId());
 
         LightStateSetMap::iterator found = mStateSetCache.find(hash);
         if (found != mStateSetCache.end())
@@ -189,7 +189,7 @@ namespace SceneUtil
 
             std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
-                lights.push_back(lightList[i]->getLight());
+                lights.push_back(lightList[i]->mLightSource->getLight());
 
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
 
@@ -237,6 +237,12 @@ namespace SceneUtil
         mId = sLightId++;
     }
 
+
+    bool sortLights (const LightManager::LightSourceTransform* left, const LightManager::LightSourceTransform* right)
+    {
+        return left->mViewBound.center().length2() < right->mViewBound.center().length2();
+    }
+
     void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
@@ -279,12 +285,12 @@ namespace SceneUtil
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
-            std::vector<LightSource*> lightList;
+            std::vector<const LightManager::LightSourceTransform*> lightList;
             for (unsigned int i=0; i<lights.size(); ++i)
             {
                 const LightManager::LightSourceTransform& l = lights[i];
                 if (l.mViewBound.intersects(nodeBound))
-                    lightList.push_back(l.mLightSource);
+                    lightList.push_back(&l);
             }
 
             if (lightList.empty())
@@ -297,12 +303,27 @@ namespace SceneUtil
 
             if (lightList.size() > maxLights)
             {
-                //std::cerr << "More than 8 lights!" << std::endl;
+                // remove lights culled by this camera
+                for (LightManager::LightList::iterator it = lightList.begin(); it != lightList.end();)
+                {
+                    osg::CullStack::CullingStack& stack = cv->getProjectionCullingStack();
 
-                // TODO: sort lights by certain criteria
+                    if (stack.back().isCulled(osg::BoundingSphere((*it)->mViewBound.center(), (*it)->mViewBound.radius()*2)))
+                    {
+                        it = lightList.erase(it);
+                        continue;
+                    }
+                    else
+                        ++it;
+                }
 
-                while (lightList.size() > maxLights)
-                    lightList.pop_back();
+                if (lightList.size() > maxLights)
+                {
+                    // sort by proximity to camera, then get rid of furthest away lights
+                    std::sort(lightList.begin(), lightList.end(), sortLights);
+                    while (lightList.size() > maxLights)
+                        lightList.pop_back();
+                }
             }
 
             osg::StateSet* stateset = mLightManager->getLightListStateSet(lightList);
