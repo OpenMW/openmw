@@ -651,6 +651,9 @@ namespace MWMechanics
         if (mAllowedNodes.empty())
             return;
 
+        if (actor.getClass().isPureWaterCreature(actor))
+            return;
+
         state.moveIn(new AiWanderStorage());
 
         int index = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
