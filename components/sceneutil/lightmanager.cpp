@@ -145,6 +145,10 @@ namespace SceneUtil
     {
         mLightsInViewSpace = false;
         mLights.clear();
+
+        // do an occasional cleanup for orphaned lights
+        if (mStateSetCache.size() > 5000)
+            mStateSetCache.clear();
     }
 
     void LightManager::addLight(LightSource* lightSource, osg::Matrix worldMat)
@@ -304,11 +308,14 @@ namespace SceneUtil
             if (lightList.size() > maxLights)
             {
                 // remove lights culled by this camera
-                for (LightManager::LightList::iterator it = lightList.begin(); it != lightList.end();)
+                for (LightManager::LightList::iterator it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights; )
                 {
-                    osg::CullStack::CullingStack& stack = cv->getProjectionCullingStack();
+                    osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
 
-                    if (stack.back().isCulled(osg::BoundingSphere((*it)->mViewBound.center(), (*it)->mViewBound.radius()*2)))
+                    osg::BoundingSphere bs = (*it)->mViewBound;
+                    bs._radius = bs._radius*2;
+                    osg::CullingSet& cullingSet = stack.front();
+                    if (cullingSet.isCulled(bs))
                     {
                         it = lightList.erase(it);
                         continue;
