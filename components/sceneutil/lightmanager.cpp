@@ -274,59 +274,44 @@ namespace SceneUtil
 
         if (lights.size())
         {
+            // we do the intersections in view space
+            osg::BoundingSphere nodeBound = node->getBound();
+            osg::Matrixf mat = *cv->getModelViewMatrix();
+            transformBoundingSphere(mat, nodeBound);
 
-            static std::map<osg::Node*, osg::ref_ptr<osg::StateSet> > statesets;
-            std::map<osg::Node*, osg::ref_ptr<osg::StateSet> >::iterator found = statesets.find(node);
-            osg::ref_ptr<osg::StateSet> stateset;
-            if (found != statesets.end())
+            std::vector<LightSource*> lightList;
+            for (unsigned int i=0; i<lights.size(); ++i)
             {
-                stateset = found->second;
-            }
-            else{
-
-                // we do the intersections in view space
-                osg::BoundingSphere nodeBound = node->getBound();
-                osg::Matrixf mat = *cv->getModelViewMatrix();
-                transformBoundingSphere(mat, nodeBound);
-
-                std::vector<LightSource*> lightList;
-                for (unsigned int i=0; i<lights.size(); ++i)
-                {
-                    const LightManager::LightSourceTransform& l = lights[i];
-                    if (l.mViewBound.intersects(nodeBound))
-                        lightList.push_back(l.mLightSource);
-                }
-
-                if (lightList.empty())
-                {
-                    statesets[node] = NULL;
-                    traverse(node, nv);
-                    return;
-                }
-
-                unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
-
-                if (lightList.size() > maxLights)
-                {
-                    //std::cerr << "More than 8 lights!" << std::endl;
-
-                    // TODO: sort lights by certain criteria
-
-                    while (lightList.size() > maxLights)
-                        lightList.pop_back();
-                }
-
-                stateset = mLightManager->getLightListStateSet(lightList);
-                statesets[node] = stateset;
+                const LightManager::LightSourceTransform& l = lights[i];
+                if (l.mViewBound.intersects(nodeBound))
+                    lightList.push_back(l.mLightSource);
             }
 
-            if (stateset)
-                cv->pushStateSet(stateset);
+            if (lightList.empty())
+            {
+                traverse(node, nv);
+                return;
+            }
+
+            unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
+
+            if (lightList.size() > maxLights)
+            {
+                //std::cerr << "More than 8 lights!" << std::endl;
+
+                // TODO: sort lights by certain criteria
+
+                while (lightList.size() > maxLights)
+                    lightList.pop_back();
+            }
+
+            osg::StateSet* stateset = mLightManager->getLightListStateSet(lightList);
+
+            cv->pushStateSet(stateset);
 
             traverse(node, nv);
 
-            if (stateset)
-                cv->popStateSet();
+            cv->popStateSet();
         }
         else
             traverse(node, nv);
