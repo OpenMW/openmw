@@ -20,18 +20,15 @@ namespace SceneUtil
         // The activation radius
         float mRadius;
 
+        int mId;
+
     public:
 
         META_Node(SceneUtil, SceneUtil::LightSource)
 
         LightSource();
 
-        LightSource(const LightSource& copy, const osg::CopyOp& copyop)
-            : osg::Node(copy, copyop)
-            , mLight(copy.mLight)
-            , mRadius(copy.mRadius)
-        {
-        }
+        LightSource(const LightSource& copy, const osg::CopyOp& copyop);
 
         float getRadius() const
         {
@@ -51,6 +48,11 @@ namespace SceneUtil
         void setLight(osg::Light* light)
         {
             mLight = light;
+        }
+
+        int getId()
+        {
+            return mId;
         }
     };
 
@@ -83,8 +85,7 @@ namespace SceneUtil
 
         const std::vector<LightSourceTransform>& getLights() const;
 
-        // Stores indices into the mLights vector
-        typedef std::vector<int> LightList;
+        typedef std::vector<LightSource*> LightList;
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList);
 

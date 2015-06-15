@@ -145,7 +145,6 @@ namespace SceneUtil
     {
         mLightsInViewSpace = false;
         mLights.clear();
-        mStateSetCache.clear();
     }
 
     void LightManager::addLight(LightSource* lightSource, osg::Matrix worldMat)
@@ -180,7 +179,7 @@ namespace SceneUtil
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
-            boost::hash_combine(hash, lightList[i]);
+            boost::hash_combine(hash, lightList[i]->getId());
 
         LightStateSetMap::iterator found = mStateSetCache.find(hash);
         if (found != mStateSetCache.end())
@@ -190,10 +189,7 @@ namespace SceneUtil
 
             std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
-            {
-                const LightSourceTransform& l = mLights[lightList[i]];
-                lights.push_back(l.mLightSource->getLight());
-            }
+                lights.push_back(lightList[i]->getLight());
 
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
 
@@ -223,11 +219,22 @@ namespace SceneUtil
         return mStartLight;
     }
 
+    static int sLightId = 0;
+
     LightSource::LightSource()
         : mRadius(0.f)
     {
         setNodeMask(Mask_Lit);
         setUpdateCallback(new CollectLightCallback);
+        mId = sLightId++;
+    }
+
+    LightSource::LightSource(const LightSource &copy, const osg::CopyOp &copyop)
+        : osg::Node(copy, copyop)
+        , mLight(copy.mLight)
+        , mRadius(copy.mRadius)
+    {
+        mId = sLightId++;
     }
 
     void LightListCallback::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -282,12 +289,12 @@ namespace SceneUtil
                 osg::Matrixf mat = *cv->getModelViewMatrix();
                 transformBoundingSphere(mat, nodeBound);
 
-                std::vector<int> lightList;
+                std::vector<LightSource*> lightList;
                 for (unsigned int i=0; i<lights.size(); ++i)
                 {
                     const LightManager::LightSourceTransform& l = lights[i];
                     if (l.mViewBound.intersects(nodeBound))
-                        lightList.push_back(i);
+                        lightList.push_back(l.mLightSource);
                 }
 
                 if (lightList.empty())
