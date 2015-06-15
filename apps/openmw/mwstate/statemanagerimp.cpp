@@ -139,11 +139,28 @@ void MWState::StateManager::newGame (bool bypass)
     if (!bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+    try
+    {
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
-    MWBase::Environment::get().getWorld()->startNewGame (bypass);
+        MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
-    mState = State_Running;
+        mState = State_Running;
+    }
+    catch (std::exception& e)
+    {
+        std::stringstream error;
+        error << "Failed to start new game: " << e.what();
+
+        std::cerr << error.str() << std::endl;
+        cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+
+        std::vector<std::string> buttons;
+        buttons.push_back("#{sOk}");
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
+    }
 }
 
 void MWState::StateManager::endGame()
