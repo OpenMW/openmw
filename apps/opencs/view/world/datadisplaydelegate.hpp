@@ -30,7 +30,6 @@ namespace CSVWorld
     private:
 
         std::vector <std::pair <int, QPixmap> > mPixmaps;
-        QTextOption mTextAlignment;
         QSize mIconSize;
         int mIconLeftOffset;
         int mTextLeftOffset;

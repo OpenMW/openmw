@@ -15,8 +15,6 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
       mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
       mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
-    mTextAlignment.setAlignment (Qt::AlignLeft | Qt::AlignVCenter );
-
     buildPixmaps();
 
     QString value =
@@ -81,24 +79,28 @@ void CSVWorld::DataDisplayDelegate::paint (QPainter *painter, const QStyleOption
 
 void CSVWorld::DataDisplayDelegate::paintIcon (QPainter *painter, const QStyleOptionViewItem &option, int index) const
 {
-    //function-level statics
     QRect iconRect = option.rect;
     QRect textRect = iconRect;
 
-    const QString &text = mValues.at(index).second;
-
-    iconRect.setSize (mIconSize);
-    iconRect.translate(mIconLeftOffset, (option.rect.height() - iconRect.height())/2);
-
-    if (mDisplayMode == Mode_IconAndText )
+    iconRect.setLeft(iconRect.left() + mIconLeftOffset);
+    iconRect.setRight(option.rect.right());
+    if (mDisplayMode == Mode_IconAndText)
     {
-        textRect.translate (iconRect.width() + mTextLeftOffset, 0 );
-        painter->drawText (textRect, text, mTextAlignment);
-    }
-    else
-        iconRect.translate( (option.rect.width() - iconRect.width()) / 2, 0);
+        iconRect.setWidth(mIconSize.width());
+        textRect.setLeft(iconRect.right() + mTextLeftOffset);
+        textRect.setRight(option.rect.right());
 
-    painter->drawPixmap (iconRect, mPixmaps.at(index).second);
+        QString text = option.fontMetrics.elidedText(mValues.at(index).second, 
+                                                     option.textElideMode,
+                                                     textRect.width());
+        QApplication::style()->drawItemText(painter,
+                                            textRect,
+                                            Qt::AlignLeft | Qt::AlignVCenter,
+                                            option.palette,
+                                            true,
+                                            text);
+    }
+    QApplication::style()->drawItemPixmap(painter, iconRect, Qt::AlignCenter, mPixmaps.at(index).second);
 }
 
 void CSVWorld::DataDisplayDelegate::updateUserSetting (const QString &name,
