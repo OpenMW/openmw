@@ -347,7 +347,10 @@ namespace MWRender
             std::string bonename = Misc::StringUtils::lowerCase(it->first);
             NodeMap::const_iterator found = mNodeMap.find(bonename);
             if (found == mNodeMap.end())
-                throw std::runtime_error("addAnimSource: can't find bone " + bonename);
+            {
+                std::cerr << "addAnimSource: can't find bone '" + bonename << "' in " << model << " (referenced by " << kfname << ")" << std::endl;
+                continue;
+            }
 
             osg::Node* node = found->second;
 
