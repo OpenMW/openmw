@@ -12,7 +12,8 @@ CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
                                                    const QString &settingName,
                                                    QObject *parent)
     : EnumDelegate (values, dispatcher, document, parent), mDisplayMode (Mode_TextOnly),
-      mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
+      mIcons (icons), mIconSize (QSize(16, 16)),
+      mHorizontalMargin(QApplication::style()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1),
       mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
     buildPixmaps();
@@ -43,14 +44,34 @@ void CSVWorld::DataDisplayDelegate::setIconSize(const QSize& size)
     buildPixmaps();
 }
 
-void CSVWorld::DataDisplayDelegate::setIconLeftOffset(int offset)
-{
-    mIconLeftOffset = offset;
-}
-
 void CSVWorld::DataDisplayDelegate::setTextLeftOffset(int offset)
 {
     mTextLeftOffset = offset;
+}
+
+QSize CSVWorld::DataDisplayDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QSize size = EnumDelegate::sizeHint(option, index);
+    
+    int valueIndex = getValueIndex(index);
+    if (valueIndex != -1)
+    {
+        if (mDisplayMode == Mode_IconOnly)
+        {
+            size.setWidth(mIconSize.width() + 2 * mHorizontalMargin);
+        }
+        else if (mDisplayMode == Mode_IconAndText)
+        {
+            int valueWidth = option.fontMetrics.width(mValues.at(valueIndex).second);
+            size.setWidth(size.width() + mIconSize.width() + mTextLeftOffset);
+        }
+
+        if (mDisplayMode != Mode_TextOnly)
+        {
+            size.setHeight(qMax(size.height(), mIconSize.height()));
+        }
+    }
+    return size;
 }
 
 void CSVWorld::DataDisplayDelegate::paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
@@ -77,13 +98,13 @@ void CSVWorld::DataDisplayDelegate::paintIcon (QPainter *painter, const QStyleOp
     QRect iconRect = option.rect;
     QRect textRect = iconRect;
 
-    iconRect.setLeft(iconRect.left() + mIconLeftOffset);
-    iconRect.setRight(option.rect.right());
+    iconRect.setLeft(iconRect.left() + mHorizontalMargin);
+    iconRect.setRight(option.rect.right() - mHorizontalMargin);
     if (mDisplayMode == Mode_IconAndText)
     {
         iconRect.setWidth(mIconSize.width());
         textRect.setLeft(iconRect.right() + mTextLeftOffset);
-        textRect.setRight(option.rect.right());
+        textRect.setRight(option.rect.right() - mHorizontalMargin);
 
         QString text = option.fontMetrics.elidedText(mValues.at(index).second, 
                                                      option.textElideMode,
