@@ -8,6 +8,9 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <osgDB/SharedStateManager>
+#include <osgDB/Registry>
+
 #include <components/nifosg/nifloader.hpp>
 #include <components/nif/niffile.hpp>
 
@@ -102,6 +105,9 @@ namespace Resource
 
             NifOsg::Loader loader;
             osg::ref_ptr<osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+
+            osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
+            // TODO: run SharedStateManager::prune on unload
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
