@@ -204,20 +204,6 @@ public:
     }
 };
 
-class DisableCullingVisitor : public osg::NodeVisitor
-{
-public:
-    DisableCullingVisitor()
-        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-    {
-    }
-
-    void apply(osg::Geode &geode)
-    {
-        geode.setCullingActive(false);
-    }
-};
-
 class ModVertexAlphaVisitor : public osg::NodeVisitor
 {
 public:
@@ -483,6 +469,7 @@ private:
 
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
+    , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mMoonRed(false)
     , mIsStorm(false)
@@ -528,14 +515,18 @@ void SkyManager::create()
     mAtmosphereUpdater = new AtmosphereUpdater;
     mAtmosphereDay->addUpdateCallback(mAtmosphereUpdater);
 
+    mAtmosphereNightNode = new osg::PositionAttitudeTransform;
+    mAtmosphereNightNode->setNodeMask(0);
+    mRootNode->addChild(mAtmosphereNightNode);
+
+    osg::ref_ptr<osg::Node> atmosphereNight;
     if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
-        mAtmosphereNight = mSceneManager->createInstance("meshes/sky_night_02.nif", mRootNode);
+        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_02.nif", mAtmosphereNightNode);
     else
-        mAtmosphereNight = mSceneManager->createInstance("meshes/sky_night_01.nif", mRootNode);
-    mAtmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        atmosphereNight = mSceneManager->createInstance("meshes/sky_night_01.nif", mAtmosphereNightNode);
+    atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     ModVertexAlphaVisitor modStars(2);
-    mAtmosphereNight->accept(modStars);
-    mAtmosphereNight->setNodeMask(0);
+    atmosphereNight->accept(modStars);
 
     mSun.reset(new Sun(mRootNode, mSceneManager));
 
@@ -543,14 +534,16 @@ void SkyManager::create()
     mMasser.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Masser_Size")/100, Moon::Type_Masser));
     mSecunda.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Secunda_Size")/100, Moon::Type_Secunda));
 
-    mCloudNode = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mRootNode);
+    mCloudNode = new osg::PositionAttitudeTransform;
+    mRootNode->addChild(mCloudNode);
+    osg::ref_ptr<osg::Node> clouds = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
     ModVertexAlphaVisitor modClouds(1);
-    mCloudNode->accept(modClouds);
+    clouds->accept(modClouds);
 
     mCloudUpdater = new CloudUpdater;
-    mCloudNode->addUpdateCallback(mCloudUpdater);
+    clouds->addUpdateCallback(mCloudUpdater);
 
-    mCloudNode->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+    clouds->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
@@ -594,12 +587,18 @@ void SkyManager::updateRain(float dt)
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
-    //const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
 
-    //if (mIsStorm)
-    //    mCloudNode->setOrientation(Ogre::Vector3::UNIT_Y.getRotationTo(mStormDirection));
-    //else
-    //    mCloudNode->setOrientation(Ogre::Quaternion::IDENTITY);
+    if (mIsStorm)
+    {
+        osg::Quat quat;
+        quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
+
+        if (mParticleNode)
+            mParticleNode->setAttitude(quat);
+        mCloudNode->setAttitude(quat);
+    }
+    else
+        mCloudNode->setAttitude(osg::Quat());
 
     updateRain(duration);
 
@@ -611,6 +610,7 @@ void SkyManager::update(float duration)
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
+    //const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
     //mSecunda->setColour ( mMoonRed ? fallback->getFallbackColour("Moons_Script_Color") : ColourValue(1,1,1,1));
     //mMasser->setColour (ColourValue(1,1,1,1));
 
@@ -641,7 +641,9 @@ void SkyManager::update(float duration)
     }
 
     // rotate the stars by 360 degrees every 4 days
-    //mAtmosphereNight->roll(Degree(MWBase::Environment::get().getWorld()->getTimeScaleFactor()*duration*360 / (3600*96.f)));
+    mAtmosphereNightRoll += MWBase::Environment::get().getWorld()->getTimeScaleFactor()*duration*osg::DegreesToRadians(360.f) / (3600*96.f);
+    if (mAtmosphereNightNode->getNodeMask() != 0)
+        mAtmosphereNightNode->setAttitude(osg::Quat(mAtmosphereNightRoll, osg::Vec3f(0,0,1)));
 }
 
 void SkyManager::setEnabled(bool enabled)
@@ -678,15 +680,18 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
         if (mCurrentParticleEffect.empty())
         {
-            if (mParticleEffect)
-                mRootNode->removeChild(mParticleEffect);
+            if (mParticleNode)
+                mRootNode->removeChild(mParticleNode);
             mParticleEffect = NULL;
         }
         else
         {
-            mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mRootNode);
-            DisableCullingVisitor visitor;
-            mParticleEffect->accept(visitor);
+            if (!mParticleNode)
+            {
+                mParticleNode = new osg::PositionAttitudeTransform;
+                mRootNode->addChild(mParticleNode);
+            }
+            mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
@@ -757,7 +762,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         }
     }
 
-    //mAtmosphereNight->setNodeMask((weather.mNight && mEnabled) ? ~0 : 0);
+    mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);
 
 
     /*

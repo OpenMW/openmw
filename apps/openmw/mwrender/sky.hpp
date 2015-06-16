@@ -93,15 +93,17 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> mRootNode;
 
+        osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
 
-        osg::ref_ptr<osg::Node> mCloudNode;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
 
         osg::ref_ptr<CloudUpdater> mCloudUpdater;
 
         osg::ref_ptr<osg::Node> mAtmosphereDay;
 
-        osg::ref_ptr<osg::Node> mAtmosphereNight;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mAtmosphereNightNode;
+        float mAtmosphereNightRoll;
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
 
