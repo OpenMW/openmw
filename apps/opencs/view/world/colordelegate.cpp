@@ -15,10 +15,10 @@ void CSVWorld::ColorDelegate::paint(QPainter *painter,
                                     const QStyleOptionViewItem &option,
                                     const QModelIndex &index) const
 {
-    QRect coloredRect(qRound(option.rect.x() + option.rect.width() / 4.0),
-                      qRound(option.rect.y() + option.rect.height() / 4.0),
-                      qRound(option.rect.width() / 2.0),
-                      qRound(option.rect.height() / 2.0));
+    QRect coloredRect(option.rect.x() + qRound(option.rect.width() / 4.0),
+                      option.rect.y() + qRound(option.rect.height() / 4.0),
+                      option.rect.width() / 2,
+                      option.rect.height() / 2);
     painter->save();
     painter->fillRect(coloredRect, index.data().value<QColor>());
     painter->setPen(Qt::black);

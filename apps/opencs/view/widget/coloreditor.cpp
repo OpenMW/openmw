@@ -25,10 +25,10 @@ void CSVWidget::ColorEditor::paintEvent(QPaintEvent *event)
     QPushButton::paintEvent(event);
 
     QRect buttonRect = rect();
-    QRect coloredRect(qRound(buttonRect.x() + buttonRect.width() / 4.0),
-                      qRound(buttonRect.y() + buttonRect.height() / 4.0),
-                      qRound(buttonRect.width() / 2.0),
-                      qRound(buttonRect.height() / 2.0));
+    QRect coloredRect(buttonRect.x() + qRound(buttonRect.width() / 4.0),
+                      buttonRect.y() + qRound(buttonRect.height() / 4.0),
+                      buttonRect.width() / 2,
+                      buttonRect.height() / 2);
     QPainter painter(this);
     painter.fillRect(coloredRect, mColor);
     painter.setPen(Qt::black);
