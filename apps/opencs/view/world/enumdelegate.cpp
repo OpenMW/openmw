@@ -10,6 +10,24 @@
 
 #include "../../model/world/commands.hpp"
 
+int CSVWorld::EnumDelegate::getValueIndex(const QModelIndex &index, int role) const
+{
+    if (index.isValid() && index.data(role).isValid())
+    {
+        int value = index.data(role).toInt();
+
+        int size = static_cast<int>(mValues.size());
+        for (int i = 0; i < size; ++i)
+        {
+            if (value == mValues.at(i).first)
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
 void CSVWorld::EnumDelegate::setModelDataImp (QWidget *editor, QAbstractItemModel *model,
     const QModelIndex& index) const
 {
@@ -67,60 +85,43 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptio
 
 void CSVWorld::EnumDelegate::setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const
 {
-    if (QComboBox *comboBox = dynamic_cast<QComboBox *> (editor))
+    if (QComboBox *comboBox = dynamic_cast<QComboBox *>(editor))
     {
-        QVariant data = index.data (Qt::EditRole);
-
-        if (tryDisplay && !data.isValid())
+        int role = Qt::EditRole;
+        if (tryDisplay && !index.data(role).isValid())
         {
-            data = index.data (Qt::DisplayRole);
-            if (!data.isValid())
+            role = Qt::DisplayRole;
+            if (!index.data(role).isValid())
             {
                 return;
             }
         }
 
-        int value = data.toInt();
-
-        std::size_t size = mValues.size();
-
-        for (std::size_t i=0; i<size; ++i)
-            if (mValues[i].first==value)
-            {
-                comboBox->setCurrentIndex (i);
-                break;
-            }
+        int valueIndex = getValueIndex(index, role);
+        if (valueIndex != -1)
+        {
+            comboBox->setCurrentIndex(valueIndex);
+        }
     }
 }
 
 void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewItem& option,
     const QModelIndex& index) const
 {
-    if (index.data().isValid())
+    int valueIndex = getValueIndex(index);
+    if (valueIndex != -1)
     {
-        QStyleOptionViewItemV4 option2 (option);
-
-        int value = index.data().toInt();
-
-        for (std::vector<std::pair<int, QString> >::const_iterator iter (mValues.begin());
-            iter!=mValues.end(); ++iter)
-            if (iter->first==value)
-            {
-                option2.text = iter->second;
-
-                QApplication::style()->drawControl (QStyle::CE_ItemViewItem, &option2, painter);
-
-                break;
-            }
+        QStyleOptionViewItemV4 itemOption(option);
+        itemOption.text = mValues.at(valueIndex).second;
+        QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
     }
 }
 
 QSize CSVWorld::EnumDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    if (index.data().isValid())
+    int valueIndex = getValueIndex(index);
+    if (valueIndex != -1)
     {
-        int value = index.data().toInt();
-
         // Calculate the size hint as for a combobox.
         // So, the whole text is visible (isn't elided) when the editor is created
         QStyleOptionComboBox itemOption;
@@ -129,20 +130,11 @@ QSize CSVWorld::EnumDelegate::sizeHint(const QStyleOptionViewItem &option, const
         itemOption.rect = option.rect;
         itemOption.state = option.state;
 
-        std::vector<std::pair<int, QString> >::const_iterator current = mValues.begin();
-        std::vector<std::pair<int, QString> >::const_iterator end = mValues.end();
-        for (; current != end; ++current)
-        {
-            if (current->first == value)
-            {
-                QSize valueSize = QSize(itemOption.fontMetrics.width(current->second),
-                                        itemOption.fontMetrics.height());
-                itemOption.currentText = current->second;
-                return QApplication::style()->sizeFromContents(QStyle::CT_ComboBox, 
-                                                               &itemOption, 
-                                                               valueSize);
-            }
-        }
+        const QString &valueText = mValues.at(valueIndex).second;
+        QSize valueSize = QSize(itemOption.fontMetrics.width(valueText), itemOption.fontMetrics.height());
+
+        itemOption.currentText = valueText;
+        return QApplication::style()->sizeFromContents(QStyle::CT_ComboBox, &itemOption, valueSize);
     }
     return option.rect.size();
 }

@@ -19,6 +19,8 @@ namespace CSVWorld
 
             std::vector<std::pair<int, QString> > mValues;
 
+            int getValueIndex(const QModelIndex &index, int role = Qt::DisplayRole) const;
+
         private:
 
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,

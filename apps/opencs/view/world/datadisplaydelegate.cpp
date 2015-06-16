@@ -62,16 +62,11 @@ void CSVWorld::DataDisplayDelegate::paint (QPainter *painter, const QStyleOption
         EnumDelegate::paint(painter, option, index);
     else
     {
-        unsigned int i = 0;
-
-        for (; i < mValues.size(); ++i)
+        int valueIndex = getValueIndex(index);
+        if (valueIndex != -1)
         {
-            if (mValues.at(i).first == index.data().toInt())
-                break;
+            paintIcon(painter, option, valueIndex);
         }
-
-        if (i < mValues.size() )
-            paintIcon (painter, option, i);
     }
 
     painter->restore();
