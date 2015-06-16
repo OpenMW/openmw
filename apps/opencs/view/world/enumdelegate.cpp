@@ -115,6 +115,37 @@ void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewIte
     }
 }
 
+QSize CSVWorld::EnumDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    if (index.data().isValid())
+    {
+        int value = index.data().toInt();
+
+        // Calculate the size hint as for a combobox.
+        // So, the whole text is visible (isn't elided) when the editor is created
+        QStyleOptionComboBox itemOption;
+        itemOption.fontMetrics = option.fontMetrics;
+        itemOption.palette = option.palette;
+        itemOption.rect = option.rect;
+        itemOption.state = option.state;
+
+        std::vector<std::pair<int, QString> >::const_iterator current = mValues.begin();
+        std::vector<std::pair<int, QString> >::const_iterator end = mValues.end();
+        for (; current != end; ++current)
+        {
+            if (current->first == value)
+            {
+                QSize valueSize = QSize(itemOption.fontMetrics.width(current->second),
+                                        itemOption.fontMetrics.height());
+                itemOption.currentText = current->second;
+                return QApplication::style()->sizeFromContents(QStyle::CT_ComboBox, 
+                                                               &itemOption, 
+                                                               valueSize);
+            }
+        }
+    }
+    return option.rect.size();
+}
 
 CSVWorld::EnumDelegateFactory::EnumDelegateFactory() {}
 
