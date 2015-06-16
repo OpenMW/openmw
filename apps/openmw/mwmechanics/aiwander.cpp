@@ -641,6 +641,9 @@ namespace MWMechanics
         if (mAllowedNodes.empty())
             return;
 
+        if (actor.getClass().isPureWaterCreature(actor))
+            return;
+
         state.moveIn(new AiWanderStorage());
 
         int index = Misc::Rng::rollDice(mAllowedNodes.size());
@@ -659,6 +662,9 @@ namespace MWMechanics
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
+
+        // may have changed cell
+        mStoredAvailableNodes = false;
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)

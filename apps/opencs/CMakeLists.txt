@@ -41,7 +41,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage pathgridcheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck
     )
 
 
@@ -211,8 +211,15 @@ if (DESIRED_QT_VERSION MATCHES 4)
     ${QT_QTCORE_LIBRARY}
     ${QT_QTNETWORK_LIBRARY}
     ${QT_QTOPENGL_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
+    endif()
 else()
     qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
+    if (WIN32)
+        target_link_libraries(Qt5::WinMain)
+    endif()
 endif()
 
 if (WIN32)

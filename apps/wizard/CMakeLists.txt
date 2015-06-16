@@ -123,8 +123,15 @@ if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-wizard
     ${QT_QTGUI_LIBRARY}
     ${QT_QTCORE_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-wizard ${QT_QTMAIN_LIBRARY})
+    endif()
 else()
     qt5_use_modules(openmw-wizard Widgets Core)
+    if (WIN32)
+        target_link_libraries(Qt5::WinMain)
+    endif()
 endif()
 
 if (OPENMW_USE_UNSHIELD)

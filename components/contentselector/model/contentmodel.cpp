@@ -473,6 +473,13 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     sortFiles();
 }
 
+void ContentSelectorModel::ContentModel::clearFiles()
+{
+    beginRemoveRows(QModelIndex(), 0, mFiles.count()-1);
+    mFiles.clear();
+    endRemoveRows();
+}
+
 QStringList ContentSelectorModel::ContentModel::gameFiles() const
 {
     QStringList gameFiles;

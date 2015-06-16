@@ -27,6 +27,7 @@
 #include "startscriptcheck.hpp"
 #include "searchoperation.hpp"
 #include "pathgridcheck.hpp"
+#include "soundgencheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -98,6 +99,10 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                 mData.getRaces() ));
 
         mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids()));
+
+        mVerifierOperation->appendStage (new SoundGenCheckStage (mData.getSoundGens(),
+                                                                 mData.getSounds(),
+                                                                 mData.getReferenceables()));
 
         mVerifier.setOperation (mVerifierOperation);
     }

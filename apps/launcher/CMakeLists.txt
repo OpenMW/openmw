@@ -98,8 +98,14 @@ target_link_libraries(openmw-launcher
 
 if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-launcher ${QT_QTGUI_LIBRARY} ${QT_QTCORE_LIBRARY})
+    if(WIN32)
+        target_link_libraries(openmw-launcher ${QT_QTMAIN_LIBRARY})
+    endif(WIN32)
 else()
     qt5_use_modules(openmw-launcher Widgets Core)
+    if (WIN32)
+        target_link_libraries(Qt5::WinMain)
+    endif()
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
