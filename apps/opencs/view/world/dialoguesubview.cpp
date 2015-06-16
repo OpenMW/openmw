@@ -469,8 +469,7 @@ void CSVWorld::EditWidget::remake(int row)
                     mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
 
                 NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
-                // FIXME: does not work well when enum delegates are used
-                //table->resizeColumnsToContents();
+                table->resizeColumnsToContents();
 
                 if(mTable->index(row, i).data().type() == QVariant::UserType)
                 {
