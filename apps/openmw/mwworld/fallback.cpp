@@ -58,4 +58,5 @@ namespace MWWorld
             return osg::Vec4f(boost::lexical_cast<int>(ret[0])/255.f,boost::lexical_cast<int>(ret[1])/255.f,boost::lexical_cast<int>(ret[2])/255.f, 1.f);
         }
     }
+
 }

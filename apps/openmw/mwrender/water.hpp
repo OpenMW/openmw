@@ -21,8 +21,15 @@ namespace Resource
     class ResourceSystem;
 }
 
+namespace MWWorld
+{
+    class Fallback;
+}
+
 namespace MWRender
 {
+
+    class RippleSimulation;
 
     /// Water rendering
     class Water
@@ -34,6 +41,8 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
+        std::auto_ptr<RippleSimulation> mSimulation;
+
         bool mEnabled;
         bool mToggled;
         float mTop;
@@ -42,7 +51,7 @@ namespace MWRender
         void updateVisible();
 
     public:
-        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico);
+        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback);
         ~Water();
 
         void setEnabled(bool enabled);
@@ -51,15 +60,18 @@ namespace MWRender
 
         bool isUnderwater(const osg::Vec3f& pos) const;
 
-        /*
         /// adds an emitter, position will be tracked automatically using its scene node
         void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
         void removeEmitter (const MWWorld::Ptr& ptr);
         void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
-        */
+        void removeCell(const MWWorld::CellStore* store); ///< remove all emitters in this cell
+
+        void clearRipples();
 
         void changeCell(const MWWorld::CellStore* store);
         void setHeight(const float height);
+
+        void update(float dt);
 
     };
 

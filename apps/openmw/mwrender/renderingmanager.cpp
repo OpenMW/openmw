@@ -114,7 +114,7 @@ namespace MWRender
         bool mWireframe;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem)
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -136,7 +136,7 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
 
-        mWater.reset(new Water(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation()));
+        mWater.reset(new Water(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback));
 
         mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
                                                 new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
@@ -265,6 +265,8 @@ namespace MWRender
 
         if (store->getCell()->isExterior())
             mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+
+        mWater->removeCell(store);
     }
 
     void RenderingManager::setSkyEnabled(bool enabled)
@@ -330,6 +332,7 @@ namespace MWRender
     {
         mEffectManager->update(dt);
         mSky->update(dt);
+        mWater->update(dt);
         mCamera->update(dt, paused);
 
         osg::Vec3f focal, cameraPos;
@@ -352,6 +355,11 @@ namespace MWRender
             mPlayerAnimation->updatePtr(ptr);
 
         mCamera->attachTo(ptr);
+    }
+
+    void RenderingManager::removePlayer(const MWWorld::Ptr &player)
+    {
+        mWater->removeEmitter(player);
     }
 
     void RenderingManager::rotateObject(const MWWorld::Ptr &ptr, const osg::Quat& rot)
@@ -378,6 +386,7 @@ namespace MWRender
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
     {
         mObjects->removeObject(ptr);
+        mWater->removeEmitter(ptr);
     }
 
     void RenderingManager::setWaterEnabled(bool enabled)
@@ -579,7 +588,7 @@ namespace MWRender
     void RenderingManager::notifyWorldSpaceChanged()
     {
         mEffectManager->clear();
-        //mWater->clearRipples();
+        mWater->clearRipples();
     }
 
     void RenderingManager::clear()
@@ -613,6 +622,8 @@ namespace MWRender
         mPlayerNode->getUserDataContainer()->addUserObject(new PtrHolder(player));
 
         player.getRefData().setBaseNode(mPlayerNode);
+
+        mWater->addEmitter(player);
     }
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
@@ -621,8 +632,6 @@ namespace MWRender
 
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
-        //mWater->removeEmitter(ptr);
-        //mWater->addEmitter(ptr);
     }
 
     void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
@@ -641,6 +650,16 @@ namespace MWRender
                 mCamera->setAnimation(anim);
             }
         }
+    }
+
+    void RenderingManager::addWaterRippleEmitter(const MWWorld::Ptr &ptr)
+    {
+        mWater->addEmitter(ptr);
+    }
+
+    void RenderingManager::removeWaterRippleEmitter(const MWWorld::Ptr &ptr)
+    {
+        mWater->removeEmitter(ptr);
     }
 
     void RenderingManager::updateProjectionMatrix()

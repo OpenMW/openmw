@@ -37,6 +37,11 @@ namespace Terrain
     class World;
 }
 
+namespace MWWorld
+{
+    class Fallback;
+}
+
 namespace MWRender
 {
 
@@ -52,7 +57,7 @@ namespace MWRender
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem);
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
@@ -125,8 +130,12 @@ namespace MWRender
         Animation* getAnimation(const MWWorld::Ptr& ptr);
         Animation* getPlayerAnimation();
 
+        void addWaterRippleEmitter(const MWWorld::Ptr& ptr);
+        void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
+
         void updatePlayerPtr(const MWWorld::Ptr &ptr);
 
+        void removePlayer(const MWWorld::Ptr& player);
         void setupPlayer(const MWWorld::Ptr& player);
         void renderPlayer(const MWWorld::Ptr& player);
 

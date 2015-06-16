@@ -18,6 +18,7 @@
 #include <components/sceneutil/controller.hpp>
 
 #include "vismask.hpp"
+#include "ripplesimulation.hpp"
 
 namespace
 {
@@ -107,13 +108,15 @@ namespace MWRender
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico)
+Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico, const MWWorld::Fallback* fallback)
     : mParent(parent)
     , mResourceSystem(resourceSystem)
     , mEnabled(true)
     , mToggled(true)
     , mTop(0)
 {
+    mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
+
     osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
 
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);
@@ -161,6 +164,11 @@ void Water::setHeight(const float height)
     mWaterNode->setPosition(pos);
 }
 
+void Water::update(float dt)
+{
+    mSimulation->update(dt);
+}
+
 void Water::updateVisible()
 {
     mWaterNode->setNodeMask(mEnabled && mToggled ? ~0 : 0);
@@ -183,7 +191,6 @@ osg::Vec3f Water::getSceneNodeCoordinates(int gridX, int gridY)
     return osg::Vec3f(static_cast<float>(gridX * CELL_SIZE + (CELL_SIZE / 2)), static_cast<float>(gridY * CELL_SIZE + (CELL_SIZE / 2)), mTop);
 }
 
-/*
 void Water::addEmitter (const MWWorld::Ptr& ptr, float scale, float force)
 {
     mSimulation->addEmitter (ptr, scale, force);
@@ -198,6 +205,15 @@ void Water::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
 {
     mSimulation->updateEmitterPtr(old, ptr);
 }
-*/
+
+void Water::removeCell(const MWWorld::CellStore *store)
+{
+    mSimulation->removeCell(store);
+}
+
+void Water::clearRipples()
+{
+    mSimulation->clear();
+}
 
 }

@@ -161,7 +161,7 @@ namespace MWWorld
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
-        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem);
+        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback);
 
         mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
 
@@ -2064,6 +2064,7 @@ namespace MWWorld
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
             mPhysics->remove(getPlayerPtr());
+            mRendering->removePlayer(getPlayerPtr());
 
             mPlayer->set(player);
         }

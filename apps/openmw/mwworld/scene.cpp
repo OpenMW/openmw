@@ -39,6 +39,9 @@ namespace
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
         ptr.getClass().insertObject (ptr, model, physics);
+
+        if (ptr.getClass().isActor())
+            rendering.addWaterRippleEmitter(ptr);
     }
 
     void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
@@ -570,6 +573,8 @@ namespace MWWorld
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);
+        if (ptr.getClass().isActor())
+            mRendering.removeWaterRippleEmitter(ptr);
     }
 
     bool Scene::isCellActive(const CellStore &cell)
