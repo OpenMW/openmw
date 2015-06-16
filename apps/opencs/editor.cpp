@@ -115,7 +115,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     boost::program_options::notify(variables);
 
-    mCfgMgr.readConfiguration(variables, desc, /*quiet*/true);
+    mCfgMgr.readConfiguration(variables, desc, quiet);
 
     mDocumentManager.setEncoding (
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
