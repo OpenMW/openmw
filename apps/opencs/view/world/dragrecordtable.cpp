@@ -1,4 +1,5 @@
 #include <QDrag>
+#include <QDragEnterEvent>
 
 #include "../../model/world/tablemimedata.hpp"
 #include "dragrecordtable.hpp"

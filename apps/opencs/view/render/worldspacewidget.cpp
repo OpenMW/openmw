@@ -7,7 +7,12 @@
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"

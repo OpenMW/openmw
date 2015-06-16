@@ -41,7 +41,7 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage pathgridcheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck
     )
 
 
@@ -154,19 +154,16 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-include(${QT_USE_FILE})
-
-qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
-qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+else()
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+endif()
 
 # for compiled .ui files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -207,11 +204,35 @@ target_link_libraries(openmw-cs
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
-    ${Boost_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_WAVE_LIBRARY}
     ${BULLET_LIBRARIES}
-    ${QT_LIBRARIES}
     components
 )
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-cs
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
+    endif()
+
+else()
+    qt5_use_modules(openmw-cs Widgets Core Network)
+    if (WIN32)
+        target_link_libraries(Qt5::WinMain)
+    endif()
+endif()
+
+if (WIN32)
+    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+endif()
+
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)
