@@ -134,9 +134,8 @@ namespace MWWorld
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            //mRendering->skySetHour (mGlobalVariables["gamehour"].getFloat());
-            //mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
-            //    mGlobalVariables["month"].getInteger());
+            mRendering->skySetDate (mGlobalVariables["day"].getInteger(),
+                mGlobalVariables["month"].getInteger());
 
             mRendering->setSkyEnabled(true);
         }
@@ -812,8 +811,6 @@ namespace MWWorld
 
         mGlobalVariables["gamehour"].setFloat(static_cast<float>(hour));
 
-        //mRendering->skySetHour (hour);
-
         mWeatherManager->setHour(static_cast<float>(hour));
 
         if (days>0)
@@ -849,7 +846,7 @@ namespace MWWorld
         mGlobalVariables["day"].setInteger (day);
         mGlobalVariables["month"].setInteger (month);
 
-        //mRendering->skySetDate (day, month);
+        mRendering->skySetDate(day, month);
     }
 
     void World::setMonth (int month)
@@ -870,7 +867,7 @@ namespace MWWorld
         if (years>0)
             mGlobalVariables["year"].setInteger (years+mGlobalVariables["year"].getInteger());
 
-        //mRendering->skySetDate (mGlobalVariables["day"].getInteger(), month);
+        mRendering->skySetDate (mGlobalVariables["day"].getInteger(), month);
     }
 
     int World::getDay() const
@@ -916,36 +913,24 @@ namespace MWWorld
 
     bool World::toggleSky()
     {
-#if 0
-        if (mSky)
-        {
-            mSky = false;
-            mRendering->skyDisable();
-            return false;
-        }
-        else
-        {
-            mSky = true;
-            mRendering->skyEnable();
-            return true;
-        }
-#endif
-        return 0;
+        mSky = !mSky;
+        mRendering->setSkyEnabled(mSky);
+        return mSky;
     }
 
     int World::getMasserPhase() const
     {
-        return 0;//mRendering->skyGetMasserPhase();
+        return mRendering->skyGetMasserPhase();
     }
 
     int World::getSecundaPhase() const
     {
-        return 0;//mRendering->skyGetSecundaPhase();
+        return mRendering->skyGetSecundaPhase();
     }
 
     void World::setMoonColour (bool red)
     {
-        //mRendering->skySetMoonColour (red);
+        mRendering->skySetMoonColour (red);
     }
 
     float World::getTimeScaleFactor() const

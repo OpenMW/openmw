@@ -473,7 +473,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mCreated(false)
     , mMoonRed(false)
     , mIsStorm(false)
-    , mHour(0.0f)
     , mDay(0)
     , mMonth(0)
     , mCloudAnimationTimer(0.f)
@@ -884,11 +883,6 @@ void SkyManager::setSecundaFade(const float fade)
 {
     if (!mCreated) return;
     mSecunda->setAlpha(fade);
-}
-
-void SkyManager::setHour(double hour)
-{
-    mHour = static_cast<float>(hour);
 }
 
 void SkyManager::setDate(int day, int month)

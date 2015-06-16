@@ -117,7 +117,6 @@ namespace MWRender
 
         bool mIsStorm;
 
-        float mHour;
         int mDay;
         int mMonth;
 

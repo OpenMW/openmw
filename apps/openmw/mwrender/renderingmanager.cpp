@@ -219,6 +219,26 @@ namespace MWRender
         updateAmbient();
     }
 
+    void RenderingManager::skySetDate(int day, int month)
+    {
+        mSky->setDate(day, month);
+    }
+
+    int RenderingManager::skyGetMasserPhase() const
+    {
+        return mSky->getMasserPhase();
+    }
+
+    int RenderingManager::skyGetSecundaPhase() const
+    {
+        return mSky->getSecundaPhase();
+    }
+
+    void RenderingManager::skySetMoonColour(bool red)
+    {
+        mSky->setMoonColour(red);
+    }
+
     void RenderingManager::configureAmbient(const ESM::Cell *cell)
     {
         setAmbientColour(SceneUtil::colourFromRGB(cell->mAmbi.mAmbient));
@@ -593,6 +613,8 @@ namespace MWRender
 
     void RenderingManager::clear()
     {
+        mSky->setMoonColour(false);
+
         notifyWorldSpaceChanged();
     }
 

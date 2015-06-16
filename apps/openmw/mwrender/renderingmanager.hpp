@@ -68,6 +68,11 @@ namespace MWRender
 
         void setAmbientColour(const osg::Vec4f& colour);
 
+        void skySetDate(int day, int month);
+        int skyGetMasserPhase() const;
+        int skyGetSecundaPhase() const;
+        void skySetMoonColour(bool red);
+
         void setSunDirection(const osg::Vec3f& direction);
         void setSunColour(const osg::Vec4f& colour);
 
