@@ -104,8 +104,7 @@ namespace Resource
 
             // TODO: add support for non-NIF formats
 
-            NifOsg::Loader loader;
-            osg::ref_ptr<osg::Node> loaded = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+            osg::ref_ptr<osg::Node> loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
             // TODO: run SharedStateManager::prune on unload
@@ -144,9 +143,8 @@ namespace Resource
         {
             Files::IStreamPtr file = mVFS->get(normalized);
 
-            NifOsg::Loader loader;
             osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
-            loader.loadKf(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), *loaded.get());
+            NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), *loaded.get());
 
             mKeyframeIndex[normalized] = loaded;
             return loaded;
