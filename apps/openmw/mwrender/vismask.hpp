@@ -22,8 +22,11 @@ namespace MWRender
         Mask_Scene = (1<<8),
         Mask_GUI = (1<<9),
 
+        // Set on a Geode
+        Mask_ParticleSystem = (1<<10),
+
         // Set on cameras within the main scene graph
-        Mask_RenderToTexture = (1<<10)
+        Mask_RenderToTexture = (1<<11)
 
         // reserved: (1<<16) for SceneUtil::Mask_Lit
     };

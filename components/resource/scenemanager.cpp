@@ -47,6 +47,7 @@ namespace
                             if (geode->getNumParents() && geode->getParent(0)->getNumParents())
                                 transformInitialParticles(partsys, geode->getParent(0)->getParent(0));
                         }
+                        geode->setNodeMask((1<<10)); //MWRender::Mask_ParticleSystem
                     }
                 }
             }
