@@ -159,6 +159,8 @@ void Water::setHeight(const float height)
 {
     mTop = height;
 
+    mSimulation->setWaterHeight(height);
+
     osg::Vec3f pos = mWaterNode->getPosition();
     pos.z() = height;
     mWaterNode->setPosition(pos);
