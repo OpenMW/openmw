@@ -28,6 +28,8 @@
 
 #include "niftypes.hpp" // Transformation
 
+#include <osg/Array>
+
 namespace Nif
 {
 
@@ -35,9 +37,10 @@ namespace Nif
 class ShapeData : public Record
 {
 public:
-    std::vector<osg::Vec3f> vertices, normals;
-    std::vector<osg::Vec4f> colors;
-    std::vector< std::vector<osg::Vec2f> > uvlist;
+    osg::ref_ptr<osg::Vec3Array> vertices, normals;
+    osg::ref_ptr<osg::Vec4Array> colors;
+
+    std::vector< osg::ref_ptr<osg::Vec2Array> > uvlist;
     osg::Vec3f center;
     float radius;
 
@@ -48,7 +51,7 @@ class NiTriShapeData : public ShapeData
 {
 public:
     // Triangles, three vertex indices per triangle
-    std::vector<unsigned short> triangles;
+    osg::ref_ptr<osg::DrawElementsUShort> triangles;
 
     void read(NIFStream *nif);
 };
@@ -166,7 +169,7 @@ struct NiMorphData : public Record
 {
     struct MorphData {
         FloatKeyMapPtr mKeyFrames;
-        std::vector<osg::Vec3f> mVertices;
+        osg::ref_ptr<osg::Vec3Array> mVertices;
     };
     std::vector<MorphData> mMorphs;
 
