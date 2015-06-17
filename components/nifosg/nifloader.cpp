@@ -866,8 +866,8 @@ namespace NifOsg
             osg::Material* mat = static_cast<osg::Material*>(parentNode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
             if (mat)
             {
-                osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,diffuse.a()));
+                // NB ignoring diffuse.a()
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
                 mat->setColorMode(osg::Material::AMBIENT);
             }
 
