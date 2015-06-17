@@ -24,6 +24,7 @@
 
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/controller.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

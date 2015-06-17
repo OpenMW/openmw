@@ -7,8 +7,6 @@
 #include <osg/ref_ptr>
 #include <osg/Node>
 
-#include <components/nifosg/nifloader.hpp>
-
 namespace Resource
 {
     class TextureManager;
