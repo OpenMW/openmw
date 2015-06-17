@@ -1768,7 +1768,7 @@ void CharacterController::update(float duration)
         if(movestate != CharState_None)
             clearAnimQueue();
 
-        if(mAnimQueue.empty())
+        if(mAnimQueue.empty() || inwater || sneak)
         {
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
         }
