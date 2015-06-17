@@ -1,6 +1,8 @@
 #ifndef CSM_WORLD_INFOTABLEPROXYMODEL_HPP
 #define CSM_WORLD_INFOTABLEPROXYMODEL_HPP
 
+#include <QHash>
+
 #include "idtableproxymodel.hpp"
 #include "universalid.hpp"
 
@@ -10,8 +12,12 @@ namespace CSMWorld
 
     class InfoTableProxyModel : public IdTableProxyModel
     {
+            Q_OBJECT
+
             UniversalId::Type mType;
             IdTableBase *mSourceModel;
+
+            mutable QHash<QString, int> mFirstRowCache;
 
             int getFirstInfoRow(int currentRow) const;
             ///< Finds the first row with the same topic (journal entry) as in \a currentRow
@@ -23,6 +29,9 @@ namespace CSMWorld
 
         protected:
             virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+
+        private slots:
+            void modelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     };
 }
 

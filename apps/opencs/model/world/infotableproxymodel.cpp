@@ -15,6 +15,11 @@ void CSMWorld::InfoTableProxyModel::setSourceModel(QAbstractItemModel *sourceMod
 {
     IdTableProxyModel::setSourceModel(sourceModel);
     mSourceModel = dynamic_cast<IdTableBase *>(sourceModel);
+    connect(mSourceModel, 
+            SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+            this, 
+            SLOT(modelDataChanged(const QModelIndex &, const QModelIndex &)));
+    mFirstRowCache.clear();
 }
 
 bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
@@ -33,8 +38,21 @@ int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
     }
 
     int column = mSourceModel->findColumnIndex(columnId);
-    QVariant info = mSourceModel->data(mSourceModel->index(currentRow, column));
-    while (--currentRow >= 0 && 
+    QString info = mSourceModel->data(mSourceModel->index(currentRow, column)).toString();
+
+    if (mFirstRowCache.contains(info))
+    {
+        return mFirstRowCache[info];
+    }
+
+    while (--currentRow >= 0 &&
            mSourceModel->data(mSourceModel->index(currentRow, column)) == info);
+
+    mFirstRowCache[info] = currentRow + 1;
     return currentRow + 1;
+}
+
+void CSMWorld::InfoTableProxyModel::modelDataChanged(const QModelIndex &/*topLeft*/, const QModelIndex &/*bottomRight*/)
+{
+    mFirstRowCache.clear();
 }
