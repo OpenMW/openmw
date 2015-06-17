@@ -274,7 +274,6 @@ namespace MWRender
             image->setDataType(mOverlayImage->getDataType());
             camera->attach(osg::Camera::COLOR_BUFFER, image);
 
-            // FIXME: why does the image get slightly darker by the read back?
             ImageDest imageDest;
             imageDest.mImage = image;
             imageDest.mX = x;
