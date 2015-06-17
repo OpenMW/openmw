@@ -344,7 +344,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, std::map<int, int>(), 0, 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -357,7 +357,7 @@ namespace NifOsg
             return created;
         }
 
-        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::vector<int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
@@ -412,7 +412,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
-                                std::map<int, int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
@@ -558,7 +558,7 @@ namespace NifOsg
             return node;
         }
 
-        void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int> &boundTextures, int animflags)
+        void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -568,8 +568,8 @@ namespace NifOsg
                 {
                     const Nif::NiUVController *uvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
                     std::set<int> texUnits;
-                    for (std::map<int, int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
-                        texUnits.insert(it->first);
+                    for (unsigned int i=0; i<boundTextures.size(); ++i)
+                        texUnits.insert(i);
 
                     osg::ref_ptr<UVController> ctrl = new UVController(uvctrl->data.getPtr(), texUnits);
                     setupController(uvctrl, ctrl, animflags);
@@ -888,7 +888,7 @@ namespace NifOsg
             }
         }
 
-        void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
+        void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
@@ -898,10 +898,10 @@ namespace NifOsg
                     geometry->setNormalArray(new osg::Vec3Array(data->normals.size(), &data->normals[0]), osg::Array::BIND_PER_VERTEX);
             }
 
-            for (std::map<int, int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it)
+            int textureStage = 0;
+            for (std::vector<int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it,++textureStage)
             {
-                int textureStage = it->first;
-                int uvSet = it->second;
+                int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
                     // Occurred in "ascendedsleeper.nif", but only for hidden Shadow nodes, apparently
@@ -928,7 +928,7 @@ namespace NifOsg
             applyMaterialProperties(parentNode, materialProps, composite, !data->colors.empty(), animflags);
         }
 
-        void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::map<int, int>& boundTextures, int animflags)
+        void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geometry> geometry;
             if(!triShape->controller.empty())
@@ -1027,7 +1027,7 @@ namespace NifOsg
         }
 
         void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
-                                          const std::map<int, int>& boundTextures, int animflags)
+                                          const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
 
@@ -1152,7 +1152,7 @@ namespace NifOsg
         }
 
         void handleProperty(const Nif::Property *property,
-                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::map<int, int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::TextureManager* textureManager, std::vector<int>& boundTextures, int animflags)
         {
             switch (property->recType)
             {
@@ -1254,6 +1254,15 @@ namespace NifOsg
             {
                 const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
+
+                if (boundTextures.size())
+                {
+                    // overriding a parent NiTexturingProperty, so remove what was previously bound
+                    for (unsigned int i=0; i<boundTextures.size(); ++i)
+                        stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    boundTextures.clear();
+                }
+
                 for (int i=0; i<Nif::NiTexturingProperty::NumTextures; ++i)
                 {
                     if (texprop->textures[i].inUse)
@@ -1290,19 +1299,21 @@ namespace NifOsg
                               wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
                               wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
-                        stateset->setTextureAttributeAndModes(i, texture2d, osg::StateAttribute::ON);
+                        int texUnit = boundTextures.size();
+
+                        stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
 
                         if (i == Nif::NiTexturingProperty::GlowTexture)
                         {
                             osg::TexEnv* texEnv = new osg::TexEnv;
                             texEnv->setMode(osg::TexEnv::ADD);
-                            stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                         }
                         else if (i == Nif::NiTexturingProperty::DarkTexture)
                         {
                             osg::TexEnv* texEnv = new osg::TexEnv;
                             texEnv->setMode(osg::TexEnv::MODULATE);
-                            stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                         }
                         else if (i == Nif::NiTexturingProperty::DetailTexture)
                         {
@@ -1318,15 +1329,10 @@ namespace NifOsg
                             texEnv->setOperand1_RGB(GL_SRC_COLOR);
                             texEnv->setSource0_RGB(GL_PREVIOUS_ARB);
                             texEnv->setSource1_RGB(GL_TEXTURE);
-                            stateset->setTextureAttributeAndModes(i, texEnv, osg::StateAttribute::ON);
+                            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                         }
 
-                        boundTextures[i] = tex.uvSet;
-                    }
-                    else if (boundTextures.find(i) != boundTextures.end())
-                    {
-                        stateset->setTextureAttributeAndModes(i, new osg::Texture2D, osg::StateAttribute::OFF);
-                        boundTextures.erase(i);
+                        boundTextures.push_back(tex.uvSet);
                     }
                     handleTextureControllers(texprop, composite, textureManager, stateset, animflags);
                 }
