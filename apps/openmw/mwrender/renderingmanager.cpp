@@ -484,6 +484,7 @@ namespace MWRender
             return osg::Vec4f();
 
         osg::ComputeBoundsVisitor computeBoundsVisitor;
+        computeBoundsVisitor.setTraversalMask(~MWRender::Mask_ParticleSystem);
         ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
 
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();

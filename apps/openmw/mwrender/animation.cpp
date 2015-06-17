@@ -1007,6 +1007,7 @@ namespace MWRender
         else
         {
             osg::ComputeBoundsVisitor computeBound;
+            computeBound.setTraversalMask(~Mask_ParticleSystem);
             parent->accept(computeBound);
 
             // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
