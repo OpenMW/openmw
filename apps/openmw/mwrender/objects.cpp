@@ -35,10 +35,24 @@ namespace
 
         virtual void apply(osg::Node &node)
         {
-            if (dynamic_cast<osgParticle::ParticleSystem*>(&node) || dynamic_cast<osgParticle::ParticleProcessor*>(&node))
+            if (dynamic_cast<osgParticle::ParticleProcessor*>(&node))
                 mToRemove.push_back(&node);
 
             traverse(node);
+        }
+
+        virtual void apply(osg::Geode& geode)
+        {
+            std::vector<osgParticle::ParticleSystem*> partsysVector;
+            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
+            {
+                osg::Drawable* drw = geode.getDrawable(i);
+                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(drw))
+                    partsysVector.push_back(partsys);
+            }
+
+            for (std::vector<osgParticle::ParticleSystem*>::iterator it = partsysVector.begin(); it != partsysVector.end(); ++it)
+                geode.removeDrawable(*it);
         }
 
         void remove()
