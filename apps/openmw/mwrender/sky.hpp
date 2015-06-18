@@ -99,6 +99,9 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
 
         osg::ref_ptr<CloudUpdater> mCloudUpdater;
+        osg::ref_ptr<CloudUpdater> mCloudUpdater2;
+        osg::ref_ptr<osg::Node> mCloudMesh;
+        osg::ref_ptr<osg::Node> mCloudMesh2;
 
         osg::ref_ptr<osg::Node> mAtmosphereDay;
 

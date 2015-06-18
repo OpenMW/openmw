@@ -141,8 +141,24 @@ public:
 protected:
     virtual void setDefaults(osg::StateSet *stateset)
     {
-        stateset->setTextureAttributeAndModes(0, new osg::TexMat, osg::StateAttribute::ON);
+        osg::ref_ptr<osg::TexMat> texmat (new osg::TexMat);
+        stateset->setTextureAttributeAndModes(0, texmat, osg::StateAttribute::ON);
+        stateset->setTextureAttributeAndModes(1, texmat, osg::StateAttribute::ON);
         stateset->setAttribute(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+        // need to set opacity on a separate texture unit, diffuse alpha is used by the vertex colors already
+        osg::ref_ptr<osg::TexEnvCombine> texEnvCombine (new osg::TexEnvCombine);
+        texEnvCombine->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+        texEnvCombine->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+        texEnvCombine->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
+        texEnvCombine->setConstantColor(osg::Vec4f(1,1,1,1));
+        texEnvCombine->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
+        texEnvCombine->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+
+        stateset->setTextureAttributeAndModes(1, texEnvCombine, osg::StateAttribute::ON);
+
+        stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     }
 
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -150,12 +166,14 @@ protected:
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
         texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, mAnimationTimer, 0.f)));
 
-        stateset->setTextureAttributeAndModes(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttribute(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
 
-        // FIXME: handle opacity, will have to resort to either shaders or multitexturing? diffuse alpha is in use by the vertex colors already
+        osg::TexEnvCombine* texEnvCombine = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+        texEnvCombine->setConstantColor(osg::Vec4f(1,1,1,mOpacity));
     }
 
 private:
@@ -533,14 +551,16 @@ void SkyManager::create()
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mRootNode->addChild(mCloudNode);
-    osg::ref_ptr<osg::Node> clouds = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
     ModVertexAlphaVisitor modClouds(1);
-    clouds->accept(modClouds);
-
+    mCloudMesh->accept(modClouds);
     mCloudUpdater = new CloudUpdater;
-    clouds->addUpdateCallback(mCloudUpdater);
+    mCloudMesh->addUpdateCallback(mCloudUpdater);
 
-    clouds->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+    mCloudMesh2 = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
+    mCloudMesh2->accept(modClouds);
+    mCloudUpdater2 = new CloudUpdater;
+    mCloudMesh2->addUpdateCallback(mCloudUpdater2);
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
@@ -602,6 +622,7 @@ void SkyManager::update(float duration)
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed * 0.003;
     mCloudUpdater->setAnimationTimer(mCloudAnimationTimer);
+    mCloudUpdater2->setAnimationTimer(mCloudAnimationTimer);
 
     /// \todo improve this
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
@@ -708,18 +729,23 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     if (mNextClouds != weather.mNextCloudTexture)
     {
         mNextClouds = weather.mNextCloudTexture;
+
+        std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
+
+        if (!texture.empty())
+            mCloudUpdater2->setTexture(mSceneManager->getTextureManager()->getTexture2D(texture,
+                                                                                       osg::Texture::REPEAT, osg::Texture::REPEAT));
     }
 
-    if (mCloudBlendFactor != weather.mCloudBlendFactor)
+    if (mCloudBlendFactor != weather.mCloudBlendFactor
+            || mCloudOpacity != weather.mCloudOpacity)
     {
         mCloudBlendFactor = weather.mCloudBlendFactor;
-    }
-
-    if (mCloudOpacity != weather.mCloudOpacity)
-    {
         mCloudOpacity = weather.mCloudOpacity;
 
-        mCloudUpdater->setOpacity(0.3);
+        mCloudUpdater->setOpacity(mCloudOpacity * (1.f-mCloudBlendFactor));
+        mCloudUpdater2->setOpacity(mCloudOpacity * mCloudBlendFactor);
+        mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0 : 0);
     }
 
     if (mCloudColour != weather.mSunColor)
@@ -730,6 +756,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
                         weather.mSunColor.b()*0.7f + weather.mAmbientColor.b()*0.7f, 1.f);
 
         mCloudUpdater->setEmissionColor(clr);
+        mCloudUpdater2->setEmissionColor(clr);
 
         mCloudColour = weather.mSunColor;
     }
