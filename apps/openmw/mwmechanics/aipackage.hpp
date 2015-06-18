@@ -4,8 +4,6 @@
 #include "pathfinding.hpp"
 #include <components/esm/defs.hpp>
 
-#include "../mwworld/cellstore.hpp"
-
 #include "obstacle.hpp"
 #include "aistate.hpp"
 
@@ -16,6 +14,7 @@ namespace MWWorld
 
 namespace ESM
 {
+    struct Cell;
     namespace AiSequence
     {
         struct AiSequence;

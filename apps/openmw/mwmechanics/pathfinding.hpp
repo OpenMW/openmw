@@ -46,7 +46,7 @@ namespace MWMechanics
 
             bool isPathConstructed() const
             {
-                return mIsPathConstructed;
+                return !mPath.empty();
             }
 
             int getPathSize() const
@@ -92,8 +92,6 @@ namespace MWMechanics
             }
 
         private:
-
-            bool mIsPathConstructed;
 
             std::list<ESM::Pathgrid::Point> mPath;
 

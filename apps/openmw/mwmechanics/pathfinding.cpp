@@ -111,8 +111,7 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mIsPathConstructed(false),
-          mPathgrid(NULL),
+        : mPathgrid(NULL),
           mCell(NULL)
     {
     }
@@ -121,7 +120,6 @@ namespace MWMechanics
     {
         if(!mPath.empty())
             mPath.clear();
-        mIsPathConstructed = false;
     }
 
     /*
@@ -177,7 +175,6 @@ namespace MWMechanics
                 static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
             {
                 mPath.push_back(endPoint);
-                mIsPathConstructed = true;
                 return;
             }
         }
@@ -194,7 +191,6 @@ namespace MWMechanics
         if(!mPathgrid || mPathgrid->mPoints.empty())
         {
             mPath.push_back(endPoint);
-            mIsPathConstructed = true;
             return;
         }
 
@@ -232,7 +228,6 @@ namespace MWMechanics
                 if(startNode == endNode.first)
                 {
                     mPath.push_back(endPoint);
-                    mIsPathConstructed = true;
                     return;
                 }
 
@@ -240,7 +235,6 @@ namespace MWMechanics
 
                 if(!mPath.empty())
                 {
-                    mIsPathConstructed = true;
                     // Add the destination (which may be different to the closest
                     // pathgrid point).  However only add if endNode was the closest
                     // point to endPoint.
@@ -253,14 +247,8 @@ namespace MWMechanics
                     if(endNode.second)
                         mPath.push_back(endPoint);
                 }
-                else
-                    mIsPathConstructed = false;
             }
-            else
-                mIsPathConstructed = false;
         }
-        else
-            mIsPathConstructed = false;
 
         return;
     }
@@ -268,7 +256,7 @@ namespace MWMechanics
     float PathFinder::getZAngleToNext(float x, float y) const
     {
         // This should never happen (programmers should have an if statement checking
-        // mIsPathConstructed that prevents this call if otherwise).
+        // isPathConstructed that prevents this call if otherwise).
         if(mPath.empty())
             return 0.;
 
@@ -290,7 +278,6 @@ namespace MWMechanics
             mPath.pop_front();
             if(mPath.empty())
             {
-                mIsPathConstructed = false;
                 return true;
             }
         }

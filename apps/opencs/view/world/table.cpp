@@ -13,6 +13,7 @@
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/infotableproxymodel.hpp"
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -276,7 +277,16 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
-    mProxyModel = new CSMWorld::IdTableProxyModel (this);
+    bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos ||
+                       id.getType() == CSMWorld::UniversalId::Type_JournalInfos;
+    if (isInfoTable)
+    {
+        mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+    }
+    else
+    {
+        mProxyModel = new CSMWorld::IdTableProxyModel (this);
+    }
     mProxyModel->setSourceModel (mModel);
 
     mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);

@@ -68,10 +68,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_JournalInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> >);
 
     // Subviews for resources tables
     manager.add (CSMWorld::UniversalId::Type_Meshes,
