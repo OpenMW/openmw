@@ -1,6 +1,7 @@
 #include "object.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
