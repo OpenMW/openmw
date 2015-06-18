@@ -243,6 +243,8 @@ namespace CSVDoc
             void closeRequest (SubView *subView);
 
             void saveWindowState();
+
+            void moveScrollBarToEnd(int min, int max);
     };
 }
 

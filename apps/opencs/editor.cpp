@@ -98,7 +98,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
     }
 }
 
-std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
@@ -118,7 +118,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     boost::program_options::notify(variables);
 
-    mCfgMgr.readConfiguration(variables, desc);
+    mCfgMgr.readConfiguration(variables, desc, quiet);
 
     mDocumentManager.setEncoding (
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
@@ -198,6 +198,11 @@ void CS::Editor::cancelCreateGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
 
@@ -218,6 +223,11 @@ void CS::Editor::cancelFileDialog()
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
@@ -312,12 +322,12 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toStdString().c_str()))
+            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
                 std::cout << "Detected unclean shutdown." << std::endl;
                 // delete the stale file
-                if(remove(fullPath.toStdString().c_str()))
+                if(remove(fullPath.toUtf8().constData()))
                     std::cerr << "ERROR removing stale connection file" << std::endl;
             }
         }

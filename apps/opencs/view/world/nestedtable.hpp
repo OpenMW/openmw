@@ -2,7 +2,7 @@
 #define CSV_WORLD_NESTEDTABLE_H
 
 #include <QTableView>
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 class QUndoStack;
 class QAction;

@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"

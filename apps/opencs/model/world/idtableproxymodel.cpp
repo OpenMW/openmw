@@ -52,9 +52,10 @@ QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, i
 
 void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
 {
+    beginResetModel();
     mFilter = filter;
     updateColumnMap();
-    reset();
+    endResetModel();
 }
 
 bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const

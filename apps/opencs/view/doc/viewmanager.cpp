@@ -6,6 +6,8 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
@@ -19,14 +21,11 @@
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
 #include "../world/idcompletiondelegate.hpp"
+#include "../world/colordelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
-
-#include <QMessageBox>
-#include <QPushButton>
-#include <QtGui/QApplication>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -62,6 +61,9 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
 
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
+
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Colour,
+        new CSVWorld::ColorDelegateFactory());
 
     std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
     for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();

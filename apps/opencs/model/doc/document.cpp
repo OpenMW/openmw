@@ -2272,7 +2272,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         if (boost::filesystem::exists (customFiltersPath))
         {
-            destination << std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
+            destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
         }
         else
         {

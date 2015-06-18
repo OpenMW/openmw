@@ -33,6 +33,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/doc/document.hpp"
 
+#include "../widget/coloreditor.hpp"
+
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 #include "tablebottombox.hpp"
@@ -331,6 +333,10 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
         }
+        else if (qobject_cast<CSVWidget::ColorEditor *>(editor))
+        {
+            connect(editor, SIGNAL(pickingFinished()), proxy, SLOT(editorDataCommited()));
+        }
         else // throw an exception because this is a coding error
             throw std::logic_error ("Dialogue editor type missing");
 
@@ -469,8 +475,7 @@ void CSVWorld::EditWidget::remake(int row)
                     mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
 
                 NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
-                // FIXME: does not work well when enum delegates are used
-                //table->resizeColumnsToContents();
+                table->resizeColumnsToContents();
 
                 if(mTable->index(row, i).data().type() == QVariant::UserType)
                 {

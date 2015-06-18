@@ -2,7 +2,7 @@
 #define CSV_WORLD_DRAGRECORDTABLE_H
 
 #include <QTableView>
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 class QWidget;
 class QAction;

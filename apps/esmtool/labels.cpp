@@ -119,7 +119,7 @@ std::string clothingTypeLabel(int idx)
 }
 
 std::string armorTypeLabel(int idx)
-{    
+{
     if (idx >= 0 && idx <= 10)
     {
         static const char *armorTypeLabels[] = {
@@ -645,7 +645,7 @@ std::string ruleFunction(int idx)
     else
         return "Invalid";
 }
-   
+
 // The "unused flag bits" should probably be defined alongside the
 // defined bits in the ESM component.  The names of the flag bits are
 // very inconsistent.
@@ -653,7 +653,7 @@ std::string ruleFunction(int idx)
 std::string bodyPartFlags(int flags)
 {
     std::string properties = "";
-    if (flags == 0) properties += "[None] ";    
+    if (flags == 0) properties += "[None] ";
     if (flags & ESM::BodyPart::BPF_Female) properties += "Female ";
     if (flags & ESM::BodyPart::BPF_NotPlayable) properties += "NotPlayable ";
     int unused = (0xFFFFFFFF ^
@@ -667,7 +667,7 @@ std::string bodyPartFlags(int flags)
 std::string cellFlags(int flags)
 {
     std::string properties = "";
-    if (flags == 0) properties += "[None] ";    
+    if (flags == 0) properties += "[None] ";
     if (flags & ESM::Cell::HasWater) properties += "HasWater ";
     if (flags & ESM::Cell::Interior) properties += "Interior ";
     if (flags & ESM::Cell::NoSleep) properties += "NoSleep ";
@@ -830,12 +830,12 @@ std::string npcFlags(int flags)
     std::string properties = "";
     if (flags == 0) properties += "[None] ";
     // Mythicmods and the ESM component differ.  Mythicmods says
-    // 0x8=None and 0x10=AutoCalc, while our code defines 0x8 as
-    // AutoCalc.  The former seems to be correct.  All Bethesda
-    // records have bit 0x8 set.  A suspiciously large portion of
-    // females have autocalc turned off.
-    if (flags & ESM::NPC::Autocalc) properties += "Unknown ";
-    if (flags & 0x00000010) properties += "Autocalc ";
+    // 0x8=None and 0x10=AutoCalc, while our code previously defined
+    // 0x8 as AutoCalc.  The former seems to be correct.  All Bethesda
+    // records have bit 0x8 set.  Previously, suspiciously large portion
+    // of females had autocalc turned off.
+    if (flags & 0x00000008) properties += "Unknown ";
+    if (flags & ESM::NPC::Autocalc) properties += "Autocalc ";
     if (flags & ESM::NPC::Female) properties += "Female ";
     if (flags & ESM::NPC::Respawn) properties += "Respawn ";
     if (flags & ESM::NPC::Essential) properties += "Essential ";
@@ -847,8 +847,8 @@ std::string npcFlags(int flags)
     // however the only unknown bit occurs on ALL records, and
     // relatively few NPCs have this bit set.
     int unused = (0xFFFFFFFF ^
-                  (ESM::NPC::Autocalc|
-                   0x00000010|
+                  (0x00000008|
+                   ESM::NPC::Autocalc|
                    ESM::NPC::Female|
                    ESM::NPC::Respawn|
                    ESM::NPC::Essential|

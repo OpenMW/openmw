@@ -6,7 +6,7 @@
 #include <OgreColourValue.h>
 #include <OgreCamera.h>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 #include "../../model/doc/document.hpp"
 

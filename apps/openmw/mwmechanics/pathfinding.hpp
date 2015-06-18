@@ -48,7 +48,7 @@ namespace MWMechanics
 
             bool isPathConstructed() const
             {
-                return mIsPathConstructed;
+                return !mPath.empty();
             }
 
             int getPathSize() const
@@ -63,13 +63,13 @@ namespace MWMechanics
 
             /** Synchronize new path with old one to avoid visiting 1 waypoint 2 times
             @note
-                If the first point is chosen as the nearest one
-                the situation can occur when the 1st point of the new path is undesirable
-                (i.e. the 2nd point of new path == the 1st point of old path).
-            @param path - old path
-            @return true if such point was found and deleted
+                BuildPath() takes closest PathGrid point to NPC as first point of path.
+                This is undesireable if NPC has just passed a Pathgrid point, as this
+                makes the 2nd point of the new path == the 1st point of old path.
+                Which results in NPC "running in a circle" back to the just passed waypoint.
              */
-            bool syncStart(const std::list<ESM::Pathgrid::Point> &path);
+            void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             void addPointToPath(ESM::Pathgrid::Point &point)
             {
@@ -95,8 +95,6 @@ namespace MWMechanics
             }
 
         private:
-
-            bool mIsPathConstructed;
 
             std::list<ESM::Pathgrid::Point> mPath;
 

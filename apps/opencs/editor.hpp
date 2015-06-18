@@ -64,7 +64,7 @@ namespace CS
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
-            std::pair<Files::PathContainer, std::vector<std::string> > readConfig();
+            std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths
 
             // not implemented
