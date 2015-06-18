@@ -5,16 +5,12 @@
 
 #include <QWidget>
 
+#include "../../model/world/scope.hpp"
 #include "../../model/world/universalid.hpp"
 
-#include "../../model/world/scope.hpp"
-
-class QUndoStack;
-
-namespace CSMWorld
+namespace CSMDoc
 {
-    class Data;
-    class UniversalId;
+    class Document;
 }
 
 namespace CSVWorld
@@ -59,8 +55,7 @@ namespace CSVWorld
 
             virtual ~CreatorFactoryBase();
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id) const = 0;
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const = 0;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -72,8 +67,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id) const;
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function always returns 0.
@@ -84,8 +78,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id) const;
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting
@@ -93,10 +86,10 @@ namespace CSVWorld
     };
 
     template<class CreatorT, unsigned int scope>
-    Creator *CreatorFactory<CreatorT, scope>::makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-        const CSMWorld::UniversalId& id) const
+    Creator *CreatorFactory<CreatorT, scope>::makeCreator (CSMDoc::Document& document,
+                                                           const CSMWorld::UniversalId& id) const
     {
-        std::auto_ptr<CreatorT> creator (new CreatorT (data, undoStack, id));
+        std::auto_ptr<CreatorT> creator (new CreatorT (document.getData(), document.getUndoStack(), id));
 
         creator->setScope (scope);
 

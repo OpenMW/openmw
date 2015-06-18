@@ -33,9 +33,7 @@ CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    layout->addWidget (mBottom =
-        new TableBottomBox (NullCreatorFactory(), document.getData(), document.getUndoStack(), id,
-        this), 0);
+    layout->addWidget (mBottom = new TableBottomBox (NullCreatorFactory(), document, id, this), 0);
 
     mLayout->setContentsMargins (QMargins (0, 0, 0, 0));
 

@@ -685,8 +685,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    mMainLayout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this));
+    mMainLayout->addWidget (mBottom = new TableBottomBox (creatorFactory, document, id, this));
 
     mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
 

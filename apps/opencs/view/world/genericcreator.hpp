@@ -13,10 +13,12 @@ class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
+class QUndoStack;
 
 namespace CSMWorld
 {
     class CreateCommand;
+    class Data;
 }
 
 namespace CSVWorld
