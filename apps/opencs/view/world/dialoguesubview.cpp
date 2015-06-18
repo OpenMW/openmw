@@ -479,8 +479,7 @@ void CSVWorld::EditWidget::remake(int row)
                 }
                 else
                     table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
-                // FIXME: does not work well when enum delegates are used
-                //table->resizeColumnsToContents();
+                table->resizeColumnsToContents();
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
