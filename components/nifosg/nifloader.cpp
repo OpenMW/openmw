@@ -903,8 +903,7 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    // Occurred in "ascendedsleeper.nif", but only for hidden Shadow nodes, apparently
-                    //std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape " << triShape->name << std::endl;
+                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape " << triShape->name << " in " << mFilename << std::endl;
                     continue;
                 }
 
