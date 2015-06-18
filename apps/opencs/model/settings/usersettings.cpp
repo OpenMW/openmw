@@ -234,6 +234,47 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDeclaredValues (jumpValues);
     }
 
+    declareSection ("report-input", "Report Input");
+    {
+        QString none ("None");
+        QString edit ("Edit");
+        QString remove ("Remove");
+        QString editAndRemove ("Edit And Remove");
+
+        QStringList values;
+        values << none << edit << remove << editAndRemove;
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit: Open a table or dialogue suitable for addressing the listed report</li>"
+            "<li>Remove: Remove the report from the report table</li>"
+            "<li>Edit and Remove: Open a table or dialogue suitable for addressing the listed report, then remove the report from the report table</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (edit);
+        doubleClick->setToolTip ("Action on double click in report table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (remove);
+        shiftDoubleClick->setToolTip ("Action on shift double click in report table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (editAndRemove);
+        ctrlDoubleClick->setToolTip ("Action on control double click in report table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (none);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in report table:<p>" + toolTip);
+    }
+    
     declareSection ("search", "Search & Replace");
     {
         Setting *before = createSetting (Type_SpinBox, "char-before",
