@@ -62,7 +62,6 @@ QSize CSVWorld::DataDisplayDelegate::sizeHint(const QStyleOptionViewItem &option
         }
         else if (mDisplayMode == Mode_IconAndText)
         {
-            int valueWidth = option.fontMetrics.width(mValues.at(valueIndex).second);
             size.setWidth(size.width() + mIconSize.width() + mTextLeftOffset);
         }
 
