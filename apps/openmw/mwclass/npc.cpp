@@ -610,6 +610,14 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
 
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        {
+            const std::string &script = ptr.getClass().getScript(ptr);
+            /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
+            if(!script.empty())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
+        }
+
         if(!successful)
         {
             // Missed
@@ -620,13 +628,6 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-        {
-            const std::string &script = ptr.getClass().getScript(ptr);
-            /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
-            if(!script.empty())
-                ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
-        }
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
