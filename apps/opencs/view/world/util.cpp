@@ -17,6 +17,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/world/usertype.hpp"
 #include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
@@ -153,7 +154,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     const QModelIndex& index) const
 {
     CSMWorld::ColumnBase::Display display = getDisplayTypeFromIndex(index);
-    
+
     // This createEditor() method is called implicitly from tables.
     // For boolean values in tables use the default editor (combobox).
     // Checkboxes is looking ugly in the table view.
@@ -295,8 +296,15 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
 
     if (!n.isEmpty()) {
         if (!v.isValid())
-            v = QVariant(editor->property(n).userType(), (const void *)0);
-        editor->setProperty(n, v);
+            editor->setProperty(n, QVariant(editor->property(n).userType(), (const void *)0));
+        else if (v.type() == QVariant::UserType
+                && QString(v.typeName()) == "CSMWorld::UserFloat" && v.canConvert<CSMWorld::UserFloat>())
+            editor->setProperty(n, QVariant(v.value<CSMWorld::UserFloat>().value()));
+        else if (v.type() == QVariant::UserType
+                && QString(v.typeName()) == "CSMWorld::UserInt" && v.canConvert<CSMWorld::UserInt>())
+            editor->setProperty(n, QVariant(v.value<CSMWorld::UserInt>().value()));
+        else
+            editor->setProperty(n, v);
     }
 
 }

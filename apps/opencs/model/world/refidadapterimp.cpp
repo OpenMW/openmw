@@ -5,7 +5,195 @@
 #include <utility>
 
 #include <components/esm/loadcont.hpp>
+#include <components/esm/attr.hpp>
+
 #include "nestedtablewrapper.hpp"
+#include "usertype.hpp"
+
+namespace
+{
+
+int is_even(double d)
+{
+    double int_part;
+
+    modf(d / 2.0, &int_part);
+    return 2.0 * int_part == d;
+}
+
+int round_ieee_754(double d)
+{
+    double i = floor(d);
+    d -= i;
+
+    if(d < 0.5)
+        return static_cast<int>(i);
+    if(d > 0.5)
+        return static_cast<int>(i) + 1;
+    if(is_even(i))
+        return static_cast<int>(i);
+    return static_cast<int>(i) + 1;
+}
+
+std::vector<int> autoCalculateAttributes (const ESM::NPC &npc,
+    const ESM::Race& race, const ESM::Class& class_, const CSMWorld::IdCollection<ESM::Skill>& skillTable)
+{
+    // race bonus
+    bool male = (npc.mFlags & ESM::NPC::Female) == 0;
+
+    if (npc.mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        return std::vector<int>();
+
+    short level = npc.mNpdt12.mLevel;
+
+    int attr[ESM::Attribute::Length];
+
+    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    {
+        const ESM::Race::MaleFemale& attribute = race.mData.mAttributeValues[i];
+        attr[i] = male ? attribute.mMale : attribute.mFemale;
+    }
+
+    // class bonus
+    for (int i = 0; i < 2; ++i)
+    {
+        int attribute = class_.mData.mAttribute[i];
+        if (attribute >= 0 && attribute < ESM::Attribute::Length)
+        {
+            attr[attribute] = attr[attribute] + 10;
+        }
+        // else log an error
+    }
+
+    std::vector<int> result(ESM::Attribute::Length);
+    // skill bonus
+    for (int attribute = 0; attribute < ESM::Attribute::Length; ++attribute)
+    {
+        float modifierSum = 0;
+
+        for (int j = 0; j < ESM::Skill::Length; ++j)
+        {
+            // if the skill does not exist, throws std::runtime_error ("invalid ID: " + id)
+            const ESM::Skill& skill = skillTable.getRecord(ESM::Skill::indexToId(j)).get();
+
+            if (skill.mData.mAttribute != attribute)
+                continue;
+
+            // is this a minor or major skill?
+            float add = 0.2f;
+            for (int k = 0; k < 5; ++k)
+            {
+                if (class_.mData.mSkills[k][0] == j)
+                    add = 0.5;
+            }
+            for (int k = 0; k < 5; ++k)
+            {
+                if (class_.mData.mSkills[k][1] == j)
+                    add = 1.0;
+            }
+            modifierSum += add;
+        }
+        result[attribute] = std::min(round_ieee_754(attr[attribute] + (level-1) * modifierSum), 100);
+    }
+
+    return result;
+}
+
+std::vector<unsigned char> autoCalculateSkills (const ESM::NPC &npc,
+    const ESM::Race& race, const ESM::Class& class_, const CSMWorld::IdCollection<ESM::Skill>& skillTable)
+{
+    unsigned char skills[ESM::Skill::Length];
+    for (int i = 0; i < ESM::Skill::Length; ++i)
+        skills[i] = 0;
+
+    for (int i = 0; i < 2; ++i)
+    {
+        int bonus = (i == 0) ? 10 : 25;
+
+        for (int i2 = 0; i2 < 5; ++i2)
+        {
+            int index = class_.mData.mSkills[i2][i];
+            if (index >= 0 && index < ESM::Skill::Length)
+            {
+                skills[index] = bonus;
+            }
+        }
+    }
+
+    std::vector<unsigned char> result(ESM::Skill::Length);
+    for (int skillIndex = 0; skillIndex < ESM::Skill::Length; ++skillIndex)
+    {
+        float majorMultiplier = 0.1f;
+        float specMultiplier = 0.0f;
+
+        int raceBonus = 0;
+        int specBonus = 0;
+
+        for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
+        {
+            if (race.mData.mBonus[raceSkillIndex].mSkill == skillIndex)
+            {
+                raceBonus = race.mData.mBonus[raceSkillIndex].mBonus;
+                break;
+            }
+        }
+
+        for (int k = 0; k < 5; ++k)
+        {
+            // is this a minor or major skill?
+            if ((class_.mData.mSkills[k][0] == skillIndex) || (class_.mData.mSkills[k][1] == skillIndex))
+            {
+                majorMultiplier = 1.0f;
+                break;
+            }
+        }
+
+        // is this skill in the same Specialization as the class?
+        const ESM::Skill& skill = skillTable.getRecord(ESM::Skill::indexToId(skillIndex)).get();
+        if (skill.mData.mSpecialization == class_.mData.mSpecialization)
+        {
+            specMultiplier = 0.5f;
+            specBonus = 5;
+        }
+
+        // Must gracefully handle level 0
+        result[skillIndex] = std::min(round_ieee_754(skills[skillIndex] + 5 + raceBonus + specBonus +
+                                                     (npc.mNpdt12.mLevel-1) * (majorMultiplier + specMultiplier)), 100);
+    }
+
+    return result;
+}
+
+unsigned short autoCalculateHealth(const ESM::NPC &npc,
+        const ESM::Class& class_, const std::vector<int>& attr)
+{
+    int multiplier = 3;
+
+    if (class_.mData.mSpecialization == ESM::Class::Combat)
+        multiplier += 2;
+    else if (class_.mData.mSpecialization == ESM::Class::Stealth)
+        multiplier += 1;
+
+    if (class_.mData.mAttribute[0] == ESM::Attribute::Endurance
+        || class_.mData.mAttribute[1] == ESM::Attribute::Endurance)
+        multiplier += 1;
+
+    return floor(0.5f * (attr[ESM::Attribute::Strength]+ attr[ESM::Attribute::Endurance]))
+            + multiplier * (npc.mNpdt12.mLevel-1);
+}
+
+unsigned short autoCalculateMana(const std::vector<int>& attr)
+{
+    return attr[ESM::Attribute::Intelligence] * 2;
+}
+
+unsigned short autoCalculateFatigue(const std::vector<int>& attr)
+{
+    return attr[ESM::Attribute::Strength] + attr[ESM::Attribute::Willpower]
+                         + attr[ESM::Attribute::Agility] + attr[ESM::Attribute::Endurance];
+}
+
+}
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
 : InventoryColumns (columns) {}
@@ -553,8 +741,12 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
   mMisc(NULL)
 {}
 
-CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
-: ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)
+CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns,
+    const CSMWorld::IdCollection<ESM::Race>& races,
+    const CSMWorld::IdCollection<ESM::Class>& classes,
+    const CSMWorld::IdCollection<ESM::Skill>& skills)
+: ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns),
+  mRaceTable(races), mClassTable(classes), mSkillTable(skills)
 {}
 
 QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data, int index)
@@ -629,8 +821,46 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
                 npc.mFlags &= ~iter->second;
 
             if (iter->second == ESM::NPC::Autocalc)
-                npc.mNpdtType = (value.toInt() != 0) ? ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS
-                                                     : ESM::NPC::NPC_DEFAULT;
+            {
+                if(value.toInt() != 0)
+                {
+                    npc.mNpdtType = ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
+
+                    // if the race/class does not exist, throws std::runtime_error ("invalid ID: " + id)
+                    const ESM::Race& race = mRaceTable.getRecord(npc.mRace).get();
+                    const ESM::Class& class_ = mClassTable.getRecord(npc.mClass).get();
+                    std::vector<int> attr = autoCalculateAttributes(npc, race, class_, mSkillTable);
+                    if (attr.empty())
+                        return;
+
+                    std::vector<unsigned char> skills = autoCalculateSkills(npc, race, class_, mSkillTable);
+
+                    ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
+
+                    npcStruct.mLevel        = npc.mNpdt12.mLevel;
+                    npcStruct.mStrength     = attr[ESM::Attribute::Strength];
+                    npcStruct.mIntelligence = attr[ESM::Attribute::Intelligence];
+                    npcStruct.mWillpower    = attr[ESM::Attribute::Willpower];
+                    npcStruct.mAgility      = attr[ESM::Attribute::Agility];
+                    npcStruct.mSpeed        = attr[ESM::Attribute::Speed];
+                    npcStruct.mEndurance    = attr[ESM::Attribute::Endurance];
+                    npcStruct.mPersonality  = attr[ESM::Attribute::Personality];
+                    npcStruct.mLuck         = attr[ESM::Attribute::Luck];
+                    for (int i = 0; i < ESM::Skill::Length; ++i)
+                    {
+                        npcStruct.mSkills[i] = skills[i];
+                    }
+                    npcStruct.mHealth       = autoCalculateHealth(npc, class_, attr);
+                    npcStruct.mMana         = autoCalculateMana(attr);
+                    npcStruct.mFatigue      = autoCalculateFatigue(attr);
+                    npcStruct.mDisposition  = npc.mNpdt12.mDisposition;
+                    npcStruct.mReputation   = npc.mNpdt12.mReputation;
+                    npcStruct.mRank         = npc.mNpdt12.mRank;
+                    npcStruct.mGold         = npc.mNpdt12.mGold;
+                }
+                else
+                    npc.mNpdtType = ESM::NPC::NPC_DEFAULT;
+            }
         }
         else
         {
@@ -643,7 +873,9 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
     record.setModified (npc);
 }
 
-CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter ()
+CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter(const CSMWorld::IdCollection<ESM::Race>& races,
+    const CSMWorld::IdCollection<ESM::Class>& classes, const CSMWorld::IdCollection<ESM::Skill>& skills)
+    : mRaceTable(races), mClassTable(classes), mSkillTable(skills)
 {}
 
 void CSMWorld::NpcAttributesRefIdAdapter::addNestedRow (const RefIdColumn *column,
@@ -691,7 +923,8 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
+    const ESM::NPC npc = record.get();
+    const ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
 
     if (subColIndex == 0)
         switch (subRowIndex)
@@ -707,18 +940,43 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
             default: return QVariant(); // throw an exception here?
         }
     else if (subColIndex == 1)
-        switch (subRowIndex)
+        // It may be possible to have mNpdt52 values different to autocalculated ones when
+        // first loaded, so re-calculate
+        if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
-            case 0: return static_cast<int>(npcStruct.mStrength);
-            case 1: return static_cast<int>(npcStruct.mIntelligence);
-            case 2: return static_cast<int>(npcStruct.mWillpower);
-            case 3: return static_cast<int>(npcStruct.mAgility);
-            case 4: return static_cast<int>(npcStruct.mSpeed);
-            case 5: return static_cast<int>(npcStruct.mEndurance);
-            case 6: return static_cast<int>(npcStruct.mPersonality);
-            case 7: return static_cast<int>(npcStruct.mLuck);
-            default: return QVariant(); // throw an exception here?
+            const ESM::Race& race = mRaceTable.getRecord(npc.mRace).get();
+            const ESM::Class& class_ = mClassTable.getRecord(npc.mClass).get();
+            std::vector<int> attr = autoCalculateAttributes(npc, race, class_, mSkillTable);
+
+            if (attr.empty())
+                return QVariant();
+
+            switch (subRowIndex)
+            {
+                case 0: return static_cast<int>(attr[ESM::Attribute::Strength]);
+                case 1: return static_cast<int>(attr[ESM::Attribute::Intelligence]);
+                case 2: return static_cast<int>(attr[ESM::Attribute::Willpower]);
+                case 3: return static_cast<int>(attr[ESM::Attribute::Agility]);
+                case 4: return static_cast<int>(attr[ESM::Attribute::Speed]);
+                case 5: return static_cast<int>(attr[ESM::Attribute::Endurance]);
+                case 6: return static_cast<int>(attr[ESM::Attribute::Personality]);
+                case 7: return static_cast<int>(attr[ESM::Attribute::Luck]);
+                default: return QVariant(); // throw an exception here?
+            }
         }
+        else
+            switch (subRowIndex)
+            {
+                case 0: return static_cast<int>(npcStruct.mStrength);
+                case 1: return static_cast<int>(npcStruct.mIntelligence);
+                case 2: return static_cast<int>(npcStruct.mWillpower);
+                case 3: return static_cast<int>(npcStruct.mAgility);
+                case 4: return static_cast<int>(npcStruct.mSpeed);
+                case 5: return static_cast<int>(npcStruct.mEndurance);
+                case 6: return static_cast<int>(npcStruct.mPersonality);
+                case 7: return static_cast<int>(npcStruct.mLuck);
+                default: return QVariant(); // throw an exception here?
+            }
     else
         return QVariant(); // throw an exception here?
 }
@@ -761,7 +1019,10 @@ int CSMWorld::NpcAttributesRefIdAdapter::getNestedRowsCount(const RefIdColumn *c
     return 8;
 }
 
-CSMWorld::NpcSkillsRefIdAdapter::NpcSkillsRefIdAdapter ()
+CSMWorld::NpcSkillsRefIdAdapter::NpcSkillsRefIdAdapter(const CSMWorld::IdCollection<ESM::Race>& races,
+                                                       const CSMWorld::IdCollection<ESM::Class>& classes,
+                                                       const CSMWorld::IdCollection<ESM::Skill>& skills)
+    : mRaceTable(races), mClassTable(classes), mSkillTable(skills)
 {}
 
 void CSMWorld::NpcSkillsRefIdAdapter::addNestedRow (const RefIdColumn *column,
@@ -809,7 +1070,7 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
+    const ESM::NPC npc = record.get();
 
     if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
         throw std::runtime_error ("index out of range");
@@ -817,7 +1078,26 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
     if (subColIndex == 0)
         return QString(ESM::Skill::sSkillNames[subRowIndex].c_str());
     else if (subColIndex == 1)
-        return static_cast<int>(npcStruct.mSkills[subRowIndex]);
+    {
+        // It may be possible to have mNpdt52 values different to autocalculated ones when
+        // first loaded, so re-calculate
+        if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        {
+            // if the race/class does not exist, throws std::runtime_error ("invalid ID: " + id)
+            const ESM::Race& race = mRaceTable.getRecord(npc.mRace).get();
+            const ESM::Class& class_ = mClassTable.getRecord(npc.mClass).get();
+            std::vector<unsigned char> skills = autoCalculateSkills(npc, race, class_, mSkillTable);
+
+            int value = static_cast<int>(skills[subRowIndex]);
+
+            return static_cast<int>(skills[subRowIndex]);
+        }
+        else
+        {
+            const ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
+            return static_cast<int>(npcStruct.mSkills[subRowIndex]);
+        }
+    }
     else
         return QVariant(); // throw an exception here?
 }
@@ -852,7 +1132,10 @@ int CSMWorld::NpcSkillsRefIdAdapter::getNestedRowsCount(const RefIdColumn *colum
     return ESM::Skill::Length;
 }
 
-CSMWorld::NpcMiscRefIdAdapter::NpcMiscRefIdAdapter ()
+CSMWorld::NpcMiscRefIdAdapter::NpcMiscRefIdAdapter(const CSMWorld::IdCollection<ESM::Race>& races,
+                                                   const CSMWorld::IdCollection<ESM::Class>& classes,
+                                                   const CSMWorld::IdCollection<ESM::Skill>& skills)
+    : mRaceTable(races), mClassTable(classes), mSkillTable(skills)
 {}
 
 CSMWorld::NpcMiscRefIdAdapter::~NpcMiscRefIdAdapter()
@@ -888,16 +1171,45 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    bool autoCalc = (record.get().mFlags & ESM::NPC::Autocalc) != 0;
+    const ESM::NPC npc = record.get();
 
+    bool autoCalc = (npc.mFlags & ESM::NPC::Autocalc) != 0;
+
+    // It may be possible to have mNpdt52 values different to autocalculated ones when
+    // first loaded, so re-calculate
     if (autoCalc)
+    {
+        // if the race/class does not exist, throws std::runtime_error ("invalid ID: " + id)
+        const ESM::Race& race = mRaceTable.getRecord(npc.mRace).get();
+        const ESM::Class& class_ = mClassTable.getRecord(npc.mClass).get();
+        std::vector<int> attr = autoCalculateAttributes(npc, race, class_, mSkillTable);
+
+        if (attr.empty())
+            return QVariant();
+
         switch (subColIndex)
         {
-            case 0: return static_cast<int>(record.get().mNpdt12.mLevel);
-            case 1: return QVariant(QVariant::UserType);
-            case 2: return QVariant(QVariant::UserType);
-            case 3: return QVariant(QVariant::UserType);
-            case 4: return QVariant(QVariant::UserType);
+            case 0: return static_cast<int>(npc.mNpdt12.mLevel);
+            case 1:
+            {
+                UserInt i(0); // unknown
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 2:
+            {
+                UserInt i(autoCalculateHealth(npc, class_, attr));
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 3:
+            {
+                UserInt i(autoCalculateMana(attr));
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 4:
+            {
+                UserInt i(autoCalculateFatigue(attr));
+                return QVariant(QVariant::fromValue(i));
+            }
             case 5: return static_cast<int>(record.get().mNpdt12.mDisposition);
             case 6: return static_cast<int>(record.get().mNpdt12.mReputation);
             case 7: return static_cast<int>(record.get().mNpdt12.mRank);
@@ -905,6 +1217,7 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             case 9: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
+    }
     else
         switch (subColIndex)
         {
@@ -934,30 +1247,107 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
     if (autoCalc)
         switch(subColIndex)
         {
-            case 0: npc.mNpdt12.mLevel = static_cast<short>(value.toInt()); break;
+            case 0:
+            {
+                npc.mNpdt12.mLevel = static_cast<short>(value.toInt()); break;
+
+                const ESM::Race& race = mRaceTable.getRecord(npc.mRace).get();
+                const ESM::Class& class_ = mClassTable.getRecord(npc.mClass).get();
+                std::vector<int> attr = autoCalculateAttributes(npc, race, class_, mSkillTable);
+                if (attr.empty())
+                    return;
+
+                ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
+
+                std::vector<unsigned char> skills = autoCalculateSkills(npc, race, class_, mSkillTable);
+
+                npcStruct.mLevel        = npc.mNpdt12.mLevel;
+                npcStruct.mStrength     = attr[ESM::Attribute::Strength];
+                npcStruct.mIntelligence = attr[ESM::Attribute::Intelligence];
+                npcStruct.mWillpower    = attr[ESM::Attribute::Willpower];
+                npcStruct.mAgility      = attr[ESM::Attribute::Agility];
+                npcStruct.mSpeed        = attr[ESM::Attribute::Speed];
+                npcStruct.mEndurance    = attr[ESM::Attribute::Endurance];
+                npcStruct.mPersonality  = attr[ESM::Attribute::Personality];
+                npcStruct.mLuck         = attr[ESM::Attribute::Luck];
+                for (int i = 0; i < ESM::Skill::Length; ++i)
+                {
+                    npcStruct.mSkills[i] = skills[i];
+                }
+                npcStruct.mHealth       = autoCalculateHealth(npc, class_, attr);
+                npcStruct.mMana         = autoCalculateMana(attr);
+                npcStruct.mFatigue      = autoCalculateFatigue(attr);
+
+                break;
+            }
             case 1: return;
             case 2: return;
             case 3: return;
             case 4: return;
-            case 5: npc.mNpdt12.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt12.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt12.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt12.mGold = value.toInt(); break;
+            case 5:
+            {
+                npc.mNpdt12.mDisposition = static_cast<signed char>(value.toInt());
+                npc.mNpdt52.mDisposition = npc.mNpdt12.mDisposition;
+                break;
+            }
+            case 6:
+            {
+                npc.mNpdt12.mReputation = static_cast<signed char>(value.toInt());
+                npc.mNpdt52.mReputation = npc.mNpdt12.mReputation;
+                break;
+            }
+            case 7:
+            {
+                npc.mNpdt12.mRank = static_cast<signed char>(value.toInt());
+                npc.mNpdt52.mRank = npc.mNpdt12.mRank;
+                break;
+            }
+            case 8:
+            {
+                npc.mNpdt12.mGold = value.toInt();
+                npc.mNpdt52.mGold = npc.mNpdt12.mGold;
+                break;
+            }
             case 9: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }
     else
         switch(subColIndex)
         {
-            case 0: npc.mNpdt52.mLevel = static_cast<short>(value.toInt()); break;
+            case 0:
+            {
+                npc.mNpdt52.mLevel = static_cast<short>(value.toInt());
+                npc.mNpdt12.mLevel = npc.mNpdt52.mLevel;
+                break;
+            }
             case 1: npc.mNpdt52.mFactionID = static_cast<char>(value.toInt()); break;
             case 2: npc.mNpdt52.mHealth = static_cast<unsigned short>(value.toInt()); break;
             case 3: npc.mNpdt52.mMana = static_cast<unsigned short>(value.toInt()); break;
             case 4: npc.mNpdt52.mFatigue = static_cast<unsigned short>(value.toInt()); break;
-            case 5: npc.mNpdt52.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt52.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt52.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt52.mGold = value.toInt(); break;
+            case 5:
+            {
+                npc.mNpdt52.mDisposition = static_cast<signed char>(value.toInt());
+                npc.mNpdt12.mDisposition = npc.mNpdt52.mDisposition;
+                break;
+            }
+            case 6:
+            {
+                npc.mNpdt52.mReputation = static_cast<signed char>(value.toInt());
+                npc.mNpdt12.mReputation = npc.mNpdt52.mReputation;
+                break;
+            }
+            case 7:
+            {
+                npc.mNpdt52.mRank = static_cast<signed char>(value.toInt());
+                npc.mNpdt12.mRank = npc.mNpdt52.mRank;
+                break;
+            }
+            case 8:
+            {
+                npc.mNpdt52.mGold = value.toInt();
+                npc.mNpdt12.mGold = npc.mNpdt52.mGold;
+                break;
+            }
             case 9: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }

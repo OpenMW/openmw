@@ -20,6 +20,7 @@ namespace CSMWorld
     class RefIdAdapter;
     struct NestedTableWrapperBase;
     class NestedRefIdAdapterBase;
+    class Data;
 
     class RefIdColumn : public NestableColumn
     {
@@ -56,7 +57,8 @@ namespace CSMWorld
 
         public:
 
-            RefIdCollection();
+            // race, classes and skills required for NPC autocalc
+            RefIdCollection(const Data& data);
 
             virtual ~RefIdCollection();
 

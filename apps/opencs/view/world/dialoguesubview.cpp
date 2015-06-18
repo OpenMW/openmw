@@ -468,17 +468,19 @@ void CSVWorld::EditWidget::remake(int row)
                     static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (row, typeColumn)).toInt()),
                     mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
 
-                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
-                // FIXME: does not work well when enum delegates are used
-                //table->resizeColumnsToContents();
-
-                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                bool editable = mTable->index(row, i).data().type() != QVariant::UserType;
+                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this, editable);
+                if (!editable)
                 {
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-                    table->setEnabled(false);
+                    table->setSelectionMode(QAbstractItemView::NoSelection);
+                    table->setStyleSheet("QTableView { color: gray; }");
+                    table->horizontalHeader()->setStyleSheet("QHeaderView { color: gray; }");
                 }
                 else
                     table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+                // FIXME: does not work well when enum delegates are used
+                //table->resizeColumnsToContents();
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);

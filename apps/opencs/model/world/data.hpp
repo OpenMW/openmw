@@ -121,6 +121,8 @@ namespace CSMWorld
 
             static int count (RecordBase::State state, const CollectionBase& collection);
 
+            const CSMWorld::Data& self ();
+
         public:
 
             Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);

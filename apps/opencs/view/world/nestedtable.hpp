@@ -36,7 +36,8 @@ namespace CSVWorld
         NestedTable(CSMDoc::Document& document,
                     CSMWorld::UniversalId id,
                     CSMWorld::NestedTableProxyModel* model,
-                    QWidget* parent = NULL);
+                    QWidget* parent = NULL,
+                    bool editable = true);
 
     protected:
         void dragEnterEvent(QDragEnterEvent *event);

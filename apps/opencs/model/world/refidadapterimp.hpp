@@ -11,12 +11,16 @@
 #include <components/esm/loadappa.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadclas.hpp>
+#include <components/esm/loadrace.hpp>
 
 #include "record.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"
 #include "refidadapter.hpp"
 #include "nestedtablewrapper.hpp"
+#include "idcollection.hpp"
 
 namespace CSMWorld
 {
@@ -802,10 +806,16 @@ namespace CSMWorld
     class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
     {
             NpcColumns mColumns;
+            const IdCollection<ESM::Race>& mRaceTable;
+            const IdCollection<ESM::Class>& mClassTable;
+            const IdCollection<ESM::Skill>& mSkillTable;
 
         public:
 
-            NpcRefIdAdapter (const NpcColumns& columns);
+            NpcRefIdAdapter (const NpcColumns& columns,
+                             const IdCollection<ESM::Race>& races,
+                             const IdCollection<ESM::Class>& classes,
+                             const IdCollection<ESM::Skill>& skills);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
@@ -850,9 +860,15 @@ namespace CSMWorld
 
     class NpcAttributesRefIdAdapter : public NestedRefIdAdapterBase
     {
+        const IdCollection<ESM::Race>& mRaceTable;
+        const IdCollection<ESM::Class>& mClassTable;
+        const IdCollection<ESM::Skill>& mSkillTable;
+
     public:
 
-        NpcAttributesRefIdAdapter ();
+        NpcAttributesRefIdAdapter (const IdCollection<ESM::Race>& races,
+                             const IdCollection<ESM::Class>& classes,
+                             const IdCollection<ESM::Skill>& skills);
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -879,9 +895,15 @@ namespace CSMWorld
 
     class NpcSkillsRefIdAdapter : public NestedRefIdAdapterBase
     {
+        const IdCollection<ESM::Race>& mRaceTable;
+        const IdCollection<ESM::Class>& mClassTable;
+        const IdCollection<ESM::Skill>& mSkillTable;
+
     public:
 
-        NpcSkillsRefIdAdapter ();
+        NpcSkillsRefIdAdapter (const IdCollection<ESM::Race>& races,
+                             const IdCollection<ESM::Class>& classes,
+                             const IdCollection<ESM::Skill>& skills);
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -908,12 +930,18 @@ namespace CSMWorld
 
     class NpcMiscRefIdAdapter : public NestedRefIdAdapterBase
     {
+        const IdCollection<ESM::Race>& mRaceTable;
+        const IdCollection<ESM::Class>& mClassTable;
+        const IdCollection<ESM::Skill>& mSkillTable;
+
         NpcMiscRefIdAdapter (const NpcMiscRefIdAdapter&);
         NpcMiscRefIdAdapter& operator= (const NpcMiscRefIdAdapter&);
 
     public:
 
-        NpcMiscRefIdAdapter ();
+        NpcMiscRefIdAdapter (const IdCollection<ESM::Race>& races,
+                             const IdCollection<ESM::Class>& classes,
+                             const IdCollection<ESM::Skill>& skills);
         virtual ~NpcMiscRefIdAdapter();
 
         virtual void addNestedRow (const RefIdColumn *column,

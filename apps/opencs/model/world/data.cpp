@@ -62,7 +62,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0),
+  mReferenceables(self())
 {
     int index = 0;
 
@@ -1158,4 +1159,9 @@ void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex&
 void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 {
     emit idListChanged();
+}
+
+const CSMWorld::Data& CSMWorld::Data::self ()
+{
+    return *this;
 }
