@@ -6,13 +6,15 @@
 #include <QDesktopWidget>
 #include <QPainter>
 #include <QRect>
+#include <QShowEvent>
 
 #include "colorpickerpopup.hpp"
 
-CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent)
+CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent, bool popupOnStart)
     : QPushButton(parent),
       mColor(color),
-      mColorPicker(new ColorPickerPopup(this))
+      mColorPicker(new ColorPickerPopup(this)),
+      mPopupOnStart(popupOnStart)
 {
     setCheckable(true);
     connect(this, SIGNAL(clicked()), this, SLOT(showPicker()));
@@ -33,6 +35,17 @@ void CSVWidget::ColorEditor::paintEvent(QPaintEvent *event)
     painter.fillRect(coloredRect, mColor);
     painter.setPen(Qt::black);
     painter.drawRect(coloredRect);
+}
+
+void CSVWidget::ColorEditor::showEvent(QShowEvent *event)
+{
+    QPushButton::showEvent(event);
+    if (isVisible() && mPopupOnStart)
+    {
+        setChecked(true);
+        showPicker();
+        mPopupOnStart = false;
+    }
 }
 
 QColor CSVWidget::ColorEditor::color() const

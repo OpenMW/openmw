@@ -17,17 +17,19 @@ namespace CSVWidget
 
             QColor mColor;
             ColorPickerPopup *mColorPicker;
+            bool mPopupOnStart;
 
             QPoint calculatePopupPosition();
 
         public:
-            ColorEditor(const QColor &color, QWidget *parent = 0);
+            ColorEditor(const QColor &color, QWidget *parent = 0, bool popupOnStart = false);
 
             QColor color() const;
             void setColor(const QColor &color);
 
         protected:
-            void paintEvent(QPaintEvent *event);
+            virtual void paintEvent(QPaintEvent *event);
+            virtual void showEvent(QShowEvent *event);
 
         private slots:
             void showPicker();

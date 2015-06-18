@@ -172,6 +172,12 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     {
         return QStyledItemDelegate::createEditor(parent, option, index);
     }
+    // For tables the pop-up of the color editor should appear immediately after the editor creation
+    // (the third parameter of ColorEditor's constructor)
+    else if (display == CSMWorld::ColumnBase::Display_Colour)
+    {
+        return new CSVWidget::ColorEditor(index.data().value<QColor>(), parent, true);
+    }
     return createEditor (parent, option, index, display);
 }
 
