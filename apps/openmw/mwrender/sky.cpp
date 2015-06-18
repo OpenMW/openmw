@@ -104,7 +104,7 @@ public:
 protected:
     virtual void setDefaults(osg::StateSet* stateset)
     {
-        stateset->setAttribute(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     }
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
@@ -224,9 +224,6 @@ public:
             if (!geom)
                 continue;
 
-            // might want to use fog coordinates instead of vertex colors so we can apply a separate fade to the diffuse alpha
-            // (that isn't possible now, with the diffuse tracking the vertex colors)
-
             osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(geom->getVertexArray()->getNumElements());
             for (unsigned int i=0; i<colors->size(); ++i)
             {
@@ -244,7 +241,7 @@ public:
                     alpha = ((*origColors)[i].x() == 1.f) ? 1.f : 0.f;
                 }
 
-                (*colors)[i] = osg::Vec4f(alpha, alpha, alpha, alpha);
+                (*colors)[i] = osg::Vec4f(0.f, 0.f, 0.f, alpha);
             }
 
             geom->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
