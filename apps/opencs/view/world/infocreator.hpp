@@ -8,6 +8,7 @@ class QLineEdit;
 namespace CSMWorld
 {
     class InfoCollection;
+    class IdCompletionManager;
 }
 
 namespace CSVWorld
@@ -25,7 +26,7 @@ namespace CSVWorld
         public:
 
             InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id);
+                const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager);
 
             virtual void cloneMode (const std::string& originId,
                 const CSMWorld::UniversalId::Type type);
@@ -42,6 +43,14 @@ namespace CSVWorld
         private slots:
 
             void topicChanged();
+    };
+
+    class InfoCreatorFactory : public CreatorFactoryBase
+    {
+        public:
+
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            ///< The ownership of the returned Creator is transferred to the caller.
     };
 }
 
