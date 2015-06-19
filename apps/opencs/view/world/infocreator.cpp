@@ -50,8 +50,7 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
 
     mTopic = new QLineEdit (this);
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;
-    if (id.getType() == CSMWorld::UniversalId::Type_JournalInfo || // For Dialogue SubView
-        id.getType() == CSMWorld::UniversalId::Type_JournalInfos)  // For Table SubView
+    if (getCollectionId().getType() == CSMWorld::UniversalId::Type_JournalInfos)
     {
         displayType = CSMWorld::ColumnBase::Display_Journal;
     }
