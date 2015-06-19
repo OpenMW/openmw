@@ -145,4 +145,9 @@ namespace Resource
         }
     }
 
+    osg::Texture2D* TextureManager::getWarningTexture()
+    {
+        return mWarningTexture.get();
+    }
+
 }

@@ -96,7 +96,7 @@ namespace MWRender
 class AtmosphereUpdater : public SceneUtil::StateSetUpdater
 {
 public:
-    void setEmissionColor(osg::Vec4f emissionColor)
+    void setEmissionColor(const osg::Vec4f& emissionColor)
     {
         mEmissionColor = emissionColor;
     }
@@ -117,6 +117,45 @@ private:
     osg::Vec4f mEmissionColor;
 };
 
+class AtmosphereNightUpdater : public SceneUtil::StateSetUpdater
+{
+public:
+    AtmosphereNightUpdater(Resource::TextureManager* textureManager)
+    {
+        // we just need a texture, its contents don't really matter
+        mTexture = textureManager->getWarningTexture();
+    }
+
+    void setFade(const float fade)
+    {
+        mColor.a() = fade;
+    }
+
+protected:
+    virtual void setDefaults(osg::StateSet* stateset)
+    {
+        osg::ref_ptr<osg::TexEnvCombine> texEnv (new osg::TexEnvCombine);
+        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
+        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+        texEnv->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
+        texEnv->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+
+        stateset->setTextureAttributeAndModes(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttributeAndModes(1, texEnv, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+    }
+
+    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
+    {
+        osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+        texEnv->setConstantColor(mColor);
+    }
+
+    osg::ref_ptr<osg::Texture2D> mTexture;
+
+    osg::Vec4f mColor;
+};
+
 class CloudUpdater : public SceneUtil::StateSetUpdater
 {
 public:
@@ -129,7 +168,7 @@ public:
     {
         mTexture = texture;
     }
-    void setEmissionColor(osg::Vec4f emissionColor)
+    void setEmissionColor(const osg::Vec4f& emissionColor)
     {
         mEmissionColor = emissionColor;
     }
@@ -570,6 +609,8 @@ void SkyManager::create()
     atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     ModVertexAlphaVisitor modStars(2);
     atmosphereNight->accept(modStars);
+    mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getTextureManager());
+    atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
     mSun.reset(new Sun(mRootNode, mSceneManager));
 
@@ -806,13 +847,9 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (weather.mNight && mStarsOpacity != weather.mNightFade)
     {
-        if (weather.mNightFade != 0)
-        {
-            //sh::Factory::getInstance().setSharedParameter ("nightFade",
-            //    sh::makeProperty<sh::FloatValue>(new sh::FloatValue(weather.mNightFade)));
+        mStarsOpacity = weather.mNightFade;
 
-            //mStarsOpacity = weather.mNightFade;
-        }
+        mAtmosphereNightUpdater->setFade(mStarsOpacity);
     }
 
     mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);

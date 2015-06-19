@@ -20,6 +20,7 @@ namespace Resource
 namespace MWRender
 {
     class AtmosphereUpdater;
+    class AtmosphereNightUpdater;
     class CloudUpdater;
     class Sun;
     class Moon;
@@ -107,6 +108,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mAtmosphereNightNode;
         float mAtmosphereNightRoll;
+        osg::ref_ptr<AtmosphereNightUpdater> mAtmosphereNightUpdater;
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
 

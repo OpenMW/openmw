@@ -38,6 +38,8 @@ namespace Resource
 
         const VFS::Manager* getVFS() { return mVFS; }
 
+        osg::Texture2D* getWarningTexture();
+
     private:
         const VFS::Manager* mVFS;
 
