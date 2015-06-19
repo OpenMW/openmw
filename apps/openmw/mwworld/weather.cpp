@@ -495,8 +495,6 @@ void WeatherManager::update(float duration, bool paused)
 
         mRendering->getSkyManager()->setMasserDirection(masser);
         mRendering->getSkyManager()->setSecundaDirection(secunda);
-        mRendering->getSkyManager()->masserEnable();
-        mRendering->getSkyManager()->secundaEnable();
 
         float angle = (1-moonHeight) * 90.f * facing;
         float masserHourFade = calculateHourFade("Masser");
@@ -507,8 +505,22 @@ void WeatherManager::update(float duration, bool paused)
         masserAngleFade *= masserHourFade;
         secundaAngleFade *= secundaHourFade;
 
-        mRendering->getSkyManager()->setMasserFade(masserAngleFade);
-        mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
+        if (masserAngleFade > 0)
+        {
+            mRendering->getSkyManager()->setMasserFade(masserAngleFade);
+            mRendering->getSkyManager()->masserEnable();
+        }
+        else
+            mRendering->getSkyManager()->masserDisable();
+
+        if (secundaAngleFade > 0)
+        {
+            mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
+            mRendering->getSkyManager()->secundaEnable();
+        }
+        else
+            mRendering->getSkyManager()->secundaDisable();
+
     }
     else
     {
