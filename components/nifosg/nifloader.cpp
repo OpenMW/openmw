@@ -1302,8 +1302,13 @@ namespace NifOsg
 
                         if (i == Nif::NiTexturingProperty::GlowTexture)
                         {
-                            osg::TexEnv* texEnv = new osg::TexEnv;
-                            texEnv->setMode(osg::TexEnv::ADD);
+                            osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
+                            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+                            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+
                             stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
                         }
                         else if (i == Nif::NiTexturingProperty::DarkTexture)
