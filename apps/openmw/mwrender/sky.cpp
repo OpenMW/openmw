@@ -574,8 +574,8 @@ void SkyManager::create()
     mSun.reset(new Sun(mRootNode, mSceneManager));
 
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Masser_Size")/100, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Secunda_Size")/100, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mRootNode, mSceneManager, fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mRootNode->addChild(mCloudNode);
