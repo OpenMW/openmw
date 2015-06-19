@@ -403,6 +403,8 @@ public:
     {
     public:
         MoonUpdater()
+            : mFade(0.f)
+            , mMoonColor(1,1,1,1)
         {
         }
 
@@ -419,8 +421,9 @@ public:
             stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
             osg::ref_ptr<osg::TexEnvCombine> texEnv2 = new osg::TexEnvCombine;
             texEnv2->setCombine_RGB(osg::TexEnvCombine::ADD);
-            texEnv2->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv2->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
             texEnv2->setSource0_Alpha(osg::TexEnvCombine::TEXTURE);
+            texEnv2->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
             texEnv2->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
             texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
             texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // atmospherecolor
@@ -432,12 +435,22 @@ public:
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor*)
         {
             osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
-            texEnv->setConstantColor(mMoonColor);
+            texEnv->setConstantColor(mMoonColor * mFade);
 
             osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-            texEnv2->setConstantColor(mAtmosphereColor);
+            const float backdropFadeThreshold = 0.03;
+            if (mFade <= backdropFadeThreshold)
+            {
+                texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mFade / backdropFadeThreshold));
+            }
+            else
+                texEnv2->setConstantColor(mAtmosphereColor);
         }
 
+        void setFade (const float fade)
+        {
+            mFade = fade;
+        }
 
         void setAtmosphereColor(const osg::Vec4f& color)
         {
@@ -457,6 +470,7 @@ public:
         }
 
     private:
+        float mFade;
         osg::Vec4f mAtmosphereColor;
         osg::Vec4f mMoonColor;
         osg::ref_ptr<osg::Texture2D> mPhaseTex;
@@ -472,6 +486,11 @@ public:
     void setColor(const osg::Vec4f& color)
     {
         mUpdater->setMoonColor(color);
+    }
+
+    void setFade(const float fade)
+    {
+        mUpdater->setFade(fade);
     }
 
     unsigned int getPhaseInt() const
@@ -497,7 +516,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     : mSceneManager(sceneManager)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
-    , mMoonRed(false)
     , mIsStorm(false)
     , mDay(0)
     , mMonth(0)
@@ -518,8 +536,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRainFrequency(1)
     , mEnabled(true)
     , mSunEnabled(true)
-    , mMasserFade(0.f)
-    , mSecundaFade(0.f)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     skyroot->setNodeMask(Mask_Sky);
@@ -642,9 +658,6 @@ void SkyManager::update(float duration)
     mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
     mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
 
-    mMasser->setColor(osg::Vec4f(mMasserFade,mMasserFade,mMasserFade,1));
-    mSecunda->setColor(mMoonRed ? (mMoonScriptColor * mSecundaFade) : osg::Vec4f(mSecundaFade,mSecundaFade,mSecundaFade,1));
-
     if (mSunEnabled)
     {
         // take 1/10 sec for fading the glare effect from invisible to full
@@ -692,7 +705,8 @@ void SkyManager::setEnabled(bool enabled)
 
 void SkyManager::setMoonColour (bool red)
 {
-    mMoonRed = red;
+    if (!mCreated) return;
+    mSecunda->setColor(red ? mMoonScriptColor : osg::Vec4f(1,1,1,1));
 }
 
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
@@ -915,12 +929,14 @@ void SkyManager::setLightningStrength(const float factor)
 
 void SkyManager::setMasserFade(const float fade)
 {
-    mMasserFade = fade;
+    if (!mCreated) return;
+    mMasser->setFade(fade);
 }
 
 void SkyManager::setSecundaFade(const float fade)
 {
-    mSecundaFade = fade;
+    if (!mCreated) return;
+    mSecunda->setFade(fade);
 }
 
 void SkyManager::setDate(int day, int month)

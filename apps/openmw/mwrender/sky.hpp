@@ -116,8 +116,6 @@ namespace MWRender
 
         bool mCreated;
 
-        bool mMoonRed;
-
         bool mIsStorm;
 
         int mDay;
@@ -156,8 +154,6 @@ namespace MWRender
         bool mSunEnabled;
 
         osg::Vec4f mMoonScriptColor;
-        float mMasserFade;
-        float mSecundaFade;
     };
 }
 
