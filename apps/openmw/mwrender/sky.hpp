@@ -154,6 +154,10 @@ namespace MWRender
 
         bool mEnabled;
         bool mSunEnabled;
+
+        osg::Vec4f mMoonScriptColor;
+        float mMasserFade;
+        float mSecundaFade;
     };
 }
 
