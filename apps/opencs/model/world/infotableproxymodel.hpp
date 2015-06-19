@@ -31,7 +31,7 @@ namespace CSMWorld
             virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
         private slots:
-            void modelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+            void modelRowsChanged(const QModelIndex &parent, int start, int end);
     };
 }
 
