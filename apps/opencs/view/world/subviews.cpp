@@ -59,7 +59,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceableCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_References,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, ReferenceCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Topics,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, TopicCreatorFactory>);
@@ -147,7 +147,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceableCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Reference,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, ReferenceCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Cell,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<CellCreator> > (false));
