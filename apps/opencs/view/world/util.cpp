@@ -17,7 +17,10 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+
 #include "../widget/coloreditor.hpp"
+#include "../widget/droplineedit.hpp"
+
 #include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
@@ -250,7 +253,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Video:
         case CSMWorld::ColumnBase::Display_GlobalVariable:
 
-            return new DropLineEdit(parent);
+            return new CSVWidget::DropLineEdit(parent);
 
         case CSMWorld::ColumnBase::Display_ScriptLines:
 
@@ -323,30 +326,4 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
         editor->setProperty(n, v);
     }
 
-}
-
-CSVWorld::DropLineEdit::DropLineEdit(QWidget* parent) :
-QLineEdit(parent)
-{
-    setAcceptDrops(true);
-}
-
-void CSVWorld::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-}
-
-void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->accept();
-}
-
-void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
-{
-    const CSMWorld::TableMimeData* data(dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData()));
-    if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
-    //WIP
 }

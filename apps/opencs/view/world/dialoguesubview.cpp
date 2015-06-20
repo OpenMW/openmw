@@ -34,6 +34,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "../widget/coloreditor.hpp"
+#include "../widget/droplineedit.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -306,7 +307,7 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
 
         // NOTE: For each entry in CSVWorld::CommandDelegate::createEditor() a corresponding entry
         // is required here
-        if (qobject_cast<DropLineEdit*>(editor))
+        if (qobject_cast<CSVWidget::DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
 
@@ -850,7 +851,7 @@ void CSVWorld::DialogueSubView::tableMimeDataDropped (QWidget* editor,
 {
     if (document == &mDocument)
     {
-        qobject_cast<DropLineEdit*>(editor)->setText(id.getId().c_str());
+        qobject_cast<CSVWidget::DropLineEdit*>(editor)->setText(id.getId().c_str());
     }
 }
 
