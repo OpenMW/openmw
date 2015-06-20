@@ -1,6 +1,8 @@
 
 #include "operationholder.hpp"
 
+#include "../settings/usersettings.hpp"
+
 #include "operation.hpp"
 
 CSMDoc::OperationHolder::OperationHolder (Operation *operation) : mRunning (false)
@@ -29,6 +31,9 @@ void CSMDoc::OperationHolder::setOperation (Operation *operation)
     connect (this, SIGNAL (abortSignal()), mOperation, SLOT (abort()));
 
     connect (&mThread, SIGNAL (started()), mOperation, SLOT (run()));
+
+    connect (&CSMSettings::UserSettings::instance(), SIGNAL (userSettingUpdated (const QString&, const QStringList&)),
+        mOperation, SLOT (updateUserSetting (const QString&, const QStringList&)));
 }
 
 bool CSMDoc::OperationHolder::isRunning() const

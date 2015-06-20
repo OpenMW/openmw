@@ -2,9 +2,11 @@
 #define CSM_DOC_OPERATION_H
 
 #include <vector>
+#include <map>
 
 #include <QObject>
 #include <QTimer>
+#include <QStringList>
 
 namespace CSMWorld
 {
@@ -30,6 +32,8 @@ namespace CSMDoc
             bool mError;
             bool mConnected;
             QTimer *mTimer;
+            std::map<QString, QStringList> mSettings;
+            bool mPrepared;
 
             void prepareStages();
 
@@ -45,6 +49,11 @@ namespace CSMDoc
             ///< The ownership of \a stage is transferred to *this.
             ///
             /// \attention Do no call this function while this Operation is running.
+
+            /// Specify settings to be passed on to stages.
+            ///
+            /// \attention Do no call this function while this Operation is running.
+            void configureSettings (const std::vector<QString>& settings);
 
             bool hasError() const;
 
@@ -62,6 +71,8 @@ namespace CSMDoc
             void abort();
 
             void run();
+
+            void updateUserSetting (const QString& name, const QStringList& value);
 
         private slots:
 
