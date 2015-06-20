@@ -253,7 +253,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_Video:
         case CSMWorld::ColumnBase::Display_GlobalVariable:
 
-            return new CSVWidget::DropLineEdit(parent);
+            return new CSVWidget::DropLineEdit(CSMWorld::UniversalId::Type_None, parent);
 
         case CSMWorld::ColumnBase::Display_ScriptLines:
 

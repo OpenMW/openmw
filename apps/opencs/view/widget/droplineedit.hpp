@@ -3,6 +3,7 @@
 
 #include <QLineEdit>
 
+#include "../../model/world/columnbase.hpp"
 #include "../../model/world/universalid.hpp"
 
 namespace CSMDoc
@@ -33,8 +34,8 @@ namespace CSVWidget
             ///< \return -1 if there is no suitable data (ID type)
 
         public:
-            DropLineEdit(QWidget *parent = 0,
-                         CSMWorld::UniversalId::Type type = CSMWorld::UniversalId::Type_None);
+            DropLineEdit(CSMWorld::UniversalId::Type type, QWidget *parent = 0);
+            DropLineEdit(CSMWorld::ColumnBase::Display display, QWidget *parent = 0);
 
         protected:
             void dragEnterEvent(QDragEnterEvent *event);

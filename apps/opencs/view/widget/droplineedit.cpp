@@ -13,9 +13,16 @@ namespace
     }
 }
 
-CSVWidget::DropLineEdit::DropLineEdit(QWidget *parent, CSMWorld::UniversalId::Type type) 
+CSVWidget::DropLineEdit::DropLineEdit(CSMWorld::UniversalId::Type type, QWidget *parent) 
     : QLineEdit(parent),
       mDropType(type)
+{
+    setAcceptDrops(true);
+}
+
+CSVWidget::DropLineEdit::DropLineEdit(CSMWorld::ColumnBase::Display display, QWidget *parent)
+    : QLineEdit(parent),
+      mDropType(CSMWorld::TableMimeData::convertEnums(display))
 {
     setAcceptDrops(true);
 }

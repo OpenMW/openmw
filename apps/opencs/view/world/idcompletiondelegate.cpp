@@ -28,7 +28,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
     }
 
     CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();
-    CSVWidget::DropLineEdit *editor = new CSVWidget::DropLineEdit(parent);
+    CSVWidget::DropLineEdit *editor = new CSVWidget::DropLineEdit(display, parent);
     editor->setCompleter(completionManager.getCompleter(display).get());
     return editor;
 }
