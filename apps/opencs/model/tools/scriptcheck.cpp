@@ -84,7 +84,8 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
     switch (mWarningMode)
     {
         case Mode_Ignore: setWarningsMode (0); break;
-        case Mode_Strict: setWarningsMode (1); break;
+        case Mode_Normal: setWarningsMode (1); break;
+        case Mode_Strict: setWarningsMode (2); break;
     }
 
     try
@@ -123,6 +124,8 @@ void CSMTools::ScriptCheckStage::updateUserSetting (const QString& name, const Q
     {
         if (value.at (0)=="Ignore")
             mWarningMode = Mode_Ignore;
+        else if (value.at (0)=="Normal")
+            mWarningMode = Mode_Normal;
         else if (value.at (0)=="Strict")
             mWarningMode = Mode_Strict;
     }

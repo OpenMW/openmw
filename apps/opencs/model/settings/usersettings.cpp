@@ -312,17 +312,18 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "\nA name from the list of colors defined in the list of SVG color keyword names."
             "\nX11 color names may also work.";
 
-        QString modeIgnore ("Ignore");
+        QString modeNormal ("Normal");
 
         QStringList modes;
-        modes << modeIgnore << "Strict";
+        modes << "Ignore" << modeNormal << "Strict";
             
         Setting *warnings = createSetting (Type_ComboBox, "warnings",
             "Warning Mode");
         warnings->setDeclaredValues (modes);
-        warnings->setDefaultValue (modeIgnore);
+        warnings->setDefaultValue (modeNormal);
         warnings->setToolTip ("<ul>How to handle warning messages during compilation:<p>"
         "<li>Ignore: Do not report warning</li>"
+        "<li>Normal: Report warning as a warning</li>"
         "<li>Strict: Promote warning to an error</li>"
         "</ul>");
         

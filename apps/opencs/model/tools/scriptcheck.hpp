@@ -21,6 +21,7 @@ namespace CSMTools
             enum WarningMode
             {
                 Mode_Ignore,
+                Mode_Normal,
                 Mode_Strict
             };
 
