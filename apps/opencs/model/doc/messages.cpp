@@ -9,7 +9,7 @@ CSMDoc::Message::Message (const CSMWorld::UniversalId& id, const std::string& me
 {}
 
 
-CSMDoc::Messages::Messages (Message::Severity default_ = Message::Severity_Error)
+CSMDoc::Messages::Messages (Message::Severity default_)
 : mDefault (default_)
 {}
 
