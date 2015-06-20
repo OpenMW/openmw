@@ -6,11 +6,6 @@
 
 #include "../world/columns.hpp"
 
-CSMTools::ReportModel::Line::Line (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
-: mId (id), mMessage (message), mHint (hint)
-{}
-
 CSMTools::ReportModel::ReportModel (bool fieldColumn)
 {
     if (fieldColumn)
@@ -137,14 +132,14 @@ void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::str
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
     
-    mRows.push_back (Line (id, message, hint));
+    mRows.push_back (CSMDoc::Message (id, message, hint));
 
     endInsertRows();
 }
 
 void CSMTools::ReportModel::flagAsReplaced (int index)
 {
-    Line& line = mRows.at (index);
+    CSMDoc::Message& line = mRows.at (index);
     std::string hint = line.mHint;
 
     if (hint.empty() || hint[0]!='R')

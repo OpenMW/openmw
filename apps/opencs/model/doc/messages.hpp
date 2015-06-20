@@ -8,16 +8,22 @@
 
 namespace CSMDoc
 {
+    struct Message
+    {
+        CSMWorld::UniversalId mId;
+        std::string mMessage;
+        std::string mHint;
+
+        Message (const CSMWorld::UniversalId& id, const std::string& message,
+            const std::string& hint);
+    };
+            
     class Messages
     {
         public:
 
-            struct Message
-            {
-                CSMWorld::UniversalId mId;
-                std::string mMessage;
-                std::string mHint;
-            };
+            // \deprecated Use CSMDoc::Message directly instead.
+            typedef CSMDoc::Message Message;
 
             typedef std::vector<Message> Collection;
 
