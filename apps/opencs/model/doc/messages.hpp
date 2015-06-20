@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <QMetaType>
+
 #include "../world/universalid.hpp"
 
 namespace CSMDoc
@@ -14,6 +16,8 @@ namespace CSMDoc
         std::string mMessage;
         std::string mHint;
 
+        Message();
+        
         Message (const CSMWorld::UniversalId& id, const std::string& message,
             const std::string& hint);
     };
@@ -46,5 +50,7 @@ namespace CSMDoc
             Iterator end() const;
     };
 }
+
+Q_DECLARE_METATYPE (CSMDoc::Message)
 
 #endif

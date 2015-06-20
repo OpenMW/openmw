@@ -68,7 +68,8 @@ void CSMDoc::Loader::load()
             for (CSMDoc::Messages::Iterator iter (messages.begin());
                 iter!=messages.end(); ++iter)
             {
-                document->getReport (log)->add (iter->mId, iter->mMessage);
+                document->getReport (log)->add (
+                    CSMDoc::Message (iter->mId, iter->mMessage, ""));
                 emit loadMessage (document, iter->mMessage);
             }
             }

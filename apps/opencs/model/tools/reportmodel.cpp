@@ -127,12 +127,11 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
     return true;
 }
 
-void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
+void CSMTools::ReportModel::add (const CSMDoc::Message& message)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
     
-    mRows.push_back (CSMDoc::Message (id, message, hint));
+    mRows.push_back (message);
 
     endInsertRows();
 }

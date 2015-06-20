@@ -13,6 +13,8 @@
 
 #include <components/ogreinit/ogreinit.hpp>
 
+#include "model/doc/messages.hpp"
+
 #include "model/world/universalid.hpp"
 
 #ifdef Q_OS_MAC
@@ -52,6 +54,7 @@ int main(int argc, char *argv[])
 
         qRegisterMetaType<std::string> ("std::string");
         qRegisterMetaType<CSMWorld::UniversalId> ("CSMWorld::UniversalId");
+        qRegisterMetaType<CSMDoc::Message> ("CSMDoc::Message");
 
         OgreInit::OgreInit ogreInit;
 

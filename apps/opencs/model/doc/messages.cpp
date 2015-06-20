@@ -1,6 +1,8 @@
 
 #include "messages.hpp"
 
+CSMDoc::Message::Message() {}
+
 CSMDoc::Message::Message (const CSMWorld::UniversalId& id, const std::string& message,
     const std::string& hint)
 : mId (id), mMessage (message), mHint (hint)

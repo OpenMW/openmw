@@ -21,8 +21,8 @@ void CSMDoc::OperationHolder::setOperation (Operation *operation)
         this, SIGNAL (progress (int, int, int)));
 
     connect (
-        mOperation, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        mOperation, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SIGNAL (reportMessage (const CSMDoc::Message&, int)));
 
     connect (
         mOperation, SIGNAL (done (int, bool)),

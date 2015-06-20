@@ -58,9 +58,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 
         connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (&mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-        connect (&mVerifier,
-            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+            this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -125,9 +124,8 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
 
     connect (&mSearch, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
     connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-    connect (&mSearch,
-        SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+    connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 }
 
 CSMTools::Tools::~Tools()
@@ -215,12 +213,11 @@ CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& 
     return mReports.at (id.getIndex());
 }
 
-void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMTools::Tools::verifierMessage (const CSMDoc::Message& message, int type)
 {
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (id, message, hint);
+        mReports[iter->second]->add (message);
 }
 
