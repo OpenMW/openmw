@@ -1,7 +1,17 @@
 #include "infotableproxymodel.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include "idtablebase.hpp"
 #include "columns.hpp"
+
+namespace
+{
+    QString toLower(const QString &str)
+    {
+        return Misc::StringUtils::lowerCase(str.toStdString()).c_str();
+    }
+}
 
 CSMWorld::InfoTableProxyModel::InfoTableProxyModel(CSMWorld::UniversalId::Type type, QObject *parent)
     : IdTableProxyModel(parent),
@@ -45,7 +55,7 @@ int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
     }
 
     int column = mSourceModel->findColumnIndex(columnId);
-    QString info = mSourceModel->data(mSourceModel->index(currentRow, column)).toString();
+    QString info = toLower(mSourceModel->data(mSourceModel->index(currentRow, column)).toString());
 
     if (mFirstRowCache.contains(info))
     {
@@ -53,10 +63,11 @@ int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
     }
 
     while (--currentRow >= 0 &&
-           mSourceModel->data(mSourceModel->index(currentRow, column)) == info);
+           toLower(mSourceModel->data(mSourceModel->index(currentRow, column)).toString()) == info);
+    ++currentRow;
 
-    mFirstRowCache[info] = currentRow + 1;
-    return currentRow + 1;
+    mFirstRowCache[info] = currentRow;
+    return currentRow;
 }
 
 void CSMWorld::InfoTableProxyModel::modelRowsChanged(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
