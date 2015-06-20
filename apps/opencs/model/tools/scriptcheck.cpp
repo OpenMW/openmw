@@ -44,7 +44,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 }
 
 CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
-: mDocument (document), mContext (document.getData()), mMessages (0)
+: mDocument (document), mContext (document.getData()), mMessages (0), mWarningMode (Mode_Ignore)
 {
     /// \todo add an option to configure warning mode
     setWarningsMode (0);
@@ -58,6 +58,7 @@ int CSMTools::ScriptCheckStage::setup()
     mContext.clear();
     mMessages = 0;
     mId.clear();
+    Compiler::ErrorHandler::reset();
 
     return mDocument.getData().getScripts().getSize();
 }
@@ -71,6 +72,12 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
         return;
 
     mMessages = &messages;
+
+    switch (mWarningMode)
+    {
+        case Mode_Ignore: setWarningsMode (0); break;
+        case Mode_Strict: setWarningsMode (1); break;
+    }
 
     try
     {
@@ -98,4 +105,15 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
     }
 
     mMessages = 0;
+}
+
+void CSMTools::ScriptCheckStage::updateUserSetting (const QString& name, const QStringList& value)
+{
+    if (name=="script-editor/warnings")
+    {
+        if (value.at (0)=="Ignore")
+            mWarningMode = Mode_Ignore;
+        else if (value.at (0)=="Strict")
+            mWarningMode = Mode_Strict;
+    }
 }

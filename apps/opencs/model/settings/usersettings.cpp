@@ -293,7 +293,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         autoDelete->setDefaultValue ("true");
     }
 
-    declareSection ("script-editor", "Script Editor");
+    declareSection ("script-editor", "Scripts");
     {
         Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
         lineNum->setDefaultValue ("true");
@@ -312,6 +312,20 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "\nA name from the list of colors defined in the list of SVG color keyword names."
             "\nX11 color names may also work.";
 
+        QString modeIgnore ("Ignore");
+
+        QStringList modes;
+        modes << modeIgnore << "Strict";
+            
+        Setting *warnings = createSetting (Type_ComboBox, "warnings",
+            "Warning Mode");
+        warnings->setDeclaredValues (modes);
+        warnings->setDefaultValue (modeIgnore);
+        warnings->setToolTip ("<ul>How to handle warning messages during compilation:<p>"
+        "<li>Ignore: Do not report warning</li>"
+        "<li>Strict: Promote warning to an error</li>"
+        "</ul>");
+        
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
