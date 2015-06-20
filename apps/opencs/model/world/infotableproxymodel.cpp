@@ -43,6 +43,12 @@ bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QMod
 {
     QModelIndex first = mSourceModel->index(getFirstInfoRow(left.row()), left.column());
     QModelIndex second = mSourceModel->index(getFirstInfoRow(right.row()), right.column());
+
+    // If both indexes are belonged to the same Topic/Journal, compare their original rows only
+    if (first.row() == second.row())
+    {
+        return sortOrder() == Qt::AscendingOrder ? left.row() < right.row() : right.row() < left.row();
+    }
     return IdTableProxyModel::lessThan(first, second);
 }
 
