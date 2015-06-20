@@ -351,9 +351,11 @@ namespace MWRender
     void RenderingManager::update(float dt, bool paused)
     {
         if (!paused)
+        {
             mEffectManager->update(dt);
+            mSky->update(dt);
+        }
 
-        mSky->update(dt);
         mWater->update(dt);
         mCamera->update(dt, paused);
 
