@@ -6,19 +6,18 @@
 
 #include "../world/columns.hpp"
 
-CSMTools::ReportModel::ReportModel (bool fieldColumn)
+CSMTools::ReportModel::ReportModel (bool fieldColumn, bool severityColumn)
+: mColumnField (-1), mColumnSeverity (-1)
 {
-    if (fieldColumn)
-    {
-        mColumnField = 3;
-        mColumnDescription = 4;
-    }
-    else
-    {
-        mColumnDescription = 3;
+    int index = 3;
 
-        mColumnField = -1;
-    }
+    if (severityColumn)
+        mColumnSeverity = index++;
+    
+    if (fieldColumn)
+        mColumnField = index++;
+
+    mColumnDescription = index;
 }
 
 int CSMTools::ReportModel::rowCount (const QModelIndex & parent) const
@@ -83,6 +82,18 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
         return QString::fromUtf8 (field.c_str());
     }
+
+    if (index.column()==mColumnSeverity)
+    {
+        switch (mRows.at (index.row()).mSeverity)
+        {
+            case CSMDoc::Message::Severity_Info: return "Information";
+            case CSMDoc::Message::Severity_Warning: return "Warning";
+            case CSMDoc::Message::Severity_Error: return "Error";
+            case CSMDoc::Message::Severity_SeriousError: return "Serious Error";
+            case CSMDoc::Message::Severity_Default: break;
+        }
+    }
     
     return QVariant();
 }
@@ -106,6 +117,9 @@ QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orienta
 
     if (section==mColumnField)
         return "Field";
+
+    if (section==mColumnSeverity)
+        return "Severity";
 
     return "-";
 }
@@ -169,4 +183,17 @@ void CSMTools::ReportModel::clear()
         mRows.clear();
         endRemoveRows();
     }
+}
+
+int CSMTools::ReportModel::countErrors() const
+{
+    int count = 0;
+
+    for (std::vector<CSMDoc::Messages::Message>::const_iterator iter (mRows.begin());
+        iter!=mRows.end(); ++iter)
+        if (iter->mSeverity==CSMDoc::Message::Severity_Error ||
+            iter->mSeverity==CSMDoc::Message::Severity_SeriousError)
+            ++count;
+
+    return count;
 }

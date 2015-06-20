@@ -158,7 +158,7 @@ CSMWorld::UniversalId CSMTools::Tools::runVerifier()
 
 CSMWorld::UniversalId CSMTools::Tools::newSearch()
 {
-    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true)));
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true, false)));
 
     return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);
 }

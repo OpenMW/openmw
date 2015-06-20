@@ -32,6 +32,7 @@ namespace CSMTools
             CSMDoc::Messages *mMessages;
             WarningMode mWarningMode;
 
+            CSMDoc::Message::Severity getSeverity (Type type);
             
             virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
             ///< Report error to the user.

@@ -4,15 +4,22 @@
 CSMDoc::Message::Message() {}
 
 CSMDoc::Message::Message (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
-: mId (id), mMessage (message), mHint (hint)
+    const std::string& hint, Severity severity)
+: mId (id), mMessage (message), mHint (hint), mSeverity (severity)
 {}
 
 
+CSMDoc::Messages::Messages (Message::Severity default_ = Message::Severity_Error)
+: mDefault (default_)
+{}
+
 void CSMDoc::Messages::add (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
+    const std::string& hint, Message::Severity severity)
 {
-    mMessages.push_back (Message (id, message, hint));
+    if (severity==Message::Severity_Default)
+        severity = mDefault;
+        
+    mMessages.push_back (Message (id, message, hint, severity));
 }
 
 void CSMDoc::Messages::push_back (const std::pair<CSMWorld::UniversalId, std::string>& data)

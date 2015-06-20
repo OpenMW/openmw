@@ -36,6 +36,7 @@ namespace CSMDoc
             QTimer *mTimer;
             std::map<QString, QStringList> mSettings;
             bool mPrepared;
+            Message::Severity mDefaultSeverity;
 
             void prepareStages();
 
@@ -56,6 +57,9 @@ namespace CSMDoc
             ///
             /// \attention Do no call this function while this Operation is running.
             void configureSettings (const std::vector<QString>& settings);
+
+            /// \attention Do no call this function while this Operation is running.
+            void setDefaultSeverity (Message::Severity severity);
 
             bool hasError() const;
 

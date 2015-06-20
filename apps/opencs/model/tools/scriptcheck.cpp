@@ -11,17 +11,23 @@
 
 #include "../world/data.hpp"
 
+CSMDoc::Message::Severity CSMTools::ScriptCheckStage::getSeverity (Type type)
+{
+    switch (type)
+    {
+        case WarningMessage: return CSMDoc::Message::Severity_Warning;
+        case ErrorMessage: return CSMDoc::Message::Severity_Error;
+    }
+
+    return CSMDoc::Message::Severity_SeriousError;
+}
+
 void CSMTools::ScriptCheckStage::report (const std::string& message, const Compiler::TokenLoc& loc,
     Type type)
 {
     std::ostringstream stream;
 
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
-
-    if (type==ErrorMessage)
-        stream << "error ";
-    else
-        stream << "warning ";
 
     stream
         << "script " << mFile
@@ -32,15 +38,17 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, const Compi
 
     hintStream << "l:" << loc.mLine << " " << loc.mColumn;
 
-    mMessages->add (id, stream.str(), hintStream.str());
+    mMessages->add (id, stream.str(), hintStream.str(), getSeverity (type));
 }
 
 void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 {
     CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-    mMessages->push_back (std::make_pair (id,
-        (type==ErrorMessage ? "error: " : "warning: ") + message));
+    std::ostringstream stream;
+    stream << "script " << mFile << ": " << message;
+    
+    mMessages->add (id, stream.str(), "", getSeverity (type));
 }
 
 CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
@@ -100,8 +108,10 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
     {
         CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Script, mId);
 
-        messages.push_back (std::make_pair (id,
-            std::string ("Critical compile error: ") + error.what()));
+        std::ostringstream stream;
+        stream << "script " << mFile << ": " << error.what();
+        
+        messages.add (id, stream.str(), "", CSMDoc::Message::Severity_SeriousError);
     }
 
     mMessages = 0;

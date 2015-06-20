@@ -27,10 +27,11 @@ namespace CSMTools
             // Configurable columns
             int mColumnDescription;
             int mColumnField;
+            int mColumnSeverity;
 
         public:
 
-            ReportModel (bool fieldColumn = false);
+            ReportModel (bool fieldColumn = false, bool severityColumn = true);
         
             virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
 
@@ -51,6 +52,9 @@ namespace CSMTools
             std::string getHint (int row) const;
 
             void clear();
+
+            // Return number of messages with Error or SeriousError severity.
+            int countErrors() const;
     };
 }
 

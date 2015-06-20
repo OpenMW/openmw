@@ -33,7 +33,8 @@ void CSMDoc::Operation::prepareStages()
 CSMDoc::Operation::Operation (int type, bool ordered, bool finalAlways)
 : mType (type), mStages(std::vector<std::pair<Stage *, int> >()), mCurrentStage(mStages.begin()),
   mCurrentStep(0), mCurrentStepTotal(0), mTotalSteps(0), mOrdered (ordered),
-  mFinalAlways (finalAlways), mError(false), mConnected (false), mPrepared (false)
+  mFinalAlways (finalAlways), mError(false), mConnected (false), mPrepared (false),
+  mDefaultSeverity (Message::Severity_Error)
 {
     mTimer = new QTimer (this);
 }
@@ -70,6 +71,11 @@ void CSMDoc::Operation::configureSettings (const std::vector<QString>& settings)
     {
         mSettings.insert (std::make_pair (*iter, CSMSettings::UserSettings::instance().definitions (*iter)));
     }
+}
+
+void CSMDoc::Operation::setDefaultSeverity (Message::Severity severity)
+{
+    mDefaultSeverity = severity;
 }
 
 bool CSMDoc::Operation::hasError() const
@@ -112,7 +118,7 @@ void CSMDoc::Operation::executeStage()
         mPrepared = true;
     }
     
-    Messages messages;
+    Messages messages (mDefaultSeverity);
 
     while (mCurrentStage!=mStages.end())
     {
@@ -129,7 +135,7 @@ void CSMDoc::Operation::executeStage()
             }
             catch (const std::exception& e)
             {
-                emit reportMessage (Message (CSMWorld::UniversalId(), e.what(), ""), mType);
+                emit reportMessage (Message (CSMWorld::UniversalId(), e.what(), "", Message::Severity_SeriousError), mType);
                 abort();
             }
 

@@ -923,7 +923,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             {
                 // log an error and continue loading the refs to the last loaded cell
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_None);
-                messages.add (id, "Logic error: cell index out of bounds");
+                messages.add (id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
@@ -984,7 +984,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     messages.add (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist");
+                        "Trying to delete dialogue record " + id + " which does not exist",
+                        "", CSMDoc::Message::Severity_Warning);
                 }
             }
             else
@@ -1001,7 +1002,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (!mDialogue)
             {
                 messages.add (UniversalId::Type_None,
-                    "Found info record not following a dialogue record");
+                    "Found info record not following a dialogue record", "", CSMDoc::Message::Severity_Error);
 
                 mReader->skipRecord();
                 break;
@@ -1044,7 +1045,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString(), "",
+            CSMDoc::Message::Severity_Error);
 
         mReader->skipRecord();
     }
