@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/scope.hpp"
 #include "../../model/world/universalid.hpp"
 
