@@ -54,8 +54,9 @@ void CSVWidget::DropLineEdit::dropEvent(QDropEvent *event)
     int dataIndex = getAcceptedDataIndex(*data);
     if (dataIndex != -1)
     {
-        setText(data->getData()[dataIndex].getId().c_str());
-        emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
+        std::vector<CSMWorld::UniversalId> idData = data->getData();
+        setText(idData[dataIndex].getId().c_str());
+        emit tableMimeDataDropped(idData[dataIndex], data->getDocumentPtr());
     }
 }
 
@@ -76,11 +77,13 @@ int CSVWidget::DropLineEdit::getAcceptedDataIndex(const CSMWorld::TableMimeData 
         return 0;
     }
 
+    bool isReferenceable = mDropType == CSMWorld::UniversalId::Type_Referenceable;
     std::vector<CSMWorld::UniversalId> idData = data.getData();
     int size = static_cast<int>(idData.size());
     for (int i = 0; i < size; ++i)
     {
-        if (idData[i].getType() == mDropType)
+        CSMWorld::UniversalId::Type type = idData[i].getType();
+        if (type == mDropType || isReferenceable && CSMWorld::TableMimeData::isReferencable(type))
         {
             return i;
         }

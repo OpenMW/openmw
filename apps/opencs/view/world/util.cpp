@@ -236,28 +236,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
             return new QCheckBox(parent);
 
-        case CSMWorld::ColumnBase::Display_String:
-        case CSMWorld::ColumnBase::Display_Skill:
-        case CSMWorld::ColumnBase::Display_Script:
-        case CSMWorld::ColumnBase::Display_Race:
-        case CSMWorld::ColumnBase::Display_Region:
-        case CSMWorld::ColumnBase::Display_Class:
-        case CSMWorld::ColumnBase::Display_Faction:
-        case CSMWorld::ColumnBase::Display_Miscellaneous:
-        case CSMWorld::ColumnBase::Display_Sound:
-        case CSMWorld::ColumnBase::Display_Mesh:
-        case CSMWorld::ColumnBase::Display_Icon:
-        case CSMWorld::ColumnBase::Display_Music:
-        case CSMWorld::ColumnBase::Display_SoundRes:
-        case CSMWorld::ColumnBase::Display_Texture:
-        case CSMWorld::ColumnBase::Display_Video:
-        case CSMWorld::ColumnBase::Display_GlobalVariable:
-
-            return new CSVWidget::DropLineEdit(CSMWorld::UniversalId::Type_None, parent);
-
         case CSMWorld::ColumnBase::Display_ScriptLines:
 
             return new ScriptEdit (mDocument, ScriptHighlighter::Mode_Console, parent);
+
+        case CSMWorld::ColumnBase::Display_String:
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+
+            return new CSVWidget::DropLineEdit(CSMWorld::UniversalId::Type_None, parent);
 
         default:
 

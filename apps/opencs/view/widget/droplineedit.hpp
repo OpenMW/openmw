@@ -43,8 +43,7 @@ namespace CSVWidget
             void dropEvent(QDropEvent *event);
 
         signals:
-            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId> &data, 
-                                      const CSMDoc::Document *document);
+            void tableMimeDataDropped(const CSMWorld::UniversalId &id, const CSMDoc::Document *document);
     };
 }
 
