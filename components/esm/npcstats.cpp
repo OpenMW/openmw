@@ -117,10 +117,6 @@ void ESM::NpcStats::save (ESMWriter &esm) const
         mSkills[i].mWerewolf.save (esm);
     }
 
-    esm.writeHNT ("HWAT", true);
-    for (int i=0; i<8; ++i)
-        mWerewolfAttributes[i].save (esm);
-
     if (mIsWerewolf)
         esm.writeHNT ("WOLF", mIsWerewolf);
 

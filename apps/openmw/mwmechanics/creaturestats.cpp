@@ -20,7 +20,7 @@ namespace MWMechanics
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0), mAttackStrength(0.f),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
-          mDeathAnimation(0), mIsWerewolf(false), mLevel (0)
+          mDeathAnimation(0), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -55,7 +55,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
+        return mAttributes[index];
     }
 
     const DynamicStat<float> &CreatureStats::getHealth() const
@@ -139,14 +139,11 @@ namespace MWMechanics
             throw std::runtime_error("attribute index is out of range");
         }
 
-        const AttributeValue& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
+        const AttributeValue& currentValue = mAttributes[index];
 
         if (value != currentValue)
         {
-            if(!mIsWerewolf)
-                mAttributes[index] = value;
-            else
-                mWerewolfAttributes[index] = value;
+            mAttributes[index] = value;
 
             if (index == ESM::Attribute::Intelligence)
                 mRecalcMagicka = true;
