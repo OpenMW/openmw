@@ -1,8 +1,14 @@
+#include "dragrecordtable.hpp"
+
 #include <QDrag>
 #include <QDragEnterEvent>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/tablemimedata.hpp"
-#include "dragrecordtable.hpp"
+#include "../../model/world/commands.hpp"
+
+#include "dragdroputils.hpp"
 
 void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTable& table)
 {
@@ -35,5 +41,48 @@ void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent *event)
 
 void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
 {
-    event->accept();
+    QModelIndex index = indexAt(event->pos());
+    if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)))
+    {
+        event->accept();
+    }
+    else
+    {
+        event->ignore();
+    }
+}
+
+void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
+{
+    QModelIndex index = indexAt(event->pos());
+    CSMWorld::ColumnBase::Display display = getIndexDisplayType(index);
+    if (CSVWorld::DragDropUtils::canAcceptData(*event, display))
+    {
+        const CSMWorld::TableMimeData *data = CSVWorld::DragDropUtils::getTableMimeData(*event);
+        if (data->fromDocument(mDocument))
+        {
+            CSMWorld::UniversalId id = CSVWorld::DragDropUtils::getAcceptedData(*event, display);
+            QVariant newIndexData = QString::fromUtf8(id.getId().c_str());
+            QVariant oldIndexData = index.data(Qt::EditRole);
+            if (newIndexData != oldIndexData)
+            {
+                mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model(), index, newIndexData));
+            }
+        }
+    }
+}
+
+CSMWorld::ColumnBase::Display CSVWorld::DragRecordTable::getIndexDisplayType(const QModelIndex &index) const
+{
+    Q_ASSERT(model() != NULL);
+
+    if (index.isValid())
+    {
+        QVariant display = model()->headerData(index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display);
+        if (display.isValid())
+        {
+            return static_cast<CSMWorld::ColumnBase::Display>(display.toInt());
+        }
+    }
+    return CSMWorld::ColumnBase::Display_None;
 }

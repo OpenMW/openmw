@@ -697,36 +697,6 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
     }
 }
 
-void CSVWorld::Table::dropEvent(QDropEvent *event)
-{
-    QModelIndex index = indexAt (event->pos());
-
-    if (!index.isValid())
-    {
-        return;
-    }
-
-    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    if (mime->fromDocument (mDocument))
-    {
-        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-                                                (mModel->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-        if (mime->holdsType (display))
-        {
-            CSMWorld::UniversalId record (mime->returnMatching (display));
-
-            std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                    (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
-
-            mDocument.getUndoStack().push (command.release());
-        }
-    } //TODO handle drops from different document
-}
-
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
 {
     const int count = mModel->columnCount();
