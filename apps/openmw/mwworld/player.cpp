@@ -271,6 +271,11 @@ namespace MWWorld
 
         player.mAutoMove = mAutoMove ? 1 : 0;
 
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i].writeState(player.mSaveAttributes[i]);
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i].writeState(player.mSaveSkills[i]);
+
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
@@ -290,6 +295,11 @@ namespace MWWorld
             }
 
             mPlayer.load (player.mObject);
+
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                mSaveAttributes[i].readState(player.mSaveAttributes[i]);
+            for (int i=0; i<ESM::Skill::Length; ++i)
+                mSaveSkills[i].readState(player.mSaveSkills[i]);
 
             getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
 
