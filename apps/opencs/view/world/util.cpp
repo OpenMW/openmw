@@ -243,7 +243,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         case CSMWorld::ColumnBase::Display_String:
         // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
 
-            return new CSVWidget::DropLineEdit(CSMWorld::UniversalId::Type_None, parent);
+            return new CSVWidget::DropLineEdit(display, parent);
 
         default:
 

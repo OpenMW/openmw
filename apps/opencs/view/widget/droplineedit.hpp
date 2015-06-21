@@ -4,7 +4,6 @@
 #include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
-#include "../../model/world/universalid.hpp"
 
 namespace CSMDoc
 {
@@ -14,6 +13,7 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class TableMimeData;
+    class UniversalId;
 }
 
 namespace CSVWidget
@@ -22,20 +22,11 @@ namespace CSVWidget
     {
             Q_OBJECT
 
-            CSMWorld::UniversalId::Type mDropType;
-            ///< The accepted ID type for this LineEdit.
-            ///< If \a mDropType has Type_None type, this LineEdit accepts all ID types
-
-            bool canAcceptEventData(QDropEvent *event) const;
-            ///< Checks whether the \a event contains CSMWorld::TableMimeData with a proper ID type
-
-            int getAcceptedDataIndex(const CSMWorld::TableMimeData &data) const;
-            ///< Checks whether the \a data has a proper type
-            ///< \return -1 if there is no suitable data (ID type)
+            CSMWorld::ColumnBase::Display mDropType;
+            ///< The accepted Display type for this LineEdit.
 
         public:
-            DropLineEdit(CSMWorld::UniversalId::Type type, QWidget *parent = 0);
-            DropLineEdit(CSMWorld::ColumnBase::Display display, QWidget *parent = 0);
+            DropLineEdit(CSMWorld::ColumnBase::Display type, QWidget *parent = 0);
 
         protected:
             void dragEnterEvent(QDragEnterEvent *event);
