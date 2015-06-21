@@ -1,10 +1,10 @@
 #ifndef CSV_WORLD_NESTEDTABLE_H
 #define CSV_WORLD_NESTEDTABLE_H
 
-#include <QTableView>
 #include <QEvent>
 
-class QUndoStack;
+#include "dragrecordtable.hpp"
+
 class QAction;
 class QContextMenuEvent;
 
@@ -22,13 +22,12 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
-    class NestedTable : public QTableView
+    class NestedTable : public DragRecordTable
     {
         Q_OBJECT
 
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
-        QUndoStack& mUndoStack;
         CSMWorld::NestedTableProxyModel* mModel;
         CSMWorld::CommandDispatcher *mDispatcher;
 
@@ -38,10 +37,7 @@ namespace CSVWorld
                     CSMWorld::NestedTableProxyModel* model,
                     QWidget* parent = NULL);
 
-    protected:
-        void dragEnterEvent(QDragEnterEvent *event);
-
-        void dragMoveEvent(QDragMoveEvent *event);
+        virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
     private:
         void contextMenuEvent (QContextMenuEvent *event);

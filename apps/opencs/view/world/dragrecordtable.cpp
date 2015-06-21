@@ -12,7 +12,13 @@
 
 void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTable& table)
 {
-    CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (table.getDraggedRecords(), mDocument);
+    std::vector<CSMWorld::UniversalId> records = table.getDraggedRecords();
+    if (records.empty())
+    {
+        return;
+    }
+
+    CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (records, mDocument);
 
     if (mime)
     {
@@ -27,7 +33,9 @@ CSVWorld::DragRecordTable::DragRecordTable (CSMDoc::Document& document, QWidget*
 QTableView(parent),
 mDocument(document),
 mEditLock(false)
-{}
+{
+    setAcceptDrops(true);
+}
 
 void CSVWorld::DragRecordTable::setEditLock (bool locked)
 {
