@@ -185,6 +185,8 @@ public:
    */
   bool isNextSub(const char* name);
 
+  bool peekNextSub(const char* name);
+
   // Read subrecord name. This gets called a LOT, so I've optimized it
   // slightly.
   void getSubName();

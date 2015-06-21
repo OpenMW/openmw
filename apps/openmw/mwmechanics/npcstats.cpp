@@ -447,16 +447,8 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     state.mDisposition = mDisposition;
 
     for (int i=0; i<ESM::Skill::Length; ++i)
-    {
-        mSkill[i].writeState (state.mSkills[i].mRegular);
-        //mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
-    }
-    /*
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-    {
-        mWerewolfAttributes[i].writeState (state.mWerewolfAttributes[i]);
-    }
-    */
+        mSkill[i].writeState (state.mSkills[i]);
+
     state.mIsWerewolf = mIsWerewolf;
 
     state.mCrimeId = mCrimeId;
@@ -504,16 +496,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     mDisposition = state.mDisposition;
 
     for (int i=0; i<ESM::Skill::Length; ++i)
-    {
-        mSkill[i].readState (state.mSkills[i].mRegular);
-        //mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
-    }
-    /*
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-    {
-        mWerewolfAttributes[i].readState (state.mWerewolfAttributes[i]);
-    }
-    */
+        mSkill[i].readState (state.mSkills[i]);
 
     mIsWerewolf = state.mIsWerewolf;
 

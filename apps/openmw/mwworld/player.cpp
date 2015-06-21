@@ -301,6 +301,12 @@ namespace MWWorld
             for (int i=0; i<ESM::Skill::Length; ++i)
                 mSaveSkills[i].readState(player.mSaveSkills[i]);
 
+            if (player.mObject.mNpcStats.mWerewolfDeprecatedData && player.mObject.mNpcStats.mIsWerewolf)
+            {
+                saveSkillsAttributes();
+                setWerewolfSkillsAttributes();
+            }
+
             getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
 
             MWBase::World& world = *MWBase::Environment::get().getWorld();
