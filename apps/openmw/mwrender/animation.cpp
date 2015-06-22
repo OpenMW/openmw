@@ -41,6 +41,7 @@
 
 #include "vismask.hpp"
 #include "util.hpp"
+#include "rotatecontroller.hpp"
 
 namespace
 {
@@ -257,6 +258,8 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
         , mTextKeyListener(NULL)
+        , mHeadYawRadians(0.f)
+        , mHeadPitchRadians(0.f)
     {
         for(size_t i = 0;i < sNumGroups;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
@@ -900,6 +903,15 @@ namespace MWRender
 
         updateEffects(duration);
 
+        if (mHeadController)
+        {
+            const float epsilon = 0.001f;
+            bool enable = (std::abs(mHeadPitchRadians) > epsilon || std::abs(mHeadYawRadians) > epsilon);
+            mHeadController->setEnabled(enable);
+            if (enable)
+                mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
+        }
+
         return movement;
     }
 
@@ -1211,6 +1223,42 @@ namespace MWRender
         else
             return found->second;
     }
+
+    void Animation::addControllers()
+    {
+        mHeadController = NULL;
+
+        NodeMap::iterator found = mNodeMap.find("bip01 head");
+        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+        {
+            osg::Node* node = found->second;
+            mHeadController = new RotateController(mObjectRoot.get());
+            node->addUpdateCallback(mHeadController);
+            mActiveControllers.insert(std::make_pair(node, mHeadController));
+        }
+    }
+
+    void Animation::setHeadPitch(float pitchRadians)
+    {
+        mHeadPitchRadians = pitchRadians;
+    }
+
+    void Animation::setHeadYaw(float yawRadians)
+    {
+        mHeadYawRadians = yawRadians;
+    }
+
+    float Animation::getHeadPitch() const
+    {
+        return mHeadPitchRadians;
+    }
+
+    float Animation::getHeadYaw() const
+    {
+        return mHeadYawRadians;
+    }
+
+    // ------------------------------------------------------
 
     float Animation::AnimationTime::getValue(osg::NodeVisitor*)
     {

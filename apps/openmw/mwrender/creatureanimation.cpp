@@ -174,6 +174,7 @@ Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()
 
 void CreatureWeaponAnimation::addControllers()
 {
+    Animation::addControllers();
     WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
 }
 

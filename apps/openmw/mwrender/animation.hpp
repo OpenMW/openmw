@@ -25,6 +25,7 @@ namespace MWRender
 {
 
 class ResetAccumRootCallback;
+class RotateController;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
@@ -197,6 +198,10 @@ protected:
 
     TextKeyListener* mTextKeyListener;
 
+    osg::ref_ptr<RotateController> mHeadController;
+    float mHeadYawRadians;
+    float mHeadPitchRadians;
+
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
@@ -243,7 +248,7 @@ protected:
      * Provided to allow derived classes adding their own controllers. Note, the controllers must be added to mActiveControllers
      * so they get cleaned up properly on the next controller rebuild. A controller rebuild may be necessary to ensure correct ordering.
      */
-    virtual void addControllers() {}
+    virtual void addControllers();
 
     osg::Vec4f getEnchantmentColor(MWWorld::Ptr item);
 
@@ -374,10 +379,10 @@ public:
     /// @param effect Controls the radius and intensity of the light.
     virtual void setLightEffect(float effect) {}
 
-    virtual void setHeadPitch(float pitchRadians) {}
-    virtual void setHeadYaw(float yawRadians) {}
-    virtual float getHeadPitch() const {return 0.f;}
-    virtual float getHeadYaw() const {return 0.f;}
+    virtual void setHeadPitch(float pitchRadians);
+    virtual void setHeadYaw(float yawRadians);
+    virtual float getHeadPitch() const;
+    virtual float getHeadYaw() const;
 
 private:
     Animation(const Animation&);

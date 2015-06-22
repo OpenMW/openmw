@@ -49,7 +49,6 @@ public:
 };
 
 class NeckController;
-class RotateController;
 
 class NpcAnimation : public Animation, public WeaponAnimation, public MWWorld::InventoryStoreListener
 {
@@ -101,9 +100,6 @@ private:
     float mAlpha;
     bool mSoundsDisabled;
 
-    float mHeadYawRadians;
-    float mHeadPitchRadians;
-
     void updateNpcBase();
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
@@ -119,7 +115,6 @@ private:
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
-    osg::ref_ptr<RotateController> mHeadController;
 
 protected:
     virtual void addControllers();
@@ -150,11 +145,6 @@ public:
     /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
-
-    virtual void setHeadPitch(float pitchRadians);
-    virtual void setHeadYaw(float yawRadians);
-    virtual float getHeadPitch() const;
-    virtual float getHeadYaw() const;
 
     virtual void showWeapons(bool showWeapon);
     virtual void showCarriedLeft(bool show);

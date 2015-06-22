@@ -243,9 +243,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
     mAlpha(1.f),
-    mSoundsDisabled(disableSounds),
-    mHeadYawRadians(0.f),
-    mHeadPitchRadians(0.f)
+    mSoundsDisabled(disableSounds)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -650,38 +648,9 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
 
-    if (mHeadController)
-    {
-        const float epsilon = 0.001f;
-        bool enable = (std::abs(mHeadPitchRadians) > epsilon || std::abs(mHeadYawRadians) > epsilon);
-        mHeadController->setEnabled(enable);
-        if (enable)
-            mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
-    }
-
     WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
 
     return ret;
-}
-
-void NpcAnimation::setHeadPitch(float pitchRadians)
-{
-    mHeadPitchRadians = pitchRadians;
-}
-
-void NpcAnimation::setHeadYaw(float yawRadians)
-{
-    mHeadYawRadians = yawRadians;
-}
-
-float NpcAnimation::getHeadPitch() const
-{
-    return mHeadPitchRadians;
-}
-
-float NpcAnimation::getHeadYaw() const
-{
-    return mHeadYawRadians;
 }
 
 void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
@@ -843,6 +812,8 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
 
 void NpcAnimation::addControllers()
 {
+    Animation::addControllers();
+
     mFirstPersonNeckController = NULL;
     mHeadController = NULL;
     WeaponAnimation::deleteControllers();
@@ -860,15 +831,6 @@ void NpcAnimation::addControllers()
     }
     else if (mViewMode == VM_Normal)
     {
-        NodeMap::iterator found = mNodeMap.find("bip01 head");
-        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
-        {
-            osg::Node* node = found->second;
-            mHeadController = new RotateController(mObjectRoot.get());
-            node->addUpdateCallback(mHeadController);
-            mActiveControllers.insert(std::make_pair(node, mHeadController));
-        }
-
         WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
     }
 }
