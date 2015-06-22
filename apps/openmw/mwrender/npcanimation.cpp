@@ -270,7 +270,7 @@ NpcAnimation::~NpcAnimation()
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener, bool disableSounds, ViewMode viewMode)
   : Animation(ptr, parentNode, resourceSystem),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),

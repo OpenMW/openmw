@@ -156,7 +156,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     insertBegin(ptr);
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
-    std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem, 0));
+    std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }

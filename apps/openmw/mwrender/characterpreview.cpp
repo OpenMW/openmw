@@ -158,7 +158,7 @@ namespace MWRender
         delete mAnimation;
         mAnimation = NULL;
 
-        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, 0, true, true,
+        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
                                       (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
 
         onSetup();

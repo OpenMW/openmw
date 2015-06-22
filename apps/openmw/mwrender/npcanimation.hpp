@@ -90,8 +90,6 @@ protected:
 public:
     /**
      * @param ptr
-     * @param node
-     * @param visibilityFlags
      * @param disableListener  Don't listen for equipment changes and magic effects. InventoryStore only supports
      *                         one listener at a time, so you shouldn't do this if creating several NpcAnimations
      *                         for the same Ptr, eg preview dolls for the player.
@@ -99,8 +97,7 @@ public:
      * @param disableSounds    Same as \a disableListener but for playing items sounds
      * @param viewMode
      */
-    NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
-                 int visibilityFlags, bool disableListener = false,
+    NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener = false,
                  bool disableSounds = false, ViewMode viewMode=VM_Normal);
     virtual ~NpcAnimation();
 
