@@ -5,6 +5,10 @@
 #include "../mwworld/livecellref.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
+#include "../mwmechanics/stat.hpp"
+
+#include <components/esm/loadskil.hpp>
+#include <components/esm/attr.hpp>
 
 namespace ESM
 {
@@ -48,9 +52,17 @@ namespace MWWorld
         int                     mCurrentCrimeId;    // the id assigned witnesses
         int                     mPaidCrimeId;      // the last id paid off (0 bounty)
 
+        // Saved skills and attributes prior to becoming a werewolf
+        MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
+        MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
+
     public:
 
         Player(const ESM::NPC *player, const MWBase::World& world);
+
+        void saveSkillsAttributes();
+        void restoreSkillsAttributes();
+        void setWerewolfSkillsAttributes();
 
         // For mark/recall magic effects
         void markPosition (CellStore* markedCell, ESM::Position markedPosition);

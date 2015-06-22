@@ -160,8 +160,7 @@ namespace CSMDoc
 
             void modificationStateChanged (bool clean);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void operationDone (int type, bool failed);
 

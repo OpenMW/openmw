@@ -694,7 +694,7 @@ namespace CSMWorld
 
             QColor colour = data.value<QColor>();
 
-            record2.mMapColor = colour.rgb() & 0xffffff;
+            record2.mMapColor = (colour.blue() << 16) | (colour.green() << 8) | colour.red();
 
             record.setModified (record2);
         }

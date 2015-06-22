@@ -70,11 +70,12 @@ opencs_units (view/world
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator idcompletiondelegate
+    colordelegate
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2 completerpopup
+    scenetooltoggle2 completerpopup coloreditor colorpickerpopup
     )
 
 opencs_units (view/render

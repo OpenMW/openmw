@@ -96,21 +96,35 @@ void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
     selectionModel()->select (index,
         QItemSelectionModel::Clear | QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
-    switch (modifiers)
+    std::map<Qt::KeyboardModifiers, DoubleClickAction>::iterator iter =
+        mDoubleClickActions.find (modifiers);
+
+    if (iter==mDoubleClickActions.end())
     {
-        case 0:
+        event->accept();
+        return;
+    }
+        
+    switch (iter->second)
+    {
+        case Action_None:
+
+            event->accept();
+            break;
+            
+        case Action_Edit:
 
             event->accept();
             showSelection();
             break;
 
-        case Qt::ShiftModifier:
+        case Action_Remove:
 
             event->accept();
             removeSelection();
             break;
 
-        case Qt::ControlModifier:
+        case Action_EditAndRemove:
 
             event->accept();
             showSelection();
@@ -155,7 +169,11 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 
     mReplaceAction = new QAction (tr ("Replace"), this);
     connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
-    addAction (mReplaceAction);    
+    addAction (mReplaceAction);
+
+    mDoubleClickActions.insert (std::make_pair (Qt::NoModifier, Action_Edit));
+    mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_Remove));
+    mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_EditAndRemove));    
 }
 
 std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() const
@@ -176,6 +194,35 @@ std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() co
 void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStringList& list)
 {
     mIdTypeDelegate->updateUserSetting (name, list);
+
+    QString base ("report-input/double");
+    if (name.startsWith (base))
+    {
+        QString modifierString = name.mid (base.size());
+        Qt::KeyboardModifiers modifiers = 0;
+
+        if (modifierString=="-s")
+            modifiers = Qt::ShiftModifier;
+        else if (modifierString=="-c")
+            modifiers = Qt::ControlModifier;
+        else if (modifierString=="-sc")
+            modifiers = Qt::ShiftModifier | Qt::ControlModifier;
+
+        DoubleClickAction action = Action_None;
+
+        QString value = list.at (0);
+
+        if (value=="Edit")
+            action = Action_Edit;
+        else if (value=="Remove")
+            action = Action_Remove;
+        else if (value=="Edit And Remove")
+            action = Action_EditAndRemove;
+
+        mDoubleClickActions[modifiers] = action;
+
+        return;
+    }    
 }
 
 std::vector<int> CSVTools::ReportTable::getReplaceIndices (bool selection) const

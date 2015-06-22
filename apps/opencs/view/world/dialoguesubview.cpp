@@ -33,6 +33,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/doc/document.hpp"
 
+#include "../widget/coloreditor.hpp"
+
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
 #include "tablebottombox.hpp"
@@ -330,6 +332,10 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         else if (qobject_cast<QAbstractSpinBox*>(editor) || qobject_cast<QLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
+        }
+        else if (qobject_cast<CSVWidget::ColorEditor *>(editor))
+        {
+            connect(editor, SIGNAL(pickingFinished()), proxy, SLOT(editorDataCommited()));
         }
         else // throw an exception because this is a coding error
             throw std::logic_error ("Dialogue editor type missing");
@@ -679,8 +685,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    mMainLayout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this));
+    mMainLayout->addWidget (mBottom = new TableBottomBox (creatorFactory, document, id, this));
 
     mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
 

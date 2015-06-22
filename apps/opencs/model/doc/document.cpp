@@ -2302,8 +2302,8 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
-        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (reportMessage (const CSMDoc::Message&, int)));
 
     connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
@@ -2404,11 +2404,10 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message << std::endl;
+    std::cout << message.mMessage << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type, bool failed)

@@ -133,6 +133,15 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
   mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
   mScopeLabel (0), mCloneMode (false)
 {
+    // If the collection ID has a parent type, use it instead.
+    // It will change IDs with Record/SubRecord class (used for creators in Dialogue subviews)
+    // to IDs with general RecordList class (used for creators in Table subviews).
+    CSMWorld::UniversalId::Type listParentType = CSMWorld::UniversalId::getParentType(mListId.getType());
+    if (listParentType != CSMWorld::UniversalId::Type_None)
+    {
+        mListId = listParentType;
+    }
+
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 

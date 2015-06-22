@@ -59,7 +59,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceableCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_References,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<ReferenceCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, ReferenceCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Topics,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, TopicCreatorFactory>);
@@ -68,10 +68,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_JournalInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<InfoCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
 
     // Subviews for resources tables
     manager.add (CSMWorld::UniversalId::Type_Meshes,
@@ -147,16 +147,16 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceableCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Reference,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<ReferenceCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, ReferenceCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_Cell,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<CellCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_JournalInfo,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, InfoCreatorFactory> (false));
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfo,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, CreatorFactory<InfoCreator> >(false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, InfoCreatorFactory>(false));
 
     manager.add (CSMWorld::UniversalId::Type_Topic,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, TopicCreatorFactory> (false));

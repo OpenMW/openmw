@@ -31,6 +31,14 @@ void ESM::Player::load (ESMReader &esm)
     esm.getHNOT (mCurrentCrimeId, "CURD");
     mPaidCrimeId = -1;
     esm.getHNOT (mPaidCrimeId, "PAYD");
+
+    if (esm.hasMoreSubs())
+    {
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i].load(esm);
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i].load(esm);
+    }
 }
 
 void ESM::Player::save (ESMWriter &esm) const
@@ -54,4 +62,9 @@ void ESM::Player::save (ESMWriter &esm) const
 
     esm.writeHNT ("CURD", mCurrentCrimeId);
     esm.writeHNT ("PAYD", mPaidCrimeId);
+
+    for (int i=0; i<ESM::Attribute::Length; ++i)
+        mSaveAttributes[i].save(esm);
+    for (int i=0; i<ESM::Skill::Length; ++i)
+        mSaveSkills[i].save(esm);
 }
