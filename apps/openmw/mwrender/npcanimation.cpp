@@ -75,6 +75,41 @@ std::string getVampireHead(const std::string& race, bool female)
 namespace MWRender
 {
 
+class HeadAnimationTime : public SceneUtil::ControllerSource
+{
+private:
+    MWWorld::Ptr mReference;
+    float mTalkStart;
+    float mTalkStop;
+    float mBlinkStart;
+    float mBlinkStop;
+
+    float mBlinkTimer;
+
+    bool mEnabled;
+
+    float mValue;
+private:
+    void resetBlinkTimer();
+public:
+    HeadAnimationTime(MWWorld::Ptr reference);
+
+    void updatePtr(const MWWorld::Ptr& updated);
+
+    void update(float dt);
+
+    void setEnabled(bool enabled);
+
+    void setTalkStart(float value);
+    void setTalkStop(float value);
+    void setBlinkStart(float value);
+    void setBlinkStop(float value);
+
+    virtual float getValue(osg::NodeVisitor* nv);
+};
+
+// --------------------------------------------------------------------------------
+
 /// Subclass RotateController to add a Z-offset for sneaking in first person mode.
 /// @note We use inheritance instead of adding another controller, so that we do not have to compute the worldOrient twice.
 /// @note Must be set on a MatrixTransform.
