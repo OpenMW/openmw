@@ -32,6 +32,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     for (int i=0; i<27; ++i)
         mSkills[i].load (esm);
 
+    mWerewolfDeprecatedData = false;
     if (esm.peekNextSub("STBA"))
     {
         // we have deprecated werewolf skills, stored interleaved
