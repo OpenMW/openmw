@@ -1,5 +1,7 @@
 #include "autocalc.hpp"
 
+#include <cmath>
+
 #include <components/esm/attr.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadskil.hpp>
