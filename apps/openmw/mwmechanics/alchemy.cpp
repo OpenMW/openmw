@@ -463,7 +463,10 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_NoName;
 
     if (listEffects().empty())
+    {
+        removeIngredients();
         return Result_NoEffects;
+    }
 
     if (beginEffects() == endEffects())
     {
