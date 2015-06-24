@@ -38,7 +38,7 @@ namespace CSMWorld
     };
 }
 
-Q_DECLARE_METATYPE(CSMWorld::UserInt);
-Q_DECLARE_METATYPE(CSMWorld::UserFloat);
+Q_DECLARE_METATYPE(CSMWorld::UserInt)
+Q_DECLARE_METATYPE(CSMWorld::UserFloat)
 
 #endif // CSM_WORLD_USERTYPE_H

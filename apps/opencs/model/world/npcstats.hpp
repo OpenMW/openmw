@@ -69,6 +69,6 @@ namespace CSMWorld
     };
 }
 
-Q_DECLARE_METATYPE(CSMWorld::NpcStats*);
+Q_DECLARE_METATYPE(CSMWorld::NpcStats*)
 
 #endif // CSM_WORLD_NPCSTATS_H

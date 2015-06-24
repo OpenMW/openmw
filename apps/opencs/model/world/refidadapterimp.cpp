@@ -1122,6 +1122,7 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     }
 }
 
+template <>
 void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int position) const
 {
@@ -1145,6 +1146,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColum
     record.setModified (caster);
 }
 
+template <>
 void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int rowToRemove) const
 {
@@ -1175,6 +1177,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdCo
     record.setModified (caster);
 }
 
+template <>
 void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColumn *column,
         RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
 {
@@ -1207,6 +1210,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColu
     record.setModified (caster);
 }
 
+template <>
 QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *column,
         const RefIdData& data, int index, int subRowIndex, int subColIndex) const
 {
@@ -1230,12 +1234,14 @@ QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefId
     }
 }
 
+template <>
 int CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedColumnsCount(const RefIdColumn *column,
         const RefIdData& data) const
 {
     return 5;
 }
 
+template <>
 int CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
     const Record<ESM::NPC>& record =
