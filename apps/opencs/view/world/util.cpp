@@ -17,6 +17,7 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../widget/coloreditor.hpp"
 #include "../../model/world/usertype.hpp"
 #include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
@@ -124,10 +125,19 @@ void CSVWorld::CommandDelegate::setModelDataImp (QWidget *editor, QAbstractItemM
     if (!mCommandDispatcher)
         return;
 
+    QVariant new_;
+    // Color columns use a custom editor, so we need explicitly extract a data from it
+    CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
+    if (colorEditor != NULL)
+    {
+        new_ = colorEditor->color();
+    }
+    else
+    {
     NastyTableModelHack hack (*model);
     QStyledItemDelegate::setModelData (editor, &hack, index);
-
-    QVariant new_ = hack.getData();
+        new_ = hack.getData();
+    }
 
     if ((model->data (index)!=new_) && (model->flags(index) & Qt::ItemIsEditable))
         mCommandDispatcher->executeModify (model, index, new_);
@@ -163,6 +173,12 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     {
         return QStyledItemDelegate::createEditor(parent, option, index);
     }
+    // For tables the pop-up of the color editor should appear immediately after the editor creation
+    // (the third parameter of ColorEditor's constructor)
+    else if (display == CSMWorld::ColumnBase::Display_Colour)
+    {
+        return new CSVWidget::ColorEditor(index.data().value<QColor>(), parent, true);
+    }
     return createEditor (parent, option, index, display);
 }
 
@@ -185,7 +201,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     {
         case CSMWorld::ColumnBase::Display_Colour:
 
-            return new QLineEdit(parent);
+            return new CSVWidget::ColorEditor(index.data().value<QColor>(), parent);
 
         case CSMWorld::ColumnBase::Display_Integer:
         {
@@ -283,6 +299,14 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
                 return;
             }
         }
+    }
+
+    // Color columns use a custom editor, so we need explicitly set a data for it
+    CSVWidget::ColorEditor *colorEditor = qobject_cast<CSVWidget::ColorEditor *>(editor);
+    if (colorEditor != NULL)
+    {
+        colorEditor->setColor(index.data().value<QColor>());
+        return;
     }
 
     QByteArray n = editor->metaObject()->userProperty().name();

@@ -2485,6 +2485,17 @@ namespace MWWorld
         if (npcStats.isWerewolf() == werewolf)
             return;
 
+        if (actor == getPlayerPtr())
+        {
+            if (werewolf)
+            {
+                mPlayer->saveSkillsAttributes();
+                mPlayer->setWerewolfSkillsAttributes();
+            }
+            else
+                mPlayer->restoreSkillsAttributes();
+        }
+
         npcStats.setWerewolf(werewolf);
 
         // This is a bit dangerous. Equipped items other than WerewolfRobe may reference

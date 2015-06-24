@@ -49,6 +49,55 @@ namespace MWWorld
         mPlayer.mData.setPosition(playerPos);
     }
 
+    void Player::saveSkillsAttributes()
+    {
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i] = stats.getSkill(i);
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i] = stats.getAttribute(i);
+    }
+
+    void Player::restoreSkillsAttributes()
+    {
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            stats.setSkill(i, mSaveSkills[i]);
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            stats.setAttribute(i, mSaveAttributes[i]);
+    }
+
+    void Player::setWerewolfSkillsAttributes()
+    {
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for(size_t i = 0;i < ESM::Attribute::Length;++i)
+        {
+            // Oh, Bethesda. It's "Intelligence".
+            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
+                                            ESM::Attribute::sAttributeNames[i]);
+
+            MWMechanics::AttributeValue value = stats.getAttribute(i);
+            value.setBase(int(gmst.find(name)->getFloat()));
+            stats.setAttribute(i, value);
+        }
+
+        for(size_t i = 0;i < ESM::Skill::Length;i++)
+        {
+            // Acrobatics is set separately for some reason.
+            if(i == ESM::Skill::Acrobatics)
+                continue;
+
+            // "Mercantile"! >_<
+            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
+                                            ESM::Skill::sSkillNames[i]);
+
+            MWMechanics::SkillValue value = stats.getSkill(i);
+            value.setBase(int(gmst.find(name)->getFloat()));
+            stats.setSkill(i, value);
+        }
+    }
+
     void Player::set(const ESM::NPC *player)
     {
         mPlayer.mBase = player;
@@ -222,6 +271,11 @@ namespace MWWorld
 
         player.mAutoMove = mAutoMove ? 1 : 0;
 
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i].writeState(player.mSaveAttributes[i]);
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i].writeState(player.mSaveSkills[i]);
+
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
         writer.endRecord (ESM::REC_PLAY);
@@ -241,6 +295,17 @@ namespace MWWorld
             }
 
             mPlayer.load (player.mObject);
+
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                mSaveAttributes[i].readState(player.mSaveAttributes[i]);
+            for (int i=0; i<ESM::Skill::Length; ++i)
+                mSaveSkills[i].readState(player.mSaveSkills[i]);
+
+            if (player.mObject.mNpcStats.mWerewolfDeprecatedData && player.mObject.mNpcStats.mIsWerewolf)
+            {
+                saveSkillsAttributes();
+                setWerewolfSkillsAttributes();
+            }
 
             getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
 

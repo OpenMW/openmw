@@ -51,11 +51,15 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
     {
         mVerifierOperation = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
+        std::vector<QString> settings;
+        settings.push_back ("script-editor/warnings");
+        
+        mVerifierOperation->configureSettings (settings);
+
         connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (&mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-        connect (&mVerifier,
-            SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-            this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+            this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 
         std::vector<std::string> mandatoryIds; //  I want C++11, damn it!
         mandatoryIds.push_back ("Day");
@@ -120,9 +124,8 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
 
     connect (&mSearch, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
     connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
-    connect (&mSearch,
-        SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+    connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
 }
 
 CSMTools::Tools::~Tools()
@@ -155,7 +158,7 @@ CSMWorld::UniversalId CSMTools::Tools::runVerifier()
 
 CSMWorld::UniversalId CSMTools::Tools::newSearch()
 {
-    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true)));
+    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true, false)));
 
     return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);
 }
@@ -210,12 +213,11 @@ CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& 
     return mReports.at (id.getIndex());
 }
 
-void CSMTools::Tools::verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMTools::Tools::verifierMessage (const CSMDoc::Message& message, int type)
 {
     std::map<int, int>::iterator iter = mActiveReports.find (type);
 
     if (iter!=mActiveReports.end())
-        mReports[iter->second]->add (id, message, hint);
+        mReports[iter->second]->add (message);
 }
 

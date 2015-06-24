@@ -1,6 +1,8 @@
 #ifndef CSV_TOOLS_REPORTTABLE_H
 #define CSV_TOOLS_REPORTTABLE_H
 
+#include <map>
+
 #include "../world/dragrecordtable.hpp"
 
 class QAction;
@@ -21,11 +23,20 @@ namespace CSVTools
     {
             Q_OBJECT
 
+            enum DoubleClickAction
+            {
+                Action_None,
+                Action_Edit,
+                Action_Remove,
+                Action_EditAndRemove
+            };
+            
             CSMTools::ReportModel *mModel;
             CSVWorld::CommandDelegate *mIdTypeDelegate;
             QAction *mShowAction;
             QAction *mRemoveAction;
             QAction *mReplaceAction;
+            std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
 
         private:
 

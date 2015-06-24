@@ -23,8 +23,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id) const;
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
     };
 
@@ -32,8 +31,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-                const CSMWorld::UniversalId& id) const;
+            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
             ///< The ownership of the returned Creator is transferred to the caller.
     };
 }
