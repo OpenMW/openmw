@@ -34,6 +34,7 @@
 #include "../../model/doc/document.hpp"
 
 #include "../widget/coloreditor.hpp"
+#include "../widget/droplineedit.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "util.hpp"
@@ -129,52 +130,6 @@ QWidget* CSVWorld::DialogueDelegateDispatcherProxy::getEditor() const
     return mEditor;
 }
 
-void CSVWorld::DialogueDelegateDispatcherProxy::tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document)
-{
-    QLineEdit* lineEdit = qobject_cast<QLineEdit*>(mEditor);
-    {
-        if (!lineEdit || !mIndexWrapper.get())
-        {
-            return;
-        }
-    }
-    for (unsigned i = 0; i < data.size();  ++i)
-    {
-        CSMWorld::UniversalId::Type type = data[i].getType();
-        if (mDisplay == CSMWorld::ColumnBase::Display_Referenceable)
-        {
-            if (type == CSMWorld::UniversalId::Type_Activator
-                || type == CSMWorld::UniversalId::Type_Potion
-                || type == CSMWorld::UniversalId::Type_Apparatus
-                || type == CSMWorld::UniversalId::Type_Armor
-                || type == CSMWorld::UniversalId::Type_Book
-                || type == CSMWorld::UniversalId::Type_Clothing
-                || type == CSMWorld::UniversalId::Type_Container
-                || type == CSMWorld::UniversalId::Type_Creature
-                || type == CSMWorld::UniversalId::Type_Door
-                || type == CSMWorld::UniversalId::Type_Ingredient
-                || type == CSMWorld::UniversalId::Type_CreatureLevelledList
-                || type == CSMWorld::UniversalId::Type_ItemLevelledList
-                || type == CSMWorld::UniversalId::Type_Light
-                || type == CSMWorld::UniversalId::Type_Lockpick
-                || type == CSMWorld::UniversalId::Type_Miscellaneous
-                || type == CSMWorld::UniversalId::Type_Npc
-                || type == CSMWorld::UniversalId::Type_Probe
-                || type == CSMWorld::UniversalId::Type_Repair
-                || type == CSMWorld::UniversalId::Type_Static
-                || type == CSMWorld::UniversalId::Type_Weapon)
-            {
-                type = CSMWorld::UniversalId::Type_Referenceable;
-            }
-        }
-        if (mDisplay == CSMWorld::TableMimeData::convertEnums(type))
-        {
-            emit tableMimeDataDropped(mEditor, mIndexWrapper->mIndex, data[i], document);
-            emit editorDataCommited(mEditor, mIndexWrapper->mIndex, mDisplay);
-            break;
-        }
-    }
-}
 /*
 ==============================DialogueDelegateDispatcher==========================================
 */
@@ -306,16 +261,12 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
 
         // NOTE: For each entry in CSVWorld::CommandDelegate::createEditor() a corresponding entry
         // is required here
-        if (qobject_cast<DropLineEdit*>(editor))
+        if (qobject_cast<CSVWidget::DropLineEdit*>(editor))
         {
             connect(editor, SIGNAL(editingFinished()), proxy, SLOT(editorDataCommited()));
 
-            connect(editor, SIGNAL(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&, const CSMDoc::Document*)),
-                    proxy, SLOT(tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>&, const CSMDoc::Document*)));
-
-            connect(proxy, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
-                    this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
-
+            connect(editor, SIGNAL(tableMimeDataDropped(const CSMWorld::UniversalId&, const CSMDoc::Document*)),
+                    proxy, SLOT(editorDataCommited()));
         }
         else if (qobject_cast<QCheckBox*>(editor))
         {
@@ -386,9 +337,6 @@ mCommandDispatcher (commandDispatcher),
 mDocument (document)
 {
     remake (row);
-
-    connect(mDispatcher, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
-            this, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 }
 
 void CSVWorld::EditWidget::remake(int row)
@@ -679,8 +627,6 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mEditWidget = new EditWidget(mainWidget,
             mTable->getModelIndex(mCurrentId, 0).row(), mTable, mCommandDispatcher, document, false);
-    connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
-            this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -840,17 +786,6 @@ void CSVWorld::DialogueSubView::rowsAboutToBeRemoved(const QModelIndex &parent, 
             mEditWidget = 0;
         }
         emit closeRequest(this);
-    }
-}
-
-void CSVWorld::DialogueSubView::tableMimeDataDropped (QWidget* editor,
-                                                      const QModelIndex& index,
-                                                      const CSMWorld::UniversalId& id,
-                                                      const CSMDoc::Document* document)
-{
-    if (document == &mDocument)
-    {
-        qobject_cast<DropLineEdit*>(editor)->setText(id.getId().c_str());
     }
 }
 

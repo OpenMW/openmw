@@ -2,6 +2,8 @@
 
 #include "../../model/world/idcompletionmanager.hpp"
 
+#include "../widget/droplineedit.hpp"
+
 CSVWorld::IdCompletionDelegate::IdCompletionDelegate(CSMWorld::CommandDispatcher *dispatcher,
                                                      CSMDoc::Document& document,
                                                      QObject *parent)
@@ -26,7 +28,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
     }
 
     CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();
-    DropLineEdit *editor = new DropLineEdit(parent);
+    CSVWidget::DropLineEdit *editor = new CSVWidget::DropLineEdit(display, parent);
     editor->setCompleter(completionManager.getCompleter(display).get());
     return editor;
 }
