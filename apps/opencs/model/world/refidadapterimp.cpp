@@ -1122,8 +1122,11 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     }
 }
 
+namespace CSMWorld
+{
+
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int position) const
 {
     Record<ESM::NPC>& record =
@@ -1147,7 +1150,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColum
 }
 
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int rowToRemove) const
 {
     Record<ESM::NPC>& record =
@@ -1178,7 +1181,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdCo
 }
 
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColumn *column,
         RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
 {
     Record<ESM::NPC>& record =
@@ -1211,13 +1214,13 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColu
 }
 
 template <>
-QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *column,
+QVariant NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *column,
         const RefIdData& data, int index, int subRowIndex, int subColIndex) const
 {
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    const std::vector<CSMWorld::SpellInfo>& spells = mData.npcAutoCalculate(record.get())->spells();
+    const std::vector<SpellInfo>& spells = mData.npcAutoCalculate(record.get())->spells();
 
     if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
         throw std::runtime_error ("index out of range");
@@ -1235,24 +1238,24 @@ QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefId
 }
 
 template <>
-int CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedColumnsCount(const RefIdColumn *column,
+int NestedSpellRefIdAdapter<ESM::NPC>::getNestedColumnsCount(const RefIdColumn *column,
         const RefIdData& data) const
 {
     return 5;
 }
 
 template <>
-int CSMWorld::NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+int NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    const std::vector<CSMWorld::SpellInfo> spells = mData.npcAutoCalculate(record.get())->spells();
+    const std::vector<SpellInfo> spells = mData.npcAutoCalculate(record.get())->spells();
     return static_cast<int>(spells.size());
 }
 
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::addNestedRow (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::Creature>::addNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int position) const
 {
     Record<ESM::Creature>& record =
@@ -1272,7 +1275,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::addNestedRow (const RefId
 }
 
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::removeNestedRow (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::Creature>::removeNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int rowToRemove) const
 {
     Record<ESM::Creature>& record =
@@ -1290,7 +1293,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::removeNestedRow (const Re
 }
 
 template <>
-void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::setNestedData (const RefIdColumn *column,
+void NestedSpellRefIdAdapter<ESM::Creature>::setNestedData (const RefIdColumn *column,
         RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
 {
     Record<ESM::Creature>& record =
@@ -1310,7 +1313,7 @@ void CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::setNestedData (const RefI
 }
 
 template<>
-QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::getNestedData (const RefIdColumn *column,
+QVariant NestedSpellRefIdAdapter<ESM::Creature>::getNestedData (const RefIdColumn *column,
         const RefIdData& data, int index, int subRowIndex, int subColIndex) const
 {
     const Record<ESM::Creature>& record =
@@ -1337,17 +1340,19 @@ QVariant CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::getNestedData (const 
 }
 
 template <>
-int CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::getNestedColumnsCount(const RefIdColumn *column,
+int NestedSpellRefIdAdapter<ESM::Creature>::getNestedColumnsCount(const RefIdColumn *column,
         const RefIdData& data) const
 {
     return 2;
 }
 
 template <>
-int CSMWorld::NestedSpellRefIdAdapter<ESM::Creature>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+int NestedSpellRefIdAdapter<ESM::Creature>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
     return static_cast<int>(record.get().mSpells.mList.size());
+}
+
 }
