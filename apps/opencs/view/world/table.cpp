@@ -9,6 +9,8 @@
 #include <QString>
 #include <QtCore/qnamespace.h>
 
+#include <components/misc/stringops.hpp>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
@@ -128,17 +130,24 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 {
                     int row = mProxyModel->mapToSource (
                         mProxyModel->index (selectedRows.begin()->row(), 0)).row();
+                    QString curData = mModel->data(mModel->index(row, column)).toString();
 
-                    if (row>0 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row-1, column)))
+                    if (row > 0)
                     {
-                        menu.addAction (mMoveUpAction);
+                        QString prevData = mModel->data(mModel->index(row - 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), prevData.toStdString()))
+                        {
+                            menu.addAction(mMoveUpAction);
+                        }
                     }
 
-                    if (row<mModel->rowCount()-1 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row+1, column)))
+                    if (row < mModel->rowCount() - 1)
                     {
-                        menu.addAction (mMoveDownAction);
+                        QString nextData = mModel->data(mModel->index(row + 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), nextData.toStdString()))
+                        {
+                            menu.addAction(mMoveDownAction);
+                        }
                     }
                 }
             }
