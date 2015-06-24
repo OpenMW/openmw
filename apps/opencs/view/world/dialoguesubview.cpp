@@ -678,6 +678,14 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
     connect(mEditWidget, SIGNAL(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)),
             this, SLOT(tableMimeDataDropped(QWidget*, const QModelIndex&, const CSMWorld::UniversalId&, const CSMDoc::Document*)));
 
+    if (id.getType() == CSMWorld::UniversalId::Type_Referenceable)
+    {
+        CSMWorld::IdTree *objectTable = static_cast<CSMWorld::IdTree*>(mTable);
+
+        connect (objectTable, SIGNAL (refreshNpcDialogue (int, const std::string&)),
+                 this,        SLOT   (refreshNpcDialogue (int, const std::string&)));
+    }
+
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
@@ -896,4 +904,28 @@ void CSVWorld::DialogueSubView::changeCurrentId (const std::string& newId)
 
     selection.push_back(mCurrentId);
     mCommandDispatcher.setSelection(selection);
+}
+
+void CSVWorld::DialogueSubView::refreshNpcDialogue (int type, const std::string& id)
+{
+    int typeColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+    if (CSMWorld::UniversalId::Type_Npc
+                != mTable->data(mTable->getModelIndex(mCurrentId, typeColumn), Qt::DisplayRole).toInt())
+    {
+        return;
+    }
+
+    int raceColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Race);
+    int classColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Class);
+
+    if ((type == 0/*FIXME*/ && id == "") // skill or gmst changed
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, raceColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData()) // race
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, classColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData())) // class
+    {
+        int y = mEditWidget->verticalScrollBar()->value();
+        mEditWidget->remake (mTable->getModelIndex(mCurrentId, 0).row());
+        mEditWidget->verticalScrollBar()->setValue(y);
+    }
 }

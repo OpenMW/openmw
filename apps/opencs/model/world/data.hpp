@@ -60,6 +60,7 @@ namespace CSMWorld
 {
     class ResourcesManager;
     class Resources;
+    class NpcStats;
 
     class Data : public QObject
     {
@@ -108,6 +109,8 @@ namespace CSMWorld
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
+            std::map<std::string, NpcStats*> mNpcStatCache;
+
             // not implemented
             Data (const Data&);
             Data& operator= (const Data&);
@@ -121,7 +124,11 @@ namespace CSMWorld
 
             static int count (RecordBase::State state, const CollectionBase& collection);
 
-            const CSMWorld::Data& self ();
+            const Data& self ();
+
+            void saveAutoCalcValues(ESM::NPC& npc);
+
+            void clearNpcStatsCache ();
 
         public:
 
@@ -277,15 +284,37 @@ namespace CSMWorld
 
             std::string getAuthor() const;
 
+            NpcStats* npcAutoCalculate (const ESM::NPC& npc) const;
+
+            NpcStats* getCachedNpcData (const std::string& id) const;
+
         signals:
 
             void idListChanged();
+
+            // refresh NPC dialogue subviews via object table model
+            void updateNpcAutocalc (int type, const std::string& id);
+
+            void cacheNpcStats (const std::string& id, NpcStats *stats) const;
 
         private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsChanged (const QModelIndex& parent, int start, int end);
+
+            // for autocalc updates when gmst/race/class/skils tables change
+            void gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void raceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void classDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void skillDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void cacheNpcStatsEvent (const std::string& id, NpcStats *stats);
     };
 }
 

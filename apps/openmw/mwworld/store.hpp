@@ -10,6 +10,7 @@
 #include <openengine/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
+#include <components/gameplay/store.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -17,89 +18,10 @@
 
 namespace MWWorld
 {
-    struct StoreBase
-    {
-        virtual ~StoreBase() {}
-
-        virtual void setUp() {}
-        virtual void listIdentifier(std::vector<std::string> &list) const {}
-
-        virtual size_t getSize() const = 0;
-        virtual int getDynamicSize() const { return 0; }
-        virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
-
-        virtual bool eraseStatic(const std::string &id) {return false;}
-        virtual void clearDynamic() {}
-
-        virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
-
-        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
-        ///< Read into dynamic storage
-    };
-
-    template <class T>
-    class SharedIterator
-    {
-        typedef typename std::vector<T *>::const_iterator Iter;
-
-        Iter mIter;
-
-    public:
-        SharedIterator() {}
-
-        SharedIterator(const SharedIterator &orig)
-          : mIter(orig.mIter)
-        {}
-
-        SharedIterator(const Iter &iter)
-          : mIter(iter)
-        {}
-
-        SharedIterator &operator++() {
-            ++mIter;
-            return *this;
-        }
-
-        SharedIterator operator++(int) {
-            SharedIterator iter = *this;
-            ++mIter;
-
-            return iter;
-        }
-
-        SharedIterator &operator--() {
-            --mIter;
-            return *this;
-        }
-
-        SharedIterator operator--(int) {
-            SharedIterator iter = *this;
-            --mIter;
-
-            return iter;
-        }
-
-        bool operator==(const SharedIterator &x) const {
-            return mIter == x.mIter;
-        }
-
-        bool operator!=(const SharedIterator &x) const {
-            return !(*this == x);
-        }
-
-        const T &operator*() const {
-            return **mIter;
-        }
-
-        const T *operator->() const {
-            return &(**mIter);
-        }
-    };
-
     class ESMStore;
 
     template <class T>
-    class Store : public StoreBase
+    class Store : public GamePlay::CommonStore<T>
     {
         std::map<std::string, T>      mStatic;
         std::vector<T *>    mShared; // Preserves the record order as it came from the content files (this
@@ -137,7 +59,7 @@ namespace MWWorld
           : mStatic(orig.mData)
         {}
 
-        typedef SharedIterator<T> iterator;
+        typedef GamePlay::SharedIterator<T> iterator;
 
         // setUp needs to be called again after
         virtual void clearDynamic()
@@ -380,7 +302,7 @@ namespace MWWorld
     }
 
     template <>
-    class Store<ESM::LandTexture> : public StoreBase
+    class Store<ESM::LandTexture> : public GamePlay::StoreBase
     {
         // For multiple ESM/ESP files we need one list per file.
         typedef std::vector<ESM::LandTexture> LandTextureList;
@@ -457,7 +379,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Land> : public StoreBase
+    class Store<ESM::Land> : public GamePlay::StoreBase
     {
         std::vector<ESM::Land *> mStatic;
 
@@ -472,7 +394,7 @@ namespace MWWorld
         };
 
     public:
-        typedef SharedIterator<ESM::Land> iterator;
+        typedef GamePlay::SharedIterator<ESM::Land> iterator;
 
         virtual ~Store<ESM::Land>()
         {
@@ -546,7 +468,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Cell> : public StoreBase
+    class Store<ESM::Cell> : public GamePlay::StoreBase
     {
         struct DynamicExtCmp
         {
@@ -586,7 +508,7 @@ namespace MWWorld
         void handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell);
 
     public:
-        typedef SharedIterator<ESM::Cell> iterator;
+        typedef GamePlay::SharedIterator<ESM::Cell> iterator;
 
         const ESM::Cell *search(const std::string &id) const {
             ESM::Cell cell;
@@ -834,7 +756,7 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Pathgrid> : public StoreBase
+    class Store<ESM::Pathgrid> : public GamePlay::StoreBase
     {
     private:
         typedef std::map<std::string, ESM::Pathgrid> Interior;

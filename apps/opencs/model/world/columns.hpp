@@ -302,6 +302,10 @@ namespace CSMWorld
             ColumnId_WaterLevel = 273,
             ColumnId_MapColor = 274,
 
+            ColumnId_SpellSrc = 275,
+            ColumnId_SpellCost = 276,
+            ColumnId_SpellChance = 277,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

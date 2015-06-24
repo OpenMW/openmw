@@ -21,6 +21,7 @@
 #include "refidadapter.hpp"
 #include "nestedtablewrapper.hpp"
 #include "idcollection.hpp"
+#include "data.hpp"
 
 namespace CSMWorld
 {
@@ -806,16 +807,10 @@ namespace CSMWorld
     class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
     {
             NpcColumns mColumns;
-            const IdCollection<ESM::Race>& mRaceTable;
-            const IdCollection<ESM::Class>& mClassTable;
-            const IdCollection<ESM::Skill>& mSkillTable;
 
         public:
 
-            NpcRefIdAdapter (const NpcColumns& columns,
-                             const IdCollection<ESM::Race>& races,
-                             const IdCollection<ESM::Class>& classes,
-                             const IdCollection<ESM::Skill>& skills);
+            NpcRefIdAdapter (const NpcColumns& columns);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;
@@ -860,15 +855,11 @@ namespace CSMWorld
 
     class NpcAttributesRefIdAdapter : public NestedRefIdAdapterBase
     {
-        const IdCollection<ESM::Race>& mRaceTable;
-        const IdCollection<ESM::Class>& mClassTable;
-        const IdCollection<ESM::Skill>& mSkillTable;
+        const Data& mData;
 
     public:
 
-        NpcAttributesRefIdAdapter (const IdCollection<ESM::Race>& races,
-                             const IdCollection<ESM::Class>& classes,
-                             const IdCollection<ESM::Skill>& skills);
+        NpcAttributesRefIdAdapter (const Data& data);
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -895,15 +886,11 @@ namespace CSMWorld
 
     class NpcSkillsRefIdAdapter : public NestedRefIdAdapterBase
     {
-        const IdCollection<ESM::Race>& mRaceTable;
-        const IdCollection<ESM::Class>& mClassTable;
-        const IdCollection<ESM::Skill>& mSkillTable;
+        const Data& mData;
 
     public:
 
-        NpcSkillsRefIdAdapter (const IdCollection<ESM::Race>& races,
-                             const IdCollection<ESM::Class>& classes,
-                             const IdCollection<ESM::Skill>& skills);
+        NpcSkillsRefIdAdapter (const Data& data);
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -930,18 +917,14 @@ namespace CSMWorld
 
     class NpcMiscRefIdAdapter : public NestedRefIdAdapterBase
     {
-        const IdCollection<ESM::Race>& mRaceTable;
-        const IdCollection<ESM::Class>& mClassTable;
-        const IdCollection<ESM::Skill>& mSkillTable;
+        const Data& mData;
 
         NpcMiscRefIdAdapter (const NpcMiscRefIdAdapter&);
         NpcMiscRefIdAdapter& operator= (const NpcMiscRefIdAdapter&);
 
     public:
 
-        NpcMiscRefIdAdapter (const IdCollection<ESM::Race>& races,
-                             const IdCollection<ESM::Class>& classes,
-                             const IdCollection<ESM::Skill>& skills);
+        NpcMiscRefIdAdapter (const Data& data);
         virtual ~NpcMiscRefIdAdapter();
 
         virtual void addNestedRow (const RefIdColumn *column,
@@ -1189,6 +1172,7 @@ namespace CSMWorld
     class NestedSpellRefIdAdapter : public NestedRefIdAdapterBase
     {
         UniversalId::Type mType;
+        const Data& mData;
 
         // not implemented
         NestedSpellRefIdAdapter (const NestedSpellRefIdAdapter&);
@@ -1196,45 +1180,15 @@ namespace CSMWorld
 
     public:
 
-        NestedSpellRefIdAdapter(UniversalId::Type type) :mType(type) {}
+        NestedSpellRefIdAdapter(UniversalId::Type type, const Data& data) :mType(type), mData(data) {}
 
         virtual ~NestedSpellRefIdAdapter() {}
 
         virtual void addNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int position) const
-        {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            ESXRecordT caster = record.get();
-
-            std::vector<std::string>& list = caster.mSpells.mList;
-
-            std::string newString;
-
-            if (position >= (int)list.size())
-                list.push_back(newString);
-            else
-                list.insert(list.begin()+position, newString);
-
-            record.setModified (caster);
-        }
+                RefIdData& data, int index, int position) const;
 
         virtual void removeNestedRow (const RefIdColumn *column,
-                RefIdData& data, int index, int rowToRemove) const
-        {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-            ESXRecordT caster = record.get();
-
-            std::vector<std::string>& list = caster.mSpells.mList;
-
-            if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
-
-            list.erase (list.begin () + rowToRemove);
-
-            record.setModified (caster);
-        }
+                RefIdData& data, int index, int rowToRemove) const;
 
         virtual void setNestedTable (const RefIdColumn* column,
                 RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
@@ -1260,55 +1214,14 @@ namespace CSMWorld
         }
 
         virtual QVariant getNestedData (const RefIdColumn *column,
-                const RefIdData& data, int index, int subRowIndex, int subColIndex) const
-        {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-
-            const std::vector<std::string>& list = record.get().mSpells.mList;
-
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
-
-            const std::string& content = list.at(subRowIndex);
-
-            if (subColIndex == 0)
-                return QString::fromUtf8(content.c_str());
-            else
-                throw std::runtime_error("Trying to access non-existing column in the nested table!");
-        }
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
 
         virtual void setNestedData (const RefIdColumn *column,
-                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
-        {
-            Record<ESXRecordT>& record =
-                static_cast<Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
-            ESXRecordT caster = record.get();
-            std::vector<std::string>& list = caster.mSpells.mList;
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
 
-            if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
-                throw std::runtime_error ("index out of range");
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
 
-            if (subColIndex == 0)
-                list.at(subRowIndex) = std::string(value.toString().toUtf8());
-            else
-                throw std::runtime_error("Trying to access non-existing column in the nested table!");
-
-            record.setModified (caster);
-        }
-
-        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
-        {
-            return 1;
-        }
-
-        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
-        {
-            const Record<ESXRecordT>& record =
-                static_cast<const Record<ESXRecordT>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
-
-            return static_cast<int>(record.get().mSpells.mList.size());
-        }
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
     };
 
     template <typename ESXRecordT>

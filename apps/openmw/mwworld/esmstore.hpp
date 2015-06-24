@@ -67,7 +67,7 @@ namespace MWWorld
         // Lookup of all IDs. Makes looking up references faster. Just
         // maps the id name to the record type.
         std::map<std::string, int> mIds;
-        std::map<int, StoreBase *> mStores;
+        std::map<int, GamePlay::StoreBase *> mStores;
 
         ESM::NPC mPlayerTemplate;
 
@@ -75,7 +75,7 @@ namespace MWWorld
 
     public:
         /// \todo replace with SharedIterator<StoreBase>
-        typedef std::map<int, StoreBase *>::const_iterator iterator;
+        typedef std::map<int, GamePlay::StoreBase *>::const_iterator iterator;
 
         iterator begin() const {
             return mStores.begin();
@@ -144,7 +144,7 @@ namespace MWWorld
 
         void clearDynamic ()
         {
-            for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+            for (std::map<int, GamePlay::StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
                 it->second->clearDynamic();
 
             mNpcs.insert(mPlayerTemplate);
