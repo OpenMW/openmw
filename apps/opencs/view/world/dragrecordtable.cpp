@@ -52,7 +52,10 @@ void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
     QModelIndex index = indexAt(event->pos());
     if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)))
     {
-        event->accept();
+        if (index.flags() & Qt::ItemIsEditable)
+        {
+            event->accept();
+        }
     }
     else
     {
