@@ -52,8 +52,9 @@ run_cmd() {
 			if [ -z $APPVEYOR ]; then
 				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
 			else
-				appveyor AddMessage "Command $CMD failed." -Category Error -Details "$CMD $@"
-				while read in; do appveyor AddMessage "$in" -Category Error; done < output.log
+				echo
+				echo "Command $CMD failed;"
+				cat output.log
 			fi
 		else
 			rm output.log
@@ -451,7 +452,8 @@ if [ -z $APPVEYOR ]; then
 	cd $QT_SDK
 	eval qtbinpatcher.exe $STRIP
 
-	add_cmake_opts -DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+	add_cmake_opts -DDESIRED_QT_VERSION=4 \
+		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 
 	if [ $CONFIGURATION == "Debug" ]; then
 		SUFFIX="d4"
@@ -471,7 +473,7 @@ else
 		QT_SDK="C:/Qt/5.4/msvc2013_64_opengl"
 	fi
 
-	add_cmake_opts -DDESIRED_QT_VERSION=4 \
+	add_cmake_opts -DDESIRED_QT_VERSION=5 \
 		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 fi
 
@@ -505,8 +507,7 @@ echo "Setting up OpenMW build..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
-	-DBUILD_MYGUI_PLUGIN=no \
-	-DOPENMW_MP_BUILD=yes
+	-DBUILD_MYGUI_PLUGIN=no
 
 if [ -z $APPVEYOR ]; then
 	echo "  (Outside of AppVeyor, doing full build.)"
