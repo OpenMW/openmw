@@ -27,7 +27,7 @@ namespace MWWorld
 
         virtual const ESM::MagicEffect* findMagicEffect(int id) const;
 
-        virtual void MWStore::getSpells(std::vector<ESM::Spell*>& spells);
+        virtual void getSpells(std::vector<ESM::Spell*>& spells);
     };
 }
 
