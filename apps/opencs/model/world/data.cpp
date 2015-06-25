@@ -130,9 +130,8 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
-: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0),
-  mReferenceables(self()), mReaderIndex(0)
+: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells), mReferenceables(self()),
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
     int index = 0;
 
