@@ -224,9 +224,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		Ogre-1.9-win$BITS.7z
 
 	# Qt
-	download "Qt 4.8.6" \
-		http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
-		qt$BITS-4.8.6.7z
+	if [ -z $APPVEYOR ]; then
+		download "Qt 4.8.6" \
+			http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
+			qt$BITS-4.8.6.7z
+	fi
 
 	# SDL2
 	download "SDL 2.0.3" \
@@ -281,6 +283,7 @@ else
 		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
 fi
 
+
 # Bullet
 printf "Bullet 2.83.5... "
 cd $DEPS_INSTALL
@@ -305,6 +308,7 @@ add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
 cd $DEPS
 
 echo Done.
+
 
 # FFmpeg
 printf "FFmpeg 2.5.2... "
@@ -349,6 +353,7 @@ cd $DEPS
 
 echo Done.
 
+
 # MyGUI
 printf "MyGUI 3.2.2... "
 cd $DEPS_INSTALL
@@ -383,6 +388,7 @@ cd $DEPS
 
 echo Done.
 
+
 # Ogre
 printf "Ogre 1.9... "
 cd $DEPS_INSTALL
@@ -412,6 +418,7 @@ cd $DEPS
 
 echo Done.
 
+
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
 if [ -d openal-soft-1.16.0-bin ]; then
@@ -426,39 +433,51 @@ OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
 add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
 	-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
 
-
-
 echo Done.
+
 
 # Qt
-printf "Qt 4.8.6... "
-cd $DEPS_INSTALL
+if [ -z $APPVEYOR ]; then
+	printf "Qt 4.8.6... "
+	cd $DEPS_INSTALL
 
-if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf Qt
-	eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
-	mv qt-4.8.6-* Qt
-fi
+	if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf Qt
+		eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
+		mv qt-4.8.6-* Qt
+	fi
 
-QT_SDK="`real_pwd`/Qt"
+	QT_SDK="`real_pwd`/Qt"
 
-cd $QT_SDK
-eval qtbinpatcher.exe $STRIP
+	cd $QT_SDK
+	eval qtbinpatcher.exe $STRIP
 
-add_cmake_opts -DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+	add_cmake_opts -DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 
-if [ $CONFIGURATION == "Debug" ]; then
-	SUFFIX="d4"
+	if [ $CONFIGURATION == "Debug" ]; then
+		SUFFIX="d4"
+	else
+		SUFFIX="4"
+	fi
+	add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
+
+	cd $DEPS
+
+	echo Done.
 else
-	SUFFIX="4"
+	echo "Using Appveyor Qt 5 version."
+	if [ $PLATFORM == "win32" ]; then
+		QT_SDK="C:/Qt/5.4/msvc2013_opengl"
+	else
+		QT_SDK="C:/Qt/5.4/msvc2013_64_opengl"
+	fi
+
+	add_cmake_opts -DDESIRED_QT_VERSION=4 \
+		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 fi
-add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
 
-cd $DEPS
-
-echo Done.
 
 # SDL2
 printf "SDL 2.0.3... "
@@ -546,11 +565,13 @@ fi
 
 echo
 
-echo "Copying Runtime DLLs..."
-mkdir -p $CONFIGURATION
-for DLL in $RUNTIME_DLLS; do
-	echo "  `basename $DLL`."
-	cp "$DLL" $CONFIGURATION/
-done
+if [ -z $APPVEYOR ]; then
+	echo "Copying Runtime DLLs..."
+	mkdir -p $CONFIGURATION
+	for DLL in $RUNTIME_DLLS; do
+		echo "  `basename $DLL`."
+		cp "$DLL" $CONFIGURATION/
+	done
+fi
 
 exit $RET
