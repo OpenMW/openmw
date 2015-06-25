@@ -4,12 +4,18 @@
 #include "reporttable.hpp"
 
 CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: CSVDoc::SubView (id)
+: CSVDoc::SubView (id), mDocument (document), mRefreshState (0)
 {
-    setWidget (mTable = new ReportTable (document, id, false, this));
+    if (id.getType()==CSMWorld::UniversalId::Type_VerificationResults)
+        mRefreshState = CSMDoc::State_Verifying;
+
+    setWidget (mTable = new ReportTable (document, id, false, mRefreshState, this));
 
     connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
         SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
+
+    if (mRefreshState==CSMDoc::State_Verifying)
+        connect (mTable, SIGNAL (refreshRequest()), this, SLOT (refreshRequest()));
 }
 
 void CSVTools::ReportSubView::setEditLock (bool locked)
@@ -20,4 +26,16 @@ void CSVTools::ReportSubView::setEditLock (bool locked)
 void CSVTools::ReportSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting (name, list);
+}
+
+void CSVTools::ReportSubView::refreshRequest()
+{
+    if (!(mDocument.getState() & mRefreshState))
+    {
+        if (mRefreshState==CSMDoc::State_Verifying)
+        {
+            mTable->clear();
+            mDocument.verify (getUniversalId());            
+        }
+    }
 }
