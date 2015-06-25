@@ -4,15 +4,8 @@
 #include <vector>
 #include <string>
 
-namespace Loading
-{
-    class Listener;
-}
-
 namespace ESM
 {
-    class ESMWriter;
-    class ESMReader;
     struct Spell;
     struct Skill;
     struct MagicEffect;

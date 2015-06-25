@@ -74,7 +74,7 @@ namespace
 
         virtual void setAttribute(int index, unsigned char value) { mNpcStats.setAttribute(index, value); }
 
-        virtual void addSpells(std::string id) { mNpcStats.getSpells().add(id); }
+        virtual void addSpell(const std::string& id) { mNpcStats.getSpells().add(id); }
 
         virtual unsigned char getBaseSkill(int index) const { return mNpcStats.getSkill(index).getBase(); }
 

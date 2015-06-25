@@ -43,7 +43,7 @@ namespace CSMWorld
 
         virtual void setAttribute(int index, unsigned char value);
 
-        virtual void addSpells(std::string id);
+        virtual void addSpell(const std::string& id);
 
         void addPowers(const std::string& id, int type);
 

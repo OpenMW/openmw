@@ -45,7 +45,7 @@ namespace CSMWorld
         mAttr[index] = value;
     }
 
-    void NpcStats::addSpells(std::string id)
+    void NpcStats::addSpell(const std::string& id)
     {
         struct SpellInfo info;
         info.mName = id;

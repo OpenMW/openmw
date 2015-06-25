@@ -130,7 +130,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
-: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells), mReferenceables(self()),
+: mEncoder (encoding), mPathgrids (mCells), mReferenceables(self()), mRefs (mCells),
   mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
     int index = 0;
@@ -1526,7 +1526,7 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
     if (autoCalc)
         level = npc.mNpdt12.mLevel;
 
-    CSMWorld::NpcStats *stats = new CSMWorld::NpcStats();
+    std::auto_ptr<CSMWorld::NpcStats> stats (new CSMWorld::NpcStats());
 
     CSStore store(mGmsts, mSkills, mMagicEffects, mSpells);
 
@@ -1547,7 +1547,7 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
         for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin();
                 it != npc.mSpells.mList.end(); ++it)
         {
-            stats->addSpells(*it);
+            stats->addSpell(*it);
         }
     }
 
@@ -1605,8 +1605,11 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
         }
     }
 
-    emit cacheNpcStats (npc.mId, stats);
-    return stats;
+    if (stats.get() == 0)
+        return 0;
+
+    emit cacheNpcStats (npc.mId, stats.release());
+    return stats.release();
 }
 
 void CSMWorld::Data::cacheNpcStatsEvent (const std::string& id, CSMWorld::NpcStats *stats)

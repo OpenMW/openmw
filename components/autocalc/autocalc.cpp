@@ -11,7 +11,6 @@
 
 #include "autocalcspell.hpp"
 
-// Most of the code in this file was moved from apps/openmw/mwclass/npc.cpp
 namespace
 {
     int is_even(double d)
@@ -117,7 +116,7 @@ namespace AutoCalc
                 int index = class_->mData.mSkills[i2][i];
                 if (index >= 0 && index < ESM::Skill::Length)
                 {
-                    stats.setBaseSkill (index, stats.getBaseSkill(index) + bonus);
+                    stats.setBaseSkill (index, bonus);
                 }
             }
         }
@@ -168,7 +167,7 @@ namespace AutoCalc
         }
     }
 
-    unsigned short autoCalculateHealth(int level, const ESM::Class *class_, StatsBase& stats)
+    unsigned short autoCalculateHealth(int level, const ESM::Class *class_, const StatsBase& stats)
     {
         // initial health
         int strength = stats.getBaseAttribute(ESM::Attribute::Strength);
@@ -200,7 +199,7 @@ namespace AutoCalc
 
         std::vector<std::string> spells = autoCalcNpcSpells(skills, attributes, race, store);
         for (std::vector<std::string>::iterator it = spells.begin(); it != spells.end(); ++it)
-            stats.addSpells(*it);
+            stats.addSpell(*it);
     }
 
     StatsBase::StatsBase() {}

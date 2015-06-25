@@ -13,7 +13,6 @@
 
 #include "autocalc.hpp"
 
-// Most of the code in this file was moved from apps/openmw/mwmechanics/autocalcspell.cpp
 namespace AutoCalc
 {
 
