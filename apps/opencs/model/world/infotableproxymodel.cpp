@@ -16,7 +16,9 @@ namespace
 CSMWorld::InfoTableProxyModel::InfoTableProxyModel(CSMWorld::UniversalId::Type type, QObject *parent)
     : IdTableProxyModel(parent),
       mType(type),
-      mSourceModel(NULL)
+      mSourceModel(NULL),
+	  mInfoColumnId(type == UniversalId::Type_TopicInfos ? Columns::ColumnId_Topic : 
+                                                           Columns::ColumnId_Journal)
 {
     Q_ASSERT(type == UniversalId::Type_TopicInfos || type == UniversalId::Type_JournalInfos);
 }
@@ -54,26 +56,21 @@ bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QMod
 
 int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
 {
-    Columns::ColumnId columnId = Columns::ColumnId_Topic;
-    if (mType == UniversalId::Type_JournalInfos)
-    {
-        columnId = Columns::ColumnId_Journal;
-    }
-
-    int column = mSourceModel->findColumnIndex(columnId);
-    QString info = toLower(mSourceModel->data(mSourceModel->index(currentRow, column)).toString());
+    int row = currentRow;
+    int column = mSourceModel->findColumnIndex(mInfoColumnId);
+    QString info = toLower(mSourceModel->data(mSourceModel->index(row, column)).toString());
 
     if (mFirstRowCache.contains(info))
     {
         return mFirstRowCache[info];
     }
 
-    while (--currentRow >= 0 &&
-           toLower(mSourceModel->data(mSourceModel->index(currentRow, column)).toString()) == info);
-    ++currentRow;
+    while (--row >= 0 && 
+           toLower(mSourceModel->data(mSourceModel->index(row, column)).toString()) == info);
+    ++row;
 
-    mFirstRowCache[info] = currentRow;
-    return currentRow;
+    mFirstRowCache[info] = row;
+    return row;
 }
 
 void CSMWorld::InfoTableProxyModel::modelRowsChanged(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)

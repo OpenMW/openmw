@@ -4,6 +4,7 @@
 #include <QHash>
 
 #include "idtableproxymodel.hpp"
+#include "columns.hpp"
 #include "universalid.hpp"
 
 namespace CSMWorld
@@ -16,6 +17,8 @@ namespace CSMWorld
 
             UniversalId::Type mType;
             IdTableBase *mSourceModel;
+            Columns::ColumnId mInfoColumnId;
+            ///< Contains ID for Topic or Journal ID
 
             mutable QHash<QString, int> mFirstRowCache;
 
