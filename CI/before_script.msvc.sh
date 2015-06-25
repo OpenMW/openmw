@@ -51,12 +51,9 @@ run_cmd() {
 		if [ $RET -ne 0 ]; then
 			if [ -z $APPVEYOR ]; then
 				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
-				exit $RET
 			else
-				7z a output.7z output.log > /dev/null 2>&1
-
-				appveyor PushArtifact output.7z -FileName $CMD-output.7z
-				appveyor AddMessage "Command $CMD failed (code $RET), output has been pushed as an artifact." -Category Error
+				appveyor AddMessage "Command $CMD failed." -Category Error -Details "$CMD $@"
+				while read in; do appveyor AddMessage "$in" -Category Error; done < output.log
 			fi
 		else
 			rm output.log
