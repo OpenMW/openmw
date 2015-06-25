@@ -1016,10 +1016,10 @@ namespace MWScript
         };
 
         template <class R>
-        class OpBetaComment : public Interpreter::Opcode0
+        class OpBetaComment : public Interpreter::Opcode1
         {
         public:
-            virtual void execute(Interpreter::Runtime &runtime)
+            virtual void execute(Interpreter::Runtime &runtime, unsigned int arg0)
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
@@ -1052,10 +1052,14 @@ namespace MWScript
                         msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;
                 }
 
-                std::string notes = runtime.getStringLiteral (runtime[0].mInteger);
-                runtime.pop();
-                if (!notes.empty())
-                    msg << "Notes: " << notes << std::endl;
+                while (arg0 > 0)
+                {
+                    std::string notes = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    if (!notes.empty())
+                        msg << "Notes: " << notes << std::endl;
+                    --arg0;
+                }
 
                 runtime.getContext().report(msg.str());
             }
@@ -1221,8 +1225,8 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeExplodeSpellExplicit, new OpExplodeSpell<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcInJail, new OpGetPcInJail);
             interpreter.installSegment5 (Compiler::Misc::opcodeGetPcTraveling, new OpGetPcTraveling);
-            interpreter.installSegment5 (Compiler::Misc::opcodeBetaComment, new OpBetaComment<ImplicitRef>);
-            interpreter.installSegment5 (Compiler::Misc::opcodeBetaCommentExplicit, new OpBetaComment<ExplicitRef>);
+            interpreter.installSegment3 (Compiler::Misc::opcodeBetaComment, new OpBetaComment<ImplicitRef>);
+            interpreter.installSegment3 (Compiler::Misc::opcodeBetaCommentExplicit, new OpBetaComment<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevCreature, new OpAddToLevCreature);
             interpreter.installSegment5 (Compiler::Misc::opcodeRemoveFromLevCreature, new OpRemoveFromLevCreature);
             interpreter.installSegment5 (Compiler::Misc::opcodeAddToLevItem, new OpAddToLevItem);
