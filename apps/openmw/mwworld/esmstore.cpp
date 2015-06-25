@@ -66,7 +66,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         esm.getRecHeader();
 
         // Look up the record type.
-        std::map<int, GamePlay::StoreBase *>::iterator it = mStores.find(n.val);
+        std::map<int, StoreBase *>::iterator it = mStores.find(n.val);
 
         if (it == mStores.end()) {
             if (n.val == ESM::REC_INFO) {
@@ -130,7 +130,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
 void ESMStore::setUp()
 {
-    std::map<int, GamePlay::StoreBase *>::iterator it = mStores.begin();
+    std::map<int, StoreBase *>::iterator it = mStores.begin();
     for (; it != mStores.end(); ++it) {
         it->second->setUp();
     }

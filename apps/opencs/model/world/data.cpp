@@ -11,9 +11,9 @@
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellref.hpp>
 
-#include <components/gameplay/autocalc.hpp>
-#include <components/gameplay/autocalcspell.hpp>
-#include <components/gameplay/store.hpp>
+#include <components/autocalc/autocalc.hpp>
+#include <components/autocalc/autocalcspell.hpp>
+#include <components/autocalc/store.hpp>
 
 #include "idtable.hpp"
 #include "idtree.hpp"
@@ -27,15 +27,21 @@
 
 namespace
 {
-    class SpellStore : public GamePlay::CommonStore <ESM::Spell>
+    class CSStore : public AutoCalc::StoreCommon
     {
+        const CSMWorld::IdCollection<ESM::GameSetting>& mGmstTable;
+        const CSMWorld::IdCollection<ESM::Skill>& mSkillTable;
+        const CSMWorld::IdCollection<ESM::MagicEffect>& mMagicEffectTable;
         const CSMWorld::NestedIdCollection<ESM::Spell>& mSpells;
         std::vector<ESM::Spell *> mLocal;
 
     public:
 
-        SpellStore(const CSMWorld::NestedIdCollection<ESM::Spell>& spells)
-            : mSpells(spells)
+        CSStore(const CSMWorld::IdCollection<ESM::GameSetting>& gmst,
+                const CSMWorld::IdCollection<ESM::Skill>& skills,
+                const CSMWorld::IdCollection<ESM::MagicEffect>& magicEffects,
+                const CSMWorld::NestedIdCollection<ESM::Spell>& spells)
+            : mGmstTable(gmst), mSkillTable(skills), mMagicEffectTable(magicEffects), mSpells(spells)
         {
             // prepare data in a format used by OpenMW store
             for (int index = 0; index < mSpells.getSize(); ++index)
@@ -44,53 +50,6 @@ namespace
                 mLocal.push_back(spell);
             }
         }
-
-        ~SpellStore() {}
-
-        typedef GamePlay::SharedIterator<ESM::Spell> iterator;
-
-        virtual iterator begin() const
-        {
-            return mLocal.begin();
-        }
-
-        virtual iterator end() const
-        {
-            return mLocal.end();
-        }
-
-        virtual const ESM::Spell *find(const std::string &id) const
-        {
-            return &mSpells.getRecord(id).get();
-        }
-
-        virtual size_t getSize() const
-        {
-            return mSpells.getSize();
-        }
-
-    private:
-        // not used in OpenCS
-        virtual void load(ESM::ESMReader &esm, const std::string &id)
-        {
-        }
-    };
-
-    class CSStore : public GamePlay::StoreWrap
-    {
-        const CSMWorld::IdCollection<ESM::GameSetting>& mGmstTable;
-        const CSMWorld::IdCollection<ESM::Skill>& mSkillTable;
-        const CSMWorld::IdCollection<ESM::MagicEffect>& mMagicEffectTable;
-        const SpellStore mSpellStore;
-
-    public:
-
-        CSStore(const CSMWorld::IdCollection<ESM::GameSetting>& gmst,
-                const CSMWorld::IdCollection<ESM::Skill>& skills,
-                const CSMWorld::IdCollection<ESM::MagicEffect>& magicEffects,
-                const CSMWorld::NestedIdCollection<ESM::Spell>& spells)
-            : mGmstTable(gmst), mSkillTable(skills), mMagicEffectTable(magicEffects), mSpellStore(spells)
-        { }
         ~CSStore() {}
 
         virtual int findGmstInt(const std::string& name) const
@@ -115,18 +74,18 @@ namespace
             return &mMagicEffectTable.getRecord(ESM::MagicEffect::indexToId((short)id)).get();
         }
 
-        virtual const GamePlay::CommonStore<ESM::Spell>& getSpells() const
+        virtual const std::vector<ESM::Spell*>& getSpells() const
         {
-            return mSpellStore;
+            return mLocal;
         }
     };
 
-    unsigned short autoCalculateMana(GamePlay::StatsBase& stats)
+    unsigned short autoCalculateMana(AutoCalc::StatsBase& stats)
     {
         return stats.getBaseAttribute(ESM::Attribute::Intelligence) * 2;
     }
 
-    unsigned short autoCalculateFatigue(GamePlay::StatsBase& stats)
+    unsigned short autoCalculateFatigue(AutoCalc::StatsBase& stats)
     {
         return stats.getBaseAttribute(ESM::Attribute::Strength)
                 + stats.getBaseAttribute(ESM::Attribute::Willpower)
@@ -1579,15 +1538,15 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
 
     if (autoCalc)
     {
-        GamePlay::autoCalcAttributesImpl (&npc, race, class_, level, *stats, &store);
+        AutoCalc::autoCalcAttributesImpl (&npc, race, class_, level, *stats, &store);
 
         stats->setHealth(autoCalculateHealth(level, class_, *stats));
         stats->setMana(autoCalculateMana(*stats));
         stats->setFatigue(autoCalculateFatigue(*stats));
 
-        GamePlay::autoCalcSkillsImpl(&npc, race, class_, level, *stats, &store);
+        AutoCalc::autoCalcSkillsImpl(&npc, race, class_, level, *stats, &store);
 
-        GamePlay::autoCalculateSpells(race, *stats, &store);
+        AutoCalc::autoCalculateSpells(race, *stats, &store);
     }
     else
     {
@@ -1645,7 +1604,7 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
 
             int school;
             float skillTerm;
-            GamePlay::calcWeakestSchool(spell, skills, school, skillTerm, &store);
+            AutoCalc::calcWeakestSchool(spell, skills, school, skillTerm, &store);
             float chance = calcAutoCastChance(spell, skills, attributes, school, &store);
 
             stats->addCostAndChance((*it).mName, cost, (int)ceil(chance)); // percent

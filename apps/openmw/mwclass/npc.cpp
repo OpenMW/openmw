@@ -11,9 +11,9 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
 
-#include <components/gameplay/autocalc.hpp>
-#include <components/gameplay/autocalcspell.hpp>
-#include <components/gameplay/store.hpp>
+#include <components/autocalc/autocalc.hpp>
+#include <components/autocalc/autocalcspell.hpp>
+#include <components/autocalc/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -62,28 +62,26 @@ namespace
         return new NpcCustomData (*this);
     }
 
-    class Stats : public GamePlay::StatsBase
+    class Stats : public AutoCalc::StatsBase
     {
-        MWMechanics::CreatureStats& mCreatureStats;
         MWMechanics::NpcStats& mNpcStats;
 
     public:
 
-        Stats(MWMechanics::CreatureStats& creatureStats, MWMechanics::NpcStats& npcStats)
-            : mCreatureStats(creatureStats), mNpcStats(npcStats) {}
+        Stats(MWMechanics::NpcStats& npcStats) : mNpcStats(npcStats) {}
 
-        virtual unsigned char getBaseAttribute(int index) const { return mCreatureStats.getAttribute(index).getBase(); }
+        virtual unsigned char getBaseAttribute(int index) const { return mNpcStats.getAttribute(index).getBase(); }
 
-        virtual void setAttribute(int index, unsigned char value) { mCreatureStats.setAttribute(index, value); }
+        virtual void setAttribute(int index, unsigned char value) { mNpcStats.setAttribute(index, value); }
 
-        virtual void addSpells(std::string id) { mCreatureStats.getSpells().add(id); }
+        virtual void addSpells(std::string id) { mNpcStats.getSpells().add(id); }
 
         virtual unsigned char getBaseSkill(int index) const { return mNpcStats.getSkill(index).getBase(); }
 
         virtual void setBaseSkill(int index, unsigned char value) { mNpcStats.getSkill(index).setBase(value); }
 	};
 
-    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
+    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::NpcStats& npcStats)
     {
         const ESM::Race *race =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
@@ -91,16 +89,15 @@ namespace
         const ESM::Class *class_ =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
 
-        int level = creatureStats.getLevel();
+        int level = npcStats.getLevel();
 
-        MWMechanics::NpcStats dummy; // npc stats are needed for skills, which is not calculated here
-        Stats stats(creatureStats, dummy);
+        Stats stats(npcStats);
 
         MWWorld::MWStore store;
 
-        GamePlay::autoCalcAttributesImpl (npc, race, class_, level, stats, &store);
+        AutoCalc::autoCalcAttributesImpl (npc, race, class_, level, stats, &store);
 
-        creatureStats.setHealth(GamePlay::autoCalculateHealth(level, class_, stats));
+        npcStats.setHealth(AutoCalc::autoCalculateHealth(level, class_, stats));
     }
 
     void autoCalculateSkills(const ESM::NPC* npc, MWMechanics::NpcStats& npcStats, const MWWorld::Ptr& ptr)
@@ -112,13 +109,13 @@ namespace
 
         const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
 
-        Stats stats(npcStats, npcStats);
+        Stats stats(npcStats);
 
         MWWorld::MWStore store;
 
-        GamePlay::autoCalcSkillsImpl(npc, race, class_, level, stats, &store);
+        AutoCalc::autoCalcSkillsImpl(npc, race, class_, level, stats, &store);
 
-        GamePlay::autoCalculateSpells(race, stats, &store);
+        AutoCalc::autoCalculateSpells(race, stats, &store);
     }
 }
 

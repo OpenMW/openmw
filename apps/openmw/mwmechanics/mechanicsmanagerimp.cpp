@@ -6,7 +6,7 @@
 
 #include <components/esm/stolenitems.hpp>
 
-#include <components/gameplay/autocalcspell.hpp>
+#include <components/autocalc/autocalcspell.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -256,10 +256,10 @@ namespace MWMechanics
             static const float fAutoPCSpellChance = esmStore.get<ESM::GameSetting>().find("fAutoPCSpellChance")->getFloat();
             MWWorld::MWStore store;
 
-            if (GamePlay::calcAutoCastChance(spell, skills, attributes, -1, &store) < fAutoPCSpellChance)
+            if (AutoCalc::calcAutoCastChance(spell, skills, attributes, -1, &store) < fAutoPCSpellChance)
                 continue;
 
-            if (!GamePlay::attrSkillCheck(spell, skills, attributes, &store))
+            if (!AutoCalc::attrSkillCheck(spell, skills, attributes, &store))
                 continue;
 
             selectedSpells.push_back(spell->mId);

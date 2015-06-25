@@ -4,8 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_EditBox.h>
 
-#include <components/gameplay/store.hpp>
-
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -142,7 +140,7 @@ namespace MWGui
         if(world->getStore().get<ESM::Class>().isDynamic(cls->mId))
         {
             // Choosing Stealth specialization and Speed/Agility as attributes, if possible. Otherwise fall back to first class found.
-            GamePlay::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
+            MWWorld::SharedIterator<ESM::Class> it = world->getStore().get<ESM::Class>().begin();
             for(; it != world->getStore().get<ESM::Class>().end(); ++it)
             {
                 if(it->mData.mIsPlayable && it->mData.mSpecialization == 2 && it->mData.mAttribute[0] == 4 && it->mData.mAttribute[1] == 3)

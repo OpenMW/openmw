@@ -14,7 +14,7 @@
 #include "autocalc.hpp"
 
 // Most of the code in this file was moved from apps/openmw/mwmechanics/autocalcspell.cpp
-namespace GamePlay
+namespace AutoCalc
 {
 
     struct SchoolCaps
@@ -27,7 +27,7 @@ namespace GamePlay
     };
 
     std::vector<std::string> autoCalcNpcSpells(const int *actorSkills,
-            const int *actorAttributes, const ESM::Race* race, StoreWrap *store)
+            const int *actorAttributes, const ESM::Race* race, StoreCommon *store)
     {
         static const float fNPCbaseMagickaMult = store->findGmstFloat("fNPCbaseMagickaMult");
         float baseMagicka = fNPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
@@ -61,13 +61,13 @@ namespace GamePlay
 
         std::vector<std::string> selectedSpells;
 
-        const CommonStore<ESM::Spell> &spells = store->getSpells();
+        const std::vector<ESM::Spell*>& spells = store->getSpells();
 
         // Note: the algorithm heavily depends on the traversal order of the spells. For vanilla-compatible results the
         // Store must preserve the record ordering as it was in the content files.
-        for (CommonStore<ESM::Spell>::iterator iter = spells.begin(); iter != spells.end(); ++iter)
+        for (std::vector<ESM::Spell*>::const_iterator iter = spells.begin(); iter != spells.end(); ++iter)
         {
-            const ESM::Spell* spell = &*iter;
+            ESM::Spell* spell = *iter;
 
             if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
@@ -107,7 +107,17 @@ namespace GamePlay
                 cap.mMinCost = INT_MAX;
                 for (std::vector<std::string>::iterator weakIt = selectedSpells.begin(); weakIt != selectedSpells.end(); ++weakIt)
                 {
-                    const ESM::Spell* testSpell = spells.find(*weakIt);
+                    std::vector<ESM::Spell*>::const_iterator it = spells.begin();
+                    for (; it != spells.end(); ++it)
+                    {
+                        if ((*it)->mId == *weakIt)
+                            break;
+                    }
+
+                    if (it == spells.end())
+                        continue;
+
+                    const ESM::Spell* testSpell = *it;
 
                     //int testSchool;
                     //float dummySkillTerm;
@@ -146,7 +156,7 @@ namespace GamePlay
     }
 
     bool attrSkillCheck (const ESM::Spell* spell,
-            const int* actorSkills, const int* actorAttributes, StoreWrap *store)
+            const int* actorSkills, const int* actorAttributes, StoreCommon *store)
     {
         const std::vector<ESM::ENAMstruct>& effects = spell->mEffects.mList;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
@@ -186,7 +196,7 @@ namespace GamePlay
     }
 
     void calcWeakestSchool (const ESM::Spell* spell,
-            const int* actorSkills, int& effectiveSchool, float& skillTerm, StoreWrap *store)
+            const int* actorSkills, int& effectiveSchool, float& skillTerm, StoreCommon *store)
     {
         float minChance = FLT_MAX;
 
@@ -220,7 +230,7 @@ namespace GamePlay
     }
 
     float calcAutoCastChance(const ESM::Spell *spell,
-            const int *actorSkills, const int *actorAttributes, int effectiveSchool, StoreWrap *store)
+            const int *actorSkills, const int *actorAttributes, int effectiveSchool, StoreCommon *store)
     {
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100.f;

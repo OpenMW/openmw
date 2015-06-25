@@ -37,10 +37,10 @@ namespace
     }
 }
 
-namespace GamePlay
+namespace AutoCalc
 {
     void autoCalcAttributesImpl (const ESM::NPC* npc,
-            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreWrap *store)
+            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreCommon *store)
     {
         // race bonus
         bool male = (npc->mFlags & ESM::NPC::Female) == 0;
@@ -106,7 +106,7 @@ namespace GamePlay
      * and by adding class, race, specialization bonus.
      */
     void autoCalcSkillsImpl (const ESM::NPC* npc,
-            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreWrap *store)
+            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreCommon *store)
     {
         for (int i = 0; i < 2; ++i)
         {
@@ -188,7 +188,7 @@ namespace GamePlay
         return static_cast<unsigned short>(floor(0.5f * (strength + endurance)) + multiplier * (level-1));
     }
 
-    void autoCalculateSpells(const ESM::Race *race, StatsBase& stats, StoreWrap *store)
+    void autoCalculateSpells(const ESM::Race *race, StatsBase& stats, StoreCommon *store)
     {
         int skills[ESM::Skill::Length];
         for (int i=0; i<ESM::Skill::Length; ++i)

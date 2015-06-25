@@ -3,13 +3,13 @@
 
 #include <string>
 
-#include <components/gameplay/store.hpp>
+#include <components/autocalc/store.hpp>
 
 #include "store.hpp"
 
 namespace MWWorld
 {
-    class MWStore : public GamePlay::StoreWrap
+    class MWStore : public AutoCalc::StoreCommon
     {
         const MWWorld::Store<ESM::GameSetting>& mGmst;
         const MWWorld::Store<ESM::Spell> &mSpells;
@@ -27,7 +27,7 @@ namespace MWWorld
 
         virtual const ESM::MagicEffect* findMagicEffect(int id) const;
 
-        virtual const GamePlay::CommonStore<ESM::Spell>& getSpells() const;
+        virtual const std::vector<ESM::Spell*>& getSpells() const;
     };
 }
 

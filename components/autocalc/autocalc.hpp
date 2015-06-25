@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_GAMEPLAY_AUTOCALC_H
-#define COMPONENTS_GAMEPLAY_AUTOCALC_H
+#ifndef COMPONENTS_AUTOCALC_AUTOCALC_H
+#define COMPONENTS_AUTOCALC_AUTOCALC_H
 
 #include <string>
 
@@ -12,7 +12,7 @@ namespace ESM
     struct Class;
 }
 
-namespace GamePlay
+namespace AutoCalc
 {
     // wrapper class for sharing the autocalc code between OpenMW and OpenCS
     class  StatsBase
@@ -35,13 +35,13 @@ namespace GamePlay
     };
 
     void autoCalcAttributesImpl (const ESM::NPC* npc,
-            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreWrap *store);
+            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreCommon *store);
 
     void autoCalcSkillsImpl (const ESM::NPC* npc,
-            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreWrap *store);
+            const ESM::Race *race, const ESM::Class *class_, int level, StatsBase& stats, StoreCommon *store);
 
     unsigned short autoCalculateHealth(int level, const ESM::Class *class_, StatsBase& stats);
 
-    void autoCalculateSpells(const ESM::Race *race, StatsBase& stats, StoreWrap *store);
+    void autoCalculateSpells(const ESM::Race *race, StatsBase& stats, StoreCommon *store);
 }
-#endif // COMPONENTS_GAMEPLAY_AUTOCALC_H
+#endif // COMPONENTS_AUTOCALC_AUTOCALC_H

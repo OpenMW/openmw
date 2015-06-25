@@ -7,7 +7,7 @@
 
 #include <components/esm/attr.hpp>
 #include <components/esm/loadskil.hpp>
-#include <components/gameplay/autocalc.hpp>
+#include <components/autocalc/autocalc.hpp>
 
 namespace CSMWorld
 {
@@ -20,7 +20,7 @@ namespace CSMWorld
         int mChance;
     };
 
-    class NpcStats : public GamePlay::StatsBase
+    class NpcStats : public AutoCalc::StatsBase
     {
 
         int mAttr[ESM::Attribute::Length];

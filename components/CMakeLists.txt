@@ -6,16 +6,16 @@ set (VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp)
 if (GIT_CHECKOUT)
     add_custom_target (git-version
         COMMAND ${CMAKE_COMMAND}
-            -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+	    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
-            -DVERSION_HPP_IN=${VERSION_HPP_IN}
-            -DVERSION_HPP=${VERSION_HPP}
-            -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
-            -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
-            -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
-            -DOPENMW_VERSION=${OPENMW_VERSION}
+	    -DVERSION_HPP_IN=${VERSION_HPP_IN}
+	    -DVERSION_HPP=${VERSION_HPP}
+	    -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
+	    -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
+	    -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+	    -DOPENMW_VERSION=${OPENMW_VERSION}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-            VERBATIM)
+	    VERBATIM)
 else (GIT_CHECKOUT)
     configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
 endif (GIT_CHECKOUT)
@@ -119,7 +119,7 @@ add_component_dir (fontloader
     fontloader
     )
 
-add_component_dir (gameplay
+add_component_dir (autocalc
     autocalc autocalcspell
     )
 
@@ -165,14 +165,14 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-target_link_libraries(components
+target_link_libraries(components 
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_THREAD_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_WAVE_LIBRARY}
     ${OGRE_LIBRARIES}
-    ${OENGINE_LIBRARY}
+    ${OENGINE_LIBRARY}    
     ${BULLET_LIBRARIES}
 )
 
