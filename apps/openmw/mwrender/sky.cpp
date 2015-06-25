@@ -7,9 +7,15 @@
 #include <osg/Material>
 #include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
-
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
+
+#include <osgParticle/ParticleSystem>
+#include <osgParticle/ParticleSystemUpdater>
+#include <osgParticle/ModularEmitter>
+#include <osgParticle/BoxPlacer>
+#include <osgParticle/ConstantRateCounter>
+#include <osgParticle/RadialShooter>
 
 #include <boost/lexical_cast.hpp>
 
@@ -573,6 +579,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRainEnabled(false)
     , mRainSpeed(0)
     , mRainFrequency(1)
+    , mWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
 {
@@ -642,9 +649,112 @@ void SkyManager::create()
     mCreated = true;
 }
 
+class RainShooter : public osgParticle::Shooter
+{
+public:
+    RainShooter()
+        : mAngle(0.f)
+    {
+    }
+
+    virtual void shoot(osgParticle::Particle* particle) const
+    {
+        particle->setVelocity(mVelocity);
+        particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PI));
+    }
+
+    void setVelocity(const osg::Vec3f& velocity)
+    {
+        mVelocity = velocity;
+    }
+
+    void setAngle(float angle)
+    {
+        mAngle = angle;
+    }
+
+    virtual osg::Object* cloneType() const
+    {
+        return new RainShooter;
+    }
+    virtual osg::Object* clone(const osg::CopyOp &) const
+    {
+        return new RainShooter(*this);
+    }
+
+private:
+    osg::Vec3f mVelocity;
+    float mAngle;
+};
+
+void SkyManager::createRain()
+{
+    if (mRainNode)
+        return;
+
+    mRainNode = new osg::Group;
+
+    mRainParticleSystem = new osgParticle::ParticleSystem;
+    mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
+    mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
+    mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,-1));
+
+    osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
+    stateset->setTextureAttributeAndModes(0, mSceneManager->getTextureManager()->getTexture2D("textures/tx_raindrop_01.dds",
+        osg::Texture::CLAMP, osg::Texture::CLAMP), osg::StateAttribute::ON);
+    stateset->setNestRenderBins(false);
+    stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+
+    osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
+    particleTemplate.setSizeRange(osgParticle::rangef(5.f, 15.f));
+    particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 1.f));
+    particleTemplate.setLifeTime(1);
+
+    osg::ref_ptr<osgParticle::ModularEmitter> emitter (new osgParticle::ModularEmitter);
+    emitter->setParticleSystem(mRainParticleSystem);
+
+    osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
+    placer->setXRange(-300, 300); // Rain_Diameter
+    placer->setYRange(-300, 300);
+    placer->setZRange(300, 300);
+    emitter->setPlacer(placer);
+
+    osg::ref_ptr<osgParticle::ConstantRateCounter> counter (new osgParticle::ConstantRateCounter);
+    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+    emitter->setCounter(counter);
+
+    osg::ref_ptr<RainShooter> shooter (new RainShooter);
+    mRainShooter = shooter;
+    emitter->setShooter(shooter);
+
+    osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater (new osgParticle::ParticleSystemUpdater);
+    updater->addParticleSystem(mRainParticleSystem);
+
+    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+    geode->addDrawable(mRainParticleSystem);
+
+    mRainNode->addChild(emitter);
+    mRainNode->addChild(geode);
+    mRainNode->addChild(updater);
+
+    mRootNode->addChild(mRainNode);
+}
+
+void SkyManager::destroyRain()
+{
+    if (!mRainNode)
+        return;
+
+    mRootNode->removeChild(mRainNode);
+    mRainNode = NULL;
+    mRainParticleSystem = NULL;
+    mRainShooter = NULL;
+}
+
 SkyManager::~SkyManager()
 {
-    clearRain();
     if (mRootNode)
     {
         mRootNode->getParent(0)->removeChild(mRootNode);
@@ -664,14 +774,6 @@ int SkyManager::getSecundaPhase() const
     return mSecunda->getPhaseInt();
 }
 
-void SkyManager::clearRain()
-{
-}
-
-void SkyManager::updateRain(float dt)
-{
-}
-
 void SkyManager::update(float duration)
 {
     if (!mEnabled) return;
@@ -687,8 +789,6 @@ void SkyManager::update(float duration)
     }
     else
         mCloudNode->setAttitude(osg::Quat());
-
-    updateRain(duration);
 
     // UV Scroll the clouds
     mCloudAnimationTimer += duration * mCloudSpeed * 0.003;
@@ -736,9 +836,6 @@ void SkyManager::setEnabled(bool enabled)
     if (enabled && !mCreated)
         create();
 
-    if (!enabled)
-        clearRain();
-
     mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
@@ -750,14 +847,38 @@ void SkyManager::setMoonColour (bool red)
     mSecunda->setColor(red ? mMoonScriptColor : osg::Vec4f(1,1,1,1));
 }
 
+void SkyManager::updateRainParameters()
+{
+    if (mRainShooter)
+    {
+        float angle = mWindSpeed/2.f * osg::PI/4;
+        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * mWindSpeed / 2.f, -mRainSpeed));
+        mRainShooter->setAngle(angle);
+    }
+}
+
 void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 {
     if (!mCreated) return;
 
-    mRainEffect = weather.mRainEffect;
-    mRainEnabled = !mRainEffect.empty();
+    if (mRainEffect != weather.mRainEffect)
+    {
+        mRainEffect = weather.mRainEffect;
+        if (!mRainEffect.empty())
+        {
+            createRain();
+        }
+        else
+        {
+            destroyRain();
+        }
+    }
+
     mRainFrequency = weather.mRainFrequency;
     mRainSpeed = weather.mRainSpeed;
+    mWindSpeed = weather.mWindSpeed;
+    updateRainParameters();
+
     mIsStorm = weather.mIsStorm;
 
     if (mCurrentParticleEffect != weather.mParticleEffect)

@@ -12,6 +12,11 @@ namespace osg
     class Material;
 }
 
+namespace osgParticle
+{
+    class ParticleSystem;
+}
+
 namespace Resource
 {
     class SceneManager;
@@ -24,6 +29,7 @@ namespace MWRender
     class CloudUpdater;
     class Sun;
     class Moon;
+    class RainShooter;
 
     class SkyManager
     {
@@ -87,8 +93,9 @@ namespace MWRender
         void create();
         ///< no need to call this, automatically done on first enable()
 
-        void updateRain(float dt);
-        void clearRain();
+        void createRain();
+        void destroyRain();
+        void updateRainParameters();
 
         Resource::SceneManager* mSceneManager;
 
@@ -115,6 +122,10 @@ namespace MWRender
         std::auto_ptr<Sun> mSun;
         std::auto_ptr<Moon> mMasser;
         std::auto_ptr<Moon> mSecunda;
+
+        osg::ref_ptr<osg::Group> mRainNode;
+        osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;
+        osg::ref_ptr<RainShooter> mRainShooter;
 
         bool mCreated;
 
@@ -151,6 +162,7 @@ namespace MWRender
         std::string mRainEffect;
         float mRainSpeed;
         float mRainFrequency;
+        float mWindSpeed;
 
         bool mEnabled;
         bool mSunEnabled;
