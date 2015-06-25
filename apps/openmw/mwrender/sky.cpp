@@ -687,6 +687,37 @@ private:
     float mAngle;
 };
 
+class RainFader : public SceneUtil::StateSetUpdater
+{
+public:
+    RainFader()
+        : mAlpha(1.f)
+    {
+    }
+
+    void setAlpha(float alpha)
+    {
+        mAlpha = alpha;
+    }
+
+    virtual void setDefaults(osg::StateSet* stateset)
+    {
+        osg::ref_ptr<osg::Material> mat (new osg::Material);
+        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+        stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+    }
+
+    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
+    {
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
+    }
+
+private:
+    float mAlpha;
+};
+
 void SkyManager::createRain()
 {
     if (mRainNode)
@@ -704,7 +735,6 @@ void SkyManager::createRain()
         osg::Texture::CLAMP, osg::Texture::CLAMP), osg::StateAttribute::ON);
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
     osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
@@ -739,6 +769,9 @@ void SkyManager::createRain()
     mRainNode->addChild(geode);
     mRainNode->addChild(updater);
 
+    mRainFader = new RainFader;
+    mRainNode->addUpdateCallback(mRainFader);
+
     mRootNode->addChild(mRainNode);
 }
 
@@ -751,6 +784,7 @@ void SkyManager::destroyRain()
     mRainNode = NULL;
     mRainParticleSystem = NULL;
     mRainShooter = NULL;
+    mRainFader = NULL;
 }
 
 SkyManager::~SkyManager()
@@ -851,8 +885,9 @@ void SkyManager::updateRainParameters()
 {
     if (mRainShooter)
     {
-        float angle = mWindSpeed/2.f * osg::PI/4;
-        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * mWindSpeed / 2.f, -mRainSpeed));
+        float windFactor = mWindSpeed/3.f;
+        float angle = windFactor * osg::PI/4;
+        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * windFactor, -mRainSpeed));
         mRainShooter->setAngle(angle);
     }
 }
@@ -991,9 +1026,10 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
     if (mParticle.get())
         setAlpha(mParticle, weather.mEffectFade);
-    for (std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr>::iterator it = mRainModels.begin(); it != mRainModels.end(); ++it)
-        setAlpha(it->second, weather.mEffectFade);
         */
+
+    if (mRainFader)
+        mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
 }
 
 void SkyManager::setGlare(const float glare)

@@ -30,6 +30,7 @@ namespace MWRender
     class Sun;
     class Moon;
     class RainShooter;
+    class RainFader;
 
     class SkyManager
     {
@@ -126,6 +127,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRainNode;
         osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;
         osg::ref_ptr<RainShooter> mRainShooter;
+        osg::ref_ptr<RainFader> mRainFader;
 
         bool mCreated;
 
