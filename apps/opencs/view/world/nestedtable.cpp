@@ -15,10 +15,7 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    CSMWorld::NestedTableProxyModel* model,
                                    QWidget* parent,
                                    bool editable)
-    : QTableView(parent),
-      mAddNewRowAction(0),
-      mRemoveRowAction(0),
-      mUndoStack(document.getUndoStack()),
+    : DragRecordTable(document, parent),
       mModel(model)
 {
     setSelectionBehavior (QAbstractItemView::SelectRows);
@@ -53,6 +50,8 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
             setItemDelegateForColumn(i, delegate);
         }
 
+    setModel(model);
+
         mAddNewRowAction = new QAction (tr ("Add new row"), this);
 
         connect(mAddNewRowAction, SIGNAL(triggered()),
@@ -65,12 +64,10 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
     }
 }
 
-void CSVWorld::NestedTable::dragEnterEvent(QDragEnterEvent *event)
+std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() const
 {
-}
-
-void CSVWorld::NestedTable::dragMoveEvent(QDragMoveEvent *event)
-{
+    // No drag support for nested tables
+    return std::vector<CSMWorld::UniversalId>();
 }
 
 void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
@@ -92,7 +89,7 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 
 void CSVWorld::NestedTable::removeRowActionTriggered()
 {
-    mUndoStack.push(new CSMWorld::DeleteNestedCommand(*(mModel->model()),
+    mDocument.getUndoStack().push(new CSMWorld::DeleteNestedCommand(*(mModel->model()),
                                                       mModel->getParentId(),
                                                       selectionModel()->selectedRows().begin()->row(),
                                                       mModel->getParentColumn()));
@@ -100,7 +97,7 @@ void CSVWorld::NestedTable::removeRowActionTriggered()
 
 void CSVWorld::NestedTable::addNewRowActionTriggered()
 {
-    mUndoStack.push(new CSMWorld::AddNestedCommand(*(mModel->model()),
+    mDocument.getUndoStack().push(new CSMWorld::AddNestedCommand(*(mModel->model()),
                                                    mModel->getParentId(),
                                                    selectionModel()->selectedRows().size(),
                                                    mModel->getParentColumn()));

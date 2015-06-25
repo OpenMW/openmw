@@ -17,8 +17,11 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+
 #include "../widget/coloreditor.hpp"
 #include "../../model/world/usertype.hpp"
+#include "../widget/droplineedit.hpp"
+
 #include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
@@ -234,28 +237,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
             return new QCheckBox(parent);
 
-        case CSMWorld::ColumnBase::Display_String:
-        case CSMWorld::ColumnBase::Display_Skill:
-        case CSMWorld::ColumnBase::Display_Script:
-        case CSMWorld::ColumnBase::Display_Race:
-        case CSMWorld::ColumnBase::Display_Region:
-        case CSMWorld::ColumnBase::Display_Class:
-        case CSMWorld::ColumnBase::Display_Faction:
-        case CSMWorld::ColumnBase::Display_Miscellaneous:
-        case CSMWorld::ColumnBase::Display_Sound:
-        case CSMWorld::ColumnBase::Display_Mesh:
-        case CSMWorld::ColumnBase::Display_Icon:
-        case CSMWorld::ColumnBase::Display_Music:
-        case CSMWorld::ColumnBase::Display_SoundRes:
-        case CSMWorld::ColumnBase::Display_Texture:
-        case CSMWorld::ColumnBase::Display_Video:
-        case CSMWorld::ColumnBase::Display_GlobalVariable:
-
-            return new DropLineEdit(parent);
-
         case CSMWorld::ColumnBase::Display_ScriptLines:
 
             return new ScriptEdit (mDocument, ScriptHighlighter::Mode_Console, parent);
+
+        case CSMWorld::ColumnBase::Display_String:
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+
+            return new CSVWidget::DropLineEdit(display, parent);
 
         default:
 
@@ -331,30 +320,4 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
             editor->setProperty(n, v);
     }
 
-}
-
-CSVWorld::DropLineEdit::DropLineEdit(QWidget* parent) :
-QLineEdit(parent)
-{
-    setAcceptDrops(true);
-}
-
-void CSVWorld::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-}
-
-void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->accept();
-}
-
-void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
-{
-    const CSMWorld::TableMimeData* data(dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData()));
-    if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
-    //WIP
 }

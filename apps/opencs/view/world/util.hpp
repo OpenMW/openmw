@@ -5,7 +5,6 @@
 
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
-#include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/doc/document.hpp"
@@ -89,24 +88,6 @@ namespace CSVWorld
 
             static const CommandDelegateFactoryCollection& get();
 
-    };
-
-    class DropLineEdit : public QLineEdit
-    {
-        Q_OBJECT
-
-        public:
-            DropLineEdit(QWidget *parent);
-
-        private:
-            void dragEnterEvent(QDragEnterEvent *event);
-
-            void dragMoveEvent(QDragMoveEvent *event);
-
-            void dropEvent(QDropEvent *event);
-
-        signals:
-            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
     };
 
     ///< \brief Use commands instead of manipulating the model directly

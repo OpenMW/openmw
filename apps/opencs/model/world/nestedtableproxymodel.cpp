@@ -192,4 +192,8 @@ void CSMWorld::NestedTableProxyModel::forwardDataChanged (const QModelIndex& top
         emit dataChanged(index(0,0),
                 index(mMainModel->rowCount(parent)-1, mMainModel->columnCount(parent)-1));
     }
+    else if (topLeft.parent() == parent && bottomRight.parent() == parent)
+    {
+        emit dataChanged(index(topLeft.row(), topLeft.column()), index(bottomRight.row(), bottomRight.column()));
+    }
 }

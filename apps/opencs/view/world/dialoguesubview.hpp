@@ -86,17 +86,11 @@ namespace CSVWorld
     public slots:
         void editorDataCommited();
         void setIndex(const QModelIndex& index);
-        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data,
-                                  const CSMDoc::Document* document);
 
     signals:
         void editorDataCommited(QWidget* editor,
                                 const QModelIndex& index,
                                 CSMWorld::ColumnBase::Display display);
-
-        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                  const CSMWorld::UniversalId& id,
-                                  const CSMDoc::Document* document);
 
     };
 
@@ -153,11 +147,6 @@ namespace CSVWorld
     private slots:
         void editorDataCommited(QWidget* editor, const QModelIndex& index,
                                 CSMWorld::ColumnBase::Display display);
-
-    signals:
-        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                  const CSMWorld::UniversalId& id,
-                                  const CSMDoc::Document* document);
     };
 
     class EditWidget : public QScrollArea
@@ -182,11 +171,6 @@ namespace CSVWorld
             virtual ~EditWidget();
 
             void remake(int row);
-
-        signals:
-            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                      const CSMWorld::UniversalId& id,
-                                      const CSMDoc::Document* document);
     };
 
     class DialogueSubView : public CSVDoc::SubView
@@ -229,10 +213,6 @@ namespace CSVWorld
 
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
-
-            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                      const CSMWorld::UniversalId& id,
-                                      const CSMDoc::Document* document);
 
             void requestFocus (const std::string& id);
 
