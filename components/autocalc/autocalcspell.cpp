@@ -60,8 +60,8 @@ namespace AutoCalc
         }
 
         std::vector<std::string> selectedSpells;
-
-        const std::vector<ESM::Spell*>& spells = store->getSpells();
+        std::vector<ESM::Spell*> spells;
+        store->getSpells(spells);
 
         // Note: the algorithm heavily depends on the traversal order of the spells. For vanilla-compatible results the
         // Store must preserve the record ordering as it was in the content files.

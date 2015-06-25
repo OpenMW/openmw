@@ -234,10 +234,6 @@ namespace MWWorld
             return mShared.size();
         }
 
-        const std::vector<T *>& getShared() const {
-            return mShared;
-        }
-
         int getDynamicSize() const
         {
             return static_cast<int> (mDynamic.size()); // truncated from unsigned __int64 if _MSC_VER && _WIN64

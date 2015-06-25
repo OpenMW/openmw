@@ -33,7 +33,6 @@ namespace
         const CSMWorld::IdCollection<ESM::Skill>& mSkillTable;
         const CSMWorld::IdCollection<ESM::MagicEffect>& mMagicEffectTable;
         const CSMWorld::NestedIdCollection<ESM::Spell>& mSpells;
-        std::vector<ESM::Spell *> mLocal;
 
     public:
 
@@ -42,14 +41,8 @@ namespace
                 const CSMWorld::IdCollection<ESM::MagicEffect>& magicEffects,
                 const CSMWorld::NestedIdCollection<ESM::Spell>& spells)
             : mGmstTable(gmst), mSkillTable(skills), mMagicEffectTable(magicEffects), mSpells(spells)
-        {
-            // prepare data in a format used by OpenMW store
-            for (int index = 0; index < mSpells.getSize(); ++index)
-            {
-                ESM::Spell *spell = const_cast<ESM::Spell *>(&mSpells.getRecord(index).get());
-                mLocal.push_back(spell);
-            }
-        }
+        { }
+
         ~CSStore() {}
 
         virtual int findGmstInt(const std::string& name) const
@@ -74,9 +67,11 @@ namespace
             return &mMagicEffectTable.getRecord(ESM::MagicEffect::indexToId((short)id)).get();
         }
 
-        virtual const std::vector<ESM::Spell*>& getSpells() const
+        virtual void getSpells(std::vector<ESM::Spell*>& spells)
         {
-            return mLocal;
+            // prepare data in a format used by OpenMW store
+            for (int index = 0; index < mSpells.getSize(); ++index)
+                spells.push_back(const_cast<ESM::Spell *>(&mSpells.getRecord(index).get()));
         }
     };
 

@@ -29,8 +29,9 @@ namespace MWWorld
         return MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(id);
     }
 
-    const std::vector<ESM::Spell*>& MWStore::getSpells() const
+    void MWStore::getSpells(std::vector<ESM::Spell*>& spells)
     {
-        return MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().getShared();
+        for (Store<ESM::Spell>::iterator iter = mSpells.begin(); iter != mSpells.end(); ++iter)
+                 spells.push_back(const_cast<ESM::Spell*>(&*iter));
     }
 }

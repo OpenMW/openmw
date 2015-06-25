@@ -16,6 +16,8 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    QWidget* parent,
                                    bool editable)
     : DragRecordTable(document, parent),
+      mAddNewRowAction(0),
+      mRemoveRowAction(0),
       mModel(model)
 {
     setSelectionBehavior (QAbstractItemView::SelectRows);
@@ -49,8 +51,6 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
 
             setItemDelegateForColumn(i, delegate);
         }
-
-    setModel(model);
 
         mAddNewRowAction = new QAction (tr ("Add new row"), this);
 
@@ -90,15 +90,15 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 void CSVWorld::NestedTable::removeRowActionTriggered()
 {
     mDocument.getUndoStack().push(new CSMWorld::DeleteNestedCommand(*(mModel->model()),
-                                                      mModel->getParentId(),
-                                                      selectionModel()->selectedRows().begin()->row(),
-                                                      mModel->getParentColumn()));
+                                                                    mModel->getParentId(),
+                                                                    selectionModel()->selectedRows().begin()->row(),
+                                                                    mModel->getParentColumn()));
 }
 
 void CSVWorld::NestedTable::addNewRowActionTriggered()
 {
     mDocument.getUndoStack().push(new CSMWorld::AddNestedCommand(*(mModel->model()),
-                                                   mModel->getParentId(),
-                                                   selectionModel()->selectedRows().size(),
-                                                   mModel->getParentColumn()));
+                                                                 mModel->getParentId(),
+                                                                 selectionModel()->selectedRows().size(),
+                                                                 mModel->getParentColumn()));
 }

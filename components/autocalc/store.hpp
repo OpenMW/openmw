@@ -36,7 +36,7 @@ namespace AutoCalc
 
         virtual const ESM::MagicEffect* findMagicEffect(int id) const = 0;
 
-        virtual const std::vector<ESM::Spell*>& getSpells() const = 0;
+        virtual void getSpells(std::vector<ESM::Spell*>& spells) = 0;
     };
 }
 #endif // COMPONENTS_AUTOCALC_STORE_H
