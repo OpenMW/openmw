@@ -76,6 +76,10 @@ namespace CSVTools
 
             void removeSelection();
 
+        public slots:
+
+            void stateChanged (int state, CSMDoc::Document *document);        
+            
         signals:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);

@@ -77,10 +77,7 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
     }
 
     if (mRefreshAction)
-    {
-        mRefreshAction->setEnabled ((mDocument.getState() & mRefreshState)==0);
         menu.addAction (mRefreshAction);
-    }
     
     menu.exec (event->globalPos());
 }
@@ -181,6 +178,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     if (mRefreshState)
     {
         mRefreshAction = new QAction (tr ("Refresh"), this);
+        mRefreshAction->setEnabled (!(mDocument.getState() & mRefreshState));
         connect (mRefreshAction, SIGNAL (triggered()), this, SIGNAL (refreshRequest()));
         addAction (mRefreshAction);
     }
@@ -300,4 +298,10 @@ void CSVTools::ReportTable::removeSelection()
 void CSVTools::ReportTable::clear()
 {
     mModel->clear();
+}
+
+void CSVTools::ReportTable::stateChanged (int state, CSMDoc::Document *document)
+{
+    if (mRefreshAction)
+        mRefreshAction->setEnabled (!(state & mRefreshState));
 }

@@ -15,7 +15,12 @@ CSVTools::ReportSubView::ReportSubView (const CSMWorld::UniversalId& id, CSMDoc:
         SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)));
 
     if (mRefreshState==CSMDoc::State_Verifying)
+    {
         connect (mTable, SIGNAL (refreshRequest()), this, SLOT (refreshRequest()));
+
+        connect (&document, SIGNAL (stateChanged (int, CSMDoc::Document *)),
+            mTable, SLOT (stateChanged (int, CSMDoc::Document *)));
+    }
 }
 
 void CSVTools::ReportSubView::setEditLock (bool locked)
