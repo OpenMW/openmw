@@ -1608,8 +1608,9 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
     if (stats.get() == 0)
         return 0;
 
-    emit cacheNpcStats (npc.mId, stats.release());
-    return stats.release();
+    CSMWorld::NpcStats *result = stats.release();
+    emit cacheNpcStats (npc.mId, result);
+    return result;
 }
 
 void CSMWorld::Data::cacheNpcStatsEvent (const std::string& id, CSMWorld::NpcStats *stats)
