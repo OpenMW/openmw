@@ -9,7 +9,7 @@ namespace
 {
     QString toLower(const QString &str)
     {
-        return Misc::StringUtils::lowerCase(str.toStdString()).c_str();
+		return QString::fromUtf8(Misc::StringUtils::lowerCase(str.toStdString()).c_str());
     }
 }
 
