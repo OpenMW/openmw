@@ -74,8 +74,10 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
 
         if (found)
             menu.addAction (mReplaceAction);
-
     }
+
+    if (mRefreshAction)
+        menu.addAction (mRefreshAction);
     
     menu.exec (event->globalPos());
 }
@@ -134,8 +136,10 @@ void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
 }
 
 CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
-    const CSMWorld::UniversalId& id, bool richTextDescription, QWidget *parent)
-: CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id))
+    const CSMWorld::UniversalId& id, bool richTextDescription, int refreshState,
+    QWidget *parent)
+: CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id)),
+  mRefreshAction (0), mRefreshState (refreshState)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
@@ -171,6 +175,14 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     connect (mReplaceAction, SIGNAL (triggered()), this, SIGNAL (replaceRequest()));
     addAction (mReplaceAction);
 
+    if (mRefreshState)
+    {
+        mRefreshAction = new QAction (tr ("Refresh"), this);
+        mRefreshAction->setEnabled (!(mDocument.getState() & mRefreshState));
+        connect (mRefreshAction, SIGNAL (triggered()), this, SIGNAL (refreshRequest()));
+        addAction (mRefreshAction);
+    }
+    
     mDoubleClickActions.insert (std::make_pair (Qt::NoModifier, Action_Edit));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_Remove));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_EditAndRemove));    
@@ -286,4 +298,10 @@ void CSVTools::ReportTable::removeSelection()
 void CSVTools::ReportTable::clear()
 {
     mModel->clear();
+}
+
+void CSVTools::ReportTable::stateChanged (int state, CSMDoc::Document *document)
+{
+    if (mRefreshAction)
+        mRefreshAction->setEnabled (!(state & mRefreshState));
 }

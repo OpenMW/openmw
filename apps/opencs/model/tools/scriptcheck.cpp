@@ -120,7 +120,7 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
 void CSMTools::ScriptCheckStage::updateUserSetting (const QString& name, const QStringList& value)
 {
-    if (name=="script-editor/warnings")
+    if (name=="script-editor/warnings" && !value.isEmpty())
     {
         if (value.at (0)=="Ignore")
             mWarningMode = Mode_Ignore;
