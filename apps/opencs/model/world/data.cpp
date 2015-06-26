@@ -1114,16 +1114,6 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mPathgrids);
 }
 
-std::string CSMWorld::Data::getDescription() const
-{
-    return mMetaData.getRecord (0).get().mDescription;
-}
-
-std::string CSMWorld::Data::getAuthor() const
-{
-    return mMetaData.getRecord (0).get().mAuthor;
-}
-
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 {
     std::vector<std::string> ids;

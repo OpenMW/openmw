@@ -269,10 +269,6 @@ namespace CSMWorld
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
 
-            std::string getDescription() const;
-
-            std::string getAuthor() const;
-
         signals:
 
             void idListChanged();
