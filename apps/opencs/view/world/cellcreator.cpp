@@ -8,6 +8,9 @@
 #include <QSpinBox>
 #include <QLabel>
 
+#include "../../model/world/commands.hpp"
+#include "../../model/world/idtree.hpp"
+
 std::string CSVWorld::CellCreator::getId() const
 {
     if (mType->currentIndex()==0)
@@ -18,6 +21,15 @@ std::string CSVWorld::CellCreator::getId() const
     stream << "#" << mX->value() << " " << mY->value();
 
     return stream.str();
+}
+
+void CSVWorld::CellCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
+{
+    CSMWorld::IdTree *model = dynamic_cast<CSMWorld::IdTree *>(getData().getTableModel(getCollectionId()));
+    Q_ASSERT(model != NULL);
+    int parentIndex = model->findColumnIndex(CSMWorld::Columns::ColumnId_Cell);
+    int index = model->findNestedColumnIndex(parentIndex, CSMWorld::Columns::ColumnId_Interior);
+    command.addNestedValue(parentIndex, index, mType->currentIndex() == 0);
 }
 
 CSVWorld::CellCreator::CellCreator (CSMWorld::Data& data, QUndoStack& undoStack,
