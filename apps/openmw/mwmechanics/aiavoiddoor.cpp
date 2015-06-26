@@ -17,7 +17,7 @@ MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::Ptr& doorPtr)
 
 }
 
-bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
 
     ESM::Position pos = actor.getRefData().getPosition();

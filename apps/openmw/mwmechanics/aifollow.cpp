@@ -54,7 +54,7 @@ AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 
 }
 
-bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     MWWorld::Ptr target = getTarget();
 

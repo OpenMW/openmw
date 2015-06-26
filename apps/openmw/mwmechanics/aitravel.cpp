@@ -47,7 +47,7 @@ namespace MWMechanics
         return new AiTravel(*this);
     }
 
-    bool AiTravel::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+    bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         ESM::Position pos = actor.getRefData().getPosition();
 

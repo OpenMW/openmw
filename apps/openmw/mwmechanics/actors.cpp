@@ -1124,7 +1124,7 @@ namespace MWMechanics
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                             if (isConscious(iter->first))
-                                stats.getAiSequence().execute(iter->first,iter->second->getAiState(), duration);
+                                stats.getAiSequence().execute(iter->first, *iter->second->getCharacterController(), iter->second->getAiState(), duration);
 
                             if (stats.getAiSequence().isInCombat() && !stats.isDead()) hostilesCount++;
                         }

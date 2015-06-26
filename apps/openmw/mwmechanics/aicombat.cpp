@@ -181,7 +181,7 @@ namespace MWMechanics
      * Use the Observer Pattern to co-ordinate attacks, provide intelligence on
      * whether the target was hit, etc.
      */
-    bool AiCombat::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+    bool AiCombat::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         // get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();

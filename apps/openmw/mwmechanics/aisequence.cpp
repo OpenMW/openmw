@@ -150,7 +150,7 @@ bool AiSequence::isPackageDone() const
     return mDone;
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
@@ -211,7 +211,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                 }
             }
 
-            if (package->execute (actor,state,duration))
+            if (package->execute (actor,characterController,state,duration))
             {
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)
