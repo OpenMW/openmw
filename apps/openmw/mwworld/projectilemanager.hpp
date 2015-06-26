@@ -108,6 +108,7 @@ namespace MWWorld
             std::string mBowId;
 
             osg::Vec3f mVelocity;
+            float mAttackStrength;
         };
 
         std::vector<MagicBoltState> mMagicBolts;

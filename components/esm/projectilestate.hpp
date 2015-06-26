@@ -45,6 +45,7 @@ namespace ESM
     {
         std::string mBowId;
         Vector3 mVelocity;
+        float mAttackStrength;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

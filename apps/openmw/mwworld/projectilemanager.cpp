@@ -123,6 +123,7 @@ namespace MWWorld
         state.mVelocity = orient * osg::Vec3f(0,1,0) * speed;
         state.mId = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
+        state.mAttackStrength = actor.getClass().getCreatureStats(actor).getAttackStrength();
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -245,7 +246,7 @@ namespace MWWorld
                 if (caster.isEmpty())
                     caster = result.mHitObject;
 
-                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos);
+                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
 
                 mParent->removeChild(it->mNode);
 
@@ -286,6 +287,7 @@ namespace MWWorld
 
             state.mBowId = it->mBowId;
             state.mVelocity = it->mVelocity;
+            state.mAttackStrength = it->mAttackStrength;
 
             state.save(writer);
 
@@ -327,6 +329,7 @@ namespace MWWorld
             state.mBowId = esm.mBowId;
             state.mVelocity = esm.mVelocity;
             state.mId = esm.mId;
+            state.mAttackStrength = esm.mAttackStrength;
 
             std::string model;
             try

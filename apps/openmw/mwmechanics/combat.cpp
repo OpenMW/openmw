@@ -166,12 +166,10 @@ namespace MWMechanics
     }
 
     void projectileHit(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, MWWorld::Ptr weapon, const MWWorld::Ptr &projectile,
-                       const osg::Vec3f& hitPosition)
+                       const osg::Vec3f& hitPosition, float attackStrength)
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
-
-        MWMechanics::CreatureStats& attackerStats = attacker.getClass().getCreatureStats(attacker);
 
         if(victim.isEmpty() || !victim.getClass().isActor() || victim.getClass().getCreatureStats(victim).isDead())
             // Can't hit non-actors or dead actors
@@ -199,12 +197,12 @@ namespace MWMechanics
 
 
         const unsigned char* attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
-        float damage = attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength()); // Bow/crossbow damage
+        float damage = attack[0] + ((attack[1]-attack[0])*attackStrength); // Bow/crossbow damage
 
         // Arrow/bolt damage
         // NB in case of thrown weapons, we are applying the damage twice since projectile == weapon
         attack = projectile.get<ESM::Weapon>()->mBase->mData.mChop;
-        damage += attack[0] + ((attack[1]-attack[0])*attackerStats.getAttackStrength());
+        damage += attack[0] + ((attack[1]-attack[0])*attackStrength);
 
         adjustWeaponDamage(damage, weapon, attacker);
         reduceWeaponCondition(damage, true, weapon, attacker);
