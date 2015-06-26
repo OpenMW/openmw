@@ -2282,9 +2282,6 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew)
     {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-
         if (mContentFiles.size()==1)
             createBase();
     }

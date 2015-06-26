@@ -131,6 +131,7 @@ namespace CSMWorld
                 Type_StartScripts,
                 Type_StartScript,
                 Type_Search,
+                Type_MetaData,
                 Type_RunLog
             };
 

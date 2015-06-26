@@ -475,6 +475,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
         ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
+    mMetaData.appendBlankRecord ("sys::meta");
+        
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -515,6 +517,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+    addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
@@ -803,6 +806,11 @@ const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) 
     return mResourcesManager.get (id.getType());
 }
 
+const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
+{
+    return mMetaData.getRecord (0).get();
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -847,9 +855,12 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mBase = base;
     mProject = project;
 
-    mAuthor = mReader->getAuthor();
-    mDescription = mReader->getDesc();
+    MetaData metaData;
+    metaData.mId = "sys::meta";
+    metaData.load (*mReader);
 
+    mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    
     return mReader->getRecordCount();
 }
 
@@ -1103,24 +1114,14 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mPathgrids);
 }
 
-void CSMWorld::Data::setDescription (const std::string& description)
-{
-    mDescription = description;
-}
-
 std::string CSMWorld::Data::getDescription() const
 {
-    return mDescription;
-}
-
-void CSMWorld::Data::setAuthor (const std::string& author)
-{
-    mAuthor = author;
+    return mMetaData.getRecord (0).get().mDescription;
 }
 
 std::string CSMWorld::Data::getAuthor() const
 {
-    return mAuthor;
+    return mMetaData.getRecord (0).get().mAuthor;
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
