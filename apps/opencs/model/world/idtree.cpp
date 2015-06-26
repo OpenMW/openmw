@@ -261,3 +261,8 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelInde
 
     return mNestedCollection->nestedTable(index.row(), index.column());
 }
+
+void CSMWorld::IdTree::updateNpcAutocalc (int type, const std::string& id)
+{
+    emit refreshNpcDialogue (type, id);
+}

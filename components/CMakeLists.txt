@@ -119,6 +119,10 @@ add_component_dir (fontloader
     fontloader
     )
 
+add_component_dir (autocalc
+    autocalc autocalcspell
+    )
+
 add_component_dir (version
     version
     )

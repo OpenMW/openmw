@@ -315,6 +315,10 @@ namespace CSMWorld
             { ColumnId_FileDescription, "File Description" },
             { ColumnId_Author, "Author" },
 
+            { ColumnId_SpellSrc, "From Race" },
+            { ColumnId_SpellCost, "Cast Cost" },
+            { ColumnId_SpellChance, "Cast Chance" },
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },
