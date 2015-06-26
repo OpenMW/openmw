@@ -266,3 +266,13 @@ void CSMWorld::IdTree::updateNpcAutocalc (int type, const std::string& id)
 {
     emit refreshNpcDialogue (type, id);
 }
+
+int CSMWorld::IdTree::searchNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->searchNestedColumnIndex(parentColumn, id);
+}
+
+int CSMWorld::IdTree::findNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->findNestedColumnIndex(parentColumn, id);
+}
