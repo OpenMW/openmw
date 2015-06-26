@@ -52,7 +52,7 @@ namespace MWWorld
                                        const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
 
         void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                       const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed);
+                                       const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
         void update(float dt);
 

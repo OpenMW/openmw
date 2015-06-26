@@ -2677,9 +2677,9 @@ namespace MWWorld
     }
 
     void World::launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                   const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed)
+                                   const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength)
     {
-        mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed);
+        mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
     void World::launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,

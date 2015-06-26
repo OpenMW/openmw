@@ -167,6 +167,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
 
+    float mAttackStrength;
+
     bool mSkipAnim;
 
     // counted for skill increase

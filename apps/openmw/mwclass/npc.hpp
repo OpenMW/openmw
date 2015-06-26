@@ -81,7 +81,7 @@ namespace MWClass
 
             virtual bool hasInventoryStore(const MWWorld::Ptr &ptr) const { return true; }
 
-            virtual void hit(const MWWorld::Ptr& ptr, int type) const;
+            virtual void hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const;
 
             virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
 

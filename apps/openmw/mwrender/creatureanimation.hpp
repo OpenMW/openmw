@@ -38,7 +38,7 @@ namespace MWRender
         void updatePart(PartHolderPtr& scene, int slot);
 
         virtual void attachArrow();
-        virtual void releaseArrow();
+        virtual void releaseArrow(float attackStrength);
         // WeaponAnimation
         virtual osg::Group* getArrowBone();
         virtual osg::Node* getWeaponNode();

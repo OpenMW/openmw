@@ -480,7 +480,7 @@ namespace MWBase
                                           float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection) = 0;
             virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
-                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed) = 0;
+                                           const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
 

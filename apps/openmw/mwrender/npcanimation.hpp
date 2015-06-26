@@ -115,7 +115,7 @@ public:
     virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
-    virtual void releaseArrow();
+    virtual void releaseArrow(float attackStrength);
 
     virtual osg::Group* getArrowBone();
     virtual osg::Node* getWeaponNode();

@@ -115,7 +115,7 @@ namespace MWWorld
         mMagicBolts.push_back(state);
     }
 
-    void ProjectileManager::launchProjectile(Ptr actor, Ptr projectile, const osg::Vec3f &pos, const osg::Quat &orient, Ptr bow, float speed)
+    void ProjectileManager::launchProjectile(Ptr actor, Ptr projectile, const osg::Vec3f &pos, const osg::Quat &orient, Ptr bow, float speed, float attackStrength)
     {
         ProjectileState state;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
@@ -123,7 +123,7 @@ namespace MWWorld
         state.mVelocity = orient * osg::Vec3f(0,1,0) * speed;
         state.mId = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
-        state.mAttackStrength = actor.getClass().getCreatureStats(actor).getAttackStrength();
+        state.mAttackStrength = attackStrength;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();

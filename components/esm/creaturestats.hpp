@@ -52,7 +52,6 @@ namespace ESM
         bool mHitRecovery;
         bool mBlock;
         unsigned int mMovementFlags;
-        float mAttackStrength;
         float mFallHeight;
         std::string mLastHitObject;
         std::string mLastHitAttemptObject;

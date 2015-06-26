@@ -209,7 +209,7 @@ namespace MWClass
     }
 
 
-    void Creature::hit(const MWWorld::Ptr& ptr, int type) const
+    void Creature::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
@@ -229,7 +229,7 @@ namespace MWClass
                 weapon = *weaponslot;
         }
 
-        MWMechanics::applyFatigueLoss(ptr, weapon);
+        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
         // TODO: where is the distance defined?
         float dist = 200.f;
@@ -276,7 +276,7 @@ namespace MWClass
             break;
         }
 
-        float damage = min + (max - min) * stats.getAttackStrength();
+        float damage = min + (max - min) * attackStrength;
         bool healthdmg = true;
         if (!weapon.isEmpty())
         {
@@ -289,7 +289,7 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                damage = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage = attack[0] + ((attack[1]-attack[0])*attackStrength);
                 MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
                 MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             }
@@ -310,12 +310,12 @@ namespace MWClass
         }
         else if (isBipedal(ptr))
         {
-            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
         }
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
         if (damage > 0)

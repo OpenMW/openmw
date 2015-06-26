@@ -90,7 +90,7 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
     }
 }
 
-void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
+void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
 {
     MWWorld::InventoryStore& inv = actor.getClass().getInventoryStore(actor);
     MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -106,7 +106,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    MWMechanics::applyFatigueLoss(actor, *weapon);
+    MWMechanics::applyFatigueLoss(actor, *weapon, attackStrength);
 
     if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
     {
@@ -121,10 +121,9 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
 
         float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->getFloat();
         float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->getFloat();
-        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) *
-                actor.getClass().getCreatureStats(actor).getAttackStrength();
+        float speed = fThrownWeaponMinSpeed + (fThrownWeaponMaxSpeed - fThrownWeaponMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *weapon, launchPos, orient, *weapon, speed);
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, *weapon, launchPos, orient, *weapon, speed, attackStrength);
 
         showWeapon(false);
 
@@ -148,9 +147,9 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor)
 
         float fProjectileMinSpeed = gmst.find("fProjectileMinSpeed")->getFloat();
         float fProjectileMaxSpeed = gmst.find("fProjectileMaxSpeed")->getFloat();
-        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * actor.getClass().getCreatureStats(actor).getAttackStrength();
+        float speed = fProjectileMinSpeed + (fProjectileMaxSpeed - fProjectileMinSpeed) * attackStrength;
 
-        MWBase::Environment::get().getWorld()->launchProjectile(actor, *ammo, launchPos, orient, *weapon, speed);
+        MWBase::Environment::get().getWorld()->launchProjectile(actor, *ammo, launchPos, orient, *weapon, speed, attackStrength);
 
         inv.remove(*ammo, 1, actor);
         mAmmunition.reset();

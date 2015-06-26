@@ -7,7 +7,7 @@ namespace MWMechanics
 {
 
 /// @return can we block the attack?
-bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker, const MWWorld::Ptr& weapon, float damage);
+bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker, const MWWorld::Ptr& weapon, float damage, float attackStrength);
 
 void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
 
@@ -31,10 +31,10 @@ void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const 
 /// Adjust weapon damage based on its condition. A used weapon will be less effective.
 void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon, const MWWorld::Ptr& attacker);
 
-void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg, float attackStrength);
 
 /// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
-void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon);
+void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength);
 
 /// Can attacker operate in victim's environment?
 /// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?

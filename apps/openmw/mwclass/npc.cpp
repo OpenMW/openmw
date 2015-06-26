@@ -470,7 +470,7 @@ namespace MWClass
     }
 
 
-    void Npc::hit(const MWWorld::Ptr& ptr, int type) const
+    void Npc::hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const
     {
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
@@ -483,7 +483,7 @@ namespace MWClass
         if(!weapon.isEmpty() && weapon.getTypeName() != typeid(ESM::Weapon).name())
             weapon = MWWorld::Ptr();
 
-        MWMechanics::applyFatigueLoss(ptr, weapon);
+        MWMechanics::applyFatigueLoss(ptr, weapon, attackStrength);
 
         const float fCombatDistance = store.find("fCombatDistance")->getFloat();
         float dist = fCombatDistance * (!weapon.isEmpty() ?
@@ -522,7 +522,6 @@ namespace MWClass
 
         bool healthdmg;
         float damage = 0.0f;
-        MWMechanics::NpcStats &stats = getNpcStats(ptr);
         if(!weapon.isEmpty())
         {
             const unsigned char *attack = NULL;
@@ -534,7 +533,7 @@ namespace MWClass
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mThrust;
             if(attack)
             {
-                damage  = attack[0] + ((attack[1]-attack[0])*stats.getAttackStrength());
+                damage  = attack[0] + ((attack[1]-attack[0])*attackStrength);
             }
             MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
             MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
@@ -542,7 +541,7 @@ namespace MWClass
         }
         else
         {
-            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg);
+            MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
         }
         if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
         {
@@ -579,7 +578,7 @@ namespace MWClass
 
         MWMechanics::applyElementalShields(ptr, victim);
 
-        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage))
+        if (MWMechanics::blockMeleeAttack(ptr, victim, weapon, damage, attackStrength))
             damage = 0;
 
         if (healthdmg && damage > 0)

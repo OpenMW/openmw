@@ -372,7 +372,7 @@ public:
     virtual void setAlpha(float alpha) {}
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
-    virtual void releaseArrow() {}
+    virtual void releaseArrow(float attackStrength) {}
     virtual void enableHeadAnimation(bool enable) {}
     // TODO: move outside of this class
     /// Makes this object glow, by placing a Light in its center.

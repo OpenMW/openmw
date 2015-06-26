@@ -930,9 +930,9 @@ void NpcAnimation::attachArrow()
     WeaponAnimation::attachArrow(mPtr);
 }
 
-void NpcAnimation::releaseArrow()
+void NpcAnimation::releaseArrow(float attackStrength)
 {
-    WeaponAnimation::releaseArrow(mPtr);
+    WeaponAnimation::releaseArrow(mPtr, attackStrength);
 }
 
 osg::Group* NpcAnimation::getArrowBone()

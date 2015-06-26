@@ -51,7 +51,7 @@ bool applyEnchantment (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim,
 namespace MWMechanics
 {
 
-    bool blockMeleeAttack(const MWWorld::Ptr &attacker, const MWWorld::Ptr &blocker, const MWWorld::Ptr &weapon, float damage)
+    bool blockMeleeAttack(const MWWorld::Ptr &attacker, const MWWorld::Ptr &blocker, const MWWorld::Ptr &weapon, float damage, float attackStrength)
     {
         if (!blocker.getClass().hasInventoryStore(blocker))
             return false;
@@ -90,7 +90,7 @@ namespace MWMechanics
 
         float blockTerm = blocker.getClass().getSkill(blocker, ESM::Skill::Block) + 0.2f * blockerStats.getAttribute(ESM::Attribute::Agility).getModified()
             + 0.1f * blockerStats.getAttribute(ESM::Attribute::Luck).getModified();
-        float enemySwing = attackerStats.getAttackStrength();
+        float enemySwing = attackStrength;
         float swingTerm = enemySwing * gmst.find("fSwingBlockMult")->getFloat() + gmst.find("fSwingBlockBase")->getFloat();
 
         float blockerTerm = blockTerm * swingTerm;
@@ -131,7 +131,7 @@ namespace MWMechanics
             normalizedEncumbrance = std::min(1.f, normalizedEncumbrance);
             float fatigueLoss = fFatigueBlockBase + normalizedEncumbrance * fFatigueBlockMult;
             if (!weapon.isEmpty())
-                fatigueLoss += weapon.getClass().getWeight(weapon) * attackerStats.getAttackStrength() * fWeaponFatigueBlockMult;
+                fatigueLoss += weapon.getClass().getWeight(weapon) * attackStrength * fWeaponFatigueBlockMult;
             fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
             blockerStats.setFatigue(fatigue);
 
@@ -363,7 +363,7 @@ namespace MWMechanics
                 (attacker.getClass().getCreatureStats(attacker).getAttribute(ESM::Attribute::Strength).getModified() * fDamageStrengthMult * 0.1f);
     }
 
-    void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg)
+    void getHandToHandDamage(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim, float &damage, bool &healthdmg, float attackStrength)
     {
         // Note: MCP contains an option to include Strength in hand-to-hand damage
         // calculations. Some mods recommend using it, so we may want to include an
@@ -372,7 +372,7 @@ namespace MWMechanics
         float minstrike = store.get<ESM::GameSetting>().find("fMinHandToHandMult")->getFloat();
         float maxstrike = store.get<ESM::GameSetting>().find("fMaxHandToHandMult")->getFloat();
         damage  = static_cast<float>(attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand));
-        damage *= minstrike + ((maxstrike-minstrike)*attacker.getClass().getCreatureStats(attacker).getAttackStrength());
+        damage *= minstrike + ((maxstrike-minstrike)*attackStrength);
 
         MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);
         healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
@@ -398,7 +398,7 @@ namespace MWMechanics
             sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
     }
 
-    void applyFatigueLoss(const MWWorld::Ptr &attacker, const MWWorld::Ptr &weapon)
+    void applyFatigueLoss(const MWWorld::Ptr &attacker, const MWWorld::Ptr &weapon, float attackStrength)
     {
         // somewhat of a guess, but using the weapon weight makes sense
         const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -410,7 +410,7 @@ namespace MWMechanics
         const float normalizedEncumbrance = attacker.getClass().getNormalizedEncumbrance(attacker);
         float fatigueLoss = fFatigueAttackBase + normalizedEncumbrance * fFatigueAttackMult;
         if (!weapon.isEmpty())
-            fatigueLoss += weapon.getClass().getWeight(weapon) * stats.getAttackStrength() * fWeaponFatigueMult;
+            fatigueLoss += weapon.getClass().getWeight(weapon) * attackStrength * fWeaponFatigueMult;
         fatigue.setCurrent(fatigue.getCurrent() - fatigueLoss);
         stats.setFatigue(fatigue);
     }

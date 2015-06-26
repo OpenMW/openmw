@@ -649,6 +649,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mUpperBodyState(UpperCharState_Nothing)
     , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
+    , mAttackStrength(0.f)
     , mSkipAnim(false)
     , mSecondsOfSwimming(0)
     , mSecondsOfRunning(0)
@@ -782,21 +783,21 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     else if(evt.compare(off, len, "unequip detach") == 0)
         mAnimation->showWeapons(false);
     else if(evt.compare(off, len, "chop hit") == 0)
-        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
     else if(evt.compare(off, len, "slash hit") == 0)
-        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
     else if(evt.compare(off, len, "thrust hit") == 0)
-        mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
     else if(evt.compare(off, len, "hit") == 0)
     {
         if (groupname == "attack1")
-            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
         else if (groupname == "attack2")
-            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
         else if (groupname == "attack3")
-            mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         else
-            mPtr.getClass().hit(mPtr);
+            mPtr.getClass().hit(mPtr, mAttackStrength);
     }
     else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
              && evt.compare(off, len, "start") == 0)
@@ -819,17 +820,17 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         if (!hasHitKey)
         {
             if (groupname == "attack1")
-                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Chop);
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
             else if (groupname == "attack2")
-                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Slash);
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
             else if (groupname == "attack3")
-                mPtr.getClass().hit(mPtr, ESM::Weapon::AT_Thrust);
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
         }
     }
     else if (evt.compare(off, len, "shoot attach") == 0)
         mAnimation->attachArrow();
     else if (evt.compare(off, len, "shoot release") == 0)
-        mAnimation->releaseArrow();
+        mAnimation->releaseArrow(mAttackStrength);
     else if (evt.compare(off, len, "shoot follow attach") == 0)
         mAnimation->attachArrow();
 
@@ -992,7 +993,7 @@ bool CharacterController::updateCreatureState()
                                  0.0f, 0);
                 mUpperBodyState = UpperCharState_StartToMinAttack;
 
-                stats.setAttackStrength(std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability()));
+                mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
         }
 
@@ -1294,7 +1295,7 @@ bool CharacterController::updateWeaponState()
                         sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
                 }
             }
-            stats.setAttackStrength(attackStrength);
+            mAttackStrength = attackStrength;
 
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
@@ -1418,7 +1419,7 @@ bool CharacterController::updateWeaponState()
                 }
                 else
                 {
-                    float str = stats.getAttackStrength();
+                    float str = mAttackStrength;
                     start = mAttackType+((str < 0.5f) ? " small follow start"
                                                                   : (str < 1.0f) ? " medium follow start"
                                                                                  : " large follow start");
