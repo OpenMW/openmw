@@ -1,12 +1,24 @@
 #include "infotableproxymodel.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include "idtablebase.hpp"
 #include "columns.hpp"
+
+namespace
+{
+    QString toLower(const QString &str)
+    {
+		return QString::fromUtf8(Misc::StringUtils::lowerCase(str.toStdString()).c_str());
+    }
+}
 
 CSMWorld::InfoTableProxyModel::InfoTableProxyModel(CSMWorld::UniversalId::Type type, QObject *parent)
     : IdTableProxyModel(parent),
       mType(type),
-      mSourceModel(NULL)
+      mSourceModel(NULL),
+	  mInfoColumnId(type == UniversalId::Type_TopicInfos ? Columns::ColumnId_Topic : 
+                                                           Columns::ColumnId_Journal)
 {
     Q_ASSERT(type == UniversalId::Type_TopicInfos || type == UniversalId::Type_JournalInfos);
 }
@@ -15,44 +27,53 @@ void CSMWorld::InfoTableProxyModel::setSourceModel(QAbstractItemModel *sourceMod
 {
     IdTableProxyModel::setSourceModel(sourceModel);
     mSourceModel = dynamic_cast<IdTableBase *>(sourceModel);
-    connect(mSourceModel, 
-            SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-            this, 
-            SLOT(modelDataChanged(const QModelIndex &, const QModelIndex &)));
-    mFirstRowCache.clear();
+    if (mSourceModel != NULL)
+    {
+        connect(mSourceModel, 
+                SIGNAL(rowsInserted(const QModelIndex &, int, int)),
+                this, 
+                SLOT(modelRowsChanged(const QModelIndex &, int, int)));
+        connect(mSourceModel, 
+                SIGNAL(rowsRemoved(const QModelIndex &, int, int)),
+                this, 
+                SLOT(modelRowsChanged(const QModelIndex &, int, int)));
+        mFirstRowCache.clear();
+    }
 }
 
 bool CSMWorld::InfoTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     QModelIndex first = mSourceModel->index(getFirstInfoRow(left.row()), left.column());
     QModelIndex second = mSourceModel->index(getFirstInfoRow(right.row()), right.column());
+
+    // If both indexes are belonged to the same Topic/Journal, compare their original rows only
+    if (first.row() == second.row())
+    {
+        return sortOrder() == Qt::AscendingOrder ? left.row() < right.row() : right.row() < left.row();
+    }
     return IdTableProxyModel::lessThan(first, second);
 }
 
 int CSMWorld::InfoTableProxyModel::getFirstInfoRow(int currentRow) const
 {
-    Columns::ColumnId columnId = Columns::ColumnId_Topic;
-    if (mType == UniversalId::Type_JournalInfos)
-    {
-        columnId = Columns::ColumnId_Journal;
-    }
-
-    int column = mSourceModel->findColumnIndex(columnId);
-    QString info = mSourceModel->data(mSourceModel->index(currentRow, column)).toString();
+    int row = currentRow;
+    int column = mSourceModel->findColumnIndex(mInfoColumnId);
+    QString info = toLower(mSourceModel->data(mSourceModel->index(row, column)).toString());
 
     if (mFirstRowCache.contains(info))
     {
         return mFirstRowCache[info];
     }
 
-    while (--currentRow >= 0 &&
-           mSourceModel->data(mSourceModel->index(currentRow, column)) == info);
+    while (--row >= 0 && 
+           toLower(mSourceModel->data(mSourceModel->index(row, column)).toString()) == info);
+    ++row;
 
-    mFirstRowCache[info] = currentRow + 1;
-    return currentRow + 1;
+    mFirstRowCache[info] = row;
+    return row;
 }
 
-void CSMWorld::InfoTableProxyModel::modelDataChanged(const QModelIndex &/*topLeft*/, const QModelIndex &/*bottomRight*/)
+void CSMWorld::InfoTableProxyModel::modelRowsChanged(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     mFirstRowCache.clear();
 }
