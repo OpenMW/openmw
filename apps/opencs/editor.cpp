@@ -7,6 +7,9 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
+#include <QSplashScreen>
+#include <QFont>
+#include <QTimer>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -253,6 +256,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     mDocumentManager.addDocument (files, savePath, true);
 
     mFileDialog.hide();
+    showSplashMessage();
 }
 
 void CS::Editor::createNewGame (const boost::filesystem::path& file)
@@ -264,6 +268,7 @@ void CS::Editor::createNewGame (const boost::filesystem::path& file)
     mDocumentManager.addDocument (files, file, true);
 
     mNewGame.hide();
+    showSplashMessage();
 }
 
 void CS::Editor::showStartup()
@@ -475,9 +480,51 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
     mViewManager.addView (document);
+    showSplashMessage();
 }
 
 void CS::Editor::lastDocumentDeleted()
 {
     QApplication::quit();
+}
+
+void CS::Editor::showSplashMessage()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    if(settings.settingValue ("filter/project-added") == "true" ||
+       settings.settingValue ("filter/project-modified") == "true")
+    {
+        QPixmap img(QPixmap(":./openmw-cs.png"));
+
+        QString msgTop("You have active global filters.");
+        QString msgBottom("Some rows may be hidden!");
+        QFont splashFont(QFont("Arial", 16, QFont::Bold)); // TODO: use system font?
+        //splashFont.setStretch(125);
+
+        QFontMetrics fm(splashFont);
+        int msgWidth = std::max(fm.width(msgTop), fm.width(msgBottom));
+        img.scaledToWidth(msgWidth);
+
+        QSplashScreen *splash = new QSplashScreen(img, Qt::WindowStaysOnTopHint);
+        splash->setFont(splashFont);
+        splash->resize(msgWidth+20, splash->height()+fm.lineSpacing()*2+20); // add some margin
+
+        // try to center the message near the center of the saved window
+        QWidget dummy;
+        bool xWorkaround = settings.settingValue ("window/x-save-state-workaround").toStdString() == "true";
+        if (settings.settingValue ("window/save-state").toStdString() == "true" &&
+            !(xWorkaround && settings.settingValue ("window/maximized").toStdString() == "true"))
+        {
+            dummy.restoreGeometry(settings.value("window/geometry").toByteArray());
+            splash->move(dummy.x()+std::max(0, (dummy.width()-msgWidth)/2),
+                         dummy.y()+std::max(0, (dummy.height()-splash->height())/2));
+        }
+        else
+            splash->move(std::max(0, splash->x()-msgWidth/2), splash->y());
+
+        splash->show();
+        splash->showMessage(msgTop+"\n"+msgBottom, Qt::AlignHCenter|Qt::AlignBottom, Qt::red);
+        QTimer::singleShot(4000, splash, SLOT(close())); // 4 seconds should be enough
+        splash->raise(); // for X windows
+    }
 }

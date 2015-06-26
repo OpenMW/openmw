@@ -1,6 +1,8 @@
 
 #include "tablesubview.hpp"
 
+#include <QHBoxLayout>
+#include <QCheckBox>
 #include <QVBoxLayout>
 #include <QEvent>
 #include <QHeaderView>
@@ -10,6 +12,7 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
@@ -33,7 +36,21 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     mFilterBox = new CSVFilter::FilterBox (document.getData(), this);
 
-    layout->insertWidget (0, mFilterBox);
+    QHBoxLayout *hLayout = new QHBoxLayout;
+    QCheckBox *added = new QCheckBox("A");
+    QCheckBox *modified = new QCheckBox("M");
+    added->setToolTip("Apply filter project::added.  Changes to\nthis filter setting is not saved in preferences.");
+    modified->setToolTip("Apply filter project::modified.  Changes to\nthis filter setting is not saved in preferences.");
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    added->setCheckState(
+            userSettings.settingValue ("filter/project-added") == "true" ? Qt::Checked : Qt::Unchecked);
+    modified->setCheckState(
+            userSettings.settingValue ("filter/project-modified") == "true" ? Qt::Checked : Qt::Unchecked);
+
+    hLayout->insertWidget(0,mFilterBox);
+    hLayout->insertWidget(1,added);
+    hLayout->insertWidget(2,modified);
+    layout->insertLayout (0, hLayout);
 
     CSVDoc::SizeHintWidget *widget = new CSVDoc::SizeHintWidget;
 
@@ -55,6 +72,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
         mBottom, SLOT (selectionSizeChanged (int)));
     connect (mTable, SIGNAL (tableSizeChanged (int, int, int)),
         mBottom, SLOT (tableSizeChanged (int, int, int)));
+
+    connect(added, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterAddedChanged(int)));
+    connect(modified, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterModifiedChanged(int)));
 
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
@@ -96,8 +116,7 @@ void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const
     focusId (id, hint);
 }
 
-void CSVWorld::TableSubView::updateUserSetting
-                                (const QString &name, const QStringList &list)
+void CSVWorld::TableSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting(name, list);
 }

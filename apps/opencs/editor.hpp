@@ -60,6 +60,8 @@ namespace CS
             boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
 
+            void showSplashMessage();
+
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
             std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);

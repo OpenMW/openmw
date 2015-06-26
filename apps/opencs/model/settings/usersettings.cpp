@@ -161,6 +161,16 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         grow->setToolTip ("When \"Grow then Scroll\" option is selected, the window size grows to"
             " the width of the virtual desktop. \nIf this option is selected the the window growth"
             "is limited to the current screen.");
+
+        Setting *saveState = createSetting (Type_CheckBox, "save-state", "Save window size and position");
+        saveState->setDefaultValue ("true");
+        saveState->setToolTip ("Remember window size and position between editing sessions.");
+
+        Setting *saveX = createSetting (Type_CheckBox, "x-save-state-workaround", "X windows workaround");
+        saveX->setDefaultValue ("false");
+        saveX->setToolTip ("Some X window managers don't remember the windows state before being"
+            " maximized. In such environments exiting while maximized will correctly start in a maximized"
+            " window, but restoring back to the normal size won't work.  Try this workaround.");
     }
 
     declareSection ("records", "Records");
@@ -298,7 +308,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
         lineNum->setDefaultValue ("true");
         lineNum->setToolTip ("Show line numbers to the left of the script editor window."
-                "The current row and column numbers of the text cursor are shown at the bottom.");
+                " The current row and column numbers of the text cursor are shown at the bottom.");
 
         Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
         monoFont->setDefaultValue ("true");
@@ -354,6 +364,19 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *formatId = createSetting (Type_LineEdit, "colour-id", "Highlight Colour: Id");
         formatId->setDefaultValues (QStringList() << "Blue");
         formatId->setToolTip ("(Default: Blue) Use one of the following formats:" + tooltip);
+    }
+
+    declareSection ("filter", "Global Filter");
+    {
+        Setting *projAdded = createSetting (Type_CheckBox, "project-added", "Project::added initial value");
+        projAdded->setDefaultValue ("false");
+        projAdded->setToolTip ("Show records added by the project when opening a table."
+                " Other records are filterd out.");
+
+        Setting *projModified = createSetting (Type_CheckBox, "project-modified", "Project::modified initial value");
+        projModified->setDefaultValue ("false");
+        projModified->setToolTip ("Show records modified by the project when opening a table."
+                " Other records are filterd out.");
     }
 
     {
@@ -574,6 +597,21 @@ QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString
     }
 
     return QString();
+}
+
+QVariant CSMSettings::UserSettings::value(const QString &viewKey, const QVariant &value)
+{
+    if(value != QVariant())
+    {
+        mSettingDefinitions->setValue (viewKey, value);
+        return value;
+    }
+    else if(mSettingDefinitions->contains(viewKey))
+    {
+        return mSettingDefinitions->value (viewKey);
+    }
+
+    return QVariant();
 }
 
 bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const

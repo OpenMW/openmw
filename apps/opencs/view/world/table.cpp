@@ -24,6 +24,9 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/filter/parser.hpp"
+#include "../../model/filter/andnode.hpp"
+#include "../../model/filter/ornode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
 #include "recordstatusdelegate.hpp"
@@ -407,6 +410,24 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
+
+    CSMFilter::Parser parser(mDocument.getData());
+
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    if(userSettings.settingValue ("filter/project-added") == "true")
+    {
+        parser.parse("!string(\"Modified\", \"Added\")");
+        mAdded = parser.getFilter();
+    }
+
+    if(userSettings.settingValue ("filter/project-modified") == "true")
+    {
+        parser.parse("!string(\"Modified\", \"Modified\")");
+        mModified = parser.getFilter();
+    }
+
+    if(mAdded || mModified)
+        recordFilterChanged(boost::shared_ptr<CSMFilter::Node>());
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -693,7 +714,37 @@ void CSVWorld::Table::requestFocus (const std::string& id)
 
 void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
 {
-    mProxyModel->setFilter (filter);
+    mFilter = filter;
+
+    boost::shared_ptr<CSMFilter::Node> global;
+    if(mAdded && mModified)
+    {
+        std::vector<boost::shared_ptr<CSMFilter::Node> > nodes;
+        nodes.push_back(mAdded);
+        nodes.push_back(mModified);
+        global = boost::shared_ptr<CSMFilter::Node>(new CSMFilter::OrNode (nodes));
+    }
+    else if(mAdded)
+    {
+        global = mAdded;
+    }
+    else if(mModified)
+    {
+        global = mModified;
+    }
+
+    if(filter && global)
+    {
+        std::vector<boost::shared_ptr<CSMFilter::Node> > nodes;
+        nodes.push_back(filter);
+        nodes.push_back(global);
+        boost::shared_ptr<CSMFilter::Node> combined(new CSMFilter::AndNode (nodes));
+        mProxyModel->setFilter (combined);
+    }
+    else if(global)
+        mProxyModel->setFilter (global);
+    else
+        mProxyModel->setFilter (filter);
     tableSizeUpdate();
     selectionSizeUpdate();
 }
@@ -735,6 +786,34 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
     }
 
     return idToDrag;
+}
+
+void CSVWorld::Table::globalFilterAddedChanged(int state)
+{
+    if(state == Qt::Checked && !mAdded)
+    {
+        CSMFilter::Parser parser(mDocument.getData());
+        parser.parse("!string(\"Modified\", \"Added\")");
+        mAdded = parser.getFilter();
+    }
+    else if(state == Qt::Unchecked)
+        mAdded.reset();
+
+    recordFilterChanged(mFilter);
+}
+
+void CSVWorld::Table::globalFilterModifiedChanged(int state)
+{
+    if(state == Qt::Checked && !mModified)
+    {
+        CSMFilter::Parser parser(mDocument.getData());
+        parser.parse("!string(\"Modified\", \"Modified\")");
+        mModified = parser.getFilter();
+    }
+    else if(state == Qt::Unchecked)
+        mModified.reset();
+
+    recordFilterChanged(mFilter);
 }
 
 void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)

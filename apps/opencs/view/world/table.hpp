@@ -70,6 +70,10 @@ namespace CSVWorld
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
 
+            boost::shared_ptr<CSMFilter::Node> mFilter;
+            boost::shared_ptr<CSMFilter::Node> mAdded;
+            boost::shared_ptr<CSMFilter::Node> mModified;
+
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
@@ -139,6 +143,10 @@ namespace CSVWorld
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
 
             void updateUserSetting (const QString &name, const QStringList &list);
+
+            void globalFilterAddedChanged (int state);
+
+            void globalFilterModifiedChanged (int state);
 
             void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
     };
