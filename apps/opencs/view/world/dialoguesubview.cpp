@@ -66,7 +66,7 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
 
     CSMWorld::Columns::ColumnId columnId = static_cast<CSMWorld::Columns::ColumnId> (
         mTable->getColumnId (index.column()));
-    
+
     if (QVariant::String == v.type())
     {
         label->setText(v.toString());
@@ -75,7 +75,7 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
     {
         int data = v.toInt();
         std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (columnId));
-   
+
         label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
     }
     else
@@ -709,6 +709,30 @@ void CSVWorld::SimpleDialogueSubView::changeCurrentId (const std::string& newId)
     mCommandDispatcher.setSelection(selection);
 }
 
+void CSVWorld::SimpleDialogueSubView::refreshNpcDialogue (int type, const std::string& id)
+{
+    int typeColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+    if (CSMWorld::UniversalId::Type_Npc
+                != mTable->data(mTable->getModelIndex(mCurrentId, typeColumn), Qt::DisplayRole).toInt())
+    {
+        return;
+    }
+
+    int raceColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Race);
+    int classColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Class);
+
+    if ((type == 0/*FIXME*/ && id == "") // skill or gmst changed
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, raceColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData()) // race
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, classColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData())) // class
+    {
+        int y = mEditWidget->verticalScrollBar()->value();
+        mEditWidget->remake (mTable->getModelIndex(mCurrentId, 0).row());
+        mEditWidget->verticalScrollBar()->setValue(y);
+    }
+}
+
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     CSMDoc::Document& document, const CreatorFactoryBase& creatorFactory, bool sorting)
 : SimpleDialogueSubView (id, document)
@@ -783,7 +807,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
         deleteButton->setDisabled (true);
     }
 
-    getMainLayout().addLayout (buttonsLayout);    
+    getMainLayout().addLayout (buttonsLayout);
 }
 
 void CSVWorld::DialogueSubView::cloneRequest()
@@ -863,7 +887,6 @@ void CSVWorld::DialogueSubView::nextId ()
         ++newRow;
     }
 }
-
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
