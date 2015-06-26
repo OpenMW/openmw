@@ -64,15 +64,23 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
         }
     }
 
+    CSMWorld::Columns::ColumnId columnId = static_cast<CSMWorld::Columns::ColumnId> (
+        mTable->getColumnId (index.column()));
+    
     if (QVariant::String == v.type())
     {
         label->setText(v.toString());
     }
-    else //else we are facing enums
+    else if (CSMWorld::Columns::hasEnums (columnId))
     {
         int data = v.toInt();
-        std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (static_cast<CSMWorld::Columns::ColumnId> (mTable->getColumnId (index.column()))));
+        std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (columnId));
+   
         label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
+    }
+    else
+    {
+        label->setText (v.toString());
     }
 }
 
