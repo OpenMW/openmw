@@ -991,6 +991,8 @@ bool CharacterController::updateCreatureState()
                                  1, startKey, stopKey,
                                  0.0f, 0);
                 mUpperBodyState = UpperCharState_StartToMinAttack;
+
+                stats.setAttackStrength(std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability()));
             }
         }
 
