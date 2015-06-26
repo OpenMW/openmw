@@ -2331,7 +2331,7 @@ namespace CSMWorld
     struct AuthorColumn : public Column<ESXRecordT>
     {
         AuthorColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_Author, ColumnBase::Display_String)
+        : Column<ESXRecordT> (Columns::ColumnId_Author, ColumnBase::Display_String32)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -2358,7 +2358,7 @@ namespace CSMWorld
     struct FileDescriptionColumn : public Column<ESXRecordT>
     {
         FileDescriptionColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_FileDescription, ColumnBase::Display_LongString)
+        : Column<ESXRecordT> (Columns::ColumnId_FileDescription, ColumnBase::Display_LongString256)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
