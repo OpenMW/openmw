@@ -173,7 +173,7 @@ namespace CSVWorld
             void remake(int row);
     };
 
-    class DialogueSubView : public CSVDoc::SubView
+    class SimpleDialogueSubView : public CSVDoc::SubView
     {
         Q_OBJECT
 
@@ -184,32 +184,31 @@ namespace CSVWorld
         std::string mCurrentId;
         bool mLocked;
         const CSMDoc::Document& mDocument;
-        TableBottomBox* mBottom;
         CSMWorld::CommandDispatcher mCommandDispatcher;
 
+        protected:
+
+            QVBoxLayout& getMainLayout();
+
+            CSMWorld::IdTable& getTable();
+
+            CSMWorld::CommandDispatcher& getCommandDispatcher();
+
+            std::string getCurrentId() const;
+
+            EditWidget& getEditWidget();
+
+            void changeCurrentId(const std::string& newCurrent);
+
+            bool isLocked() const;
+        
         public:
 
-            DialogueSubView (const CSMWorld::UniversalId& id,
-                             CSMDoc::Document& document,
-                             const CreatorFactoryBase& creatorFactory,
-                             bool sorting = false);
+            SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
 
-        private:
-        void changeCurrentId(const std::string& newCurrent);
-
         private slots:
-
-            void nextId();
-
-            void prevId();
-
-            void showPreview();
-
-            void viewRecord();
-
-            void cloneRequest();
 
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
@@ -219,6 +218,30 @@ namespace CSVWorld
             void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
 
             void refreshNpcDialogue (int type, const std::string& id);
+    };
+
+    class DialogueSubView : public SimpleDialogueSubView
+    {
+            Q_OBJECT
+            
+            TableBottomBox* mBottom;
+
+        public:
+
+            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+                const CreatorFactoryBase& creatorFactory, bool sorting = false);
+
+        private slots:
+
+            void cloneRequest();
+
+            void nextId();
+
+            void prevId();
+
+            void showPreview();
+
+            void viewRecord();
     };
 }
 

@@ -57,8 +57,11 @@ namespace CSMTools
 
             virtual ~Tools();
 
-            CSMWorld::UniversalId runVerifier();
-            ///< \return ID of the report for this verification run
+            /// \param reportId If a valid VerificationResults ID, run verifier for the
+            /// specified report instead of creating a new one.
+            ///
+            /// \return ID of the report for this verification run
+            CSMWorld::UniversalId runVerifier (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
 
             /// Return ID of the report for this search.
             CSMWorld::UniversalId newSearch();

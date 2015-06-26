@@ -302,9 +302,13 @@ namespace CSMWorld
             ColumnId_WaterLevel = 273,
             ColumnId_MapColor = 274,
 
-            ColumnId_SpellSrc = 275,
-            ColumnId_SpellCost = 276,
-            ColumnId_SpellChance = 277,
+            ColumnId_FileFormat = 275,
+            ColumnId_FileDescription = 276,
+            ColumnId_Author = 277,
+
+            ColumnId_SpellSrc = 278,
+            ColumnId_SpellCost = 279,
+            ColumnId_SpellChance = 280,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

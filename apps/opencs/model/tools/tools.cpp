@@ -146,14 +146,19 @@ CSMTools::Tools::~Tools()
         delete iter->second;
 }
 
-CSMWorld::UniversalId CSMTools::Tools::runVerifier()
+CSMWorld::UniversalId CSMTools::Tools::runVerifier (const CSMWorld::UniversalId& reportId)
 {
-    mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
-    mActiveReports[CSMDoc::State_Verifying] = mNextReportNumber-1;
+    int reportNumber = reportId.getType()==CSMWorld::UniversalId::Type_VerificationResults ?
+        reportId.getIndex() : mNextReportNumber++;
+
+    if (mReports.find (reportNumber)==mReports.end())
+        mReports.insert (std::make_pair (reportNumber, new ReportModel));
+        
+    mActiveReports[CSMDoc::State_Verifying] = reportNumber;
 
     getVerifier()->start();
 
-    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, mNextReportNumber-1);
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_VerificationResults, reportNumber);
 }
 
 CSMWorld::UniversalId CSMTools::Tools::newSearch()

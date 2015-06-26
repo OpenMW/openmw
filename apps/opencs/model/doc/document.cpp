@@ -2282,9 +2282,6 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew)
     {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-
         if (mContentFiles.size()==1)
             createBase();
     }
@@ -2369,9 +2366,9 @@ void CSMDoc::Document::save()
     emit stateChanged (getState(), this);
 }
 
-CSMWorld::UniversalId CSMDoc::Document::verify()
+CSMWorld::UniversalId CSMDoc::Document::verify (const CSMWorld::UniversalId& reportId)
 {
-    CSMWorld::UniversalId id = mTools.runVerifier();
+    CSMWorld::UniversalId id = mTools.runVerifier (reportId);
     emit stateChanged (getState(), this);
     return id;
 }

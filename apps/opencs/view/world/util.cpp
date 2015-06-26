@@ -233,6 +233,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return edit;
         }
 
+        case CSMWorld::ColumnBase::Display_LongString256:
+        {
+            /// \todo implement size limit. QPlainTextEdit does not support a size limit.
+            QPlainTextEdit *edit = new QPlainTextEdit(parent);
+            edit->setUndoRedoEnabled (false);
+            return edit;
+        }
+        
         case CSMWorld::ColumnBase::Display_Boolean:
 
             return new QCheckBox(parent);
@@ -246,6 +254,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
 
             return new CSVWidget::DropLineEdit(display, parent);
 
+        case CSMWorld::ColumnBase::Display_String32:
+        {
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+            CSVWidget::DropLineEdit *widget = new CSVWidget::DropLineEdit(display, parent);
+            widget->setMaxLength (32);
+            return widget;
+        }
+            
         default:
 
             return QStyledItemDelegate::createEditor (parent, option, index);
