@@ -9,6 +9,8 @@
 #include <QString>
 #include <QtCore/qnamespace.h>
 
+#include <components/misc/stringops.hpp>
+
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
@@ -131,17 +133,24 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 {
                     int row = mProxyModel->mapToSource (
                         mProxyModel->index (selectedRows.begin()->row(), 0)).row();
+                    QString curData = mModel->data(mModel->index(row, column)).toString();
 
-                    if (row>0 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row-1, column)))
+                    if (row > 0)
                     {
-                        menu.addAction (mMoveUpAction);
+                        QString prevData = mModel->data(mModel->index(row - 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), prevData.toStdString()))
+                        {
+                            menu.addAction(mMoveUpAction);
+                        }
                     }
 
-                    if (row<mModel->rowCount()-1 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row+1, column)))
+                    if (row < mModel->rowCount() - 1)
                     {
-                        menu.addAction (mMoveDownAction);
+                        QString nextData = mModel->data(mModel->index(row + 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), nextData.toStdString()))
+                        {
+                            menu.addAction(mMoveDownAction);
+                        }
                     }
                 }
             }
@@ -746,36 +755,6 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
     {
         startDragFromTable(*this);
     }
-}
-
-void CSVWorld::Table::dropEvent(QDropEvent *event)
-{
-    QModelIndex index = indexAt (event->pos());
-
-    if (!index.isValid())
-    {
-        return;
-    }
-
-    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    if (mime->fromDocument (mDocument))
-    {
-        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-                                                (mModel->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-        if (mime->holdsType (display))
-        {
-            CSMWorld::UniversalId record (mime->returnMatching (display));
-
-            std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                    (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
-
-            mDocument.getUndoStack().push (command.release());
-        }
-    } //TODO handle drops from different document
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const

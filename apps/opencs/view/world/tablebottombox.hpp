@@ -9,10 +9,9 @@ class QStackedLayout;
 class QStatusBar;
 class QUndoStack;
 
-namespace CSMWorld
+namespace CSMDoc
 {
-    class Data;
-    class UniversalId;
+    class Document;
 }
 
 namespace CSVWorld
@@ -42,8 +41,10 @@ namespace CSVWorld
 
         public:
 
-            TableBottomBox (const CreatorFactoryBase& creatorFactory, CSMWorld::Data& data,
-                QUndoStack& undoStack, const CSMWorld::UniversalId& id, QWidget *parent = 0);
+            TableBottomBox (const CreatorFactoryBase& creatorFactory, 
+                            CSMDoc::Document& document, 
+                            const CSMWorld::UniversalId& id, 
+                            QWidget *parent = 0);
 
             virtual ~TableBottomBox();
 

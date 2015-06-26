@@ -86,17 +86,11 @@ namespace CSVWorld
     public slots:
         void editorDataCommited();
         void setIndex(const QModelIndex& index);
-        void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data,
-                                  const CSMDoc::Document* document);
 
     signals:
         void editorDataCommited(QWidget* editor,
                                 const QModelIndex& index,
                                 CSMWorld::ColumnBase::Display display);
-
-        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                  const CSMWorld::UniversalId& id,
-                                  const CSMDoc::Document* document);
 
     };
 
@@ -153,11 +147,6 @@ namespace CSVWorld
     private slots:
         void editorDataCommited(QWidget* editor, const QModelIndex& index,
                                 CSMWorld::ColumnBase::Display display);
-
-    signals:
-        void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                  const CSMWorld::UniversalId& id,
-                                  const CSMDoc::Document* document);
     };
 
     class EditWidget : public QScrollArea
@@ -182,14 +171,9 @@ namespace CSVWorld
             virtual ~EditWidget();
 
             void remake(int row);
-
-        signals:
-            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                      const CSMWorld::UniversalId& id,
-                                      const CSMDoc::Document* document);
     };
 
-    class DialogueSubView : public CSVDoc::SubView
+    class SimpleDialogueSubView : public CSVDoc::SubView
     {
         Q_OBJECT
 
@@ -200,22 +184,54 @@ namespace CSVWorld
         std::string mCurrentId;
         bool mLocked;
         const CSMDoc::Document& mDocument;
-        TableBottomBox* mBottom;
         CSMWorld::CommandDispatcher mCommandDispatcher;
 
+        protected:
+
+            QVBoxLayout& getMainLayout();
+
+            CSMWorld::IdTable& getTable();
+
+            CSMWorld::CommandDispatcher& getCommandDispatcher();
+
+            std::string getCurrentId() const;
+
+            EditWidget& getEditWidget();
+
+            void changeCurrentId(const std::string& newCurrent);
+
+            bool isLocked() const;
+        
         public:
 
-            DialogueSubView (const CSMWorld::UniversalId& id,
-                             CSMDoc::Document& document,
-                             const CreatorFactoryBase& creatorFactory,
-                             bool sorting = false);
+            SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
 
-        private:
-        void changeCurrentId(const std::string& newCurrent);
+        private slots:
+
+            void dataChanged(const QModelIndex & index);
+            ///\brief we need to care for deleting currently edited record
+
+            void requestFocus (const std::string& id);
+
+            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
+    };
+
+    class DialogueSubView : public SimpleDialogueSubView
+    {
+            Q_OBJECT
+            
+            TableBottomBox* mBottom;
+
+        public:
+
+            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+                const CreatorFactoryBase& creatorFactory, bool sorting = false);
 
         private slots:
+
+            void cloneRequest();
 
             void nextId();
 
@@ -224,19 +240,6 @@ namespace CSVWorld
             void showPreview();
 
             void viewRecord();
-
-            void cloneRequest();
-
-            void dataChanged(const QModelIndex & index);
-            ///\brief we need to care for deleting currently edited record
-
-            void tableMimeDataDropped(QWidget* editor, const QModelIndex& index,
-                                      const CSMWorld::UniversalId& id,
-                                      const CSMDoc::Document* document);
-
-            void requestFocus (const std::string& id);
-
-            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
 }
 

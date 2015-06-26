@@ -651,9 +651,6 @@ namespace MWMechanics
         if (mAllowedNodes.empty())
             return;
 
-        if (actor.getClass().isPureWaterCreature(actor))
-            return;
-
         state.moveIn(new AiWanderStorage());
 
         int index = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
@@ -700,7 +697,8 @@ namespace MWMechanics
         // actor can  wander from the spawn position.  AiWander assumes that
         // pathgrid points are available, and uses them to randomly select wander
         // destinations within the allowed set of pathgrid points (nodes).
-        if(mDistance)
+        // ... pathgrids don't usually include water, so swimmers ignore them
+        if (mDistance && !actor.getClass().isPureWaterCreature(actor))
         {
             float cellXOffset = 0;
             float cellYOffset = 0;

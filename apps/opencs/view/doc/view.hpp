@@ -232,6 +232,8 @@ namespace CSVDoc
 
             void addSearchSubView();
 
+            void addMetaDataSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();

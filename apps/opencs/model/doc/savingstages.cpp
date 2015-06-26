@@ -53,18 +53,16 @@ void CSMDoc::WriteHeaderStage::perform (int stage, Messages& messages)
 
     mState.getWriter().clearMaster();
 
-    mState.getWriter().setFormat (0);
-
     if (mSimple)
     {
         mState.getWriter().setAuthor ("");
         mState.getWriter().setDescription ("");
         mState.getWriter().setRecordCount (0);
+        mState.getWriter().setFormat (ESM::Header::CurrentFormat);
     }
     else
     {
-        mState.getWriter().setAuthor (mDocument.getData().getAuthor());
-        mState.getWriter().setDescription (mDocument.getData().getDescription());
+        mDocument.getData().getMetaData().save (mState.getWriter());
         mState.getWriter().setRecordCount (
             mDocument.getData().count (CSMWorld::RecordBase::State_Modified) +
             mDocument.getData().count (CSMWorld::RecordBase::State_ModifiedOnly) +

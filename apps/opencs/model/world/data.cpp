@@ -475,6 +475,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
         ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
+    mMetaData.appendBlankRecord ("sys::meta");
+
+    mMetaData.addColumn (new StringIdColumn<MetaData> (true));
+    mMetaData.addColumn (new RecordStateColumn<MetaData>);
+    mMetaData.addColumn (new FormatColumn<MetaData>);
+    mMetaData.addColumn (new AuthorColumn<MetaData>);
+    mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
+    
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -515,6 +523,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+    addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
@@ -803,6 +812,11 @@ const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) 
     return mResourcesManager.get (id.getType());
 }
 
+const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
+{
+    return mMetaData.getRecord (0).get();
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -847,9 +861,15 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mBase = base;
     mProject = project;
 
-    mAuthor = mReader->getAuthor();
-    mDescription = mReader->getDesc();
+    if (!mProject && !mBase)
+    {
+        MetaData metaData;
+        metaData.mId = "sys::meta";
+        metaData.load (*mReader);
 
+        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
+    
     return mReader->getRecordCount();
 }
 
@@ -923,7 +943,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             {
                 // log an error and continue loading the refs to the last loaded cell
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_None);
-                messages.add (id, "Logic error: cell index out of bounds");
+                messages.add (id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
@@ -984,7 +1004,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     messages.add (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist");
+                        "Trying to delete dialogue record " + id + " which does not exist",
+                        "", CSMDoc::Message::Severity_Warning);
                 }
             }
             else
@@ -1001,7 +1022,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (!mDialogue)
             {
                 messages.add (UniversalId::Type_None,
-                    "Found info record not following a dialogue record");
+                    "Found info record not following a dialogue record", "", CSMDoc::Message::Severity_Error);
 
                 mReader->skipRecord();
                 break;
@@ -1044,7 +1065,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString(), "",
+            CSMDoc::Message::Severity_Error);
 
         mReader->skipRecord();
     }
@@ -1099,26 +1121,6 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mMagicEffects) +
         count (state, mReferenceables) +
         count (state, mPathgrids);
-}
-
-void CSMWorld::Data::setDescription (const std::string& description)
-{
-    mDescription = description;
-}
-
-std::string CSMWorld::Data::getDescription() const
-{
-    return mDescription;
-}
-
-void CSMWorld::Data::setAuthor (const std::string& author)
-{
-    mAuthor = author;
-}
-
-std::string CSMWorld::Data::getAuthor() const
-{
-    return mAuthor;
 }
 
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const

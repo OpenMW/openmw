@@ -6,6 +6,8 @@
 
 #include <QAbstractTableModel>
 
+#include "../doc/messages.hpp"
+
 #include "../world/universalid.hpp"
 
 namespace CSMTools
@@ -14,17 +16,7 @@ namespace CSMTools
     {
             Q_OBJECT
 
-            struct Line
-            {
-                Line (const CSMWorld::UniversalId& id, const std::string& message,
-                    const std::string& hint);
-                
-                CSMWorld::UniversalId mId;
-                std::string mMessage;
-                std::string mHint;
-            };
-
-            std::vector<Line> mRows;
+            std::vector<CSMDoc::Messages::Message> mRows;
 
             // Fixed columns
             enum Columns
@@ -35,10 +27,11 @@ namespace CSMTools
             // Configurable columns
             int mColumnDescription;
             int mColumnField;
+            int mColumnSeverity;
 
         public:
 
-            ReportModel (bool fieldColumn = false);
+            ReportModel (bool fieldColumn = false, bool severityColumn = true);
         
             virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
 
@@ -50,8 +43,7 @@ namespace CSMTools
 
             virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
             
-            void add (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint = "");
+            void add (const CSMDoc::Message& message);
 
             void flagAsReplaced (int index);
                 
@@ -60,6 +52,9 @@ namespace CSMTools
             std::string getHint (int row) const;
 
             void clear();
+
+            // Return number of messages with Error or SeriousError severity.
+            int countErrors() const;
     };
 }
 

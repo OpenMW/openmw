@@ -80,8 +80,6 @@ namespace CSVWorld
 
             void mouseMoveEvent(QMouseEvent *event);
 
-            void dropEvent(QDropEvent *event);
-
         protected:
 
             virtual void mouseDoubleClickEvent (QMouseEvent *event);

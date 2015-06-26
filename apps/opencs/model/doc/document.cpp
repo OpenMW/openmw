@@ -2282,9 +2282,6 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew)
     {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-
         if (mContentFiles.size()==1)
             createBase();
     }
@@ -2304,8 +2301,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
-        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (reportMessage (const CSMDoc::Message&, int)));
 
     connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
@@ -2369,9 +2366,9 @@ void CSMDoc::Document::save()
     emit stateChanged (getState(), this);
 }
 
-CSMWorld::UniversalId CSMDoc::Document::verify()
+CSMWorld::UniversalId CSMDoc::Document::verify (const CSMWorld::UniversalId& reportId)
 {
-    CSMWorld::UniversalId id = mTools.runVerifier();
+    CSMWorld::UniversalId id = mTools.runVerifier (reportId);
     emit stateChanged (getState(), this);
     return id;
 }
@@ -2401,11 +2398,10 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message << std::endl;
+    std::cout << message.mMessage << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type, bool failed)

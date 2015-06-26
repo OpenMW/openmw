@@ -97,7 +97,8 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
         return false;
 
     // Check that topics match
-    if (getRecord (baseIndex).get().mTopicId!=getRecord (lastIndex).get().mTopicId)
+    if (!Misc::StringUtils::ciEqual(getRecord(baseIndex).get().mTopicId,
+                                    getRecord(lastIndex).get().mTopicId))
         return false;
 
     // reorder
