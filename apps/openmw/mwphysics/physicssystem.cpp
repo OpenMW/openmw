@@ -887,12 +887,12 @@ namespace MWPhysics
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
-            const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
+            const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
 #else
         virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
                                          const btCollisionObject* col1, int partId1, int index1)
         {
-            const btCollisionObject* collisionObject = col1;
+            const btCollisionObject* collisionObject = col0;
 #endif
             const PtrHolder* holder = static_cast<const PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
