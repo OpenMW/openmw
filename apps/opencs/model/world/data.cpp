@@ -1373,70 +1373,33 @@ void CSMWorld::Data::npcDataChanged (const QModelIndex& topLeft, const QModelInd
         static_cast<CSMWorld::IdTree*>(getTableModel(CSMWorld::UniversalId::Type_Referenceable));
 
     int autoCalcColumn = objectModel->findColumnIndex(CSMWorld::Columns::ColumnId_AutoCalc);
-    int miscColumn = objectModel->findColumnIndex(CSMWorld::Columns::ColumnId_NpcMisc);
 
-    // first check for level
-    bool levelChanged = false;
-    if (topLeft.parent().isValid() && bottomRight.parent().isValid())
+    // check for autocalc
+    if (topLeft.parent().isValid() || bottomRight.parent().isValid()
+        || topLeft.column() > autoCalcColumn || autoCalcColumn > bottomRight.column())
     {
-        if (topLeft.parent().column() <= miscColumn && miscColumn <= bottomRight.parent().column())
-        {
-            for (int col = topLeft.column(); col <= bottomRight.column(); ++col)
-            {
-                int role = objectModel->nestedHeaderData(topLeft.parent().column(),
-                                    col, Qt::Horizontal, CSMWorld::ColumnBase::Role_ColumnId).toInt();
-                if (role == CSMWorld::Columns::ColumnId_NpcLevel)
-                {
-                    levelChanged = true;
-                    break;
-                }
-            }
-        }
+           return;
     }
 
-    // next check for autocalc
-    bool autoCalcChanged = false;
-    if (!topLeft.parent().isValid() && !bottomRight.parent().isValid())
-    {
-        if ((topLeft.column() <= autoCalcColumn && autoCalcColumn <= bottomRight.column())
-           || (topLeft.column() <= miscColumn && miscColumn <= bottomRight.column()))
-        {
-            autoCalcChanged = true;
-        }
-    }
-
-    if (!levelChanged && !autoCalcChanged)
-        return;
-
-    int row = 0;
-    int end = 0;
-    if (topLeft.parent().isValid())
-        row = topLeft.parent().row();
-    else
-        row = topLeft.row();
-
-    if (bottomRight.parent().isValid())
-        end = bottomRight.parent().row();
-    else
-        end = bottomRight.row();
-
-    for (; row <= end; ++row)
+    int row = topLeft.row();
+    for (; row <= bottomRight.row(); ++row)
     {
         Record<ESM::NPC> record =
             static_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(row));
         ESM::NPC &npc = record.get();
 
-        // If going from autocalc to non-autocalc, save the autocalc values
-        if (autoCalcChanged)
+        if (npc.mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
-            if (npc.mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-                saveAutoCalcValues(npc); // update attributes and skills
-            else
-                npc.mNpdt12.mLevel = npc.mNpdt52.mLevel; // for NPC's loaded as non-autocalc
-
-            record.setModified(npc);
-            mReferenceables.replace(row, record);
+            // first pretend autocalc to force recalculation
+            npc.mNpdtType = ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
+            saveAutoCalcValues(npc); // update attributes and skills
+            npc.mNpdtType = ESM::NPC::NPC_DEFAULT;
         }
+        else
+            npc.mNpdt12.mLevel = npc.mNpdt52.mLevel; // for NPC's loaded as non-autocalc
+
+        record.setModified(npc);
+        mReferenceables.replace(row, record);
     }
 }
 
@@ -1469,11 +1432,7 @@ void CSMWorld::Data::gmstDataChanged (const QModelIndex& topLeft, const QModelIn
 // FIXME: how to undo?
 void CSMWorld::Data::saveAutoCalcValues(ESM::NPC& npc)
 {
-    CSMWorld::NpcStats * cachedStats = getCachedNpcData (npc.mId);
-    if (!cachedStats)
-        return; // silently fail
-
-    CSMWorld::NpcStats* stats = npcAutoCalculate(npc);
+    CSMWorld::NpcStats *stats = npcAutoCalculate(npc);
 
     // update npc
     npc.mNpdt52.mLevel        = npc.mNpdt12.mLevel;
