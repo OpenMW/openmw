@@ -73,11 +73,17 @@ namespace CSMWorld
 
             virtual bool hasChildren (const QModelIndex& index) const;
 
-    signals:
+        signals:
 
-        void resetStart(const QString& id);
+            void resetStart(const QString& id);
 
-        void resetEnd(const QString& id);
+            void resetEnd(const QString& id);
+
+            void refreshNpcDialogue (int type, const std::string& id);
+
+        public slots:
+
+            void updateNpcAutocalc (int type, const std::string& id);
     };
 }
 

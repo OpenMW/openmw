@@ -217,6 +217,8 @@ namespace CSVWorld
             void requestFocus (const std::string& id);
 
             void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
+
+            void refreshNpcDialogue (int type, const std::string& id);
     };
 }
 

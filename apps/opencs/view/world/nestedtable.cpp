@@ -13,12 +13,13 @@
 CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    CSMWorld::UniversalId id,
                                    CSMWorld::NestedTableProxyModel* model,
-                                   QWidget* parent)
+                                   QWidget* parent,
+                                   bool editable)
     : DragRecordTable(document, parent),
+      mAddNewRowAction(0),
+      mRemoveRowAction(0),
       mModel(model)
 {
-    mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
-
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
@@ -31,30 +32,36 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
 
     int columns = model->columnCount(QModelIndex());
 
-    for(int i = 0 ; i < columns; ++i)
-    {
-        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
-            model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-        CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
-                                                                                         mDispatcher,
-                                                                                         document,
-                                                                                         this);
-
-        setItemDelegateForColumn(i, delegate);
-    }
-
     setModel(model);
 
-    mAddNewRowAction = new QAction (tr ("Add new row"), this);
+    setAcceptDrops(true);
 
-    connect(mAddNewRowAction, SIGNAL(triggered()),
-            this, SLOT(addNewRowActionTriggered()));
+    if (editable)
+    {
+        mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
+        for(int i = 0 ; i < columns; ++i)
+        {
+            CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
+                model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-    mRemoveRowAction = new QAction (tr ("Remove row"), this);
+            CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
+                                                                                             mDispatcher,
+                                                                                             document,
+                                                                                             this);
 
-    connect(mRemoveRowAction, SIGNAL(triggered()),
-            this, SLOT(removeRowActionTriggered()));
+            setItemDelegateForColumn(i, delegate);
+        }
+
+        mAddNewRowAction = new QAction (tr ("Add new row"), this);
+
+        connect(mAddNewRowAction, SIGNAL(triggered()),
+                this, SLOT(addNewRowActionTriggered()));
+
+        mRemoveRowAction = new QAction (tr ("Remove row"), this);
+
+        connect(mRemoveRowAction, SIGNAL(triggered()),
+                this, SLOT(removeRowActionTriggered()));
+    }
 }
 
 std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() const
@@ -65,6 +72,9 @@ std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() co
 
 void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 {
+    if (!mRemoveRowAction || !mAddNewRowAction)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     QMenu menu(this);

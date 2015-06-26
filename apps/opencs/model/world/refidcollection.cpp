@@ -10,6 +10,7 @@
 #include "columns.hpp"
 #include "nestedtablewrapper.hpp"
 #include "nestedcoladapterimp.hpp"
+#include "data.hpp"
 
 CSMWorld::RefIdColumn::RefIdColumn (int columnId, Display displayType, int flag,
     bool editable, bool userEditable)
@@ -36,7 +37,7 @@ const CSMWorld::RefIdAdapter& CSMWorld::RefIdCollection::findAdapter (UniversalI
     return *iter->second;
 }
 
-CSMWorld::RefIdCollection::RefIdCollection()
+CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
 {
     BaseColumns baseColumns;
 
@@ -145,12 +146,21 @@ CSMWorld::RefIdCollection::RefIdCollection()
     actorsColumns.mSpells = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> spellsMap;
     spellsMap.insert(std::make_pair(UniversalId::Type_Npc,
-            new NestedSpellRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc)));
+            new NestedSpellRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, data)));
     spellsMap.insert(std::make_pair(UniversalId::Type_Creature,
-            new NestedSpellRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature)));
+            new NestedSpellRefIdAdapter<ESM::Creature> (UniversalId::Type_Creature, data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), spellsMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_SpellId, CSMWorld::ColumnBase::Display_Spell));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SpellType, CSMWorld::ColumnBase::Display_SpellType, false/*editable*/, false/*user editable*/));
+    // creatures do not have below columns
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SpellSrc, CSMWorld::ColumnBase::Display_YesNo, false, false)); // from race
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SpellCost, CSMWorld::ColumnBase::Display_Integer, false, false));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SpellChance, CSMWorld::ColumnBase::Display_Integer/*Percent*/, false, false));
 
     // Nested table
     mColumns.push_back(RefIdColumn (Columns::ColumnId_NpcDestinations,
@@ -437,7 +447,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
             ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     npcColumns.mAttributes = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> attrMap;
-    attrMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcAttributesRefIdAdapter()));
+    attrMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcAttributesRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), attrMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcAttributes, CSMWorld::ColumnBase::Display_String, false, false));
@@ -449,7 +459,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
             ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
     npcColumns.mSkills = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> skillsMap;
-    skillsMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcSkillsRefIdAdapter()));
+    skillsMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcSkillsRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), skillsMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcSkills, CSMWorld::ColumnBase::Display_String, false, false));
@@ -461,10 +471,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
         ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
     npcColumns.mMisc = &mColumns.back();
     std::map<UniversalId::Type, NestedRefIdAdapterBase*> miscMap;
-    miscMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcMiscRefIdAdapter()));
+    miscMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcMiscRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), miscMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcLevel, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_NpcLevel, CSMWorld::ColumnBase::Display_Integer,
+            ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcFactionID, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
@@ -609,7 +620,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
         new MiscRefIdAdapter (inventoryColumns, key)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
-        new NpcRefIdAdapter (npcColumns)));
+        new NpcRefIdAdapter (npcColumns, data)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
         new ToolRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,

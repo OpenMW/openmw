@@ -422,16 +422,18 @@ void CSVWorld::EditWidget::remake(int row)
                     static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (row, typeColumn)).toInt()),
                     mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
 
-                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
-                table->resizeColumnsToContents();
-
-                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                bool editable = mTable->index(row, i).data().type() != QVariant::UserType;
+                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this, editable);
+                if (!editable)
                 {
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-                    table->setEnabled(false);
+                    table->setSelectionMode(QAbstractItemView::NoSelection);
+                    table->setStyleSheet("QTableView { color: gray; }");
+                    table->horizontalHeader()->setStyleSheet("QHeaderView { color: gray; }");
                 }
                 else
                     table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+                table->resizeColumnsToContents();
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
@@ -627,6 +629,14 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id, CSM
 
     mEditWidget = new EditWidget(mainWidget,
             mTable->getModelIndex(mCurrentId, 0).row(), mTable, mCommandDispatcher, document, false);
+
+    if (id.getType() == CSMWorld::UniversalId::Type_Referenceable)
+    {
+        CSMWorld::IdTree *objectTable = static_cast<CSMWorld::IdTree*>(mTable);
+
+        connect (objectTable, SIGNAL (refreshNpcDialogue (int, const std::string&)),
+                 this,        SLOT   (refreshNpcDialogue (int, const std::string&)));
+    }
 
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -834,4 +844,28 @@ void CSVWorld::DialogueSubView::changeCurrentId (const std::string& newId)
 
     selection.push_back(mCurrentId);
     mCommandDispatcher.setSelection(selection);
+}
+
+void CSVWorld::DialogueSubView::refreshNpcDialogue (int type, const std::string& id)
+{
+    int typeColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+    if (CSMWorld::UniversalId::Type_Npc
+                != mTable->data(mTable->getModelIndex(mCurrentId, typeColumn), Qt::DisplayRole).toInt())
+    {
+        return;
+    }
+
+    int raceColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Race);
+    int classColumn = mTable->findColumnIndex (CSMWorld::Columns::ColumnId_Class);
+
+    if ((type == 0/*FIXME*/ && id == "") // skill or gmst changed
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, raceColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData()) // race
+        || (id == mTable->data(mTable->getModelIndex(mCurrentId, classColumn),
+                               Qt::DisplayRole).toString().toUtf8().constData())) // class
+    {
+        int y = mEditWidget->verticalScrollBar()->value();
+        mEditWidget->remake (mTable->getModelIndex(mCurrentId, 0).row());
+        mEditWidget->verticalScrollBar()->setValue(y);
+    }
 }
