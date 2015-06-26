@@ -861,11 +861,14 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mBase = base;
     mProject = project;
 
-    MetaData metaData;
-    metaData.mId = "sys::meta";
-    metaData.load (*mReader);
+    if (!mProject && !mBase)
+    {
+        MetaData metaData;
+        metaData.mId = "sys::meta";
+        metaData.load (*mReader);
 
-    mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
     
     return mReader->getRecordCount();
 }
