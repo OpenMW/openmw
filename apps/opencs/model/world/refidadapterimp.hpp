@@ -807,10 +807,11 @@ namespace CSMWorld
     class NpcRefIdAdapter : public ActorRefIdAdapter<ESM::NPC>
     {
             NpcColumns mColumns;
+            const Data& mData;
 
         public:
 
-            NpcRefIdAdapter (const NpcColumns& columns);
+            NpcRefIdAdapter (const NpcColumns& columns, const Data& data);
 
             virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
                 const;

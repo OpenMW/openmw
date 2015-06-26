@@ -126,8 +126,6 @@ namespace CSMWorld
 
             const Data& self ();
 
-            void saveAutoCalcValues(ESM::NPC& npc);
-
             void clearNpcStatsCache ();
 
         public:

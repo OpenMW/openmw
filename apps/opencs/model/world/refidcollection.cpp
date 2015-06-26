@@ -620,7 +620,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mAdapters.insert (std::make_pair (UniversalId::Type_Miscellaneous,
         new MiscRefIdAdapter (inventoryColumns, key)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Npc,
-        new NpcRefIdAdapter (npcColumns)));
+        new NpcRefIdAdapter (npcColumns, data)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Probe,
         new ToolRefIdAdapter<ESM::Probe> (UniversalId::Type_Probe, toolsColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Repair,

@@ -1324,25 +1324,33 @@ void CSMWorld::Data::raceDataChanged (const QModelIndex& topLeft, const QModelIn
     // affects racial bonus attributes & skills
     // - mData.mAttributeValues[]
     // - mData.mBonus[].mBonus
+    // - mPowers.mList[]
     CSMWorld::IdTree *raceModel =
         static_cast<CSMWorld::IdTree*>(getTableModel(CSMWorld::UniversalId::Type_Race));
 
     int attrColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_RaceAttributes);
     int bonusColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_RaceSkillBonus);
+    int powersColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_PowerList);
 
     bool match = false;
+    int raceRow = topLeft.row();
+    int raceEnd = bottomRight.row();
     if (topLeft.parent().isValid() && bottomRight.parent().isValid())
     {
         if ((topLeft.parent().column() <= attrColumn && attrColumn <= bottomRight.parent().column())
-            || (topLeft.parent().column() <= bonusColumn && bonusColumn <= bottomRight.parent().column()))
+            || (topLeft.parent().column() <= bonusColumn && bonusColumn <= bottomRight.parent().column())
+            || (topLeft.parent().column() <= powersColumn && powersColumn <= bottomRight.parent().column()))
         {
             match = true; // TODO: check for specific nested column?
+            raceRow = topLeft.parent().row();
+            raceEnd = bottomRight.parent().row();
         }
     }
     else
     {
         if ((topLeft.column() <= attrColumn && attrColumn <= bottomRight.column())
-            || (topLeft.column() <= bonusColumn && bonusColumn <= bottomRight.column()))
+            || (topLeft.column() <= bonusColumn && bonusColumn <= bottomRight.column())
+            || (topLeft.column() <= powersColumn && powersColumn <= bottomRight.column()))
         {
             match = true; // maybe the whole table changed
         }
@@ -1353,7 +1361,7 @@ void CSMWorld::Data::raceDataChanged (const QModelIndex& topLeft, const QModelIn
 
     // update autocalculated attributes/skills of every NPC with matching race
     int idColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-    for (int raceRow = topLeft.parent().row(); raceRow <= bottomRight.parent().row(); ++raceRow)
+    for (; raceRow <= raceEnd; ++raceRow)
     {
         clearNpcStatsCache();
 
@@ -1363,44 +1371,10 @@ void CSMWorld::Data::raceDataChanged (const QModelIndex& topLeft, const QModelIn
     }
 }
 
-// FIXME: currently ignoring level changes
 void CSMWorld::Data::npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
+    // TODO: for now always recalculate
     clearNpcStatsCache();
-
-    // Either autoCalc flag changed or NPC level changed
-    CSMWorld::IdTree *objectModel =
-        static_cast<CSMWorld::IdTree*>(getTableModel(CSMWorld::UniversalId::Type_Referenceable));
-
-    int autoCalcColumn = objectModel->findColumnIndex(CSMWorld::Columns::ColumnId_AutoCalc);
-
-    // check for autocalc
-    if (topLeft.parent().isValid() || bottomRight.parent().isValid()
-        || topLeft.column() > autoCalcColumn || autoCalcColumn > bottomRight.column())
-    {
-           return;
-    }
-
-    int row = topLeft.row();
-    for (; row <= bottomRight.row(); ++row)
-    {
-        Record<ESM::NPC> record =
-            static_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(row));
-        ESM::NPC &npc = record.get();
-
-        if (npc.mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
-        {
-            // first pretend autocalc to force recalculation
-            npc.mNpdtType = ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
-            saveAutoCalcValues(npc); // update attributes and skills
-            npc.mNpdtType = ESM::NPC::NPC_DEFAULT;
-        }
-        else
-            npc.mNpdt12.mLevel = npc.mNpdt52.mLevel; // for NPC's loaded as non-autocalc
-
-        record.setModified(npc);
-        mReferenceables.replace(row, record);
-    }
 }
 
 void CSMWorld::Data::gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -1427,39 +1401,6 @@ void CSMWorld::Data::gmstDataChanged (const QModelIndex& topLeft, const QModelIn
 
     std::string empty;
     emit updateNpcAutocalc(0/*all*/, empty);
-}
-
-// FIXME: how to undo?
-void CSMWorld::Data::saveAutoCalcValues(ESM::NPC& npc)
-{
-    CSMWorld::NpcStats *stats = npcAutoCalculate(npc);
-
-    // update npc
-    npc.mNpdt52.mLevel        = npc.mNpdt12.mLevel;
-
-    npc.mNpdt52.mStrength     = stats->getBaseAttribute(ESM::Attribute::Strength);
-    npc.mNpdt52.mIntelligence = stats->getBaseAttribute(ESM::Attribute::Intelligence);
-    npc.mNpdt52.mWillpower    = stats->getBaseAttribute(ESM::Attribute::Willpower);
-    npc.mNpdt52.mAgility      = stats->getBaseAttribute(ESM::Attribute::Agility);
-    npc.mNpdt52.mSpeed        = stats->getBaseAttribute(ESM::Attribute::Speed);
-    npc.mNpdt52.mEndurance    = stats->getBaseAttribute(ESM::Attribute::Endurance);
-    npc.mNpdt52.mPersonality  = stats->getBaseAttribute(ESM::Attribute::Personality);
-    npc.mNpdt52.mLuck         = stats->getBaseAttribute(ESM::Attribute::Luck);
-
-    for (int i = 0; i < ESM::Skill::Length; ++i)
-    {
-        npc.mNpdt52.mSkills[i] = stats->getBaseSkill(i);
-    }
-
-    npc.mNpdt52.mHealth       = stats->getHealth();
-    npc.mNpdt52.mMana         = stats->getMana();
-    npc.mNpdt52.mFatigue      = stats->getFatigue();
-    npc.mNpdt52.mDisposition  = npc.mNpdt12.mDisposition;
-    npc.mNpdt52.mReputation   = npc.mNpdt12.mReputation;
-    npc.mNpdt52.mRank         = npc.mNpdt12.mRank;
-    npc.mNpdt52.mGold         = npc.mNpdt12.mGold;
-
-    // TODO: add spells from autogenerated list like vanilla (but excluding any race powers or abilities)
 }
 
 void CSMWorld::Data::clearNpcStatsCache ()
