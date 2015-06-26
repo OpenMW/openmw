@@ -23,6 +23,9 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            /// Allow subclasses to add additional data to \a command.
+            virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
+
         public:
 
             CellCreator (CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
