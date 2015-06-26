@@ -123,6 +123,8 @@ namespace CSMWorld
             Display_InfoCondVar,
             Display_InfoCondComp,
             Display_RaceSkill,
+            Display_String32,
+            Display_LongString256,
 
             //top level columns that nest other columns
             Display_NestedHeader
