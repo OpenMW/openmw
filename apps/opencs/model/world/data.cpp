@@ -476,7 +476,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
     mMetaData.appendBlankRecord ("sys::meta");
-        
+
+    mMetaData.addColumn (new StringIdColumn<MetaData> (true));
+    mMetaData.addColumn (new RecordStateColumn<MetaData>);
+    mMetaData.addColumn (new FormatColumn<MetaData>);
+    mMetaData.addColumn (new AuthorColumn<MetaData>);
+    mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
+    
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
