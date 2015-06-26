@@ -923,7 +923,10 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
         if (mCurrentParticleEffect.empty())
         {
             if (mParticleNode)
+            {
                 mRootNode->removeChild(mParticleNode);
+                mParticleNode = NULL;
+            }
             mParticleEffect = NULL;
         }
         else
