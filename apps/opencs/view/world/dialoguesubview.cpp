@@ -40,6 +40,7 @@
 #include "util.hpp"
 #include "tablebottombox.hpp"
 #include "nestedtable.hpp"
+#include "recordbuttonbar.hpp"
 /*
 ==============================NotEditableSubDelegate==========================================
 */
@@ -712,69 +713,16 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     connect(mBottom, SIGNAL(requestFocus(const std::string&)), this, SLOT(requestFocus(const std::string&)));
 
     // buttons
-    QHBoxLayout *buttonsLayout = new QHBoxLayout;
-    QToolButton* prevButton = new QToolButton (this);
-    prevButton->setIcon(QIcon(":/go-previous.png"));
-    prevButton->setToolTip ("Switch to previous record");
-    QToolButton* nextButton = new QToolButton (this);
-    nextButton->setIcon(QIcon(":/go-next.png"));
-    nextButton->setToolTip ("Switch to next record");
-    buttonsLayout->addWidget(prevButton, 0);
-    buttonsLayout->addWidget(nextButton, 1);
-    buttonsLayout->addStretch(2);
+    RecordButtonBar *buttons = new RecordButtonBar (getTable(), mBottom,
+        &getCommandDispatcher(), this);
+        
+    getMainLayout().addWidget (buttons);
 
-    QToolButton* cloneButton = new QToolButton (this);
-    cloneButton->setIcon(QIcon(":/edit-clone.png"));
-    cloneButton->setToolTip ("Clone record");
-    QToolButton* addButton = new QToolButton (this);
-    addButton->setIcon(QIcon(":/add.png"));
-    addButton->setToolTip ("Add new record");
-    QToolButton* deleteButton = new QToolButton (this);
-    deleteButton->setIcon(QIcon(":/edit-delete.png"));
-    deleteButton->setToolTip ("Delete record");
-    QToolButton* revertButton = new QToolButton (this);
-    revertButton->setIcon(QIcon(":/edit-undo.png"));
-    revertButton->setToolTip ("Revert record");
-
-    if (getTable().getFeatures() & CSMWorld::IdTable::Feature_Preview)
-    {
-        QToolButton* previewButton = new QToolButton (this);
-        previewButton->setIcon(QIcon(":/edit-preview.png"));
-        previewButton->setToolTip ("Open a preview of this record");
-        buttonsLayout->addWidget(previewButton);
-        connect(previewButton, SIGNAL(clicked()), this, SLOT(showPreview()));
-    }
-
-    if (getTable().getFeatures() & CSMWorld::IdTable::Feature_View)
-    {
-        QToolButton* viewButton = new QToolButton (this);
-        viewButton->setIcon(QIcon(":/cell.png"));
-        viewButton->setToolTip ("Open a scene view of the cell this record is located in");
-        buttonsLayout->addWidget(viewButton);
-        connect(viewButton, SIGNAL(clicked()), this, SLOT(viewRecord()));
-    }
-
-    buttonsLayout->addWidget(cloneButton);
-    buttonsLayout->addWidget(addButton);
-    buttonsLayout->addWidget(deleteButton);
-    buttonsLayout->addWidget(revertButton);
-
-    connect(nextButton, SIGNAL(clicked()), this, SLOT(nextId()));
-    connect(prevButton, SIGNAL(clicked()), this, SLOT(prevId()));
-    connect(cloneButton, SIGNAL(clicked()), this, SLOT(cloneRequest()));
-    connect(revertButton, SIGNAL(clicked()), &getCommandDispatcher(), SLOT(executeRevert()));
-    connect(deleteButton, SIGNAL(clicked()), &getCommandDispatcher(), SLOT(executeDelete()));
-
-    connect(addButton, SIGNAL(clicked()), mBottom, SLOT(createRequest()));
-
-    if(!mBottom->canCreateAndDelete())
-    {
-        cloneButton->setDisabled (true);
-        addButton->setDisabled (true);
-        deleteButton->setDisabled (true);
-    }
-
-    getMainLayout().addLayout (buttonsLayout);    
+    connect (buttons, SIGNAL(nextId()), this, SLOT(nextId()));
+    connect (buttons, SIGNAL (prevId()), this, SLOT(prevId()));
+    connect (buttons, SIGNAL (cloneRequest()), this, SLOT(cloneRequest()));
+    connect (buttons, SIGNAL (showPreview()), this, SLOT(showPreview()));
+    connect (buttons, SIGNAL (viewRecord()), this, SLOT(viewRecord()));
 }
 
 void CSVWorld::DialogueSubView::cloneRequest()
