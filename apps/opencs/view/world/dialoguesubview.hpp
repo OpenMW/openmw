@@ -228,6 +228,8 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+            
         private slots:
 
             void showPreview();

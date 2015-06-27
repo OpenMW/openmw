@@ -719,6 +719,12 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
     mButtons->setEditLock (locked);
 }
 
+void CSVWorld::DialogueSubView::updateUserSetting (const QString& name, const QStringList& value)
+{
+    SimpleDialogueSubView::updateUserSetting (name, value);
+    mButtons->updateUserSetting (name, value);
+}
+
 void CSVWorld::DialogueSubView::showPreview ()
 {
     QModelIndex currentIndex (getTable().getModelIndex (getUniversalId().getId(), 0));

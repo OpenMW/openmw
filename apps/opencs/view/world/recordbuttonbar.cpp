@@ -25,6 +25,29 @@ void CSVWorld::RecordButtonBar::updateModificationButtons()
     mDeleteButton->setDisabled (commandDisabled);
 }
 
+void CSVWorld::RecordButtonBar::updatePrevNextButtons()
+{
+    int rows = mTable.rowCount();
+    
+    if (rows<=1)
+    {
+        mPrevButton->setDisabled (true);
+        mNextButton->setDisabled (true);
+    }
+    else if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")=="true")
+    {
+        mPrevButton->setDisabled (false);
+        mNextButton->setDisabled (false);
+    }
+    else
+    {
+        int row = mTable.getModelIndex (mId.getId(), 0).row();
+
+        mPrevButton->setDisabled (row<=0);
+        mNextButton->setDisabled (row>=rows-1);
+    }
+}
+
 CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     CSMWorld::IdTable& table, TableBottomBox *bottomBox,
     CSMWorld::CommandDispatcher *commandDispatcher, QWidget *parent)
@@ -35,15 +58,15 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     buttonsLayout->setContentsMargins (0, 0, 0, 0);
 
     // left section
-    QToolButton* prevButton = new QToolButton (this);
-    prevButton->setIcon(QIcon(":/go-previous.png"));
-    prevButton->setToolTip ("Switch to previous record");
-    buttonsLayout->addWidget (prevButton, 0);
+    mPrevButton = new QToolButton (this);
+    mPrevButton->setIcon(QIcon(":/go-previous.png"));
+    mPrevButton->setToolTip ("Switch to previous record");
+    buttonsLayout->addWidget (mPrevButton, 0);
     
-    QToolButton* nextButton = new QToolButton (this);
-    nextButton->setIcon(QIcon(":/go-next.png"));
-    nextButton->setToolTip ("Switch to next record");
-    buttonsLayout->addWidget (nextButton, 1);
+    mNextButton = new QToolButton (this);
+    mNextButton->setIcon(QIcon(":/go-next.png"));
+    mNextButton->setToolTip ("Switch to next record");
+    buttonsLayout->addWidget (mNextButton, 1);
     
     buttonsLayout->addStretch(2);
 
@@ -96,8 +119,8 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         connect (mCloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
     }
 
-    connect (nextButton, SIGNAL (clicked()), this, SLOT (nextId()));
-    connect (prevButton, SIGNAL (clicked()), this, SLOT (prevId()));
+    connect (mNextButton, SIGNAL (clicked()), this, SLOT (nextId()));
+    connect (mPrevButton, SIGNAL (clicked()), this, SLOT (prevId()));
 
     if (mCommandDispatcher)
     {
@@ -105,7 +128,13 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         connect (mDeleteButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeDelete()));
     }
 
+    connect (&mTable, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+        this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
+    connect (&mTable, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
+        this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
+    
     updateModificationButtons();
+    updatePrevNextButtons();
 }
 
 void CSVWorld::RecordButtonBar::setEditLock (bool locked)
@@ -114,9 +143,16 @@ void CSVWorld::RecordButtonBar::setEditLock (bool locked)
     updateModificationButtons();
 }
 
+void CSVWorld::RecordButtonBar::updateUserSetting (const QString& name, const QStringList& value)
+{
+    if (name=="general-input/cycle")
+        updatePrevNextButtons();
+}
+
 void CSVWorld::RecordButtonBar::universalIdChanged (const CSMWorld::UniversalId& id)
 {
     mId = id;
+    updatePrevNextButtons();
 }
 
 void CSVWorld::RecordButtonBar::cloneRequest()
@@ -163,4 +199,9 @@ void CSVWorld::RecordButtonBar::prevId()
     }
     
     emit switchToRow (newRow);
+}
+
+void CSVWorld::RecordButtonBar::rowNumberChanged (const QModelIndex& parent, int start, int end)
+{
+    updatePrevNextButtons();
 }

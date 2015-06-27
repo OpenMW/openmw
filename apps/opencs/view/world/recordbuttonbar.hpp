@@ -6,6 +6,7 @@
 #include "../../model/world/universalid.hpp"
 
 class QToolButton;
+class QModelIndex;
 
 namespace CSMWorld
 {
@@ -35,6 +36,8 @@ namespace CSVWorld
             CSMWorld::IdTable& mTable;
             TableBottomBox *mBottom;
             CSMWorld::CommandDispatcher *mCommandDispatcher;
+            QToolButton *mPrevButton;
+            QToolButton *mNextButton;
             QToolButton *mCloneButton;
             QToolButton *mAddButton;
             QToolButton *mDeleteButton;
@@ -44,6 +47,8 @@ namespace CSVWorld
         private:
 
             void updateModificationButtons();
+
+            void updatePrevNextButtons();
             
         public:
 
@@ -52,7 +57,9 @@ namespace CSVWorld
                 CSMWorld::CommandDispatcher *commandDispatcher = 0, QWidget *parent = 0);
 
             void setEditLock (bool locked);
-                
+
+            void updateUserSetting (const QString& name, const QStringList& value);
+            
         public slots:
 
             void universalIdChanged (const CSMWorld::UniversalId& id);
@@ -64,6 +71,8 @@ namespace CSVWorld
             void nextId();
 
             void prevId();
+
+            void rowNumberChanged (const QModelIndex& parent, int start, int end);
             
         signals:
 
