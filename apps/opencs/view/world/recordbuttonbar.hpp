@@ -5,6 +5,8 @@
 
 #include "../../model/world/universalid.hpp"
 
+class QToolButton;
+
 namespace CSMWorld
 {
     class IdTable;
@@ -33,13 +35,24 @@ namespace CSVWorld
             CSMWorld::IdTable& mTable;
             TableBottomBox *mBottom;
             CSMWorld::CommandDispatcher *mCommandDispatcher;
+            QToolButton *mCloneButton;
+            QToolButton *mAddButton;
+            QToolButton *mDeleteButton;
+            QToolButton *mRevertButton;
+            bool mLocked;
 
+        private:
+
+            void updateModificationButtons();
+            
         public:
 
             RecordButtonBar (const CSMWorld::UniversalId& id,
                 CSMWorld::IdTable& table, TableBottomBox *bottomBox = 0,
                 CSMWorld::CommandDispatcher *commandDispatcher = 0, QWidget *parent = 0);
 
+            void setEditLock (bool locked);
+                
         public slots:
 
             void universalIdChanged (const CSMWorld::UniversalId& id);

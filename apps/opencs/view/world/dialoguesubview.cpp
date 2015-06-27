@@ -714,20 +714,26 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
         this, SLOT (requestFocus (const std::string&)));
 
     // button bar
-    RecordButtonBar *buttons = new RecordButtonBar (id, getTable(), mBottom,
+    mButtons = new RecordButtonBar (id, getTable(), mBottom,
         &getCommandDispatcher(), this);
 
     // layout
-    getMainLayout().addWidget (buttons);
+    getMainLayout().addWidget (mButtons);
     getMainLayout().addWidget (mBottom);
 
     // connections
-    connect (buttons, SIGNAL (nextId()), this, SLOT (nextId()));
-    connect (buttons, SIGNAL (prevId()), this, SLOT (prevId()));
-    connect (buttons, SIGNAL (showPreview()), this, SLOT (showPreview()));
-    connect (buttons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
+    connect (mButtons, SIGNAL (nextId()), this, SLOT (nextId()));
+    connect (mButtons, SIGNAL (prevId()), this, SLOT (prevId()));
+    connect (mButtons, SIGNAL (showPreview()), this, SLOT (showPreview()));
+    connect (mButtons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
     connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
-        buttons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+}
+
+void CSVWorld::DialogueSubView::setEditLock (bool locked)
+{
+    SimpleDialogueSubView::setEditLock (locked);
+    mButtons->setEditLock (locked);
 }
 
 void CSVWorld::DialogueSubView::prevId()

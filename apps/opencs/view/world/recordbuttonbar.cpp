@@ -9,11 +9,25 @@
 
 #include "../world/tablebottombox.hpp"
 
+void CSVWorld::RecordButtonBar::updateModificationButtons()
+{
+    bool createAndDeleteDisabled = !mBottom || !mBottom->canCreateAndDelete() || mLocked;
+
+    mCloneButton->setDisabled (createAndDeleteDisabled);
+    mAddButton->setDisabled (createAndDeleteDisabled);
+    mDeleteButton->setDisabled (createAndDeleteDisabled);
+
+    bool commandDisabled = !mCommandDispatcher || mLocked;
+    
+    mRevertButton->setDisabled (commandDisabled);
+    mDeleteButton->setDisabled (commandDisabled);
+}
+
 CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     CSMWorld::IdTable& table, TableBottomBox *bottomBox,
     CSMWorld::CommandDispatcher *commandDispatcher, QWidget *parent)
 : QWidget (parent), mId (id), mTable (table), mBottom (bottomBox),
-  mCommandDispatcher (commandDispatcher)
+  mCommandDispatcher (commandDispatcher), mLocked (false)
 {
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->setContentsMargins (0, 0, 0, 0);
@@ -51,54 +65,51 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     }
 
     // right section
-    QToolButton* cloneButton = new QToolButton (this);
-    cloneButton->setIcon(QIcon(":/edit-clone.png"));
-    cloneButton->setToolTip ("Clone record");
-    buttonsLayout->addWidget(cloneButton);
+    mCloneButton = new QToolButton (this);
+    mCloneButton->setIcon(QIcon(":/edit-clone.png"));
+    mCloneButton->setToolTip ("Clone record");
+    buttonsLayout->addWidget(mCloneButton);
     
-    QToolButton* addButton = new QToolButton (this);
-    addButton->setIcon(QIcon(":/add.png"));
-    addButton->setToolTip ("Add new record");
-    buttonsLayout->addWidget(addButton);
+    mAddButton = new QToolButton (this);
+    mAddButton->setIcon(QIcon(":/add.png"));
+    mAddButton->setToolTip ("Add new record");
+    buttonsLayout->addWidget(mAddButton);
     
-    QToolButton* deleteButton = new QToolButton (this);
-    deleteButton->setIcon(QIcon(":/edit-delete.png"));
-    deleteButton->setToolTip ("Delete record");
-    buttonsLayout->addWidget(deleteButton);
+    mDeleteButton = new QToolButton (this);
+    mDeleteButton->setIcon(QIcon(":/edit-delete.png"));
+    mDeleteButton->setToolTip ("Delete record");
+    buttonsLayout->addWidget(mDeleteButton);
     
-    QToolButton* revertButton = new QToolButton (this);
-    revertButton->setIcon(QIcon(":/edit-undo.png"));
-    revertButton->setToolTip ("Revert record");
-    buttonsLayout->addWidget(revertButton);
+    mRevertButton = new QToolButton (this);
+    mRevertButton->setIcon(QIcon(":/edit-undo.png"));
+    mRevertButton->setToolTip ("Revert record");
+    buttonsLayout->addWidget(mRevertButton);
     
     setLayout (buttonsLayout);
 
-    // disabling and connections
-    if(!mBottom || !mBottom->canCreateAndDelete())
+    // connections
+    if(mBottom && mBottom->canCreateAndDelete())
     {
-        cloneButton->setDisabled (true);
-        addButton->setDisabled (true);
-        deleteButton->setDisabled (true);
-    }
-    else
-    {
-        connect (addButton, SIGNAL (clicked()), mBottom, SLOT (createRequest()));
-        connect (cloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
+        connect (mAddButton, SIGNAL (clicked()), mBottom, SLOT (createRequest()));
+        connect (mCloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
     }
 
     connect (nextButton, SIGNAL (clicked()), this, SIGNAL (nextId()));
     connect (prevButton, SIGNAL (clicked()), this, SIGNAL (prevId()));
 
-    if (!mCommandDispatcher)
+    if (mCommandDispatcher)
     {
-        revertButton->setDisabled (true);
-        deleteButton->setDisabled (true);
+        connect (mRevertButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeRevert()));
+        connect (mDeleteButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeDelete()));
     }
-    else
-    {
-        connect (revertButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeRevert()));
-        connect (deleteButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeDelete()));
-    }
+
+    updateModificationButtons();
+}
+
+void CSVWorld::RecordButtonBar::setEditLock (bool locked)
+{
+    mLocked = locked;
+    updateModificationButtons();
 }
 
 void CSVWorld::RecordButtonBar::universalIdChanged (const CSMWorld::UniversalId& id)

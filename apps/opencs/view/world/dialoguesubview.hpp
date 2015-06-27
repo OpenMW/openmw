@@ -218,16 +218,21 @@ namespace CSVWorld
             void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
 
+    class RecordButtonBar;
+
     class DialogueSubView : public SimpleDialogueSubView
     {
             Q_OBJECT
             
             TableBottomBox* mBottom;
+            RecordButtonBar *mButtons;
 
         public:
 
             DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
                 const CreatorFactoryBase& creatorFactory, bool sorting = false);
+
+            virtual void setEditLock (bool locked);
 
         private slots:
 
