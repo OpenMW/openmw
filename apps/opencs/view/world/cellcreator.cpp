@@ -106,3 +106,17 @@ void CSVWorld::CellCreator::cloneMode(const std::string& originId,
         mType->setCurrentIndex(0);
     }
 }
+
+std::string CSVWorld::CellCreator::getErrors() const
+{
+    std::string errors;
+    if (mType->currentIndex() == 0)
+    {
+        errors = GenericCreator::getErrors();
+    }
+    else if (getData().hasId(getId()))
+    {
+        errors = "The Exterior Cell is already exist";
+    }
+    return errors;
+}
