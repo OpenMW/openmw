@@ -44,6 +44,7 @@
 #include "infocollection.hpp"
 #include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
+#include "metadata.hpp"
 #ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
 #endif
@@ -94,11 +95,10 @@ namespace CSMWorld
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
+            Collection<MetaData> mMetaData;
             const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
-            std::string mAuthor;
-            std::string mDescription;
             ESM::ESMReader *mReader;
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
@@ -238,6 +238,8 @@ namespace CSMWorld
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
 
+            const MetaData& getMetaData() const;
+
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///
@@ -266,14 +268,6 @@ namespace CSMWorld
 
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
-
-            void setDescription (const std::string& description);
-
-            std::string getDescription() const;
-
-            void setAuthor (const std::string& author);
-
-            std::string getAuthor() const;
 
         signals:
 

@@ -70,6 +70,10 @@ void CSVDoc::View::setupFileMenu()
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     file->addAction (loadErrors);
 
+    QAction *meta = new QAction (tr ("Meta Data"), this);
+    connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
+    file->addAction (meta);
+
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
     file->addAction(close);
@@ -811,6 +815,11 @@ void CSVDoc::View::addStartScriptsSubView()
 void CSVDoc::View::addSearchSubView()
 {
     addSubView (mDocument->newSearch());
+}
+
+void CSVDoc::View::addMetaDataSubView()
+{
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_MetaData, "sys::meta"));
 }
 
 void CSVDoc::View::abortOperation (int type)

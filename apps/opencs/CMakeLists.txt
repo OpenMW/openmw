@@ -26,7 +26,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager
+    idcompletionmanager metadata
     )
 
 opencs_hdrs_noqt (model/world
@@ -64,7 +64,7 @@ opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
-    dialoguespinbox
+    dialoguespinbox recordbuttonbar
     )
 
 opencs_units_noqt (view/world

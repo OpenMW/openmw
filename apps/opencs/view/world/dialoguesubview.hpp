@@ -173,50 +173,72 @@ namespace CSVWorld
             void remake(int row);
     };
 
-    class DialogueSubView : public CSVDoc::SubView
+    class SimpleDialogueSubView : public CSVDoc::SubView
     {
-        Q_OBJECT
+            Q_OBJECT
 
-        EditWidget* mEditWidget;
-        QVBoxLayout* mMainLayout;
-        CSMWorld::IdTable* mTable;
-        QUndoStack& mUndoStack;
-        std::string mCurrentId;
-        bool mLocked;
-        const CSMDoc::Document& mDocument;
-        TableBottomBox* mBottom;
-        CSMWorld::CommandDispatcher mCommandDispatcher;
+            EditWidget* mEditWidget;
+            QVBoxLayout* mMainLayout;
+            CSMWorld::IdTable* mTable;
+            bool mLocked;
+            const CSMDoc::Document& mDocument;
+            CSMWorld::CommandDispatcher mCommandDispatcher;
 
+        protected:
+
+            QVBoxLayout& getMainLayout();
+
+            CSMWorld::IdTable& getTable();
+
+            CSMWorld::CommandDispatcher& getCommandDispatcher();
+
+            EditWidget& getEditWidget();
+
+            void updateCurrentId();
+
+            bool isLocked() const;
+        
         public:
 
-            DialogueSubView (const CSMWorld::UniversalId& id,
-                             CSMDoc::Document& document,
-                             const CreatorFactoryBase& creatorFactory,
-                             bool sorting = false);
+            SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
 
-        private:
-        void changeCurrentId(const std::string& newCurrent);
-
         private slots:
 
-            void nextId();
+            void dataChanged(const QModelIndex & index);
+            ///\brief we need to care for deleting currently edited record
 
-            void prevId();
+            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
+    };
+
+    class RecordButtonBar;
+
+    class DialogueSubView : public SimpleDialogueSubView
+    {
+            Q_OBJECT
+            
+            TableBottomBox* mBottom;
+            RecordButtonBar *mButtons;
+
+        public:
+
+            DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
+                const CreatorFactoryBase& creatorFactory, bool sorting = false);
+
+            virtual void setEditLock (bool locked);
+
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+            
+        private slots:
 
             void showPreview();
 
             void viewRecord();
 
-            void cloneRequest();
-
-            void dataChanged(const QModelIndex & index);
-            ///\brief we need to care for deleting currently edited record
+            void switchToRow (int row);            
 
             void requestFocus (const std::string& id);
-
-            void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
 }
 
