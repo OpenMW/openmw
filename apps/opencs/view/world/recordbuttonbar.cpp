@@ -7,6 +7,8 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 
+#include "../../model/settings/usersettings.hpp"
+
 #include "../world/tablebottombox.hpp"
 
 void CSVWorld::RecordButtonBar::updateModificationButtons()
@@ -132,12 +134,16 @@ void CSVWorld::RecordButtonBar::cloneRequest()
 }
 
 void CSVWorld::RecordButtonBar::nextId()
-{
+{    
     int newRow = mTable.getModelIndex (mId.getId(), 0).row() + 1;
 
     if (newRow >= mTable.rowCount())
     {
-        return;
+        if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")
+            =="true")
+            newRow = 0;
+        else
+            return;
     }    
     
     emit switchToRow (newRow);
@@ -149,7 +155,11 @@ void CSVWorld::RecordButtonBar::prevId()
 
     if (newRow < 0)
     {
-        return;
+        if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")
+            =="true")
+            newRow = mTable.rowCount()-1;
+        else
+            return;
     }
     
     emit switchToRow (newRow);
