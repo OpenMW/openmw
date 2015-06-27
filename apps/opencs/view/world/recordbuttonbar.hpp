@@ -60,6 +60,10 @@ namespace CSVWorld
         private slots:
 
             void cloneRequest();
+
+            void nextId();
+
+            void prevId();
             
         signals:
 
@@ -67,9 +71,7 @@ namespace CSVWorld
 
             void viewRecord();
 
-            void nextId();
-
-            void prevId();
+            void switchToRow (int row);
     };
 }
 

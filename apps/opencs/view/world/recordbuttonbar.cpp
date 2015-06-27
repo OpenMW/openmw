@@ -94,8 +94,8 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         connect (mCloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
     }
 
-    connect (nextButton, SIGNAL (clicked()), this, SIGNAL (nextId()));
-    connect (prevButton, SIGNAL (clicked()), this, SIGNAL (prevId()));
+    connect (nextButton, SIGNAL (clicked()), this, SLOT (nextId()));
+    connect (prevButton, SIGNAL (clicked()), this, SLOT (prevId()));
 
     if (mCommandDispatcher)
     {
@@ -132,4 +132,28 @@ void CSVWorld::RecordButtonBar::cloneRequest()
             mBottom->cloneRequest (mId.getId(), type);
         }
     }
+}
+
+void CSVWorld::RecordButtonBar::nextId()
+{
+    int newRow = mTable.getModelIndex (mId.getId(), 0).row() + 1;
+
+    if (newRow >= mTable.rowCount())
+    {
+        return;
+    }    
+    
+    emit switchToRow (newRow);
+}
+
+void CSVWorld::RecordButtonBar::prevId()
+{
+    int newRow = mTable.getModelIndex (mId.getId(), 0).row() - 1;
+
+    if (newRow < 0)
+    {
+        return;
+    }
+    
+    emit switchToRow (newRow);
 }

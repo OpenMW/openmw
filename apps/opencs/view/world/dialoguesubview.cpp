@@ -722,10 +722,10 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     getMainLayout().addWidget (mBottom);
 
     // connections
-    connect (mButtons, SIGNAL (nextId()), this, SLOT (nextId()));
-    connect (mButtons, SIGNAL (prevId()), this, SLOT (prevId()));
     connect (mButtons, SIGNAL (showPreview()), this, SLOT (showPreview()));
     connect (mButtons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
+    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+    
     connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
         mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
 }
@@ -735,78 +735,6 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
     SimpleDialogueSubView::setEditLock (locked);
     mButtons->setEditLock (locked);
 }
-
-void CSVWorld::DialogueSubView::prevId()
-{
-    int newRow = getTable().getModelIndex (getCurrentId(), 0).row() - 1;
-
-    if (newRow < 0)
-    {
-        return;
-    }
-    while (newRow >= 0)
-    {
-        QModelIndex newIndex (getTable().index(newRow, 0));
-
-        if (!newIndex.isValid())
-        {
-            return;
-        }
-
-        CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (getTable().data (getTable().index (newRow, 1)).toInt());
-        if (!(state == CSMWorld::RecordBase::State_Deleted || state == CSMWorld::RecordBase::State_Erased))
-        {
-            getEditWidget().remake (newRow);
-
-            setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (getTable().data (getTable().index (newRow, 2)).toInt()),
-                                    getTable().data (getTable().index (newRow, 0)).toString().toUtf8().constData()));
-
-            changeCurrentId(std::string (getTable().data (getTable().index (newRow, 0)).toString().toUtf8().constData()));
-
-            getEditWidget().setDisabled (isLocked());
-
-            return;
-        }
-        --newRow;
-    }
-}
-
-void CSVWorld::DialogueSubView::nextId ()
-{
-    int newRow = getTable().getModelIndex (getCurrentId(), 0).row() + 1;
-
-    if (newRow >= getTable().rowCount())
-    {
-        return;
-    }
-
-    while (newRow < getTable().rowCount())
-    {
-        QModelIndex newIndex (getTable().index(newRow, 0));
-
-        if (!newIndex.isValid())
-        {
-            return;
-        }
-
-        CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (getTable().data (getTable().index (newRow, 1)).toInt());
-        if (!(state == CSMWorld::RecordBase::State_Deleted))
-        {
-            getEditWidget().remake(newRow);
-
-            setUniversalId(CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (getTable().data (getTable().index (newRow, 2)).toInt()),
-                                                  getTable().data (getTable().index (newRow, 0)).toString().toUtf8().constData()));
-
-            changeCurrentId(std::string (getTable().data (getTable().index (newRow, 0)).toString().toUtf8().constData()));
-
-            getEditWidget().setDisabled (isLocked());
-
-            return;
-        }
-        ++newRow;
-    }
-}
-
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
@@ -832,4 +760,16 @@ void CSVWorld::DialogueSubView::viewRecord ()
         if (params.first.getType()!=CSMWorld::UniversalId::Type_None)
             emit focusId (params.first, params.second);
     }
+}
+
+void CSVWorld::DialogueSubView::switchToRow (int row)
+{
+    getEditWidget().remake (row);
+
+    setUniversalId (CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (getTable().data (getTable().index (row, 2)).toInt()),
+                            getTable().data (getTable().index (row, 0)).toString().toUtf8().constData()));
+
+    changeCurrentId(std::string (getTable().data (getTable().index (row, 0)).toString().toUtf8().constData()));
+
+    getEditWidget().setDisabled (isLocked());
 }

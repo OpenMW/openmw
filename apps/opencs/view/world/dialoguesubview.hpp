@@ -236,13 +236,11 @@ namespace CSVWorld
 
         private slots:
 
-            void nextId();
-
-            void prevId();
-
             void showPreview();
 
             void viewRecord();
+
+            void switchToRow (int row);            
     };
 }
 
