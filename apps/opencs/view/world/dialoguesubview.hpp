@@ -231,8 +231,6 @@ namespace CSVWorld
 
         private slots:
 
-            void cloneRequest();
-
             void nextId();
 
             void prevId();

@@ -714,7 +714,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
         this, SLOT (requestFocus (const std::string&)));
 
     // button bar
-    RecordButtonBar *buttons = new RecordButtonBar (getTable(), mBottom,
+    RecordButtonBar *buttons = new RecordButtonBar (id, getTable(), mBottom,
         &getCommandDispatcher(), this);
 
     // layout
@@ -724,16 +724,10 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     // connections
     connect (buttons, SIGNAL (nextId()), this, SLOT (nextId()));
     connect (buttons, SIGNAL (prevId()), this, SLOT (prevId()));
-    connect (buttons, SIGNAL (cloneRequest()), this, SLOT (cloneRequest()));
     connect (buttons, SIGNAL (showPreview()), this, SLOT (showPreview()));
     connect (buttons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
-}
-
-void CSVWorld::DialogueSubView::cloneRequest()
-{
-    mBottom->cloneRequest (getCurrentId(),
-        static_cast<CSMWorld::UniversalId::Type> (getTable().
-        data (getTable().getModelIndex(getCurrentId(), 2)).toInt()));
+    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
+        buttons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
 }
 
 void CSVWorld::DialogueSubView::prevId()

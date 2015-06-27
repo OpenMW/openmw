@@ -9,9 +9,11 @@
 
 #include "../world/tablebottombox.hpp"
 
-CSVWorld::RecordButtonBar::RecordButtonBar (CSMWorld::IdTable& table, TableBottomBox *bottomBox,
+CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
+    CSMWorld::IdTable& table, TableBottomBox *bottomBox,
     CSMWorld::CommandDispatcher *commandDispatcher, QWidget *parent)
-: QWidget (parent), mTable (table), mBottom (bottomBox), mCommandDispatcher (commandDispatcher)
+: QWidget (parent), mId (id), mTable (table), mBottom (bottomBox),
+  mCommandDispatcher (commandDispatcher)
 {
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->setContentsMargins (0, 0, 0, 0);
@@ -81,7 +83,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar (CSMWorld::IdTable& table, TableBotto
     else
     {
         connect (addButton, SIGNAL (clicked()), mBottom, SLOT (createRequest()));
-        connect (cloneButton, SIGNAL (clicked()), this, SIGNAL (cloneRequest()));
+        connect (cloneButton, SIGNAL (clicked()), this, SLOT (cloneRequest()));
     }
 
     connect (nextButton, SIGNAL (clicked()), this, SIGNAL (nextId()));
@@ -96,5 +98,27 @@ CSVWorld::RecordButtonBar::RecordButtonBar (CSMWorld::IdTable& table, TableBotto
     {
         connect (revertButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeRevert()));
         connect (deleteButton, SIGNAL (clicked()), mCommandDispatcher, SLOT (executeDelete()));
+    }
+}
+
+void CSVWorld::RecordButtonBar::universalIdChanged (const CSMWorld::UniversalId& id)
+{
+    mId = id;
+}
+
+void CSVWorld::RecordButtonBar::cloneRequest()
+{
+    if (mBottom)
+    {
+        int typeColumn = mTable.searchColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+
+        if (typeColumn!=-1)
+        {
+            QModelIndex typeIndex = mTable.getModelIndex (mId.getId(), typeColumn);
+            CSMWorld::UniversalId::Type type = static_cast<CSMWorld::UniversalId::Type> (
+                mTable.data (typeIndex).toInt());
+            
+            mBottom->cloneRequest (mId.getId(), type);
+        }
     }
 }

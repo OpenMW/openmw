@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "../../model/world/universalid.hpp"
+
 namespace CSMWorld
 {
     class IdTable;
@@ -27,15 +29,25 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            CSMWorld::UniversalId mId;
             CSMWorld::IdTable& mTable;
             TableBottomBox *mBottom;
             CSMWorld::CommandDispatcher *mCommandDispatcher;
 
         public:
 
-            RecordButtonBar (CSMWorld::IdTable& table, TableBottomBox *bottomBox = 0,
+            RecordButtonBar (const CSMWorld::UniversalId& id,
+                CSMWorld::IdTable& table, TableBottomBox *bottomBox = 0,
                 CSMWorld::CommandDispatcher *commandDispatcher = 0, QWidget *parent = 0);
 
+        public slots:
+
+            void universalIdChanged (const CSMWorld::UniversalId& id);
+
+        private slots:
+
+            void cloneRequest();
+            
         signals:
 
             void showPreview();
@@ -45,9 +57,6 @@ namespace CSVWorld
             void nextId();
 
             void prevId();
-
-            void cloneRequest();
-
     };
 }
 
