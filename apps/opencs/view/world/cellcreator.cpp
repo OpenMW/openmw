@@ -106,10 +106,3 @@ void CSVWorld::CellCreator::cloneMode(const std::string& originId,
         mType->setCurrentIndex(0);
     }
 }
-
-
-void CSVWorld::CellCreator::toggleWidgets(bool active)
-{
-    CSVWorld::GenericCreator::toggleWidgets(active);
-    mType->setEnabled(active);
-}
