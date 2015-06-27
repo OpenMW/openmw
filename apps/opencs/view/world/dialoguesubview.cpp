@@ -764,12 +764,21 @@ void CSVWorld::DialogueSubView::viewRecord ()
 
 void CSVWorld::DialogueSubView::switchToRow (int row)
 {
+    int idColumn = getTable().findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    std::string id = getTable().data (getTable().index (row, idColumn)).toString().toUtf8().constData();
+
+    int typeColumn = getTable().findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+    CSMWorld::UniversalId::Type type = static_cast<CSMWorld::UniversalId::Type> (
+        getTable().data (getTable().index (row, typeColumn)).toInt());
+
+    setUniversalId (CSMWorld::UniversalId (type, id));
+    changeCurrentId (id);
+    
     getEditWidget().remake (row);
 
-    setUniversalId (CSMWorld::UniversalId (static_cast<CSMWorld::UniversalId::Type> (getTable().data (getTable().index (row, 2)).toInt()),
-                            getTable().data (getTable().index (row, 0)).toString().toUtf8().constData()));
+    int stateColumn = getTable().findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
+    CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (
+        getTable().data (getTable().index (row, stateColumn)).toInt());
 
-    changeCurrentId(std::string (getTable().data (getTable().index (row, 0)).toString().toUtf8().constData()));
-
-    getEditWidget().setDisabled (isLocked());
+    getEditWidget().setDisabled (isLocked() || state==CSMWorld::RecordBase::State_Deleted);
 }

@@ -121,16 +121,13 @@ void CSVWorld::RecordButtonBar::cloneRequest()
 {
     if (mBottom)
     {
-        int typeColumn = mTable.searchColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
+        int typeColumn = mTable.findColumnIndex (CSMWorld::Columns::ColumnId_RecordType);
 
-        if (typeColumn!=-1)
-        {
-            QModelIndex typeIndex = mTable.getModelIndex (mId.getId(), typeColumn);
-            CSMWorld::UniversalId::Type type = static_cast<CSMWorld::UniversalId::Type> (
-                mTable.data (typeIndex).toInt());
-            
-            mBottom->cloneRequest (mId.getId(), type);
-        }
+        QModelIndex typeIndex = mTable.getModelIndex (mId.getId(), typeColumn);
+        CSMWorld::UniversalId::Type type = static_cast<CSMWorld::UniversalId::Type> (
+            mTable.data (typeIndex).toInt());
+
+        mBottom->cloneRequest (mId.getId(), type);
     }
 }
 
