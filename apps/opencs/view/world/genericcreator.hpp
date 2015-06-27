@@ -113,6 +113,8 @@ namespace CSVWorld
             void create();
 
             void scopeChanged (int index);
+
+            void dataIdListChanged();
     };
 }
 
