@@ -706,23 +706,27 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
 : SimpleDialogueSubView (id, document)
 {
     // bottom box
-    getMainLayout().addWidget (mBottom = new TableBottomBox (creatorFactory, document, id, this));
+    mBottom = new TableBottomBox (creatorFactory, document, id, this);
 
-    mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+    mBottom->setSizePolicy (QSizePolicy::Ignored, QSizePolicy::Fixed);
 
-    connect(mBottom, SIGNAL(requestFocus(const std::string&)), this, SLOT(requestFocus(const std::string&)));
+    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
+        this, SLOT (requestFocus (const std::string&)));
 
-    // buttons
+    // button bar
     RecordButtonBar *buttons = new RecordButtonBar (getTable(), mBottom,
         &getCommandDispatcher(), this);
-        
-    getMainLayout().addWidget (buttons);
 
-    connect (buttons, SIGNAL(nextId()), this, SLOT(nextId()));
-    connect (buttons, SIGNAL (prevId()), this, SLOT(prevId()));
-    connect (buttons, SIGNAL (cloneRequest()), this, SLOT(cloneRequest()));
-    connect (buttons, SIGNAL (showPreview()), this, SLOT(showPreview()));
-    connect (buttons, SIGNAL (viewRecord()), this, SLOT(viewRecord()));
+    // layout
+    getMainLayout().addWidget (buttons);
+    getMainLayout().addWidget (mBottom);
+
+    // connections
+    connect (buttons, SIGNAL (nextId()), this, SLOT (nextId()));
+    connect (buttons, SIGNAL (prevId()), this, SLOT (prevId()));
+    connect (buttons, SIGNAL (cloneRequest()), this, SLOT (cloneRequest()));
+    connect (buttons, SIGNAL (showPreview()), this, SLOT (showPreview()));
+    connect (buttons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
 }
 
 void CSVWorld::DialogueSubView::cloneRequest()
