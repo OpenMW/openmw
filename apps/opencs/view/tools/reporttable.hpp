@@ -36,7 +36,9 @@ namespace CSVTools
             QAction *mShowAction;
             QAction *mRemoveAction;
             QAction *mReplaceAction;
+            QAction *mRefreshAction;
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
+            int mRefreshState;
 
         private:
 
@@ -49,8 +51,11 @@ namespace CSVTools
         public:
 
             /// \param richTextDescription Use rich text in the description column.
+            /// \param refreshState Document state to check for refresh function. If value is
+            /// 0 no refresh function exists. If the document current has the specified state
+            /// the refresh function is disabled.
             ReportTable (CSMDoc::Document& document, const CSMWorld::UniversalId& id,
-                bool richTextDescription, QWidget *parent = 0);
+                bool richTextDescription, int refreshState = 0, QWidget *parent = 0);
 
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
@@ -71,11 +76,17 @@ namespace CSVTools
 
             void removeSelection();
 
+        public slots:
+
+            void stateChanged (int state, CSMDoc::Document *document);        
+            
         signals:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);
 
             void replaceRequest();
+
+            void refreshRequest();
     };
 }
 

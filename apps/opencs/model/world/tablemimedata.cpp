@@ -264,6 +264,8 @@ namespace
         { CSMWorld::UniversalId::Type_Texture, CSMWorld::ColumnBase::Display_Texture },
         { CSMWorld::UniversalId::Type_Video, CSMWorld::ColumnBase::Display_Video },
         { CSMWorld::UniversalId::Type_Global, CSMWorld::ColumnBase::Display_GlobalVariable },
+        { CSMWorld::UniversalId::Type_BodyPart, CSMWorld::ColumnBase::Display_BodyPart },
+        { CSMWorld::UniversalId::Type_Enchantment, CSMWorld::ColumnBase::Display_Enchantment },
 
         { CSMWorld::UniversalId::Type_None, CSMWorld::ColumnBase::Display_None } // end marker
     };

@@ -124,7 +124,7 @@ namespace CSMDoc
 
             void save();
 
-            CSMWorld::UniversalId verify();
+            CSMWorld::UniversalId verify (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
 
             CSMWorld::UniversalId newSearch();
 
