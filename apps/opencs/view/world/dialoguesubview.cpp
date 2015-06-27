@@ -17,8 +17,6 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QComboBox>
-#include <QPushButton>
-#include <QToolButton>
 #include <QHeaderView>
 #include <QScrollBar>
 
@@ -573,11 +571,6 @@ CSMWorld::CommandDispatcher& CSVWorld::SimpleDialogueSubView::getCommandDispatch
     return mCommandDispatcher;
 }
 
-std::string CSVWorld::SimpleDialogueSubView::getCurrentId() const
-{
-    return mCurrentId;
-}
-
 CSVWorld::EditWidget& CSVWorld::SimpleDialogueSubView::getEditWidget()
 {
     return *mEditWidget;
@@ -593,7 +586,6 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     mEditWidget(0),
     mMainLayout(NULL),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
-    mUndoStack(document.getUndoStack()),
     mLocked(false),
     mDocument(document),
     mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
@@ -601,7 +593,7 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     connect(mTable, SIGNAL(dataChanged (const QModelIndex&, const QModelIndex&)), this, SLOT(dataChanged(const QModelIndex&)));
     connect(mTable, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
 
-    changeCurrentId(id.getId());
+    updateCurrentId();
 
     QWidget *mainWidget = new QWidget(this);
 
@@ -609,21 +601,21 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     setWidget (mainWidget);
 
     mEditWidget = new EditWidget(mainWidget,
-            mTable->getModelIndex(mCurrentId, 0).row(), mTable, mCommandDispatcher, document, false);
+            mTable->getModelIndex(getUniversalId().getId(), 0).row(), mTable, mCommandDispatcher, document, false);
 
     mMainLayout->addWidget(mEditWidget);
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    dataChanged(mTable->getModelIndex (mCurrentId, 0));
+    dataChanged(mTable->getModelIndex (getUniversalId().getId(), 0));
 }
 
 void CSVWorld::SimpleDialogueSubView::setEditLock (bool locked)
 {
-    if (!mEditWidget) // hack to indicate that mCurrentId is no longer valid
+    if (!mEditWidget) // hack to indicate that getUniversalId().getId() is no longer valid
         return;
 
     mLocked = locked;
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
+    QModelIndex currentIndex(mTable->getModelIndex(getUniversalId().getId(), 0));
 
     if (currentIndex.isValid())
     {
@@ -638,7 +630,7 @@ void CSVWorld::SimpleDialogueSubView::setEditLock (bool locked)
 
 void CSVWorld::SimpleDialogueSubView::dataChanged (const QModelIndex & index)
 {
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
+    QModelIndex currentIndex(mTable->getModelIndex(getUniversalId().getId(), 0));
 
     if (currentIndex.isValid() &&
             (index.parent().isValid() ? index.parent().row() : index.row()) == currentIndex.row())
@@ -671,7 +663,7 @@ void CSVWorld::SimpleDialogueSubView::dataChanged (const QModelIndex & index)
 
 void CSVWorld::SimpleDialogueSubView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
-    QModelIndex currentIndex(mTable->getModelIndex(mCurrentId, 0));
+    QModelIndex currentIndex(mTable->getModelIndex(getUniversalId().getId(), 0));
 
     if (currentIndex.isValid() && currentIndex.row() >= start && currentIndex.row() <= end)
     {
@@ -684,19 +676,10 @@ void CSVWorld::SimpleDialogueSubView::rowsAboutToBeRemoved(const QModelIndex &pa
     }
 }
 
-void CSVWorld::SimpleDialogueSubView::requestFocus (const std::string& id)
-{
-    changeCurrentId(id);
-
-    mEditWidget->remake(mTable->getModelIndex (id, 0).row());
-}
-
-void CSVWorld::SimpleDialogueSubView::changeCurrentId (const std::string& newId)
+void CSVWorld::SimpleDialogueSubView::updateCurrentId()
 {
     std::vector<std::string> selection;
-    mCurrentId = std::string(newId);
-
-    selection.push_back(mCurrentId);
+    selection.push_back (getUniversalId().getId());
     mCommandDispatcher.setSelection(selection);
 }
 
@@ -738,19 +721,19 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
 
 void CSVWorld::DialogueSubView::showPreview ()
 {
-    QModelIndex currentIndex (getTable().getModelIndex (getCurrentId(), 0));
+    QModelIndex currentIndex (getTable().getModelIndex (getUniversalId().getId(), 0));
 
     if (currentIndex.isValid() &&
         getTable().getFeatures() & CSMWorld::IdTable::Feature_Preview &&
         currentIndex.row() < getTable().rowCount())
     {
-        emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, getCurrentId()), "");
+        emit focusId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Preview, getUniversalId().getId()), "");
     }
 }
 
 void CSVWorld::DialogueSubView::viewRecord ()
 {
-    QModelIndex currentIndex (getTable().getModelIndex (getCurrentId(), 0));
+    QModelIndex currentIndex (getTable().getModelIndex (getUniversalId().getId(), 0));
 
     if (currentIndex.isValid() &&
         currentIndex.row() < getTable().rowCount())
@@ -772,7 +755,7 @@ void CSVWorld::DialogueSubView::switchToRow (int row)
         getTable().data (getTable().index (row, typeColumn)).toInt());
 
     setUniversalId (CSMWorld::UniversalId (type, id));
-    changeCurrentId (id);
+    updateCurrentId();
     
     getEditWidget().remake (row);
 
@@ -781,4 +764,12 @@ void CSVWorld::DialogueSubView::switchToRow (int row)
         getTable().data (getTable().index (row, stateColumn)).toInt());
 
     getEditWidget().setDisabled (isLocked() || state==CSMWorld::RecordBase::State_Deleted);
+}
+
+void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
+{
+    QModelIndex index = getTable().getModelIndex (id, 0);
+
+    if (index.isValid())
+        switchToRow (index.row());    
 }

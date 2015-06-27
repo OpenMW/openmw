@@ -175,16 +175,14 @@ namespace CSVWorld
 
     class SimpleDialogueSubView : public CSVDoc::SubView
     {
-        Q_OBJECT
+            Q_OBJECT
 
-        EditWidget* mEditWidget;
-        QVBoxLayout* mMainLayout;
-        CSMWorld::IdTable* mTable;
-        QUndoStack& mUndoStack;
-        std::string mCurrentId;
-        bool mLocked;
-        const CSMDoc::Document& mDocument;
-        CSMWorld::CommandDispatcher mCommandDispatcher;
+            EditWidget* mEditWidget;
+            QVBoxLayout* mMainLayout;
+            CSMWorld::IdTable* mTable;
+            bool mLocked;
+            const CSMDoc::Document& mDocument;
+            CSMWorld::CommandDispatcher mCommandDispatcher;
 
         protected:
 
@@ -194,11 +192,9 @@ namespace CSVWorld
 
             CSMWorld::CommandDispatcher& getCommandDispatcher();
 
-            std::string getCurrentId() const;
-
             EditWidget& getEditWidget();
 
-            void changeCurrentId(const std::string& newCurrent);
+            void updateCurrentId();
 
             bool isLocked() const;
         
@@ -212,8 +208,6 @@ namespace CSVWorld
 
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
-
-            void requestFocus (const std::string& id);
 
             void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
     };
@@ -241,6 +235,8 @@ namespace CSVWorld
             void viewRecord();
 
             void switchToRow (int row);            
+
+            void requestFocus (const std::string& id);
     };
 }
 
