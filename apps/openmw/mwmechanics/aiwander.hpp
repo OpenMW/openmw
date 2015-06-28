@@ -74,6 +74,9 @@ namespace MWMechanics
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             void getRandomIdle(unsigned short& playedIdle);
 
+            /// populate mAllowedNodes with all pathgrid points within specified distance of NPC's location
+            void pointsWithinDistance(const Ogre::Vector3& npcPos, const ESM::Pathgrid * pathgrid, int distance);
+
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
             int mTimeOfDay;
