@@ -516,35 +516,7 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
                 ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                switch(type)
-                {
-                    case ESM::Weapon::ShortBladeOneHand:
-                    case ESM::Weapon::LongBladeOneHand:
-                    case ESM::Weapon::BluntOneHand:
-                    case ESM::Weapon::AxeOneHand:
-                    case ESM::Weapon::Arrow:
-                    case ESM::Weapon::Bolt:
-                        *weaptype = WeapType_OneHand;
-                        break;
-                    case ESM::Weapon::LongBladeTwoHand:
-                    case ESM::Weapon::BluntTwoClose:
-                    case ESM::Weapon::AxeTwoHand:
-                        *weaptype = WeapType_TwoHand;
-                        break;
-                    case ESM::Weapon::BluntTwoWide:
-                    case ESM::Weapon::SpearTwoWide:
-                        *weaptype = WeapType_TwoWide;
-                        break;
-                    case ESM::Weapon::MarksmanBow:
-                        *weaptype = WeapType_BowAndArrow;
-                        break;
-                    case ESM::Weapon::MarksmanCrossbow:
-                        *weaptype = WeapType_Crossbow;
-                        break;
-                    case ESM::Weapon::MarksmanThrown:
-                        *weaptype = WeapType_Thrown;
-                        break;
-                }
+                *weaptype = getWeaponType(type);
             }
         }
 
@@ -552,6 +524,43 @@ MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::I
     }
 
     return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+}
+
+WeaponType getWeaponType(ESM::Weapon::Type type)
+{
+    WeaponType weaptype = WeapType_None;
+
+    switch(type)
+    {
+        case ESM::Weapon::ShortBladeOneHand:
+        case ESM::Weapon::LongBladeOneHand:
+        case ESM::Weapon::BluntOneHand:
+        case ESM::Weapon::AxeOneHand:
+        case ESM::Weapon::Arrow:
+        case ESM::Weapon::Bolt:
+            weaptype = WeapType_OneHand;
+            break;
+        case ESM::Weapon::LongBladeTwoHand:
+        case ESM::Weapon::BluntTwoClose:
+        case ESM::Weapon::AxeTwoHand:
+            weaptype = WeapType_TwoHand;
+            break;
+        case ESM::Weapon::BluntTwoWide:
+        case ESM::Weapon::SpearTwoWide:
+            weaptype = WeapType_TwoWide;
+            break;
+        case ESM::Weapon::MarksmanBow:
+            weaptype = WeapType_BowAndArrow;
+            break;
+        case ESM::Weapon::MarksmanCrossbow:
+            weaptype = WeapType_Crossbow;
+            break;
+        case ESM::Weapon::MarksmanThrown:
+            weaptype = WeapType_Thrown;
+            break;
+    }
+
+    return weaptype;
 }
 
 void CharacterController::playDeath(float startpoint, CharacterState death)

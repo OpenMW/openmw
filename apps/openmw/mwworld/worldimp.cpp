@@ -2018,6 +2018,17 @@ namespace MWWorld
         return isUnderwater(object.getCell(), pos);
     }
 
+    Ogre::Vector3 World::getHalfExtents(const MWWorld::Ptr& actor)
+    {
+        const OEngine::Physic::PhysicActor *physActor = mPhysEngine->getCharacter(actor.getRefData().getHandle());
+        if (physActor)
+        {
+            return physActor->getHalfExtents();
+        }
+
+        return Ogre::Vector3(0.0);
+    }
+
     bool World::isUnderwater(const MWWorld::CellStore* cell, const Ogre::Vector3 &pos) const
     {
         if (!(cell->getCell()->mData.mFlags & ESM::Cell::HasWater)) {

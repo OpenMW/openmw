@@ -27,8 +27,11 @@ namespace MWMechanics
         std::string mSpellId;
         /// Sets the given spell as selected on the actor's spell list.
         virtual void prepare(const MWWorld::Ptr& actor);
-
         virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
+
+        const std::string& getSpellId() const;
+        ESM::RangeType getSpellRangeType() const;
+        float getSpellSpeed() const;
     };
 
     class ActionEnchantedItem : public Action
@@ -62,6 +65,7 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mAmmunition;
         MWWorld::Ptr mWeapon;
+        bool         mIsNpc;
 
     public:
         /// \a weapon may be empty for hand-to-hand combat
@@ -70,6 +74,8 @@ namespace MWMechanics
         /// Equips the given weapon.
         virtual void prepare(const MWWorld::Ptr& actor);
         virtual void getCombatRange (float& rangeAttack, float& rangeFollow);
+
+        const ESM::Weapon* getWeapon() const;
     };
 
     float rateSpell (const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);

@@ -442,6 +442,7 @@ namespace MWBase
             virtual float getDistToNearestRayHit(const Ogre::Vector3& from, const Ogre::Vector3& dir, float maxDist) = 0;
 
             virtual void enableActorCollision(const MWWorld::Ptr& actor, bool enable) = 0;
+            virtual Ogre::Vector3 getHalfExtents(const MWWorld::Ptr& actor) = 0;
 
             virtual int canRest() = 0;
             ///< check if the player is allowed to rest \n
