@@ -1,9 +1,6 @@
 #ifndef VIDEOPLAYER_VIDEOSTATE_H
 #define VIDEOPLAYER_VIDEOSTATE_H
 
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
 #include <stdint.h>
 
 #include <boost/thread.hpp>

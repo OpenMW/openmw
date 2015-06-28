@@ -3,9 +3,6 @@
 #ifndef HAVE_LIBSWRESAMPLE
 extern "C"
 {
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
 #include <stdint.h>
 
 #include <libavcodec/avcodec.h>

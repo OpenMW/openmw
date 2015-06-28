@@ -120,6 +120,8 @@ else()
         message(FATAL_ERROR "Install either libswresample (FFmpeg) or libavresample (Libav).")
     endif()
 endif()
+# Required for building the FFmpeg headers
+add_definitions(-D__STDC_CONSTANT_MACROS)
 
 set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
 
