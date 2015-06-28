@@ -1,6 +1,6 @@
 os:
  - linux
- - osx
+# - osx
 language: cpp
 branches:
   only:
