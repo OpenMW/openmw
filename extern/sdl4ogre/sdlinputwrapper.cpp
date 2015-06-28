@@ -469,5 +469,7 @@ namespace SFO
         mKeyMap.insert( KeyMap::value_type(SDLK_LGUI, OIS::KC_LWIN) );
         mKeyMap.insert( KeyMap::value_type(SDLK_RGUI, OIS::KC_RWIN) );
         mKeyMap.insert( KeyMap::value_type(SDLK_APPLICATION, OIS::KC_APPS) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_LEFTBRACKET, OIS::KC_LBRACKET) );
+        mKeyMap.insert( KeyMap::value_type(SDLK_RIGHTBRACKET, OIS::KC_RBRACKET) );
     }
 }

@@ -674,14 +674,10 @@ namespace MWInput
                 && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
             SDL_StopTextInput();
 
-        bool consumed = false;
-        if (kc != OIS::KC_UNASSIGNED)
-        {
-            consumed = SDL_IsTextInputActive() &&
-                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)); // Little trick to check if key is printable
-            bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-            setPlayerControlsEnabled(!guiFocus);
-        }
+        bool consumed = SDL_IsTextInputActive();
+        bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
+        setPlayerControlsEnabled(!guiFocus);
+
         if (!mControlsDisabled && !consumed)
             mInputBinder->keyPressed (arg);
         mJoystickLastUsed = false;
