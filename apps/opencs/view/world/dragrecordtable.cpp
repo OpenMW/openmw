@@ -55,12 +55,10 @@ void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
         if (index.flags() & Qt::ItemIsEditable)
         {
             event->accept();
+            return;
         }
     }
-    else
-    {
-        event->ignore();
-    }
+    event->ignore();
 }
 
 void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
