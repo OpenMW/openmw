@@ -687,10 +687,11 @@ private:
     float mAngle;
 };
 
-class RainFader : public SceneUtil::StateSetUpdater
+// Updater for alpha value on a node's StateSet. Assumes the node has an existing Material StateAttribute.
+class AlphaFader : public SceneUtil::StateSetUpdater
 {
 public:
-    RainFader()
+    AlphaFader()
         : mAlpha(1.f)
     {
     }
@@ -700,18 +701,69 @@ public:
         mAlpha = alpha;
     }
 
+    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
+    {
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
+    }
+
+    // Helper for adding AlphaFader to a subgraph
+    class SetupVisitor : public osg::NodeVisitor
+    {
+    public:
+        SetupVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+            mAlphaFader = new AlphaFader;
+        }
+
+        virtual void apply(osg::Node &node)
+        {
+            if (osg::StateSet* stateset = node.getStateSet())
+            {
+                if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
+                {
+                    SceneUtil::CompositeStateSetUpdater* composite = NULL;
+                    osg::NodeCallback* callback = node.getUpdateCallback();
+                    while (callback)
+                    {
+                        if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
+                            break;
+                        callback = callback->getNestedCallback();
+                    }
+
+                    if (composite)
+                        composite->addController(mAlphaFader);
+                    else
+                        node.addUpdateCallback(mAlphaFader);
+                }
+            }
+            traverse(node);
+        }
+
+        osg::ref_ptr<AlphaFader> getAlphaFader()
+        {
+            return mAlphaFader;
+        }
+
+    private:
+        osg::ref_ptr<AlphaFader> mAlphaFader;
+    };
+
+private:
+    float mAlpha;
+};
+
+class RainFader : public AlphaFader
+{
+public:
     virtual void setDefaults(osg::StateSet* stateset)
     {
         osg::ref_ptr<osg::Material> mat (new osg::Material);
         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+        mat->setColorMode(osg::Material::OFF);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
-    }
-
-    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
-    {
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
     }
 
 private:
@@ -928,6 +980,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
                 mParticleNode = NULL;
             }
             mParticleEffect = NULL;
+            mParticleFader = NULL;
         }
         else
         {
@@ -940,6 +993,10 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
 
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
+
+            AlphaFader::SetupVisitor alphaFaderSetupVisitor;
+            mParticleEffect->accept(alphaFaderSetupVisitor);
+            mParticleFader = alphaFaderSetupVisitor.getAlphaFader();
         }
     }
 
@@ -1025,14 +1082,12 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
     mSunGlare->setVisibility(weather.mGlareView * mGlareFade * strength);
 
     mSun->setVisibility(weather.mGlareView * strength);
-
-
-    if (mParticle.get())
-        setAlpha(mParticle, weather.mEffectFade);
-        */
+    */
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
+    if (mParticleFader)
+        mParticleFader->setAlpha(weather.mEffectFade);
 }
 
 void SkyManager::setGlare(const float glare)
