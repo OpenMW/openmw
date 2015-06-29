@@ -5,7 +5,6 @@
 #include <osg/Depth>
 #include <osg/Geometry>
 #include <osg/Material>
-#include <osg/Geometry>
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
@@ -16,8 +15,6 @@
 #include <osgParticle/BoxPlacer>
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/RadialShooter>
-
-#include <boost/lexical_cast.hpp>
 
 #include <components/misc/rng.hpp>
 
