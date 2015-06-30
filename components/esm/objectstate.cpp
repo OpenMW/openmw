@@ -5,6 +5,8 @@
 
 void ESM::ObjectState::load (ESMReader &esm)
 {
+    mVersion = esm.getVer();
+
     mRef.loadData(esm);
 
     mHasLocals = 0;
