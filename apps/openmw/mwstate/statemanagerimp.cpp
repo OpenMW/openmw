@@ -310,8 +310,6 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     // have to peek into the save file to get the player name
     ESM::ESMReader reader;
     reader.open (filepath);
-    if (reader.getFormat()>ESM::Header::CurrentFormat)
-        return; // format is too new -> ignore
     if (reader.getRecName()!=ESM::REC_SAVE)
         return; // invalid save file -> ignore
     reader.getRecHeader();
@@ -332,6 +330,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         ESM::ESMReader reader;
         reader.open (filepath);
+
+        if (reader.getFormat() > ESM::SavedGame::sCurrentFormat)
+            throw std::runtime_error("This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade to the newest OpenMW version to load this file.");
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
 
