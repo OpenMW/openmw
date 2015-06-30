@@ -73,7 +73,7 @@ namespace MWGui
         mPages.clear();
     }
 
-    void BookWindow::open (MWWorld::Ptr book, bool showTakeButton)
+    void BookWindow::openBook (MWWorld::Ptr book, bool showTakeButton)
     {
         mBook = book;
 

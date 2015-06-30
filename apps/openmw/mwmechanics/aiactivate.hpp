@@ -28,7 +28,7 @@ namespace MWMechanics
             AiActivate(const ESM::AiSequence::AiActivate* activate);
 
             virtual AiActivate *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
             virtual int getTypeId() const;
 
             virtual void writeState(ESM::AiSequence::AiSequence& sequence) const;

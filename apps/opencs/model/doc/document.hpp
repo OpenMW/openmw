@@ -25,6 +25,12 @@
 
 class QAbstractItemModel;
 
+namespace VFS
+{
+
+    class Manager;
+}
+
 namespace ESM
 {
     struct GameSetting;
@@ -42,11 +48,6 @@ namespace CSMWorld
     class ResourcesManager;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSMDoc
 {
     class Document : public QObject
@@ -55,6 +56,7 @@ namespace CSMDoc
 
         private:
 
+            const VFS::Manager* mVFS;
             boost::filesystem::path mSavePath;
             std::vector<boost::filesystem::path> mContentFiles;
             bool mNew;
@@ -66,7 +68,7 @@ namespace CSMDoc
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+
             CSMWorld::IdCompletionManager mIdCompletionManager;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
@@ -95,13 +97,15 @@ namespace CSMDoc
 
         public:
 
-            Document (const Files::ConfigurationManager& configuration,
+            Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
                 ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
                 const std::vector<std::string>& blacklistedScripts);
 
             ~Document();
+
+            const VFS::Manager* getVFS() const;
 
             QUndoStack& getUndoStack();
 
@@ -143,8 +147,6 @@ namespace CSMDoc
             void stopRunning();
 
             QTextDocument *getRunLog();
-
-            boost::shared_ptr<CSVWorld::PhysicsSystem> getPhysics();
 
             CSMWorld::IdCompletionManager &getIdCompletionManager();
 

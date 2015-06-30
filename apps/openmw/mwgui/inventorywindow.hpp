@@ -6,6 +6,16 @@
 
 #include "../mwworld/ptr.hpp"
 
+namespace osgViewer
+{
+    class Viewer;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
 namespace MWRender
 {
     class InventoryPreview;
@@ -27,11 +37,9 @@ namespace MWGui
     class InventoryWindow : public WindowPinnableBase
     {
         public:
-            InventoryWindow(DragAndDrop* dragAndDrop);
+            InventoryWindow(DragAndDrop* dragAndDrop, osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem);
 
             virtual void open();
-
-            void doRenderUpdate();
 
             /// start trading, disables item drag&drop
             void setTrading(bool trading);
@@ -62,8 +70,6 @@ namespace MWGui
         private:
             DragAndDrop* mDragAndDrop;
 
-            bool mPreviewDirty;
-            bool mPreviewResize;
             int mSelectedItem;
 
             MWWorld::Ptr mPtr;
@@ -93,6 +99,7 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
+            std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
             std::auto_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
@@ -113,6 +120,9 @@ namespace MWGui
 
             void updateEncumbranceBar();
             void notifyContentChanged();
+            void dirtyPreview();
+            void updatePreviewSize();
+            void updateArmorRating();
 
             void adjustPanes();
 

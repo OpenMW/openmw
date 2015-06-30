@@ -5,7 +5,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/records.hpp>
 
@@ -165,7 +165,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
         intelligenceTerm = 1;
 
     float x = (npcStats.getSkill(ESM::Skill::Enchant).getModified() + intelligenceTerm + luckTerm) * stats.getFatigueTerm();
-    int roll = OEngine::Misc::Rng::roll0to99();
+    int roll = Misc::Rng::roll0to99();
     if (roll < x)
     {
         std::string soul = gem.getCellRef().getSoul();

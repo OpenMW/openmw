@@ -261,3 +261,13 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelInde
 
     return mNestedCollection->nestedTable(index.row(), index.column());
 }
+
+int CSMWorld::IdTree::searchNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->searchNestedColumnIndex(parentColumn, id);
+}
+
+int CSMWorld::IdTree::findNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->findNestedColumnIndex(parentColumn, id);
+}

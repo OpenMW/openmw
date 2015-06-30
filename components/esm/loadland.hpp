@@ -82,7 +82,7 @@ struct Land
         VNML mNormals[LAND_NUM_VERTS * 3];
         uint16_t mTextures[LAND_NUM_TEXTURES];
 
-        char mColours[3 * LAND_NUM_VERTS];
+        unsigned char mColours[3 * LAND_NUM_VERTS];
         int mDataTypes;
 
         // low-LOD heightmap (used for rendering the global map)

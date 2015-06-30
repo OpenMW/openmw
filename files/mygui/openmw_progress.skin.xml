@@ -2,7 +2,7 @@
 
 <MyGUI type="Resource" version="1.1">
     <!-- Progress bar track, various colors -->
-    <Resource type="ResourceSkin" name="MW_Track_Red" size="16 16" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_Track_Red" size="2 14" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=health}"/>
         <BasisSkin type="MainSkin" offset="0 0 16 16" align="Stretch">
             <State name="normal" offset="0 0 16 16"/>

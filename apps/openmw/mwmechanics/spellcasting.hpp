@@ -3,8 +3,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-#include <OgreVector3.h>
-
 #include <components/esm/loadskil.hpp>
 
 namespace ESM
@@ -71,7 +69,7 @@ namespace MWMechanics
         bool mStack;
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
-        Ogre::Vector3 mHitPosition; // Used for spawning area orb
+        osg::Vec3f mHitPosition; // Used for spawning area orb
         bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
 
     public:

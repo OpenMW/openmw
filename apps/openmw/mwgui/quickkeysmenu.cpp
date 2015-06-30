@@ -3,9 +3,9 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_ImageBox.h>
 
 #include <components/esm/quickkeys.hpp>
-#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -19,8 +19,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwgui/inventorywindow.hpp"
-#include "../mwgui/bookwindow.hpp"
-#include "../mwgui/scrollwindow.hpp"
 
 #include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
@@ -245,7 +243,7 @@ namespace MWGui
         std::string path = effect->mIcon;
         int slashPos = path.rfind('\\');
         path.insert(slashPos+1, "b_");
-        path = Misc::ResourceHelpers::correctIconPath(path);
+        path = MWBase::Environment::get().getWindowManager()->correctIconPath(path);
 
         button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
         button->setIcon(path);

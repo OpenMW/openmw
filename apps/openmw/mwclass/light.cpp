@@ -17,13 +17,12 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/customdata.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
 #include "../mwrender/objects.hpp"
-#include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 namespace MWClass
@@ -39,18 +38,18 @@ namespace MWClass
             ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
-        MWRender::Actors& actors = renderingInterface.getActors();
-        actors.insertActivator(ptr, model, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        renderingInterface.getObjects().insertModel(ptr, model, true, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
-    void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
         assert (ref->mBase != NULL);
 
-        if(!model.empty())
-            physics.addObject(ptr, model, (ref->mBase->mData.mFlags & ESM::Light::Carry) != 0);
+        // TODO: add option somewhere to enable collision for placeable objects
+        if (!model.empty() && (ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
+            physics.addObject(ptr, model);
 
         if (!ref->mBase->mSound.empty() && !(ref->mBase->mData.mFlags & ESM::Light::OffDefault))
             MWBase::Environment::get().getSoundManager()->playSound3D(ptr, ref->mBase->mSound, 1.0, 1.0,

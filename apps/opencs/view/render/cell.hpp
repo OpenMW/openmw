@@ -7,7 +7,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <OgreVector3.h>
+#include <osg/ref_ptr>
 
 #ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
@@ -17,20 +17,14 @@
 
 class QModelIndex;
 
-namespace Ogre
+namespace osg
 {
-    class SceneManager;
-    class SceneNode;
+    class Group;
 }
 
 namespace CSMWorld
 {
     class Data;
-}
-
-namespace CSVWorld
-{
-    class PhysicsSystem;
 }
 
 namespace CSVRender
@@ -39,11 +33,9 @@ namespace CSVRender
     {
             CSMWorld::Data& mData;
             std::string mId;
-            Ogre::SceneNode *mCellNode;
+            osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
-            Ogre::SceneManager *mSceneMgr;
             int mX;
             int mY;
 
@@ -59,8 +51,7 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id);
 
             ~Cell();
 
@@ -84,8 +75,6 @@ namespace CSVRender
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
-
-            float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
     };
 }
 

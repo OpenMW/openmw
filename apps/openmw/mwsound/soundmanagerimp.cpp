@@ -4,7 +4,9 @@
 #include <algorithm>
 #include <map>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
+
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -27,8 +29,8 @@
 
 namespace MWSound
 {
-    SoundManager::SoundManager(bool useSound)
-        : mResourceMgr(Ogre::ResourceGroupManager::getSingleton())
+    SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
+        : mVFS(vfs)
         , mOutput(new DEFAULT_OUTPUT(*this))
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
@@ -96,7 +98,7 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return DecoderPtr(new DEFAULT_DECODER);
+        return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
     // Convert a soundId to file name, and modify the volume
@@ -208,17 +210,26 @@ namespace MWSound
 
     void SoundManager::startRandomTitle()
     {
-        Ogre::StringVector filelist;
+        std::vector<std::string> filelist;
         if (mMusicFiles.find(mCurrentPlaylist) == mMusicFiles.end())
         {
-            Ogre::StringVector groups = Ogre::ResourceGroupManager::getSingleton().getResourceGroups ();
-            for (Ogre::StringVector::iterator it = groups.begin(); it != groups.end(); ++it)
+            const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+
+            std::string pattern = "Music/" + mCurrentPlaylist;
+            mVFS->normalizeFilename(pattern);
+
+            std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
+            while (found != index.end())
             {
-                Ogre::StringVectorPtr resourcesInThisGroup = mResourceMgr.findResourceNames(*it,
-                                                                                            "Music/"+mCurrentPlaylist+"/*");
-                filelist.insert(filelist.end(), resourcesInThisGroup->begin(), resourcesInThisGroup->end());
+                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
+                    filelist.push_back(found->first);
+                else
+                    break;
+                ++found;
             }
+
             mMusicFiles[mCurrentPlaylist] = filelist;
+
         }
         else
             filelist = mMusicFiles[mCurrentPlaylist];
@@ -226,7 +237,7 @@ namespace MWSound
         if(!filelist.size())
             return;
 
-        int i = OEngine::Misc::Rng::rollDice(filelist.size());
+        int i = Misc::Rng::rollDice(filelist.size());
 
         // Don't play the same music track twice in a row
         if (filelist[i] == mLastPlayedMusic)
@@ -257,7 +268,7 @@ namespace MWSound
             float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos);
+            const osg::Vec3f objpos(pos.asVec3());
 
             MWBase::World* world = MWBase::Environment::get().getWorld();
             static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
@@ -385,9 +396,9 @@ namespace MWSound
             float min, max;
             std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();
-            const Ogre::Vector3 objpos(pos.pos);
+            const osg::Vec3f objpos(pos.asVec3());
 
-            if ((mode & Play_RemoveAtDistance) && mListenerPos.squaredDistance(objpos) > 2000*2000)
+            if ((mode & Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
             {
                 return MWBase::SoundPtr();
             }
@@ -405,7 +416,7 @@ namespace MWSound
         return sound;
     }
 
-    MWBase::SoundPtr SoundManager::playManualSound3D(const Ogre::Vector3& initialPos, const std::string& soundId,
+    MWBase::SoundPtr SoundManager::playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                                      float volume, float pitch, PlayType type, PlayMode mode, float offset)
     {
         MWBase::SoundPtr sound;
@@ -561,7 +572,7 @@ namespace MWSound
         if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
             return;
 
-        float a = OEngine::Misc::Rng::rollClosedProbability();
+        float a = Misc::Rng::rollClosedProbability();
         // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
         // "Maximum Time Between Environmental Sounds" fallback settings here.
         sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
@@ -590,7 +601,7 @@ namespace MWSound
                 return;
         }
 
-        int r = OEngine::Misc::Rng::rollDice(total);
+        int r = Misc::Rng::rollDice(total);
         int pos = 0;
 
         soundIter = regn->mSoundList.begin();
@@ -655,11 +666,11 @@ namespace MWSound
                 if(!ptr.isEmpty())
                 {
                     const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const Ogre::Vector3 objpos(pos.pos);
+                    const osg::Vec3f objpos(pos.asVec3());
                     snditer->first->setPosition(objpos);
 
                     if ((snditer->first->mFlags & Play_RemoveAtDistance)
-                            && mListenerPos.squaredDistance(Ogre::Vector3(ptr.getRefData().getPosition().pos)) > 2000*2000)
+                            && (mListenerPos - ptr.getRefData().getPosition().asVec3()).length2() > 2000*2000)
                     {
                         mActiveSounds.erase(snditer++);
                         continue;
@@ -717,7 +728,7 @@ namespace MWSound
         }
     }
 
-    void SoundManager::setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up)
+    void SoundManager::setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up)
     {
         mListenerPos = pos;
         mListenerDir = dir;
@@ -727,7 +738,7 @@ namespace MWSound
             MWBase::Environment::get().getWorld()->getPlayerPtr();
         const MWWorld::CellStore *cell = player.getCell();
 
-        mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z < cell->getWaterLevel());
+        mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z() < cell->getWaterLevel());
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

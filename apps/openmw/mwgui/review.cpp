@@ -1,5 +1,7 @@
 #include "review.hpp"
 
+#include <cmath>
+
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
@@ -10,9 +12,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "tooltips.hpp"
-
-#undef min
-#undef max
 
 namespace
 {

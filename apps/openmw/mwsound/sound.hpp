@@ -1,8 +1,6 @@
 #ifndef GAME_SOUND_SOUND_H
 #define GAME_SOUND_SOUND_H
 
-#include <OgreVector3.h>
-
 #include "soundmanagerimp.hpp"
 
 namespace MWSound
@@ -15,7 +13,7 @@ namespace MWSound
         Sound(const Sound &rhs);
 
     protected:
-        Ogre::Vector3 mPos;
+        osg::Vec3f mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
         float mBaseVolume;
         float mPitch;
@@ -31,7 +29,7 @@ namespace MWSound
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
         virtual double getTimeOffset() = 0;
-        void setPosition(const Ogre::Vector3 &pos) { mPos = pos; }
+        void setPosition(const osg::Vec3f &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
         void setFadeout(float duration) { mFadeOutTime=duration; }
         void setLoudnessVector(const std::vector<float>& loudnessVector, float loudnessFPS);
@@ -44,7 +42,7 @@ namespace MWSound
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
 
 
-        Sound(const Ogre::Vector3& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+        Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
           : mPos(pos)
           , mVolume(vol)
           , mBaseVolume(basevol)

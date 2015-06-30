@@ -55,8 +55,6 @@ namespace MWDialogue
       , mTalkedTo(false)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f)
-      , mScriptVerbose (scriptVerbose)
-
     {
         mChoice = -1;
         mIsInChoice = false;

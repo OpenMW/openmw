@@ -2,7 +2,7 @@
 
 <MyGUI type="Resource" version="1.1">
     <!-- Defines a transparent background -->
-    <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent.png">
+    <Resource type="ResourceSkin" name="BlackBG" size="8 8" texture="transparent">
         <Property key="Colour" value="#{fontcolour=background}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
@@ -122,7 +122,7 @@
     </Resource>
 
     <!-- Defines a pure black background -->
-    <Resource type="ResourceSkin" name="DialogBG" size="8 8" texture="white.png">
+    <Resource type="ResourceSkin" name="DialogBG" size="8 8" texture="white">
         <Property key="Colour" value="#{fontcolour=background}"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
@@ -151,14 +151,22 @@
     </Resource>
 
     <Resource type="ResourceSkin" name="DB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
-        <BasisSkin type="MainSkin" offset="0 0 512 4">
-            <State name="normal" offset="0 0 512 4"/>
+        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
+            <State name="normal" offset="0 0 512 4">
+                <Property key="TileSize" value="512 4"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Resource>
 
     <Resource type="ResourceSkin" name="DB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
-        <BasisSkin type="MainSkin" offset="0 0 4 512">
-            <State name="normal" offset="0 0 4 512"/>
+        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
+            <State name="normal" offset="0 0 4 512">
+                <Property key="TileSize" value="4 512"/>
+                <Property key="TileH" value="true"/>
+                <Property key="TileV" value="true"/>
+            </State>
         </BasisSkin>
     </Resource>
 

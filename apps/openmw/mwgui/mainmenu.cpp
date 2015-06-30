@@ -1,7 +1,5 @@
 #include "mainmenu.hpp"
 
-#include <OgreResourceGroupManager.h>
-
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_RenderManager.h>
@@ -10,6 +8,7 @@
 
 #include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -29,9 +28,10 @@
 namespace MWGui
 {
 
-    MainMenu::MainMenu(int w, int h)
-        : OEngine::GUI::Layout("openmw_mainmenu.layout")
-        , mWidth (w), mHeight (h), mButtonBox(0)
+    MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs)
+        : Layout("openmw_mainmenu.layout")
+        , mWidth (w), mHeight (h)
+        , mVFS(vfs), mButtonBox(0)
         , mBackground(NULL)
         , mVideoBackground(NULL)
         , mVideo(NULL)
@@ -53,7 +53,7 @@ namespace MWGui
         std::string output = sstream.str();
         mVersionText->setCaption(output);
 
-        mHasAnimatedMenu = (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
+        mHasAnimatedMenu = mVFS->exists("video/menu_background.bik");
 
         updateMenu();
     }
@@ -80,7 +80,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
             MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
 
-        OEngine::GUI::Layout::setVisible (visible);
+        Layout::setVisible (visible);
     }
 
     void MainMenu::onNewGameConfirmed()
@@ -112,7 +112,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sMessage2}");
+                dialog->askForConfirmation("#{sMessage2}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onExitConfirmed);
                 dialog->eventCancelClicked.clear();
@@ -125,7 +125,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sNotifyMessage54}");
+                dialog->askForConfirmation("#{sNotifyMessage54}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onNewGameConfirmed);
                 dialog->eventCancelClicked.clear();
@@ -170,10 +170,11 @@ namespace MWGui
                 // Use black background to correct aspect ratio
                 mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Default, "Menu");
-                mVideoBackground->setImageTexture("black.png");
+                mVideoBackground->setImageTexture("black");
 
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
+                mVideo->setVFS(mVFS);
 
                 mVideo->playVideo("video\\menu_background.bik");
             }

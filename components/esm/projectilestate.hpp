@@ -3,8 +3,8 @@
 
 #include <string>
 
-#include <OgreVector3.h>
-#include <OgreQuaternion.h>
+#include <osg/Quat>
+#include <osg/Vec3f>
 
 #include "effectlist.hpp"
 
@@ -45,6 +45,7 @@ namespace ESM
     {
         std::string mBowId;
         Vector3 mVelocity;
+        float mAttackStrength;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

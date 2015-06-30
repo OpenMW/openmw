@@ -13,7 +13,7 @@
 #include "document.hpp"
 
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
-: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252)
+: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mVFS(NULL)
 {
     boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
@@ -57,7 +57,7 @@ bool CSMDoc::DocumentManager::isEmpty()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+    Document *document = new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
 
     mDocuments.push_back (document);
 
@@ -95,11 +95,6 @@ void CSMDoc::DocumentManager::setBlacklistedScripts (const std::vector<std::stri
     mBlacklistedScripts = scriptIds;
 }
 
-void CSMDoc::DocumentManager::listResources()
-{
-    mResourcesManager.listResources();
-}
-
 void CSMDoc::DocumentManager::documentLoaded (Document *document)
 {
     emit documentAdded (document);
@@ -112,4 +107,10 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
 
     if (error.empty()) // do not remove the document yet, if we have an error
         removeDocument (document);
+}
+
+void CSMDoc::DocumentManager::setVFS(const VFS::Manager *vfs)
+{
+    mResourcesManager.setVFS(vfs);
+    mVFS = vfs;
 }

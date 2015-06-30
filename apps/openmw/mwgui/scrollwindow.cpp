@@ -48,7 +48,7 @@ namespace MWGui
         center();
     }
 
-    void ScrollWindow::open (MWWorld::Ptr scroll, bool showTakeButton)
+    void ScrollWindow::openScroll (MWWorld::Ptr scroll, bool showTakeButton)
     {
         // no 3d sounds because the object could be in a container.
         MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);

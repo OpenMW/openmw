@@ -12,7 +12,7 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -35,10 +35,9 @@ namespace MWClass
         }
     }
 
-    void Book::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Book::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
     std::string Book::getModel(const MWWorld::Ptr &ptr) const

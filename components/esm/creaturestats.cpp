@@ -60,8 +60,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mMovementFlags = 0;
     esm.getHNOT (mMovementFlags, "MOVE");
 
-    mAttackStrength = 0;
-    esm.getHNOT (mAttackStrength, "ASTR");
+    if (esm.isNextSub("ASTR"))
+        esm.skipHSub(); // attackStrength, no longer used
 
     mFallHeight = 0;
     esm.getHNOT (mFallHeight, "FALL");
@@ -170,9 +170,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mMovementFlags)
         esm.writeHNT ("MOVE", mMovementFlags);
 
-    if (mAttackStrength)
-        esm.writeHNT ("ASTR", mAttackStrength);
-
     if (mFallHeight)
         esm.writeHNT ("FALL", mFallHeight);
 
@@ -242,7 +239,6 @@ void ESM::CreatureStats::blank()
     mHitRecovery = false;
     mBlock = false;
     mMovementFlags = 0;
-    mAttackStrength = 0.f;
     mFallHeight = 0.f;
     mRecalcDynamicStats = false;
     mDrawState = 0;

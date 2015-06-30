@@ -1,7 +1,5 @@
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -37,7 +35,7 @@ namespace MWMechanics
         MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
         MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
         MWWorld::CellRefList<ESM::Door>::List::iterator it = refList.begin();
-        Ogre::Vector3 pos(actor.getRefData().getPosition().pos);
+        osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
 
         /// TODO: How to check whether the actor is facing a door? Below code is for
         ///       the player, perhaps it can be adapted.
@@ -50,7 +48,7 @@ namespace MWMechanics
         for (; it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if(pos.squaredDistance(Ogre::Vector3(ref.mData.getPosition().pos)) < minSqr)
+            if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr)
                 if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
                    (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
                 {

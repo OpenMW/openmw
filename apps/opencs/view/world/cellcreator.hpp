@@ -23,16 +23,21 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            /// Allow subclasses to add additional data to \a command.
+            virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
+
         public:
 
             CellCreator (CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
             virtual void reset();
 
-            virtual void toggleWidgets(bool active = true);
-
             virtual void cloneMode(const std::string& originId, 
                                    const CSMWorld::UniversalId::Type type);
+
+            virtual std::string getErrors() const;
+            ///< Return formatted error descriptions for the current state of the creator. if an empty
+            /// string is returned, there is no error.
 
         private slots:
 

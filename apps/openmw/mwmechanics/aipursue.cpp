@@ -30,7 +30,7 @@ AiPursue *MWMechanics::AiPursue::clone() const
 {
     return new AiPursue(*this);
 }
-bool AiPursue::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor.getClass().getCreatureStats(actor).isDead())
         return true;

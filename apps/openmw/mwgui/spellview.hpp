@@ -86,7 +86,7 @@ namespace MWGui
         void adjustSpellWidget(const Spell& spell, SpellModel::ModelIndex index, MyGUI::Widget* widget);
 
         void onSpellSelected(MyGUI::Widget* _sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
 
         SpellModel::ModelIndex getSpellModelIndex(MyGUI::Widget* _sender);
 

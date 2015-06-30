@@ -51,7 +51,7 @@ namespace MWGui
             int mLastButtonPressed;
     };
 
-    class MessageBox : public OEngine::GUI::Layout
+    class MessageBox : public Layout
     {
         public:
             MessageBox (MessageBoxManager& parMessageBoxManager, const std::string& message);
@@ -88,7 +88,6 @@ namespace MWGui
             MyGUI::Widget* mButtonsWidget;
             std::vector<MyGUI::Button*> mButtons;
 
-            int mTextButtonPadding;
             int mButtonPressed;
     };
 

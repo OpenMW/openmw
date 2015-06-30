@@ -3,10 +3,14 @@
 
 #include "scenewidget.hpp"
 
-#include "navigationorbit.hpp"
 #include "object.hpp"
 
 class QModelIndex;
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace CSMWorld
 {
@@ -20,8 +24,7 @@ namespace CSVRender
             Q_OBJECT
 
             CSMWorld::Data& mData;
-            CSVRender::NavigationOrbit mOrbit;
-            Object mObject;
+            CSVRender::Object mObject;
 
         public:
 

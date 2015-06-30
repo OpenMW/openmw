@@ -20,7 +20,6 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actors.hpp"
-#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
@@ -256,9 +255,9 @@ namespace MWWorld
 
         player.mBirthsign = mSign;
 
-        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
-        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y;
-        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z;
+        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x();
+        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y();
+        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z();
 
         if (mMarkedCell)
         {
@@ -345,9 +344,9 @@ namespace MWWorld
 
             mSign = player.mBirthsign;
 
-            mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
-            mLastKnownExteriorPosition.y = player.mLastKnownExteriorPosition[1];
-            mLastKnownExteriorPosition.z = player.mLastKnownExteriorPosition[2];
+            mLastKnownExteriorPosition.x() = player.mLastKnownExteriorPosition[0];
+            mLastKnownExteriorPosition.y() = player.mLastKnownExteriorPosition[1];
+            mLastKnownExteriorPosition.z() = player.mLastKnownExteriorPosition[2];
 
             if (player.mHasMark && !player.mMarkedCell.mPaged)
             {

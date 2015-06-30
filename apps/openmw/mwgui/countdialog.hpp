@@ -14,7 +14,7 @@ namespace MWGui
     {
         public:
             CountDialog();
-            void open(const std::string& item, const std::string& message, const int maxCount);
+            void openCountDialog(const std::string& item, const std::string& message, const int maxCount);
             void cancel();
             virtual void exit();
 

@@ -14,7 +14,7 @@ void BackgroundImage::setBackgroundImage (const std::string& image, bool fixedRa
     }
     if (!stretch)
     {
-        setImageTexture("black.png");
+        setImageTexture("black");
 
         if (fixedRatio)
             mAspect = 4.0/3.0;

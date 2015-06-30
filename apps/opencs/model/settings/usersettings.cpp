@@ -12,8 +12,6 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include <extern/shiny/Main/Factory.hpp>
-
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -44,13 +42,9 @@ CSMSettings::UserSettings *CSMSettings::UserSettings::sUserSettingsInstance = 0;
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    QString section;
-
+    /*
     declareSection ("3d-render", "3D Rendering");
     {
-        Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
-        shaders->setDefaultValue ("true");
-
         Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far-clip-distance", "Far clipping distance");
         farClipDist->setDefaultValue (300000);
         farClipDist->setRange (0, 1000000);
@@ -62,23 +56,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16");
         antialiasing->setDefaultValue (defaultValue);
     }
+    */
 
-    declareSection ("3d-render-adv", "3D Rendering (Advanced)");
-    {
-        Setting *numLights = createSetting (Type_SpinBox, "num_lights",
-            "Number of lights per pass");
-        numLights->setDefaultValue (8);
-        numLights->setRange (1, 100);
-    }
-
+    /*
     declareSection ("scene-input", "Scene Input");
     {
-        Setting *timer = createSetting (Type_SpinBox, "timer", "Input responsiveness");
-        timer->setDefaultValue (20);
-        timer->setRange (1, 100);
-        timer->setToolTip ("The time between two checks for user input in milliseconds.<p>"
-            "Lower value result in higher responsiveness.");
-
         Setting *fastFactor = createSetting (Type_SpinBox, "fast-factor",
             "Fast movement factor");
         fastFactor->setDefaultValue (4);
@@ -86,6 +68,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         fastFactor->setToolTip (
             "Factor by which movement is speed up while the shift key is held down.");
     }
+    */
 
     declareSection ("window", "Window");
     {
@@ -625,15 +608,6 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
                                                     const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
-
-    if(settingKey == "3d-render-adv/num_lights" && !list.empty())
-    {
-        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
-    }
-    else if(settingKey == "3d-render/shaders" && !list.empty())
-    {
-        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
-    }
 
     emit userSettingUpdated (settingKey, list);
 }

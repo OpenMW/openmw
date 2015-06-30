@@ -1,11 +1,11 @@
 #include "projectilemanager.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
-
-#include <libs/openengine/bullet/physic.hpp>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/projectilestate.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/controller.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -22,72 +22,72 @@
 
 #include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
-#include "../mwrender/renderconst.hpp"
+#include "../mwrender/vismask.hpp"
 
 #include "../mwsound/sound.hpp"
+
+#include "../mwphysics/physicssystem.hpp"
+
 
 namespace MWWorld
 {
 
-    ProjectileManager::ProjectileManager(Ogre::SceneManager* sceneMgr, OEngine::Physic::PhysicEngine &engine)
-        : mPhysEngine(engine)
-        , mSceneMgr(sceneMgr)
+    ProjectileManager::ProjectileManager(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWPhysics::PhysicsSystem* physics)
+        : mParent(parent)
+        , mResourceSystem(resourceSystem)
+        , mPhysics(physics)
     {
 
     }
 
-    void ProjectileManager::createModel(State &state, const std::string &model)
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient)
     {
-        state.mObject = NifOgre::Loader::createObjects(state.mNode, model);
-        for(size_t i = 0;i < state.mObject->mControllers.size();i++)
-        {
-            if(state.mObject->mControllers[i].getSource().isNull())
-                state.mObject->mControllers[i].setSource(Ogre::SharedPtr<MWRender::EffectAnimationTime> (new MWRender::EffectAnimationTime()));
-        }
+        state.mNode = new osg::PositionAttitudeTransform;
+        state.mNode->setNodeMask(MWRender::Mask_Effect);
+        state.mNode->setPosition(pos);
+        state.mNode->setAttitude(orient);
+        mParent->addChild(state.mNode);
 
-        MWRender::Animation::setRenderProperties(state.mObject, MWRender::RV_Effects,
-                            MWRender::RQG_Main, MWRender::RQG_Alpha, 0.f, false, NULL);
+        mResourceSystem->getSceneManager()->createInstance(model, state.mNode);
+
+        state.mEffectAnimationTime.reset(new MWRender::EffectAnimationTime);
+
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor (state.mEffectAnimationTime);
+        state.mNode->accept(assignVisitor);
     }
 
-    void ProjectileManager::update(NifOgre::ObjectScenePtr object, float duration)
+    void ProjectileManager::update(State& state, float duration)
     {
-        for(size_t i = 0; i < object->mControllers.size() ;i++)
-        {
-            MWRender::EffectAnimationTime* value = dynamic_cast<MWRender::EffectAnimationTime*>(object->mControllers[i].getSource().get());
-            if (value)
-                value->addTime(duration);
-
-            object->mControllers[i].update();
-        }
+        state.mEffectAnimationTime->addTime(duration);
     }
 
     void ProjectileManager::launchMagicBolt(const std::string &model, const std::string &sound,
                                             const std::string &spellId, float speed, bool stack,
                                             const ESM::EffectList &effects, const Ptr &caster, const std::string &sourceName,
-                                            const Ogre::Vector3& fallbackDirection)
+                                            const osg::Vec3f& fallbackDirection)
     {
         float height = 0;
-        if (OEngine::Physic::PhysicActor* actor = mPhysEngine.getCharacter(caster.getRefData().getHandle()))
-            height = actor->getHalfExtents().z * 2 * 0.75f;         // Spawn at 0.75 * ActorHeight
 
-        Ogre::Vector3 pos(caster.getRefData().getPosition().pos);
-        pos.z += height;
+        height += mPhysics->getHalfExtents(caster).z() * 2.f * 0.75f;  // Spawn at 0.75 * ActorHeight
+
+        osg::Vec3f pos(caster.getRefData().getPosition().asVec3());
+        pos.z() += height;
 
         if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
             return;
 
-        Ogre::Quaternion orient;
+        osg::Quat orient;
         if (caster.getClass().isActor())
-            orient = Ogre::Quaternion(Ogre::Radian(caster.getRefData().getPosition().rot[2]), Ogre::Vector3::NEGATIVE_UNIT_Z) *
-                    Ogre::Quaternion(Ogre::Radian(caster.getRefData().getPosition().rot[0]), Ogre::Vector3::NEGATIVE_UNIT_X);
+            orient = osg::Quat(caster.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
+                    * osg::Quat(caster.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
         else
-            orient = Ogre::Vector3::UNIT_Y.getRotationTo(fallbackDirection);
+            orient.makeRotate(osg::Vec3f(0,1,0), osg::Vec3f(fallbackDirection));
 
         MagicBoltState state;
         state.mSourceName = sourceName;
         state.mId = model;
         state.mSpellId = spellId;
-        state.mCasterHandle = caster.getRefData().getHandle();
+        state.mCasterHandle = caster;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -107,8 +107,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), model);
         MWWorld::Ptr ptr = ref.getPtr();
 
-        state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(pos, orient);
-        createModel(state, ptr.getClass().getModel(ptr));
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         state.mSound = sndMgr->playManualSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
@@ -116,20 +115,20 @@ namespace MWWorld
         mMagicBolts.push_back(state);
     }
 
-    void ProjectileManager::launchProjectile(Ptr actor, Ptr projectile, const Ogre::Vector3 &pos,
-                                             const Ogre::Quaternion &orient, Ptr bow, float speed)
+    void ProjectileManager::launchProjectile(Ptr actor, Ptr projectile, const osg::Vec3f &pos, const osg::Quat &orient, Ptr bow, float speed, float attackStrength)
     {
         ProjectileState state;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();
         state.mBowId = bow.getCellRef().getRefId();
-        state.mVelocity = orient.yAxis() * speed;
+        state.mVelocity = orient * osg::Vec3f(0,1,0) * speed;
         state.mId = projectile.getCellRef().getRefId();
+        state.mCasterHandle = actor;
+        state.mAttackStrength = attackStrength;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(pos, orient);
-        createModel(state, ptr.getClass().getModel(ptr));
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
 
         mProjectiles.push_back(state);
     }
@@ -144,60 +143,46 @@ namespace MWWorld
     {
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
         {
-            Ogre::Quaternion orient = it->mNode->getOrientation();
+            osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->getFloat();
             float speed = fTargetSpellMaxSpeed * it->mSpeed;
 
-            Ogre::Vector3 direction = orient.yAxis();
-            direction.normalise();
-            Ogre::Vector3 pos(it->mNode->getPosition());
-            Ogre::Vector3 newPos = pos + direction * duration * speed;
+            osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
+            direction.normalize();
+            osg::Vec3f pos(it->mNode->getPosition());
+            osg::Vec3f newPos = pos + direction * duration * speed;
 
             if (it->mSound.get())
                 it->mSound->setPosition(newPos);
 
             it->mNode->setPosition(newPos);
 
-            update(it->mObject, duration);
+            update(*it, duration);
+
+            MWWorld::Ptr caster = it->getCaster();
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            btVector3 from(pos.x, pos.y, pos.z);
-            btVector3 to(newPos.x, newPos.y, newPos.z);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
 
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
-            bool hit=false;
-
-            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
+            bool hit = false;
+            if (result.mHit)
             {
-                MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
-
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaHandle(it->mCasterHandle);
-                if (caster.isEmpty())
-                    caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
-
-                if (!obstacle.isEmpty() && obstacle == caster)
-                    continue;
-
-                if (caster.isEmpty())
-                    caster = obstacle;
-
-                if (obstacle.isEmpty())
+                hit = true;
+                if (result.mHitObject.isEmpty())
                 {
-                    // Terrain
+                    // terrain
                 }
                 else
                 {
-                    MWMechanics::CastSpell cast(caster, obstacle);
+                    MWMechanics::CastSpell cast(caster, result.mHitObject);
                     cast.mHitPosition = pos;
                     cast.mId = it->mSpellId;
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = it->mStack;
-                    cast.inflict(obstacle, caster, it->mEffects, ESM::RT_Target, false, true);
+                    cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
                 }
-
-                hit = true;
             }
 
             // Explodes when hitting water
@@ -206,12 +191,11 @@ namespace MWWorld
 
             if (hit)
             {
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
 
-                mSceneMgr->destroySceneNode(it->mNode);
+                mParent->removeChild(it->mNode);
 
                 it = mMagicBolts.erase(it);
                 continue;
@@ -227,34 +211,26 @@ namespace MWWorld
         {
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
             // simulating aerodynamics at all
-            it->mVelocity -= Ogre::Vector3(0, 0, 627.2f * 0.1f) * duration;
+            it->mVelocity -= osg::Vec3f(0, 0, 627.2f * 0.1f) * duration;
 
-            Ogre::Vector3 pos(it->mNode->getPosition());
-            Ogre::Vector3 newPos = pos + it->mVelocity * duration;
+            osg::Vec3f pos(it->mNode->getPosition());
+            osg::Vec3f newPos = pos + it->mVelocity * duration;
 
-            Ogre::Quaternion orient = Ogre::Vector3::UNIT_Y.getRotationTo(it->mVelocity);
-            it->mNode->setOrientation(orient);
+            osg::Quat orient;
+            orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+            it->mNode->setAttitude(orient);
             it->mNode->setPosition(newPos);
 
-            update(it->mObject, duration);
+            update(*it, duration);
+
+            MWWorld::Ptr caster = it->getCaster();
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            btVector3 from(pos.x, pos.y, pos.z);
-            btVector3 to(newPos.x, newPos.y, newPos.z);
-            std::vector<std::pair<float, std::string> > collisions = mPhysEngine.rayTest2(from, to, OEngine::Physic::CollisionType_Projectile);
-            bool hit=false;
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
 
-            for (std::vector<std::pair<float, std::string> >::iterator cIt = collisions.begin(); cIt != collisions.end() && !hit; ++cIt)
+            if (result.mHit)
             {
-                MWWorld::Ptr obstacle = MWBase::Environment::get().getWorld()->searchPtrViaHandle(cIt->second);
-
-                MWWorld::Ptr caster = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->mActorId);
-
-                // Arrow intersects with player immediately after shooting :/
-                if (obstacle == caster)
-                    continue;
-
                 MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
 
                 // Try to get a Ptr to the bow that was used. It might no longer exist.
@@ -268,15 +244,11 @@ namespace MWWorld
                 }
 
                 if (caster.isEmpty())
-                    caster = obstacle;
+                    caster = result.mHitObject;
 
-                MWMechanics::projectileHit(caster, obstacle, bow, projectileRef.getPtr(), pos + (newPos - pos) * cIt->first);
+                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
 
-                hit = true;
-            }
-            if (hit)
-            {
-                mSceneMgr->destroySceneNode(it->mNode);
+                mParent->removeChild(it->mNode);
 
                 it = mProjectiles.erase(it);
                 continue;
@@ -290,13 +262,13 @@ namespace MWWorld
     {
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
         {
-            mSceneMgr->destroySceneNode(it->mNode);
+            mParent->removeChild(it->mNode);
         }
         mProjectiles.clear();
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
+            mParent->removeChild(it->mNode);
             MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
-            mSceneMgr->destroySceneNode(it->mNode);
         }
         mMagicBolts.clear();
     }
@@ -309,12 +281,13 @@ namespace MWWorld
 
             ESM::ProjectileState state;
             state.mId = it->mId;
-            state.mPosition = it->mNode->getPosition();
-            state.mOrientation = it->mNode->getOrientation();
+            state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
+            state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
 
             state.mBowId = it->mBowId;
             state.mVelocity = it->mVelocity;
+            state.mAttackStrength = it->mAttackStrength;
 
             state.save(writer);
 
@@ -327,8 +300,8 @@ namespace MWWorld
 
             ESM::MagicBoltState state;
             state.mId = it->mId;
-            state.mPosition = it->mNode->getPosition();
-            state.mOrientation = it->mNode->getOrientation();
+            state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
+            state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
 
             state.mSpellId = it->mSpellId;
@@ -356,6 +329,7 @@ namespace MWWorld
             state.mBowId = esm.mBowId;
             state.mVelocity = esm.mVelocity;
             state.mId = esm.mId;
+            state.mAttackStrength = esm.mAttackStrength;
 
             std::string model;
             try
@@ -369,8 +343,7 @@ namespace MWWorld
                 return true;
             }
 
-            state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(esm.mPosition, esm.mOrientation);
-            createModel(state, model);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
 
             mProjectiles.push_back(state);
             return true;
@@ -401,8 +374,7 @@ namespace MWWorld
                 return true;
             }
 
-            state.mNode = mSceneMgr->getRootSceneNode()->createChildSceneNode(esm.mPosition, esm.mOrientation);
-            createModel(state, model);
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
@@ -419,6 +391,14 @@ namespace MWWorld
     int ProjectileManager::countSavedGameRecords() const
     {
         return mMagicBolts.size() + mProjectiles.size();
+    }
+
+    MWWorld::Ptr ProjectileManager::State::getCaster()
+    {
+        if (!mCasterHandle.isEmpty())
+            return mCasterHandle;
+
+        return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mActorId);
     }
 
 }

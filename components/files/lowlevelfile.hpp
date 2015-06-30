@@ -1,17 +1,15 @@
 #ifndef COMPONENTS_FILES_LOWLEVELFILE_HPP
 #define COMPONENTS_FILES_LOWLEVELFILE_HPP
 
-#include <OgrePlatform.h>
-
 #include <cstdlib>
 
 #define FILE_API_STDIO  0
 #define FILE_API_POSIX  1
 #define FILE_API_WIN32  2
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+#if defined(__linux) || defined(__unix) || defined(__posix)
 #define FILE_API    FILE_API_POSIX
-#elif OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+#elif defined(_WIN32)
 #define FILE_API    FILE_API_WIN32
 #else
 #define FILE_API    FILE_API_STDIO

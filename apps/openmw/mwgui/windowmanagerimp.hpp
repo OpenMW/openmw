@@ -38,23 +38,38 @@ namespace Translation
     class Storage;
 }
 
-namespace OEngine
+namespace osg
 {
-    namespace GUI
-    {
-        class Layout;
-        class MyGUIManager;
-    }
-
-    namespace Render
-    {
-        class OgreRenderer;
-    }
+    class Group;
+}
+namespace osgViewer
+{
+    class Viewer;
 }
 
-namespace SFO
+namespace Resource
 {
-    class CursorManager;
+    class ResourceSystem;
+}
+
+namespace SDLUtil
+{
+    class SDLCursorManager;
+}
+
+namespace osgMyGUI
+{
+    class Platform;
+}
+
+namespace Gui
+{
+    class FontLoader;
+}
+
+namespace MWRender
+{
+    class LocalMap;
 }
 
 namespace MWGui
@@ -99,9 +114,8 @@ namespace MWGui
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(const Compiler::Extensions& extensions,
-                  OEngine::Render::OgreRenderer *mOgre, const std::string& logpath,
-                  const std::string& cacheDir, bool consoleOnlyScripts,
+    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
+                  const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
     virtual ~WindowManager();
 
@@ -163,7 +177,7 @@ namespace MWGui
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
-    virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount);
+    virtual void wmUpdateFps(float fps);
 
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
@@ -182,8 +196,6 @@ namespace MWGui
     virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(MWWorld::CellStore* cell); ///< change the active cell
-    virtual void setPlayerPos(int cellX, int cellY, const float x, const float y); ///< set player position in map space
-    virtual void setPlayerDir(const float x, const float y); ///< set player view direction in map space
 
     virtual void setFocusObject(const MWWorld::Ptr& focus);
     virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
@@ -233,7 +245,7 @@ namespace MWGui
     virtual void addVisitedLocation(const std::string& name, int x, int y);
 
     ///Hides dialog and schedules dialog to be deleted.
-    virtual void removeDialog(OEngine::GUI::Layout* dialog);
+    virtual void removeDialog(Layout* dialog);
 
     ///Gracefully attempts to exit the topmost GUI mode
     virtual void exitCurrentGuiMode();
@@ -294,8 +306,6 @@ namespace MWGui
     virtual void showBook(const MWWorld::Ptr& item, bool showTakeButton);
     virtual void showScroll(const MWWorld::Ptr& item, bool showTakeButton);
 
-    virtual void frameStarted(float dt);
-
     virtual void showSoulgemDialog (MWWorld::Ptr item);
 
     virtual void changePointer (const std::string& name);
@@ -351,11 +361,27 @@ namespace MWGui
     /// Cycle to next or previous weapon
     virtual void cycleWeapon(bool next);
 
+    // In WindowManager for now since there isn't a VFS singleton
+    virtual std::string correctIconPath(const std::string& path);
+    virtual std::string correctBookartPath(const std::string& path, int width, int height);
+    virtual std::string correctTexturePath(const std::string& path);
+
+    void requestMap(std::set<MWWorld::CellStore*> cells);
+    void removeCell(MWWorld::CellStore* cell);
+    void writeFog(MWWorld::CellStore* cell);
+
   private:
+    Resource::ResourceSystem* mResourceSystem;
+
+    osgMyGUI::Platform* mGuiPlatform;
+    osgViewer::Viewer* mViewer;
+
+    std::auto_ptr<Gui::FontLoader> mFontLoader;
+
     bool mConsoleOnlyScripts;
 
     std::map<MyGUI::Window*, std::string> mTrackedWindows;
-    void trackWindow(OEngine::GUI::Layout* layout, const std::string& name);
+    void trackWindow(Layout* layout, const std::string& name);
     void onWindowChangeCoord(MyGUI::Window* _sender);
 
     std::string mSelectedSpell;
@@ -365,10 +391,9 @@ namespace MWGui
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
     CustomMarkerCollection mCustomMarkers;
 
-    OEngine::GUI::MyGUIManager *mGuiManager;
-    OEngine::Render::OgreRenderer *mRendering;
     HUD *mHud;
     MapWindow *mMap;
+    MWRender::LocalMap* mLocalMapRender;
     MainMenu *mMenu;
     ToolTips *mToolTips;
     StatsWindow *mStatsWindow;
@@ -437,9 +462,9 @@ namespace MWGui
     MyGUI::Gui *mGui; // Gui
     std::vector<GuiMode> mGuiModes;
 
-    SFO::CursorManager* mCursorManager;
+    SDLUtil::SDLCursorManager* mCursorManager;
 
-    std::vector<OEngine::GUI::Layout*> mGarbageDialogs;
+    std::vector<Layout*> mGarbageDialogs;
     void cleanupGarbage();
 
     GuiWindow mShown; // Currently shown windows in inventory mode
@@ -456,9 +481,9 @@ namespace MWGui
 
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
+    void updateMap();
+
     float mFPS;
-    unsigned int mTriangleCount;
-    unsigned int mBatchCount;
 
     std::map<std::string, std::string> mFallbackMap;
 
@@ -484,6 +509,9 @@ namespace MWGui
 
     void onClipboardChanged(const std::string& _type, const std::string& _data);
     void onClipboardRequested(const std::string& _type, std::string& _data);
+
+    void createTextures();
+    void setMenuTransparency(float value);
   };
 }
 

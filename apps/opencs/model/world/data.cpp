@@ -62,7 +62,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(resourcesManager.getVFS())
 {
     int index = 0;
 
@@ -534,6 +534,16 @@ CSMWorld::Data::~Data()
         delete *iter;
 
     delete mReader;
+}
+
+Resource::ResourceSystem* CSMWorld::Data::getResourceSystem()
+{
+    return &mResourceSystem;
+}
+
+const Resource::ResourceSystem* CSMWorld::Data::getResourceSystem() const
+{
+    return &mResourceSystem;
 }
 
 const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const
@@ -1160,4 +1170,9 @@ void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex&
 void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 {
     emit idListChanged();
+}
+
+const VFS::Manager* CSMWorld::Data::getVFS() const
+{
+    return mResourcesManager.getVFS();
 }

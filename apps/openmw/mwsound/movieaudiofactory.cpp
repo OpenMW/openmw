@@ -1,7 +1,7 @@
 #include "movieaudiofactory.hpp"
 
-#include <extern/ogre-ffmpeg-videoplayer/audiodecoder.hpp>
-#include <extern/ogre-ffmpeg-videoplayer/videostate.hpp>
+#include <extern/osg-ffmpeg-videoplayer/audiodecoder.hpp>
+#include <extern/osg-ffmpeg-videoplayer/videostate.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -17,7 +17,8 @@ namespace MWSound
     {
     public:
         MWSoundDecoderBridge(MWSound::MovieAudioDecoder* decoder)
-            : mDecoder(decoder)
+            : Sound_Decoder(NULL)
+            , mDecoder(decoder)
         {
         }
 
@@ -51,7 +52,7 @@ namespace MWSound
 
         std::string getStreamName()
         {
-            return mVideoState->stream->getName();
+            return std::string();
         }
 
     private:

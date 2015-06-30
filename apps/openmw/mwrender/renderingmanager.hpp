@@ -1,36 +1,35 @@
-#ifndef GAME_RENDERING_MANAGER_H
-#define GAME_RENDERING_MANAGER_H
+#ifndef OPENMW_MWRENDER_RENDERINGMANAGER_H
+#define OPENMW_MWRENDER_RENDERINGMANAGER_H
 
-#include "sky.hpp"
-#include "debugging.hpp"
+#include <osg/ref_ptr>
+#include <osg/Light>
 
 #include <components/settings/settings.hpp>
 
-#include <boost/filesystem.hpp>
-
-#include <OgreRenderTargetListener.h>
+#include "objects.hpp"
 
 #include "renderinginterface.hpp"
+#include "rendermode.hpp"
 
-#include "objects.hpp"
-#include "actors.hpp"
-#include "camera.hpp"
-#include "occlusionquery.hpp"
-
-namespace Ogre
+namespace osg
 {
-    class SceneNode;
+    class Group;
+    class PositionAttitudeTransform;
 }
 
-namespace MWWorld
+namespace Resource
 {
-    class Ptr;
-    class CellStore;
+    class ResourceSystem;
 }
 
-namespace sh
+namespace osgViewer
 {
-    class Factory;
+    class Viewer;
+}
+
+namespace ESM
+{
+    struct Cell;
 }
 
 namespace Terrain
@@ -38,240 +37,171 @@ namespace Terrain
     class World;
 }
 
+namespace MWWorld
+{
+    class Fallback;
+}
+
 namespace MWRender
 {
-    class Shadows;
-    class LocalMap;
-    class Water;
-    class GlobalMap;
-    class Animation;
+
+    class StateUpdater;
+
     class EffectManager;
+    class SkyManager;
+    class NpcAnimation;
+    class Pathgrid;
+    class Camera;
+    class Water;
 
-class RenderingManager: private RenderingInterface, public Ogre::RenderTargetListener, public OEngine::Render::WindowSizeListener
-{
-private:
-    virtual MWRender::Objects& getObjects();
-    virtual MWRender::Actors& getActors();
-
-public:
-    RenderingManager(OEngine::Render::OgreRenderer& _rend, const boost::filesystem::path& resDir,
-                     const boost::filesystem::path& cacheDir, OEngine::Physic::PhysicEngine* engine,
-                     MWWorld::Fallback* fallback);
-    virtual ~RenderingManager();
-
-    void togglePOV()
-    { mCamera->toggleViewMode(); }
-
-    void togglePreviewMode(bool enable)
-    { mCamera->togglePreviewMode(enable); }
-
-    bool toggleVanityMode(bool enable)
-    { return mCamera->toggleVanityMode(enable); }
-
-    void allowVanityMode(bool allow)
-    { mCamera->allowVanityMode(allow); }
-
-    void togglePlayerLooking(bool enable)
-    { mCamera->togglePlayerLooking(enable); }
-
-    void changeVanityModeScale(float factor)
+    class RenderingManager : public MWRender::RenderingInterface
     {
-        if(mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->setCameraDistance(-factor/120.f*10, true, true);
-    }
+    public:
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback);
+        ~RenderingManager();
 
-    void resetCamera();
+        MWRender::Objects& getObjects();
 
-    bool vanityRotateCamera(const float *rot);
-    void setCameraDistance(float dist, bool adjust = false, bool override = true);
-    float getCameraDistance() const;
+        Resource::ResourceSystem* getResourceSystem();
 
-    void setupPlayer(const MWWorld::Ptr &ptr);
-    void renderPlayer(const MWWorld::Ptr &ptr);
+        void setNightEyeFactor(float factor);
 
-    SkyManager* getSkyManager();
+        void setAmbientColour(const osg::Vec4f& colour);
 
-    MWRender::Camera* getCamera() const;
+        void skySetDate(int day, int month);
+        int skyGetMasserPhase() const;
+        int skyGetSecundaPhase() const;
+        void skySetMoonColour(bool red);
 
-    bool toggleRenderMode(int mode);
+        void setSunDirection(const osg::Vec3f& direction);
+        void setSunColour(const osg::Vec4f& colour);
 
-    void removeCell (MWWorld::CellStore *store);
+        void configureAmbient(const ESM::Cell* cell);
+        void configureFog(const ESM::Cell* cell);
+        void configureFog(float fogDepth, const osg::Vec4f& colour);
 
-    /// \todo this function should be removed later. Instead the rendering subsystems should track
-    /// when rebatching is needed and update automatically at the end of each frame.
-    void cellAdded (MWWorld::CellStore *store);
+        void addCell(const MWWorld::CellStore* store);
+        void removeCell(const MWWorld::CellStore* store);
 
-    /// Clear all savegame-specific data (i.e. fog of war textures)
-    void clear();
+        void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
-    void enableTerrain(bool enable);
+        void rotateObject(const MWWorld::Ptr& ptr, const osg::Quat& rot);
+        void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos);
+        void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
 
-    void removeWater();
+        void removeObject(const MWWorld::Ptr& ptr);
 
-    /// Write current fog of war for this cell to the CellStore
-    void writeFog (MWWorld::CellStore* store);
+        void setWaterEnabled(bool enabled);
+        void setWaterHeight(float level);
 
-    void addObject (const MWWorld::Ptr& ptr, const std::string& model);
-    void removeObject (const MWWorld::Ptr& ptr);
+        /// Take a screenshot of w*h onto the given image, not including the GUI.
+        void screenshot(osg::Image* image, int w, int h);
 
-    void moveObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& position);
-    void scaleObject (const MWWorld::Ptr& ptr, const Ogre::Vector3& scale);
+        struct RayResult
+        {
+            bool mHit;
+            osg::Vec3f mHitNormalWorld;
+            osg::Vec3f mHitPointWorld;
+            MWWorld::Ptr mHitObject;
+        };
 
-    /// Updates an object's rotation
-    void rotateObject (const MWWorld::Ptr& ptr);
+        RayResult castRay(const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors=false);
 
-    void setWaterHeight(float height);
-    void setWaterEnabled(bool enabled);
-    bool toggleWater();
-    bool toggleWorld();
+        /// Return the object under the mouse cursor / crosshair position, given by nX and nY normalized screen coordinates,
+        /// where (0,0) is the top left corner.
+        RayResult castCameraToViewportRay(const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors=false);
 
-    /// Updates object rendering after cell change
-    /// \param old Object reference in previous cell
-    /// \param cur Object reference in new cell
-    void updateObjectCell(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
+        /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
+        osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
 
-    /// Specifies an updated Ptr object for the player (used on cell change).
-    void updatePlayerPtr(const MWWorld::Ptr &ptr);
+        void setSkyEnabled(bool enabled);
 
-    /// Currently for NPCs only. Rebuilds the NPC, updating their root model, animation sources,
-    /// and equipment.
-    void rebuildPtr(const MWWorld::Ptr &ptr);
+        bool toggleRenderMode(RenderMode mode);
 
-    void update (float duration, bool paused);
+        SkyManager* getSkyManager();
 
-    void setAmbientColour(const Ogre::ColourValue& colour);
-    void setSunColour(const Ogre::ColourValue& colour);
-    void setSunDirection(const Ogre::Vector3& direction, bool is_night);
-    void sunEnable(bool real); ///< @param real whether or not to really disable the sunlight (otherwise just set diffuse to 0)
-    void sunDisable(bool real);
+        osg::Vec3f getEyePos();
 
-    void disableLights(bool sun); ///< @param sun whether or not to really disable the sunlight (otherwise just set diffuse to 0)
-    void enableLights(bool sun);
+        void spawnEffect(const std::string &model, const std::string &texture, const osg::Vec3f &worldPosition, float scale = 1.f);
 
+        /// Clear all savegame-specific data
+        void clear();
 
-    void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-    void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
+        /// Clear all worldspace-specific data
+        void notifyWorldSpaceChanged();
 
-    bool occlusionQuerySupported() { return mOcclusionQuery->supported(); }
-    OcclusionQuery* getOcclusionQuery() { return mOcclusionQuery; }
+        void update(float dt, bool paused);
 
-    float getTerrainHeightAt (Ogre::Vector3 worldPos);
+        Animation* getAnimation(const MWWorld::Ptr& ptr);
+        Animation* getPlayerAnimation();
 
-    void notifyWorldSpaceChanged();
+        void addWaterRippleEmitter(const MWWorld::Ptr& ptr);
+        void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
 
-    void getTriangleBatchCount(unsigned int &triangles, unsigned int &batches);
+        void updatePlayerPtr(const MWWorld::Ptr &ptr);
 
-    void setGlare(bool glare);
-    void skyEnable ();
-    void skyDisable ();
-    void skySetHour (double hour);
-    void skySetDate (int day, int month);
-    int skyGetMasserPhase() const;
-    int skyGetSecundaPhase() const;
-    void skySetMoonColour (bool red);
-    void configureAmbient(MWWorld::CellStore &mCell);
+        void removePlayer(const MWWorld::Ptr& player);
+        void setupPlayer(const MWWorld::Ptr& player);
+        void renderPlayer(const MWWorld::Ptr& player);
 
-    void addWaterRippleEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
-    void removeWaterRippleEmitter (const MWWorld::Ptr& ptr);
-    void updateWaterRippleEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        void rebuildPtr(const MWWorld::Ptr& ptr);
 
-    void updateTerrain ();
-    ///< update the terrain according to the player position. Usually done automatically, but should be done manually
-    /// before calling requestMap
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
 
-    void requestMap (MWWorld::CellStore* cell);
-    ///< request the local map for a cell
+        float getNearClipDistance() const;
 
-    /// configure fog according to cell
-    void configureFog(const MWWorld::CellStore &mCell);
+        float getTerrainHeightAt(const osg::Vec3f& pos);
 
-    /// configure fog manually
-    void configureFog(const float density, const Ogre::ColourValue& colour);
-
-    Ogre::Vector4 boundingBoxToScreen(Ogre::AxisAlignedBox bounds);
-    ///< transform the specified bounding box (in world coordinates) into screen coordinates.
-    /// @return packed vector4 (min_x, min_y, max_x, max_y)
-
-    void processChangedSettings(const Settings::CategorySettingVector& settings);
-
-    Ogre::Viewport* getViewport() { return mRendering.getViewport(); }
-
-    void worldToInteriorMapPosition (Ogre::Vector2 position, float& nX, float& nY, int &x, int& y);
-    ///< see MWRender::LocalMap::worldToInteriorMapPosition
-
-    Ogre::Vector2 interiorMapToWorldPosition (float nX, float nY, int x, int y);
-    ///< see MWRender::LocalMap::interiorMapToWorldPosition
-
-    bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
-    ///< see MWRender::LocalMap::isPositionExplored
-
-    Animation* getAnimation(const MWWorld::Ptr &ptr);
-
-    void frameStarted(float dt, bool paused);
-    void screenshot(Ogre::Image& image, int w, int h);
-
-    void spawnEffect (const std::string& model, const std::string& texture, const Ogre::Vector3& worldPosition, float scale=1.f);
-
-protected:
-    virtual void windowResized(int x, int y);
-
-private:
-    sh::Factory* mFactory;
-
-    void setAmbientMode();
-    void applyFog(bool underwater);
-
-    void attachCameraTo(const MWWorld::Ptr& ptr);
-
-    void setMenuTransparency(float val);
-
-    bool mSunEnabled;
-
-    MWWorld::Fallback* mFallback;
-
-    SkyManager* mSkyManager;
-
-    OcclusionQuery* mOcclusionQuery;
-
-    Terrain::World* mTerrain;
-
-    MWRender::Water *mWater;
-
-    GlobalMap* mGlobalMap;
-
-    OEngine::Render::OgreRenderer &mRendering;
-
-    MWRender::Objects* mObjects;
-    MWRender::Actors* mActors;
-
-    MWRender::EffectManager* mEffectManager;
-
-    MWRender::NpcAnimation *mPlayerAnimation;
-
-    // 0 normal, 1 more bright, 2 max
-    int mAmbientMode;
-
-    Ogre::ColourValue mAmbientColor;
-    Ogre::Light* mSun;
-
-    Ogre::SceneNode *mRootNode;
-
-    Ogre::ColourValue mFogColour;
-    float mFogStart;
-    float mFogEnd;
-
-    OEngine::Physic::PhysicEngine* mPhysicsEngine;
-
-    MWRender::Camera *mCamera;
-
-    MWRender::Debugging *mDebugging;
-
-    MWRender::LocalMap* mLocalMap;
-
-    MWRender::Shadows* mShadows;
-
-    bool mRenderWorld;
-};
+        // camera stuff
+        bool vanityRotateCamera(const float *rot);
+        void setCameraDistance(float dist, bool adjust, bool override);
+        void resetCamera();
+        float getCameraDistance() const;
+        Camera* getCamera();
+        void togglePOV();
+        void togglePreviewMode(bool enable);
+        bool toggleVanityMode(bool enable);
+        void allowVanityMode(bool allow);
+        void togglePlayerLooking(bool enable);
+        void changeVanityModeScale(float factor);
+
+    private:
+        void updateProjectionMatrix();
+        void updateTextureFiltering();
+        void updateAmbient();
+        void setFogColor(const osg::Vec4f& color);
+
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
+        osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mLightRoot;
+        Resource::ResourceSystem* mResourceSystem;
+
+        osg::ref_ptr<osg::Light> mSunLight;
+
+        std::auto_ptr<Pathgrid> mPathgrid;
+        std::auto_ptr<Objects> mObjects;
+        std::auto_ptr<Water> mWater;
+        std::auto_ptr<Terrain::World> mTerrain;
+        std::auto_ptr<SkyManager> mSky;
+        std::auto_ptr<EffectManager> mEffectManager;
+        std::auto_ptr<NpcAnimation> mPlayerAnimation;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
+        std::auto_ptr<Camera> mCamera;
+
+        osg::ref_ptr<StateUpdater> mStateUpdater;
+
+        osg::Vec4f mFogColor;
+
+        osg::Vec4f mAmbientColor;
+        float mNightEyeFactor;
+
+        float mNearClip;
+        float mViewDistance;
+        float mFieldOfView;
+
+        void operator = (const RenderingManager&);
+        RenderingManager(const RenderingManager&);
+    };
 
 }
 

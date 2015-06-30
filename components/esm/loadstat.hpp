@@ -28,8 +28,6 @@ struct Static
 
   std::string mId, mModel;
 
-  bool mPersistent;
-
   void load(ESMReader &esm);
   void save(ESMWriter &esm) const;
 

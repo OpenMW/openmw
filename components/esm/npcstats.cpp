@@ -86,7 +86,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     if (esm.isNextSub("PROF"))
         esm.skipHSub(); // int profit
 
-    // No longer used. Now part of CreatureStats.
+    // No longer used
     if (esm.isNextSub("ASTR"))
         esm.skipHSub(); // attackStrength
 

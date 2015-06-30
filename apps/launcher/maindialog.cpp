@@ -199,7 +199,7 @@ bool Launcher::MainDialog::setup()
     // Now create the pages as they need the settings
     createPages();
 
-    // Call this so we can exit on Ogre/SDL errors before mainwindow is shown
+    // Call this so we can exit on SDL errors before mainwindow is shown
     if (!mGraphicsPage->loadSettings())
         return false;
 

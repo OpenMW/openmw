@@ -2,7 +2,7 @@
 
 #include <MyGUI_ProgressBar.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/widgets/box.hpp>
 #include <components/settings/settings.hpp>
@@ -155,7 +155,7 @@ namespace MWGui
                 if (!region->mSleepList.empty())
                 {
                     // figure out if player will be woken while sleeping
-                    int x = OEngine::Misc::Rng::rollDice(hoursToWait);
+                    int x = Misc::Rng::rollDice(hoursToWait);
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
                     if (x < fSleepRandMod * hoursToWait)
                     {

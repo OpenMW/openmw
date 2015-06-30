@@ -58,6 +58,8 @@ op 0x20029: PCRaiseRank, explicit reference
 op 0x2002a: PCLowerRank, explicit reference
 op 0x2002b: PCJoinFaction, explicit reference
 op 0x2002c: MenuTest
+op 0x2002d: BetaComment
+op 0x2002e: BetaComment, explicit reference
 opcodes 0x2002d-0x3ffff unused
 
 Segment 4:
@@ -396,8 +398,8 @@ op 0x2000243: GetFactionReaction
 op 0x2000244: Activate, explicit
 op 0x2000245: ClearInfoActor
 op 0x2000246: ClearInfoActor, explicit
-op 0x2000247: BetaComment
-op 0x2000248: BetaComment, explicit
+op 0x2000247: (unused)
+op 0x2000248: (unused)
 op 0x2000249: OnMurder
 op 0x200024a: OnMurder, explicit
 op 0x200024b: ToggleMenus

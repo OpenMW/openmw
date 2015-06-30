@@ -19,15 +19,16 @@
 
 #include "character.hpp"
 
-#include <OgreStringConverter.h>
-#include <OgreSceneNode.h>
+#include <iostream>
+
+#include <osg/PositionAttitudeTransform>
 
 #include "movement.hpp"
 #include "npcstats.hpp"
 #include "creaturestats.hpp"
 #include "security.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -47,12 +48,19 @@ namespace
 {
 
 // Wraps a value to (-PI, PI]
-void wrap(Ogre::Radian& rad)
+void wrap(float& rad)
 {
-    if (rad.valueRadians()>0)
-        rad = Ogre::Radian(std::fmod(rad.valueRadians()+Ogre::Math::PI, 2.0f*Ogre::Math::PI)-Ogre::Math::PI);
+    if (rad>0)
+        rad = std::fmod(rad+osg::PI, 2.0f*osg::PI)-osg::PI;
     else
-        rad = Ogre::Radian(std::fmod(rad.valueRadians()-Ogre::Math::PI, 2.0f*Ogre::Math::PI)+Ogre::Math::PI);
+        rad = std::fmod(rad-osg::PI, 2.0f*osg::PI)+osg::PI;
+}
+
+std::string toString(int num)
+{
+    std::ostringstream stream;
+    stream << num;
+    return stream.str();
 }
 
 std::string getBestAttack (const ESM::Weapon* weapon)
@@ -219,13 +227,13 @@ public:
 std::string CharacterController::chooseRandomGroup (const std::string& prefix, int* num)
 {
     int numAnims=0;
-    while (mAnimation->hasAnimation(prefix + Ogre::StringConverter::toString(numAnims+1)))
+    while (mAnimation->hasAnimation(prefix + toString(numAnims+1)))
         ++numAnims;
 
-    int roll = OEngine::Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
+    int roll = Misc::Rng::rollDice(numAnims) + 1; // [1, numAnims]
     if (num)
         *num = roll;
-    return prefix + Ogre::StringConverter::toString(roll);
+    return prefix + toString(roll);
 }
 
 void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
@@ -568,7 +576,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
         mCurrentDeath = "deathknockout";
         break;
     default:
-        mCurrentDeath = "death" + Ogre::StringConverter::toString(death - CharState_Death1 + 1);
+        mCurrentDeath = "death" + toString(death - CharState_Death1 + 1);
     }
     mDeathState = death;
 
@@ -641,6 +649,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mUpperBodyState(UpperCharState_Nothing)
     , mJumpState(JumpState_None)
     , mWeaponType(WeapType_None)
+    , mAttackStrength(0.f)
     , mSkipAnim(false)
     , mSecondsOfSwimming(0)
     , mSecondsOfRunning(0)
@@ -649,12 +658,14 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     if(!mAnimation)
         return;
 
+    mAnimation->setTextKeyListener(this);
+
     const MWWorld::Class &cls = mPtr.getClass();
     if(cls.isActor())
     {
         /* Accumulate along X/Y only for now, until we can figure out how we should
          * handle knockout and death which moves the character down. */
-        mAnimation->setAccumulation(Ogre::Vector3(1.0f, 1.0f, 0.0f));
+        mAnimation->setAccumulation(osg::Vec3f(1.0f, 1.0f, 0.0f));
 
         if (cls.hasInventoryStore(mPtr))
         {
@@ -685,7 +696,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     else
     {
         /* Don't accumulate with non-actors. */
-        mAnimation->setAccumulation(Ogre::Vector3(0.0f));
+        mAnimation->setAccumulation(osg::Vec3f(0.f, 0.f, 0.f));
 
         mIdleState = CharState_Idle;
     }
@@ -699,8 +710,141 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
 CharacterController::~CharacterController()
 {
+    if (mAnimation)
+        mAnimation->setTextKeyListener(NULL);
 }
 
+void split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+}
+
+void CharacterController::handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key, const std::multimap<float, std::string> &map)
+{
+    const std::string &evt = key->second;
+
+    if(evt.compare(0, 7, "sound: ") == 0)
+    {
+        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+        sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+        return;
+    }
+    if(evt.compare(0, 10, "soundgen: ") == 0)
+    {
+        std::string soundgen = evt.substr(10);
+
+        // The event can optionally contain volume and pitch modifiers
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+            {
+                std::stringstream stream;
+                stream << tokens[1];
+                stream >> volume;
+            }
+            if (tokens.size() >= 3)
+            {
+                std::stringstream stream;
+                stream << tokens[2];
+                stream >> pitch;
+            }
+        }
+
+        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
+        if(!sound.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
+            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
+                type = MWBase::SoundManager::Play_TypeFoot;
+            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
+        }
+        return;
+    }
+
+    if(evt.compare(0, groupname.size(), groupname) != 0 ||
+       evt.compare(groupname.size(), 2, ": ") != 0)
+    {
+        // Not ours, skip it
+        return;
+    }
+    size_t off = groupname.size()+2;
+    size_t len = evt.size() - off;
+
+    if(evt.compare(off, len, "equip attach") == 0)
+        mAnimation->showWeapons(true);
+    else if(evt.compare(off, len, "unequip detach") == 0)
+        mAnimation->showWeapons(false);
+    else if(evt.compare(off, len, "chop hit") == 0)
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+    else if(evt.compare(off, len, "slash hit") == 0)
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+    else if(evt.compare(off, len, "thrust hit") == 0)
+        mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+    else if(evt.compare(off, len, "hit") == 0)
+    {
+        if (groupname == "attack1")
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+        else if (groupname == "attack2")
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+        else if (groupname == "attack3")
+            mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+        else
+            mPtr.getClass().hit(mPtr, mAttackStrength);
+    }
+    else if (!groupname.empty() && groupname.compare(0, groupname.size()-1, "attack") == 0
+             && evt.compare(off, len, "start") == 0)
+    {
+        std::multimap<float, std::string>::const_iterator hitKey = key;
+
+        // Not all animations have a hit key defined. If there is none, the hit happens with the start key.
+        bool hasHitKey = false;
+        while (hitKey != map.end())
+        {
+            if (hitKey->second == groupname + ": hit")
+            {
+                hasHitKey = true;
+                break;
+            }
+            if (hitKey->second == groupname + ": stop")
+                break;
+            ++hitKey;
+        }
+        if (!hasHitKey)
+        {
+            if (groupname == "attack1")
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Chop);
+            else if (groupname == "attack2")
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Slash);
+            else if (groupname == "attack3")
+                mPtr.getClass().hit(mPtr, mAttackStrength, ESM::Weapon::AT_Thrust);
+        }
+    }
+    else if (evt.compare(off, len, "shoot attach") == 0)
+        mAnimation->attachArrow();
+    else if (evt.compare(off, len, "shoot release") == 0)
+        mAnimation->releaseArrow(mAttackStrength);
+    else if (evt.compare(off, len, "shoot follow attach") == 0)
+        mAnimation->attachArrow();
+
+    else if (groupname == "spellcast" && evt.substr(evt.size()-7, 7) == "release"
+             // Make sure this key is actually for the RangeType we are casting. The flame atronach has
+             // the same animation for all range types, so there are 3 "release" keys on the same time, one for each range type.
+             && evt.compare(off, len, mAttackType + " release") == 0)
+    {
+        MWBase::Environment::get().getWorld()->castSpell(mPtr);
+    }
+
+    else if (groupname == "shield" && evt.compare(off, len, "block hit") == 0)
+        mPtr.getClass().block(mPtr);
+}
 
 void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 {
@@ -712,9 +856,10 @@ void CharacterController::updateIdleStormState()
     bool inStormDirection = false;
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
-        Ogre::Vector3 stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
-        Ogre::Vector3 characterDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
-        inStormDirection = stormDirection.angleBetween(characterDirection) > Ogre::Degree(120);
+        osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
+        osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
+                > osg::DegreesToRadians(120.f);
     }
     if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
@@ -831,7 +976,7 @@ bool CharacterController::updateCreatureState()
             }
             if (weapType != WeapType_Spell || !mAnimation->hasAnimation("spellcast")) // Not all creatures have a dedicated spellcast animation
             {
-                int roll = OEngine::Misc::Rng::rollDice(3); // [0, 2]
+                int roll = Misc::Rng::rollDice(3); // [0, 2]
                 if (roll == 0)
                     mCurrentWeapon = "attack1";
                 else if (roll == 1)
@@ -847,6 +992,8 @@ bool CharacterController::updateCreatureState()
                                  1, startKey, stopKey,
                                  0.0f, 0);
                 mUpperBodyState = UpperCharState_StartToMinAttack;
+
+                mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
         }
 
@@ -1030,14 +1177,10 @@ bool CharacterController::updateWeaponState()
                     effect = store.get<ESM::MagicEffect>().find(effectentry.mEffectID);
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
-                    if (mAnimation->getNode("Left Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Left Hand", effect->mParticle);
-                    else
+                    if (mAnimation->getNode("Bip01 L Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
 
-                    if (mAnimation->getNode("Right Hand"))
-                        mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Right Hand", effect->mParticle);
-                    else
+                    if (mAnimation->getNode("Bip01 R Hand"))
                         mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
 
                     switch(effectentry.mRange)
@@ -1127,7 +1270,7 @@ bool CharacterController::updateWeaponState()
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
                 // Note: vanilla MW uses a random value for *all* non-player actors, but we probably don't need to go that far.
-                attackStrength = std::min(1.f, 0.1f + OEngine::Misc::Rng::rollClosedProbability());
+                attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
 
             if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
@@ -1152,7 +1295,7 @@ bool CharacterController::updateWeaponState()
                         sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
                 }
             }
-            stats.setAttackStrength(attackStrength);
+            mAttackStrength = attackStrength;
 
             mAnimation->disable(mCurrentWeapon);
             mAnimation->play(mCurrentWeapon, Priority_Weapon,
@@ -1276,7 +1419,7 @@ bool CharacterController::updateWeaponState()
                 }
                 else
                 {
-                    float str = stats.getAttackStrength();
+                    float str = mAttackStrength;
                     start = mAttackType+((str < 0.5f) ? " small follow start"
                                                                   : (str < 1.0f) ? " medium follow start"
                                                                                  : " large follow start");
@@ -1345,7 +1488,7 @@ void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
-    Ogre::Vector3 movement(0.0f);
+    osg::Vec3f movement(0.f, 0.f, 0.f);
 
     updateMagicEffects();
 
@@ -1402,23 +1545,23 @@ void CharacterController::update(float duration)
             }
         }
 
-        Ogre::Vector3 vec(cls.getMovementSettings(mPtr).mPosition);
-        vec.normalise();
+        osg::Vec3f vec(cls.getMovementSettings(mPtr).asVec3());
+        vec.normalize();
 
         if(mHitState != CharState_None && mJumpState == JumpState_None)
-            vec = Ogre::Vector3(0.0f);
-        Ogre::Vector3 rot = cls.getRotationVector(mPtr);
+            vec = osg::Vec3f(0.f, 0.f, 0.f);
+        osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         mMovementSpeed = cls.getSpeed(mPtr);
 
-        vec.x *= mMovementSpeed;
-        vec.y *= mMovementSpeed;
+        vec.x() *= mMovementSpeed;
+        vec.y() *= mMovementSpeed;
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
         bool forcestateupdate = false;
 
-        mHasMovedInXY = std::abs(vec[0])+std::abs(vec[1]) > 0.0f;
+        mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
         isrunning = isrunning && mHasMovedInXY;
 
 
@@ -1481,7 +1624,7 @@ void CharacterController::update(float duration)
         cls.getCreatureStats(mPtr).setFatigue(fatigue);
 
         if(sneak || inwater || flying)
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
         if (inwater || flying)
             cls.getCreatureStats(mPtr).land();
@@ -1504,22 +1647,23 @@ void CharacterController::update(float duration)
             static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
             float factor = fJumpMoveBase + fJumpMoveMult * mPtr.getClass().getSkill(mPtr, ESM::Skill::Acrobatics)/100.f;
             factor = std::min(1.f, factor);
-            vec.x *= factor;
-            vec.y *= factor;
-            vec.z  = 0.0f;
+            vec.x() *= factor;
+            vec.y() *= factor;
+            vec.z()  = 0.0f;
         }
-        else if(vec.z > 0.0f && mJumpState == JumpState_None)
+        else if(vec.z() > 0.0f && mJumpState == JumpState_None)
         {
             // Started a jump.
             float z = cls.getJump(mPtr);
             if (z > 0)
             {
-                if(vec.x == 0 && vec.y == 0)
-                    vec = Ogre::Vector3(0.0f, 0.0f, z);
+                if(vec.x() == 0 && vec.y() == 0)
+                    vec = osg::Vec3f(0.0f, 0.0f, z);
                 else
                 {
-                    Ogre::Vector3 lat = Ogre::Vector3(vec.x, vec.y, 0.0f).normalisedCopy();
-                    vec = Ogre::Vector3(lat.x, lat.y, 1.0f) * z * 0.707f;
+                    osg::Vec3f lat (vec.x(), vec.y(), 0.0f);
+                    lat.normalize();
+                    vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
                 }
 
                 // advance acrobatics
@@ -1543,7 +1687,7 @@ void CharacterController::update(float duration)
         {
             forcestateupdate = true;
             mJumpState = JumpState_Landing;
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
             float healthLost = getFallDamage(mPtr, height);
@@ -1574,28 +1718,28 @@ void CharacterController::update(float duration)
         else
         {
             mJumpState = JumpState_None;
-            vec.z = 0.0f;
+            vec.z() = 0.0f;
 
             inJump = false;
 
-            if(std::abs(vec.x/2.0f) > std::abs(vec.y))
+            if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
             {
-                if(vec.x > 0.0f)
+                if(vec.x() > 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunRight : CharState_SwimWalkRight)
                                          : (sneak ? CharState_SneakRight
                                                   : (isrunning ? CharState_RunRight : CharState_WalkRight)));
-                else if(vec.x < 0.0f)
+                else if(vec.x() < 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunLeft : CharState_SwimWalkLeft)
                                          : (sneak ? CharState_SneakLeft
                                                   : (isrunning ? CharState_RunLeft : CharState_WalkLeft)));
             }
-            else if(vec.y != 0.0f)
+            else if(vec.y() != 0.0f)
             {
-                if(vec.y > 0.0f)
+                if(vec.y() > 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunForward : CharState_SwimWalkForward)
                                          : (sneak ? CharState_SneakForward
                                                   : (isrunning ? CharState_RunForward : CharState_WalkForward)));
-                else if(vec.y < 0.0f)
+                else if(vec.y() < 0.0f)
                     movestate = (inwater ? (isrunning ? CharState_SwimRunBack : CharState_SwimWalkBack)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
@@ -1603,11 +1747,11 @@ void CharacterController::update(float duration)
             // Don't play turning animations during attack. It would break positioning of the arrow bone when releasing a shot.
             // Actually, in vanilla the turning animation is not even played when merely having equipped the weapon,
             // but I don't think we need to go as far as that.
-            else if(rot.z != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
+            else if(rot.z() != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
             {
-                if(rot.z > 0.0f)
+                if(rot.z() > 0.0f)
                     movestate = CharState_TurnRight;
-                else if(rot.z < 0.0f)
+                else if(rot.z() < 0.0f)
                     movestate = CharState_TurnLeft;
             }
         }
@@ -1627,7 +1771,7 @@ void CharacterController::update(float duration)
         if(movestate != CharState_None)
             clearAnimQueue();
 
-        if(mAnimQueue.empty())
+        if(mAnimQueue.empty() || inwater || sneak)
         {
             idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
         }
@@ -1657,25 +1801,25 @@ void CharacterController::update(float duration)
         if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
         {
             if (duration > 0)
-                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z) / duration / Ogre::Math::PI));
+                mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
         }
 
         if (!mSkipAnim)
         {
-            rot *= Ogre::Math::RadiansToDegrees(1.0f);
+            rot *= osg::RadiansToDegrees(1.0f);
             if(mHitState != CharState_KnockDown && mHitState != CharState_KnockOut)
             {
-                world->rotateObject(mPtr, rot.x, rot.y, rot.z, true);
+                world->rotateObject(mPtr, rot.x(), rot.y(), rot.z(), true);
             }
             else //avoid z-rotating for knockdown
-                world->rotateObject(mPtr, rot.x, rot.y, 0.0f, true);
+                world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
 
             if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
         else
             // We must always queue movement, even if there is none, to apply gravity.
-            world->queueMovement(mPtr, Ogre::Vector3(0.0f));
+            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
@@ -1687,29 +1831,29 @@ void CharacterController::update(float duration)
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
-        world->queueMovement(mPtr, Ogre::Vector3(0.0f));
+        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
-    Ogre::Vector3 moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
+    osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim ? 0.f : duration);
     if(duration > 0.0f)
         moved /= duration;
     else
-        moved = Ogre::Vector3(0.0f);
+        moved = osg::Vec3f(0.f, 0.f, 0.f);
 
     // Ensure we're moving in generally the right direction...
     if(mMovementSpeed > 0.f)
     {
         float l = moved.length();
 
-        if((movement.x < 0.0f && movement.x < moved.x*2.0f) ||
-           (movement.x > 0.0f && movement.x > moved.x*2.0f))
-            moved.x = movement.x;
-        if((movement.y < 0.0f && movement.y < moved.y*2.0f) ||
-           (movement.y > 0.0f && movement.y > moved.y*2.0f))
-            moved.y = movement.y;
-        if((movement.z < 0.0f && movement.z < moved.z*2.0f) ||
-           (movement.z > 0.0f && movement.z > moved.z*2.0f))
-            moved.z = movement.z;
+        if((movement.x() < 0.0f && movement.x() < moved.x()*2.0f) ||
+           (movement.x() > 0.0f && movement.x() > moved.x()*2.0f))
+            moved.x() = movement.x();
+        if((movement.y() < 0.0f && movement.y() < moved.y()*2.0f) ||
+           (movement.y() > 0.0f && movement.y() > moved.y()*2.0f))
+            moved.y() = movement.y();
+        if((movement.z() < 0.0f && movement.z() < moved.z()*2.0f) ||
+           (movement.z() > 0.0f && movement.z() > moved.z()*2.0f))
+            moved.z() = movement.z();
         // but keep the original speed
         float newLength = moved.length();
         if (newLength > 0)
@@ -1732,7 +1876,7 @@ void CharacterController::update(float duration)
 void CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
-        std::cerr<< "Animation "<<groupname<<" not found" <<std::endl;
+        std::cerr<< "Animation "<<groupname<<" not found for " << mPtr.getCellRef().getRefId() << std::endl;
     else
     {
         count = std::max(count, 1);
@@ -1897,6 +2041,11 @@ bool CharacterController::isKnockedOut() const
     return mHitState == CharState_KnockOut;
 }
 
+void CharacterController::setActive(bool active)
+{
+    mAnimation->setActive(active);
+}
+
 void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
 {
     mHeadTrackTarget = target;
@@ -1904,48 +2053,61 @@ void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
 
 void CharacterController::updateHeadTracking(float duration)
 {
-    Ogre::Node* head = mAnimation->getNode("Bip01 Head");
+    const osg::Node* head = mAnimation->getNode("Bip01 Head");
     if (!head)
         return;
-    Ogre::Radian zAngle (0.f);
-    Ogre::Radian xAngle (0.f);
+
+    float zAngleRadians = 0.f;
+    float xAngleRadians = 0.f;
+
     if (!mHeadTrackTarget.isEmpty())
     {
-        Ogre::Vector3 headPos = mPtr.getRefData().getBaseNode()->convertLocalToWorldPosition(head->_getDerivedPosition());
-        Ogre::Vector3 targetPos (mHeadTrackTarget.getRefData().getPosition().pos);
+        osg::MatrixList mats = head->getWorldMatrices();
+        if (mats.empty())
+            return;
+        osg::Matrixf mat = mats[0];
+        osg::Vec3f headPos = mat.getTrans();
+
+        osg::Vec3f targetPos (mHeadTrackTarget.getRefData().getPosition().asVec3());
         if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
-            Ogre::Node* targetHead = anim->getNode("Head");
-            if (!targetHead)
-                targetHead = anim->getNode("Bip01 Head");
-            if (targetHead)
-                targetPos = mHeadTrackTarget.getRefData().getBaseNode()->convertLocalToWorldPosition(
-                        targetHead->_getDerivedPosition());
+            const osg::Node* node = anim->getNode("Head");
+            if (node == NULL)
+                node = anim->getNode("Bip01 Head");
+            if (node != NULL)
+            {
+                osg::MatrixList mats = node->getWorldMatrices();
+                if (mats.size())
+                    targetPos = mats[0].getTrans();
+            }
         }
 
-        Ogre::Vector3 direction = targetPos - headPos;
-        direction.normalise();
+        osg::Vec3f direction = targetPos - headPos;
+        direction.normalize();
 
-        const Ogre::Vector3 actorDirection = mPtr.getRefData().getBaseNode()->getOrientation().yAxis();
+        if (!mPtr.getRefData().getBaseNode())
+            return;
+        const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
-        zAngle = Ogre::Math::ATan2(direction.x,direction.y) -
-                Ogre::Math::ATan2(actorDirection.x, actorDirection.y);
-        xAngle = -Ogre::Math::ASin(direction.z);
-        wrap(zAngle);
-        wrap(xAngle);
-        xAngle = Ogre::Degree(std::min(xAngle.valueDegrees(), 40.f));
-        xAngle = Ogre::Degree(std::max(xAngle.valueDegrees(), -40.f));
-        zAngle = Ogre::Degree(std::min(zAngle.valueDegrees(), 30.f));
-        zAngle = Ogre::Degree(std::max(zAngle.valueDegrees(), -30.f));
+        zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
+        xAngleRadians = -std::asin(direction.z());
 
+        wrap(zAngleRadians);
+        wrap(xAngleRadians);
+
+        xAngleRadians = std::min(xAngleRadians, osg::DegreesToRadians(40.f));
+        xAngleRadians = std::max(xAngleRadians, osg::DegreesToRadians(-40.f));
+        zAngleRadians = std::min(zAngleRadians, osg::DegreesToRadians(30.f));
+        zAngleRadians = std::max(zAngleRadians, osg::DegreesToRadians(-30.f));
     }
+
     float factor = duration*5;
     factor = std::min(factor, 1.f);
-    xAngle = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngle);
-    zAngle = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngle);
+    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
+    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
 
-    mAnimation->setHeadPitch(xAngle);
-    mAnimation->setHeadYaw(zAngle);
+    mAnimation->setHeadPitch(xAngleRadians);
+    mAnimation->setHeadYaw(zAngleRadians);
 }
 
 }

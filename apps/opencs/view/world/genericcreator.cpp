@@ -161,6 +161,8 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+
+    connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
 
 void CSVWorld::GenericCreator::setEditLock (bool locked)
@@ -290,4 +292,13 @@ void CSVWorld::GenericCreator::scopeChanged (int index)
 {
     update();
     updateNamespace();
+}
+
+void CSVWorld::GenericCreator::dataIdListChanged()
+{
+    // If the original ID of cloned record was removed, cancel the creator
+    if (mCloneMode && !mData.hasId(mClonedId))
+    {
+        emit done();
+    }
 }

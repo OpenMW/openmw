@@ -1,9 +1,6 @@
 #include "aiwander.hpp"
 
-#include <OgreVector3.h>
-#include <OgreSceneNode.h>
-
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>
 
@@ -48,7 +45,7 @@ namespace MWMechanics
     {
         // the z rotation angle (degrees) we want to reach
         // used every frame when mRotate is true
-        Ogre::Radian mTargetAngle;
+        float mTargetAngleRadians;
         bool mRotate;
         float mReaction; // update some actions infrequently
         
@@ -69,7 +66,7 @@ namespace MWMechanics
         PathFinder mPathFinder;
         
         AiWanderStorage():
-            mTargetAngle(0),
+            mTargetAngleRadians(0),
             mRotate(false),
             mReaction(0),
             mSaidGreeting(AiWander::Greet_None),
@@ -101,7 +98,7 @@ namespace MWMechanics
         mTrimCurrentNode = false;
 
         mHasReturnPosition = false;
-        mReturnPosition = Ogre::Vector3(0,0,0);
+        mReturnPosition = osg::Vec3f(0,0,0);
 
         if(mDistance < 0)
             mDistance = 0;
@@ -171,7 +168,7 @@ namespace MWMechanics
      * actors will enter combat (i.e. no longer wandering) and different pathfinding
      * will kick in.
      */
-    bool AiWander::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+    bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
@@ -231,7 +228,7 @@ namespace MWMechanics
         if(walking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
-            zTurn(actor, Ogre::Degree(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+            zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
             // Returns true if evasive action needs to be taken
@@ -255,7 +252,7 @@ namespace MWMechanics
                     actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
                     actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
                     // change the angle a bit, too
-                    zTurn(actor, Ogre::Degree(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                    zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
                 }
                 mStuckCount++;  // TODO: maybe no longer needed
             }
@@ -275,14 +272,14 @@ namespace MWMechanics
         }
         
         
-        Ogre::Radian& targetAngle = storage.mTargetAngle;
+        float& targetAngleRadians = storage.mTargetAngleRadians;
         bool& rotate = storage.mRotate;
         if (rotate)
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, targetAngle, Ogre::Degree(5)))
+            if (zTurn(actor, targetAngleRadians, osg::DegreesToRadians(5.f)))
                 rotate = false;
         }
 
@@ -329,7 +326,7 @@ namespace MWMechanics
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                     .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
 
-            float roll = OEngine::Misc::Rng::rollProbability() * 10000.0f;
+            float roll = Misc::Rng::rollProbability() * 10000.0f;
 
             // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
             // due to the roll being an integer.
@@ -340,7 +337,7 @@ namespace MWMechanics
             // Only say Idle voices when player is in LOS
             // A bit counterintuitive, likely vanilla did this to reduce the appearance of
             // voices going through walls?
-            if (roll < x && Ogre::Vector3(player.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(pos.pos))
+            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
                     < 3000*3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
                     && MWBase::Environment::get().getWorld()->getLOS(player, actor))
                 MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
@@ -400,7 +397,7 @@ namespace MWMechanics
         // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
         if (cellChange)
             mHasReturnPosition = false;
-        if (mDistance == 0 && mHasReturnPosition && Ogre::Vector3(pos.pos).squaredDistance(mReturnPosition) > 20*20)
+        if (mDistance == 0 && mHasReturnPosition && (pos.asVec3() - mReturnPosition).length2() > 20*20)
         {
             chooseAction = false;
             idleNow = false;
@@ -435,9 +432,9 @@ namespace MWMechanics
             helloDistance *= iGreetDistanceMultiplier;
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            Ogre::Vector3 playerPos(player.getRefData().getPosition().pos);
-            Ogre::Vector3 actorPos(actor.getRefData().getPosition().pos);
-            float playerDistSqr = playerPos.squaredDistance(actorPos);
+            osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+            osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+            float playerDistSqr = (playerPos - actorPos).length2();
 
             int& greetingTimer = storage.mGreetingTimer;
             if (greetingState == Greet_None)
@@ -471,16 +468,11 @@ namespace MWMechanics
 
                 if(!rotate)
                 {
-                    Ogre::Vector3 dir = playerPos - actorPos;
+                    osg::Vec3f dir = playerPos - actorPos;
 
-                    Ogre::Radian faceAngle = Ogre::Math::ATan2(dir.x,dir.y);
-                    Ogre::Radian actorAngle = actor.getRefData().getBaseNode()->getOrientation().getRoll();
-                    // an attempt at reducing the turning animation glitch
-                    if( Ogre::Math::Abs( faceAngle - actorAngle ) >= Ogre::Degree(5) ) // TODO: is there a better way?
-                    {
-                        targetAngle = faceAngle;
-                        rotate = true;
-                    }
+                    float faceAngleRadians = std::atan2(dir.x(), dir.y());
+                    targetAngleRadians = faceAngleRadians;
+                    rotate = true;
                 }
                 
                 if (greetingTimer >= GREETING_SHOULD_END)
@@ -504,12 +496,10 @@ namespace MWMechanics
             if(!storage.mPathFinder.isPathConstructed())
             {
                 assert(mAllowedNodes.size());
-                unsigned int randNode = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
+                unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
                 // NOTE: initially constructed with local (i.e. cell) co-ordinates
-                Ogre::Vector3 destNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[randNode]));
-
                 // convert dest to use world co-ordinates
-                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(destNodePos));
+                ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
                 if (currentCell->getCell()->isExterior())
                 {
                     dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
@@ -612,7 +602,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::setReturnPosition(const Ogre::Vector3& position)
+    void AiWander::setReturnPosition(const osg::Vec3f& position)
     {
         if (!mHasReturnPosition)
         {
@@ -631,7 +621,7 @@ namespace MWMechanics
                 .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
 
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
-            unsigned short randSelect = (int)(OEngine::Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
+            unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
                 playedIdle = counter+2;
@@ -653,12 +643,12 @@ namespace MWMechanics
 
         state.moveIn(new AiWanderStorage());
 
-        int index = OEngine::Misc::Rng::rollDice(mAllowedNodes.size());
+        int index = Misc::Rng::rollDice(mAllowedNodes.size());
         ESM::Pathgrid::Point dest = mAllowedNodes[index];
 
         // apply a slight offset to prevent overcrowding
-        dest.mX += static_cast<int>(Ogre::Math::RangeRandom(-64, 64));
-        dest.mY += static_cast<int>(Ogre::Math::RangeRandom(-64, 64));
+        dest.mX += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
+        dest.mY += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
 
         if (actor.getCell()->isExterior())
         {
@@ -678,7 +668,7 @@ namespace MWMechanics
     {
         if (!mStoredInitialActorPosition)
         {
-            mInitialActorPosition = Ogre::Vector3(actor.getRefData().getPosition().pos);
+            mInitialActorPosition = actor.getRefData().getPosition().asVec3();
             mStoredInitialActorPosition = true;
         }
 
@@ -709,7 +699,7 @@ namespace MWMechanics
             }
 
             // convert npcPos to local (i.e. cell) co-ordinates
-            Ogre::Vector3 npcPos(mInitialActorPosition);
+            osg::Vec3f npcPos(mInitialActorPosition);
             npcPos[0] = npcPos[0] - cellXOffset;
             npcPos[1] = npcPos[1] - cellYOffset;
 
@@ -717,19 +707,19 @@ namespace MWMechanics
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
-                Ogre::Vector3 nodePos(PathFinder::MakeOgreVector3(pathgrid->mPoints[counter]));
-                if(npcPos.squaredDistance(nodePos) <= mDistance * mDistance)
+                osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
+                if((npcPos - nodePos).length2() <= mDistance * mDistance)
                     mAllowedNodes.push_back(pathgrid->mPoints[counter]);
             }
             if(!mAllowedNodes.empty())
             {
-                Ogre::Vector3 firstNodePos(PathFinder::MakeOgreVector3(mAllowedNodes[0]));
-                float closestNode = npcPos.squaredDistance(firstNodePos);
+                osg::Vec3f firstNodePos(PathFinder::MakeOsgVec3(mAllowedNodes[0]));
+                float closestNode = (npcPos - firstNodePos).length2();
                 unsigned int index = 0;
                 for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
                 {
-                    Ogre::Vector3 nodePos(PathFinder::MakeOgreVector3(mAllowedNodes[counterThree]));
-                    float tempDist = npcPos.squaredDistance(nodePos);
+                    osg::Vec3f nodePos(PathFinder::MakeOsgVec3(mAllowedNodes[counterThree]));
+                    float tempDist = (npcPos - nodePos).length2();
                     if(tempDist < closestNode)
                         index = counterThree;
                 }
@@ -746,7 +736,7 @@ namespace MWMechanics
                 std::vector<PathDistance> nodeDistances;
                 for (unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
                 {
-                    float distance = npcPos.squaredDistance(PathFinder::MakeOgreVector3(pathgrid->mPoints[counter]));
+                    float distance = (npcPos - PathFinder::MakeOsgVec3(pathgrid->mPoints[counter])).length2();
                     nodeDistances.push_back(std::make_pair(distance, &pathgrid->mPoints.at(counter)));
                 }
                 std::sort(nodeDistances.begin(), nodeDistances.end(), sortByDistance);

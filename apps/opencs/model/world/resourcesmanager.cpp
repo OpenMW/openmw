@@ -3,6 +3,11 @@
 
 #include <stdexcept>
 
+CSMWorld::ResourcesManager::ResourcesManager()
+    : mVFS(NULL)
+{
+}
+
 void CSMWorld::ResourcesManager::addResources (const Resources& resources)
 {
     mResources.insert (std::make_pair (resources.getType(), resources));
@@ -10,16 +15,24 @@ void CSMWorld::ResourcesManager::addResources (const Resources& resources)
         resources));
 }
 
-void CSMWorld::ResourcesManager::listResources()
+void CSMWorld::ResourcesManager::setVFS(const VFS::Manager *vfs)
 {
+    mVFS = vfs;
+    mResources.clear();
+
     static const char * const sMeshTypes[] = { "nif", 0 };
 
-    addResources (Resources ("meshes", UniversalId::Type_Mesh, sMeshTypes));
-    addResources (Resources ("icons", UniversalId::Type_Icon));
-    addResources (Resources ("music", UniversalId::Type_Music));
-    addResources (Resources ("sound", UniversalId::Type_SoundRes));
-    addResources (Resources ("textures", UniversalId::Type_Texture));
-    addResources (Resources ("videos", UniversalId::Type_Video));
+    addResources (Resources (vfs, "meshes", UniversalId::Type_Mesh, sMeshTypes));
+    addResources (Resources (vfs, "icons", UniversalId::Type_Icon));
+    addResources (Resources (vfs, "music", UniversalId::Type_Music));
+    addResources (Resources (vfs, "sound", UniversalId::Type_SoundRes));
+    addResources (Resources (vfs, "textures", UniversalId::Type_Texture));
+    addResources (Resources (vfs, "videos", UniversalId::Type_Video));
+}
+
+const VFS::Manager* CSMWorld::ResourcesManager::getVFS() const
+{
+    return mVFS;
 }
 
 const CSMWorld::Resources& CSMWorld::ResourcesManager::get (UniversalId::Type type) const

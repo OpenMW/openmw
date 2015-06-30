@@ -3,11 +3,7 @@
 
 #include <QWidget>
 
-#include <components/ogreinit/ogreinit.hpp>
-
 #include "ui_graphicspage.h"
-
-namespace Ogre { class Root; class RenderSystem; }
 
 namespace Files { struct ConfigurationManager; }
 
@@ -26,7 +22,6 @@ namespace Launcher
         bool loadSettings();
 
     public slots:
-        void rendererChanged(const QString &renderer);
         void screenChanged(int screen);
 
     private slots:
@@ -34,20 +29,12 @@ namespace Launcher
         void slotStandardToggled(bool checked);
 
     private:
-        OgreInit::OgreInit mOgreInit;
-        Ogre::Root *mOgre;
-        Ogre::RenderSystem *mSelectedRenderSystem;
-        Ogre::RenderSystem *mOpenGLRenderSystem;
-        Ogre::RenderSystem *mDirect3DRenderSystem;
-
         Files::ConfigurationManager &mCfgMgr;
         GraphicsSettings &mGraphicsSettings;
 
-        QStringList getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer);
         QStringList getAvailableResolutions(int screen);
         QRect getMaximumResolution();
 
-        bool setupOgre();
         bool setupSDL();
     };
 }

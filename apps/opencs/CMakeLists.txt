@@ -69,7 +69,7 @@ opencs_units (view/world
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem idcompletiondelegate
+    scripthighlighter idvalidator dialoguecreator idcompletiondelegate
     colordelegate dragdroputils
     )
 
@@ -84,8 +84,8 @@ opencs_units (view/render
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem mousestate
+    lighting lightingday lightingnight
+    lightingbright object cell terrainstorage
     )
 
 opencs_hdrs_noqt (view/render
@@ -199,16 +199,10 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OENGINE_LIBRARY}
-    ${OGRE_LIBRARIES}
-    ${OGRE_Overlay_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
-    ${SHINY_LIBRARIES}
+    ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_WAVE_LIBRARY}
-    ${BULLET_LIBRARIES}
     components
 )
 
@@ -216,14 +210,14 @@ if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-cs
     ${QT_QTGUI_LIBRARY}
     ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY})
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTOPENGL_LIBRARY})
 
     if (WIN32)
         target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
     endif()
-
 else()
-    qt5_use_modules(openmw-cs Widgets Core Network)
+    qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
     if (WIN32)
         target_link_libraries(Qt5::WinMain)
     endif()

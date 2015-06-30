@@ -10,7 +10,9 @@
 
 #include <components/settings/settings.hpp>
 
-#include <OgreImage.h>
+#include <osg/Image>
+
+#include <osgDB/Registry>
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -137,11 +139,28 @@ void MWState::StateManager::newGame (bool bypass)
     if (!bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+    try
+    {
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
-    MWBase::Environment::get().getWorld()->startNewGame (bypass);
+        MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
-    mState = State_Running;
+        mState = State_Running;
+    }
+    catch (std::exception& e)
+    {
+        std::stringstream error;
+        error << "Failed to start new game: " << e.what();
+
+        std::cerr << error.str() << std::endl;
+        cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+
+        std::vector<std::string> buttons;
+        buttons.push_back("#{sOk}");
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
+    }
 }
 
 void MWState::StateManager::endGame()
@@ -179,12 +198,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 
-        int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
-        Ogre::Image screenshot;
-        world.screenshot(screenshot, screenshotW, screenshotH);
-        Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
-        profile.mScreenshot.resize(encoded->size());
-        encoded->read(&profile.mScreenshot[0], encoded->size());
+        writeScreenshot(profile.mScreenshot);
 
         if (!slot)
             slot = getCurrentCharacter()->createSlot (profile);
@@ -569,4 +583,32 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
             return false;
     }
     return true;
+}
+
+void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
+{
+    int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
+
+    osg::ref_ptr<osg::Image> screenshot (new osg::Image);
+
+    MWBase::Environment::get().getWorld()->screenshot(screenshot.get(), screenshotW, screenshotH);
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+    if (!readerwriter)
+    {
+        std::cerr << "Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+        return;
+    }
+
+    std::ostringstream ostream;
+    osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
+    if (!result.success())
+    {
+        std::cerr << "Unable to write screenshot: " << result.message() << std::endl;
+        return;
+    }
+
+    std::string data = ostream.str();
+    imageData = std::vector<char>(data.begin(), data.end());
+
 }

@@ -1,6 +1,6 @@
-
 #include "statsextensions.hpp"
 
+#include <iostream>
 #include <cmath>
 
 #include <components/esm/loadnpc.hpp>

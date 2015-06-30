@@ -5,9 +5,11 @@
 
 #include "../mwscript/locals.hpp"
 
-namespace Ogre
+#include <osg/Vec3f>
+
+namespace osg
 {
-    class SceneNode;
+    class PositionAttitudeTransform;
 }
 
 namespace ESM
@@ -27,8 +29,7 @@ namespace MWWorld
 
     class RefData
     {
-            Ogre::SceneNode* mBaseNode;
-
+            osg::PositionAttitudeTransform* mBaseNode;
 
             MWScript::Locals mLocals; // if we find the overhead of heaving a locals
                                       // object in the refdata of refs without a script,
@@ -74,14 +75,11 @@ namespace MWWorld
 
             RefData& operator= (const RefData& refData);
 
-            /// Return OGRE handle (may be empty).
-            const std::string &getHandle();
+            /// Return base node (can be a null pointer).
+            osg::PositionAttitudeTransform* getBaseNode();
 
-            /// Return OGRE base node (can be a null pointer).
-            Ogre::SceneNode* getBaseNode();
-
-            /// Set OGRE base node (can be a null pointer).
-            void setBaseNode (Ogre::SceneNode* base);
+            /// Set base node (can be a null pointer).
+            void setBaseNode (osg::PositionAttitudeTransform* base);
 
             int getCount() const;
 

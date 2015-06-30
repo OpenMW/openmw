@@ -29,6 +29,8 @@
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../doc/stage.hpp"
@@ -50,6 +52,11 @@
 #endif
 
 class QAbstractItemModel;
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace ESM
 {
@@ -106,6 +113,8 @@ namespace CSMWorld
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
 
+            Resource::ResourceSystem mResourceSystem;
+
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
             // not implemented
@@ -126,6 +135,12 @@ namespace CSMWorld
             Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
+
+            const VFS::Manager* getVFS() const;
+
+            Resource::ResourceSystem* getResourceSystem();
+
+            const Resource::ResourceSystem* getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 

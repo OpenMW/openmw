@@ -25,6 +25,8 @@ namespace MWState
 
             bool verifyProfile (const ESM::SavedGame& profile) const;
 
+            void writeScreenshot (std::vector<char>& imageData) const;
+
             std::map<int, int> buildContentFileIndexMap (const ESM::ESMReader& reader) const;
 
         public:

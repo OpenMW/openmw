@@ -3,7 +3,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>
 
@@ -180,7 +179,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
+        mEffectImage->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 

@@ -38,7 +38,6 @@ namespace MWGui
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mShadersButton;
-            MyGUI::Button* mShaderModeButton;
             MyGUI::Button* mRefractionButton;
 
             MyGUI::Button* mShadowsEnabledButton;
@@ -61,7 +60,6 @@ namespace MWGui
             void onResolutionAccept();
             void onResolutionCancel();
 
-            void onShaderModeToggled(MyGUI::Widget* _sender);
             void onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onRebindAction(MyGUI::Widget* _sender);
