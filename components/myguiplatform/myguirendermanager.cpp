@@ -18,6 +18,10 @@
 
 #include "myguitexture.hpp"
 
+#ifdef OPENGLES
+#include <GLES/gl.h>
+#endif
+
 #define MYGUI_PLATFORM_LOG_SECTION "Platform"
 #define MYGUI_PLATFORM_LOG(level, text) MYGUI_LOGGING(MYGUI_PLATFORM_LOG_SECTION, level, text)
 
