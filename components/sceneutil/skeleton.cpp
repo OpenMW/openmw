@@ -133,6 +133,13 @@ bool Skeleton::getActive() const
     return mActive;
 }
 
+void Skeleton::traverse(osg::NodeVisitor& nv)
+{
+    if (!mActive && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR && mLastFrameNumber != 0)
+        return;
+    osg::Group::traverse(nv);
+}
+
 Bone::Bone()
     : mNode(NULL)
 {

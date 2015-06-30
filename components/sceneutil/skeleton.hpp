@@ -53,6 +53,8 @@ namespace SceneUtil
 
         bool getActive() const;
 
+        void traverse(osg::NodeVisitor& nv);
+
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.
         // As far as the scene graph goes we support multiple root bones.
