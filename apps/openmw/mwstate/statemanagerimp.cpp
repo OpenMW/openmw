@@ -201,11 +201,10 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             ++iter)
             writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
 
-        writer.setFormat (ESM::Header::CurrentFormat);
-
-        writer.setVersion(1);
+        writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
         // all unused
+        writer.setVersion(0);
         writer.setType(0);
         writer.setAuthor("");
         writer.setDescription("");

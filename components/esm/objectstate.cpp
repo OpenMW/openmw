@@ -5,7 +5,7 @@
 
 void ESM::ObjectState::load (ESMReader &esm)
 {
-    mVersion = esm.getVer();
+    mVersion = esm.getFormat();
 
     mRef.loadData(esm);
 
