@@ -203,8 +203,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         writer.setFormat (ESM::Header::CurrentFormat);
 
+        writer.setVersion(1);
+
         // all unused
-        writer.setVersion(0);
         writer.setType(0);
         writer.setAuthor("");
         writer.setDescription("");
