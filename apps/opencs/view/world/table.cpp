@@ -447,7 +447,7 @@ void CSVWorld::Table::cloneRecord()
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
         const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
-        if (selectedRows.size()==1 && !mModel->isDeleted (toClone.getId()))
+        if (selectedRows.size() == 1)
         {
             emit cloneRequest (toClone);
         }
