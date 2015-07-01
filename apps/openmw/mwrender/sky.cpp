@@ -162,6 +162,12 @@ protected:
 class CloudUpdater : public SceneUtil::StateSetUpdater
 {
 public:
+    CloudUpdater()
+        : mAnimationTimer(0.f)
+        , mOpacity(0.f)
+    {
+    }
+
     void setAnimationTimer(float timer)
     {
         mAnimationTimer = timer;
@@ -762,9 +768,6 @@ public:
         mat->setColorMode(osg::Material::OFF);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
-
-private:
-    float mAlpha;
 };
 
 void SkyManager::createRain()

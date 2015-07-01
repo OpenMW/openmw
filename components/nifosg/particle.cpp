@@ -45,7 +45,7 @@ void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
         osg::NodePath path = nv->getNodePath();
         path.pop_back();
 
-        osg::MatrixTransform* trans = dynamic_cast<osg::MatrixTransform*>(node);
+        osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
 
         osg::Matrix mat = osg::computeLocalToWorld( path );
         mat.orthoNormalize(mat); // don't undo the scale

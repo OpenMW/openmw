@@ -72,6 +72,11 @@ namespace MWGui
         {
             MarkerUserData(MWRender::LocalMap* map)
                 : mLocalMapRender(map)
+                , interior(false)
+                , cellX(0)
+                , cellY(0)
+                , nX(0.f)
+                , nY(0.f)
             {
             }
 
