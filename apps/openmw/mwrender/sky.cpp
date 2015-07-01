@@ -721,12 +721,12 @@ public:
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
-                    osg::NodeCallback* callback = node.getUpdateCallback();
+                    osg::NodeCallback* callback = dynamic_cast<osg::NodeCallback*>(node.getUpdateCallback());
                     while (callback)
                     {
                         if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
                             break;
-                        callback = callback->getNestedCallback();
+                        callback = dynamic_cast<osg::NodeCallback*>(callback->getNestedCallback());
                     }
 
                     if (composite)
