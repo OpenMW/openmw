@@ -18,7 +18,7 @@ addons:
       name: "OpenMW/openmw"
       description: "<Your project description here>"
     notification_email: scrawl@baseoftrash.de
-    build_command_prepend: "cmake ."
+    build_command_prepend: "cmake . -DBUILD_OPENCS=FALSE -DBUILD_UNITTESTS=FALSE -DBUILD_WIZARD=FALSE -DBUILD_BSATOOL=FALSE -DBUILD_ESMTOOL=FALSE -DBUILD_LAUNCHER=FALSE -DBUILD_MWINIIMPORTER=FALSE"
     build_command:   "make"
     branch_pattern: coverity_scan
 matrix:
