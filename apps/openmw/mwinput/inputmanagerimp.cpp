@@ -207,7 +207,7 @@ namespace MWInput
         if (mControlSwitch["playercontrols"])
         {
             if (action == A_Use)
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue != 0);
+                mPlayer->setAttackingOrSpell(currentValue != 0);
             else if (action == A_Jump)
                 mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }

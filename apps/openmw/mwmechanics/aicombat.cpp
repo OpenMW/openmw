@@ -269,8 +269,7 @@ namespace MWMechanics
             attack = false;
         }
 
-        actorClass.getCreatureStats(actor).setAttackingOrSpell(attack);
-
+        characterController.setAttackingOrSpell(attack);
 
         float& actionCooldown = storage.mActionCooldown;
         actionCooldown -= duration;
@@ -476,7 +475,7 @@ namespace MWMechanics
             movement.mPosition[1] = 0;
             movement.mPosition[2] = 0;
             readyToAttack = false;
-            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
+            characterController.setAttackingOrSpell(false);
             return false;
         }
 

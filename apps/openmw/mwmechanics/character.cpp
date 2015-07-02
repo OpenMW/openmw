@@ -654,6 +654,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mSecondsOfSwimming(0)
     , mSecondsOfRunning(0)
     , mTurnAnimationThreshold(0)
+    , mAttackingOrSpell(false)
 {
     if(!mAnimation)
         return;
@@ -937,7 +938,7 @@ bool CharacterController::updateCreatureState()
             mAnimation->disable(mCurrentWeapon);
     }
 
-    if(stats.getAttackingOrSpell())
+    if(mAttackingOrSpell)
     {
         if(mUpperBodyState == UpperCharState_Nothing && mHitState == CharState_None)
         {
@@ -997,7 +998,7 @@ bool CharacterController::updateCreatureState()
             }
         }
 
-        stats.setAttackingOrSpell(false);
+        mAttackingOrSpell = false;
     }
 
     bool animPlaying = mAnimation->getInfo(mCurrentWeapon);
@@ -1142,7 +1143,7 @@ bool CharacterController::updateWeaponState()
 
     float complete;
     bool animPlaying;
-    if(stats.getAttackingOrSpell())
+    if(mAttackingOrSpell)
     {
         if(mUpperBodyState == UpperCharState_WeapEquiped && mHitState == CharState_None)
         {
@@ -1152,7 +1153,7 @@ bool CharacterController::updateWeaponState()
             {
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
-                stats.setAttackingOrSpell(false);
+                mAttackingOrSpell = false;
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -2039,6 +2040,11 @@ bool CharacterController::isReadyToBlock() const
 bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut;
+}
+
+void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
+{
+    mAttackingOrSpell = attackingOrSpell;
 }
 
 void CharacterController::setActive(bool active)

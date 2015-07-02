@@ -50,6 +50,8 @@ namespace MWWorld
         MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
+        bool mAttackingOrSpell;
+
     public:
 
         Player(const ESM::NPC *player);
@@ -97,6 +99,9 @@ namespace MWWorld
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
+
+        void setAttackingOrSpell(bool attackingOrSpell);
+        bool getAttackingOrSpell() const;
 
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();

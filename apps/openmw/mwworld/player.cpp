@@ -36,7 +36,8 @@ namespace MWWorld
         mForwardBackward(0),
         mTeleported(false),
         mCurrentCrimeId(-1),
-        mPaidCrimeId(-1)
+        mPaidCrimeId(-1),
+        mAttackingOrSpell(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -214,6 +215,16 @@ namespace MWWorld
     void Player::setTeleported(bool teleported)
     {
         mTeleported = teleported;
+    }
+
+    void Player::setAttackingOrSpell(bool attackingOrSpell)
+    {
+        mAttackingOrSpell = attackingOrSpell;
+    }
+
+    bool Player::getAttackingOrSpell() const
+    {
+        return mAttackingOrSpell;
     }
 
     bool Player::isInCombat() {
