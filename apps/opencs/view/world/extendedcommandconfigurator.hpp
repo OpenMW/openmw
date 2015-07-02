@@ -52,7 +52,7 @@ namespace CSVWorld
                                         QWidget *parent = 0);
             virtual ~ExtendedCommandConfigurator();
 
-            void configure(Mode mode);
+            void configure(Mode mode, const std::vector<std::string> &selectedIds);
 
         protected:
             virtual void resizeEvent(QResizeEvent *event);

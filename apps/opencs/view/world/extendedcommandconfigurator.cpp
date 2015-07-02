@@ -37,7 +37,7 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
 
     mCancelButton = new QPushButton("Cancel", this);
     mCancelButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    connect(mCancelButton, SIGNAL(clicked(bool)), this, SLOT(done()));
+    connect(mCancelButton, SIGNAL(clicked(bool)), this, SIGNAL(done()));
 
     mButtonLayout = new QHBoxLayout();
     mButtonLayout->setAlignment(Qt::AlignCenter);
@@ -61,12 +61,14 @@ CSVWorld::ExtendedCommandConfigurator::~ExtendedCommandConfigurator()
     delete mButtonLayout;
 }
 
-void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandConfigurator::Mode mode)
+void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandConfigurator::Mode mode,
+                                                      const std::vector<std::string> &selectedIds)
 {
     mMode = mode;
     if (mMode != Mode_None)
     {
         mTypeGroup->setTitle(getTypeGroupTitle(mMode));
+        mCommandDispatcher->setSelection(selectedIds);
         setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
         setupGroupLayout();
     }
