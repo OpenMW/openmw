@@ -4,10 +4,11 @@
 #include <QWidget>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include "extendedcommandconfigurator.hpp"
+
 class QLabel;
 class QStackedLayout;
 class QStatusBar;
-class QUndoStack;
 
 namespace CSMDoc
 {
@@ -23,12 +24,17 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            enum EditMode { EditMode_None, EditMode_Creation, EditMode_ExtendedConfig };
+
             bool mShowStatusBar;
             QLabel *mStatus;
             QStatusBar *mStatusBar;
             int mStatusCount[4];
+
+            EditMode mEditMode;
             Creator *mCreator;
-            bool mCreating;
+            ExtendedCommandConfigurator *mExtendedConfigurator;
+
             QStackedLayout *mLayout;
 
         private:
@@ -38,6 +44,8 @@ namespace CSVWorld
             TableBottomBox& operator= (const TableBottomBox&);
 
             void updateStatus();
+
+            void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode);
 
         public:
 
@@ -65,7 +73,7 @@ namespace CSVWorld
 
         private slots:
 
-            void createRequestDone();
+            void requestDone();
             ///< \note This slot being called does not imply success.
 
         public slots:
@@ -80,6 +88,9 @@ namespace CSVWorld
             void createRequest();
             void cloneRequest(const std::string& id,
                               const CSMWorld::UniversalId::Type type);
+
+            void extendedDeleteConfigRequest();
+            void extendedRevertConfigRequest();
     };
 }
 

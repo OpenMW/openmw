@@ -39,11 +39,19 @@ void CSVWorld::TableBottomBox::updateStatus()
     }
 }
 
+void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandConfigurator::Mode mode)
+{
+    mExtendedConfigurator->configure (mode);
+    mLayout->setCurrentWidget (mExtendedConfigurator);
+    mEditMode = EditMode_ExtendedConfig;
+    setVisible (true);
+}
+
 CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory, 
                                           CSMDoc::Document& document, 
                                           const CSMWorld::UniversalId& id, 
                                           QWidget *parent)
-: QWidget (parent), mShowStatusBar (false), mCreating (false)
+: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None)
 {
     for (int i=0; i<4; ++i)
         mStatusCount[i] = 0;
@@ -69,11 +77,15 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     {
         mLayout->addWidget (mCreator);
 
-        connect (mCreator, SIGNAL (done()), this, SLOT (createRequestDone()));
+        connect (mCreator, SIGNAL (done()), this, SLOT (requestDone()));
 
         connect (mCreator, SIGNAL (requestFocus (const std::string&)),
             this, SIGNAL (requestFocus (const std::string&)));
     }
+
+    mExtendedConfigurator = new ExtendedCommandConfigurator (document, id, this);
+    mLayout->addWidget (mExtendedConfigurator);
+    connect (mExtendedConfigurator, SIGNAL (done()), this, SLOT (requestDone()));
 }
 
 void CSVWorld::TableBottomBox::setEditLock (bool locked)
@@ -91,7 +103,7 @@ void CSVWorld::TableBottomBox::setStatusBar (bool show)
 {
     if (show!=mShowStatusBar)
     {
-        setVisible (show || mCreating);
+        setVisible (show || (mEditMode != EditMode_None));
 
         mShowStatusBar = show;
 
@@ -105,7 +117,7 @@ bool CSVWorld::TableBottomBox::canCreateAndDelete() const
     return mCreator;
 }
 
-void CSVWorld::TableBottomBox::createRequestDone()
+void CSVWorld::TableBottomBox::requestDone()
 {
     if (!mShowStatusBar)
         setVisible (false);
@@ -113,8 +125,7 @@ void CSVWorld::TableBottomBox::createRequestDone()
         updateStatus();
 
     mLayout->setCurrentWidget (mStatusBar);
-
-    mCreating = false;
+    mEditMode = EditMode_None;
 }
 
 void CSVWorld::TableBottomBox::selectionSizeChanged (int size)
@@ -158,7 +169,7 @@ void CSVWorld::TableBottomBox::createRequest()
     mCreator->toggleWidgets(true);
     mLayout->setCurrentWidget (mCreator);
     setVisible (true);
-    mCreating = true;
+    mEditMode = EditMode_Creation;
     mCreator->focus();
 }
 
@@ -170,6 +181,16 @@ void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
     mLayout->setCurrentWidget(mCreator);
     mCreator->toggleWidgets(false);
     setVisible (true);
-    mCreating = true;
+    mEditMode = EditMode_Creation;
     mCreator->focus();
+}
+
+void CSVWorld::TableBottomBox::extendedDeleteConfigRequest()
+{
+    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Delete);
+}
+
+void CSVWorld::TableBottomBox::extendedRevertConfigRequest()
+{
+    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Revert);
 }
