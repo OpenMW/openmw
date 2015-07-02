@@ -333,9 +333,6 @@ namespace MWMechanics
         // Get weapon characteristics
         if (actorClass.hasInventoryStore(actor))
         {
-            // TODO: Check equipped weapon and equip a different one if we can't attack with it
-            // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
-
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
                 MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
