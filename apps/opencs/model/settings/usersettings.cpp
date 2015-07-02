@@ -242,6 +242,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Jump to the added or cloned record.");
         jumpToAdded->setDefaultValue (defaultValue);
         jumpToAdded->setDeclaredValues (jumpValues);
+
+        Setting *extendedConfig = createSetting (Type_CheckBox, "extended-config",
+            "Enable configuration of the extended delete/revert");
+        extendedConfig->setDefaultValue("false");
+        extendedConfig->setToolTip("Enables the ability to specify tables that will be affected by "
+                                   "the extended delete/revert command");
     }
 
     declareSection ("dialogues", "ID Dialogues");
