@@ -28,7 +28,7 @@
 
 namespace MWWorld
 {
-    Player::Player (const ESM::NPC *player, const MWBase::World& world)
+    Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
         mMarkedCell(NULL),

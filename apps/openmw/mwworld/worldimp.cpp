@@ -2045,7 +2045,7 @@ namespace MWWorld
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
         if (!mPlayer)
-            mPlayer = new MWWorld::Player(player, *this);
+            mPlayer = new MWWorld::Player(player);
         else
         {
             // Remove the old CharacterController

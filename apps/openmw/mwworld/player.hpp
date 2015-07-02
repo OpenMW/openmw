@@ -17,12 +17,6 @@ namespace ESM
     class ESMReader;
 }
 
-namespace MWBase
-{
-    class World;
-    class Ptr;
-}
-
 namespace Loading
 {
     class Listener;
@@ -58,7 +52,7 @@ namespace MWWorld
 
     public:
 
-        Player(const ESM::NPC *player, const MWBase::World& world);
+        Player(const ESM::NPC *player);
 
         void saveSkillsAttributes();
         void restoreSkillsAttributes();
