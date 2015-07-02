@@ -240,6 +240,8 @@ public:
 
     void setAttackingOrSpell(bool attackingOrSpell);
 
+    bool readyToPrepareAttack() const;
+
     /// @see Animation::setActive
     void setActive(bool active);
 

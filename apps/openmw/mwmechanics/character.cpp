@@ -2047,6 +2047,11 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
     mAttackingOrSpell = attackingOrSpell;
 }
 
+bool CharacterController::readyToPrepareAttack() const
+{
+    return mHitState == CharState_None && mUpperBodyState  <= UpperCharState_WeapEquiped;
+}
+
 void CharacterController::setActive(bool active)
 {
     mAnimation->setActive(active);

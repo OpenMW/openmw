@@ -300,10 +300,6 @@ namespace MWMechanics
             currentCell = actor.getCell();
         }
 
-        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
-        if (!anim) // shouldn't happen
-            return false;
-
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         if (actionCooldown > 0)
@@ -312,11 +308,7 @@ namespace MWMechanics
         float rangeAttack = 0;
         float rangeFollow = 0;
         boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
-        // TODO: upperBodyReady() works fine for checking if we can start an attack,
-        // but doesn't work properly for checking if the attack is finished (as things like hit recovery or knockdown also play on the upper body)
-        // Only a minor problem, but can mess with the actionCooldown timer.
-        // To fix this the AI needs to be brought closer to the CharacterController, so we can simply check if a weapon animation is playing.
-        if (anim->upperBodyReady())
+        if (characterController.readyToPrepareAttack())
         {
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
