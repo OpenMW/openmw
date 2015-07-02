@@ -47,9 +47,10 @@ void CSVWorld::TableBottomBox::updateStatus()
     }
 }
 
-void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandConfigurator::Mode mode)
+void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandConfigurator::Mode mode,
+                                                     const std::vector<std::string> &selectedIds)
 {
-    mExtendedConfigurator->configure (mode);
+    mExtendedConfigurator->configure (mode, selectedIds);
     mLayout->setCurrentWidget (mExtendedConfigurator);
     mEditMode = EditMode_ExtendedConfig;
     setVisible (true);
@@ -207,12 +208,12 @@ void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
     mCreator->focus();
 }
 
-void CSVWorld::TableBottomBox::extendedDeleteConfigRequest()
+void CSVWorld::TableBottomBox::extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds)
 {
-    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Delete);
+    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Delete, selectedIds);
 }
 
-void CSVWorld::TableBottomBox::extendedRevertConfigRequest()
+void CSVWorld::TableBottomBox::extendedRevertConfigRequest(const std::vector<std::string> &selectedIds)
 {
-    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Revert);
+    extendedConfigRequest(ExtendedCommandConfigurator::Mode_Revert, selectedIds);
 }

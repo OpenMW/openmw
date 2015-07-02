@@ -48,7 +48,8 @@ namespace CSVWorld
 
             void updateStatus();
 
-            void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode);
+            void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode,
+                                       const std::vector<std::string> &selectedIds);
 
         public:
 
@@ -96,8 +97,8 @@ namespace CSVWorld
             void cloneRequest(const std::string& id,
                               const CSMWorld::UniversalId::Type type);
 
-            void extendedDeleteConfigRequest();
-            void extendedRevertConfigRequest();
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
     };
 }
 

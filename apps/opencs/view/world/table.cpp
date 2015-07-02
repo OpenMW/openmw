@@ -36,28 +36,14 @@
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
     // configure dispatcher
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-    std::vector<std::string> records;
-
-    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-        ++iter)
-    {
-        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
-
-        records.push_back (mModel->data (
-            mModel->index (row, columnIndex)).toString().toUtf8().constData());
-    }
-
-    mDispatcher->setSelection (records);
+    mDispatcher->setSelection (getSelectedIds());
 
     std::vector<CSMWorld::UniversalId> extendedTypes = mDispatcher->getExtendedTypes();
 
     mDispatcher->setExtendedTypes (extendedTypes);
 
     // create context menu
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
     QMenu menu (this);
 
     ///  \todo add menu items for select all and clear selection
@@ -355,16 +341,12 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
     addAction (mPreviewAction);
 
-    /// \todo add a user option, that redirects the extended action to an input panel (in
-    /// the bottom bar) that lets the user select which record collections should be
-    /// modified.
-
     mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
-    connect (mExtendedDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedDelete()));
+    connect (mExtendedDeleteAction, SIGNAL (triggered()), this, SLOT (executeExtendedDelete()));
     addAction (mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
-    connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
+    connect (mExtendedRevertAction, SIGNAL (triggered()), this, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
 
     mEditIdAction = new TableEditIdAction (*this, this);
@@ -432,6 +414,22 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
     return CSMWorld::UniversalId (
         static_cast<CSMWorld::UniversalId::Type> (mModel->data (mModel->index (row, typeColumn)).toInt()),
         mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData());
+}
+
+std::vector<std::string> CSVWorld::Table::getSelectedIds() const
+{
+    std::vector<std::string> ids;
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); 
+         iter != selectedRows.end();
+         ++iter)
+    {
+        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
+        ids.push_back (mModel->data (mModel->index (row, columnIndex)).toString().toUtf8().constData());
+    }
+    return ids;
 }
 
 void CSVWorld::Table::editRecord()
@@ -563,6 +561,34 @@ void CSVWorld::Table::previewRecord()
         if (mModel->data (index)!=CSMWorld::RecordBase::State_Deleted)
             emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id),
                 "");
+    }
+}
+
+void CSVWorld::Table::executeExtendedDelete()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedDeleteConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedDelete", Qt::QueuedConnection);
+    }
+}
+
+void CSVWorld::Table::executeExtendedRevert()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedRevertConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedRevert", Qt::QueuedConnection);
     }
 }
 

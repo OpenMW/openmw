@@ -97,6 +97,8 @@ namespace CSVWorld
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
+            std::vector<std::string> getSelectedIds() const;
+
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
@@ -116,6 +118,10 @@ namespace CSVWorld
 
             void closeRequest();
 
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
+
         private slots:
 
             void editCell();
@@ -131,6 +137,10 @@ namespace CSVWorld
             void viewRecord();
 
             void previewRecord();
+
+            void executeExtendedDelete();
+
+            void executeExtendedRevert();
 
         public slots:
 
