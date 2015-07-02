@@ -1,0 +1,184 @@
+#include "extendedcommandconfigurator.hpp"
+
+#include <QPushButton>
+#include <QGroupBox>
+#include <QCheckBox>
+#include <QLayout>
+
+#include "../../model/world/commanddispatcher.hpp"
+#include "../../model/world/universalid.hpp"
+
+namespace
+{
+    QString getTypeGroupTitle(CSVWorld::ExtendedCommandConfigurator::Mode mode)
+    {
+        static const QString title = "Tables affected by ";
+        QString titleSuffix = "Extended Delete";
+        if (mode == CSVWorld::ExtendedCommandConfigurator::Mode_Revert)
+        {
+            titleSuffix = "Extended Revert";
+        }
+        return title + titleSuffix;
+    }
+}
+
+CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Document &document,
+                                                                   const CSMWorld::UniversalId &id,
+                                                                   QWidget *parent)
+    : QWidget(parent),
+      mNumUsedCheckBoxes(0),
+      mMode(Mode_None)
+{
+    mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
+
+    mPerformButton = new QPushButton("Perform", this);
+    mPerformButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(mPerformButton, SIGNAL(clicked(bool)), this, SLOT(performExtendedCommand()));
+
+    mCancelButton = new QPushButton("Cancel", this);
+    mCancelButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    connect(mCancelButton, SIGNAL(clicked(bool)), this, SLOT(done()));
+
+    mButtonLayout = new QHBoxLayout();
+    mButtonLayout->setAlignment(Qt::AlignCenter);
+    mButtonLayout->addWidget(mPerformButton);
+    mButtonLayout->addWidget(mCancelButton);
+
+    mTypeGroup = new QGroupBox(this);
+
+    QGridLayout *groupLayout = new QGridLayout(mTypeGroup);
+    groupLayout->setAlignment(Qt::AlignCenter);
+    mTypeGroup->setLayout(groupLayout);
+
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
+    mainLayout->addWidget(mTypeGroup);
+    mainLayout->addLayout(mButtonLayout);
+}
+
+CSVWorld::ExtendedCommandConfigurator::~ExtendedCommandConfigurator()
+{
+    delete mButtonLayout;
+}
+
+void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandConfigurator::Mode mode)
+{
+    mMode = mode;
+    if (mMode != Mode_None)
+    {
+        mTypeGroup->setTitle(getTypeGroupTitle(mMode));
+        setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
+        setupGroupLayout();
+    }
+}
+
+void CSVWorld::ExtendedCommandConfigurator::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+    setupGroupLayout();
+}
+
+void CSVWorld::ExtendedCommandConfigurator::setupGroupLayout()
+{
+    if (mMode == Mode_None)
+    {
+        return;
+    }
+
+    int groupWidth = mTypeGroup->geometry().width();
+    QGridLayout *layout = qobject_cast<QGridLayout *>(mTypeGroup->layout());
+
+    // One row of checkboxes with enough space - the setup is over
+    if (mNumUsedCheckBoxes > 0 && layout->rowCount() == 1 && groupWidth >= mTypeGroup->sizeHint().width())
+    {
+        return;
+    }
+
+    // Find the optimal number of rows to place the checkboxes within the available space
+    int divider = 1;
+    do
+    {
+        while (layout->itemAt(0) != NULL)
+        {
+            layout->removeItem(layout->itemAt(0));
+        }
+
+        int counter = 0;
+        int itemsPerRow = mNumUsedCheckBoxes / divider;
+        CheckBoxMap::const_iterator current = mTypeCheckBoxes.begin();
+        CheckBoxMap::const_iterator end = mTypeCheckBoxes.end();
+        for (; current != end; ++current)
+        {
+            if (current->first->isVisible())
+            {
+                int row = counter / itemsPerRow;
+                int column = counter - (counter / itemsPerRow) * itemsPerRow;
+                layout->addWidget(current->first, row, column);
+            }
+            ++counter;
+        }
+        divider *= 2;
+    }
+    while (groupWidth < mTypeGroup->sizeHint().width());
+}
+
+void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CSMWorld::UniversalId> &types)
+{
+    // Make sure that we have enough checkboxes
+    int numTypes =  static_cast<int>(types.size());
+    int numCheckBoxes = static_cast<int>(mTypeCheckBoxes.size());
+    if (numTypes > numCheckBoxes)
+    {
+        for (int i = numTypes - numCheckBoxes; i > 0; --i)
+        {
+            mTypeCheckBoxes.insert(std::make_pair(new QCheckBox(this), CSMWorld::UniversalId::Type_None));
+        }
+    }
+
+    // Set up the checkboxes
+    int counter = 0;
+    CheckBoxMap::iterator current = mTypeCheckBoxes.begin();
+    CheckBoxMap::iterator end = mTypeCheckBoxes.end();
+    for (; current != end; ++current)
+    {
+        if (counter < numTypes)
+        {
+            CSMWorld::UniversalId type = types[counter];
+            current->first->setText(QString::fromUtf8(type.getTypeName().c_str()));
+            current->first->setChecked(true);
+            current->second = type;
+            ++counter;
+        }
+        else
+        {
+            current->first->hide();
+        }
+    }
+    mNumUsedCheckBoxes = counter - 1;
+}
+
+void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
+{
+    std::vector<CSMWorld::UniversalId> types;
+    
+    CheckBoxMap::const_iterator current = mTypeCheckBoxes.begin();
+    CheckBoxMap::const_iterator end = mTypeCheckBoxes.end();
+    for (; current != end; ++current)
+    {
+        if (current->first->isChecked())
+        {
+            types.push_back(current->second);
+        }
+    }
+
+    mCommandDispatcher->setExtendedTypes(types);
+    if (mMode == Mode_Delete)
+    {
+        mCommandDispatcher->executeExtendedDelete();
+    }
+    else
+    {
+        mCommandDispatcher->executeExtendedRevert();
+    }
+    emit done();
+}
