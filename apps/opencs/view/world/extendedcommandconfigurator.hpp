@@ -8,6 +8,7 @@
 class QPushButton;
 class QGroupBox;
 class QCheckBox;
+class QLabel;
 class QHBoxLayout;
 
 namespace CSMDoc
@@ -35,7 +36,7 @@ namespace CSVWorld
 
             QPushButton *mPerformButton;
             QPushButton *mCancelButton;
-            QHBoxLayout *mButtonLayout;
+            QLabel *mCommandTitle;
             QGroupBox *mTypeGroup;
             CheckBoxMap mTypeCheckBoxes;
             int mNumUsedCheckBoxes;
@@ -50,7 +51,6 @@ namespace CSVWorld
             ExtendedCommandConfigurator(CSMDoc::Document &document,
                                         const CSMWorld::UniversalId &id,
                                         QWidget *parent = 0);
-            virtual ~ExtendedCommandConfigurator();
 
             void configure(Mode mode, const std::vector<std::string> &selectedIds);
 
