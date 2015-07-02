@@ -3,6 +3,7 @@
 #include <QPushButton>
 #include <QGroupBox>
 #include <QCheckBox>
+#include <QLabel>
 #include <QLayout>
 
 #include "../../model/world/commanddispatcher.hpp"
@@ -39,10 +40,8 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
     mCancelButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(mCancelButton, SIGNAL(clicked(bool)), this, SIGNAL(done()));
 
-    mButtonLayout = new QHBoxLayout();
-    mButtonLayout->setAlignment(Qt::AlignCenter);
-    mButtonLayout->addWidget(mPerformButton);
-    mButtonLayout->addWidget(mCancelButton);
+    mCommandTitle = new QLabel(this);
+    mCommandTitle->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     mTypeGroup = new QGroupBox(this);
 
@@ -50,15 +49,12 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
     groupLayout->setAlignment(Qt::AlignCenter);
     mTypeGroup->setLayout(groupLayout);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(this);
+    QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
+    mainLayout->addWidget(mCommandTitle);
     mainLayout->addWidget(mTypeGroup);
-    mainLayout->addLayout(mButtonLayout);
-}
-
-CSVWorld::ExtendedCommandConfigurator::~ExtendedCommandConfigurator()
-{
-    delete mButtonLayout;
+    mainLayout->addWidget(mPerformButton);
+    mainLayout->addWidget(mCancelButton);
 }
 
 void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandConfigurator::Mode mode,
@@ -67,7 +63,9 @@ void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandC
     mMode = mode;
     if (mMode != Mode_None)
     {
-        mTypeGroup->setTitle(getTypeGroupTitle(mMode));
+        QString title = (mMode == Mode_Delete) ? "Extended Delete" : "Extended Revert";
+        title.append(" from:");
+        mCommandTitle->setText(title);
         mCommandDispatcher->setSelection(selectedIds);
         setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
         setupGroupLayout();
@@ -90,12 +88,6 @@ void CSVWorld::ExtendedCommandConfigurator::setupGroupLayout()
     int groupWidth = mTypeGroup->geometry().width();
     QGridLayout *layout = qobject_cast<QGridLayout *>(mTypeGroup->layout());
 
-    // One row of checkboxes with enough space - the setup is over
-    if (mNumUsedCheckBoxes > 0 && layout->rowCount() == 1 && groupWidth >= mTypeGroup->sizeHint().width())
-    {
-        return;
-    }
-
     // Find the optimal number of rows to place the checkboxes within the available space
     int divider = 1;
     do
@@ -111,7 +103,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupGroupLayout()
         CheckBoxMap::const_iterator end = mTypeCheckBoxes.end();
         for (; current != end; ++current)
         {
-            if (current->first->isVisible())
+            if (counter < mNumUsedCheckBoxes)
             {
                 int row = counter / itemsPerRow;
                 int column = counter - (counter / itemsPerRow) * itemsPerRow;
@@ -121,7 +113,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupGroupLayout()
         }
         divider *= 2;
     }
-    while (groupWidth < mTypeGroup->sizeHint().width());
+    while (groupWidth < mTypeGroup->sizeHint().width() && divider <= mNumUsedCheckBoxes);
 }
 
 void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CSMWorld::UniversalId> &types)
@@ -133,7 +125,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
     {
         for (int i = numTypes - numCheckBoxes; i > 0; --i)
         {
-            mTypeCheckBoxes.insert(std::make_pair(new QCheckBox(this), CSMWorld::UniversalId::Type_None));
+            mTypeCheckBoxes.insert(std::make_pair(new QCheckBox(mTypeGroup), CSMWorld::UniversalId::Type_None));
         }
     }
 
@@ -156,7 +148,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
             current->first->hide();
         }
     }
-    mNumUsedCheckBoxes = counter - 1;
+    mNumUsedCheckBoxes = numTypes;
 }
 
 void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
