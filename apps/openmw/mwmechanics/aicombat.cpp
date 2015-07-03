@@ -640,24 +640,6 @@ namespace MWMechanics
             }
         }
 
-        // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        if((distToTarget > rangeAttack || followTarget) &&
-            mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
-        {
-            // probably walking into another NPC TODO: untested in combat situation
-            // TODO: diagonal should have same animation as walk forward
-            //       but doesn't seem to do that?
-            actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-            // change the angle a bit, too
-            if(mPathFinder.isPathConstructed())
-                zTurn(actor, osg::DegreesToRadians(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-
-            if(followTarget)
-                followTarget = false;
-            // FIXME: can fool actors to stay behind doors, etc.
-            // Related to Bug#1102 and to some degree #1155 as well
-        }
         return false;
     }
 
