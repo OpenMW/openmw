@@ -20,6 +20,7 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
 
     mPerformButton = new QPushButton(this);
+    mPerformButton->setDefault(true);
     mPerformButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(mPerformButton, SIGNAL(clicked(bool)), this, SLOT(performExtendedCommand()));
 
