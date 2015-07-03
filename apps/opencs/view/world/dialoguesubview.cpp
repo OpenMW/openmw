@@ -338,16 +338,10 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
     if (lineEdit != NULL)
     {
         mContextMenu = lineEdit->createStandardContextMenu();
-        mContextMenu->setParent(mWidget);
-        
-        QAction *action = mContextMenu->actions().first();
-        mContextMenu->insertAction(action, mEditIdAction);
-        mContextMenu->insertSeparator(action);
     }
     else
     {
         mContextMenu = new QMenu(mWidget);
-        mContextMenu->addAction(mEditIdAction);
     }
 }
 
@@ -368,12 +362,52 @@ QString CSVWorld::IdContextMenu::getWidgetValue() const
     return value;
 }
 
+void CSVWorld::IdContextMenu::addEditIdActionToMenu(const QString &text)
+{
+    mEditIdAction->setText(text);
+    if (mContextMenu->actions().isEmpty())
+    {
+        mContextMenu->addAction(mEditIdAction);
+    }
+    else
+    {
+        QAction *action = mContextMenu->actions().first();
+        mContextMenu->insertAction(action, mEditIdAction);
+        mContextMenu->insertSeparator(action);
+    }
+}
+
+void CSVWorld::IdContextMenu::removeEditIdActionFromMenu()
+{
+    if (mContextMenu->actions().isEmpty())
+    {
+        return;
+    }
+
+    if (mContextMenu->actions().first() == mEditIdAction)
+    {
+        mContextMenu->removeAction(mEditIdAction);
+        if (!mContextMenu->actions().isEmpty() && mContextMenu->actions().first()->isSeparator())
+        {
+            mContextMenu->removeAction(mContextMenu->actions().first());
+        }
+    }
+}
+
 void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
 {
     QString value = getWidgetValue();
     if (!value.isEmpty())
     {
-        mEditIdAction->setText("Edit '" + value + "'");
+        addEditIdActionToMenu("Edit '" + value + "'");
+    }
+    else
+    {
+        removeEditIdActionFromMenu();
+    }
+    
+    if (!mContextMenu->actions().isEmpty())
+    {
         mContextMenu->exec(mWidget->mapToGlobal(pos));
     }
 }
