@@ -7,7 +7,6 @@
 #include <QLayout>
 
 #include "../../model/world/commanddispatcher.hpp"
-#include "../../model/world/universalid.hpp"
 
 CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Document &document,
                                                                    const CSMWorld::UniversalId &id,

@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include "../../model/world/universalid.hpp"
+
 class QPushButton;
 class QGroupBox;
 class QCheckBox;
@@ -19,7 +21,6 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class CommandDispatcher;
-    class UniversalId;
 }
 
 namespace CSVWorld
