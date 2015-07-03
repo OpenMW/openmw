@@ -40,6 +40,7 @@ namespace CSVWorld
             QGroupBox *mTypeGroup;
             CheckBoxMap mTypeCheckBoxes;
             int mNumUsedCheckBoxes;
+            int mNumChecked;
 
             Mode mMode;
             CSMWorld::CommandDispatcher *mCommandDispatcher;
@@ -59,6 +60,7 @@ namespace CSVWorld
 
         private slots:
             void performExtendedCommand();
+            void checkBoxStateChanged(int state);
 
         signals:
             void done();
