@@ -345,6 +345,11 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
     }
 }
 
+void CSVWorld::IdContextMenu::excludeId(const std::string &id)
+{
+    mExcludedIds.insert(id);
+}
+
 QString CSVWorld::IdContextMenu::getWidgetValue() const
 {
     QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
@@ -397,7 +402,8 @@ void CSVWorld::IdContextMenu::removeEditIdActionFromMenu()
 void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
 {
     QString value = getWidgetValue();
-    if (!value.isEmpty())
+    bool isExcludedId = mExcludedIds.find(value.toUtf8().constData()) != mExcludedIds.end();
+    if (!value.isEmpty() && !isExcludedId)
     {
         addEditIdActionToMenu("Edit '" + value + "'");
     }
@@ -597,7 +603,12 @@ void CSVWorld::EditWidget::remake(int row)
 
                     if (CSMWorld::ColumnBase::isId(display))
                     {
+                        int idColumn = mTable->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+                        QString id = mTable->data(mTable->index(row, idColumn)).toString();
+
                         IdContextMenu *menu = new IdContextMenu(editor, display);
+                        // Current ID is already opened, so no need to create Edit 'ID' action for it
+                        menu->excludeId(id.toUtf8().constData());
                         connect(menu,
                                 SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
                                 this,
