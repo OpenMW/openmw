@@ -374,7 +374,7 @@ void CSVWorld::IdContextMenu::addEditIdActionToMenu(const QString &text)
     {
         mContextMenu->addAction(mEditIdAction);
     }
-    else
+    else if (mContextMenu->actions().first() != mEditIdAction)
     {
         QAction *action = mContextMenu->actions().first();
         mContextMenu->insertAction(action, mEditIdAction);
