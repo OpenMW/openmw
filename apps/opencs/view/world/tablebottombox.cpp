@@ -68,6 +68,7 @@ void CSVWorld::TableBottomBox::extendedConfigRequest(CSVWorld::ExtendedCommandCo
     mLayout->setCurrentWidget (mExtendedConfigurator);
     mEditMode = EditMode_ExtendedConfig;
     setVisible (true);
+    mExtendedConfigurator->setFocus();
 }
 
 CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFactory,
