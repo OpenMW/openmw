@@ -241,6 +241,9 @@ public:
     void setAttackingOrSpell(bool attackingOrSpell);
 
     bool readyToPrepareAttack() const;
+    bool readyToStartAttack() const;
+
+    float getAttackStrength() const;
 
     /// @see Animation::setActive
     void setActive(bool active);
@@ -249,7 +252,6 @@ public:
     void setHeadTrackTarget(const MWWorld::Ptr& target);
 };
 
-    void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 

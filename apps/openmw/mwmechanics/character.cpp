@@ -1259,6 +1259,8 @@ bool CharacterController::updateWeaponState()
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
+            mAttackStrength = complete;
     }
     else
     {
@@ -2051,6 +2053,22 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 bool CharacterController::readyToPrepareAttack() const
 {
     return mHitState == CharState_None && mUpperBodyState  <= UpperCharState_WeapEquiped;
+}
+
+bool CharacterController::readyToStartAttack() const
+{
+    if (mHitState != CharState_None)
+        return false;
+
+    if (mPtr.getClass().hasInventoryStore(mPtr) || mPtr.getClass().isBipedal(mPtr))
+        return mUpperBodyState == UpperCharState_WeapEquiped;
+    else
+        return mUpperBodyState == UpperCharState_Nothing;
+}
+
+float CharacterController::getAttackStrength() const
+{
+    return mAttackStrength;
 }
 
 void CharacterController::setActive(bool active)
