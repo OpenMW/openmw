@@ -28,6 +28,7 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
                                                                    QWidget *parent)
     : QWidget(parent),
       mNumUsedCheckBoxes(0),
+      mNumChecked(0),
       mMode(Mode_None)
 {
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
@@ -125,7 +126,9 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
     {
         for (int i = numTypes - numCheckBoxes; i > 0; --i)
         {
-            mTypeCheckBoxes.insert(std::make_pair(new QCheckBox(mTypeGroup), CSMWorld::UniversalId::Type_None));
+            QCheckBox *checkBox = new QCheckBox(mTypeGroup);
+            connect(checkBox, SIGNAL(stateChanged(int)), this, SLOT(checkBoxStateChanged(int)));
+            mTypeCheckBoxes.insert(std::make_pair(checkBox, CSMWorld::UniversalId::Type_None));
         }
     }
 
@@ -148,7 +151,7 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
             current->first->hide();
         }
     }
-    mNumUsedCheckBoxes = numTypes;
+    mNumChecked = mNumUsedCheckBoxes = numTypes;
 }
 
 void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
@@ -175,4 +178,21 @@ void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
         mCommandDispatcher->executeExtendedRevert();
     }
     emit done();
+}
+
+void CSVWorld::ExtendedCommandConfigurator::checkBoxStateChanged(int state)
+{
+    switch (state)
+    {
+        case Qt::Unchecked:
+            --mNumChecked;
+            break;
+        case Qt::Checked:
+            ++mNumChecked;
+            break;
+        case Qt::PartiallyChecked: // Not used
+            break;
+    }
+
+    mPerformButton->setEnabled(mNumChecked > 0);
 }
