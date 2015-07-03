@@ -11,12 +11,14 @@
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/world/universalid.hpp"
 
 class QDataWidgetMapper;
 class QSize;
 class QEvent;
 class QLabel;
 class QVBoxLayout;
+class QMenu;
 
 namespace CSMWorld
 {
@@ -147,6 +149,28 @@ namespace CSVWorld
     private slots:
         void editorDataCommited(QWidget* editor, const QModelIndex& index,
                                 CSMWorld::ColumnBase::Display display);
+    };
+
+    class IdContextMenu : public QObject
+    {
+            Q_OBJECT
+
+            QWidget *mWidget;
+            CSMWorld::UniversalId::Type mIdType;
+
+            QMenu *mContextMenu;
+            QAction *mEditIdAction;
+
+            QString getWidgetValue() const;
+
+        public:
+            IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Display display);
+
+        private slots:
+            void showContextMenu(const QPoint &pos);
+
+        signals:
+            void editIdRequest(const CSMWorld::UniversalId &id, const std::string &hint);
     };
 
     class EditWidget : public QScrollArea

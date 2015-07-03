@@ -19,6 +19,7 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QMenu>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -311,6 +312,74 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
     for (unsigned i = 0; i < mProxys.size(); ++i)
     {
         delete mProxys[i]; //unique_ptr could be handy
+    }
+}
+
+
+CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Display display)
+    : QObject(widget),
+      mWidget(widget),
+      mIdType(CSMWorld::TableMimeData::convertEnums(display))
+{
+    Q_ASSERT(mWidget != NULL);
+    Q_ASSERT(CSMWorld::ColumnBase::isId(display));
+    Q_ASSERT(mIdType != CSMWorld::UniversalId::Type_None);
+    
+    mWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(mWidget, 
+            SIGNAL(customContextMenuRequested(const QPoint &)), 
+            this, 
+            SLOT(showContextMenu(const QPoint &)));
+
+    mEditIdAction = new QAction(this);
+
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
+    if (lineEdit != NULL)
+    {
+        mContextMenu = lineEdit->createStandardContextMenu();
+        mContextMenu->setParent(mWidget);
+        
+        QAction *action = mContextMenu->actions().first();
+        mContextMenu->insertAction(action, mEditIdAction);
+        mContextMenu->insertSeparator(action);
+    }
+    else
+    {
+        mContextMenu = new QMenu(mWidget);
+        mContextMenu->addAction(mEditIdAction);
+    }
+}
+
+QString CSVWorld::IdContextMenu::getWidgetValue() const
+{
+    static QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
+    static QLabel *label = qobject_cast<QLabel *>(mWidget);
+
+    QString value = "";
+    if (lineEdit != NULL)
+    {
+        value = lineEdit->text();
+    }
+    else if (label != NULL)
+    {
+        value = label->text();
+    }
+    return value;
+}
+
+void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
+{
+    QString value = getWidgetValue();
+    if (!value.isEmpty())
+    {
+        mEditIdAction->setText("Edit '" + value + "'");
+        
+        QAction *selectedAction = mContextMenu->exec(mWidget->mapToGlobal(pos));
+        if (selectedAction != NULL && selectedAction == mEditIdAction)
+        {
+            CSMWorld::UniversalId editId(mIdType, value.toUtf8().constData());
+            emit editIdRequest(editId, "");
+        }
     }
 }
 
