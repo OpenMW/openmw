@@ -9,20 +9,6 @@
 #include "../../model/world/commanddispatcher.hpp"
 #include "../../model/world/universalid.hpp"
 
-namespace
-{
-    QString getTypeGroupTitle(CSVWorld::ExtendedCommandConfigurator::Mode mode)
-    {
-        static const QString title = "Tables affected by ";
-        QString titleSuffix = "Extended Delete";
-        if (mode == CSVWorld::ExtendedCommandConfigurator::Mode_Revert)
-        {
-            titleSuffix = "Extended Revert";
-        }
-        return title + titleSuffix;
-    }
-}
-
 CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Document &document,
                                                                    const CSMWorld::UniversalId &id,
                                                                    QWidget *parent)
@@ -33,16 +19,13 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
 {
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
 
-    mPerformButton = new QPushButton("Perform", this);
+    mPerformButton = new QPushButton(this);
     mPerformButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(mPerformButton, SIGNAL(clicked(bool)), this, SLOT(performExtendedCommand()));
 
     mCancelButton = new QPushButton("Cancel", this);
     mCancelButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     connect(mCancelButton, SIGNAL(clicked(bool)), this, SIGNAL(done()));
-
-    mCommandTitle = new QLabel(this);
-    mCommandTitle->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     mTypeGroup = new QGroupBox(this);
 
@@ -52,7 +35,6 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
-    mainLayout->addWidget(mCommandTitle);
     mainLayout->addWidget(mTypeGroup);
     mainLayout->addWidget(mPerformButton);
     mainLayout->addWidget(mCancelButton);
@@ -64,9 +46,7 @@ void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandC
     mMode = mode;
     if (mMode != Mode_None)
     {
-        QString title = (mMode == Mode_Delete) ? "Extended Delete" : "Extended Revert";
-        title.append(" from:");
-        mCommandTitle->setText(title);
+        mPerformButton->setText((mMode == Mode_Delete) ? "Extended Delete" : "Extended Revert");
         mCommandDispatcher->setSelection(selectedIds);
         setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
         setupGroupLayout();
