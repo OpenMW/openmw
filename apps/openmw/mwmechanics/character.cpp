@@ -1789,7 +1789,8 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isBipedal(mPtr))
+        // bipedal means hand-to-hand could be used (which is handled in updateWeaponState). an existing InventoryStore means an actual weapon could be used.
+        if(cls.isBipedal(mPtr) || cls.hasInventoryStore(mPtr))
             forcestateupdate = updateWeaponState() || forcestateupdate;
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
