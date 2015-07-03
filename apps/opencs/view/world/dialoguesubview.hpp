@@ -1,6 +1,7 @@
 #ifndef CSV_WORLD_DIALOGUESUBVIEW_H
 #define CSV_WORLD_DIALOGUESUBVIEW_H
 
+#include <set>
 #include <map>
 #include <memory>
 
@@ -151,12 +152,15 @@ namespace CSVWorld
                                 CSMWorld::ColumnBase::Display display);
     };
 
+    /// A context menu with "Edit 'ID'" action for editors in the dialogue subview
     class IdContextMenu : public QObject
     {
             Q_OBJECT
 
             QWidget *mWidget;
             CSMWorld::UniversalId::Type mIdType;
+            std::set<std::string> mExcludedIds;
+            ///< A list of IDs that should not have the Edit 'ID' action.
 
             QMenu *mContextMenu;
             QAction *mEditIdAction;
@@ -167,6 +171,8 @@ namespace CSVWorld
 
         public:
             IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Display display);
+
+            void excludeId(const std::string &id);
 
         private slots:
             void showContextMenu(const QPoint &pos);
