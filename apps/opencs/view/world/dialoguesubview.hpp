@@ -168,6 +168,7 @@ namespace CSVWorld
 
         private slots:
             void showContextMenu(const QPoint &pos);
+            void editIdRequest();
 
         signals:
             void editIdRequest(const CSMWorld::UniversalId &id, const std::string &hint);
@@ -195,6 +196,9 @@ namespace CSVWorld
             virtual ~EditWidget();
 
             void remake(int row);
+
+        signals:
+            void editIdRequest(const CSMWorld::UniversalId &id, const std::string &hint);
     };
 
     class SimpleDialogueSubView : public CSVDoc::SubView

@@ -332,6 +332,7 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
             SLOT(showContextMenu(const QPoint &)));
 
     mEditIdAction = new QAction(this);
+    connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editIdRequest()));
 
     QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
     if (lineEdit != NULL)
@@ -352,8 +353,8 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
 
 QString CSVWorld::IdContextMenu::getWidgetValue() const
 {
-    static QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
-    static QLabel *label = qobject_cast<QLabel *>(mWidget);
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
+    QLabel *label = qobject_cast<QLabel *>(mWidget);
 
     QString value = "";
     if (lineEdit != NULL)
@@ -373,14 +374,14 @@ void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
     if (!value.isEmpty())
     {
         mEditIdAction->setText("Edit '" + value + "'");
-        
-        QAction *selectedAction = mContextMenu->exec(mWidget->mapToGlobal(pos));
-        if (selectedAction != NULL && selectedAction == mEditIdAction)
-        {
-            CSMWorld::UniversalId editId(mIdType, value.toUtf8().constData());
-            emit editIdRequest(editId, "");
-        }
+        mContextMenu->exec(mWidget->mapToGlobal(pos));
     }
+}
+
+void CSVWorld::IdContextMenu::editIdRequest()
+{
+    CSMWorld::UniversalId editId(mIdType, getWidgetValue().toUtf8().constData());
+    emit editIdRequest(editId, "");
 }
 
 /*
@@ -559,6 +560,15 @@ void CSVWorld::EditWidget::remake(int row)
                         editor->setEnabled(false);
                         label->setEnabled(false);
                     }
+
+                    if (CSMWorld::ColumnBase::isId(display))
+                    {
+                        IdContextMenu *menu = new IdContextMenu(editor, display);
+                        connect(menu,
+                                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
+                                this,
+                                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
+                    }
                 }
             }
             else
@@ -686,6 +696,11 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     dataChanged(mTable->getModelIndex (getUniversalId().getId(), 0));
+
+    connect(mEditWidget,
+            SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
+            this,
+            SIGNAL(focusId(const CSMWorld::UniversalId &, const std::string &)));
 }
 
 void CSVWorld::SimpleDialogueSubView::setEditLock (bool locked)
