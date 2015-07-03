@@ -9,6 +9,20 @@
 
 #include "creator.hpp"
 
+void CSVWorld::TableBottomBox::updateSize()
+{
+    // Make sure that the size of the bottom box is determined by the currently visible widget
+    for (int i = 0; i < mLayout->count(); ++i)
+    {
+        QSizePolicy::Policy verPolicy = QSizePolicy::Ignored;
+        if (mLayout->widget(i) == mLayout->currentWidget())
+        {
+            verPolicy = QSizePolicy::Expanding;
+        }
+        mLayout->widget(i)->setSizePolicy(QSizePolicy::Expanding, verPolicy);
+    }
+}
+
 void CSVWorld::TableBottomBox::updateStatus()
 {
     if (mShowStatusBar)
@@ -69,6 +83,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     mLayout = new QStackedLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
+    connect (mLayout, SIGNAL (currentChanged (int)), this, SLOT (currentWidgetChanged (int)));
 
     mStatus = new QLabel;
 
@@ -95,6 +110,8 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     mExtendedConfigurator = new ExtendedCommandConfigurator (document, id, this);
     mLayout->addWidget (mExtendedConfigurator);
     connect (mExtendedConfigurator, SIGNAL (done()), this, SLOT (requestDone()));
+
+    updateSize();
 }
 
 void CSVWorld::TableBottomBox::setEditLock (bool locked)
@@ -135,6 +152,11 @@ void CSVWorld::TableBottomBox::requestDone()
 
     mLayout->setCurrentWidget (mStatusBar);
     mEditMode = EditMode_None;
+}
+
+void CSVWorld::TableBottomBox::currentWidgetChanged(int /*index*/)
+{
+    updateSize();
 }
 
 void CSVWorld::TableBottomBox::selectionSizeChanged (int size)

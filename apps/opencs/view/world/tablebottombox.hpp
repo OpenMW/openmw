@@ -46,6 +46,8 @@ namespace CSVWorld
             TableBottomBox (const TableBottomBox&);
             TableBottomBox& operator= (const TableBottomBox&);
 
+            void updateSize();
+
             void updateStatus();
 
             void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode,
@@ -79,6 +81,8 @@ namespace CSVWorld
 
             void requestDone();
             ///< \note This slot being called does not imply success.
+
+            void currentWidgetChanged(int index);
 
         public slots:
 
