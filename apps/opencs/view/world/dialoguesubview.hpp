@@ -162,6 +162,8 @@ namespace CSVWorld
             QAction *mEditIdAction;
 
             QString getWidgetValue() const;
+            void addEditIdActionToMenu(const QString &text);
+            void removeEditIdActionFromMenu();
 
         public:
             IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Display display);
