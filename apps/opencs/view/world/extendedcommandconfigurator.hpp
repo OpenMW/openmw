@@ -36,7 +36,6 @@ namespace CSVWorld
 
             QPushButton *mPerformButton;
             QPushButton *mCancelButton;
-            QLabel *mCommandTitle;
             QGroupBox *mTypeGroup;
             CheckBoxMap mTypeCheckBoxes;
             int mNumUsedCheckBoxes;
