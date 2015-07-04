@@ -24,6 +24,7 @@ namespace ESM
 
 namespace MWMechanics
 {
+    const float AI_REACTION_TIME = 0.25f;
 
     /// \brief Base class for AI packages
     class AiPackage
@@ -70,7 +71,16 @@ namespace MWMechanics
         protected:
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
-            bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
+            bool pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance = 0.0f);
+
+            /// Check if there aren't any obstacles along the path to make shortcut possible
+            /// If a shortcut is possible then path will be cleared and filled with the destination point.
+            /// \param destInLOS If not NULL function will return ray cast check result
+            /// \return If can shortcut the path
+            bool shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS);
+
+            /// Check if the way to the destination is clear, taking into account actor speed
+            bool checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
 
             virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
@@ -83,6 +93,9 @@ namespace MWMechanics
 
             ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;
+
+            bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
+            ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
     };
 }
 

@@ -413,7 +413,7 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildPath(start, dest, actor.getCell());
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
@@ -520,7 +520,7 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildPath(start, dest, actor.getCell());
 
                 if(storage.mPathFinder.isPathConstructed())
                 {

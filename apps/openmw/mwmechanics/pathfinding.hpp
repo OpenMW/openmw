@@ -15,8 +15,24 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    float distance(ESM::Pathgrid::Point point, float x, float y, float);
+    float distance(ESM::Pathgrid::Point point, float x, float y, float z);
     float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
+    float getZAngleToDir(const Ogre::Vector3& dir);
+    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f);
+    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
+    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
+
+     const float PATHFIND_Z_REACH = 50.0f;
+    //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
+    // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
+    const float PATHFIND_CAUTION_DIST = 500.0f;
+    // distance after which actor (failed previously to shortcut) will try again
+    const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
+
+    // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
+    // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
+    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY);
+
     class PathFinder
     {
         public:
@@ -39,12 +55,14 @@ namespace MWMechanics
             void clearPath();
 
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const MWWorld::CellStore* cell, bool allowShortcuts = true);
+                           const MWWorld::CellStore* cell);
 
             bool checkPathCompleted(float x, float y, float tolerance=32.f);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
             float getZAngleToNext(float x, float y) const;
+
+            float getXAngleToNext(float x, float y, float z) const;
 
             bool isPathConstructed() const
             {
@@ -69,9 +87,9 @@ namespace MWMechanics
                 Which results in NPC "running in a circle" back to the just passed waypoint.
              */
             void buildSyncedPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                const MWWorld::CellStore* cell, bool allowShortcuts = true);
+                const MWWorld::CellStore* cell);
 
-            void addPointToPath(ESM::Pathgrid::Point &point)
+            void addPointToPath(const ESM::Pathgrid::Point &point)
             {
                 mPath.push_back(point);
             }

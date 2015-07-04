@@ -34,19 +34,16 @@ bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor, AiState& state
             )
         return true;   //Target doesn't exist
 
-    //Set the target desition from the actor
+    //Set the target destination for the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < 200) { //Stop when you get close
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+    if (pathTo(actor, dest, duration, 200)) //Go to the destination
+    {
+        // activate when reached
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(mObjectId,false);
-
         MWBase::Environment::get().getWorld()->activate(target, actor);
 
         return true;
-    }
-    else {
-        pathTo(actor, dest, duration); //Go to the destination
     }
 
     return false;

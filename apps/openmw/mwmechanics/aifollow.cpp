@@ -130,19 +130,7 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) < followDistance) //Stop when you get close
-    {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-
-        // turn towards target anyway
-        float directionX = target.getRefData().getPosition().pos[0] - actor.getRefData().getPosition().pos[0];
-        float directionY = target.getRefData().getPosition().pos[1] - actor.getRefData().getPosition().pos[1];
-        zTurn(actor, Ogre::Math::ATan2(directionX,directionY), Ogre::Degree(5));
-    }
-    else
-    {
-        pathTo(actor, dest, duration); //Go to the destination
-    }
+    pathTo(actor, dest, duration, followDistance); //Go to the destination
 
     //Check if you're far away
     if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 450)

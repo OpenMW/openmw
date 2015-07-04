@@ -113,6 +113,49 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
+    float getZAngleToDir(const Ogre::Vector3& dir)
+    {
+        return Ogre::Math::ATan2(dir.x,dir.y).valueDegrees();
+    }
+
+    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen)
+    {
+        float len = (dirLen > 0.0f)? dirLen : dir.length();
+        return -Ogre::Math::ASin(dir.z / len).valueDegrees();
+    }
+
+    float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
+    {
+        Ogre::Vector3 dir = PathFinder::MakeOgreVector3(dest) - PathFinder::MakeOgreVector3(origin);
+        return getZAngleToDir(dir);
+    }
+
+    float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest)
+    {
+        Ogre::Vector3 dir = PathFinder::MakeOgreVector3(dest) - PathFinder::MakeOgreVector3(origin);
+        return getXAngleToDir(dir);
+    }
+
+    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
+    {
+        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
+        {
+            Ogre::Vector3 dir = to - from;
+            dir.z = 0;
+            dir.normalise();
+			float verticalOffset = 200; // instead of '200' here we want the height of the actor
+            Ogre::Vector3 _from = from + dir*offsetXY + Ogre::Vector3::UNIT_Z * verticalOffset;
+
+            // cast up-down ray and find height in world space of hit
+            float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
+
+            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
+                return true;
+        }
+
+        return false;
+    }
+
     PathFinder::PathFinder()
         : mPathgrid(NULL),
           mCell(NULL)
@@ -165,22 +208,9 @@ namespace MWMechanics
      */
     void PathFinder::buildPath(const ESM::Pathgrid::Point &startPoint,
                                const ESM::Pathgrid::Point &endPoint,
-                               const MWWorld::CellStore* cell,
-                               bool allowShortcuts)
+                               const MWWorld::CellStore* cell)
     {
         mPath.clear();
-
-        if(allowShortcuts)
-        {
-            // if there's a ray cast hit, can't take a direct path
-            if (!MWBase::Environment::get().getWorld()->castRay(
-                static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
-                static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
-            {
-                mPath.push_back(endPoint);
-                return;
-            }
-        }
 
         if(mCell != cell || !mPathgrid)
         {
@@ -270,6 +300,19 @@ namespace MWMechanics
         return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
     }
 
+    float PathFinder::getXAngleToNext(float x, float y, float z) const
+    {
+        // This should never happen (programmers should have an if statement checking
+        // isPathConstructed that prevents this call if otherwise).
+        if(mPath.empty())
+            return 0.;
+
+        const ESM::Pathgrid::Point &nextPoint = *mPath.begin();
+        Ogre::Vector3 dir = MakeOgreVector3(nextPoint) - Ogre::Vector3(x,y,z);
+
+        return -Ogre::Math::ASin(dir.z / dir.length()).valueDegrees();
+    }
+
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
     {
         if(mPath.empty())
@@ -291,19 +334,18 @@ namespace MWMechanics
     // see header for the rationale
     void PathFinder::buildSyncedPath(const ESM::Pathgrid::Point &startPoint,
         const ESM::Pathgrid::Point &endPoint,
-        const MWWorld::CellStore* cell,
-        bool allowShortcuts)
+        const MWWorld::CellStore* cell)
     {
         if (mPath.size() < 2)
         {
             // if path has one point, then it's the destination.
             // don't need to worry about bad path for this case
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            buildPath(startPoint, endPoint, cell);
         }
         else
         {
             const ESM::Pathgrid::Point oldStart(*getPath().begin());
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            buildPath(startPoint, endPoint, cell);
             if (mPath.size() >= 2)
             {
                 // if 2nd waypoint of new path == 1st waypoint of old, 

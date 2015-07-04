@@ -37,46 +37,6 @@ namespace
 
     Ogre::Vector3 AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const Ogre::Vector3& vLastTargetPos, 
         float duration, int weapType, float strength);
-
-    float getZAngleToDir(const Ogre::Vector3& dir)
-    {
-        return Ogre::Math::ATan2(dir.x,dir.y).valueDegrees();
-    }
-
-    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f)
-    {
-        float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return -Ogre::Math::ASin(dir.z / len).valueDegrees();
-    }
-
-
-    const float PATHFIND_Z_REACH = 50.0f;
-    // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
-    const float PATHFIND_CAUTION_DIST = 500.0f;
-    // distance after which actor (failed previously to shortcut) will try again
-    const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
-
-    // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
-    // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
-    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY)
-    {
-        if((to - from).length() >= PATHFIND_CAUTION_DIST || std::abs(from.z - to.z) <= PATHFIND_Z_REACH)
-        {
-            Ogre::Vector3 dir = to - from;
-            dir.z = 0;
-            dir.normalise();
-			float verticalOffset = 200; // instead of '200' here we want the height of the actor
-            Ogre::Vector3 _from = from + dir*offsetXY + Ogre::Vector3::UNIT_Z * verticalOffset;
-
-            // cast up-down ray and find height in world space of hit
-            float h = _from.z - MWBase::Environment::get().getWorld()->getDistToNearestRayHit(_from, -Ogre::Vector3::UNIT_Z, verticalOffset + PATHFIND_Z_REACH + 1);
-
-            if(std::abs(from.z - h) <= PATHFIND_Z_REACH)
-                return true;
-        }
-
-        return false;
-    }
 }
 
 namespace MWMechanics
@@ -702,7 +662,7 @@ namespace MWMechanics
         if (doesPathNeedRecalc(newPathTarget, actor.getCell()->getCell()))
         {
             ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actor.getRefData().getPosition()));
-            mPathFinder.buildSyncedPath(start, newPathTarget, actor.getCell(), false);
+            mPathFinder.buildSyncedPath(start, newPathTarget, actor.getCell());
         }
     }
 
