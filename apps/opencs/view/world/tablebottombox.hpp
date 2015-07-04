@@ -62,6 +62,8 @@ namespace CSVWorld
 
             virtual ~TableBottomBox();
 
+            virtual bool eventFilter(QObject *object, QEvent *event);
+
             void setEditLock (bool locked);
 
             void setStatusBar (bool show);

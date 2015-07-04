@@ -6,6 +6,8 @@
 #include <QStatusBar>
 #include <QStackedLayout>
 #include <QLabel>
+#include <QEvent>
+#include <QKeyEvent>
 
 #include "creator.hpp"
 
@@ -100,6 +102,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     if (mCreator)
     {
+        mCreator->installEventFilter(this);
         mLayout->addWidget (mCreator);
 
         connect (mCreator, SIGNAL (done()), this, SLOT (requestDone()));
@@ -109,6 +112,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
     }
 
     mExtendedConfigurator = new ExtendedCommandConfigurator (document, id, this);
+    mExtendedConfigurator->installEventFilter(this);
     mLayout->addWidget (mExtendedConfigurator);
     connect (mExtendedConfigurator, SIGNAL (done()), this, SLOT (requestDone()));
 
@@ -124,6 +128,20 @@ void CSVWorld::TableBottomBox::setEditLock (bool locked)
 CSVWorld::TableBottomBox::~TableBottomBox()
 {
     delete mCreator;
+}
+
+bool CSVWorld::TableBottomBox::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Escape)
+        {
+            requestDone();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(object, event);
 }
 
 void CSVWorld::TableBottomBox::setStatusBar (bool show)
