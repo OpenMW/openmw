@@ -25,9 +25,13 @@ CSVWorld::TableEditIdAction::TableEditIdAction(const QTableView &table, QWidget 
 void CSVWorld::TableEditIdAction::setCell(int row, int column)
 {
     CellData data = getCellData(row, column);
-    mCurrentId = CSMWorld::UniversalId(CSMWorld::TableMimeData::convertEnums(data.first), 
-                                       data.second.toUtf8().constData());
-    setText("Edit '" + data.second + "'");
+    CSMWorld::UniversalId::Type idType = CSMWorld::TableMimeData::convertEnums(data.first);
+
+    if (idType != CSMWorld::UniversalId::Type_None)
+    {
+        mCurrentId = CSMWorld::UniversalId(idType, data.second.toUtf8().constData());
+        setText("Edit '" + data.second + "'");
+    }
 }
 
 CSMWorld::UniversalId CSVWorld::TableEditIdAction::getCurrentId() const
@@ -38,5 +42,8 @@ CSMWorld::UniversalId CSVWorld::TableEditIdAction::getCurrentId() const
 bool CSVWorld::TableEditIdAction::isValidIdCell(int row, int column) const
 {
     CellData data = getCellData(row, column);
-    return CSMWorld::ColumnBase::isId(data.first) && !data.second.isEmpty();
+    CSMWorld::UniversalId::Type idType = CSMWorld::TableMimeData::convertEnums(data.first);
+    return CSMWorld::ColumnBase::isId(data.first) && 
+           idType != CSMWorld::UniversalId::Type_None &&
+           !data.second.isEmpty();
 }
