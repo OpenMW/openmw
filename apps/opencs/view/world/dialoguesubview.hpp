@@ -195,6 +195,9 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             std::vector<CSMWorld::NestedTableProxyModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
+            void createEditorContextMenu(QWidget *editor, 
+                                         CSMWorld::ColumnBase::Display display, 
+                                         int currentRow) const;
         public:
 
             EditWidget (QWidget *parent, int row, CSMWorld::IdTable* table,
