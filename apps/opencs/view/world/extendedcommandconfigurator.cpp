@@ -30,11 +30,12 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
     mTypeGroup = new QGroupBox(this);
 
     QGridLayout *groupLayout = new QGridLayout(mTypeGroup);
-    groupLayout->setAlignment(Qt::AlignCenter);
+    groupLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     mTypeGroup->setLayout(groupLayout);
 
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
     mainLayout->setSizeConstraint(QLayout::SetNoConstraint);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(mTypeGroup);
     mainLayout->addWidget(mPerformButton);
     mainLayout->addWidget(mCancelButton);
