@@ -428,6 +428,28 @@ void CSVWorld::IdContextMenu::editIdRequest()
 =============================================================EditWidget=====================================================
 */
 
+void CSVWorld::EditWidget::createEditorContextMenu(QWidget *editor,
+                                                   CSMWorld::ColumnBase::Display display,
+                                                   int currentRow) const
+{
+    Q_ASSERT(editor != NULL);
+
+    if (CSMWorld::ColumnBase::isId(display) &&
+        CSMWorld::TableMimeData::convertEnums(display) != CSMWorld::UniversalId::Type_None)
+    {
+        int idColumn = mTable->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+        QString id = mTable->data(mTable->index(currentRow, idColumn)).toString();
+
+        IdContextMenu *menu = new IdContextMenu(editor, display);
+        // Current ID is already opened, so no need to create Edit 'ID' action for it
+        menu->excludeId(id.toUtf8().constData());
+        connect(menu,
+                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
+                this,
+                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
+    }
+}
+
 CSVWorld::EditWidget::~EditWidget()
 {
     for (unsigned i = 0; i < mNestedModels.size(); ++i)
@@ -606,19 +628,7 @@ void CSVWorld::EditWidget::remake(int row)
                         label->setEnabled(false);
                     }
 
-                    if (CSMWorld::ColumnBase::isId(display))
-                    {
-                        int idColumn = mTable->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
-                        QString id = mTable->data(mTable->index(row, idColumn)).toString();
-
-                        IdContextMenu *menu = new IdContextMenu(editor, display);
-                        // Current ID is already opened, so no need to create Edit 'ID' action for it
-                        menu->excludeId(id.toUtf8().constData());
-                        connect(menu,
-                                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
-                                this,
-                                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
-                    }
+                    createEditorContextMenu(editor, display, row);
                 }
             }
             else
@@ -670,6 +680,8 @@ void CSVWorld::EditWidget::remake(int row)
                             editor->setEnabled(false);
                             label->setEnabled(false);
                         }
+
+                        createEditorContextMenu(editor, display, row);
                     }
                 }
                 mNestedTableMapper->setCurrentModelIndex(tree->index(0, 0, tree->index(row, i)));
