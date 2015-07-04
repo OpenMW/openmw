@@ -1,14 +1,17 @@
 #include "nestedtable.hpp"
-#include "../../model/world/nestedtableproxymodel.hpp"
-#include "../../model/world/universalid.hpp"
-#include "../../model/world/commands.hpp"
-#include "../../model/world/commanddispatcher.hpp"
-#include "util.hpp"
 
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMenu>
 #include <QDebug>
+
+#include "../../model/world/nestedtableproxymodel.hpp"
+#include "../../model/world/universalid.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/commanddispatcher.hpp"
+
+#include "tableeditidaction.hpp"
+#include "util.hpp"
 
 CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    CSMWorld::UniversalId id,
@@ -55,6 +58,9 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
 
     connect(mRemoveRowAction, SIGNAL(triggered()),
             this, SLOT(removeRowActionTriggered()));
+
+    mEditIdAction = new TableEditIdAction(*this, this);
+    connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editCell()));
 }
 
 std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() const
@@ -68,6 +74,15 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     QMenu menu(this);
+
+    int currentRow = rowAt(event->y());
+    int currentColumn = columnAt(event->x());
+    if (mEditIdAction->isValidIdCell(currentRow, currentColumn))
+    {
+        mEditIdAction->setCell(currentRow, currentColumn);
+        menu.addAction(mEditIdAction);
+        menu.addSeparator();
+    }
 
     if (selectionModel()->selectedRows().size() == 1)
         menu.addAction(mRemoveRowAction);
@@ -91,4 +106,9 @@ void CSVWorld::NestedTable::addNewRowActionTriggered()
                                                                  mModel->getParentId(),
                                                                  selectionModel()->selectedRows().size(),
                                                                  mModel->getParentColumn()));
+}
+
+void CSVWorld::NestedTable::editCell()
+{
+    emit editRequest(mEditIdAction->getCurrentId(), "");
 }
