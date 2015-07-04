@@ -81,6 +81,7 @@ namespace MWMechanics
     /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
     struct AiCombatStorage : AiTemporaryBase
     {
+        float mAttackCooldown;
         float mTimerReact;
         float mTimerCombatMove;
         bool mReadyToAttack;
@@ -98,6 +99,7 @@ namespace MWMechanics
         MWMechanics::Movement mMovement;
         
         AiCombatStorage():
+        mAttackCooldown(0),
         mTimerReact(0),
         mTimerCombatMove(0),
         mReadyToAttack(false),
@@ -340,24 +342,34 @@ namespace MWMechanics
         // start new attack
         if(readyToAttack && characterController.readyToStartAttack())
         {
-            attack = true; // attack starts just now
-            characterController.setAttackingOrSpell(attack);
-
-            if (!distantCombat)
-                chooseBestAttack(weapon, movement);
-
-            strength = Misc::Rng::rollClosedProbability();
-
-            //say a provoking combat phrase
-            if (actor.getClass().isNpc())
+            if (storage.mAttackCooldown <= 0)
             {
+                attack = true; // attack starts just now
+                characterController.setAttackingOrSpell(attack);
+
+                if (!distantCombat)
+                    chooseBestAttack(weapon, movement);
+
+                strength = Misc::Rng::rollClosedProbability();
+
                 const MWWorld::ESMStore &store = world->getStore();
-                int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
-                if (Misc::Rng::roll0to99() < chance)
+
+                //say a provoking combat phrase
+                if (actor.getClass().isNpc())
                 {
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                    int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
+                    if (Misc::Rng::roll0to99() < chance)
+                    {
+                        MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                    }
                 }
+                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->getFloat();
+                if (actor.getClass().isNpc())
+                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->getFloat();
+                storage.mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(), baseDelay + 0.9);
             }
+            else
+                storage.mAttackCooldown -= tReaction;
         }
 
 
