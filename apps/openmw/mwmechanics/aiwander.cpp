@@ -267,6 +267,7 @@ namespace MWMechanics
                 moveNow = false;
                 walking = false;
                 chooseAction = true;
+                mStuckCount = 0;
             }
 //#endif
         }
