@@ -567,6 +567,11 @@ void CSVWorld::EditWidget::remake(int row)
 
                 tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
+
+                connect(table, 
+                        SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)), 
+                        this, 
+                        SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {

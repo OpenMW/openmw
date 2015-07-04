@@ -22,12 +22,15 @@ namespace CSMDoc
 
 namespace CSVWorld
 {
+    class TableEditIdAction;
+
     class NestedTable : public DragRecordTable
     {
         Q_OBJECT
 
         QAction *mAddNewRowAction;
         QAction *mRemoveRowAction;
+        TableEditIdAction *mEditIdAction;
         CSMWorld::NestedTableProxyModel* mModel;
         CSMWorld::CommandDispatcher *mDispatcher;
 
@@ -47,6 +50,11 @@ namespace CSVWorld
         void removeRowActionTriggered();
 
         void addNewRowActionTriggered();
+
+        void editCell();
+
+    signals:
+        void editRequest(const CSMWorld::UniversalId &id, const std::string &hint);
     };
 }
 
