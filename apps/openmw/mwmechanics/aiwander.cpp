@@ -410,7 +410,7 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
@@ -510,17 +510,10 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
-                    // buildPath inserts dest in case it is not a pathgraph point
-                    // index which is a duplicate for AiWander.  However below code
-                    // does not work since getPath() returns a copy of path not a
-                    // reference
-                    //if(storage.mPathFinder.getPathSize() > 1)
-                        //storage.mPathFinder.getPath().pop_back();
-
                     // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);

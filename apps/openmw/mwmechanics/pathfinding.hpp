@@ -35,9 +35,6 @@ namespace MWMechanics
 
             void clearPath();
 
-            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
-                           const MWWorld::CellStore* cell, bool allowShortcuts = true);
-
             bool checkPathCompleted(float x, float y, float tolerance=32.f);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
@@ -92,6 +89,8 @@ namespace MWMechanics
             }
 
         private:
+            void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
+                const MWWorld::CellStore* cell, bool allowShortcuts = true);
 
             std::list<ESM::Pathgrid::Point> mPath;
 
