@@ -19,8 +19,6 @@ namespace MWRender
         float mStartTime;
     public:
         WeaponAnimationTime(Animation* animation) : mAnimation(animation), mStartTime(0) {}
-        virtual ~WeaponAnimationTime() { }
-
         void setGroup(const std::string& group);
         void updateStartTime();
 

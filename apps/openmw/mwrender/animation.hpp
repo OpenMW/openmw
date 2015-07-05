@@ -93,7 +93,6 @@ protected:
         boost::shared_ptr<float> mTimePtr;
 
     public:
-        virtual ~AnimationTime() { }
 
         void setTimePtr(boost::shared_ptr<float> time)
         { mTimePtr = time; }
