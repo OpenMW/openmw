@@ -682,18 +682,13 @@ namespace MWMechanics
         // ... pathgrids don't usually include water, so swimmers ignore them
         if (mDistance && !actor.getClass().isPureWaterCreature(actor))
         {
-            float cellXOffset = 0;
-            float cellYOffset = 0;
+            // get NPC's position in local (i.e. cell) co-ordinates
+            osg::Vec3f npcPos(mInitialActorPosition);
             if(cell->isExterior())
             {
-                cellXOffset = static_cast<float>(cell->mData.mX * ESM::Land::REAL_SIZE);
-                cellYOffset = static_cast<float>(cell->mData.mY * ESM::Land::REAL_SIZE);
+                npcPos[0] = npcPos[0] - static_cast<float>(cell->mData.mX * ESM::Land::REAL_SIZE);
+                npcPos[1] = npcPos[1] - static_cast<float>(cell->mData.mY * ESM::Land::REAL_SIZE);
             }
-
-            // convert npcPos to local (i.e. cell) co-ordinates
-            osg::Vec3f npcPos(mInitialActorPosition);
-            npcPos[0] = npcPos[0] - cellXOffset;
-            npcPos[1] = npcPos[1] - cellYOffset;
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
