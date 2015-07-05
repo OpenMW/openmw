@@ -244,10 +244,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDeclaredValues (jumpValues);
 
         Setting *extendedConfig = createSetting (Type_CheckBox, "extended-config",
-            "Enable configuration of the extended delete/revert");
+            "Manually specify affected record types for an extended delete/revert");
         extendedConfig->setDefaultValue("false");
-        extendedConfig->setToolTip("Enables the ability to specify tables that will be affected by "
-                                   "the extended delete/revert command");
+        extendedConfig->setToolTip("Delete and revert commands have an extended form that also affects "
+                                   "associated records.\n\n"
+                                   "If this option is enabled, types of affected records are selected "
+                                   "manually before a command execution.\nOtherwise, all associated "
+                                   "records are deleted/reverted immediately.");
     }
 
     declareSection ("dialogues", "ID Dialogues");
