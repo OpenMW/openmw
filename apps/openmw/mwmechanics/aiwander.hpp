@@ -118,6 +118,9 @@ namespace MWMechanics
                 GroupIndex_MaxIdle = 9
             };
 
+            /// convert point from local (i.e. cell) to world co-ordinates
+            void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
+
             /// lookup table for converting idleSelect value to groupName
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
     };

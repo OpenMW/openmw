@@ -498,14 +498,8 @@ namespace MWMechanics
             {
                 assert(mAllowedNodes.size());
                 unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
-                // NOTE: initially constructed with local (i.e. cell) co-ordinates
-                // convert dest to use world co-ordinates
                 ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
-                if (currentCell->getCell()->isExterior())
-                {
-                    dest.mX += currentCell->getCell()->mData.mX * ESM::Land::REAL_SIZE;
-                    dest.mY += currentCell->getCell()->mData.mY * ESM::Land::REAL_SIZE;
-                }
+                ToWorldCoordinates(dest, currentCell->getCell());
 
                 // actor position is already in world co-ordinates
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
@@ -535,6 +529,15 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
+    {
+        if (cell->isExterior())
+        {
+            point.mX += cell->mData.mX * ESM::Land::REAL_SIZE;
+            point.mY += cell->mData.mY * ESM::Land::REAL_SIZE;
+        }
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
@@ -643,12 +646,7 @@ namespace MWMechanics
         // apply a slight offset to prevent overcrowding
         dest.mX += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
         dest.mY += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
-
-        if (actor.getCell()->isExterior())
-        {
-            dest.mX += actor.getCell()->getCell()->mData.mX * ESM::Land::REAL_SIZE;
-            dest.mY += actor.getCell()->getCell()->mData.mY * ESM::Land::REAL_SIZE;
-        }
+        ToWorldCoordinates(dest, actor.getCell()->getCell());
 
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
