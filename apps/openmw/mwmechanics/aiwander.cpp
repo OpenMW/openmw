@@ -1,5 +1,7 @@
 #include "aiwander.hpp"
 
+#include <cfloat>
+
 #include <components/misc/rng.hpp>
 
 #include <components/esm/aisequence.hpp>
@@ -700,21 +702,28 @@ namespace MWMechanics
             }
             if(!mAllowedNodes.empty())
             {
-                osg::Vec3f firstNodePos(PathFinder::MakeOsgVec3(mAllowedNodes[0]));
-                float closestNode = (npcPos - firstNodePos).length2();
-                unsigned int index = 0;
-                for(unsigned int counterThree = 1; counterThree < mAllowedNodes.size(); counterThree++)
-                {
-                    osg::Vec3f nodePos(PathFinder::MakeOsgVec3(mAllowedNodes[counterThree]));
-                    float tempDist = (npcPos - nodePos).length2();
-                    if(tempDist < closestNode)
-                        index = counterThree;
-                }
-                mCurrentNode = mAllowedNodes[index];
-                mAllowedNodes.erase(mAllowedNodes.begin() + index);
+                SetCurrentNodeToClosestAllowedNode(npcPos);
             }
             mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
+    }
+
+    void AiWander::SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos)
+    {
+        float distanceToClosestNode = FLT_MAX;
+        unsigned int index = 0;
+        for (unsigned int counterThree = 0; counterThree < mAllowedNodes.size(); counterThree++)
+        {
+            osg::Vec3f nodePos(PathFinder::MakeOsgVec3(mAllowedNodes[counterThree]));
+            float tempDist = (npcPos - nodePos).length2();
+            if (tempDist < distanceToClosestNode)
+            {
+                index = counterThree;
+                distanceToClosestNode = tempDist;
+            }
+        }
+        mCurrentNode = mAllowedNodes[index];
+        mAllowedNodes.erase(mAllowedNodes.begin() + index);
     }
 
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
