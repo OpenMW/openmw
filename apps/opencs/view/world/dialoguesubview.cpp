@@ -19,6 +19,7 @@
 #include <QComboBox>
 #include <QHeaderView>
 #include <QScrollBar>
+#include <QMenu>
 
 #include "../../model/world/nestedtableproxymodel.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -314,9 +315,140 @@ CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
     }
 }
 
+
+CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Display display)
+    : QObject(widget),
+      mWidget(widget),
+      mIdType(CSMWorld::TableMimeData::convertEnums(display))
+{
+    Q_ASSERT(mWidget != NULL);
+    Q_ASSERT(CSMWorld::ColumnBase::isId(display));
+    Q_ASSERT(mIdType != CSMWorld::UniversalId::Type_None);
+    
+    mWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(mWidget, 
+            SIGNAL(customContextMenuRequested(const QPoint &)), 
+            this, 
+            SLOT(showContextMenu(const QPoint &)));
+
+    mEditIdAction = new QAction(this);
+    connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editIdRequest()));
+
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
+    if (lineEdit != NULL)
+    {
+        mContextMenu = lineEdit->createStandardContextMenu();
+    }
+    else
+    {
+        mContextMenu = new QMenu(mWidget);
+    }
+}
+
+void CSVWorld::IdContextMenu::excludeId(const std::string &id)
+{
+    mExcludedIds.insert(id);
+}
+
+QString CSVWorld::IdContextMenu::getWidgetValue() const
+{
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
+    QLabel *label = qobject_cast<QLabel *>(mWidget);
+
+    QString value = "";
+    if (lineEdit != NULL)
+    {
+        value = lineEdit->text();
+    }
+    else if (label != NULL)
+    {
+        value = label->text();
+    }
+    return value;
+}
+
+void CSVWorld::IdContextMenu::addEditIdActionToMenu(const QString &text)
+{
+    mEditIdAction->setText(text);
+    if (mContextMenu->actions().isEmpty())
+    {
+        mContextMenu->addAction(mEditIdAction);
+    }
+    else if (mContextMenu->actions().first() != mEditIdAction)
+    {
+        QAction *action = mContextMenu->actions().first();
+        mContextMenu->insertAction(action, mEditIdAction);
+        mContextMenu->insertSeparator(action);
+    }
+}
+
+void CSVWorld::IdContextMenu::removeEditIdActionFromMenu()
+{
+    if (mContextMenu->actions().isEmpty())
+    {
+        return;
+    }
+
+    if (mContextMenu->actions().first() == mEditIdAction)
+    {
+        mContextMenu->removeAction(mEditIdAction);
+        if (!mContextMenu->actions().isEmpty() && mContextMenu->actions().first()->isSeparator())
+        {
+            mContextMenu->removeAction(mContextMenu->actions().first());
+        }
+    }
+}
+
+void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
+{
+    QString value = getWidgetValue();
+    bool isExcludedId = mExcludedIds.find(value.toUtf8().constData()) != mExcludedIds.end();
+    if (!value.isEmpty() && !isExcludedId)
+    {
+        addEditIdActionToMenu("Edit '" + value + "'");
+    }
+    else
+    {
+        removeEditIdActionFromMenu();
+    }
+    
+    if (!mContextMenu->actions().isEmpty())
+    {
+        mContextMenu->exec(mWidget->mapToGlobal(pos));
+    }
+}
+
+void CSVWorld::IdContextMenu::editIdRequest()
+{
+    CSMWorld::UniversalId editId(mIdType, getWidgetValue().toUtf8().constData());
+    emit editIdRequest(editId, "");
+}
+
 /*
 =============================================================EditWidget=====================================================
 */
+
+void CSVWorld::EditWidget::createEditorContextMenu(QWidget *editor,
+                                                   CSMWorld::ColumnBase::Display display,
+                                                   int currentRow) const
+{
+    Q_ASSERT(editor != NULL);
+
+    if (CSMWorld::ColumnBase::isId(display) &&
+        CSMWorld::TableMimeData::convertEnums(display) != CSMWorld::UniversalId::Type_None)
+    {
+        int idColumn = mTable->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+        QString id = mTable->data(mTable->index(currentRow, idColumn)).toString();
+
+        IdContextMenu *menu = new IdContextMenu(editor, display);
+        // Current ID is already opened, so no need to create Edit 'ID' action for it
+        menu->excludeId(id.toUtf8().constData());
+        connect(menu,
+                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
+                this,
+                SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
+    }
+}
 
 CSVWorld::EditWidget::~EditWidget()
 {
@@ -455,6 +587,11 @@ void CSVWorld::EditWidget::remake(int row)
 
                 tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
+
+                connect(table, 
+                        SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)), 
+                        this, 
+                        SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
             {
@@ -488,6 +625,8 @@ void CSVWorld::EditWidget::remake(int row)
                         editor->setEnabled(false);
                         label->setEnabled(false);
                     }
+
+                    createEditorContextMenu(editor, display, row);
                 }
             }
             else
@@ -539,6 +678,8 @@ void CSVWorld::EditWidget::remake(int row)
                             editor->setEnabled(false);
                             label->setEnabled(false);
                         }
+
+                        createEditorContextMenu(editor, display, row);
                     }
                 }
                 mNestedTableMapper->setCurrentModelIndex(tree->index(0, 0, tree->index(row, i)));
@@ -607,6 +748,11 @@ CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::Universa
     mEditWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     dataChanged(mTable->getModelIndex (getUniversalId().getId(), 0));
+
+    connect(mEditWidget,
+            SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)),
+            this,
+            SIGNAL(focusId(const CSMWorld::UniversalId &, const std::string &)));
 }
 
 void CSVWorld::SimpleDialogueSubView::setEditLock (bool locked)
