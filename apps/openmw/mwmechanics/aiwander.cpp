@@ -216,7 +216,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], 64.f))
+           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
         {
             stopWalking(actor, storage);
             moveNow = false;
@@ -694,11 +694,19 @@ namespace MWMechanics
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates
+            int pointIndex = 0;
             for(unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
                 osg::Vec3f nodePos(PathFinder::MakeOsgVec3(pathgrid->mPoints[counter]));
                 if((npcPos - nodePos).length2() <= mDistance * mDistance)
+                {
                     mAllowedNodes.push_back(pathgrid->mPoints[counter]);
+                    pointIndex = counter;
+                }
+            }
+            if (mAllowedNodes.size() == 1)
+            {
+                AddNonPathGridAllowedPoints(npcPos, pathgrid, pointIndex);
             }
             if(!mAllowedNodes.empty())
             {
@@ -706,6 +714,40 @@ namespace MWMechanics
             }
             mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
+    }
+
+    // When only one path grid point in wander distance, 
+    // additional points for NPC to wander to are:
+    // 1. NPC's initial location
+    // 2. Partway along the path between the point and its connected points.
+    void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex)
+    {
+        mAllowedNodes.push_back(PathFinder::MakePathgridPoint(npcPos));
+        for (std::vector<ESM::Pathgrid::Edge>::const_iterator it = pathGrid->mEdges.begin(); it != pathGrid->mEdges.end(); ++it)
+        {
+            if (it->mV0 == pointIndex)
+            {
+                AddPointBetweenPathGridPoints(pathGrid->mPoints[it->mV0], pathGrid->mPoints[it->mV1]);
+            }
+        }
+    }
+
+    void AiWander::AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end)
+    {
+        osg::Vec3f vectorStart = PathFinder::MakeOsgVec3(start);
+        osg::Vec3f delta = PathFinder::MakeOsgVec3(end) - vectorStart;
+        float length = delta.length();
+        delta.normalize();
+
+        // destination must be far enough away that NPC will need to move to get there.
+        const int threshold = PathFinder::PathTolerance * 2;
+        int distance = std::max(mDistance / 2, threshold);
+        
+        // must not travel more than 1/2 way between waypoints,
+        // otherwise, NPC goes to far endpoint then comes back.  Looks weird.
+        distance = std::min(distance, static_cast<int>(length / 2));
+        delta *= distance;
+        mAllowedNodes.push_back(PathFinder::MakePathgridPoint(vectorStart + delta));
     }
 
     void AiWander::SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos)
