@@ -48,8 +48,11 @@ namespace CSVWorld
             CSMWorld::Data &mData;
             std::vector<std::string> mSelectedIds;
             
+            bool mEditLock;
+
             void setupGroupLayout();
             void setupCheckBoxes(const std::vector<CSMWorld::UniversalId> &types);
+            void lockWidgets(bool locked);
 
         public:
             ExtendedCommandConfigurator(CSMDoc::Document &document,
@@ -57,6 +60,7 @@ namespace CSVWorld
                                         QWidget *parent = 0);
 
             void configure(Mode mode, const std::vector<std::string> &selectedIds);
+            void setEditLock(bool locked);
 
         protected:
             virtual void resizeEvent(QResizeEvent *event);

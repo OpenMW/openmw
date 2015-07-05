@@ -20,7 +20,8 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
       mNumUsedCheckBoxes(0),
       mNumChecked(0),
       mMode(Mode_None),
-      mData(document.getData())
+      mData(document.getData()),
+      mEditLock(false)
 {
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
 
@@ -58,8 +59,19 @@ void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandC
         mPerformButton->setText((mMode == Mode_Delete) ? "Extended Delete" : "Extended Revert");
         mSelectedIds = selectedIds;
         mCommandDispatcher->setSelection(mSelectedIds);
+
         setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
         setupGroupLayout();
+        lockWidgets(mEditLock);
+    }
+}
+
+void CSVWorld::ExtendedCommandConfigurator::setEditLock(bool locked)
+{
+    if (mEditLock != locked)
+    {
+        mEditLock = locked;
+        lockWidgets(mEditLock);
     }
 }
 
@@ -142,6 +154,18 @@ void CSVWorld::ExtendedCommandConfigurator::setupCheckBoxes(const std::vector<CS
         }
     }
     mNumChecked = mNumUsedCheckBoxes = numTypes;
+}
+
+void CSVWorld::ExtendedCommandConfigurator::lockWidgets(bool locked)
+{
+    mPerformButton->setEnabled(!mEditLock && mNumChecked > 0);
+
+    CheckBoxMap::const_iterator current = mTypeCheckBoxes.begin();
+    CheckBoxMap::const_iterator end = mTypeCheckBoxes.end();
+    for (int i = 0; current != end && i < mNumUsedCheckBoxes; ++current, ++i)
+    {
+        current->first->setEnabled(!mEditLock);
+    }
 }
 
 void CSVWorld::ExtendedCommandConfigurator::performExtendedCommand()
