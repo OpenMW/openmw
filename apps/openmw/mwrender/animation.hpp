@@ -21,6 +21,11 @@ namespace NifOsg
     class KeyframeController;
 }
 
+namespace SceneUtil
+{
+    class LightSource;
+}
+
 namespace MWRender
 {
 
@@ -202,6 +207,8 @@ protected:
     float mHeadYawRadians;
     float mHeadPitchRadians;
 
+    osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
+
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
@@ -377,7 +384,7 @@ public:
     // TODO: move outside of this class
     /// Makes this object glow, by placing a Light in its center.
     /// @param effect Controls the radius and intensity of the light.
-    virtual void setLightEffect(float effect) {}
+    virtual void setLightEffect(float effect);
 
     virtual void setHeadPitch(float pitchRadians);
     virtual void setHeadYaw(float yawRadians);

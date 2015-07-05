@@ -165,6 +165,8 @@ public:
     Drawable(const Drawable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
         : osg::Drawable(copy, copyop)
         , mParent(copy.mParent)
+        , mWriteTo(0)
+        , mReadFrom(0)
     {
     }
 

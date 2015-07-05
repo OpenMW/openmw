@@ -30,6 +30,7 @@ namespace CSMWorld
 namespace CSVWorld
 {
     class CommandDelegate;
+    class TableEditIdAction;
 
     ///< Table widget
     class Table : public DragRecordTable
@@ -57,15 +58,14 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
-            QAction *mEditCellAction;
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
+            TableEditIdAction *mEditIdAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
-            CSMWorld::UniversalId mEditCellId;
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;

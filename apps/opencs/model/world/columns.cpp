@@ -92,7 +92,7 @@ namespace CSMWorld
             { ColumnId_Trainer, "Trainer" },
             { ColumnId_Spellmaking, "Spellmaking" },
             { ColumnId_EnchantingService, "Enchanting Service" },
-            { ColumnId_RepairService, "Repair Serivce" },
+            { ColumnId_RepairService, "Repair Service" },
             { ColumnId_ApparatusType, "Apparatus Type" },
             { ColumnId_ArmorType, "Armor Type" },
             { ColumnId_Health, "Health" },

@@ -16,7 +16,7 @@ namespace MWMechanics
 
     CreatureStats::CreatureStats()
         : mDrawState (DrawState_Nothing), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
-          mTalkedTo (false), mAlarmed (false), mAttacked (false), mAttackingOrSpell(false),
+          mTalkedTo (false), mAlarmed (false), mAttacked (false),
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
@@ -86,11 +86,6 @@ namespace MWMechanics
     const MagicEffects &CreatureStats::getMagicEffects() const
     {
         return mMagicEffects;
-    }
-
-    bool CreatureStats::getAttackingOrSpell() const
-    {
-        return mAttackingOrSpell;
     }
 
     int CreatureStats::getLevel() const
@@ -210,11 +205,6 @@ namespace MWMechanics
             mRecalcMagicka = true;
 
         mMagicEffects.setModifiers(effects);
-    }
-
-    void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
-    {
-        mAttackingOrSpell = attackingOrSpell;
     }
 
     void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
@@ -487,7 +477,6 @@ namespace MWMechanics
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
-        state.mAttackingOrSpell = mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         state.mKnockdown = mKnockdown;
         state.mKnockdownOneFrame = mKnockdownOneFrame;
@@ -534,7 +523,6 @@ namespace MWMechanics
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;
-        mAttackingOrSpell = state.mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         mKnockdown = state.mKnockdown;
         mKnockdownOneFrame = state.mKnockdownOneFrame;

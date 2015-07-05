@@ -850,7 +850,6 @@ void NpcAnimation::addControllers()
     Animation::addControllers();
 
     mFirstPersonNeckController = NULL;
-    mHeadController = NULL;
     WeaponAnimation::deleteControllers();
 
     if (mViewMode == VM_FirstPerson)
