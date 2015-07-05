@@ -21,6 +21,7 @@ namespace CSMDoc
 namespace CSMWorld
 {
     class CommandDispatcher;
+    class Data;
 }
 
 namespace CSVWorld
@@ -44,6 +45,8 @@ namespace CSVWorld
 
             Mode mMode;
             CSMWorld::CommandDispatcher *mCommandDispatcher;
+            CSMWorld::Data &mData;
+            std::vector<std::string> mSelectedIds;
             
             void setupGroupLayout();
             void setupCheckBoxes(const std::vector<CSMWorld::UniversalId> &types);
@@ -61,6 +64,7 @@ namespace CSVWorld
         private slots:
             void performExtendedCommand();
             void checkBoxStateChanged(int state);
+            void dataIdListChanged();
 
         signals:
             void done();
