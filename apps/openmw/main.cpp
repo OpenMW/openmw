@@ -14,7 +14,9 @@
 
 #if defined(_WIN32)
 // For OutputDebugString
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
