@@ -115,6 +115,7 @@ void CSVWorld::TableBottomBox::setEditLock (bool locked)
 {
     if (mCreator)
         mCreator->setEditLock (locked);
+    mExtendedConfigurator->setEditLock (locked);
 }
 
 CSVWorld::TableBottomBox::~TableBottomBox()
