@@ -1,12 +1,17 @@
 #include "extendedcommandconfigurator.hpp"
 
+#include <algorithm>
+
 #include <QPushButton>
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QLabel>
 #include <QLayout>
 
+#include "../../model/doc/document.hpp"
+
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/world/data.hpp"
 
 CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Document &document,
                                                                    const CSMWorld::UniversalId &id,
@@ -14,9 +19,12 @@ CSVWorld::ExtendedCommandConfigurator::ExtendedCommandConfigurator(CSMDoc::Docum
     : QWidget(parent),
       mNumUsedCheckBoxes(0),
       mNumChecked(0),
-      mMode(Mode_None)
+      mMode(Mode_None),
+      mData(document.getData())
 {
     mCommandDispatcher = new CSMWorld::CommandDispatcher(document, id, this);
+
+    connect(&mData, SIGNAL(idListChanged()), this, SLOT(dataIdListChanged()));
 
     mPerformButton = new QPushButton(this);
     mPerformButton->setDefault(true);
@@ -48,7 +56,8 @@ void CSVWorld::ExtendedCommandConfigurator::configure(CSVWorld::ExtendedCommandC
     if (mMode != Mode_None)
     {
         mPerformButton->setText((mMode == Mode_Delete) ? "Extended Delete" : "Extended Revert");
-        mCommandDispatcher->setSelection(selectedIds);
+        mSelectedIds = selectedIds;
+        mCommandDispatcher->setSelection(mSelectedIds);
         setupCheckBoxes(mCommandDispatcher->getExtendedTypes());
         setupGroupLayout();
     }
@@ -176,4 +185,31 @@ void CSVWorld::ExtendedCommandConfigurator::checkBoxStateChanged(int state)
     }
 
     mPerformButton->setEnabled(mNumChecked > 0);
+}
+
+void CSVWorld::ExtendedCommandConfigurator::dataIdListChanged()
+{
+    bool idsRemoved = false;
+    for (int i = 0; i < static_cast<int>(mSelectedIds.size()); ++i)
+    {
+        if (!mData.hasId(mSelectedIds[i]))
+        {
+            std::swap(mSelectedIds[i], mSelectedIds.back());
+            mSelectedIds.pop_back();
+            idsRemoved = true;
+            --i;
+        }
+    }
+
+    // If all selected IDs were removed, cancel the configurator
+    if (mSelectedIds.empty())
+    {
+        emit done();
+        return;
+    }
+
+    if (idsRemoved)
+    {
+        mCommandDispatcher->setSelection(mSelectedIds);
+    }
 }
