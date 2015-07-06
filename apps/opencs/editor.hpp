@@ -11,15 +11,11 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 
-#include <extern/shiny/Main/Factory.hpp>
-
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
 
 #include <components/files/multidircollection.hpp>
-
-#include <components/nifcache/nifcache.hpp>
 
 #include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
@@ -30,11 +26,10 @@
 #include "view/doc/newgame.hpp"
 
 #include "view/settings/dialog.hpp"
-#include "view/render/overlaysystem.hpp"
 
-namespace OgreInit
+namespace VFS
 {
-    class OgreInit;
+    class Manager;
 }
 
 namespace CS
@@ -43,10 +38,11 @@ namespace CS
     {
             Q_OBJECT
 
-            Nif::Cache mNifCache;
+            // FIXME: should be moved to document, so we can have different resources for each opened project
+            std::auto_ptr<VFS::Manager> mVFS;
+
             Files::ConfigurationManager mCfgMgr;
             CSMSettings::UserSettings mUserSettings;
-            std::auto_ptr<CSVRender::OverlaySystem> mOverlaySystem;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
@@ -62,7 +58,7 @@ namespace CS
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
-            std::pair<Files::PathContainer, std::vector<std::string> > readConfig();
+            std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths
 
             // not implemented
@@ -71,7 +67,7 @@ namespace CS
 
         public:
 
-            Editor (OgreInit::OgreInit& ogreInit);
+            Editor ();
             ~Editor ();
 
             bool makeIPCServer();
@@ -79,9 +75,6 @@ namespace CS
 
             int run();
             ///< \return error status
-
-            std::auto_ptr<sh::Factory> setupGraphics();
-            ///< The returned factory must persist at least as long as *this.
 
         private slots:
 

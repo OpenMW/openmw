@@ -2,6 +2,6 @@
 
 <MyGUI type="Layout">
     <Widget type="ImageBox" skin="ImageBox" layer="Render" position="0 0 300 200" name="_Main" align="Stretch">
-        <Property key="ImageTexture" value="black.png"/>
+        <Property key="ImageTexture" value="black"/>
     </Widget>
 </MyGUI>

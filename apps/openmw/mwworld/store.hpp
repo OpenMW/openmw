@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 
@@ -180,7 +180,7 @@ namespace MWWorld
             std::vector<const T*> results;
             std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
             if(!results.empty())
-                return results[OEngine::Misc::Rng::rollDice(results.size())];
+                return results[Misc::Rng::rollDice(results.size())];
             return NULL;
         }
 
@@ -188,7 +188,7 @@ namespace MWWorld
             const T *ptr = search(id);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Object '" << id << "' not found (const)";
+                msg << T::getRecordType() << " '" << id << "' not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
@@ -202,7 +202,7 @@ namespace MWWorld
             if(ptr == 0)
             {
                 std::ostringstream msg;
-                msg << "Object starting with '"<<id<<"' not found (const)";
+                msg << T::getRecordType() << " starting with '"<<id<<"' not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
@@ -989,7 +989,7 @@ namespace MWWorld
             const T *ptr = search(index);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Object with index " << index << " not found";
+                msg << T::getRecordType() << " with index " << index << " not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;

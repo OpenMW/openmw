@@ -30,6 +30,8 @@ namespace MWGui
 
         void update();
 
+        void resetScrollBars();
+
     private:
         virtual void initialiseOverride();
 
@@ -40,7 +42,7 @@ namespace MWGui
 
         void onSelectedItem (MyGUI::Widget* sender);
         void onSelectedBackground (MyGUI::Widget* sender);
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
 
         ItemModel* mModel;
         MyGUI::ScrollView* mScrollView;

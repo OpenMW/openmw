@@ -1,12 +1,55 @@
 #include "settings.hpp"
 
 #include <stdexcept>
+#include <sstream>
 
-#include <OgreStringConverter.h>
+#include <components/misc/stringops.hpp>
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string.hpp>
+
+namespace
+{
+
+    bool parseBool(const std::string& string)
+    {
+        return (Misc::StringUtils::ciEqual(string, "true"));
+    }
+
+    float parseFloat(const std::string& string)
+    {
+        std::stringstream stream;
+        stream << string;
+        float ret = 0.f;
+        stream >> ret;
+        return ret;
+    }
+
+    int parseInt(const std::string& string)
+    {
+        std::stringstream stream;
+        stream << string;
+        int ret = 0;
+        stream >> ret;
+        return ret;
+    }
+
+    template <typename T>
+    std::string toString(T val)
+    {
+        std::ostringstream stream;
+        stream << val;
+        return stream.str();
+    }
+
+    template <>
+    std::string toString(bool val)
+    {
+        return val ? "true" : "false";
+    }
+
+}
 
 namespace Settings
 {
@@ -143,17 +186,17 @@ std::string Manager::getString(const std::string &setting, const std::string &ca
 
 float Manager::getFloat (const std::string& setting, const std::string& category)
 {
-    return Ogre::StringConverter::parseReal( getString(setting, category) );
+    return parseFloat( getString(setting, category) );
 }
 
 int Manager::getInt (const std::string& setting, const std::string& category)
 {
-    return Ogre::StringConverter::parseInt( getString(setting, category) );
+    return parseInt( getString(setting, category) );
 }
 
 bool Manager::getBool (const std::string& setting, const std::string& category)
 {
-    return Ogre::StringConverter::parseBool( getString(setting, category) );
+    return parseBool( getString(setting, category) );
 }
 
 void Manager::setString(const std::string &setting, const std::string &category, const std::string &value)
@@ -174,17 +217,17 @@ void Manager::setString(const std::string &setting, const std::string &category,
 
 void Manager::setInt (const std::string& setting, const std::string& category, const int value)
 {
-    setString(setting, category, Ogre::StringConverter::toString(value));
+    setString(setting, category, toString(value));
 }
 
 void Manager::setFloat (const std::string &setting, const std::string &category, const float value)
 {
-    setString(setting, category, Ogre::StringConverter::toString(value));
+    setString(setting, category, toString(value));
 }
 
 void Manager::setBool(const std::string &setting, const std::string &category, const bool value)
 {
-    setString(setting, category, Ogre::StringConverter::toString(value));
+    setString(setting, category, toString(value));
 }
 
 const CategorySettingVector Manager::apply()

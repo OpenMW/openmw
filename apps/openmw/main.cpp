@@ -21,15 +21,16 @@
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+    #define USE_CRASH_CATCHER 1
+#else
+    #define USE_CRASH_CATCHER 0
+#endif
+
+#if USE_CRASH_CATCHER
 #include <csignal>
 extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
 extern int is_debugger_attached(void);
-#endif
-
-// for Ogre::macBundlePath
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
 #endif
 
 #include <boost/version.hpp>
@@ -362,7 +363,7 @@ int main(int argc, char**argv)
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if USE_CRASH_CATCHER
         // Unix crash catcher
         if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
         {
@@ -374,10 +375,10 @@ int main(int argc, char**argv)
             std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
 #endif
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        // set current dir to bundle path
-        boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-        boost::filesystem::current_path(bundlePath);
+#ifdef __APPLE__
+        // FIXME: set current dir to bundle path
+        //boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
+        //boost::filesystem::current_path(bundlePath);
 #endif
 
         engine.reset(new OMW::Engine(cfgMgr));
@@ -389,7 +390,7 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
         if (!isatty(fileno(stdin)))
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);

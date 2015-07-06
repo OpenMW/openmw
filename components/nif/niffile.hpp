@@ -7,6 +7,8 @@
 #include <vector>
 #include <iostream>
 
+#include <components/files/constrainedfilestream.hpp>
+
 #include "record.hpp"
 
 namespace Nif
@@ -30,6 +32,8 @@ class NIFFile
     /// Root list.  This is a select portion of the pointers from records
     std::vector<Record*> roots;
 
+    bool mUseSkinning;
+
     /// Parse the file
     void parse();
 
@@ -41,6 +45,8 @@ class NIFFile
     NIFFile (NIFFile const &);
     ///\overload
     void operator = (NIFFile const &);
+
+    Files::IStreamPtr mStream;
 
 public:
     /// Used if file parsing fails
@@ -57,8 +63,8 @@ public:
                   << "File: " << filename <<std::endl;
     }
 
-    /// Open a NIF stream. The name is used for error messages and opening the file.
-    NIFFile(const std::string &name);
+    /// Open a NIF stream. The name is used for error messages.
+    NIFFile(Files::IStreamPtr stream, const std::string &name);
     ~NIFFile();
 
     /// Get a given record
@@ -79,9 +85,16 @@ public:
     /// Number of roots
     size_t numRoots() const { return roots.size(); }
 
+    /// Set whether there is skinning contained in this NIF file.
+    /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.
+    void setUseSkinning(bool skinning);
+
+    bool getUseSkinning() const;
+
     /// Get the name of the file
     std::string getFilename(){ return filename; }
 };
+typedef boost::shared_ptr<Nif::NIFFile> NIFFilePtr;
 
 
 

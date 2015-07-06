@@ -15,6 +15,8 @@ namespace ESM
     {
         static unsigned int sRecordId;
 
+        static int sCurrentFormat;
+
         struct TimeStamp
         {
             float mGameHour;

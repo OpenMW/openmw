@@ -52,8 +52,11 @@ void ConfigurationManager::setupTokensMapping()
 }
 
 void ConfigurationManager::readConfiguration(boost::program_options::variables_map& variables,
-    boost::program_options::options_description& description)
+    boost::program_options::options_description& description, bool quiet)
 {
+    bool silent = mSilent;
+    mSilent = quiet;
+
     loadConfig(mFixedPath.getUserConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
@@ -62,6 +65,7 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
+    mSilent = silent;
 }
 
 void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create)

@@ -4,7 +4,8 @@ namespace CSVRender
 {
 
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)
-        : mData(data)
+        : ESMTerrain::Storage(data.getResourceSystem()->getVFS())
+        , mData(data)
     {
     }
 

@@ -13,7 +13,7 @@
 #include "../mwworld/actiontake.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/actionsoulgem.hpp"
@@ -51,10 +51,9 @@ namespace MWClass
         }
     }
 
-    void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Miscellaneous::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
     std::string Miscellaneous::getModel(const MWWorld::Ptr &ptr) const

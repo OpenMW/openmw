@@ -4,11 +4,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "scenewidget.hpp"
-#include "mousestate.hpp"
 
-#include "navigation1st.hpp"
-#include "navigationfree.hpp"
-#include "navigationorbit.hpp"
 #include <apps/opencs/model/doc/document.hpp>
 #include <apps/opencs/model/world/tablemimedata.hpp>
 
@@ -25,25 +21,15 @@ namespace CSVWidget
     class SceneToolRun;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSVRender
 {
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
 
-            CSVRender::Navigation1st m1st;
-            CSVRender::NavigationFree mFree;
-            CSVRender::NavigationOrbit mOrbit;
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
-            MouseState *mMouse;
             unsigned int mInteractionMask;
 
         public:

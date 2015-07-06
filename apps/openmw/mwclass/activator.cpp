@@ -11,12 +11,13 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/physicssystem.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/nullaction.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwphysics/physicssystem.hpp"
+
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -34,12 +35,11 @@ namespace MWClass
     void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
-            MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model, true);
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
             physics.addObject(ptr, model);

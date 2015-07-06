@@ -3,11 +3,15 @@
 
 #include <algorithm>
 
-#include <OgreSceneNode.h>
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
+#include <QEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
 
-#include <QtGui/qevent.h>
+#include <osgGA/TrackballManipulator>
+#include <osgGA/FirstPersonManipulator>
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
@@ -16,13 +20,11 @@
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
-#include "../world/physicssystem.hpp"
-
 #include "elements.hpp"
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mSceneElements(0), mRun(0), mDocument(document), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
+: SceneWidget (document.getData().getResourceSystem()->getSceneManager(), parent), mSceneElements(0), mRun(0), mDocument(document),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -54,33 +56,27 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
-
-    mPhysics = document.getPhysics(); // create physics if one doesn't exist
-    mPhysics->addSceneManager(getSceneManager(), this);
-    mMouse = new MouseState(this);
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
-    delete mMouse;
-    mPhysics->removeSceneManager(getSceneManager());
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
 {
     if (mode=="1st")
-        setNavigation (&m1st);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="free")
-        setNavigation (&mFree);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="orbit")
-        setNavigation (&mOrbit);
+        mView->setCameraManipulator(new osgGA::OrbitManipulator);
 }
 
 void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
 
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
-    setNavigation (&m1st);
+    mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
 }
 
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
@@ -368,16 +364,16 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
     if(event->buttons() & Qt::RightButton)
     {
-        mMouse->mouseMoveEvent(event);
+        //mMouse->mouseMoveEvent(event);
     }
-    SceneWidget::mouseMoveEvent(event);
+    RenderWidget::mouseMoveEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
     if(event->buttons() & Qt::RightButton)
     {
-        mMouse->mousePressEvent(event);
+        //mMouse->mousePressEvent(event);
     }
     //SceneWidget::mousePressEvent(event);
 }
@@ -386,37 +382,39 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
+        /*
         if(!getViewport())
         {
             SceneWidget::mouseReleaseEvent(event);
             return;
         }
-        mMouse->mouseReleaseEvent(event);
+        */
+        //mMouse->mouseReleaseEvent(event);
     }
-    SceneWidget::mouseReleaseEvent(event);
+    RenderWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
-        mMouse->mouseDoubleClickEvent(event);
+        //mMouse->mouseDoubleClickEvent(event);
     }
     //SceneWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
-    if(!mMouse->wheelEvent(event))
-        SceneWidget::wheelEvent(event);
+    //if(!mMouse->wheelEvent(event))
+        RenderWidget::wheelEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        mMouse->cancelDrag();
+        //mMouse->cancelDrag();
     }
     else
-        SceneWidget::keyPressEvent(event);
+        RenderWidget::keyPressEvent(event);
 }

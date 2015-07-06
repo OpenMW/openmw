@@ -7,7 +7,6 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ImageBox.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
@@ -169,7 +168,7 @@ namespace MWGui
                 {
                     LocalMapBase::MarkerUserData data = *focus->getUserData<LocalMapBase::MarkerUserData>();
 
-                    if (!MWBase::Environment::get().getWorld ()->isPositionExplored (data.nX, data.nY, data.cellX, data.cellY, data.interior))
+                    if (!data.isPositionExplored())
                         return;
 
                     ToolTipInfo info;
@@ -200,9 +199,7 @@ namespace MWGui
                 {
                     MyGUI::IntCoord avatarPos = focus->getAbsoluteCoord();
                     MyGUI::IntPoint relMousePos = MyGUI::InputManager::getInstance ().getMousePosition () - MyGUI::IntPoint(avatarPos.left, avatarPos.top);
-                    int realX = int(float(relMousePos.left) / float(avatarPos.width) * 512.f );
-                    int realY = int(float(relMousePos.top) / float(avatarPos.height) * 1024.f );
-                    MWWorld::Ptr item = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarSelectedItem (realX, realY);
+                    MWWorld::Ptr item = MWBase::Environment::get().getWindowManager()->getInventoryWindow ()->getAvatarSelectedItem (relMousePos.left, relMousePos.top);
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty ())
@@ -388,7 +385,7 @@ namespace MWGui
         const int imageCaptionHPadding = (caption != "" ? 8 : 0);
         const int imageCaptionVPadding = (caption != "" ? 4 : 0);
 
-        std::string realImage = Misc::ResourceHelpers::correctIconPath(image);
+        std::string realImage = MWBase::Environment::get().getWindowManager()->correctIconPath(image);
 
         MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setProperty("Static", "true");
@@ -689,7 +686,7 @@ namespace MWGui
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "BirthSignToolTip");
-        widget->setUserString("ImageTexture_BirthSignImage", Misc::ResourceHelpers::correctTexturePath(sign->mTexture));
+        widget->setUserString("ImageTexture_BirthSignImage", MWBase::Environment::get().getWindowManager()->correctTexturePath(sign->mTexture));
         std::string text;
 
         text += sign->mName;
@@ -784,7 +781,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = Misc::ResourceHelpers::correctIconPath(icon);
+        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");

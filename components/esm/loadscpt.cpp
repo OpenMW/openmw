@@ -4,6 +4,8 @@
 #include "esmwriter.hpp"
 #include "defs.hpp"
 
+#include <iostream>
+
 namespace ESM
 {
 

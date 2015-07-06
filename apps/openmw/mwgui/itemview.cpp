@@ -103,7 +103,7 @@ void ItemView::update()
                                                                        MyGUI::Align::Stretch);
     dragArea->setNeedMouseFocus(true);
     dragArea->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedBackground);
-    dragArea->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
+    dragArea->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);
 
     for (ItemModel::ModelIndex i=0; i<static_cast<int>(mModel->getItemCount()); ++i)
     {
@@ -122,10 +122,15 @@ void ItemView::update()
         itemWidget->setCount(item.mCount);
 
         itemWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedItem);
-        itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheel);
+        itemWidget->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);
     }
 
     layoutWidgets();
+}
+
+void ItemView::resetScrollBars()
+{
+    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void ItemView::onSelectedItem(MyGUI::Widget *sender)
@@ -139,7 +144,7 @@ void ItemView::onSelectedBackground(MyGUI::Widget *sender)
     eventBackgroundClicked();
 }
 
-void ItemView::onMouseWheel(MyGUI::Widget *_sender, int _rel)
+void ItemView::onMouseWheelMoved(MyGUI::Widget *_sender, int _rel)
 {
     if (mScrollView->getViewOffset().left + _rel*0.3f > 0)
         mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));

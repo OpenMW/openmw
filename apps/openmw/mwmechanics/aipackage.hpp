@@ -14,6 +14,7 @@ namespace MWWorld
 
 namespace ESM
 {
+    struct Cell;
     namespace AiSequence
     {
         struct AiSequence;
@@ -23,6 +24,8 @@ namespace ESM
 
 namespace MWMechanics
 {
+
+    class CharacterController;
 
     /// \brief Base class for AI packages
     class AiPackage
@@ -52,7 +55,7 @@ namespace MWMechanics
 
             /// Updates and runs the package (Should run every frame)
             /// \return Package completed?
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration) = 0;
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) = 0;
 
             /// Returns the TypeID of the AiPackage
             /// \see enum TypeId
@@ -70,6 +73,8 @@ namespace MWMechanics
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
             bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
+
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

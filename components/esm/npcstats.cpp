@@ -1,4 +1,3 @@
-
 #include "npcstats.hpp"
 
 #include "esmreader.hpp"
@@ -31,18 +30,44 @@ void ESM::NpcStats::load (ESMReader &esm)
     esm.getHNOT (mDisposition, "DISP");
 
     for (int i=0; i<27; ++i)
+        mSkills[i].load (esm);
+
+    mWerewolfDeprecatedData = false;
+    if (esm.peekNextSub("STBA"))
     {
-        mSkills[i].mRegular.load (esm);
-        mSkills[i].mWerewolf.load (esm);
+        // we have deprecated werewolf skills, stored interleaved
+        // Load into one big vector, then remove every 2nd value
+        mWerewolfDeprecatedData = true;
+        std::vector<ESM::StatState<int> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
+
+        for (int i=0; i<27; ++i)
+        {
+            ESM::StatState<int> skill;
+            skill.load(esm);
+            skills.push_back(skill);
+        }
+
+        int i=0;
+        for (std::vector<ESM::StatState<int> >::iterator it = skills.begin(); it != skills.end(); ++i)
+        {
+            if (i%2 == 1)
+                it = skills.erase(it);
+            else
+                ++it;
+        }
+        assert(skills.size() == 27);
+        std::copy(skills.begin(), skills.end(), mSkills);
     }
 
+    // No longer used
     bool hasWerewolfAttributes = false;
     esm.getHNOT (hasWerewolfAttributes, "HWAT");
-
     if (hasWerewolfAttributes)
     {
+        ESM::StatState<int> dummy;
         for (int i=0; i<8; ++i)
-            mWerewolfAttributes[i].load (esm);
+            dummy.load(esm);
+        mWerewolfDeprecatedData = true;
     }
 
     mIsWerewolf = false;
@@ -61,7 +86,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     if (esm.isNextSub("PROF"))
         esm.skipHSub(); // int profit
 
-    // No longer used. Now part of CreatureStats.
+    // No longer used
     if (esm.isNextSub("ASTR"))
         esm.skipHSub(); // attackStrength
 
@@ -112,14 +137,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
         esm.writeHNT ("DISP", mDisposition);
 
     for (int i=0; i<27; ++i)
-    {
-        mSkills[i].mRegular.save (esm);
-        mSkills[i].mWerewolf.save (esm);
-    }
-
-    esm.writeHNT ("HWAT", true);
-    for (int i=0; i<8; ++i)
-        mWerewolfAttributes[i].save (esm);
+        mSkills[i].save (esm);
 
     if (mIsWerewolf)
         esm.writeHNT ("WOLF", mIsWerewolf);
@@ -151,6 +169,7 @@ void ESM::NpcStats::save (ESMWriter &esm) const
 
 void ESM::NpcStats::blank()
 {
+    mWerewolfDeprecatedData = false;
     mIsWerewolf = false;
     mDisposition = 0;
     mBounty = 0;

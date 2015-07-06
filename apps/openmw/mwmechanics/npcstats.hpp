@@ -22,7 +22,7 @@ namespace MWMechanics
     {
             int mDisposition;
             SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
-            SkillValue mWerewolfSkill[ESM::Skill::Length];
+
             int mReputation;
             int mCrimeId;
 
@@ -41,6 +41,8 @@ namespace MWMechanics
             /// Countdown to getting damage while underwater
             float mTimeToStartDrowning;
 
+            bool mIsWerewolf;
+
         public:
 
             NpcStats();
@@ -56,6 +58,7 @@ namespace MWMechanics
 
             const SkillValue& getSkill (int index) const;
             SkillValue& getSkill (int index);
+            void setSkill(int index, const SkillValue& value);
 
             const std::map<std::string, int>& getFactionRanks() const;
             /// Increase the rank in this faction by 1, if such a rank exists.

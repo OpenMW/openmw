@@ -9,7 +9,8 @@
 namespace MWRender
 {
 
-    TerrainStorage::TerrainStorage(bool preload)
+    TerrainStorage::TerrainStorage(const VFS::Manager* vfs, bool preload)
+        : ESMTerrain::Storage(vfs)
     {
         if (preload)
         {

@@ -1,36 +1,36 @@
-
 #include "lightingday.hpp"
 
-#include <OgreSceneManager.h>
+#include <osg/LightSource>
 
-CSVRender::LightingDay::LightingDay() : mSceneManager (0), mLight (0) {}
+CSVRender::LightingDay::LightingDay(){}
 
-void CSVRender::LightingDay::activate (Ogre::SceneManager *sceneManager,
-    const Ogre::ColourValue *defaultAmbient)
+void CSVRender::LightingDay::activate (osg::Group* rootNode)
 {
-    mSceneManager = sceneManager;
+    mRootNode = rootNode;
 
-    if (defaultAmbient)
-        mSceneManager->setAmbientLight (*defaultAmbient);
-    else
-        mSceneManager->setAmbientLight (Ogre::ColourValue (0.7, 0.7, 0.7, 1));
+    mLightSource = new osg::LightSource;
 
-    mLight = mSceneManager->createLight();
-    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3 (0, 0, -1));
-    mLight->setDiffuseColour (Ogre::ColourValue (1, 1, 1));
+    osg::ref_ptr<osg::Light> light (new osg::Light);
+    light->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
+    light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+    light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+    light->setConstantAttenuation(1.f);
+
+    mLightSource->setLight(light);
+    mRootNode->addChild(mLightSource);
 }
 
 void CSVRender::LightingDay::deactivate()
 {
-    if (mLight)
-    {
-        mSceneManager->destroyLight (mLight);
-        mLight = 0;
-    }
+    if (mRootNode && mLightSource.get())
+        mRootNode->removeChild(mLightSource);
 }
 
-void CSVRender::LightingDay::setDefaultAmbient (const Ogre::ColourValue& colour)
+osg::Vec4f CSVRender::LightingDay::getAmbientColour(osg::Vec4f *defaultAmbient)
 {
-    mSceneManager->setAmbientLight (colour);
+    if (defaultAmbient)
+        return *defaultAmbient;
+    else
+        return osg::Vec4f(0.7f, 0.7f, 0.7f, 1.f);
 }
