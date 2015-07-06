@@ -157,7 +157,6 @@ case $PLATFORM in
 		;;
 esac
 
-
 case $CONFIGURATION in
 	debug|Debug|DEBUG )
 		CONFIGURATION=Debug
@@ -178,6 +177,7 @@ echo "Starting prebuild on win$BITS"
 echo "=========================="
 echo
 
+# cd OpenMW/AppVeyor-test
 mkdir -p deps
 cd deps
 
@@ -216,17 +216,15 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip \
 		OpenAL-Soft-1.16.0.zip
 
-	# Ogre
-	download "Ogre 1.9" \
-		http://www.lysator.liu.se/~ace/OpenMW/deps/Ogre-1.9-win$BITS.7z \
-		Ogre-1.9-win$BITS.7z
+	# OSG
+	download "OpenSceneGraph 3.3.8" \
+		http://www.lysator.liu.se/~ace/OpenMW/deps/OSG-3.3.8-win$BITS.7z \
+		OSG-3.3.8-win$BITS.7z
 
 	# Qt
-	if [ -z $APPVEYOR ]; then
-		download "Qt 4.8.6" \
-			http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
-			qt$BITS-4.8.6.7z
-	fi
+	download "Qt 4.8.6" \
+		http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
+		qt$BITS-4.8.6.7z
 
 	# SDL2
 	download "SDL 2.0.3" \
@@ -234,7 +232,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		SDL2-2.0.3.zip
 fi
 
-cd ..
+cd .. #/..
 
 # Set up dependencies
 if [ -z $KEEP ]; then
@@ -253,6 +251,7 @@ DEPS_INSTALL=`pwd`
 
 echo
 echo "Extracting dependencies..."
+
 
 # Boost
 if [ -z $APPVEYOR ]; then
@@ -387,36 +386,6 @@ cd $DEPS
 echo Done.
 
 
-# Ogre
-printf "Ogre 1.9... "
-cd $DEPS_INSTALL
-
-if [ -d Ogre ]; then
-	printf "Exists. (No version check) "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf Ogre
-	eval 7z x -y $DEPS/Ogre-1.9-win$BITS.7z $STRIP
-	mv Ogre-1.9-win$BITS Ogre
-fi
-
-OGRE_SDK="`real_pwd`/Ogre"
-
-add_cmake_opts -DOGRE_SDK="$OGRE_SDK"
-
-if [ $CONFIGURATION == "Debug" ]; then
-	SUFFIX="_d"
-else
-	SUFFIX=""
-fi
-
-add_runtime_dlls `pwd`/Ogre/bin/$CONFIGURATION/cg.dll \
-	`pwd`/Ogre/bin/$CONFIGURATION/{OgreMain,OgreOverlay,Plugin_CgProgramManager,Plugin_ParticleFX,RenderSystem_Direct3D9,RenderSystem_GL}$SUFFIX.dll
-
-cd $DEPS
-
-echo Done.
-
-
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
 if [ -d openal-soft-1.16.0-bin ]; then
@@ -430,6 +399,46 @@ OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
 
 add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
 	-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
+
+echo Done.
+
+
+# OSG
+printf "OSG 3.3.8... "
+cd $DEPS_INSTALL
+
+if [ -d OSG ] && \
+	grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
+	grep "OPENSCENEGRAPH_MINOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
+	grep "OPENSCENEGRAPH_PATCH_VERSION    8" OSG/include/osg/Version > /dev/null
+then
+	printf "Exists. "
+elif [ -z $SKIP_EXTRACT ]; then
+	rm -rf OSG
+	eval 7z x -y $DEPS/OSG-3.3.8-win$BITS.7z $STRIP
+	mv OSG-3.3.8-win$BITS OSG
+fi
+
+OSG_SDK="`real_pwd`/OSG"
+
+add_cmake_opts -DOSG_DIR="$OSG_SDK"
+
+if [ $CONFIGURATION == "Debug" ]; then
+	SUFFIX="d"
+else
+	SUFFIX=""
+fi
+add_runtime_dlls `pwd`/OSG/bin/{OpenThreads,zlib}$SUFFIX.dll \
+	`pwd`/OSG/bin/osg{,Animation,DB,FX,GA,Particle,Qt,Text,Util,Viewer}$SUFFIX.dll
+
+OSG_PLUGINS=""
+add_osg_dlls() {
+	OSG_PLUGINS="$OSG_PLUGINS $@"
+}
+
+add_osg_dlls `pwd`/OSG/bin/osgPlugins-3.3.8/osgdb_{bmp,dds,gif,jpeg,png,tga}$SUFFIX.dll
+
+cd $DEPS
 
 echo Done.
 
@@ -507,7 +516,46 @@ echo "Setting up OpenMW build..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
-	-DBUILD_MYGUI_PLUGIN=no
+	-DBUILD_MYGUI_PLUGIN=no \
+	-DOPENMW_MP_BUILD=yes
+
+if [ -z $APPVEYOR ]; then
+	echo "  (Outside of AppVeyor, doing full build.)"
+else
+	case $STEP in
+		components )
+			echo "  Subproject: Components."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENCS=no \
+				-DBUILD_OPENMW=no \
+				-DBUILD_WIZARD=no
+			rm -rf components
+			;;
+		openmw )
+			echo "  Subproject: OpenMW."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENCS=no \
+				-DBUILD_WIZARD=no
+			;;
+		opencs )
+			echo "  Subproject: OpenCS."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENMW=no \
+				-DBUILD_WIZARD=no
+			;;
+		misc )
+			echo "  Subproject: Misc."
+			add_cmake_opts -DBUILD_OPENCS=no \
+				-DBUILD_OPENMW=no
+			;;
+	esac
+fi
 
 if [ -z $APPVEYOR ]; then
 	echo "  (Outside of AppVeyor, doing full build.)"
@@ -570,6 +618,13 @@ if [ -z $APPVEYOR ]; then
 		echo "  `basename $DLL`."
 		cp "$DLL" $CONFIGURATION/
 	done
+	echo "OSG Plugin DLLs..."
+	mkdir -p $CONFIGURATION/osgPlugins-3.3.8
+	for DLL in $OSG_PLUGINS; do
+		echo "  `basename $DLL`."
+		cp "$DLL" $CONFIGURATION/osgPlugins-3.3.8
+	done
+	echo
 fi
 
 exit $RET
