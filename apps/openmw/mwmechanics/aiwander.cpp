@@ -267,6 +267,7 @@ namespace MWMechanics
                 moveNow = false;
                 walking = false;
                 chooseAction = true;
+                mStuckCount = 0;
             }
 //#endif
         }
@@ -410,7 +411,7 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
@@ -510,17 +511,10 @@ namespace MWMechanics
                 ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
 
                 // don't take shortcuts for wandering
-                storage.mPathFinder.buildPath(start, dest, actor.getCell(), false);
+                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
-                    // buildPath inserts dest in case it is not a pathgraph point
-                    // index which is a duplicate for AiWander.  However below code
-                    // does not work since getPath() returns a copy of path not a
-                    // reference
-                    //if(storage.mPathFinder.getPathSize() > 1)
-                        //storage.mPathFinder.getPath().pop_back();
-
                     // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
                     ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
                     mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
@@ -726,34 +720,8 @@ namespace MWMechanics
                 mCurrentNode = mAllowedNodes[index];
                 mAllowedNodes.erase(mAllowedNodes.begin() + index);
             }
-            
-            // In vanilla Morrowind, sometimes distance is too small to include at least two points,
-            // in which case, we will take the two closest points regardless of the wander distance
-            // This is a backup option, as std::sort is potentially O(n^2) in time.
-            if (mAllowedNodes.empty())
-            {
-                // Start with list of PathGrid nodes, sorted by distance from actor
-                std::vector<PathDistance> nodeDistances;
-                for (unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
-                {
-                    float distance = (npcPos - PathFinder::MakeOsgVec3(pathgrid->mPoints[counter])).length2();
-                    nodeDistances.push_back(std::make_pair(distance, &pathgrid->mPoints.at(counter)));
-                }
-                std::sort(nodeDistances.begin(), nodeDistances.end(), sortByDistance);
-
-                // make closest node the current node
-                mCurrentNode = *nodeDistances[0].second;
-
-                // give Actor a 2nd node to walk to
-                mAllowedNodes.push_back(*nodeDistances[1].second);
-            }
             mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
-    }
-
-    bool AiWander::sortByDistance(const PathDistance& left, const PathDistance& right)
-    {
-        return left.first < right.first;
     }
 
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
