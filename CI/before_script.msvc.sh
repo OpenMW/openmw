@@ -51,12 +51,10 @@ run_cmd() {
 		if [ $RET -ne 0 ]; then
 			if [ -z $APPVEYOR ]; then
 				echo "Command $CMD failed, output can be found in `real_pwd`/output.log"
-				exit $RET
 			else
-				7z a output.7z output.log > /dev/null 2>&1
-
-				appveyor PushArtifact output.7z -FileName $CMD-output.7z
-				appveyor AddMessage "Command $CMD failed (code $RET), output has been pushed as an artifact." -Category Error
+				echo
+				echo "Command $CMD failed;"
+				cat output.log
 			fi
 		else
 			rm output.log
@@ -254,6 +252,7 @@ DEPS_INSTALL=`pwd`
 echo
 echo "Extracting dependencies..."
 
+
 # Boost
 if [ -z $APPVEYOR ]; then
 	printf "Boost 1.58.0... "
@@ -281,6 +280,7 @@ else
 		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
 fi
 
+
 # Bullet
 printf "Bullet 2.83.5... "
 cd $DEPS_INSTALL
@@ -305,6 +305,7 @@ add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
 cd $DEPS
 
 echo Done.
+
 
 # FFmpeg
 printf "FFmpeg 2.5.2... "
@@ -349,6 +350,7 @@ cd $DEPS
 
 echo Done.
 
+
 # MyGUI
 printf "MyGUI 3.2.2... "
 cd $DEPS_INSTALL
@@ -368,7 +370,8 @@ fi
 MYGUI_SDK="`real_pwd`/MyGUI"
 
 add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
-	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
+	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include" \
+	-DMYGUI_PLATFORM_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
 	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
 
 if [ $CONFIGURATION == "Debug" ]; then
@@ -381,6 +384,7 @@ add_runtime_dlls `pwd`/MyGUI/bin/$CONFIGURATION/MyGUIEngine$SUFFIX.dll
 cd $DEPS
 
 echo Done.
+
 
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
@@ -396,9 +400,8 @@ OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
 add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
 	-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
 
-
-
 echo Done.
+
 
 # OSG
 printf "OSG 3.3.8... "
@@ -439,35 +442,50 @@ cd $DEPS
 
 echo Done.
 
+
 # Qt
-printf "Qt 4.8.6... "
-cd $DEPS_INSTALL
+if [ -z $APPVEYOR ]; then
+	printf "Qt 4.8.6... "
+	cd $DEPS_INSTALL
 
-if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf Qt
-	eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
-	mv qt-4.8.6-* Qt
-fi
+	if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf Qt
+		eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
+		mv qt-4.8.6-* Qt
+	fi
 
-QT_SDK="`real_pwd`/Qt"
+	QT_SDK="`real_pwd`/Qt"
 
-cd $QT_SDK
-eval qtbinpatcher.exe $STRIP
+	cd $QT_SDK
+	eval qtbinpatcher.exe $STRIP
 
-add_cmake_opts -DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+	add_cmake_opts -DDESIRED_QT_VERSION=4 \
+		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 
-if [ $CONFIGURATION == "Debug" ]; then
-	SUFFIX="d4"
+	if [ $CONFIGURATION == "Debug" ]; then
+		SUFFIX="d4"
+	else
+		SUFFIX="4"
+	fi
+	add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
+
+	cd $DEPS
+
+	echo Done.
 else
-	SUFFIX="4"
+	echo "Using Appveyor Qt 5 version."
+	if [ $PLATFORM == "win32" ]; then
+		QT_SDK="C:/Qt/5.4/msvc2013_opengl"
+	else
+		QT_SDK="C:/Qt/5.4/msvc2013_64_opengl"
+	fi
+
+	add_cmake_opts -DDESIRED_QT_VERSION=5 \
+		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
 fi
-add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
 
-cd $DEPS
-
-echo Done.
 
 # SDL2
 printf "SDL 2.0.3... "
@@ -539,6 +557,44 @@ else
 	esac
 fi
 
+if [ -z $APPVEYOR ]; then
+	echo "  (Outside of AppVeyor, doing full build.)"
+else
+	case $STEP in
+		components )
+			echo "  Subproject: Components."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENCS=no \
+				-DBUILD_OPENMW=no \
+				-DBUILD_WIZARD=no
+			rm -rf components
+			;;
+		openmw )
+			echo "  Subproject: OpenMW."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENCS=no \
+				-DBUILD_WIZARD=no
+			;;
+		opencs )
+			echo "  Subproject: OpenCS."
+			add_cmake_opts -DBUILD_ESSIMPORTER=no \
+				-DBUILD_LAUNCHER=no \
+				-DBUILD_MWINIIMPORTER=no \
+				-DBUILD_OPENMW=no \
+				-DBUILD_WIZARD=no
+			;;
+		misc )
+			echo "  Subproject: Misc."
+			add_cmake_opts -DBUILD_OPENCS=no \
+				-DBUILD_OPENMW=no
+			;;
+	esac
+fi
+
 if [ -z $VERBOSE ]; then
 	printf "  Configuring... "
 else
@@ -555,18 +611,20 @@ fi
 
 echo
 
-echo "Copying Runtime DLLs..."
-mkdir -p $CONFIGURATION
-for DLL in $RUNTIME_DLLS; do
-	echo "  `basename $DLL`."
-	cp "$DLL" $CONFIGURATION/
-done
-echo "OSG Plugin DLLs..."
-mkdir -p $CONFIGURATION/osgPlugins-3.3.8
-for DLL in $OSG_PLUGINS; do
-	echo "  `basename $DLL`."
-	cp "$DLL" $CONFIGURATION/osgPlugins-3.3.8
-done
-echo
+if [ -z $APPVEYOR ]; then
+	echo "Copying Runtime DLLs..."
+	mkdir -p $CONFIGURATION
+	for DLL in $RUNTIME_DLLS; do
+		echo "  `basename $DLL`."
+		cp "$DLL" $CONFIGURATION/
+	done
+	echo "OSG Plugin DLLs..."
+	mkdir -p $CONFIGURATION/osgPlugins-3.3.8
+	for DLL in $OSG_PLUGINS; do
+		echo "  `basename $DLL`."
+		cp "$DLL" $CONFIGURATION/osgPlugins-3.3.8
+	done
+	echo
+fi
 
 exit $RET

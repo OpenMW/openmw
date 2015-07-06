@@ -27,6 +27,10 @@ cache:
     - C:\projects\openmw\deps\MyGUI-3.2.2-win64.7z
     - C:\projects\openmw\deps\OSG-3.3.8-win32.7z
     - C:\projects\openmw\deps\OSG-3.3.8-win64.7z
+    - C:\projects\openmw\deps\ffmpeg32-2.5.2.7z
+    - C:\projects\openmw\deps\ffmpeg32-2.5.2-dev.7z
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2.7z
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2-dev.7z
 
 init:
     - cmd: bash --version
@@ -40,6 +44,6 @@ build_script:
     - cmd: bash --login C:\projects\openmw\CI\build.msvc.sh
 
 before_build:
-    - cmd: bash --login C:\projects\openmw\CI\before_script.msvc.sh -k
+    - cmd: bash --login C:\projects\openmw\CI\before_script.msvc.sh
 
 test: off
