@@ -222,9 +222,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		OSG-3.3.8-win$BITS.7z
 
 	# Qt
-	download "Qt 4.8.6" \
-		http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
-		qt$BITS-4.8.6.7z
+	if [ -z $APPVEYOR ]; then
+		download "Qt 4.8.6" \
+			http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
+			qt$BITS-4.8.6.7z
+	fi
 
 	# SDL2
 	download "SDL 2.0.3" \
@@ -518,44 +520,6 @@ add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
 	-DBUILD_MYGUI_PLUGIN=no \
 	-DOPENMW_MP_BUILD=yes
-
-if [ -z $APPVEYOR ]; then
-	echo "  (Outside of AppVeyor, doing full build.)"
-else
-	case $STEP in
-		components )
-			echo "  Subproject: Components."
-			add_cmake_opts -DBUILD_ESSIMPORTER=no \
-				-DBUILD_LAUNCHER=no \
-				-DBUILD_MWINIIMPORTER=no \
-				-DBUILD_OPENCS=no \
-				-DBUILD_OPENMW=no \
-				-DBUILD_WIZARD=no
-			rm -rf components
-			;;
-		openmw )
-			echo "  Subproject: OpenMW."
-			add_cmake_opts -DBUILD_ESSIMPORTER=no \
-				-DBUILD_LAUNCHER=no \
-				-DBUILD_MWINIIMPORTER=no \
-				-DBUILD_OPENCS=no \
-				-DBUILD_WIZARD=no
-			;;
-		opencs )
-			echo "  Subproject: OpenCS."
-			add_cmake_opts -DBUILD_ESSIMPORTER=no \
-				-DBUILD_LAUNCHER=no \
-				-DBUILD_MWINIIMPORTER=no \
-				-DBUILD_OPENMW=no \
-				-DBUILD_WIZARD=no
-			;;
-		misc )
-			echo "  Subproject: Misc."
-			add_cmake_opts -DBUILD_OPENCS=no \
-				-DBUILD_OPENMW=no
-			;;
-	esac
-fi
 
 if [ -z $APPVEYOR ]; then
 	echo "  (Outside of AppVeyor, doing full build.)"
