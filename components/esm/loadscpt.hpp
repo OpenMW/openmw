@@ -50,6 +50,8 @@ public:
     /// Script source code
     std::string mScriptText;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -63,6 +64,10 @@ namespace ESM
         mData = data.mData;
         mId = data.mName.toString();
 
+        // In scripts DELE sub-record appears after a header.
+        // The script data is following after DELE in this case.
+        mIsDeleted = readDeleSubRecord(esm);
+
         mVarNames.clear();
 
         while (esm.hasMoreSubs())
@@ -109,6 +114,11 @@ namespace ESM
 
         esm.writeHNT("SCHD", data, 52);
 
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+        }
+
         if (!mVarNames.empty())
         {
             esm.startSubRecord("SCVR");
@@ -139,6 +149,8 @@ namespace ESM
             mScriptText = "Begin \"" + mId + "\"\n\nEnd " + mId + "\n";
         else
             mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
+
+        mIsDeleted = false;
     }
 
 }
