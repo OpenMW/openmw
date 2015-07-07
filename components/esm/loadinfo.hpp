@@ -106,6 +106,8 @@ struct DialInfo
         REC_DELE = 0x454c4544
     };
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

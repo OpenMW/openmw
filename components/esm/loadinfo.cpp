@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -19,10 +20,17 @@ void DialInfo::load(ESMReader &esm)
     // Since there's no way to mark selects as "deleted", we have to clear the SelectStructs from all previous loadings
     mSelects.clear();
 
-    // Not present if deleted
-    if (esm.isNextSub("DATA")) {
-        esm.getHT(mData, 12);
+    // If the info is deleted, NAME and DELE sub-records are followed after NNAM
+    if (esm.isNextSub("NAME"))
+    {
+        esm.getSubName();
+        mResponse = esm.getHString();
+        mIsDeleted = readDeleSubRecord(esm);
+        return;
     }
+
+    esm.getSubNameIs("DATA");
+    esm.getHT(mData, 12);
 
     if (!esm.hasMoreSubs())
         return;
@@ -131,6 +139,13 @@ void DialInfo::save(ESMWriter &esm) const
 {
     esm.writeHNCString("PNAM", mPrev);
     esm.writeHNCString("NNAM", mNext);
+    if (mIsDeleted)
+    {
+        esm.writeHNCString("NAME", mResponse);
+        writeDeleSubRecord(esm);
+        return;
+    }
+
     esm.writeHNT("DATA", mData, 12);
     esm.writeHNOCString("ONAM", mActor);
     esm.writeHNOCString("RNAM", mRace);
