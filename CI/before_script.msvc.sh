@@ -222,9 +222,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		OSG-3.3.8-win$BITS.7z
 
 	# Qt
-	download "Qt 4.8.6" \
-		http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
-		qt$BITS-4.8.6.7z
+	if [ -z $APPVEYOR ]; then
+		download "Qt 4.8.6" \
+			http://sourceforge.net/projects/qt64ng/files/qt/$ARCHNAME/4.8.6/msvc2013/qt-4.8.6-x$ARCHSUFFIX-msvc2013.7z \
+			qt$BITS-4.8.6.7z
+	fi
 
 	# SDL2
 	download "SDL 2.0.3" \
