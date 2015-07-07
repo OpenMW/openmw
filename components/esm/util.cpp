@@ -1,5 +1,7 @@
 #include "util.hpp"
 
+#include <cstdint>
+
 namespace ESM
 {
     bool readDeleSubRecord(ESMReader &esm)
@@ -15,6 +17,6 @@ namespace ESM
 
     void writeDeleSubRecord(ESMWriter &esm)
     {
-        esm.writeHNString("DELE", "");
+        esm.writeHNT("DELE", static_cast<int32_t>(0));
     }
 }
