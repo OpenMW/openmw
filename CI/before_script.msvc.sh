@@ -474,7 +474,8 @@ else
 	fi
 
 	add_cmake_opts -DDESIRED_QT_VERSION=5 \
-		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe" \
+		-DCMAKE_PREFIX_PATH="$QT_SDK"
 fi
 
 
@@ -507,7 +508,8 @@ echo "Setting up OpenMW build..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
-	-DBUILD_MYGUI_PLUGIN=no
+	-DBUILD_MYGUI_PLUGIN=no \
+	-DOPENMW_MP_BUILD=on
 
 if [ -z $APPVEYOR ]; then
 	echo "  (Outside of AppVeyor, doing full build.)"
