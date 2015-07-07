@@ -19,6 +19,8 @@ namespace MWMechanics
         public:
             PathFinder();
 
+            static const int PathTolerance = 32;
+
             static float sgn(float val)
             {
                 if(val > 0)
@@ -35,7 +37,7 @@ namespace MWMechanics
 
             void clearPath();
 
-            bool checkPathCompleted(float x, float y, float tolerance=32.f);
+            bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
             /// In degrees
