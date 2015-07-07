@@ -50,6 +50,10 @@ else
 	msbuild OpenMW.sln //t:Build //m:8 //logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 fi
 
-if [ ! -z $PACKAGE ]; then
+RET=$?
+if [ $RET -eq 0 ] && [ ! -z $PACKAGE ]; then
 	msbuild PACKAGE.vcxproj //t:Build //m:8
+	RET=$?
 fi
+
+exit $RET

@@ -372,8 +372,7 @@ fi
 MYGUI_SDK="`real_pwd`/MyGUI"
 
 add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
-	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include" \
-	-DMYGUI_PLATFORM_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
+	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
 	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
 
 if [ $CONFIGURATION == "Debug" ]; then
