@@ -112,11 +112,14 @@ struct Cell
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
+  bool mIsDeleted;
+
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
   void load(ESMReader &esm, bool saveContext = true); // Load everything (except references)
+  void loadName(ESMReader &esm); // Load NAME and checks for DELE
   void loadData(ESMReader &esm); // Load DATAstruct only
   void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except DATAstruct and references
 

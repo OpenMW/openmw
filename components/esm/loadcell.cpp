@@ -12,6 +12,7 @@
 #include "esmwriter.hpp"
 #include "defs.hpp"
 #include "cellid.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -54,8 +55,15 @@ namespace ESM
 
 void Cell::load(ESMReader &esm, bool saveContext)
 {
+    loadName(esm);
     loadData(esm);
     loadCell(esm, saveContext);
+}
+
+void Cell::loadName(ESMReader &esm)
+{
+    mName = esm.getHNString("NAME");
+    mIsDeleted = readDeleSubRecord(esm);
 }
 
 void Cell::loadCell(ESMReader &esm, bool saveContext)
@@ -105,13 +113,6 @@ void Cell::loadCell(ESMReader &esm, bool saveContext)
 
 void Cell::loadData(ESMReader &esm)
 {
-    // Ignore this for now, it might mean we should delete the entire
-    // cell?
-    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
-    if (esm.isNextSub("DELE")) {
-        esm.skipHSub();
-    }
-
     esm.getHNT(mData, "DATA", 12);
 }
 
@@ -124,6 +125,12 @@ void Cell::postLoad(ESMReader &esm)
 
 void Cell::save(ESMWriter &esm) const
 {
+    esm.writeHNCString("NAME", mName);
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+    }
+
     esm.writeHNT("DATA", mData, 12);
     if (mData.mFlags & Interior)
     {
@@ -147,7 +154,7 @@ void Cell::save(ESMWriter &esm) const
             esm.writeHNT("NAM5", mMapColor);
     }
 
-    if (mRefNumCounter != 0)
+    if (mRefNumCounter != 0 && !mIsDeleted)
         esm.writeHNT("NAM0", mRefNumCounter);
 }
 
