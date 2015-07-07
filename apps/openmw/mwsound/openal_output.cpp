@@ -856,7 +856,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 
 MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, float basevol, float pitch, int flags,float offset)
 {
-    boost::shared_ptr<OpenAL_Sound> sound;
+    std::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -895,7 +895,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
 MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const osg::Vec3f &pos, float vol, float basevol, float pitch,
                                             float min, float max, int flags, float offset, bool extractLoudness)
 {
-    boost::shared_ptr<OpenAL_Sound> sound;
+    std::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -940,7 +940,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const osg:
 
 MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, float pitch, int flags)
 {
-    boost::shared_ptr<OpenAL_SoundStream> sound;
+    std::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())

@@ -4,8 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QMetaType>
 
@@ -48,6 +47,6 @@ namespace CSMFilter
     };
 }
 
-Q_DECLARE_METATYPE (boost::shared_ptr<CSMFilter::Node>)
+Q_DECLARE_METATYPE (std::shared_ptr<CSMFilter::Node>)
 
 #endif

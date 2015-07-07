@@ -95,7 +95,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
@@ -139,14 +139,14 @@ namespace MWClass
             if(!ptr.getCellRef().getTrap().empty())
             {
                 // Trap activation
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().getTrap(), ptr));
+                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTrap(actor, ptr.getCellRef().getTrap(), ptr));
                 action->setSound(trapActivationSound);
                 return action;
             }
 
             if (ptr.getCellRef().getTeleport())
             {
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
+                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionTeleport (ptr.getCellRef().getDestCell(), ptr.getCellRef().getDoorDest(), true));
 
                 action->setSound(openSound);
 
@@ -155,7 +155,7 @@ namespace MWClass
             else
             {
                 // animated door
-                boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
+                std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
                 int doorstate = getDoorState(ptr);
                 bool opening = true;
                 if (doorstate == 1)
@@ -188,7 +188,7 @@ namespace MWClass
         else
         {
             // locked, and we can't open.
-            boost::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
+            std::shared_ptr<MWWorld::Action> action(new MWWorld::FailedAction);
             action->setSound(lockedSound);
             return action;
         }
@@ -217,7 +217,7 @@ namespace MWClass
 
     void Door::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Door);
+        std::shared_ptr<Class> instance (new Door);
 
         registerClass (typeid (ESM::Door).name(), instance);
     }

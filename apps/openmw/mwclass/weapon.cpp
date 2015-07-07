@@ -63,7 +63,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Weapon::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -157,7 +157,7 @@ namespace MWClass
 
     void Weapon::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Weapon);
+        std::shared_ptr<Class> instance (new Weapon);
 
         registerClass (typeid (ESM::Weapon).name(), instance);
     }
@@ -403,9 +403,9 @@ namespace MWClass
         return std::make_pair(1, "");
     }
 
-    boost::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Weapon::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
         action->setSound(getUpSoundId(ptr));
 

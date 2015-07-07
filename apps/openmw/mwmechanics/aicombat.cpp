@@ -90,7 +90,7 @@ namespace MWMechanics
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        boost::shared_ptr<Action> mCurrentAction;
+        std::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -273,7 +273,7 @@ namespace MWMechanics
 
         float rangeAttack = 0;
         float rangeFollow = 0;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
         if (characterController.readyToPrepareAttack())
         {
             currentAction = prepareNextAction(actor, target);

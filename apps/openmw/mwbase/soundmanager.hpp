@@ -3,7 +3,7 @@
 
 #include <string>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "../mwworld/ptr.hpp"
 
@@ -16,12 +16,12 @@ namespace MWSound
 {
     class Sound;
     struct Sound_Decoder;
-    typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
+    typedef std::shared_ptr<Sound_Decoder> DecoderPtr;
 }
 
 namespace MWBase
 {
-    typedef boost::shared_ptr<MWSound::Sound> SoundPtr;
+    typedef std::shared_ptr<MWSound::Sound> SoundPtr;
 
     /// \brief Interface for sound manager (implemented in MWSound)
     class SoundManager

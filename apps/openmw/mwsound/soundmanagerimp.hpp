@@ -5,7 +5,7 @@
 #include <utility>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <components/settings/settings.hpp>
 
@@ -43,7 +43,7 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        boost::shared_ptr<Sound> mMusic;
+        std::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;

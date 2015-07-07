@@ -502,7 +502,7 @@ namespace MWScript
 
     void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
-        boost::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
+        std::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute (actor);
         if (mActivated == ptr)
         {

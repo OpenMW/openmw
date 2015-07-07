@@ -27,7 +27,7 @@ void VideoPlayer::setAudioFactory(MovieAudioFactory *factory)
     mAudioFactory.reset(factory);
 }
 
-void VideoPlayer::playVideo(boost::shared_ptr<std::istream> inputstream, const std::string& name)
+void VideoPlayer::playVideo(std::shared_ptr<std::istream> inputstream, const std::string& name)
 {
     if(mState)
         close();

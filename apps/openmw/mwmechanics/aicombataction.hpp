@@ -1,12 +1,12 @@
 #ifndef OPENMW_AICOMBAT_ACTION_H
 #define OPENMW_AICOMBAT_ACTION_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
+#include <components/esm/loadspel.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/containerstore.hpp"
-
-#include <components/esm/loadspel.hpp>
 
 namespace MWMechanics
 {
@@ -84,7 +84,7 @@ namespace MWMechanics
     /// @note target may be empty
     float rateEffects (const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
 
-    boost::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+    std::shared_ptr<Action> prepareNextAction (const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
 }
 
 #endif

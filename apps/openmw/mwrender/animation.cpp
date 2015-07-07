@@ -341,7 +341,7 @@ namespace MWRender
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
-        boost::shared_ptr<AnimSource> animsrc;
+        std::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
         animsrc->mKeyframes = mResourceSystem->getSceneManager()->getKeyframes(kfname);
 
@@ -391,7 +391,7 @@ namespace MWRender
         mStates.clear();
 
         for(size_t i = 0;i < sNumGroups;i++)
-            mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
+            mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
         mAccumCtrl = NULL;
 
@@ -657,12 +657,12 @@ namespace MWRender
                     active = state;
             }
 
-            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
+            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? std::shared_ptr<float>() : active->second.mTime);
 
             // add external controllers for the AnimSource active in this group
             if (active != mStates.end())
             {
-                boost::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                std::shared_ptr<AnimSource> animsrc = active->second.mSource;
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[grp].begin(); it != animsrc->mControllerMap[grp].end(); ++it)
                 {
@@ -1146,9 +1146,9 @@ namespace MWRender
         params.mEffectId = effectId;
         params.mBoneName = bonename;
 
-        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
 
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideTexture(texture, mResourceSystem, node);

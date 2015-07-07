@@ -94,7 +94,7 @@ public:
     /// Get the name of the file
     std::string getFilename(){ return filename; }
 };
-typedef boost::shared_ptr<Nif::NIFFile> NIFFilePtr;
+typedef std::shared_ptr<Nif::NIFFile> NIFFilePtr;
 
 
 

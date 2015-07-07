@@ -24,7 +24,7 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
@@ -40,7 +40,7 @@ namespace MWClass
             virtual int getValue (const MWWorld::Ptr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
             ///< Generate action for using via inventory menu
 
             static void registerSelf();

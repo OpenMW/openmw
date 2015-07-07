@@ -50,7 +50,7 @@ QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, i
     return mapFromSource (dynamic_cast<IdTableBase&> (*sourceModel()).getModelIndex (id, column));
 }
 
-void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
+void CSMWorld::IdTableProxyModel::setFilter (const std::shared_ptr<CSMFilter::Node>& filter)
 {
     beginResetModel();
     mFilter = filter;

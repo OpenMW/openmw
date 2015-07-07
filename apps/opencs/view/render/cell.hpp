@@ -5,7 +5,7 @@
 #include <map>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <osg/ref_ptr>
 

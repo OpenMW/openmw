@@ -1,7 +1,7 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "scenewidget.hpp"
 

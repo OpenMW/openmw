@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
@@ -44,7 +44,7 @@ namespace MWWorld
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
             // Note this is NULL until the cell is explored to save some memory
-            boost::shared_ptr<ESM::FogState> mFogState;
+            std::shared_ptr<ESM::FogState> mFogState;
 
             const ESM::Cell *mCell;
             State mState;

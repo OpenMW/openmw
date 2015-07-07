@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "windowpinnablebase.hpp"
 
@@ -111,7 +111,7 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
-        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        typedef std::vector<std::shared_ptr<MyGUI::ITexture> > TextureVector;
         TextureVector mMapTextures;
         TextureVector mFogTextures;
 

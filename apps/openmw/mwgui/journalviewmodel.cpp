@@ -360,7 +360,7 @@ struct JournalViewModelImpl : JournalViewModel
 
 JournalViewModel::Ptr JournalViewModel::create ()
 {
-    return boost::make_shared <JournalViewModelImpl> ();
+    return std::make_shared <JournalViewModelImpl> ();
 }
 
 }

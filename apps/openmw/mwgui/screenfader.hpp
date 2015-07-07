@@ -3,7 +3,7 @@
 
 #include <deque>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "windowbase.hpp"
 
@@ -14,7 +14,7 @@ namespace MWGui
     class FadeOp
     {
     public:
-        typedef boost::shared_ptr<FadeOp> Ptr;
+        typedef std::shared_ptr<FadeOp> Ptr;
 
         FadeOp(ScreenFader * fader, float time, float targetAlpha);
 

@@ -59,7 +59,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Apparatus::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Apparatus::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -83,7 +83,7 @@ namespace MWClass
 
     void Apparatus::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Apparatus);
+        std::shared_ptr<Class> instance (new Apparatus);
 
         registerClass (typeid (ESM::Apparatus).name(), instance);
     }
@@ -138,9 +138,9 @@ namespace MWClass
     }
 
 
-    boost::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Apparatus::use (const MWWorld::Ptr& ptr) const
     {
-        return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionAlchemy());
     }
 
     MWWorld::Ptr

@@ -236,7 +236,7 @@ CSMFilter::Token CSMFilter::Parser::getNextToken()
     return Token (Token::Type_None);
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty, bool ignoreOneShot)
+std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty, bool ignoreOneShot)
 {
     if (Token token = getNextToken())
     {
@@ -248,11 +248,11 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty,
             {
                 case Token::Type_Keyword_True:
 
-                    return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
+                    return std::shared_ptr<CSMFilter::Node> (new BooleanNode (true));
 
                 case Token::Type_Keyword_False:
 
-                    return boost::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
+                    return std::shared_ptr<CSMFilter::Node> (new BooleanNode (false));
 
                 case Token::Type_Keyword_And:
                 case Token::Type_Keyword_Or:
@@ -261,12 +261,12 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty,
 
                 case Token::Type_Keyword_Not:
                 {
-                    boost::shared_ptr<CSMFilter::Node> node = parseImp();
+                    std::shared_ptr<CSMFilter::Node> node = parseImp();
 
                     if (mError)
-                        return boost::shared_ptr<Node>();
+                        return std::shared_ptr<Node>();
 
-                    return boost::shared_ptr<CSMFilter::Node> (new NotNode (node));
+                    return std::shared_ptr<CSMFilter::Node> (new NotNode (node));
                 }
 
                 case Token::Type_Keyword_Text:
@@ -282,7 +282,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty,
                     if (!allowEmpty)
                         error();
 
-                    return boost::shared_ptr<Node>();
+                    return std::shared_ptr<Node>();
 
                 default:
 
@@ -290,27 +290,27 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseImp (bool allowEmpty,
             }
     }
 
-    return boost::shared_ptr<Node>();
+    return std::shared_ptr<Node>();
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& keyword)
+std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& keyword)
 {
-    std::vector<boost::shared_ptr<Node> > nodes;
+    std::vector<std::shared_ptr<Node> > nodes;
 
     Token token = getNextToken();
 
     if (token.mType!=Token::Type_Open)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     for (;;)
     {
-        boost::shared_ptr<Node> node = parseImp();
+        std::shared_ptr<Node> node = parseImp();
 
         if (mError)
-            return boost::shared_ptr<Node>();
+            return std::shared_ptr<Node>();
 
         nodes.push_back (node);
 
@@ -319,7 +319,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
         if (!token || (token.mType!=Token::Type_Close && token.mType!=Token::Type_Comma))
         {
             error();
-            return boost::shared_ptr<Node>();
+            return std::shared_ptr<Node>();
         }
 
         if (token.mType==Token::Type_Close)
@@ -329,31 +329,31 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
     if (nodes.empty())
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     switch (keyword.mType)
     {
-        case Token::Type_Keyword_And: return boost::shared_ptr<CSMFilter::Node> (new AndNode (nodes));
-        case Token::Type_Keyword_Or: return boost::shared_ptr<CSMFilter::Node> (new OrNode (nodes));
-        default: error(); return boost::shared_ptr<Node>();
+        case Token::Type_Keyword_And: return std::shared_ptr<CSMFilter::Node> (new AndNode (nodes));
+        case Token::Type_Keyword_Or: return std::shared_ptr<CSMFilter::Node> (new OrNode (nodes));
+        default: error(); return std::shared_ptr<Node>();
     }
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
+std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
 {
     Token token = getNextToken();
 
     if (token.mType!=Token::Type_Open)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     token = getNextToken();
 
     if (!token)
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
 
     // parse column ID
     int columnId = -1;
@@ -371,7 +371,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
     if (columnId<0)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     token = getNextToken();
@@ -379,7 +379,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
     if (token.mType!=Token::Type_Comma)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     // parse text pattern
@@ -388,7 +388,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
     if (!token.isString())
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     std::string text = token.mString;
@@ -398,26 +398,26 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseText()
     if (token.mType!=Token::Type_Close)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
-    return boost::shared_ptr<Node> (new TextNode (columnId, text));
+    return std::shared_ptr<Node> (new TextNode (columnId, text));
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
+std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
 {
     Token token = getNextToken();
 
     if (token.mType!=Token::Type_Open)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     token = getNextToken();
 
     if (!token)
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
 
     // parse column ID
     int columnId = -1;
@@ -435,7 +435,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
     if (columnId<0)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     token = getNextToken();
@@ -443,7 +443,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
     if (token.mType!=Token::Type_Comma)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
     // parse value
@@ -468,7 +468,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         else if (token.mType!=Token::Type_CloseSquare && token.mType!=Token::Type_Open)
         {
             error();
-            return boost::shared_ptr<Node>();
+            return std::shared_ptr<Node>();
         }
 
         token = getNextToken();
@@ -482,7 +482,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
             if (token.mType!=Token::Type_Comma)
             {
                 error();
-                return boost::shared_ptr<Node>();
+                return std::shared_ptr<Node>();
             }
         }
         else if (token.mType==Token::Type_Comma)
@@ -492,7 +492,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         else
         {
             error();
-            return boost::shared_ptr<Node>();
+            return std::shared_ptr<Node>();
         }
 
         token = getNextToken();
@@ -514,7 +514,7 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
         else if (token.mType!=Token::Type_OpenSquare && token.mType!=Token::Type_Close)
         {
             error();
-            return boost::shared_ptr<Node>();
+            return std::shared_ptr<Node>();
         }
     }
 
@@ -523,10 +523,10 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseValue()
     if (token.mType!=Token::Type_Close)
     {
         error();
-        return boost::shared_ptr<Node>();
+        return std::shared_ptr<Node>();
     }
 
-    return boost::shared_ptr<Node> (new ValueNode (columnId, lowerType, upperType, lower, upper));
+    return std::shared_ptr<Node> (new ValueNode (columnId, lowerType, upperType, lower, upper));
 }
 
 void CSMFilter::Parser::error()
@@ -557,7 +557,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
     }
     else if (!allowPredefined || token==Token (Token::Type_OneShot))
     {
-        boost::shared_ptr<Node> node = parseImp (true, token!=Token (Token::Type_OneShot));
+        std::shared_ptr<Node> node = parseImp (true, token!=Token (Token::Type_OneShot));
 
         if (mError)
             return false;
@@ -613,7 +613,7 @@ bool CSMFilter::Parser::parse (const std::string& filter, bool allowPredefined)
     }
 }
 
-boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::getFilter() const
+std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::getFilter() const
 {
     if (mError)
         throw std::logic_error ("No filter available");

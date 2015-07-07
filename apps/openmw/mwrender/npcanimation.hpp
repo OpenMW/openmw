@@ -62,8 +62,8 @@ private:
 
     osg::Vec3f mFirstPersonOffset;
 
-    boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
-    boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
+    std::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
+    std::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
     bool mSoundsDisabled;

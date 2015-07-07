@@ -12,7 +12,7 @@
 
 #include "../mwbase/world.hpp"
 
-#include <boost/shared_ptr.hpp>
+
 
 namespace ESM
 {

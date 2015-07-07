@@ -24,7 +24,7 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
-            virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
@@ -57,7 +57,7 @@ namespace MWClass
             virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            virtual boost::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
+            virtual std::shared_ptr<MWWorld::Action> use (const MWWorld::Ptr& ptr) const;
             ///< Generate action for using via inventory menu
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

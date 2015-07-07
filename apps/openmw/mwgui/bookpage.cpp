@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/make_shared.hpp>
 
 #include <components/misc/utf8stream.hpp>
@@ -207,7 +207,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     };
 
     typedef TypesetBookImpl Book;
-    typedef boost::shared_ptr <Book> BookPtr;
+    typedef std::shared_ptr <Book> BookPtr;
     typedef std::vector<PartialText>::const_iterator PartialTextConstIterator;
 
     int mPageWidth;
@@ -231,7 +231,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mCurrentContent (NULL),
         mCurrentAlignment (AlignLeft)
     {
-        mBook = boost::make_shared <Book> ();
+        mBook = std::make_shared <Book> ();
     }
 
     virtual ~Typesetter ()
@@ -254,7 +254,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         style.mActiveColour = fontColour;
         style.mNormalColour = fontColour;
         style.mInteractiveId = 0;
-                
+
         return &style;
     }
 
@@ -315,7 +315,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
         writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
-    
+
     void lineBreak (float margin)
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
@@ -325,7 +325,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mRun = NULL;
         mLine = NULL;
     }
-    
+
     void sectionBreak (int margin)
     {
         add_partial_text();
@@ -597,7 +597,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
 
 BookTypesetter::Ptr BookTypesetter::create (int pageWidth, int pageHeight)
 {
-    return boost::make_shared <TypesetBookImpl::Typesetter> (pageWidth, pageHeight);
+    return std::make_shared <TypesetBookImpl::Typesetter> (pageWidth, pageHeight);
 }
 
 namespace
@@ -869,7 +869,7 @@ public:
     boost::function <void (intptr_t)> mLinkClicked;
 
 
-    boost::shared_ptr <TypesetBookImpl> mBook;
+    std::shared_ptr <TypesetBookImpl> mBook;
 
     MyGUI::ILayerNode* mNode;
     ActiveTextFormats mActiveTextFormats;
@@ -990,7 +990,7 @@ public:
 
     void showPage (TypesetBook::Ptr book, size_t newPage)
     {
-        boost::shared_ptr <TypesetBookImpl> newBook = boost::dynamic_pointer_cast <TypesetBookImpl> (book);
+        std::shared_ptr <TypesetBookImpl> newBook = std::dynamic_pointer_cast <TypesetBookImpl> (book);
 
         if (mBook != newBook)
         {
@@ -1079,7 +1079,7 @@ public:
         }
     };
 
-    void createActiveFormats (boost::shared_ptr <TypesetBookImpl> newBook)
+    void createActiveFormats (std::shared_ptr <TypesetBookImpl> newBook)
     {
         newBook->visitRuns (0, 0x7FFFFFFF, CreateActiveFormat (this));
 

@@ -996,7 +996,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
 
-            SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
 
             AlphaFader::SetupVisitor alphaFaderSetupVisitor;

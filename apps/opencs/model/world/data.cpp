@@ -858,7 +858,7 @@ void CSMWorld::Data::merge()
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
-    boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+    std::shared_ptr<ESM::ESMReader> ptr(mReader);
     mReaders.push_back(ptr);
     mReader = 0;
 
@@ -896,7 +896,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading.
             // We don't store non-base reader, because everything going into modified will be
             // fully loaded during the initial loading process.
-            boost::shared_ptr<ESM::ESMReader> ptr(mReader);
+            std::shared_ptr<ESM::ESMReader> ptr(mReader);
             mReaders.push_back(ptr);
         }
         else

@@ -1,9 +1,12 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <cassert>
+
+#include <vector>
+
 #include "niffile.hpp"
 #include "nifstream.hpp"
-#include <vector>
 
 namespace Nif
 {

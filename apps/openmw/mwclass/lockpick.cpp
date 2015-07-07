@@ -60,7 +60,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    boost::shared_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,
+    std::shared_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
@@ -93,7 +93,7 @@ namespace MWClass
 
     void Lockpick::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Lockpick);
+        std::shared_ptr<Class> instance (new Lockpick);
 
         registerClass (typeid (ESM::Lockpick).name(), instance);
     }
@@ -152,9 +152,9 @@ namespace MWClass
         return info;
     }
 
-    boost::shared_ptr<MWWorld::Action> Lockpick::use (const MWWorld::Ptr& ptr) const
+    std::shared_ptr<MWWorld::Action> Lockpick::use (const MWWorld::Ptr& ptr) const
     {
-        boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
+        std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionEquip(ptr));
 
         action->setSound(getUpSoundId(ptr));
 

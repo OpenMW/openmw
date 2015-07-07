@@ -1,7 +1,7 @@
 #ifndef CSV_FILTER_EDITWIDGET_H
 #define CSV_FILTER_EDITWIDGET_H
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <QLineEdit>
 #include <QPalette>
@@ -35,7 +35,7 @@ namespace CSVFilter
 
         signals:
 
-            void filterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+            void filterChanged (std::shared_ptr<CSMFilter::Node> filter);
 
     private:
             std::string generateFilter(std::pair<std::string, std::vector<std::string> >& seekedString) const;

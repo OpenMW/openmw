@@ -454,13 +454,13 @@ namespace MWMechanics
         // Already done in AiCombat itself
     }
 
-    boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
+    std::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
         float bestActionRating = 0.f;
         // Default to hand-to-hand combat
-        boost::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
+        std::shared_ptr<Action> bestAction (new ActionWeapon(MWWorld::Ptr()));
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
             bestAction->prepare(actor);
