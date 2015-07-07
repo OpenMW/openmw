@@ -62,6 +62,8 @@ struct Faction
     // Name of faction ranks (may be empty for NPC factions)
     std::string mRanks[10];
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

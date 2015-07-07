@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -11,6 +12,13 @@ namespace ESM
 void Enchantment::load(ESMReader &esm)
 {
     mEffects.mList.clear();
+
+    mId = esm.getHNString("NAME");
+    if (mIsDeleted = readDeleSubRecord(esm))
+    {
+        return;
+    }
+
     bool hasData = false;
     while (esm.hasMoreSubs())
     {
@@ -36,6 +44,13 @@ void Enchantment::load(ESMReader &esm)
 
 void Enchantment::save(ESMWriter &esm) const
 {
+    esm.writeHNCString("NAME", mId);
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+        return;
+    }
+
     esm.writeHNT("ENDT", mData, 16);
     mEffects.save(esm);
 }
@@ -48,5 +63,7 @@ void Enchantment::save(ESMWriter &esm) const
         mData.mAutocalc = 0;
 
         mEffects.mList.clear();
+
+        mIsDeleted = false;
     }
 }

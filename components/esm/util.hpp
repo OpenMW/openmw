@@ -1,8 +1,14 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
+#include <string>
+
 #include <osg/Vec3f>
 #include <osg/Quat>
+
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+#include "loadbsgn.hpp"
 
 namespace ESM
 {
@@ -47,6 +53,9 @@ struct Vector3
         return osg::Vec3f(mValues[0], mValues[1], mValues[2]);
     }
 };
+
+bool readDeleSubRecord(ESMReader &esm);
+void writeDeleSubRecord(ESMWriter &esm);
 
 }
 

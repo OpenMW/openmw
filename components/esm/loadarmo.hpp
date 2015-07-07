@@ -96,6 +96,8 @@ struct Armor
 
     std::string mId, mName, mModel, mIcon, mScript, mEnchant;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

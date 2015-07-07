@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -27,6 +28,13 @@ namespace ESM
     void Container::load(ESMReader &esm)
     {
         mInventory.mList.clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasWeight = false;
         bool hasFlags = false;
         while (esm.hasMoreSubs())
@@ -71,6 +79,13 @@ namespace ESM
 
     void Container::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CNDT", mWeight, 4);
@@ -89,5 +104,6 @@ namespace ESM
         mWeight = 0;
         mFlags = 0x8; // set default flag value
         mInventory.mList.clear();
+        mIsDeleted = false;
     }
 }

@@ -5,6 +5,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -31,6 +32,12 @@ void Faction::load(ESMReader &esm)
     mReactions.clear();
     for (int i=0;i<10;++i)
         mRanks[i].clear();
+
+    mId = esm.getHNString("NAME");
+    if (mIsDeleted = readDeleSubRecord(esm))
+    {
+        return;
+    }
 
     int rankCounter=0;
     bool hasData = false;
@@ -71,6 +78,13 @@ void Faction::load(ESMReader &esm)
 }
 void Faction::save(ESMWriter &esm) const
 {
+    esm.writeHNCString("NAME", mId);
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+        return;
+    }
+
     esm.writeHNOCString("FNAM", mName);
 
     for (int i = 0; i < 10; i++)
@@ -109,5 +123,7 @@ void Faction::save(ESMWriter &esm) const
             mData.mSkills[i] = 0;
 
         mReactions.clear();
+
+        mIsDeleted = false;
     }
 }

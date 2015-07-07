@@ -28,6 +28,8 @@ struct Static
 
   std::string mId, mModel;
 
+  bool mIsDeleted;
+
   void load(ESMReader &esm);
   void save(ESMWriter &esm) const;
 

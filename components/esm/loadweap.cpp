@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -10,6 +11,12 @@ namespace ESM
 
     void Weapon::load(ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -45,6 +52,13 @@ namespace ESM
     }
     void Weapon::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("WPDT", mData, 32);
@@ -72,5 +86,7 @@ namespace ESM
         mIcon.clear();
         mEnchant.clear();
         mScript.clear();
+
+        mIsDeleted = false;
     }
 }

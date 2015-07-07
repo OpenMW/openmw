@@ -33,6 +33,8 @@ struct Potion
     std::string mId, mName, mModel, mIcon, mScript;
     EffectList mEffects;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

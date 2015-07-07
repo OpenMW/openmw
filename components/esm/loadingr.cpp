@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -10,6 +11,12 @@ namespace ESM
 
     void Ingredient::load(ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -67,6 +74,13 @@ namespace ESM
 
     void Ingredient::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("IRDT", mData, 56);
@@ -89,5 +103,7 @@ namespace ESM
         mModel.clear();
         mIcon.clear();
         mScript.clear();
+
+        mIsDeleted = false;
     }
 }
