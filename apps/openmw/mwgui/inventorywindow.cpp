@@ -10,6 +10,8 @@
 
 #include <osg/Texture2D>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/settings/settings.hpp>

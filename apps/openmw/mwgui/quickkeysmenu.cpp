@@ -5,6 +5,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/quickkeys.hpp>
 
 #include "../mwworld/inventorystore.hpp"
