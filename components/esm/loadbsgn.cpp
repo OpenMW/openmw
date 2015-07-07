@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -11,6 +12,10 @@ namespace ESM
 void BirthSign::load(ESMReader &esm)
 {
     mPowers.mList.clear();
+
+    mIsDeleted = readDeleSubRecord(esm);
+    mId = esm.getHNString("NAME");
+
     while (esm.hasMoreSubs())
     {
         esm.getSubName();
@@ -37,6 +42,11 @@ void BirthSign::load(ESMReader &esm)
 
 void BirthSign::save(ESMWriter &esm) const
 {
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+    }
+    esm.writeHNCString("NAME", mId);
     esm.writeHNOCString("FNAM", mName);
     esm.writeHNOCString("TNAM", mTexture);
     esm.writeHNOCString("DESC", mDescription);
@@ -50,6 +60,7 @@ void BirthSign::save(ESMWriter &esm) const
         mDescription.clear();
         mTexture.clear();
         mPowers.mList.clear();
+        mIsDeleted = false;
     }
 
 }

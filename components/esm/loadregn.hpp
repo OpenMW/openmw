@@ -51,6 +51,8 @@ struct Region
 
     std::vector<SoundRef> mSoundList;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
