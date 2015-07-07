@@ -30,8 +30,7 @@ struct Dialogue
         Voice = 1,
         Greeting = 2,
         Persuasion = 3,
-        Journal = 4,
-        Deleted = -1
+        Journal = 4
     };
 
     std::string mId;
@@ -45,6 +44,8 @@ struct Dialogue
 
     // This is only used during the loading phase to speed up DialInfo merging.
     LookupMap mLookup;
+
+    bool mIsDeleted;
 
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;

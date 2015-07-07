@@ -2,9 +2,12 @@
 
 #include <iostream>
 
+#include <cstdint>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -12,18 +15,19 @@ namespace ESM
 
 void Dialogue::load(ESMReader &esm)
 {
+    mIsDeleted = false;
+
+    mId = esm.getHNString("NAME");
     esm.getSubNameIs("DATA");
     esm.getSubHeader();
     int si = esm.getSubSize();
     if (si == 1)
         esm.getT(mType);
-    else if (si == 4)
+    else if (si == 4) // The dialogue is deleted
     {
-        // These are just markers, their values are not used.
-        int i;
-        esm.getT(i);
-        esm.getHNT(i, "DELE");
-        mType = Deleted;
+        int32_t empty;
+        esm.getT(empty); // Skip an empty DATA
+        mIsDeleted = readDeleSubRecord(esm);
     }
     else
         esm.fail("Unknown sub record size");
@@ -31,12 +35,15 @@ void Dialogue::load(ESMReader &esm)
 
 void Dialogue::save(ESMWriter &esm) const
 {
-    if (mType != Deleted)
-        esm.writeHNT("DATA", mType);
+    esm.writeHNCString("NAME", mId);
+    if (mIsDeleted)
+    {
+        esm.writeHNT("DATA", static_cast<int32_t>(0));
+        writeDeleSubRecord(esm);
+    }
     else
     {
-        esm.writeHNT("DATA", (int)1);
-        esm.writeHNT("DELE", (int)1);
+        esm.writeHNT("DATA", mType);
     }
 }
 
