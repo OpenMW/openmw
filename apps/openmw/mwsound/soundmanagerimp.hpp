@@ -31,7 +31,7 @@ namespace MWSound
     {
         const VFS::Manager* mVFS;
 
-        std::auto_ptr<Sound_Output> mOutput;
+        std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;

@@ -73,7 +73,7 @@ void TerrainGrid::loadCell(int x, int y)
     if (!mStorage->getMinMaxHeights(1, center, minH, maxH))
         return; // no terrain defined
 
-    std::auto_ptr<GridElement> element (new GridElement);
+    std::unique_ptr<GridElement> element (new GridElement);
 
     osg::Vec2f worldCenter = center*mStorage->getCellWorldSize();
     element->mNode = new osg::PositionAttitudeTransform;

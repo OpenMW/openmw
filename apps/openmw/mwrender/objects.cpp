@@ -123,7 +123,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 {
     insertBegin(ptr);
 
-    std::auto_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
+    std::unique_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
     if (!allowLight)
     {
@@ -141,7 +141,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     // CreatureAnimation
-    std::auto_ptr<Animation> anim;
+    std::unique_ptr<Animation> anim;
 
     if (weaponsShields)
         anim.reset(new CreatureWeaponAnimation(ptr, mesh, mResourceSystem));
@@ -156,7 +156,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     insertBegin(ptr);
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
-    std::auto_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+    std::unique_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
 
     mObjects.insert(std::make_pair(ptr, anim.release()));
 }

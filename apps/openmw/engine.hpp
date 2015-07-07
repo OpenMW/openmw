@@ -66,8 +66,8 @@ namespace OMW
     class Engine
     {
             SDL_Window* mWindow;
-            std::auto_ptr<VFS::Manager> mVFS;
-            std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
+            std::unique_ptr<VFS::Manager> mVFS;
+            std::unique_ptr<Resource::ResourceSystem> mResourceSystem;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;

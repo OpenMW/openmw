@@ -59,6 +59,8 @@ namespace MWGui
         center();
     }
 
+    AlchemyWindow::~AlchemyWindow() {}
+
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {
         exit();

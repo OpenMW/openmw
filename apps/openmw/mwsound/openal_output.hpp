@@ -70,7 +70,7 @@ namespace MWSound
         virtual ~OpenAL_Output();
 
         struct StreamThread;
-        std::auto_ptr<StreamThread> mStreamThread;
+        std::unique_ptr<StreamThread> mStreamThread;
 
         friend class OpenAL_Sound;
         friend class OpenAL_Sound3D;

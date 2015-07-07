@@ -102,6 +102,8 @@ namespace MWGui
         adjustPanes();
     }
 
+    InventoryWindow::~InventoryWindow() {}
+
     void InventoryWindow::adjustPanes()
     {
         const float aspect = 0.5; // fixed aspect ratio for the avatar image

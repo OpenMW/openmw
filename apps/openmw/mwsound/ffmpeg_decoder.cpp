@@ -1,6 +1,6 @@
 #include "ffmpeg_decoder.hpp"
 
-// auto_ptr
+// unique_ptr
 #include <memory>
 
 #include <stdexcept>

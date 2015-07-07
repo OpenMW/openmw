@@ -39,6 +39,8 @@ namespace MWGui
         public:
             InventoryWindow(DragAndDrop* dragAndDrop, osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem);
 
+            ~InventoryWindow();
+
             virtual void open();
 
             /// start trading, disables item drag&drop
@@ -99,8 +101,8 @@ namespace MWGui
             int mLastXSize;
             int mLastYSize;
 
-            std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
-            std::auto_ptr<MWRender::InventoryPreview> mPreview;
+            std::unique_ptr<MyGUI::ITexture> mPreviewTexture;
+            std::unique_ptr<MWRender::InventoryPreview> mPreview;
 
             bool mTrading;
 

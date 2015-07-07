@@ -35,7 +35,7 @@ void CSVWorld::ReferenceCreator::configureCreateCommand (CSMWorld::CreateCommand
     command.addValue (refNumColumn, getRefNumCount());
 }
 
-void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+void CSVWorld::ReferenceCreator::pushCommand (std::unique_ptr<CSMWorld::CreateCommand> command,
     const std::string& id)
 {
     // get the old count
@@ -51,11 +51,11 @@ void CSVWorld::ReferenceCreator::pushCommand (std::auto_ptr<CSMWorld::CreateComm
     int count = cellTable.data (countIndex).toInt();
 
     // command for incrementing counter
-    std::auto_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
+    std::unique_ptr<CSMWorld::ModifyCommand> increment (new CSMWorld::ModifyCommand
         (cellTable, countIndex, count+1));
 
     getUndoStack().beginMacro (command->text());
-    GenericCreator::pushCommand (command, id);
+    GenericCreator::pushCommand (std::move (command), id);
     getUndoStack().push (increment.release());
     getUndoStack().endMacro();
 }
@@ -148,11 +148,11 @@ void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,
     cellChanged(); //otherwise ok button will remain disabled
 }
 
-CSVWorld::Creator *CSVWorld::ReferenceCreatorFactory::makeCreator (CSMDoc::Document& document, 
+CSVWorld::Creator *CSVWorld::ReferenceCreatorFactory::makeCreator (CSMDoc::Document& document,
                                                                    const CSMWorld::UniversalId& id) const
 {
-    return new ReferenceCreator(document.getData(), 
-                                document.getUndoStack(), 
+    return new ReferenceCreator(document.getData(),
+                                document.getUndoStack(),
                                 id,
                                 document.getIdCompletionManager());
 }

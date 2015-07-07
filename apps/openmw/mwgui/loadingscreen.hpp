@@ -76,7 +76,7 @@ namespace MWGui
         // TODO: add releaseGLObjects() for mTexture
 
         osg::ref_ptr<osg::Texture2D> mTexture;
-        std::auto_ptr<MyGUI::ITexture> mGuiTexture;
+        std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 
         void changeWallpaper();
 

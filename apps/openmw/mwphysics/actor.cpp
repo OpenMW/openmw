@@ -19,7 +19,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
-  , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
+  , mCollisionObject(nullptr), mForce(0.f, 0.f, 0.f), mOnGround(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
   , mCollisionWorld(world)

@@ -18,7 +18,7 @@ void DataManager::setResourcePath(const std::string &path)
 MyGUI::IDataStream *DataManager::getData(const std::string &name)
 {
     std::string fullpath = getDataPath(name);
-    std::auto_ptr<boost::filesystem::ifstream> stream;
+    std::unique_ptr<boost::filesystem::ifstream> stream;
     stream.reset(new boost::filesystem::ifstream);
     stream->open(fullpath, std::ios::binary);
     if (stream->fail())

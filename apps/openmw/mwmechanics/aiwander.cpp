@@ -726,7 +726,7 @@ namespace MWMechanics
 
     void AiWander::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::auto_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
+        std::unique_ptr<ESM::AiSequence::AiWander> wander(new ESM::AiSequence::AiWander());
         wander->mData.mDistance = mDistance;
         wander->mData.mDuration = mDuration;
         wander->mData.mTimeOfDay = mTimeOfDay;

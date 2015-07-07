@@ -32,7 +32,7 @@ namespace MWMechanics
         AiState& getAiState();
 
     private:
-        std::auto_ptr<CharacterController> mCharacterController;
+        std::unique_ptr<CharacterController> mCharacterController;
 
         AiState mAiState;
     };

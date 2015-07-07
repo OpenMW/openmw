@@ -29,7 +29,7 @@ namespace CSVWorld
 
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 
-            virtual void pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
+            virtual void pushCommand (std::unique_ptr<CSMWorld::CreateCommand> command,
                 const std::string& id);
 
             int getRefNumCount() const;

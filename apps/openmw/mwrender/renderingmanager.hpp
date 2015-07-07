@@ -178,15 +178,15 @@ namespace MWRender
 
         osg::ref_ptr<osg::Light> mSunLight;
 
-        std::auto_ptr<Pathgrid> mPathgrid;
-        std::auto_ptr<Objects> mObjects;
-        std::auto_ptr<Water> mWater;
-        std::auto_ptr<Terrain::World> mTerrain;
-        std::auto_ptr<SkyManager> mSky;
-        std::auto_ptr<EffectManager> mEffectManager;
-        std::auto_ptr<NpcAnimation> mPlayerAnimation;
+        std::unique_ptr<Pathgrid> mPathgrid;
+        std::unique_ptr<Objects> mObjects;
+        std::unique_ptr<Water> mWater;
+        std::unique_ptr<Terrain::World> mTerrain;
+        std::unique_ptr<SkyManager> mSky;
+        std::unique_ptr<EffectManager> mEffectManager;
+        std::unique_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
-        std::auto_ptr<Camera> mCamera;
+        std::unique_ptr<Camera> mCamera;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 

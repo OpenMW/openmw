@@ -112,6 +112,8 @@ namespace MWGui
         updateSpellPowers();
     }
 
+    RaceDialog::~RaceDialog() {}
+
     void RaceDialog::setNextButtonShow(bool shown)
     {
         MyGUI::Button* okButton;

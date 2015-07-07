@@ -41,7 +41,7 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
-        std::auto_ptr<RippleSimulation> mSimulation;
+        std::unique_ptr<RippleSimulation> mSimulation;
 
         bool mEnabled;
         bool mToggled;

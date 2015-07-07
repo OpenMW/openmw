@@ -145,7 +145,7 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<NifBullet::BulletShapeManager> mShapeManager;
+            std::unique_ptr<NifBullet::BulletShapeManager> mShapeManager;
 
             typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
             ObjectMap mObjects;
@@ -176,10 +176,10 @@ namespace MWPhysics
             float mWaterHeight;
             float mWaterEnabled;
 
-            std::auto_ptr<btCollisionObject> mWaterCollisionObject;
-            std::auto_ptr<btCollisionShape> mWaterCollisionShape;
+            std::unique_ptr<btCollisionObject> mWaterCollisionObject;
+            std::unique_ptr<btCollisionShape> mWaterCollisionShape;
 
-            std::auto_ptr<MWRender::DebugDrawer> mDebugDrawer;
+            std::unique_ptr<MWRender::DebugDrawer> mDebugDrawer;
 
             osg::ref_ptr<osg::Group> mParentNode;
 

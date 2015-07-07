@@ -55,7 +55,7 @@ private:
     };
 
 
-    std::auto_ptr<AudioResampler> mAudioResampler;
+    std::unique_ptr<AudioResampler> mAudioResampler;
 
     uint8_t *mDataBuf;
     uint8_t **mFrameData;

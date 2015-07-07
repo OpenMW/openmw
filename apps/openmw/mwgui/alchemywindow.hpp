@@ -21,6 +21,7 @@ namespace MWGui
     {
     public:
         AlchemyWindow();
+        ~AlchemyWindow();
 
         virtual void open();
         virtual void exit();
@@ -48,7 +49,7 @@ namespace MWGui
 
         void update();
 
-        std::auto_ptr<MWMechanics::Alchemy> mAlchemy;
+        std::unique_ptr<MWMechanics::Alchemy> mAlchemy;
 
         std::vector<ItemWidget*> mApparatus;
         std::vector<ItemWidget*> mIngredients;
