@@ -107,7 +107,7 @@ namespace MWMechanics
         mFollowTarget(false),
         mCombatMove(false),
         mLastTargetPos(0,0,0),
-        mCell(NULL),
+        mCell(nullptr),
         mCurrentAction(),
         mActionCooldown(0),
         mStrength(),
@@ -284,7 +284,7 @@ namespace MWMechanics
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
         // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
-        const ESM::Weapon *weapon = NULL;
+        const ESM::Weapon *weapon = nullptr;
         MWMechanics::WeaponType weaptype = WeapType_None;
         float weapRange = 1.0f;
 
@@ -650,7 +650,7 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
 {
     ESM::Weapon::AttackType attackType;
 
-    if (weapon == NULL)
+    if (weapon == nullptr)
     {
         //hand-to-hand deal equal damage for each type
         float roll = Misc::Rng::rollClosedProbability();

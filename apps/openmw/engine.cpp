@@ -193,9 +193,9 @@ void OMW::Engine::frame(float frametime)
 }
 
 OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
-  : mWindow(NULL)
+  : mWindow(nullptr)
   , mEncoding(ToUTF8::WINDOWS_1252)
-  , mEncoder(NULL)
+  , mEncoder(nullptr)
   , mVerboseScripts (false)
   , mSkipMenu (false)
   , mUseSound (true)
@@ -233,16 +233,16 @@ OMW::Engine::~Engine()
     mEnvironment.cleanup();
 
     delete mScriptContext;
-    mScriptContext = NULL;
+    mScriptContext = nullptr;
 
     mResourceSystem.reset();
 
-    mViewer = NULL;
+    mViewer = nullptr;
 
     if (mWindow)
     {
         SDL_DestroyWindow(mWindow);
-        mWindow = NULL;
+        mWindow = nullptr;
     }
 
     SDL_Quit();

@@ -173,7 +173,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         mObjects.erase(iter);
 
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
-        ptr.getRefData().setBaseNode(NULL);
+        ptr.getRefData().setBaseNode(nullptr);
         return true;
     }
     return false;
@@ -246,7 +246,7 @@ Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)
     if(iter != mObjects.end())
         return iter->second;
 
-    return NULL;
+    return nullptr;
 }
 
 }

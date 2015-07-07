@@ -585,7 +585,7 @@ namespace MWSound
         }
 
         const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
-        if(regn == NULL)
+        if(regn == nullptr)
             return;
 
         std::vector<ESM::Region::SoundRef>::const_iterator soundIter;

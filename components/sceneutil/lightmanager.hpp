@@ -111,7 +111,7 @@ namespace SceneUtil
     {
     public:
         LightListCallback()
-            : mLightManager(NULL)
+            : mLightManager(nullptr)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
             : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), mLightManager(copy.mLightManager)

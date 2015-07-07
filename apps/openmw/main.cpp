@@ -368,7 +368,7 @@ int main(int argc, char**argv)
         if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
         {
             int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
-            cc_install_handlers(argc, argv, 5, s, (cfgMgr.getLogPath() / "crash.log").string().c_str(), NULL);
+            cc_install_handlers(argc, argv, 5, s, (cfgMgr.getLogPath() / "crash.log").string().c_str(), nullptr);
             std::cout << "Installing crash catcher" << std::endl;
         }
         else
@@ -393,7 +393,7 @@ int main(int argc, char**argv)
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
         if (!isatty(fileno(stdin)))
 #endif
-            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);
+            SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), nullptr);
 
         std::cerr << "\nERROR: " << e.what() << std::endl;
 

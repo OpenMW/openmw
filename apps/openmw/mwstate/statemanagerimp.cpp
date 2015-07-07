@@ -293,7 +293,7 @@ void MWState::StateManager::quickSave (std::string name)
         return;
     }
 
-    const Slot* slot = NULL;
+    const Slot* slot = nullptr;
     Character* mCurrentCharacter = getCurrentCharacter(true); //Get current character
 
     //Find quicksave slot

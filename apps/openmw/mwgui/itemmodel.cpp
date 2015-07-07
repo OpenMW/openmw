@@ -61,7 +61,7 @@ namespace MWGui
     ItemStack::ItemStack()
         : mType(Type_Normal)
         , mFlags(0)
-        , mCreator(NULL)
+        , mCreator(nullptr)
         , mCount(0)
     {
     }

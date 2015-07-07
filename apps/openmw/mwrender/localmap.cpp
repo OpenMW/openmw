@@ -289,7 +289,7 @@ void LocalMap::cleanupCameras()
     for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
     {
         (*it)->removeChildren(0, (*it)->getNumChildren());
-        (*it)->setGraphicsContext(NULL);
+        (*it)->setGraphicsContext(nullptr);
         mRoot->removeChild(*it);
     }
 
@@ -390,7 +390,7 @@ void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
                 || std::abs(mAngle - fog->mNorthMarkerAngle) > osg::DegreesToRadians(5.f))
         {
             // Nuke it
-            cell->setFog(NULL);
+            cell->setFog(nullptr);
         }
         else
         {

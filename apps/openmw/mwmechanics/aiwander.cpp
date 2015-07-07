@@ -71,7 +71,7 @@ namespace MWMechanics
             mReaction(0),
             mSaidGreeting(AiWander::Greet_None),
             mGreetingTimer(0),
-            mCell(NULL),
+            mCell(nullptr),
             mChooseAction(true),
             mIdleNow(false),
             mMoveNow(false),

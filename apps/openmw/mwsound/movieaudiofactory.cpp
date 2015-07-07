@@ -17,7 +17,7 @@ namespace MWSound
     {
     public:
         MWSoundDecoderBridge(MWSound::MovieAudioDecoder* decoder)
-            : Sound_Decoder(NULL)
+            : Sound_Decoder(nullptr)
             , mDecoder(decoder)
         {
         }

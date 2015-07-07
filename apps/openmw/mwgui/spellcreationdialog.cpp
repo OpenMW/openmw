@@ -55,7 +55,7 @@ namespace MWGui
     EditEffectDialog::EditEffectDialog()
         : WindowModal("openmw_edit_effect.layout")
         , mEditing(false)
-        , mMagicEffect(NULL)
+        , mMagicEffect(nullptr)
         , mConstantEffect(false)
     {
         init(mEffect);
@@ -482,11 +482,11 @@ namespace MWGui
 
 
     EffectEditorBase::EffectEditorBase(Type type)
-        : mAvailableEffectsList(NULL)
-        , mUsedEffectsView(NULL)
+        : mAvailableEffectsList(nullptr)
+        , mUsedEffectsView(nullptr)
         , mAddEffectDialog()
-        , mSelectAttributeDialog(NULL)
-        , mSelectSkillDialog(NULL)
+        , mSelectAttributeDialog(nullptr)
+        , mSelectSkillDialog(nullptr)
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
         , mConstantEffect(false)

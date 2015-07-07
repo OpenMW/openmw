@@ -14,7 +14,7 @@ namespace MWGui
 
         mPinButton->eventMouseButtonPressed += MyGUI::newDelegate(this, &WindowPinnableBase::onPinButtonPressed);
 
-        MyGUI::Button* button = NULL;
+        MyGUI::Button* button = nullptr;
         MyGUI::VectorWidgetPtr widgets = window->getSkinWidgetsByName("Action");
         for (MyGUI::VectorWidgetPtr::iterator it = widgets.begin(); it != widgets.end(); ++it)
         {

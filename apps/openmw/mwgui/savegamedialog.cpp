@@ -32,8 +32,8 @@ namespace MWGui
     SaveGameDialog::SaveGameDialog()
         : WindowModal("openmw_savegame_dialog.layout")
         , mSaving(true)
-        , mCurrentCharacter(NULL)
-        , mCurrentSlot(NULL)
+        , mCurrentCharacter(nullptr)
+        , mCurrentSlot(nullptr)
     {
         getWidget(mScreenshot, "Screenshot");
         getWidget(mCharacterSelection, "SelectCharacter");
@@ -120,8 +120,8 @@ namespace MWGui
 
         mCharacterSelection->setCaption("");
         mCharacterSelection->removeAllItems();
-        mCurrentCharacter = NULL;
-        mCurrentSlot = NULL;
+        mCurrentCharacter = nullptr;
+        mCurrentSlot = nullptr;
         mSaveList->removeAllItems();
         onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
 
@@ -224,12 +224,12 @@ namespace MWGui
     void SaveGameDialog::accept(bool reallySure)
     {
         // Remove for MyGUI 3.2.2
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
 
         if (mSaving)
         {
             // If overwriting an existing slot, ask for confirmation first
-            if (mCurrentSlot != NULL && !reallySure)
+            if (mCurrentSlot != nullptr && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
                 dialog->askForConfirmation("#{sMessage4}");
@@ -275,7 +275,7 @@ namespace MWGui
         MWBase::StateManager* mgr = MWBase::Environment::get().getStateManager();
 
         unsigned int i=0;
-        const MWState::Character* character = NULL;
+        const MWState::Character* character = nullptr;
         for (MWBase::StateManager::CharacterIterator it = mgr->characterBegin(); it != mgr->characterEnd(); ++it, ++i)
         {
             if (i == pos)
@@ -284,7 +284,7 @@ namespace MWGui
         assert(character && "Can't find selected character");
 
         mCurrentCharacter = character;
-        mCurrentSlot = NULL;
+        mCurrentSlot = nullptr;
         fillSaveList();
     }
 
@@ -316,7 +316,7 @@ namespace MWGui
 
         if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
-            mCurrentSlot = NULL;
+            mCurrentSlot = nullptr;
             mInfoText->setCaption("");
             mScreenshot->setImageTexture("");
             return;
@@ -325,7 +325,7 @@ namespace MWGui
         if (mSaving)
             mSaveNameEdit->setCaption(sender->getItemNameAt(pos));
 
-        mCurrentSlot = NULL;
+        mCurrentSlot = nullptr;
         unsigned int i=0;
         for (MWState::Character::SlotIterator it = mCurrentCharacter->begin(); it != mCurrentCharacter->end(); ++it, ++i)
         {

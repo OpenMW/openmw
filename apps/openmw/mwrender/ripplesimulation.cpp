@@ -131,7 +131,7 @@ void RippleSimulation::update(float dt)
             if (mParticleSystem->numParticles()-mParticleSystem->numDeadParticles() > 500)
                 continue; // TODO: remove the oldest particle to make room?
 
-            osgParticle::Particle* p = mParticleSystem->createParticle(NULL);
+            osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
             p->setPosition(currentPos);
             p->setAngle(osg::Vec3f(0,0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
         }

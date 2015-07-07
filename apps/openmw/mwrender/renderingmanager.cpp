@@ -487,7 +487,7 @@ namespace MWRender
         m.unlock();
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
-        rttCamera->setGraphicsContext(NULL);
+        rttCamera->setGraphicsContext(nullptr);
         mRootNode->removeChild(rttCamera);
 
         mViewer->getCamera()->setCullMask(oldCullMask);
@@ -540,7 +540,7 @@ namespace MWRender
             result.mHitPointWorld = intersection.getWorldIntersectPoint();
             result.mHitNormalWorld = intersection.getWorldIntersectNormal();
 
-            PtrHolder* ptrHolder = NULL;
+            PtrHolder* ptrHolder = nullptr;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -674,7 +674,7 @@ namespace MWRender
 
     void RenderingManager::rebuildPtr(const MWWorld::Ptr &ptr)
     {
-        NpcAnimation *anim = NULL;
+        NpcAnimation *anim = nullptr;
         if(ptr == mPlayerAnimation->getPtr())
             anim = mPlayerAnimation.get();
         else

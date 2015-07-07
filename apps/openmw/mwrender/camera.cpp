@@ -43,7 +43,7 @@ namespace MWRender
 
     Camera::Camera (osg::Camera* camera)
     : mCamera(camera),
-      mAnimation(NULL),
+      mAnimation(nullptr),
       mFirstPersonView(true),
       mPreviewMode(false),
       mFreeLook(true),

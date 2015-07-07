@@ -59,9 +59,9 @@ void DebugDrawer::destroyGeometry()
     if (mGeometry)
     {
         mGeode->removeDrawable(mGeometry);
-        mGeometry = NULL;
-        mVertices = NULL;
-        mDrawArrays = NULL;
+        mGeometry = nullptr;
+        mVertices = nullptr;
+        mDrawArrays = nullptr;
     }
 }
 

@@ -343,7 +343,7 @@ public:
      * \param speedmult Stores the animation speed multiplier
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
+    bool getInfo(const std::string &groupname, float *complete=nullptr, float *speedmult=nullptr) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
     float getStartTime(const std::string &groupname) const;
@@ -368,7 +368,7 @@ public:
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
-    /// Return a node with the specified name, or NULL if not existing.
+    /// Return a node with the specified name, or nullptr if not existing.
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 

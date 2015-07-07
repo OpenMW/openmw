@@ -430,7 +430,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         std::string model = "meshes\\base_anim.nif";
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -524,7 +524,7 @@ namespace MWClass
         float damage = 0.0f;
         if(!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -1300,7 +1300,7 @@ namespace MWClass
                 // Reset to original position
                 ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
 
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
             }
         }
     }

@@ -20,7 +20,7 @@ namespace osgMyGUI
     }
 
     OSGTexture::OSGTexture(osg::Texture2D *texture)
-        : mTextureManager(NULL)
+        : mTextureManager(nullptr)
         , mTexture(texture)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)

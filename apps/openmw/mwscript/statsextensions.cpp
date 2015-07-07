@@ -1126,7 +1126,7 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
                         // resets runtime state such as inventory, stats and AI. does not reset position in the world
-                        ptr.getRefData().setCustomData(NULL);
+                        ptr.getRefData().setCustomData(nullptr);
                     }
                 }
         };

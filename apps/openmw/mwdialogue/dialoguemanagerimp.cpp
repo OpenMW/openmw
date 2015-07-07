@@ -622,7 +622,7 @@ namespace MWDialogue
 
         Filter filter(actor, 0, false);
         const ESM::DialInfo *info = filter.search(*dial, false);
-        if(info != NULL)
+        if(info != nullptr)
         {
             MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
             if(winMgr->getSubtitlesEnabled())

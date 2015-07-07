@@ -26,7 +26,7 @@ namespace MWGui
     StatsWindow::StatsWindow (DragAndDrop* drag)
       : WindowPinnableBase("openmw_stats_window.layout")
       , NoDrop(drag, mMainWidget)
-      , mSkillView(NULL)
+      , mSkillView(nullptr)
       , mMajorSkills()
       , mMinorSkills()
       , mMiscSkills()
@@ -68,7 +68,7 @@ namespace MWGui
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
             mSkillValues.insert(std::pair<int, MWMechanics::SkillValue >(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)NULL));
+            mSkillWidgetMap.insert(std::pair<int, MyGUI::TextBox*>(i, (MyGUI::TextBox*)nullptr));
         }
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();

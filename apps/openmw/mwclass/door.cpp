@@ -78,7 +78,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

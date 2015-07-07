@@ -31,7 +31,7 @@ namespace ICS
 	// load xml
 	void InputControlSystem::loadMouseAxisBinders(TiXmlElement* xmlControlNode)
 	{
-		TiXmlElement* xmlMouseBinder = xmlControlNode->FirstChildElement("MouseBinder");    
+		TiXmlElement* xmlMouseBinder = xmlControlNode->FirstChildElement("MouseBinder");
 		while(xmlMouseBinder)
 		{
 			Control::ControlChangingDirection dir = Control::STOP;
@@ -48,11 +48,11 @@ namespace ICS
 			if((*xmlMouseBinder->Attribute("axis")) == 'Y')
 			{
 				axis = /*NamedAxis::*/ Y;
-			} 
+			}
 			else if((*xmlMouseBinder->Attribute("axis")) == 'Z')
 			{
 				axis = /*NamedAxis::*/ Z;
-			} 
+			}
 
 			addMouseAxisBinding(mControls.back(), axis, dir);
 
@@ -62,7 +62,7 @@ namespace ICS
 
 	void InputControlSystem::loadMouseButtonBinders(TiXmlElement* xmlControlNode)
 	{
-		TiXmlElement* xmlMouseButtonBinder = xmlControlNode->FirstChildElement("MouseButtonBinder");    
+		TiXmlElement* xmlMouseButtonBinder = xmlControlNode->FirstChildElement("MouseButtonBinder");
 		while(xmlMouseButtonBinder)
 		{
 			Control::ControlChangingDirection dir = Control::STOP;
@@ -79,15 +79,15 @@ namespace ICS
 			if(std::string(xmlMouseButtonBinder->Attribute("button")) == "LEFT")
 			{
 				button = SDL_BUTTON_LEFT;
-			} 
+			}
 			else if(std::string(xmlMouseButtonBinder->Attribute("button")) == "RIGHT")
 			{
 				button = SDL_BUTTON_RIGHT;
-			} 
+			}
 			else if(std::string(xmlMouseButtonBinder->Attribute("button")) == "MIDDLE")
 			{
 				button = SDL_BUTTON_MIDDLE;
-			} 
+			}
 			else
 			{
 				button = FromString<int>(xmlMouseButtonBinder->Attribute("button"));
@@ -110,7 +110,7 @@ namespace ICS
 		else if(axis == /*NamedAxis::*/Y)
 		{
 			mYmouseAxisBinded = true;
-		}		
+		}
 
 		addMouseAxisBinding_(control, axis, direction);
 	}
@@ -124,7 +124,7 @@ namespace ICS
 		ControlAxisBinderItem controlAxisBinderItem;
 		controlAxisBinderItem.control = control;
 		controlAxisBinderItem.direction = direction;
-		mControlsMouseAxisBinderMap[ axis ] = controlAxisBinderItem; 
+		mControlsMouseAxisBinderMap[ axis ] = controlAxisBinderItem;
 	}
 
 	void InputControlSystem::addMouseButtonBinding(Control* control, unsigned int button, Control::ControlChangingDirection direction)
@@ -200,7 +200,7 @@ namespace ICS
 		else if(axis == /*NamedAxis::*/Y)
 		{
 			mYmouseAxisBinded = false;
-		}		
+		}
 
 		removeMouseAxisBinding_(axis);
 	}
@@ -211,7 +211,7 @@ namespace ICS
 		{
 			mControlsMouseAxisBinderMap.erase(it);
 		}
-	}		
+	}
 
 
 	void InputControlSystem::removeMouseButtonBinding(unsigned int button)
@@ -304,7 +304,7 @@ namespace ICS
 					else if( abs(mMouseAxisBindingInitialValues[2]) > ICS_MOUSE_BINDING_MARGIN )
 					{
 						mDetectingBindingListener->mouseAxisBindingDetected(this,
-							mDetectingBindingControl, Z, mDetectingBindingDirection);		
+							mDetectingBindingControl, Z, mDetectingBindingDirection);
 					}
 				}
 			}
@@ -326,7 +326,7 @@ namespace ICS
 						it->second.control->setChangingDirection(it->second.direction);
 					}
 					else
-					{                   
+					{
 						if(it->second.control->getValue() == 1)
 						{
 							it->second.control->setChangingDirection(Control::DECREASE);
@@ -342,7 +342,7 @@ namespace ICS
 	}
 
     void InputControlSystem::mouseReleased(const SDL_MouseButtonEvent &evt, Uint8 btn)
-	{		
+	{
 		if(mActive)
 		{
             if (!mDetectingBindingControl)
@@ -370,7 +370,7 @@ namespace ICS
 
 		// if the control has an axis assigned, remove it
 		InputControlSystem::NamedAxis oldAxis = ICS->getMouseAxisBinding(control, direction);
-		if(oldAxis != InputControlSystem::UNASSIGNED) 
+		if(oldAxis != InputControlSystem::UNASSIGNED)
 		{
 			ICS->removeMouseAxisBinding(oldAxis);
 		}

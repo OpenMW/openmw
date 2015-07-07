@@ -62,7 +62,7 @@ void CSMWorld::CreateCommand::applyModifications()
     if (!mNestedValues.empty())
     {
         CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
-        if (tree == NULL)
+        if (tree == nullptr)
         {
             throw std::logic_error("CSMWorld::CreateCommand: Attempt to add nested values to the non-nested model");
         }

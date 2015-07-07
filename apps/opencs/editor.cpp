@@ -21,7 +21,7 @@
 CS::Editor::Editor ()
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
-  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
@@ -332,7 +332,7 @@ bool CS::Editor::makeIPCServer()
     }
 
     mServer->close();
-    mServer = NULL;
+    mServer = nullptr;
     return false;
 }
 

@@ -174,14 +174,14 @@ namespace MWWorld
             return (dit != mDynamic.end());
         }
 
-        /** Returns a random record that starts with the named ID, or NULL if not found. */
+        /** Returns a random record that starts with the named ID, or nullptr if not found. */
         const T *searchRandom(const std::string &id) const
         {
             std::vector<const T*> results;
             std::for_each(mShared.begin(), mShared.end(), GetRecords(id, &results));
             if(!results.empty())
                 return results[Misc::Rng::rollDice(results.size())];
-            return NULL;
+            return nullptr;
         }
 
         const T *find(const std::string &id) const {
@@ -848,7 +848,7 @@ namespace MWWorld
     public:
 
         Store<ESM::Pathgrid>()
-            : mCells(NULL)
+            : mCells(nullptr)
         {
         }
 
@@ -866,7 +866,7 @@ namespace MWWorld
             // mX and mY will be (0,0) for interior cells, but there is also an exterior cell with the coordinates of (0,0), so that doesn't help.
             // Check whether mCell is an interior cell. This isn't perfect, will break if a Region with the same name as an interior cell is created.
             // A proper fix should be made for future versions of the file format.
-            bool interior = mCells->search(pathgrid.mCell) != NULL;
+            bool interior = mCells->search(pathgrid.mCell) != nullptr;
 
             // Try to overwrite existing record
             if (interior)
@@ -894,14 +894,14 @@ namespace MWWorld
             Exterior::const_iterator it = mExt.find(std::make_pair(x,y));
             if (it != mExt.end())
                 return &(it->second);
-            return NULL;
+            return nullptr;
         }
 
         const ESM::Pathgrid *search(const std::string& name) const {
             Interior::const_iterator it = mInt.find(name);
             if (it != mInt.end())
                 return &(it->second);
-            return NULL;
+            return nullptr;
         }
 
         const ESM::Pathgrid *find(int x, int y) const {
@@ -982,7 +982,7 @@ namespace MWWorld
             typename Static::const_iterator it = mStatic.find(index);
             if (it != mStatic.end())
                 return &(it->second);
-            return NULL;
+            return nullptr;
         }
 
         const T *find(int index) const {

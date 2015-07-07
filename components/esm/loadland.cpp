@@ -68,10 +68,10 @@ Land::Land()
     , mX(0)
     , mY(0)
     , mPlugin(0)
-    , mEsm(NULL)
+    , mEsm(nullptr)
     , mDataTypes(0)
     , mDataLoaded(false)
-    , mLandData(NULL)
+    , mLandData(nullptr)
 {
 }
 
@@ -124,7 +124,7 @@ void Land::load(ESMReader &esm)
     }
 
     mDataLoaded = 0;
-    mLandData = NULL;
+    mLandData = nullptr;
 }
 
 void Land::save(ESMWriter &esm) const
@@ -146,7 +146,7 @@ void Land::loadData(int flags)
         return;
     }
     // Create storage if nothing is loaded
-    if (mLandData == NULL) {
+    if (mLandData == nullptr) {
         mLandData = new LandData;
         mLandData->mDataTypes = mDataTypes;
     }
@@ -194,7 +194,7 @@ void Land::unloadData()
     if (mDataLoaded)
     {
         delete mLandData;
-        mLandData = NULL;
+        mLandData = nullptr;
         mDataLoaded = 0;
     }
 }

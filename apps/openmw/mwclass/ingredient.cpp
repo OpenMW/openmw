@@ -48,7 +48,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

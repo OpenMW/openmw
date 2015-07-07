@@ -46,7 +46,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

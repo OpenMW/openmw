@@ -162,7 +162,7 @@ namespace ESMTerrain
             {
                 ESM::Land* land = getLand(cellX, cellY);
                 if (land && !(land->mDataTypes&ESM::Land::DATA_VHGT))
-                    land = NULL;
+                    land = nullptr;
 
                 int rowStart = 0;
                 int colStart = 0;

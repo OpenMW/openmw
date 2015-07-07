@@ -68,7 +68,7 @@ namespace SceneUtil
         osg::ref_ptr<WorkTicket> addWorkItem(WorkItem* item);
 
         /// Get the next work item from the front of the queue. If the queue is empty, waits until a new item is added.
-        /// If the workqueue is in the process of being destroyed, may return NULL.
+        /// If the workqueue is in the process of being destroyed, may return nullptr.
         /// @note The caller must free the returned WorkItem
         WorkItem* removeWorkItem();
 

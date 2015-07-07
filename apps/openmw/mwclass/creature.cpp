@@ -184,7 +184,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
-        assert (ref->mBase != NULL);
+        assert (ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -280,7 +280,7 @@ namespace MWClass
         bool healthdmg = true;
         if (!weapon.isEmpty())
         {
-            const unsigned char *attack = NULL;
+            const unsigned char *attack = nullptr;
             if(type == ESM::Weapon::AT_Chop)
                 attack = weapon.get<ESM::Weapon>()->mBase->mData.mChop;
             else if(type == ESM::Weapon::AT_Slash)
@@ -862,7 +862,7 @@ namespace MWClass
                 // Reset to original position
                 ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
 
-                ptr.getRefData().setCustomData(NULL);
+                ptr.getRefData().setCustomData(nullptr);
             }
         }
     }

@@ -13,7 +13,7 @@
 #include "document.hpp"
 
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
-: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mVFS(NULL)
+: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mVFS(nullptr)
 {
     boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 

@@ -32,10 +32,10 @@ namespace MWGui
         : Layout("openmw_mainmenu.layout")
         , mWidth (w), mHeight (h)
         , mVFS(vfs), mButtonBox(0)
-        , mBackground(NULL)
-        , mVideoBackground(NULL)
-        , mVideo(NULL)
-        , mSaveGameDialog(NULL)
+        , mBackground(nullptr)
+        , mVideoBackground(nullptr)
+        , mVideo(nullptr)
+        , mSaveGameDialog(nullptr)
     {
         getWidget(mVersionText, "VersionText");
         std::stringstream sstream;
@@ -149,13 +149,13 @@ namespace MWGui
         if (mVideo && !show)
         {
             MyGUI::Gui::getInstance().destroyWidget(mVideoBackground);
-            mVideoBackground = NULL;
-            mVideo = NULL;
+            mVideoBackground = nullptr;
+            mVideo = nullptr;
         }
         if (mBackground && !show)
         {
             MyGUI::Gui::getInstance().destroyWidget(mBackground);
-            mBackground = NULL;
+            mBackground = nullptr;
         }
 
         if (!show)

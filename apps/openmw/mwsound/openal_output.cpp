@@ -655,10 +655,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
-        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
     else
-        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);
@@ -681,7 +681,7 @@ void OpenAL_Output::init(const std::string &devname)
     }
     else
     {
-        const ALCchar *name = NULL;
+        const ALCchar *name = nullptr;
         if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
             name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
         if(alcGetError(mDevice) != AL_NO_ERROR || !name)
@@ -689,7 +689,7 @@ void OpenAL_Output::init(const std::string &devname)
         std::cout << "Opened \""<<name<<"\"" << std::endl;
     }
 
-    mContext = alcCreateContext(mDevice, NULL);
+    mContext = alcCreateContext(mDevice, nullptr);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
     {
         if(mContext)

@@ -42,7 +42,7 @@ boost::filesystem::path WindowsPath::getUserConfigPath() const
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, nullptr, 0, path)))
     {
         userPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
@@ -63,7 +63,7 @@ boost::filesystem::path WindowsPath::getGlobalConfigPath() const
     WCHAR path[MAX_PATH + 1];
     memset(path, 0, sizeof(path));
 
-    if(SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, NULL, 0, path)))
+    if(SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_PROGRAM_FILES | CSIDL_FLAG_CREATE, nullptr, 0, path)))
     {
         globalPath = boost::filesystem::path(bconv::utf_to_utf<char>(path));
     }
@@ -99,7 +99,7 @@ boost::filesystem::path WindowsPath::getInstallPath() const
         std::vector<char> buf(512);
         int len = 512;
 
-        if (RegQueryValueEx(hKey, TEXT("Installed Path"), NULL, NULL, (LPBYTE)&buf[0], (LPDWORD)&len) == ERROR_SUCCESS)
+        if (RegQueryValueEx(hKey, TEXT("Installed Path"), nullptr, nullptr, (LPBYTE)&buf[0], (LPDWORD)&len) == ERROR_SUCCESS)
         {
             installPath = &buf[0];
         }

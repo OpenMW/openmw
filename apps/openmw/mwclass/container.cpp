@@ -75,7 +75,7 @@ namespace MWClass
             ptr.get<ESM::Container>();
         if (ref->mBase->mFlags & ESM::Container::Respawn)
         {
-            ptr.getRefData().setCustomData(NULL);
+            ptr.getRefData().setCustomData(nullptr);
         }
     }
 
@@ -108,7 +108,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

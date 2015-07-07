@@ -70,23 +70,23 @@ namespace MWGui
     HUD::HUD(CustomMarkerCollection &customMarkers, bool showFps, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : Layout("openmw_hud.layout")
         , LocalMapBase(customMarkers, localMapRender)
-        , mHealth(NULL)
-        , mMagicka(NULL)
-        , mStamina(NULL)
-        , mDrowning(NULL)
-        , mWeapImage(NULL)
-        , mSpellImage(NULL)
-        , mWeapStatus(NULL)
-        , mSpellStatus(NULL)
-        , mEffectBox(NULL)
-        , mMinimap(NULL)
-        , mCompass(NULL)
-        , mCrosshair(NULL)
-        , mCellNameBox(NULL)
-        , mDrowningFrame(NULL)
-        , mDrowningFlash(NULL)
-        , mFpsBox(NULL)
-        , mFpsCounter(NULL)
+        , mHealth(nullptr)
+        , mMagicka(nullptr)
+        , mStamina(nullptr)
+        , mDrowning(nullptr)
+        , mWeapImage(nullptr)
+        , mSpellImage(nullptr)
+        , mWeapStatus(nullptr)
+        , mSpellStatus(nullptr)
+        , mEffectBox(nullptr)
+        , mMinimap(nullptr)
+        , mCompass(nullptr)
+        , mCrosshair(nullptr)
+        , mCellNameBox(nullptr)
+        , mDrowningFrame(nullptr)
+        , mDrowningFlash(nullptr)
+        , mFpsBox(nullptr)
+        , mFpsCounter(nullptr)
         , mHealthManaStaminaBaseLeft(0)
         , mWeapBoxBaseLeft(0)
         , mSpellBoxBaseLeft(0)
@@ -268,7 +268,7 @@ namespace MWGui
             float mouseY = cursorPosition.top / float(viewSize.height);
 
             WorldItemModel drop (mouseX, mouseY);
-            mDragAndDrop->drop(&drop, NULL);
+            mDragAndDrop->drop(&drop, nullptr);
 
             MWBase::Environment::get().getWindowManager()->changePointer("arrow");
         }

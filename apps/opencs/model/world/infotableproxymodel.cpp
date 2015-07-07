@@ -16,7 +16,7 @@ namespace
 CSMWorld::InfoTableProxyModel::InfoTableProxyModel(CSMWorld::UniversalId::Type type, QObject *parent)
     : IdTableProxyModel(parent),
       mType(type),
-      mSourceModel(NULL),
+      mSourceModel(nullptr),
 	  mInfoColumnId(type == UniversalId::Type_TopicInfos ? Columns::ColumnId_Topic : 
                                                            Columns::ColumnId_Journal)
 {
@@ -27,7 +27,7 @@ void CSMWorld::InfoTableProxyModel::setSourceModel(QAbstractItemModel *sourceMod
 {
     IdTableProxyModel::setSourceModel(sourceModel);
     mSourceModel = dynamic_cast<IdTableBase *>(sourceModel);
-    if (mSourceModel != NULL)
+    if (mSourceModel != nullptr)
     {
         connect(mSourceModel, 
                 SIGNAL(rowsInserted(const QModelIndex &, int, int)),

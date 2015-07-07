@@ -190,7 +190,7 @@ void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool s
 {
     QString fileName = ui.gameFileView->itemText(index);
     const ContentSelectorModel::EsmFile* file = mContentModel->item(fileName);
-    if (file != NULL)
+    if (file != nullptr)
     {
         QModelIndex index(mContentModel->indexFromItem(file));
         mContentModel->setData(index, selected, Qt::UserRole + 1);

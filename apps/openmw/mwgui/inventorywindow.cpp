@@ -56,8 +56,8 @@ namespace MWGui
         : WindowPinnableBase("openmw_inventory_window.layout")
         , mDragAndDrop(dragAndDrop)
         , mSelectedItem(-1)
-        , mSortModel(NULL)
-        , mTradeModel(NULL)
+        , mSortModel(nullptr)
+        , mTradeModel(nullptr)
         , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
@@ -249,9 +249,9 @@ namespace MWGui
         {
             mSelectedItem = index;
             if (mTrading)
-                sellItem (NULL, count);
+                sellItem (nullptr, count);
             else
-                dragItem (NULL, count);
+                dragItem (nullptr, count);
         }
     }
 

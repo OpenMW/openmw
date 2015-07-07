@@ -35,7 +35,7 @@ osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particl
 {
     if (numParticles()-numDeadParticles() < mQuota)
         return osgParticle::ParticleSystem::createParticle(ptemplate);
-    return NULL;
+    return nullptr;
 }
 
 void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -308,7 +308,7 @@ void Emitter::emitParticles(double dt)
 
 FindRecIndexVisitor::FindRecIndexVisitor(int recIndex)
     : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-    , mFound(NULL)
+    , mFound(nullptr)
     , mRecIndex(recIndex)
 {
 }

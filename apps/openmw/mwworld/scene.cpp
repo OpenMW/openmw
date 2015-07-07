@@ -47,7 +47,7 @@ namespace
     void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                                     MWRender::RenderingManager& rendering)
     {
-        if (ptr.getRefData().getBaseNode() != NULL)
+        if (ptr.getRefData().getBaseNode() != nullptr)
         {
             osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
             if (!ptr.getClass().isActor())
@@ -70,7 +70,7 @@ namespace
     void updateObjectScale(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                             MWRender::RenderingManager& rendering)
     {
-        if (ptr.getRefData().getBaseNode() != NULL)
+        if (ptr.getRefData().getBaseNode() != nullptr)
         {
             float scale = ptr.getCellRef().getScale();
             osg::Vec3f scaleVec (scale, scale, scale);
@@ -292,7 +292,7 @@ namespace MWWorld
         while (active!=mActiveCells.end())
             unloadCell (active++);
         assert(mActiveCells.empty());
-        mCurrentCell = NULL;
+        mCurrentCell = nullptr;
     }
 
     void Scene::playerMoved(const osg::Vec3f &pos)
@@ -460,7 +460,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position)
     {
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
-        bool loadcell = (mCurrentCell == NULL);
+        bool loadcell = (mCurrentCell == nullptr);
         if(!loadcell)
             loadcell = *mCurrentCell != *cell;
 

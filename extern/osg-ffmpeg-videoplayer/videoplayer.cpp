@@ -11,7 +11,7 @@ namespace Video
 {
 
 VideoPlayer::VideoPlayer()
-    : mState(NULL)
+    : mState(nullptr)
 {
 
 }
@@ -87,13 +87,13 @@ void VideoPlayer::close()
         mState->deinit();
 
         delete mState;
-        mState = NULL;
+        mState = nullptr;
     }
 }
 
 bool VideoPlayer::hasAudioStream()
 {
-    return mState && mState->audio_st != NULL;
+    return mState && mState->audio_st != nullptr;
 }
 
 void VideoPlayer::play()

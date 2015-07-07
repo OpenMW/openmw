@@ -1150,7 +1150,7 @@ namespace MWMechanics
                 iter->second->getCharacterController()->updateContinuousVfx();
 
             // Animation/movement update
-            CharacterController* playerCharacter = NULL;
+            CharacterController* playerCharacter = nullptr;
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first != player &&
@@ -1505,7 +1505,7 @@ namespace MWMechanics
         for (; it != mActors.end(); ++it)
         {
             delete it->second;
-            it->second = NULL;
+            it->second = nullptr;
         }
         mActors.clear();
         mDeathCount.clear();

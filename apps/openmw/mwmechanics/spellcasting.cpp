@@ -275,9 +275,9 @@ namespace MWMechanics
 
             // This makes spells that are easy to cast harder to resist and vice versa
             float castChance = 100.f;
-            if (spell != NULL && !caster.isEmpty() && caster.getClass().isActor())
+            if (spell != nullptr && !caster.isEmpty() && caster.getClass().isActor())
             {
-                castChance = getSpellSuccessChance(spell, caster, NULL, false); // Uncapped casting chance
+                castChance = getSpellSuccessChance(spell, caster, nullptr, false); // Uncapped casting chance
             }
             if (castChance > 0)
                 x *= 50 / castChance;
@@ -672,7 +672,7 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
-                MWWorld::CellStore* markedCell = NULL;
+                MWWorld::CellStore* markedCell = nullptr;
                 ESM::Position markedPosition;
 
                 MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);

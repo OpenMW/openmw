@@ -51,9 +51,9 @@ public:
             boundXYZ = nif->getVector3();
         }
 
-        parent = NULL;
+        parent = nullptr;
 
-        boneTrafo = NULL;
+        boneTrafo = nullptr;
         boneIndex = -1;
     }
 
@@ -63,7 +63,7 @@ public:
         props.post(nif);
     }
 
-    // Parent node, or NULL for the root node. As far as I'm aware, only
+    // Parent node, or nullptr for the root node. As far as I'm aware, only
     // NiNodes (or types derived from NiNodes) can be parents.
     NiNode *parent;
 

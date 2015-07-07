@@ -17,7 +17,7 @@ namespace SceneUtil
 
     bool Controller::hasInput() const
     {
-        return mSource.get() != NULL;
+        return mSource.get() != nullptr;
     }
 
     float Controller::getInputValue(osg::NodeVisitor* nv)

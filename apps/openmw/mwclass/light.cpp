@@ -45,7 +45,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
+        assert (ref->mBase != nullptr);
 
         // TODO: add option somewhere to enable collision for placeable objects
         if (!model.empty() && (ref->mBase->mData.mFlags & ESM::Light::Carry) == 0)
@@ -63,7 +63,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Light> *ref =
             ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
+        assert (ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

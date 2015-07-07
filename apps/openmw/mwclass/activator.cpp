@@ -50,7 +50,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

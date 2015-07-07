@@ -161,7 +161,7 @@ void WeaponAnimation::addControllers(const std::map<std::string, osg::ref_ptr<os
 {
     for (int i=0; i<2; ++i)
     {
-        mSpineControllers[i] = NULL;
+        mSpineControllers[i] = nullptr;
 
         std::map<std::string, osg::ref_ptr<osg::MatrixTransform> >::const_iterator found = nodes.find(i == 0 ? "bip01 spine1" : "bip01 spine2");
         if (found != nodes.end())
@@ -177,7 +177,7 @@ void WeaponAnimation::addControllers(const std::map<std::string, osg::ref_ptr<os
 void WeaponAnimation::deleteControllers()
 {
     for (int i=0; i<2; ++i)
-        mSpineControllers[i] = NULL;
+        mSpineControllers[i] = nullptr;
 }
 
 void WeaponAnimation::configureControllers(float characterPitchRadians)

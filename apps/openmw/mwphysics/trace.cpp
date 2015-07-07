@@ -85,7 +85,7 @@ void ActorTracer::doTrace(btCollisionObject *actor, const osg::Vec3f& start, con
         mEndPos = end;
         mPlaneNormal = osg::Vec3f(0.0f, 0.0f, 1.0f);
         mFraction = 1.0f;
-        mHitObject = NULL;
+        mHitObject = nullptr;
     }
 }
 

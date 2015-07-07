@@ -26,7 +26,7 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
-        , mSortModel(NULL)
+        , mSortModel(nullptr)
         , mAlchemy(new MWMechanics::Alchemy())
         , mApparatus (4)
         , mIngredients (4)

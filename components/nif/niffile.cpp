@@ -158,7 +158,7 @@ void NIFFile::parse()
 
     for(size_t i = 0;i < recNum;i++)
     {
-        Record *r = NULL;
+        Record *r = nullptr;
 
         std::string rec = nif.getString();
         if(rec.empty())
@@ -178,7 +178,7 @@ void NIFFile::parse()
         else
             fail("Unknown record type " + rec);
 
-        assert(r != NULL);
+        assert(r != nullptr);
         assert(r->recType != RC_MISSING);
         r->recName = rec;
         r->recIndex = i;
@@ -199,7 +199,7 @@ void NIFFile::parse()
         }
         else
         {
-            roots[i] = NULL;
+            roots[i] = nullptr;
             warn("Null Root found");
         }
     }

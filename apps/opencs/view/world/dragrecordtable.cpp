@@ -83,7 +83,7 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
 
 CSMWorld::ColumnBase::Display CSVWorld::DragRecordTable::getIndexDisplayType(const QModelIndex &index) const
 {
-    Q_ASSERT(model() != NULL);
+    Q_ASSERT(model() != nullptr);
 
     if (index.isValid())
     {

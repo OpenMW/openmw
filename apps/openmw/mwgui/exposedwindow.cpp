@@ -14,7 +14,7 @@ namespace MWGui
         if (widgets.empty())
         {
             MYGUI_ASSERT( ! _throw, "widget name '" << _name << "' not found in skin of layout '" << getName() << "'");
-            return NULL;
+            return nullptr;
         }
         else
         {
