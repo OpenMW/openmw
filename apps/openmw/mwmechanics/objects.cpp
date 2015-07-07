@@ -1,7 +1,5 @@
 #include "objects.hpp"
 
-#include <OgreVector3.h>
-
 #include "movement.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -92,11 +90,11 @@ void Objects::skipAnimation(const MWWorld::Ptr& ptr)
         iter->second->skipAnim();
 }
 
-void Objects::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
 {
     for (PtrControllerMap::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
     {
-        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+        if ((position - iter->first.getRefData().getPosition().asVec3()).length2() <= radius*radius)
             out.push_back(iter->first);
     }
 }

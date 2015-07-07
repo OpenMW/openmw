@@ -133,6 +133,15 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
   mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
   mScopeLabel (0), mCloneMode (false)
 {
+    // If the collection ID has a parent type, use it instead.
+    // It will change IDs with Record/SubRecord class (used for creators in Dialogue subviews)
+    // to IDs with general RecordList class (used for creators in Table subviews).
+    CSMWorld::UniversalId::Type listParentType = CSMWorld::UniversalId::getParentType(mListId.getType());
+    if (listParentType != CSMWorld::UniversalId::Type_None)
+    {
+        mListId = listParentType;
+    }
+
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
 
@@ -152,6 +161,8 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+
+    connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
 
 void CSVWorld::GenericCreator::setEditLock (bool locked)
@@ -281,4 +292,13 @@ void CSVWorld::GenericCreator::scopeChanged (int index)
 {
     update();
     updateNamespace();
+}
+
+void CSVWorld::GenericCreator::dataIdListChanged()
+{
+    // If the original ID of cloned record was removed, cancel the creator
+    if (mCloneMode && !mData.hasId(mClonedId))
+    {
+        emit done();
+    }
 }

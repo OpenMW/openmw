@@ -16,6 +16,8 @@ class ESMWriter;
 struct Apparatus
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Apparatus"; }
 
     enum AppaType
     {

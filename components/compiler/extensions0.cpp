@@ -308,8 +308,9 @@ namespace Compiler
             extensions.registerInstruction ("enablelevitation", "", opcodeEnableLevitation);
             extensions.registerFunction ("getpcinjail", 'l', "", opcodeGetPcInJail);
             extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
-            extensions.registerInstruction ("betacomment", "S", opcodeBetaComment, opcodeBetaCommentExplicit);
-            extensions.registerInstruction ("bc", "S", opcodeBetaComment, opcodeBetaCommentExplicit);
+            extensions.registerInstruction ("betacomment", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
+            extensions.registerInstruction ("bc", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
+            extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("addtolevcreature", "ccl", opcodeAddToLevCreature);
             extensions.registerInstruction ("removefromlevcreature", "ccl", opcodeRemoveFromLevCreature);
             extensions.registerInstruction ("addtolevitem", "ccl", opcodeAddToLevItem);

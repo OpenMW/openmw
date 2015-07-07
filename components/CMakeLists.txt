@@ -20,34 +20,40 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
 endif (GIT_CHECKOUT)
 
+find_package(OpenGL REQUIRED)
+
 # source files
 
 add_component_dir (settings
     settings
     )
 
-add_component_dir (nifoverrides
-    nifoverrides
+add_component_dir (bsa
+    bsa_file
     )
 
-add_component_dir (bsa
-    bsa_archive bsa_file resources
+add_component_dir (vfs
+    manager archive bsaarchive filesystemarchive registerarchives
+    )
+
+add_component_dir (resource
+    scenemanager texturemanager resourcesystem
+    )
+
+add_component_dir (sceneutil
+    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller workqueue
     )
 
 add_component_dir (nif
     controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
     )
 
-add_component_dir (nifcache
-    nifcache
-    )
-
-add_component_dir (nifogre
-    ogrenifloader skeleton material mesh particles controller
+add_component_dir (nifosg
+    nifloader controller particle userdata
     )
 
 add_component_dir (nifbullet
-    bulletnifloader
+    bulletnifloader bulletshapemanager
     )
 
 add_component_dir (to_utf8
@@ -70,7 +76,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    utf8stream stringops resourcehelpers
+    utf8stream stringops resourcehelpers rng
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -79,7 +85,7 @@ IF(NOT WIN32 AND NOT APPLE)
 ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
-    constrainedfiledatastream lowlevelfile
+    lowlevelfile constrainedfilestream memorystream
     )
 
 add_component_dir (compiler
@@ -98,17 +104,16 @@ add_component_dir (translation
     translation
     )
 
-add_definitions(-DTERRAIN_USE_SHADER=1)
 add_component_dir (terrain
-    quadtreenode chunk world defaultworld terraingrid storage material buffercache defs
+    storage world buffercache defs terraingrid material
     )
 
 add_component_dir (loadinglistener
     loadinglistener
     )
 
-add_component_dir (ogreinit
-    ogreinit ogreplugin
+add_component_dir (myguiplatform
+    myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener
     )
 
 add_component_dir (widgets
@@ -119,6 +124,10 @@ add_component_dir (fontloader
     fontloader
     )
 
+add_component_dir (sdlutil
+    sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper OISCompat events sdlcursormanager
+    )
+
 add_component_dir (version
     version
     )
@@ -126,32 +135,30 @@ add_component_dir (version
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
-find_package(Qt4 COMPONENTS QtCore QtGui)
-if(MINGW)
-find_package(Bullet REQUIRED COMPONENTS Collision)
-endif()
-
-if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
-    add_component_qt_dir (contentselector
-        model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
-		model/loadordererror
-        view/combobox view/contentselector
-        )
-    add_component_qt_dir (config
-        gamesettings
-        launchersettings
-        settingsbase
-        )
-
-    add_component_qt_dir (process
-        processinvoker
+add_component_qt_dir (contentselector
+    model/modelitem model/esmfile
+    model/naturalsort model/contentmodel
+    model/loadordererror
+    view/combobox view/contentselector
+    )
+add_component_qt_dir (config
+    gamesettings
+    launchersettings
+    settingsbase
     )
 
-   include(${QT_USE_FILE})
+add_component_qt_dir (process
+    processinvoker
+)
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
-   QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
-endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+else()
+    QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
+    QT5_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
@@ -164,18 +171,33 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
-    ${Boost_LIBRARIES} 
-    ${OGRE_LIBRARIES}
-    ${OENGINE_LIBRARY}    
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARY}
+    # For MyGUI platform
+    ${OPENGL_gl_LIBRARY}
 )
+
+if (WIN32)
+    target_link_libraries(components
+    ${Boost_LOCALE_LIBRARY})
+endif()
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(components
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTGUI_LIBRARY})
+else()
+    qt5_use_modules(components Widgets Core)
+endif()
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
-
-if(MINGW)
-target_link_libraries(components ${QT_LIBRARIES} ${BULLET_LIBRARIES})
-endif()
 
 if (WIN32)
 target_link_libraries(components shlwapi)

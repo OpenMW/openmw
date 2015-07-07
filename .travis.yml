@@ -1,6 +1,6 @@
 os:
  - linux
- - osx
+# - osx
 language: cpp
 branches:
   only:
@@ -38,7 +38,7 @@ before_script:
  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ./CI/before_script.osx.sh; fi
 script:
  - cd ./build
- - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j4; fi
+ - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j2; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
 after_script:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi

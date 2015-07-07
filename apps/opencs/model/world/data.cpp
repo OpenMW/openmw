@@ -62,7 +62,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(resourcesManager.getVFS())
 {
     int index = 0;
 
@@ -115,7 +115,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
     mFactions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_Faction));
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
@@ -135,7 +135,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
     // Race attributes
     mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes));
     index = mRaces.getColumns()-1;
@@ -180,7 +180,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
 
@@ -196,7 +196,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
         new SpellListAdapter<ESM::BirthSign> ()));
     mBirthsigns.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
@@ -475,6 +475,15 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
         ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
+    mMetaData.appendBlankRecord ("sys::meta");
+
+    mMetaData.addColumn (new StringIdColumn<MetaData> (true));
+    mMetaData.addColumn (new RecordStateColumn<MetaData>);
+    mMetaData.addColumn (new FixedRecordTypeColumn<MetaData> (UniversalId::Type_MetaData));
+    mMetaData.addColumn (new FormatColumn<MetaData>);
+    mMetaData.addColumn (new AuthorColumn<MetaData>);
+    mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
+    
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -515,6 +524,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+    addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
@@ -525,6 +535,16 @@ CSMWorld::Data::~Data()
         delete *iter;
 
     delete mReader;
+}
+
+Resource::ResourceSystem* CSMWorld::Data::getResourceSystem()
+{
+    return &mResourceSystem;
+}
+
+const Resource::ResourceSystem* CSMWorld::Data::getResourceSystem() const
+{
+    return &mResourceSystem;
 }
 
 const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const
@@ -803,6 +823,11 @@ const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) 
     return mResourcesManager.get (id.getType());
 }
 
+const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
+{
+    return mMetaData.getRecord (0).get();
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -847,9 +872,15 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mBase = base;
     mProject = project;
 
-    mAuthor = mReader->getAuthor();
-    mDescription = mReader->getDesc();
+    if (!mProject && !mBase)
+    {
+        MetaData metaData;
+        metaData.mId = "sys::meta";
+        metaData.load (*mReader);
 
+        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
+    
     return mReader->getRecordCount();
 }
 
@@ -923,7 +954,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             {
                 // log an error and continue loading the refs to the last loaded cell
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_None);
-                messages.add (id, "Logic error: cell index out of bounds");
+                messages.add (id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
@@ -984,7 +1015,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     messages.add (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist");
+                        "Trying to delete dialogue record " + id + " which does not exist",
+                        "", CSMDoc::Message::Severity_Warning);
                 }
             }
             else
@@ -1001,7 +1033,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (!mDialogue)
             {
                 messages.add (UniversalId::Type_None,
-                    "Found info record not following a dialogue record");
+                    "Found info record not following a dialogue record", "", CSMDoc::Message::Severity_Error);
 
                 mReader->skipRecord();
                 break;
@@ -1044,7 +1076,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString(), "",
+            CSMDoc::Message::Severity_Error);
 
         mReader->skipRecord();
     }
@@ -1101,26 +1134,6 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mPathgrids);
 }
 
-void CSMWorld::Data::setDescription (const std::string& description)
-{
-    mDescription = description;
-}
-
-std::string CSMWorld::Data::getDescription() const
-{
-    return mDescription;
-}
-
-void CSMWorld::Data::setAuthor (const std::string& author)
-{
-    mAuthor = author;
-}
-
-std::string CSMWorld::Data::getAuthor() const
-{
-    return mAuthor;
-}
-
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 {
     std::vector<std::string> ids;
@@ -1158,4 +1171,9 @@ void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex&
 void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 {
     emit idListChanged();
+}
+
+const VFS::Manager* CSMWorld::Data::getVFS() const
+{
+    return mResourcesManager.getVFS();
 }

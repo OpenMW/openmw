@@ -12,9 +12,6 @@
 
 #include <SDL_video.h>
 
-#include <OgreRoot.h>
-#include <OgreRenderSystem.h>
-
 #include <boost/math/common_factor.hpp>
 
 #include <components/files/configurationmanager.hpp>
@@ -37,10 +34,6 @@ QString getAspect(int x, int y)
 
 Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
     : QWidget(parent)
-    , mOgre(NULL)
-    , mSelectedRenderSystem(NULL)
-    , mOpenGLRenderSystem(NULL)
-    , mDirect3DRenderSystem(NULL)
     , mCfgMgr(cfg)
     , mGraphicsSettings(graphicsSetting)
 {
@@ -52,77 +45,10 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsS
     customWidthSpinBox->setMaximum(res.width());
     customHeightSpinBox->setMaximum(res.height());
 
-    connect(rendererComboBox, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(rendererChanged(const QString&)));
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
 
-}
-
-bool Launcher::GraphicsPage::setupOgre()
-{
-    try
-    {
-        mOgre = mOgreInit.init(mCfgMgr.getLogPath().string() + "/launcherOgre.log");
-    }
-    catch(Ogre::Exception &ex)
-    {
-        QString ogreError = QString::fromUtf8(ex.getFullDescription().c_str());
-        QMessageBox msgBox;
-        msgBox.setWindowTitle("Error creating Ogre::Root");
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Failed to create the Ogre::Root object</b><br><br> \
-        Press \"Show Details...\" for more information.<br>"));
-        msgBox.setDetailedText(ogreError);
-        msgBox.exec();
-
-        qCritical("Error creating Ogre::Root, the error reported was:\n %s", qPrintable(ogreError));
-        return false;
-    }
-
-    // Get the available renderers and put them in the combobox
-    const Ogre::RenderSystemList &renderers = mOgre->getAvailableRenderers();
-
-    for (Ogre::RenderSystemList::const_iterator r = renderers.begin(); r != renderers.end(); ++r) {
-        mSelectedRenderSystem = *r;
-        rendererComboBox->addItem((*r)->getName().c_str());
-    }
-
-    QString openGLName = QString("OpenGL Rendering Subsystem");
-    QString direct3DName = QString("Direct3D9 Rendering Subsystem");
-
-    // Create separate rendersystems
-    mOpenGLRenderSystem = mOgre->getRenderSystemByName(openGLName.toStdString());
-    mDirect3DRenderSystem = mOgre->getRenderSystemByName(direct3DName.toStdString());
-
-    if (!mOpenGLRenderSystem && !mDirect3DRenderSystem) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error creating renderer"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not select a valid render system</b><br><br> \
-                          Please make sure Ogre plugins were installed correctly.<br>"));
-        msgBox.exec();
-        return false;
-    }
-
-    // Now fill the GUI elements
-    int index = rendererComboBox->findText(mGraphicsSettings.value(QString("Video/render system")));
-    if ( index != -1) {
-        rendererComboBox->setCurrentIndex(index);
-    } else {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        rendererComboBox->setCurrentIndex(rendererComboBox->findText(direct3DName));
-#else
-        rendererComboBox->setCurrentIndex(rendererComboBox->findText(openGLName));
-#endif
-    }
-
-    antiAliasingComboBox->clear();
-    antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
-
-    return true;
 }
 
 bool Launcher::GraphicsPage::setupSDL()
@@ -152,8 +78,6 @@ bool Launcher::GraphicsPage::setupSDL()
 bool Launcher::GraphicsPage::loadSettings()
 {
     if (!setupSDL())
-        return false;
-    if (!mOgre && !setupOgre())
         return false;
 
     if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
@@ -203,7 +127,6 @@ void Launcher::GraphicsPage::saveSettings()
                                       : mGraphicsSettings.setValue(QString("Video/window border"), QString("false"));
 
     mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
-    mGraphicsSettings.setValue(QString("Video/render system"), rendererComboBox->currentText());
 
 
     if (standardRadioButton->isChecked()) {
@@ -219,39 +142,6 @@ void Launcher::GraphicsPage::saveSettings()
     }
 
     mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
-}
-
-QStringList Launcher::GraphicsPage::getAvailableOptions(const QString &key, Ogre::RenderSystem *renderer)
-{
-    QStringList result;
-
-    uint row = 0;
-    Ogre::ConfigOptionMap options = renderer->getConfigOptions();
-
-    for (Ogre::ConfigOptionMap::iterator i = options.begin (); i != options.end (); ++i, ++row)
-    {
-        Ogre::StringVector::iterator opt_it;
-        uint idx = 0;
-
-        for (opt_it = i->second.possibleValues.begin();
-             opt_it != i->second.possibleValues.end(); ++opt_it, ++idx)
-        {
-            if (strcmp (key.toStdString().c_str(), i->first.c_str()) == 0) {
-                result << ((key == "FSAA") ? QString("MSAA ") : QString("")) + QString::fromUtf8((*opt_it).c_str()).simplified();
-            }
-        }
-    }
-
-    // Sort ascending
-    qSort(result.begin(), result.end(), naturalSortLessThanCI);
-
-    // Replace the zero option with Off
-    int index = result.indexOf("MSAA 0");
-
-    if (index != -1)
-        result.replace(index, tr("Off"));
-
-    return result;
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -314,15 +204,6 @@ QRect Launcher::GraphicsPage::getMaximumResolution()
             max.setHeight(res.height());
     }
     return max;
-}
-
-void Launcher::GraphicsPage::rendererChanged(const QString &renderer)
-{
-    mSelectedRenderSystem = mOgre->getRenderSystemByName(renderer.toStdString());
-
-    antiAliasingComboBox->clear();
-
-    antiAliasingComboBox->addItems(getAvailableOptions(QString("FSAA"), mSelectedRenderSystem));
 }
 
 void Launcher::GraphicsPage::screenChanged(int screen)

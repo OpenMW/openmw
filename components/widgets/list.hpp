@@ -1,5 +1,5 @@
-#ifndef MWGUI_LIST_HPP
-#define MWGUI_LIST_HPP
+#ifndef OPENMW_COMPONENTS_WIDGETS_LIST_HPP
+#define OPENMW_COMPONENTS_WIDGETS_LIST_HPP
 
 #include <MyGUI_ScrollView.h>
 
@@ -55,7 +55,7 @@ namespace Gui
 
         void redraw(bool scrollbarShown = false);
 
-        void onMouseWheel(MyGUI::Widget* _sender, int _rel);
+        void onMouseWheelMoved(MyGUI::Widget* _sender, int _rel);
         void onItemSelected(MyGUI::Widget* _sender);
 
     private:

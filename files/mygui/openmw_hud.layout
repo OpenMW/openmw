@@ -132,46 +132,5 @@
             <Widget type="TextBox" skin="NumFPS" position="3 3 25 17" align="Center" name="FPSCounter"/>
         </Widget>
 
-        <!-- Advanced FPSCounter box -->
-        <Widget type="Widget" skin="" position="12 12 135 64" align="Left Top" name="FPSBoxAdv">
-            <Property key="Visible" value="false"/>
-
-            <Widget type="Widget" skin="" position="0 0 80 60" align="Left Top">
-
-                <Widget type="TextBox" skin="NumFPS" position="0 0 80 32" align="Left Top">
-                    <Property key="Caption" value="FPS: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 16 80 32" align="Left Top">
-                    <Property key="Caption" value="Triangles: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 32 80 32" align="Left Top">
-                    <Property key="Caption" value="Batches: "/>
-                    <Property key="TextAlign" value="Right"/>
-                </Widget>
-
-            </Widget>
-
-            <Widget type="Widget" skin="" position="80 0 55 60" align="Left Top">
-
-                <Widget type="TextBox" skin="NumFPS" position="0 0 55 32" align="Left Top" name="FPSCounterAdv">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 16 55 32" align="Left Top" name="TriangleCounter">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-                <Widget type="TextBox" skin="NumFPS" position="0 32 55 32" align="Left Top" name="BatchCounter">
-                    <Property key="TextAlign" value="Left"/>
-                </Widget>
-
-            </Widget>
-
-        </Widget>
-
     </Widget>
 </MyGUI>

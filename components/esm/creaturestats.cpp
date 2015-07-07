@@ -39,8 +39,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     if (esm.isNextSub("HOST"))
         esm.skipHSub(); // Hostile, no longer used
 
-    mAttackingOrSpell = false;
-    esm.getHNOT (mAttackingOrSpell, "ATCK");
+    if (esm.isNextSub("ATCK"))
+        esm.skipHSub(); // attackingOrSpell, no longer used
 
     mKnockdown = false;
     esm.getHNOT (mKnockdown, "KNCK");
@@ -60,8 +60,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mMovementFlags = 0;
     esm.getHNOT (mMovementFlags, "MOVE");
 
-    mAttackStrength = 0;
-    esm.getHNOT (mAttackStrength, "ASTR");
+    if (esm.isNextSub("ASTR"))
+        esm.skipHSub(); // attackStrength, no longer used
 
     mFallHeight = 0;
     esm.getHNOT (mFallHeight, "FALL");
@@ -149,9 +149,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mAttacked)
         esm.writeHNT ("ATKD", mAttacked);
 
-    if (mAttackingOrSpell)
-        esm.writeHNT ("ATCK", mAttackingOrSpell);
-
     if (mKnockdown)
         esm.writeHNT ("KNCK", mKnockdown);
 
@@ -169,9 +166,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
 
     if (mMovementFlags)
         esm.writeHNT ("MOVE", mMovementFlags);
-
-    if (mAttackStrength)
-        esm.writeHNT ("ASTR", mAttackStrength);
 
     if (mFallHeight)
         esm.writeHNT ("FALL", mFallHeight);
@@ -235,14 +229,12 @@ void ESM::CreatureStats::blank()
     mTalkedTo = false;
     mAlarmed = false;
     mAttacked = false;
-    mAttackingOrSpell = false;
     mKnockdown = false;
     mKnockdownOneFrame = false;
     mKnockdownOverOneFrame = false;
     mHitRecovery = false;
     mBlock = false;
     mMovementFlags = 0;
-    mAttackStrength = 0.f;
     mFallHeight = 0.f;
     mRecalcDynamicStats = false;
     mDrawState = 0;

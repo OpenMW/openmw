@@ -83,7 +83,7 @@ namespace MWGui
         if (count > 1 && !shift)
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-            dialog->open(object.getClass().getName(object), "#{sTake}", count);
+            dialog->openCountDialog(object.getClass().getName(object), "#{sTake}", count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &ContainerWindow::dragItem);
         }
@@ -131,7 +131,7 @@ namespace MWGui
             dropItem();
     }
 
-    void ContainerWindow::open(const MWWorld::Ptr& container, bool loot)
+    void ContainerWindow::openContainer(const MWWorld::Ptr& container, bool loot)
     {
         mPickpocketDetected = false;
         mPtr = container;
@@ -151,6 +151,7 @@ namespace MWGui
         mSortModel = new SortFilterItemModel(mModel);
 
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 

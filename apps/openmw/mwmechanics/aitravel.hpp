@@ -30,9 +30,12 @@ namespace MWMechanics
 
             virtual AiTravel *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
+
+        protected:
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
         private:
             float mX;

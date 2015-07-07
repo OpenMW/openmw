@@ -6,25 +6,21 @@
 
 #include "ptr.hpp"
 
-namespace ESM
-{
-    class CellRef;
-}
 
 namespace MWWorld
 {
-    /// List all (Ogre-)handles, then reset RefData::mBaseNode to 0.
-    struct ListAndResetHandles
+    struct ListAndResetObjects
     {
-        std::vector<Ogre::SceneNode*> mHandles;
+        std::vector<MWWorld::Ptr> mObjects;
 
         bool operator() (MWWorld::Ptr ptr)
         {
-            Ogre::SceneNode* handle = ptr.getRefData().getBaseNode();
-            if (handle)
-                mHandles.push_back (handle);
+            if (ptr.getRefData().getBaseNode())
+            {
+                ptr.getRefData().setBaseNode(NULL);
+                mObjects.push_back (ptr);
+            }
 
-            ptr.getRefData().setBaseNode(0);
             return true;
         }
     };

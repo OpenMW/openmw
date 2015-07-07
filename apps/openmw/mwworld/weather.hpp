@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
 
-#include <OgreColourValue.h>
-#include <OgreVector3.h>
+#include <osg/Vec4f>
 
 #include "../mwbase/soundmanager.hpp"
 
@@ -37,15 +37,15 @@ namespace MWWorld
         std::string mNextCloudTexture;
         float mCloudBlendFactor;
 
-        Ogre::ColourValue mFogColor;
+        osg::Vec4f mFogColor;
 
-        Ogre::ColourValue mAmbientColor;
+        osg::Vec4f mAmbientColor;
 
-        Ogre::ColourValue mSkyColor;
+        osg::Vec4f mSkyColor;
 
-        Ogre::ColourValue mSunColor;
+        osg::Vec4f mSunColor;
 
-        Ogre::ColourValue mSunDiscColor;
+        osg::Vec4f mSunDiscColor;
 
         float mFogDepth;
 
@@ -80,25 +80,25 @@ namespace MWWorld
         std::string mCloudTexture;
 
         // Sky (atmosphere) colors
-        Ogre::ColourValue   mSkySunriseColor,
+        osg::Vec4f   mSkySunriseColor,
                             mSkyDayColor,
                             mSkySunsetColor,
                             mSkyNightColor;
 
         // Fog colors
-        Ogre::ColourValue   mFogSunriseColor,
+        osg::Vec4f   mFogSunriseColor,
                             mFogDayColor,
                             mFogSunsetColor,
                             mFogNightColor;
 
         // Ambient lighting colors
-        Ogre::ColourValue   mAmbientSunriseColor,
+        osg::Vec4f   mAmbientSunriseColor,
                             mAmbientDayColor,
                             mAmbientSunsetColor,
                             mAmbientNightColor;
 
         // Sun (directional) lighting colors
-        Ogre::ColourValue   mSunSunriseColor,
+        osg::Vec4f   mSunSunriseColor,
                             mSunDayColor,
                             mSunSunsetColor,
                             mSunNightColor;
@@ -108,7 +108,7 @@ namespace MWWorld
                 mLandFogNightDepth;
 
         // Color modulation for the sun itself during sunset (not completely sure)
-        Ogre::ColourValue mSunDiscSunsetColor;
+        osg::Vec4f mSunDiscSunsetColor;
 
         // Duration of weather transition (in days)
         float mTransitionDelta;
@@ -183,12 +183,9 @@ namespace MWWorld
         /// Are we in an ash or blight storm?
         bool isInStorm() const;
 
-        Ogre::Vector3 getStormDirection() const;
+        osg::Vec3f getStormDirection() const;
 
-        void advanceTime(double hours)
-        {
-            mTimePassed += hours*3600;
-        }
+        void advanceTime(double hours);
 
         unsigned int getWeatherID() const;
 
@@ -207,7 +204,7 @@ namespace MWWorld
         float mHour;
         float mWindSpeed;
         bool mIsStorm;
-        Ogre::Vector3 mStormDirection;
+        osg::Vec3f mStormDirection;
 
         MWBase::SoundPtr mAmbientSound;
         std::string mPlayingSoundID;

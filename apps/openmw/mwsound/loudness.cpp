@@ -1,5 +1,8 @@
 #include "loudness.hpp"
 
+#include <stdint.h>
+#include <limits>
+
 #include "soundmanagerimp.hpp"
 
 namespace MWSound
@@ -28,8 +31,8 @@ namespace MWSound
                     value = ((char)(data[sample*advance]^0x80))/128.f;
                 else if (type == SampleType_Int16)
                 {
-                    value = *reinterpret_cast<const Ogre::int16*>(&data[sample*advance]);
-                    value /= float(std::numeric_limits<Ogre::int16>::max());
+                    value = *reinterpret_cast<const int16_t*>(&data[sample*advance]);
+                    value /= float(std::numeric_limits<int16_t>::max());
                 }
                 else if (type == SampleType_Float32)
                 {

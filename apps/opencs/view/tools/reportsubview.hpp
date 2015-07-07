@@ -20,6 +20,8 @@ namespace CSVTools
             Q_OBJECT
 
             ReportTable *mTable;
+            CSMDoc::Document& mDocument;
+            int mRefreshState;
 
         public:
 
@@ -28,6 +30,10 @@ namespace CSVTools
             virtual void setEditLock (bool locked);
 
             virtual void updateUserSetting (const QString &, const QStringList &);
+
+        private slots:
+
+            void refreshRequest();
     };
 }
 

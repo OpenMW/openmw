@@ -84,7 +84,7 @@ void CompanionWindow::onItemSelected(int index)
     if (count > 1 && !shift)
     {
         CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-        dialog->open(object.getClass().getName(object), "#{sTake}", count);
+        dialog->openCountDialog(object.getClass().getName(object), "#{sTake}", count);
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
     }
@@ -106,7 +106,7 @@ void CompanionWindow::onBackgroundSelected()
     }
 }
 
-void CompanionWindow::open(const MWWorld::Ptr& npc)
+void CompanionWindow::openCompanion(const MWWorld::Ptr& npc)
 {
     mPtr = npc;
     updateEncumbranceBar();
@@ -114,6 +114,7 @@ void CompanionWindow::open(const MWWorld::Ptr& npc)
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
     mItemView->setModel(mSortModel);
+    mItemView->resetScrollBars();
 
     setTitle(npc.getClass().getName(npc));
 }

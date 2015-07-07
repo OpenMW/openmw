@@ -1,8 +1,5 @@
 #include "pathfinding.hpp"
 
-#include "OgreMath.h"
-#include "OgreVector3.h"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
@@ -15,9 +12,9 @@ namespace
     // Caller needs to be careful for very short distances (i.e. less than 1)
     // or when accumuating the results i.e. (a + b)^2 != a^2 + b^2
     //
-    float distanceSquared(ESM::Pathgrid::Point point, Ogre::Vector3 pos)
+    float distanceSquared(ESM::Pathgrid::Point point, const osg::Vec3f& pos)
     {
-        return MWMechanics::PathFinder::MakeOgreVector3(point).squaredDistance(pos);
+        return (MWMechanics::PathFinder::MakeOsgVec3(point) - pos).length2();
     }
 
     // Return the closest pathgrid point index from the specified position co
@@ -26,7 +23,7 @@ namespace
     //
     // NOTE: pos is expected to be in local co-ordinates, as is grid->mPoints
     //
-    int getClosestPoint(const ESM::Pathgrid* grid, Ogre::Vector3 pos)
+    int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
     {
         if(!grid || grid->mPoints.empty())
             return -1;
@@ -52,7 +49,7 @@ namespace
     // Chooses a reachable end pathgrid point.  start is assumed reachable.
     std::pair<int, bool> getClosestReachablePoint(const ESM::Pathgrid* grid,
                                                   const MWWorld::CellStore *cell,
-                                                  Ogre::Vector3 pos, int start)
+                                                  const osg::Vec3f pos, int start)
     {
         if(!grid || grid->mPoints.empty())
             return std::pair<int, bool> (-1, false);
@@ -114,8 +111,7 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mIsPathConstructed(false),
-          mPathgrid(NULL),
+        : mPathgrid(NULL),
           mCell(NULL)
     {
     }
@@ -124,7 +120,6 @@ namespace MWMechanics
     {
         if(!mPath.empty())
             mPath.clear();
-        mIsPathConstructed = false;
     }
 
     /*
@@ -180,7 +175,6 @@ namespace MWMechanics
                 static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
             {
                 mPath.push_back(endPoint);
-                mIsPathConstructed = true;
                 return;
             }
         }
@@ -197,7 +191,6 @@ namespace MWMechanics
         if(!mPathgrid || mPathgrid->mPoints.empty())
         {
             mPath.push_back(endPoint);
-            mIsPathConstructed = true;
             return;
         }
 
@@ -216,12 +209,12 @@ namespace MWMechanics
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
         int startNode = getClosestPoint(mPathgrid,
-                Ogre::Vector3(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
+                osg::Vec3f(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
         // Some cells don't have any pathgrids at all
         if(startNode != -1)
         {
             std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
-                Ogre::Vector3(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
+                osg::Vec3f(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
                     startNode);
 
             // this shouldn't really happen, but just in case
@@ -235,7 +228,6 @@ namespace MWMechanics
                 if(startNode == endNode.first)
                 {
                     mPath.push_back(endPoint);
-                    mIsPathConstructed = true;
                     return;
                 }
 
@@ -243,7 +235,6 @@ namespace MWMechanics
 
                 if(!mPath.empty())
                 {
-                    mIsPathConstructed = true;
                     // Add the destination (which may be different to the closest
                     // pathgrid point).  However only add if endNode was the closest
                     // point to endPoint.
@@ -256,14 +247,8 @@ namespace MWMechanics
                     if(endNode.second)
                         mPath.push_back(endPoint);
                 }
-                else
-                    mIsPathConstructed = false;
             }
-            else
-                mIsPathConstructed = false;
         }
-        else
-            mIsPathConstructed = false;
 
         return;
     }
@@ -271,7 +256,7 @@ namespace MWMechanics
     float PathFinder::getZAngleToNext(float x, float y) const
     {
         // This should never happen (programmers should have an if statement checking
-        // mIsPathConstructed that prevents this call if otherwise).
+        // isPathConstructed that prevents this call if otherwise).
         if(mPath.empty())
             return 0.;
 
@@ -279,7 +264,7 @@ namespace MWMechanics
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
 
-        return Ogre::Math::ATan2(directionX,directionY).valueDegrees();
+        return osg::RadiansToDegrees(std::atan2(directionX, directionY));
     }
 
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
@@ -293,7 +278,6 @@ namespace MWMechanics
             mPath.pop_front();
             if(mPath.empty())
             {
-                mIsPathConstructed = false;
                 return true;
             }
         }
@@ -301,23 +285,35 @@ namespace MWMechanics
         return false;
     }
 
-    // used by AiCombat, see header for the rationale
-    bool PathFinder::syncStart(const std::list<ESM::Pathgrid::Point> &path)
+    // see header for the rationale
+    void PathFinder::buildSyncedPath(const ESM::Pathgrid::Point &startPoint,
+        const ESM::Pathgrid::Point &endPoint,
+        const MWWorld::CellStore* cell,
+        bool allowShortcuts)
     {
         if (mPath.size() < 2)
-            return false; //nothing to pop
-
-        std::list<ESM::Pathgrid::Point>::const_iterator oldStart = path.begin();
-        std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
-
-        if(    (*iter).mX == oldStart->mX
-            && (*iter).mY == oldStart->mY
-            && (*iter).mZ == oldStart->mZ)
         {
-            mPath.pop_front();
-            return true;
+            // if path has one point, then it's the destination.
+            // don't need to worry about bad path for this case
+            buildPath(startPoint, endPoint, cell, allowShortcuts);
         }
-        return false;
+        else
+        {
+            const ESM::Pathgrid::Point oldStart(*getPath().begin());
+            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            if (mPath.size() >= 2)
+            {
+                // if 2nd waypoint of new path == 1st waypoint of old, 
+                // delete 1st waypoint of new path.
+                std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
+                if (iter->mX == oldStart.mX
+                    && iter->mY == oldStart.mY
+                    && iter->mZ == oldStart.mZ)
+                {
+                    mPath.pop_front();
+                }
+            }
+        }
     }
 
 }

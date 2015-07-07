@@ -1,13 +1,12 @@
 #include "settingswindow.hpp"
 
-#include <OgreRoot.h>
-
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Window.h>
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/math/common_factor_rt.hpp>
@@ -32,20 +31,16 @@ namespace
     {
         if (level == 0)
             return "#{sOff}";
-        else if (level == 1)
-            return "Basic";
-        else
-            return "Detailed";
+        else //if (level == 1)
+            return "#{sOn}";
     }
 
     std::string textureFilteringToStr(const std::string& val)
     {
-        if (val == "anisotropic")
-            return "Anisotropic";
-        else if (val == "bilinear")
-            return "Bilinear";
-        else
+        if (val == "trilinear")
             return "Trilinear";
+        else
+            return "Bilinear";
     }
 
     void parseResolution (int &x, int &y, const std::string& str)
@@ -75,11 +70,6 @@ namespace
         if (xaspect == 8 && yaspect == 5)
             return "16 : 10";
         return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
-    }
-
-    std::string hlslGlsl ()
-    {
-        return (Ogre::Root::getSingleton ().getRenderSystem ()->getName ().find("OpenGL") != std::string::npos) ? "glsl" : "hlsl";
     }
 
     const char* checkButtonType = "CheckButton";
@@ -170,6 +160,7 @@ namespace MWGui
 
         setTitle("#{sOptions}");
 
+        getWidget(mSettingsTab, "SettingsTab");
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
@@ -182,7 +173,6 @@ namespace MWGui
         getWidget(mAnisotropyLabel, "AnisotropyLabel");
         getWidget(mAnisotropyBox, "AnisotropyBox");
         getWidget(mShadersButton, "ShadersButton");
-        getWidget(mShaderModeButton, "ShaderModeButton");
         getWidget(mShadowsEnabledButton, "ShadowsEnabledButton");
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
@@ -208,8 +198,8 @@ namespace MWGui
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 
+        mSettingsTab->eventTabChangeSelect += MyGUI::newDelegate(this, &SettingsWindow::onTabChanged);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
-        mShaderModeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onShaderModeToggled);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
@@ -250,8 +240,6 @@ namespace MWGui
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
 
-        mShaderModeButton->setCaption (Settings::Manager::getString("shader mode", "General"));
-
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
             mRefractionButton->setEnabled(false);
@@ -275,6 +263,11 @@ namespace MWGui
         mControllerSwitch->setStateSelected(false);
     }
 
+    void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
+    {
+        resetScrollbars();
+    }
+
     void SettingsWindow::onOkButtonClicked(MyGUI::Widget* _sender)
     {
         exit();
@@ -286,7 +279,7 @@ namespace MWGui
             return;
 
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sNotifyMessage67}");
+        dialog->askForConfirmation("#{sNotifyMessage67}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
@@ -400,20 +393,9 @@ namespace MWGui
         }
     }
 
-    void SettingsWindow::onShaderModeToggled(MyGUI::Widget* _sender)
-    {
-        std::string val = hlslGlsl();
-
-        _sender->castType<MyGUI::Button>()->setCaption(val);
-
-        Settings::Manager::setString("shader mode", "General", val);
-
-        apply();
-    }
-
     void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
     {
-        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 3;
+        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 2;
         Settings::Manager::setInt("fps", "HUD", newLevel);
         mFPSButton->setCaptionWithReplacing(fpsLevelToStr(newLevel));
         apply();
@@ -480,6 +462,7 @@ namespace MWGui
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
         updateControlsBox();
+        resetScrollbars();
     }
 
     void SettingsWindow::onControllerSwitchClicked(MyGUI::Widget* _sender)
@@ -490,6 +473,7 @@ namespace MWGui
         mKeyboardSwitch->setStateSelected(false);
         mControllerSwitch->setStateSelected(true);
         updateControlsBox();
+        resetScrollbars();
     }
 
     void SettingsWindow::updateControlsBox()
@@ -566,7 +550,7 @@ namespace MWGui
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->open("#{sNotifyMessage66}");
+        dialog->askForConfirmation("#{sNotifyMessage66}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);
         dialog->eventCancelClicked.clear();
@@ -584,6 +568,7 @@ namespace MWGui
     void SettingsWindow::open()
     {
         updateControlsBox ();
+        resetScrollbars();
     }
 
     void SettingsWindow::exit()
@@ -594,5 +579,11 @@ namespace MWGui
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)
     {
         updateControlsBox();
+    }
+
+    void SettingsWindow::resetScrollbars()
+    {
+        mResolutionList->setScrollPosition(0);
+        mControlsBox->setViewOffset(MyGUI::IntPoint(0, 0));
     }
 }

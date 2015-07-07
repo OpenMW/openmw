@@ -12,8 +12,6 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include <extern/shiny/Main/Factory.hpp>
-
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -44,13 +42,9 @@ CSMSettings::UserSettings *CSMSettings::UserSettings::sUserSettingsInstance = 0;
 
 void CSMSettings::UserSettings::buildSettingModelDefaults()
 {
-    QString section;
-
+    /*
     declareSection ("3d-render", "3D Rendering");
     {
-        Setting *shaders = createSetting (Type_CheckBox, "shaders", "Enable Shaders");
-        shaders->setDefaultValue ("true");
-
         Setting *farClipDist = createSetting (Type_DoubleSpinBox, "far-clip-distance", "Far clipping distance");
         farClipDist->setDefaultValue (300000);
         farClipDist->setRange (0, 1000000);
@@ -62,23 +56,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             << defaultValue << "MSAA 2" << "MSAA 4" << "MSAA 8" << "MSAA 16");
         antialiasing->setDefaultValue (defaultValue);
     }
+    */
 
-    declareSection ("3d-render-adv", "3D Rendering (Advanced)");
-    {
-        Setting *numLights = createSetting (Type_SpinBox, "num_lights",
-            "Number of lights per pass");
-        numLights->setDefaultValue (8);
-        numLights->setRange (1, 100);
-    }
-
+    /*
     declareSection ("scene-input", "Scene Input");
     {
-        Setting *timer = createSetting (Type_SpinBox, "timer", "Input responsiveness");
-        timer->setDefaultValue (20);
-        timer->setRange (1, 100);
-        timer->setToolTip ("The time between two checks for user input in milliseconds.<p>"
-            "Lower value result in higher responsiveness.");
-
         Setting *fastFactor = createSetting (Type_SpinBox, "fast-factor",
             "Fast movement factor");
         fastFactor->setDefaultValue (4);
@@ -86,6 +68,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         fastFactor->setToolTip (
             "Factor by which movement is speed up while the shift key is held down.");
     }
+    */
 
     declareSection ("window", "Window");
     {
@@ -234,6 +217,47 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDeclaredValues (jumpValues);
     }
 
+    declareSection ("report-input", "Report Input");
+    {
+        QString none ("None");
+        QString edit ("Edit");
+        QString remove ("Remove");
+        QString editAndRemove ("Edit And Remove");
+
+        QStringList values;
+        values << none << edit << remove << editAndRemove;
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit: Open a table or dialogue suitable for addressing the listed report</li>"
+            "<li>Remove: Remove the report from the report table</li>"
+            "<li>Edit and Remove: Open a table or dialogue suitable for addressing the listed report, then remove the report from the report table</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (edit);
+        doubleClick->setToolTip ("Action on double click in report table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (remove);
+        shiftDoubleClick->setToolTip ("Action on shift double click in report table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (editAndRemove);
+        ctrlDoubleClick->setToolTip ("Action on control double click in report table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (none);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in report table:<p>" + toolTip);
+    }
+    
     declareSection ("search", "Search & Replace");
     {
         Setting *before = createSetting (Type_SpinBox, "char-before",
@@ -252,7 +276,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         autoDelete->setDefaultValue ("true");
     }
 
-    declareSection ("script-editor", "Script Editor");
+    declareSection ("script-editor", "Scripts");
     {
         Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
         lineNum->setDefaultValue ("true");
@@ -271,6 +295,21 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "\nA name from the list of colors defined in the list of SVG color keyword names."
             "\nX11 color names may also work.";
 
+        QString modeNormal ("Normal");
+
+        QStringList modes;
+        modes << "Ignore" << modeNormal << "Strict";
+            
+        Setting *warnings = createSetting (Type_ComboBox, "warnings",
+            "Warning Mode");
+        warnings->setDeclaredValues (modes);
+        warnings->setDefaultValue (modeNormal);
+        warnings->setToolTip ("<ul>How to handle warning messages during compilation:<p>"
+        "<li>Ignore: Do not report warning</li>"
+        "<li>Normal: Report warning as a warning</li>"
+        "<li>Strict: Promote warning to an error</li>"
+        "</ul>");
+        
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
@@ -300,6 +339,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         formatId->setToolTip ("(Default: Blue) Use one of the following formats:" + tooltip);
     }
 
+    declareSection ("general-input", "General Input");
+    {
+        Setting *cycle = createSetting (Type_CheckBox, "cycle", "Cyclic next/previous");
+        cycle->setDefaultValue ("false");
+        cycle->setToolTip ("When using next/previous functions at the last/first item of a "
+            "list go to the first/last item");
+    }
+    
     {
         /******************************************************************
         * There are three types of values:
@@ -561,15 +608,6 @@ void CSMSettings::UserSettings::updateUserSetting(const QString &settingKey,
                                                     const QStringList &list)
 {
     mSettingDefinitions->setValue (settingKey ,list);
-
-    if(settingKey == "3d-render-adv/num_lights" && !list.empty())
-    {
-        sh::Factory::getInstance ().setGlobalSetting ("num_lights", list.at(0).toStdString());
-    }
-    else if(settingKey == "3d-render/shaders" && !list.empty())
-    {
-        sh::Factory::getInstance ().setShadersEnabled (list.at(0).toStdString() == "true" ? true : false);
-    }
 
     emit userSettingUpdated (settingKey, list);
 }

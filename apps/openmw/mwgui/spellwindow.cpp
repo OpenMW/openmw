@@ -134,7 +134,7 @@ namespace MWGui
             ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
             std::string question = MWBase::Environment::get().getWindowManager()->getGameSettingString("sQuestionDeleteSpell", "Delete %s?");
             question = boost::str(boost::format(question) % spell->mName);
-            dialog->open(question);
+            dialog->askForConfirmation(question);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &SpellWindow::onDeleteSpellAccept);
             dialog->eventCancelClicked.clear();

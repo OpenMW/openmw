@@ -1,128 +1,47 @@
-#ifndef GAME_RENDER_SKY_H
-#define GAME_RENDER_SKY_H
+#ifndef OPENMW_MWRENDER_SKY_H
+#define OPENMW_MWRENDER_SKY_H
 
-#include <vector>
-
-#include <OgreVector3.h>
-#include <OgreString.h>
-#include <OgreMaterial.h>
-#include <OgreColourValue.h>
-#include <OgreHighLevelGpuProgram.h>
-
-#include <extern/shiny/Main/Factory.hpp>
-
-#include <components/nifogre/ogrenifloader.hpp>
-
+#include <osg/ref_ptr>
 
 #include "../mwworld/weather.hpp"
 
-namespace Ogre
+namespace osg
 {
-    class RenderWindow;
-    class SceneNode;
-    class Camera;
-    class Viewport;
+    class Group;
+    class Node;
+    class Material;
+}
+
+namespace osgParticle
+{
+    class ParticleSystem;
+}
+
+namespace Resource
+{
     class SceneManager;
-    class Entity;
-    class BillboardSet;
-    class TextureUnitState;
 }
 
 namespace MWRender
 {
-    class BillboardObject : public sh::MaterialInstanceListener
-    {
-    public:
-        BillboardObject(  const Ogre::String& textureName,
-                        const float size,
-                        const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode,
-                          const std::string& material
-                    );
-
-        void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
-        void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
-
-        virtual ~BillboardObject() {}
-
-        void setColour(const Ogre::ColourValue& pColour);
-        void setPosition(const Ogre::Vector3& pPosition);
-        void setVisible(const bool visible);
-        void setRenderQueue(unsigned int id);
-        void setVisibilityFlags(int flags);
-        void setSize(const float size);
-        Ogre::Vector3 getPosition() const;
-
-        void setVisibility(const float visibility);
-
-        Ogre::SceneNode* getNode();
-
-    protected:
-        float mVisibility;
-        Ogre::ColourValue mColour;
-        Ogre::SceneNode* mNode;
-        sh::MaterialInstance* mMaterial;
-        Ogre::Entity* mEntity;
-    };
-
-
-    /*
-     * The moons need a seperate class because of their shader (which allows them to be partially transparent)
-     */
-    class Moon : public BillboardObject
-    {
-    public:
-        Moon(  const Ogre::String& textureName,
-                        const float size,
-                        const Ogre::Vector3& position,
-                        Ogre::SceneNode* rootNode,
-               const std::string& material
-                    );
-
-        virtual ~Moon() {}
-
-        enum Phase
-        {
-            Phase_New = 0,
-            Phase_WaxingCrescent,
-            Phase_WaxingHalf,
-            Phase_WaxingGibbous,
-            Phase_Full,
-            Phase_WaningGibbous,
-            Phase_WaningHalf,
-            Phase_WaningCrescent
-        };
-
-        enum Type
-        {
-            Type_Masser = 0,
-            Type_Secunda
-        };
-
-        void setPhase(const Phase& phase);
-        void setType(const Type& type);
-
-        unsigned int getPhaseInt() const;
-
-    private:
-        Type mType;
-        Phase mPhase;
-    };
+    class AtmosphereUpdater;
+    class AtmosphereNightUpdater;
+    class CloudUpdater;
+    class Sun;
+    class Moon;
+    class RainShooter;
+    class RainFader;
+    class AlphaFader;
 
     class SkyManager
     {
     public:
-        SkyManager(Ogre::SceneNode* root, Ogre::Camera* pCamera);
+        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager);
         ~SkyManager();
-
-        /// Attach weather particle effects to this scene node (should be the Camera's parent node)
-        void attachToNode(Ogre::SceneNode* sceneNode);
 
         void update(float duration);
 
-        void enable();
-
-        void disable();
+        void setEnabled(bool enabled);
 
         void setHour (double hour);
         ///< will be called even when sky is disabled.
@@ -143,21 +62,19 @@ namespace MWRender
 
         void setWeather(const MWWorld::WeatherResult& weather);
 
-        Ogre::SceneNode* getSunNode();
-
         void sunEnable();
 
         void sunDisable();
 
         void setRainSpeed(float speed);
 
-        void setStormDirection(const Ogre::Vector3& direction);
+        void setStormDirection(const osg::Vec3f& direction);
 
-        void setSunDirection(const Ogre::Vector3& direction, bool is_night);
+        void setSunDirection(const osg::Vec3f& direction);
 
-        void setMasserDirection(const Ogre::Vector3& direction);
+        void setMasserDirection(const osg::Vec3f& direction);
 
-        void setSecundaDirection(const Ogre::Vector3& direction);
+        void setSecundaDirection(const osg::Vec3f& direction);
 
         void setMasserFade(const float fade);
 
@@ -173,65 +90,72 @@ namespace MWRender
 
         void setGlare(const float glare);
         void setGlareEnabled(bool enabled);
-        Ogre::Vector3 getRealSunPos();
 
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
 
-        void updateRain(float dt);
-        void clearRain();
+        void createRain();
+        void destroyRain();
+        void updateRainParameters();
+
+        Resource::SceneManager* mSceneManager;
+
+        osg::ref_ptr<osg::Group> mRootNode;
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
+        osg::ref_ptr<osg::Node> mParticleEffect;
+        osg::ref_ptr<AlphaFader> mParticleFader;
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
+
+        osg::ref_ptr<CloudUpdater> mCloudUpdater;
+        osg::ref_ptr<CloudUpdater> mCloudUpdater2;
+        osg::ref_ptr<osg::Node> mCloudMesh;
+        osg::ref_ptr<osg::Node> mCloudMesh2;
+
+        osg::ref_ptr<osg::Node> mAtmosphereDay;
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> mAtmosphereNightNode;
+        float mAtmosphereNightRoll;
+        osg::ref_ptr<AtmosphereNightUpdater> mAtmosphereNightUpdater;
+
+        osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
+
+        std::auto_ptr<Sun> mSun;
+        std::auto_ptr<Moon> mMasser;
+        std::auto_ptr<Moon> mSecunda;
+
+        osg::ref_ptr<osg::Group> mRainNode;
+        osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;
+        osg::ref_ptr<RainShooter> mRainShooter;
+        osg::ref_ptr<RainFader> mRainFader;
 
         bool mCreated;
 
-        bool mMoonRed;
-
         bool mIsStorm;
 
-        float mHour;
         int mDay;
         int mMonth;
 
         float mCloudAnimationTimer;
 
-        BillboardObject* mSun;
-        BillboardObject* mSunGlare;
-        Moon* mMasser;
-        Moon* mSecunda;
-
-        Ogre::Camera* mCamera;
-        Ogre::SceneNode* mRootNode;
-        Ogre::SceneManager* mSceneMgr;
-
-        Ogre::SceneNode* mAtmosphereDay;
-        Ogre::SceneNode* mAtmosphereNight;
-
-        Ogre::SceneNode* mCloudNode;
-
-        std::vector<NifOgre::ObjectScenePtr> mObjects;
-
-        Ogre::SceneNode* mParticleNode;
-        NifOgre::ObjectScenePtr mParticle;
-
-        std::map<Ogre::SceneNode*, NifOgre::ObjectScenePtr> mRainModels;
         float mRainTimer;
 
-        Ogre::Vector3 mStormDirection;
+        osg::Vec3f mStormDirection;
 
         // remember some settings so we don't have to apply them again if they didnt change
-        Ogre::String mClouds;
-        Ogre::String mNextClouds;
+        std::string mClouds;
+        std::string mNextClouds;
         float mCloudBlendFactor;
         float mCloudOpacity;
         float mCloudSpeed;
         float mStarsOpacity;
-        Ogre::ColourValue mCloudColour;
-        Ogre::ColourValue mSkyColour;
-        Ogre::ColourValue mFogColour;
+        osg::Vec4f mCloudColour;
+        osg::Vec4f mSkyColour;
+        osg::Vec4f mFogColour;
 
         std::string mCurrentParticleEffect;
-
-        Ogre::Light* mLightning;
 
         float mRemainingTransitionTime;
 
@@ -242,11 +166,12 @@ namespace MWRender
         std::string mRainEffect;
         float mRainSpeed;
         float mRainFrequency;
+        float mWindSpeed;
 
         bool mEnabled;
         bool mSunEnabled;
-        bool mMasserEnabled;
-        bool mSecundaEnabled;
+
+        osg::Vec4f mMoonScriptColor;
     };
 }
 

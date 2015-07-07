@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<MyGUI type="Layer">
-    <Layer name="Render" overlapped="false" peek="false"/>
-    <Layer name="HUD" overlapped="false" peek="true"/>
-    <Layer name="Menu" overlapped="false" peek="false"/>
-    <Layer name="Windows" overlapped="true" peek="true"/>
-    <Layer name="Console" overlapped="false" peek="true"/>
-    <Layer name="Debug" overlapped="true" peek="true"/>
-    <Layer name="Notification" overlapped="false" peek="false"/>
-    <Layer name="Popup" overlapped="true" peek="true"/>
-    <Layer name="DragAndDrop" overlapped="false" peek="false"/>
-    <Layer name="LoadingScreen" overlapped="false" peek="true"/>
-    <Layer name="MessageBox" overlapped="false" peek="true"/>
-    <Layer name="Overlay" overlapped="false" peek="true"/>
-    <Layer name="Pointer" overlapped="false" peek="false"/>
+<MyGUI type="Layer" version="1.0">
+    <Layer name="Render" overlapped="false" pick="false"/>
+    <Layer name="HUD" overlapped="false" pick="true"/>
+    <Layer name="Menu" overlapped="false" pick="false"/>
+    <Layer name="Windows" overlapped="true" pick="true"/>
+    <Layer name="Console" overlapped="false" pick="true"/>
+    <Layer name="Debug" overlapped="true" pick="true"/>
+    <Layer name="Notification" overlapped="false" pick="false"/>
+    <Layer name="Popup" overlapped="true" pick="true"/>
+    <Layer name="DragAndDrop" overlapped="false" pick="false"/>
+    <Layer name="LoadingScreen" overlapped="false" pick="true"/>
+    <Layer name="MessageBox" overlapped="false" pick="true"/>
+    <Layer name="Overlay" overlapped="false" pick="true"/>
+    <Layer name="Pointer" overlapped="false" pick="false"/>
 </MyGUI>

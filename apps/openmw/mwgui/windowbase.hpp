@@ -1,7 +1,7 @@
 #ifndef MWGUI_WINDOW_BASE_H
 #define MWGUI_WINDOW_BASE_H
 
-#include <openengine/gui/layout.hpp>
+#include "layout.hpp"
 
 namespace MWBase
 {
@@ -13,7 +13,7 @@ namespace MWGui
     class WindowManager;
     class DragAndDrop;
 
-    class WindowBase: public OEngine::GUI::Layout
+    class WindowBase: public Layout
     {
         public:
         WindowBase(const std::string& parLayout);

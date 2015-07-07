@@ -10,8 +10,7 @@ namespace MWRender
     {
     public:
         virtual MWRender::Objects& getObjects() = 0;
-        virtual MWRender::Actors& getActors() = 0;
-        virtual ~RenderingInterface(){};
+        virtual ~RenderingInterface(){}
     };
 }
 #endif

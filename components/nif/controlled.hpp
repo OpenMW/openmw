@@ -62,31 +62,8 @@ public:
     */
     int alpha;
 
-    void read(NIFStream *nif)
-    {
-        Named::read(nif);
-
-        external = !!nif->getChar();
-        if(external)
-            filename = nif->getString();
-        else
-        {
-            nif->getChar(); // always 1
-            data.read(nif);
-        }
-
-        pixel = nif->getInt();
-        mipmap = nif->getInt();
-        alpha = nif->getInt();
-
-        nif->getChar(); // always 1
-    }
-
-    void post(NIFFile *nif)
-    {
-        Named::post(nif);
-        data.post(nif);
-    }
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 class NiParticleGrowFade : public Controlled
@@ -95,12 +72,7 @@ public:
     float growTime;
     float fadeTime;
 
-    void read(NIFStream *nif)
-    {
-        Controlled::read(nif);
-        growTime = nif->getFloat();
-        fadeTime = nif->getFloat();
-    }
+    void read(NIFStream *nif);
 };
 
 class NiParticleColorModifier : public Controlled
@@ -108,17 +80,8 @@ class NiParticleColorModifier : public Controlled
 public:
     NiColorDataPtr data;
 
-    void read(NIFStream *nif)
-    {
-        Controlled::read(nif);
-        data.read(nif);
-    }
-
-    void post(NIFFile *nif)
-    {
-        Controlled::post(nif);
-        data.post(nif);
-    }
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 class NiGravity : public Controlled
@@ -129,48 +92,29 @@ public:
      * 1 - Point (fixed origin)
      */
     int mType;
-    Ogre::Vector3 mPosition;
-    Ogre::Vector3 mDirection;
+    float mDecay;
+    osg::Vec3f mPosition;
+    osg::Vec3f mDirection;
 
-    void read(NIFStream *nif)
-    {
-        Controlled::read(nif);
-
-        /*unknown*/nif->getFloat();
-        mForce = nif->getFloat();
-        mType = nif->getUInt();
-        mPosition = nif->getVector3();
-        mDirection = nif->getVector3();
-    }
+    void read(NIFStream *nif);
 };
 
 // NiPinaColada
 class NiPlanarCollider : public Controlled
 {
 public:
-    void read(NIFStream *nif)
-    {
-        Controlled::read(nif);
+    void read(NIFStream *nif);
 
-        // (I think) 4 floats + 4 vectors
-        nif->skip(4*16);
-    }
+    float mBounceFactor;
+
+    osg::Vec3f mPlaneNormal;
+    float mPlaneDistance;
 };
 
 class NiParticleRotation : public Controlled
 {
 public:
-    void read(NIFStream *nif)
-    {
-        Controlled::read(nif);
-
-        /*
-           byte (0 or 1)
-           float (1)
-           float*3
-        */
-        nif->skip(17);
-    }
+    void read(NIFStream *nif);
 };
 
 

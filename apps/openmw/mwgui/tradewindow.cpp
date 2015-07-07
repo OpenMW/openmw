@@ -4,7 +4,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -136,6 +136,7 @@ namespace MWGui
         mTradeModel = new TradeItemModel(new ContainerItemModel(itemSources, worldItems), mPtr);
         mSortModel = new SortFilterItemModel(mTradeModel);
         mItemView->setModel (mSortModel);
+        mItemView->resetScrollBars();
 
         updateLabels();
 
@@ -194,7 +195,7 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sQuanityMenuMessage02}";
-            dialog->open(object.getClass().getName(object), message, count);
+            dialog->openCountDialog(object.getClass().getName(object), message, count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::sellItem);
             mItemToSell = mSortModel->mapToSource(index);
@@ -367,7 +368,7 @@ namespace MWGui
             else
                 x += abs(int(npcTerm - pcTerm));
 
-            int roll = OEngine::Misc::Rng::rollDice(100) + 1;
+            int roll = Misc::Rng::rollDice(100) + 1;
             if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->

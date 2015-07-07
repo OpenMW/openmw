@@ -28,8 +28,6 @@ namespace CSVRender
             std::string mWorldspace;
             CSVWidget::SceneToolToggle *mControlElements;
             bool mDisplayCellCoord;
-            std::map<CSMWorld::CellCoordinates, TextOverlay *> mTextOverlays;
-            OverlayMask *mOverlayMask;
 
         private:
 
@@ -86,14 +84,6 @@ namespace CSVRender
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
-
-            virtual void updateOverlay();
-
-            virtual void mousePressEvent (QMouseEvent *event);
-
-            virtual void mouseReleaseEvent (QMouseEvent *event);
-
-            virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
         signals:
 

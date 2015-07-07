@@ -25,7 +25,7 @@
 
 /// \namespace MWRender
 /// \ingroup openmw
-/// \brief Rendering via Ogre
+/// \brief Rendering
 
 /// \namespace MWWorld
 /// \ingroup openmw

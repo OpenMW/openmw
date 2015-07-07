@@ -8,8 +8,6 @@
 #include "movement.hpp"
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
@@ -42,7 +40,7 @@ namespace MWMechanics
 
             virtual AiCombat *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -52,6 +50,9 @@ namespace MWMechanics
             MWWorld::Ptr getTarget() const;
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+
+        protected:
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
         private:
 

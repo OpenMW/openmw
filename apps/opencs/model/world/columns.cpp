@@ -92,7 +92,7 @@ namespace CSMWorld
             { ColumnId_Trainer, "Trainer" },
             { ColumnId_Spellmaking, "Spellmaking" },
             { ColumnId_EnchantingService, "Enchanting Service" },
-            { ColumnId_RepairService, "Repair Serivce" },
+            { ColumnId_RepairService, "Repair Service" },
             { ColumnId_ApparatusType, "Apparatus Type" },
             { ColumnId_ArmorType, "Armor Type" },
             { ColumnId_Health, "Health" },
@@ -310,6 +310,10 @@ namespace CSMWorld
             { ColumnId_FogDensity, "Fog Density" },
             { ColumnId_WaterLevel, "Water Level" },
             { ColumnId_MapColor, "Map Color" },
+
+            { ColumnId_FileFormat, "File Format" },
+            { ColumnId_FileDescription, "File Description" },
+            { ColumnId_Author, "Author" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },

@@ -1,11 +1,13 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
-#include <OgreVector3.h>
+#include <deque>
 
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+
+#include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
@@ -134,7 +136,7 @@ enum JumpingState {
     JumpState_Landing
 };
 
-class CharacterController
+class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
@@ -165,6 +167,8 @@ class CharacterController
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
 
+    float mAttackStrength;
+
     bool mSkipAnim;
 
     // counted for skill increase
@@ -176,6 +180,9 @@ class CharacterController
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
+
+    bool mAttackingOrSpell;
+
     void determineAttackType();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
@@ -205,6 +212,9 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
+    virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                       const std::multimap<float, std::string>& map);
+
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx();
 
@@ -228,11 +238,20 @@ public:
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
 
+    void setAttackingOrSpell(bool attackingOrSpell);
+
+    bool readyToPrepareAttack() const;
+    bool readyToStartAttack() const;
+
+    float getAttackStrength() const;
+
+    /// @see Animation::setActive
+    void setActive(bool active);
+
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
     void setHeadTrackTarget(const MWWorld::Ptr& target);
 };
 
-    void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 

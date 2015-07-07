@@ -6,7 +6,6 @@
 #include <QWriteLocker>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFileInfoListIterator>
 #include <QStringList>
 #include <QTextStream>
 #include <QTextCodec>

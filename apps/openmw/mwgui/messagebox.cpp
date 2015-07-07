@@ -195,7 +195,6 @@ namespace MWGui
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
         : WindowModal("openmw_interactive_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
-      , mTextButtonPadding(0)
       , mButtonPressed(-1)
     {
         WindowModal::open();

@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QDesktopWidget>
 #include <QScrollArea>
 #include <QHBoxLayout>
@@ -69,6 +69,10 @@ void CSVDoc::View::setupFileMenu()
     QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     file->addAction (loadErrors);
+
+    QAction *meta = new QAction (tr ("Meta Data"), this);
+    connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
+    file->addAction (meta);
 
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
@@ -515,6 +519,10 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
         }
     }
 
+    if (mScroll)
+        QObject::connect(mScroll->horizontalScrollBar(),
+            SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
+
     // User setting for limiting the number of sub views per top level view.
     // Automatically open a new top level view if this number is exceeded
     //
@@ -586,12 +594,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
             mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minWidth);
             move(0, y());
         }
-
-        // Make the new subview visible, setFocus() or raise() don't seem to work
-        // On Ubuntu the scrollbar does not go right to the end, even if using
-        // mScroll->horizontalScrollBar()->setValue(mScroll->horizontalScrollBar()->maximum());
-        if (mSubViewWindow.width() > rect.width())
-            mScroll->horizontalScrollBar()->setValue(mSubViewWindow.width());
     }
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
@@ -612,6 +614,17 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     if (!hint.empty())
         view->useHint (hint);
+}
+
+void CSVDoc::View::moveScrollBarToEnd(int min, int max)
+{
+    if (mScroll)
+    {
+        mScroll->horizontalScrollBar()->setValue(max);
+
+        QObject::disconnect(mScroll->horizontalScrollBar(),
+            SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
+    }
 }
 
 void CSVDoc::View::newView()
@@ -802,6 +815,11 @@ void CSVDoc::View::addStartScriptsSubView()
 void CSVDoc::View::addSearchSubView()
 {
     addSubView (mDocument->newSearch());
+}
+
+void CSVDoc::View::addMetaDataSubView()
+{
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_MetaData, "sys::meta"));
 }
 
 void CSVDoc::View::abortOperation (int type)

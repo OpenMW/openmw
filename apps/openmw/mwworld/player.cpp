@@ -20,7 +20,6 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actors.hpp"
-#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
@@ -29,7 +28,7 @@
 
 namespace MWWorld
 {
-    Player::Player (const ESM::NPC *player, const MWBase::World& world)
+    Player::Player (const ESM::NPC *player)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
         mMarkedCell(NULL),
@@ -37,7 +36,8 @@ namespace MWWorld
         mForwardBackward(0),
         mTeleported(false),
         mCurrentCrimeId(-1),
-        mPaidCrimeId(-1)
+        mPaidCrimeId(-1),
+        mAttackingOrSpell(false)
     {
         ESM::CellRef cellRef;
         cellRef.blank();
@@ -47,6 +47,55 @@ namespace MWWorld
         ESM::Position playerPos = mPlayer.mData.getPosition();
         playerPos.pos[0] = playerPos.pos[1] = playerPos.pos[2] = 0;
         mPlayer.mData.setPosition(playerPos);
+    }
+
+    void Player::saveSkillsAttributes()
+    {
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i] = stats.getSkill(i);
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i] = stats.getAttribute(i);
+    }
+
+    void Player::restoreSkillsAttributes()
+    {
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            stats.setSkill(i, mSaveSkills[i]);
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            stats.setAttribute(i, mSaveAttributes[i]);
+    }
+
+    void Player::setWerewolfSkillsAttributes()
+    {
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
+        for(size_t i = 0;i < ESM::Attribute::Length;++i)
+        {
+            // Oh, Bethesda. It's "Intelligence".
+            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
+                                            ESM::Attribute::sAttributeNames[i]);
+
+            MWMechanics::AttributeValue value = stats.getAttribute(i);
+            value.setBase(int(gmst.find(name)->getFloat()));
+            stats.setAttribute(i, value);
+        }
+
+        for(size_t i = 0;i < ESM::Skill::Length;i++)
+        {
+            // Acrobatics is set separately for some reason.
+            if(i == ESM::Skill::Acrobatics)
+                continue;
+
+            // "Mercantile"! >_<
+            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
+                                            ESM::Skill::sSkillNames[i]);
+
+            MWMechanics::SkillValue value = stats.getSkill(i);
+            value.setBase(int(gmst.find(name)->getFloat()));
+            stats.setSkill(i, value);
+        }
     }
 
     void Player::set(const ESM::NPC *player)
@@ -168,6 +217,16 @@ namespace MWWorld
         mTeleported = teleported;
     }
 
+    void Player::setAttackingOrSpell(bool attackingOrSpell)
+    {
+        mAttackingOrSpell = attackingOrSpell;
+    }
+
+    bool Player::getAttackingOrSpell() const
+    {
+        return mAttackingOrSpell;
+    }
+
     bool Player::isInCombat() {
         return MWBase::Environment::get().getMechanicsManager()->getActorsFighting(getPlayer()).size() != 0;
     }
@@ -207,9 +266,9 @@ namespace MWWorld
 
         player.mBirthsign = mSign;
 
-        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x;
-        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y;
-        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z;
+        player.mLastKnownExteriorPosition[0] = mLastKnownExteriorPosition.x();
+        player.mLastKnownExteriorPosition[1] = mLastKnownExteriorPosition.y();
+        player.mLastKnownExteriorPosition[2] = mLastKnownExteriorPosition.z();
 
         if (mMarkedCell)
         {
@@ -221,6 +280,11 @@ namespace MWWorld
             player.mHasMark = false;
 
         player.mAutoMove = mAutoMove ? 1 : 0;
+
+        for (int i=0; i<ESM::Attribute::Length; ++i)
+            mSaveAttributes[i].writeState(player.mSaveAttributes[i]);
+        for (int i=0; i<ESM::Skill::Length; ++i)
+            mSaveSkills[i].writeState(player.mSaveSkills[i]);
 
         writer.startRecord (ESM::REC_PLAY);
         player.save (writer);
@@ -241,6 +305,17 @@ namespace MWWorld
             }
 
             mPlayer.load (player.mObject);
+
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                mSaveAttributes[i].readState(player.mSaveAttributes[i]);
+            for (int i=0; i<ESM::Skill::Length; ++i)
+                mSaveSkills[i].readState(player.mSaveSkills[i]);
+
+            if (player.mObject.mNpcStats.mWerewolfDeprecatedData && player.mObject.mNpcStats.mIsWerewolf)
+            {
+                saveSkillsAttributes();
+                setWerewolfSkillsAttributes();
+            }
 
             getPlayer().getClass().getCreatureStats(getPlayer()).getAiSequence().clear();
 
@@ -280,9 +355,9 @@ namespace MWWorld
 
             mSign = player.mBirthsign;
 
-            mLastKnownExteriorPosition.x = player.mLastKnownExteriorPosition[0];
-            mLastKnownExteriorPosition.y = player.mLastKnownExteriorPosition[1];
-            mLastKnownExteriorPosition.z = player.mLastKnownExteriorPosition[2];
+            mLastKnownExteriorPosition.x() = player.mLastKnownExteriorPosition[0];
+            mLastKnownExteriorPosition.y() = player.mLastKnownExteriorPosition[1];
+            mLastKnownExteriorPosition.z() = player.mLastKnownExteriorPosition[2];
 
             if (player.mHasMark && !player.mMarkedCell.mPaged)
             {

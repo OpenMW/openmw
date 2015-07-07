@@ -2,14 +2,13 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
 #endif
-
-#include "../../view/world/physicssystem.hpp"
 
 void CSMDoc::Document::addGmsts()
 {
@@ -2245,19 +2244,19 @@ void CSMDoc::Document::createBase()
     }
 }
 
-CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
+CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
-: mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
+: mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
   mTools (*this),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>())
+  mRunner (mProjectPath), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2271,7 +2270,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         if (boost::filesystem::exists (customFiltersPath))
         {
-            destination << std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
+            destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
         }
         else
         {
@@ -2281,9 +2280,6 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew)
     {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-
         if (mContentFiles.size()==1)
             createBase();
     }
@@ -2303,14 +2299,19 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
-        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (reportMessage (const CSMDoc::Message&, int)));
 
     connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
 
 CSMDoc::Document::~Document()
 {
+}
+
+const VFS::Manager *CSMDoc::Document::getVFS() const
+{
+    return mVFS;
 }
 
 QUndoStack& CSMDoc::Document::getUndoStack()
@@ -2368,9 +2369,9 @@ void CSMDoc::Document::save()
     emit stateChanged (getState(), this);
 }
 
-CSMWorld::UniversalId CSMDoc::Document::verify()
+CSMWorld::UniversalId CSMDoc::Document::verify (const CSMWorld::UniversalId& reportId)
 {
-    CSMWorld::UniversalId id = mTools.runVerifier();
+    CSMWorld::UniversalId id = mTools.runVerifier (reportId);
     emit stateChanged (getState(), this);
     return id;
 }
@@ -2400,11 +2401,10 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message << std::endl;
+    std::cout << message.mMessage << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type, bool failed)
@@ -2481,10 +2481,7 @@ void CSMDoc::Document::progress (int current, int max, int type)
     emit progress (current, max, type, 1, this);
 }
 
-boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
+CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
-    if(!mPhysics)
-        mPhysics = boost::shared_ptr<CSVWorld::PhysicsSystem> (new CSVWorld::PhysicsSystem());
-
-    return mPhysics;
+    return mIdCompletionManager;
 }

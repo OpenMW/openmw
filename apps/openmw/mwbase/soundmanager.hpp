@@ -7,11 +7,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWWorld
 {
     class CellStore;
@@ -125,7 +120,7 @@ namespace MWBase
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
             ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
-            virtual MWBase::SoundPtr playManualSound3D(const Ogre::Vector3& initialPos, const std::string& soundId,
+            virtual MWBase::SoundPtr playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                                              float volume, float pitch, PlayType type, PlayMode mode, float offset=0) = 0;
             ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
 
@@ -162,7 +157,7 @@ namespace MWBase
 
             virtual void update(float duration) = 0;
 
-            virtual void setListenerPosDir(const Ogre::Vector3 &pos, const Ogre::Vector3 &dir, const Ogre::Vector3 &up) = 0;
+            virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up) = 0;
 
             virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated) = 0;
 

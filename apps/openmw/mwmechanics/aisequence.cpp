@@ -150,7 +150,7 @@ bool AiSequence::isPackageDone() const
     return mDone;
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
     {
@@ -165,7 +165,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                 std::list<AiPackage *>::iterator itActualCombat;
 
                 float nearestDist = std::numeric_limits<float>::max();
-                Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
+                osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
 
                 for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
                 {
@@ -183,7 +183,12 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                     {
                         const ESM::Position &targetPos = target.getRefData().getPosition();
 
-                        float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
+                        float distTo = (targetPos.asVec3() - vActorPos).length();
+
+                        // Small threshold for changing target
+                        if (it == mPackages.begin())
+                            distTo = std::max(0.f, distTo - 50.f);
+
                         if (distTo < nearestDist)
                         {
                             nearestDist = distTo;
@@ -211,7 +216,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                 }
             }
 
-            if (package->execute (actor,state,duration))
+            if (package->execute (actor,characterController,state,duration))
             {
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)
@@ -258,7 +263,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
                 return; // already in combat with this actor
             }
             else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
-                static_cast<AiWander*>(*iter)->setReturnPosition(Ogre::Vector3(actor.getRefData().getPosition().pos));
+                static_cast<AiWander*>(*iter)->setReturnPosition(actor.getRefData().getPosition().asVec3());
         }
     }
 

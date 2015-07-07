@@ -1,8 +1,6 @@
 
 #include "refdata.hpp"
 
-#include <OgreSceneNode.h>
-
 #include <components/esm/objectstate.hpp>
 
 #include "customdata.hpp"
@@ -59,7 +57,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode (0), mDeleted(false), mHasLocals (false),
+    : mBaseNode(0), mDeleted(false), mHasLocals (false),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
@@ -125,25 +123,14 @@ namespace MWWorld
         {}
     }
 
-    const std::string &RefData::getHandle()
+    void RefData::setBaseNode(osg::PositionAttitudeTransform *base)
     {
-        if(!mBaseNode)
-        {
-            static const std::string empty;
-            return empty;
-        }
-
-        return mBaseNode->getName();
+        mBaseNode = base;
     }
 
-    Ogre::SceneNode* RefData::getBaseNode()
+    osg::PositionAttitudeTransform* RefData::getBaseNode()
     {
         return mBaseNode;
-    }
-
-    void RefData::setBaseNode(Ogre::SceneNode* base)
-    {
-         mBaseNode = base;
     }
 
     int RefData::getCount() const

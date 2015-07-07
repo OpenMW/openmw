@@ -2,20 +2,19 @@
 #define OPENMW_MECHANICS_COMBAT_H
 
 #include "../mwworld/ptr.hpp"
-#include <OgreVector3.h>
 
 namespace MWMechanics
 {
 
 /// @return can we block the attack?
-bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker, const MWWorld::Ptr& weapon, float damage);
+bool blockMeleeAttack (const MWWorld::Ptr& attacker, const MWWorld::Ptr& blocker, const MWWorld::Ptr& weapon, float damage, float attackStrength);
 
 void resistNormalWeapon (const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage);
 
 /// @note for a thrown weapon, \a weapon == \a projectile, for bows/crossbows, \a projectile is the arrow/bolt
 /// @note \a victim may be empty (e.g. for a hit on terrain), a non-actor (environment objects) or an actor
 void projectileHit (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, MWWorld::Ptr weapon, const MWWorld::Ptr& projectile,
-                    const Ogre::Vector3& hitPosition);
+                    const osg::Vec3f& hitPosition, float attackStrength);
 
 /// Get the chance (in percent) for \a attacker to successfully hit \a victim with a given weapon skill value
 float getHitChance (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, int skillValue);
@@ -32,10 +31,10 @@ void reduceWeaponCondition (float damage, bool hit, MWWorld::Ptr& weapon, const 
 /// Adjust weapon damage based on its condition. A used weapon will be less effective.
 void adjustWeaponDamage (float& damage, const MWWorld::Ptr& weapon, const MWWorld::Ptr& attacker);
 
-void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg);
+void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, float& damage, bool& healthdmg, float attackStrength);
 
 /// Apply the fatigue loss incurred by attacking with the given weapon (weapon may be empty = hand-to-hand)
-void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon);
+void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength);
 
 /// Can attacker operate in victim's environment?
 /// e.g. If attacker is a fish, is victim in water? Or, if attacker can't swim, is victim on land?
