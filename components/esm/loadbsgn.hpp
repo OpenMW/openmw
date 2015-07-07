@@ -22,6 +22,8 @@ struct BirthSign
     // List of powers and abilities that come with this birth sign.
     SpellList mPowers;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

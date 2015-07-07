@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -10,6 +11,8 @@ namespace ESM
 
 void Region::load(ESMReader &esm)
 {
+    mIsDeleted = readDeleSubRecord(esm);
+    mId = esm.getHNString("NAME");
     mName = esm.getHNOString("FNAM");
 
     esm.getSubNameIs("WEAT");
@@ -49,6 +52,11 @@ void Region::load(ESMReader &esm)
 }
 void Region::save(ESMWriter &esm) const
 {
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+    }
+    esm.writeHNString("NAME", mId);
     esm.writeHNOCString("FNAM", mName);
 
     if (esm.getVersion() == VER_12)
@@ -77,5 +85,7 @@ void Region::save(ESMWriter &esm) const
         mName.clear();
         mSleepList.clear();
         mSoundList.clear();
+
+        mIsDeleted = false;
     }
 }

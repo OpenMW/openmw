@@ -34,6 +34,8 @@ struct LandTexture
     std::string mId, mTexture;
     int mIndex;
 
+    bool mIsDeleted;
+
     void blank();
     ///< Set record to default state (does not touch the ID).
 
