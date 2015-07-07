@@ -8,7 +8,6 @@ namespace ESM
     {
         if (esm.isNextSub("DELE"))
         {
-            esm.getSubName();
             esm.skipHSub();
             return true;
         }

@@ -23,7 +23,6 @@ void DialInfo::load(ESMReader &esm)
     // If the info is deleted, NAME and DELE sub-records are followed after NNAM
     if (esm.isNextSub("NAME"))
     {
-        esm.getSubName();
         mResponse = esm.getHString();
         mIsDeleted = readDeleSubRecord(esm);
         return;
