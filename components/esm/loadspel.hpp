@@ -45,6 +45,8 @@ struct Spell
     std::string mId, mName;
     EffectList mEffects;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

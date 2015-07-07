@@ -52,6 +52,8 @@ struct Container
     int mFlags;
     InventoryList mInventory;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

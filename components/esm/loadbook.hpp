@@ -28,6 +28,8 @@ struct Book
     std::string mName, mModel, mIcon, mScript, mEnchant, mText;
     std::string mId;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

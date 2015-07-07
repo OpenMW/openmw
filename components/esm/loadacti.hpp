@@ -17,6 +17,8 @@ struct Activator
 
     std::string mId, mName, mScript, mModel;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

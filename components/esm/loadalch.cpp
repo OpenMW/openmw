@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -11,6 +12,13 @@ namespace ESM
     void Potion::load(ESMReader &esm)
     {
         mEffects.mList.clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -46,6 +54,13 @@ namespace ESM
     }
     void Potion::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("TEXT", mIcon);
         esm.writeHNOCString("SCRI", mScript);
@@ -64,5 +79,6 @@ namespace ESM
         mIcon.clear();
         mScript.clear();
         mEffects.mList.clear();
+        mIsDeleted = false;
     }
 }

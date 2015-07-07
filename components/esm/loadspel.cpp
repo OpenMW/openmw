@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -11,6 +12,13 @@ namespace ESM
     void Spell::load(ESMReader &esm)
     {
         mEffects.mList.clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -39,6 +47,13 @@ namespace ESM
 
     void Spell::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("SPDT", mData, 12);
         mEffects.save(esm);
@@ -53,5 +68,7 @@ namespace ESM
         mName.clear();
 
         mEffects.mList.clear();
+
+        mIsDeleted = false;
     }
 }

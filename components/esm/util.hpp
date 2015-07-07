@@ -1,8 +1,14 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
+#include <string>
+
 #include <OgreVector3.h>
 #include <OgreQuaternion.h>
+
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
+#include "loadbsgn.hpp"
 
 namespace ESM
 {
@@ -45,6 +51,9 @@ struct Vector3
         return Ogre::Vector3(&mValues[0]);
     }
 };
+
+bool readDeleSubRecord(ESMReader &esm);
+void writeDeleSubRecord(ESMWriter &esm);
 
 }
 

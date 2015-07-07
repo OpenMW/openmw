@@ -91,11 +91,12 @@ struct Creature
     InventoryList mInventory;
     SpellList mSpells;
 
-
     bool mHasAI;
     AIData mAiData;
     AIPackageList mAiPackage;
     Transport mTransport;
+
+    bool mIsDeleted;
 
     const std::vector<Transport::Dest>& getTransport() const;
 

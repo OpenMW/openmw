@@ -5,6 +5,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -41,6 +42,12 @@ namespace ESM
 
     void Class::load(ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -69,6 +76,13 @@ namespace ESM
     }
     void Class::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CLDT", mData, 60);
         esm.writeHNOString("DESC", mDescription);
@@ -87,5 +101,7 @@ namespace ESM
         for (int i=0; i<5; ++i)
             for (int i2=0; i2<2; ++i2)
                 mData.mSkills[i][i2] = 0;
+
+        mIsDeleted = false;
     }
 }

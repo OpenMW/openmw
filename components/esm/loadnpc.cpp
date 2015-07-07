@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -16,6 +17,12 @@ namespace ESM
         mInventory.mList.clear();
         mTransport.mList.clear();
         mAiPackage.mList.clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
 
         bool hasNpdt = false;
         bool hasFlags = false;
@@ -103,6 +110,13 @@ namespace ESM
     }
     void NPC::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNOCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNCString("RNAM", mRace);
@@ -183,6 +197,7 @@ namespace ESM
         mScript.clear();
         mHair.clear();
         mHead.clear();
+        mIsDeleted = false;
     }
 
     int NPC::getFactionRank() const

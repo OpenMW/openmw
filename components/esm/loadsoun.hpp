@@ -23,6 +23,8 @@ struct Sound
     SOUNstruct mData;
     std::string mId, mSound;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

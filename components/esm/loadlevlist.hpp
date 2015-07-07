@@ -36,6 +36,8 @@ struct LevelledListBase
 
     std::vector<LevelItem> mList;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

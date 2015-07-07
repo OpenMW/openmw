@@ -60,6 +60,8 @@ struct BodyPart
     BYDTstruct mData;
     std::string mId, mModel, mRace;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

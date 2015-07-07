@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM {
 
@@ -16,6 +17,12 @@ namespace ESM {
         mInventory.mList.clear();
         mSpells.mList.clear();
         mTransport.mList.clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
 
         mScale = 1.f;
         mHasAI = false;
@@ -84,6 +91,13 @@ namespace ESM {
 
     void Creature::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("CNAM", mOriginal);
         esm.writeHNOCString("FNAM", mName);
@@ -132,6 +146,7 @@ namespace ESM {
         mAiData.mServices = 0;
         mAiPackage.mList.clear();
         mTransport.mList.clear();
+        mIsDeleted = false;
     }
 
     const std::vector<Transport::Dest>& Creature::getTransport() const

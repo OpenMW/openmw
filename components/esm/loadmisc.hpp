@@ -32,6 +32,8 @@ struct Miscellaneous
 
     std::string mId, mName, mModel, mIcon, mScript;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

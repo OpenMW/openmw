@@ -3,12 +3,19 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
 
     void LevelledListBase::load(ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         esm.getHNT(mFlags, "DATA");
         esm.getHNT(mChanceNone, "NNAM");
 
@@ -42,6 +49,13 @@ namespace ESM
     }
     void LevelledListBase::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNT("DATA", mFlags);
         esm.writeHNT("NNAM", mChanceNone);
         esm.writeHNT<int>("INDX", mList.size());
@@ -58,6 +72,7 @@ namespace ESM
         mFlags = 0;
         mChanceNone = 0;
         mList.clear();
+        mIsDeleted = false;
     }
 
     unsigned int CreatureLevList::sRecordId = REC_LEVC;

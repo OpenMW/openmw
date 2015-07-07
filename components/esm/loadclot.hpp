@@ -48,6 +48,8 @@ struct Clothing
 
     std::string mId, mName, mModel, mIcon, mEnchant, mScript;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

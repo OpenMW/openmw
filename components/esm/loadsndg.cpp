@@ -3,6 +3,7 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
+#include "util.hpp"
 
 namespace ESM
 {
@@ -10,6 +11,12 @@ namespace ESM
 
     void SoundGenerator::load(ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -36,6 +43,13 @@ namespace ESM
     }
     void SoundGenerator::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
+
         esm.writeHNT("DATA", mType, 4);
         esm.writeHNOCString("CNAM", mCreature);
         esm.writeHNOCString("SNAM", mSound);
@@ -46,5 +60,6 @@ namespace ESM
         mType = LeftFoot;
         mCreature.clear();
         mSound.clear();
+        mIsDeleted = false;
     }
 }
