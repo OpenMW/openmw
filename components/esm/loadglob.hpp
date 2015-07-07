@@ -24,6 +24,8 @@ struct Global
     std::string mId;
     Variant mValue;
 
+    bool mIsDeleted;
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
