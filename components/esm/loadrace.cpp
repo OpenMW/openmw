@@ -22,6 +22,8 @@ void Race::load(ESMReader &esm)
 {
     mPowers.mList.clear();
 
+    mId = esm.getHNString("NAME");
+
     bool hasData = false;
     while (esm.hasMoreSubs())
     {
@@ -51,6 +53,7 @@ void Race::load(ESMReader &esm)
 }
 void Race::save(ESMWriter &esm) const
 {
+    esm.writeHNCString("NAME", mId);
     esm.writeHNOCString("FNAM", mName);
     esm.writeHNT("RADT", mData, 140);
     mPowers.save(esm);
