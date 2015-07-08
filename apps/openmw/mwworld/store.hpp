@@ -10,6 +10,7 @@
 #include <openengine/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
+#include <components/esm/util.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -26,15 +27,19 @@ namespace MWWorld
 
         virtual size_t getSize() const = 0;
         virtual int getDynamicSize() const { return 0; }
-        virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
+        virtual void load(ESM::ESMReader &esm) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
         virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
+        virtual void read (ESM::ESMReader& reader) {}
         ///< Read into dynamic storage
+
+        virtual std::string getLastAddedRecordId() const { return ""; }
+        ///< Returns the last loaded/read ID or empty string if a loaded record has no ID
+        virtual bool isLastAddedRecordDeleted() const { return false; }
     };
 
     template <class T>
@@ -126,6 +131,7 @@ namespace MWWorld
             }
         };
 
+        T mLastAddedRecord;
 
         friend class ESMStore;
 
@@ -208,15 +214,16 @@ namespace MWWorld
             return ptr;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
-            std::string idLower = Misc::StringUtils::lowerCase(id);
+        void load(ESM::ESMReader &esm) {
+            T record;
+            record.load(esm);
 
-            std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, T()));
+            std::string idLower = Misc::StringUtils::lowerCase(record.mId);
+            std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, record));
             if (inserted.second)
                 mShared.push_back(&inserted.first->second);
 
-            inserted.first->second.mId = idLower;
-            inserted.first->second.load(esm);
+            mLastAddedRecord = record;
         }
 
         void setUp() {
@@ -325,58 +332,79 @@ namespace MWWorld
                  ++iter)
             {
                 writer.startRecord (T::sRecordId);
-                writer.writeHNString ("NAME", iter->second.mId);
                 iter->second.save (writer);
                 writer.endRecord (T::sRecordId);
             }
         }
 
-        void read (ESM::ESMReader& reader, const std::string& id)
+        void read (ESM::ESMReader& reader)
         {
             T record;
-            record.mId = id;
             record.load (reader);
             insert (record);
+
+            mLastAddedRecord = record;
+        }
+
+        std::string getLastAddedRecordId() const
+        {
+            return ESM::getRecordId(mLastAddedRecord);
+        }
+
+        bool isLastAddedRecordDeleted() const
+        {
+            return ESM::isRecordDeleted(mLastAddedRecord);
         }
     };
 
     template <>
-    inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
-        std::string idLower = Misc::StringUtils::lowerCase(id);
+    inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
+        ESM::Dialogue dialogue;
+        dialogue.load(esm);
 
-        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.find(idLower);
-        if (it == mStatic.end()) {
-            it = mStatic.insert( std::make_pair( idLower, ESM::Dialogue() ) ).first;
-            it->second.mId = id; // don't smash case here, as this line is printed
+        std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
+        std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
+        if (found == mStatic.end())
+        {
+            mStatic.insert(std::make_pair(idLower, dialogue));
         }
-
-        it->second.load(esm);
+        else
+        {
+            found->second = dialogue;
+        }
+        
+        mLastAddedRecord = dialogue;
     }
 
     template <>
-    inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
-        ESM::Script scpt;
-        scpt.load(esm);
-        Misc::StringUtils::toLower(scpt.mId);
+    inline void Store<ESM::Script>::load(ESM::ESMReader &esm) {
+        ESM::Script script;
+        script.load(esm);
 
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
+        std::string idLower = Misc::StringUtils::toLower(script.mId);
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, script));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
         else
-            inserted.first->second = scpt;
+            inserted.first->second = script;
+        
+        mLastAddedRecord = script;
     }
 
     template <>
-    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
+    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm)
     {
-        ESM::StartScript s;
-        s.load(esm);
-        s.mId = Misc::StringUtils::toLower(s.mId);
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
+        ESM::StartScript script;
+        script.load(esm);
+
+        std::string idLower = Misc::StringUtils::toLower(script.mId);
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, script));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
         else
-            inserted.first->second = s;
+            inserted.first->second = script;
+        
+        mLastAddedRecord = script;
     }
 
     template <>
@@ -385,6 +413,7 @@ namespace MWWorld
         // For multiple ESM/ESP files we need one list per file.
         typedef std::vector<ESM::LandTexture> LandTextureList;
         std::vector<LandTextureList> mStatic;
+        ESM::LandTexture mLastLoadedTexture;
 
     public:
         Store<ESM::LandTexture>() {
@@ -426,10 +455,9 @@ namespace MWWorld
             return mStatic[plugin].size();
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id, size_t plugin) {
+        void load(ESM::ESMReader &esm, size_t plugin) {
             ESM::LandTexture lt;
             lt.load(esm);
-            lt.mId = id;
 
             // Make sure we have room for the structure
             if (plugin >= mStatic.size()) {
@@ -443,7 +471,7 @@ namespace MWWorld
             ltexl[lt.mIndex] = lt;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id);
+        void load(ESM::ESMReader &esm);
 
         iterator begin(size_t plugin) const {
             assert(plugin < mStatic.size());
@@ -453,6 +481,16 @@ namespace MWWorld
         iterator end(size_t plugin) const {
             assert(plugin < mStatic.size());
             return mStatic[plugin].end();
+        }
+
+        std::string getLastAddedRecordId() const
+        {
+            return ESM::getRecordId(mLastLoadedTexture);
+        }
+
+        bool isLastAddedRecordDeleted() const
+        {
+            return ESM::isRecordDeleted(mLastLoadedTexture);
         }
     };
 
@@ -521,7 +559,7 @@ namespace MWWorld
             return ptr;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
+        void load(ESM::ESMReader &esm) {
             ESM::Land *ptr = new ESM::Land();
             ptr->load(esm);
 
@@ -688,7 +726,7 @@ namespace MWWorld
         //  errors related to the compare operator used in std::find for ESM::MovedCellRefTracker::find.
         //  There some nasty three-way cyclic header dependency involved, which I could only fix by moving
         //  this method.
-        void load(ESM::ESMReader &esm, const std::string &id);
+        void load(ESM::ESMReader &esm);
 
         iterator intBegin() const {
             return iterator(mSharedInt.begin());
@@ -857,7 +895,7 @@ namespace MWWorld
             mCells = &cells;
         }
 
-        void load(ESM::ESMReader &esm, const std::string &id) {
+        void load(ESM::ESMReader &esm) {
             ESM::Pathgrid pathgrid;
             pathgrid.load(esm);
 
