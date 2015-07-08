@@ -30,6 +30,12 @@ namespace MWMechanics
     static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
     static const int GREETING_SHOULD_END = 10;
 
+    // to prevent overcrowding
+    static const int DESTINATION_TOLERANCE = 64;
+
+    // distance must be long enough that NPC will need to move to get there.
+    static const int MINIMUM_WANDER_DISTANCE = DESTINATION_TOLERANCE * 2;
+
     const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] =
     {
         std::string("idle2"),
@@ -216,7 +222,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-            storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DestinationTolerance))
+            storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
             moveNow = false;
@@ -659,7 +665,7 @@ namespace MWMechanics
 
     int AiWander::OffsetToPreventOvercrowding()
     {
-        return static_cast<int>(DestinationTolerance * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
+        return static_cast<int>(DESTINATION_TOLERANCE * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
@@ -743,7 +749,7 @@ namespace MWMechanics
         float length = delta.length();
         delta.normalize();
 
-        int distance = std::max(mDistance / 2, MinimumWanderDistance);
+        int distance = std::max(mDistance / 2, MINIMUM_WANDER_DISTANCE);
         
         // must not travel longer than distance between waypoints or NPC goes past waypoint
         distance = std::min(distance, static_cast<int>(length));

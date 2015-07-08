@@ -118,12 +118,6 @@ namespace MWMechanics
                 GroupIndex_MaxIdle = 9
             };
 
-            // to prevent overcrowding
-            static const int DestinationTolerance = 64;
-
-            // distance must be long enough that NPC will need to move to get there.
-            static const int MinimumWanderDistance = DestinationTolerance * 2;
-
             /// convert point from local (i.e. cell) to world co-ordinates
             void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
 
