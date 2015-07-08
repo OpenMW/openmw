@@ -216,7 +216,7 @@ namespace MWMechanics
         // Are we there yet?
         bool& chooseAction = storage.mChooseAction;
         if(walking &&
-           storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
+            storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DestinationTolerance))
         {
             stopWalking(actor, storage);
             moveNow = false;
@@ -645,9 +645,8 @@ namespace MWMechanics
         int index = Misc::Rng::rollDice(mAllowedNodes.size());
         ESM::Pathgrid::Point dest = mAllowedNodes[index];
 
-        // apply a slight offset to prevent overcrowding
-        dest.mX += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
-        dest.mY += static_cast<int>(Misc::Rng::rollProbability() * 128 - 64);
+        dest.mX += OffsetToPreventOvercrowding();
+        dest.mY += OffsetToPreventOvercrowding();
         ToWorldCoordinates(dest, actor.getCell()->getCell());
 
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
@@ -656,6 +655,11 @@ namespace MWMechanics
 
         // may have changed cell
         mStoredAvailableNodes = false;
+    }
+
+    int AiWander::OffsetToPreventOvercrowding()
+    {
+        return static_cast<int>(DestinationTolerance * (Misc::Rng::rollProbability() * 2.0f - 1.0f));
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
@@ -739,13 +743,10 @@ namespace MWMechanics
         float length = delta.length();
         delta.normalize();
 
-        // destination must be far enough away that NPC will need to move to get there.
-        const int threshold = PathFinder::PathTolerance * 2;
-        int distance = std::max(mDistance / 2, threshold);
+        int distance = std::max(mDistance / 2, MinimumWanderDistance);
         
-        // must not travel more than 1/2 way between waypoints,
-        // otherwise, NPC goes to far endpoint then comes back.  Looks weird.
-        distance = std::min(distance, static_cast<int>(length / 2));
+        // must not travel longer than distance between waypoints or NPC goes past waypoint
+        distance = std::min(distance, static_cast<int>(length));
         delta *= distance;
         mAllowedNodes.push_back(PathFinder::MakePathgridPoint(vectorStart + delta));
     }
