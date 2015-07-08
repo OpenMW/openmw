@@ -18,4 +18,22 @@ namespace ESM
     {
         esm.writeHNT("DELE", static_cast<int32_t>(0));
     }
+
+    template <>
+    bool isRecordDeleted<StartScript>(const StartScript &script)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<Race>(const Race &race)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<GameSetting>(const GameSetting &gmst)
+    {
+        return false;
+    }
 }

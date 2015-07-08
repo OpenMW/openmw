@@ -35,7 +35,7 @@ void Store<ESM::Cell>::handleMovedCellRefs(ESM::ESMReader& esm, ESM::Cell* cell)
     }
 }
 
-void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
+void Store<ESM::Cell>::load(ESM::ESMReader &esm)
 {
     // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
     //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
@@ -43,9 +43,9 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
     //  are not available until both cells have been loaded at least partially!
 
     // All cells have a name record, even nameless exterior cells.
-    std::string idLower = Misc::StringUtils::lowerCase(id);
     ESM::Cell cell;
-    cell.mName = id;
+    cell.loadName(esm);
+    std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
 
     // Load the (x,y) coordinates of the cell, if it is an exterior cell,
     // so we can find the cell we need to merge with
@@ -119,9 +119,9 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
     }
 }
 
-void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, const std::string &id)
+void Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
 {
-    load(esm, id, esm.getIndex());
+    load(esm, esm.getIndex());
 }
 
 }
