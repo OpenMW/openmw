@@ -1,5 +1,7 @@
 #include "loadgmst.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 #include "defs.hpp"
 
 namespace ESM
@@ -8,11 +10,13 @@ namespace ESM
 
     void GameSetting::load (ESMReader &esm)
     {
+        mId = esm.getHNString("NAME");
         mValue.read (esm, ESM::Variant::Format_Gmst);
     }
 
     void GameSetting::save (ESMWriter &esm) const
     {
+        esm.writeHNCString("NAME", mId);
         mValue.write (esm, ESM::Variant::Format_Gmst);
     }
 
