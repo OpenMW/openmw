@@ -95,23 +95,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 throw std::runtime_error(error.str());
             }
         } else {
-            // Load it
-            std::string id = esm.getHNOString("NAME");
-            // ... unless it got deleted! This means that the following record
-            //  has been deleted, and trying to load it using standard assumptions
-            //  on the structure will (probably) fail.
-            if (esm.isNextSub("DELE")) {
-              esm.skipRecord();
-              it->second->eraseStatic(id);
-              continue;
-            }
-            it->second->load(esm, id);
-
-            // DELE can also occur after the usual subrecords
-            if (esm.isNextSub("DELE")) {
-              esm.skipRecord();
-              it->second->eraseStatic(id);
-              continue;
+            it->second->load(esm);
+            std::string id = it->second->getLastAddedRecordId();
+            if (it->second->isLastAddedRecordDeleted())
+            {
+                it->second->eraseStatic(id);
+                continue;
             }
 
             if (n.val==ESM::REC_DIAL) {
@@ -194,13 +183,13 @@ void ESMStore::setUp()
             case ESM::REC_LEVC:
 
                 {
-                    std::string id = reader.getHNString ("NAME");
-                    mStores[type]->read (reader, id);
+                    StoreBase *store = mStores[type];
+                    store->read (reader);
 
                     // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
                     // that really should be cleared instead of just overwritten
 
-                    mIds[id] = type;
+                    mIds[store->getLastAddedRecordId()] = type;
                 }
 
                 if (type==ESM::REC_NPC_)
