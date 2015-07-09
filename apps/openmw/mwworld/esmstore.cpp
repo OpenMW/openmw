@@ -8,6 +8,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 
 namespace MWWorld
 {

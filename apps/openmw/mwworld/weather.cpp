@@ -5,6 +5,7 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
