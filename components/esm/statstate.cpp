@@ -46,7 +46,7 @@ namespace ESM
         if (mProgress)
             esm.writeHNT("STPR", mProgress);
     }
-
-    template class StatState<int>;
-    template class StatState<float>;
 }
+
+template struct ESM::StatState<int>;
+template struct ESM::StatState<float>;
