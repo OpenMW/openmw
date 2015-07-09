@@ -92,9 +92,9 @@ namespace MWWorld
         {
             ESM::Global global;
             global.load(reader);
+            Misc::StringUtils::toLower(global.mId);
 
-            Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (global.mId));
-
+            Collection::iterator iter = mVariables.find (global.mId);
             if (iter!=mVariables.end())
                 iter->second = global;
 
