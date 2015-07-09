@@ -67,16 +67,16 @@ typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 class Animation
 {
 public:
-    enum Group {
-        Group_LowerBody = 1<<0,
+    enum BlendMask {
+        BlendMask_LowerBody = 1<<0,
 
-        Group_Torso = 1<<1,
-        Group_LeftArm = 1<<2,
-        Group_RightArm = 1<<3,
+        BlendMask_Torso = 1<<1,
+        BlendMask_LeftArm = 1<<2,
+        BlendMask_RightArm = 1<<3,
 
-        Group_UpperBody = Group_Torso | Group_LeftArm | Group_RightArm,
+        BlendMask_UpperBody = BlendMask_Torso | BlendMask_LeftArm | BlendMask_RightArm,
 
-        Group_All = Group_LowerBody | Group_UpperBody
+        BlendMask_All = BlendMask_LowerBody | BlendMask_UpperBody
     };
 
     class TextKeyListener
@@ -90,7 +90,7 @@ public:
 
 protected:
     /* This is the number of *discrete* groups. */
-    static const size_t sNumGroups = 4;
+    static const size_t sNumBlendMasks = 4;
 
     class AnimationTime : public SceneUtil::ControllerSource
     {
@@ -133,12 +133,12 @@ protected:
         size_t mLoopCount;
 
         int mPriority;
-        int mGroups;
+        int mBlendMask;
         bool mAutoDisable;
 
         AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
                       mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
-                      mPriority(0), mGroups(0), mAutoDisable(true)
+                      mPriority(0), mBlendMask(0), mAutoDisable(true)
         {
         }
         ~AnimState();
@@ -176,7 +176,7 @@ protected:
     typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
     ControllerMap mActiveControllers;
 
-    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
@@ -213,7 +213,7 @@ protected:
      */
     void resetActiveGroups();
 
-    size_t detectAnimGroup(osg::Node* node);
+    size_t detectBlendMask(osg::Node* node);
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
@@ -304,7 +304,7 @@ public:
      * \param priority Priority of the animation. The animation will play on
      *                 bone groups that don't have another animation set of a
      *                 higher priority.
-     * \param groups Bone groups to play the animation on.
+     * \param blendMask Bone groups to play the animation on.
      * \param autodisable Automatically disable the animation when it stops
      *                    playing.
      * \param speedmult Speed multiplier for the animation.
@@ -319,7 +319,7 @@ public:
      * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
      *                     the "start" and "stop" keys for looping?
      */
-    void play(const std::string &groupname, int priority, int groups, bool autodisable,
+    void play(const std::string &groupname, int priority, int blendMask, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops, bool loopfallback=false);
 
@@ -358,7 +358,7 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
-    void changeGroups(const std::string &groupname, int group);
+    void changeBlendMask(const std::string &groupname, int mask);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
