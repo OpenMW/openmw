@@ -1,4 +1,6 @@
 #include "creaturestats.hpp"
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 
 void ESM::CreatureStats::load (ESMReader &esm)
 {
