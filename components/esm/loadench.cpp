@@ -9,51 +9,55 @@ namespace ESM
 {
     unsigned int Enchantment::sRecordId = REC_ENCH;
 
-void Enchantment::load(ESMReader &esm)
-{
-    mEffects.mList.clear();
+    Enchantment::Enchantment()
+        : mIsDeleted(false)
+    {}
 
-    mId = esm.getHNString("NAME");
-    if (mIsDeleted = readDeleSubRecord(esm))
+    void Enchantment::load(ESMReader &esm)
     {
-        return;
-    }
+        mEffects.mList.clear();
 
-    bool hasData = false;
-    while (esm.hasMoreSubs())
-    {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
         {
-            case ESM::FourCC<'E','N','D','T'>::value:
-                esm.getHT(mData, 16);
-                hasData = true;
-                break;
-            case ESM::FourCC<'E','N','A','M'>::value:
-                mEffects.add(esm);
-                break;
-            default:
-                esm.fail("Unknown subrecord");
-                break;
+            return;
         }
-    }
-    if (!hasData)
-        esm.fail("Missing ENDT subrecord");
-}
 
-void Enchantment::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("NAME", mId);
-    if (mIsDeleted)
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'E','N','D','T'>::value:
+                    esm.getHT(mData, 16);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'E','N','A','M'>::value:
+                    mEffects.add(esm);
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing ENDT subrecord");
+    }
+
+    void Enchantment::save(ESMWriter &esm) const
     {
-        writeDeleSubRecord(esm);
-        return;
-    }
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
 
-    esm.writeHNT("ENDT", mData, 16);
-    mEffects.save(esm);
-}
+        esm.writeHNT("ENDT", mData, 16);
+        mEffects.save(esm);
+    }
 
     void Enchantment::blank()
     {

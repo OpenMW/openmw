@@ -64,6 +64,8 @@ struct Faction
 
     bool mIsDeleted;
 
+    Faction();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

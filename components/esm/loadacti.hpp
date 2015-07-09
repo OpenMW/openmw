@@ -19,6 +19,8 @@ struct Activator
 
     bool mIsDeleted;
 
+    Activator();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

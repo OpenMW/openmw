@@ -53,6 +53,8 @@ struct Region
 
     bool mIsDeleted;
 
+    Region();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

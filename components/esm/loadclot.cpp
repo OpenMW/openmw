@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Clothing::sRecordId = REC_CLOT;
 
+    Clothing::Clothing()
+        : mIsDeleted(false)
+    {}
+
     void Clothing::load(ESMReader &esm)
     {
         mParts.mParts.clear();

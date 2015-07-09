@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Global::sRecordId = REC_GLOB;
 
+    Global::Global()
+        : mIsDeleted(false)
+    {}
+
     void Global::load (ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

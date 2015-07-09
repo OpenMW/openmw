@@ -23,6 +23,9 @@ namespace ESM
       "sSpecializationStealth"
     };
 
+    Class::Class()
+        : mIsDeleted(false)
+    {}
 
     int& Class::CLDTstruct::getSkill (int index, bool major)
     {

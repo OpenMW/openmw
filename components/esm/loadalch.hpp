@@ -35,6 +35,8 @@ struct Potion
 
     bool mIsDeleted;
 
+    Potion();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

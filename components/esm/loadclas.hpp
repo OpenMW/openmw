@@ -75,6 +75,8 @@ struct Class
 
     bool mIsDeleted;
 
+    Class();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

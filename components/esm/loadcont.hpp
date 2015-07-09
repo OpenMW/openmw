@@ -54,6 +54,8 @@ struct Container
 
     bool mIsDeleted;
 
+    Container();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

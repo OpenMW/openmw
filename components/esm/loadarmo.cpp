@@ -39,6 +39,10 @@ namespace ESM
 
     unsigned int Armor::sRecordId = REC_ARMO;
 
+    Armor::Armor()
+        : mIsDeleted(false)
+    {}
+
     void Armor::load(ESMReader &esm)
     {
         mParts.mParts.clear();

@@ -33,6 +33,8 @@ struct Ingredient
 
     bool mIsDeleted;
 
+    Ingredient();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

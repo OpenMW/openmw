@@ -7,8 +7,11 @@
 
 namespace ESM
 {
-
     unsigned int Script::sRecordId = REC_SCPT;
+
+    Script::Script()
+        : mIsDeleted(false)
+    {}
 
     void Script::loadSCVR(ESMReader &esm)
     {

@@ -11,6 +11,10 @@ namespace ESM
 {
     unsigned int Faction::sRecordId = REC_FACT;
 
+    Faction::Faction()
+        : mIsDeleted(false)
+    {}
+
     int& Faction::FADTstruct::getSkill (int index, bool ignored)
     {
         if (index<0 || index>=7)
@@ -27,82 +31,83 @@ namespace ESM
         return mSkills[index];
     }
 
-void Faction::load(ESMReader &esm)
-{
-    mReactions.clear();
-    for (int i=0;i<10;++i)
-        mRanks[i].clear();
-
-    mId = esm.getHNString("NAME");
-    if (mIsDeleted = readDeleSubRecord(esm))
+    void Faction::load(ESMReader &esm)
     {
-        return;
+        mReactions.clear();
+        for (int i=0;i<10;++i)
+            mRanks[i].clear();
+
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
+        {
+            return;
+        }
+
+        int rankCounter=0;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'R','N','A','M'>::value:
+                    if (rankCounter >= 10)
+                        esm.fail("Rank out of range");
+                    mRanks[rankCounter++] = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','A','D','T'>::value:
+                    esm.getHT(mData, 240);
+                    if (mData.mIsHidden > 1)
+                        esm.fail("Unknown flag!");
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'A','N','A','M'>::value:
+                {
+                    std::string faction = esm.getHString();
+                    int reaction;
+                    esm.getHNT(reaction, "INTV");
+                    mReactions[faction] = reaction;
+                    break;
+                }
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing FADT subrecord");
     }
 
-    int rankCounter=0;
-    bool hasData = false;
-    while (esm.hasMoreSubs())
+    void Faction::save(ESMWriter &esm) const
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
         {
-            case ESM::FourCC<'F','N','A','M'>::value:
-                mName = esm.getHString();
+            writeDeleSubRecord(esm);
+            return;
+        }
+
+        esm.writeHNOCString("FNAM", mName);
+
+        for (int i = 0; i < 10; i++)
+        {
+            if (mRanks[i].empty())
                 break;
-            case ESM::FourCC<'R','N','A','M'>::value:
-                if (rankCounter >= 10)
-                    esm.fail("Rank out of range");
-                mRanks[rankCounter++] = esm.getHString();
-                break;
-            case ESM::FourCC<'F','A','D','T'>::value:
-                esm.getHT(mData, 240);
-                if (mData.mIsHidden > 1)
-                    esm.fail("Unknown flag!");
-                hasData = true;
-                break;
-            case ESM::FourCC<'A','N','A','M'>::value:
-            {
-                std::string faction = esm.getHString();
-                int reaction;
-                esm.getHNT(reaction, "INTV");
-                mReactions[faction] = reaction;
-                break;
-            }
-            default:
-                esm.fail("Unknown subrecord");
+
+            esm.writeHNString("RNAM", mRanks[i], 32);
+        }
+
+        esm.writeHNT("FADT", mData, 240);
+
+        for (std::map<std::string, int>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
+        {
+            esm.writeHNString("ANAM", it->first);
+            esm.writeHNT("INTV", it->second);
         }
     }
-    if (!hasData)
-        esm.fail("Missing FADT subrecord");
-}
-void Faction::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("NAME", mId);
-    if (mIsDeleted)
-    {
-        writeDeleSubRecord(esm);
-        return;
-    }
-
-    esm.writeHNOCString("FNAM", mName);
-
-    for (int i = 0; i < 10; i++)
-    {
-        if (mRanks[i].empty())
-            break;
-
-        esm.writeHNString("RNAM", mRanks[i], 32);
-    }
-
-    esm.writeHNT("FADT", mData, 240);
-
-    for (std::map<std::string, int>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
-    {
-        esm.writeHNString("ANAM", it->first);
-        esm.writeHNT("INTV", it->second);
-    }
-}
 
     void Faction::blank()
     {

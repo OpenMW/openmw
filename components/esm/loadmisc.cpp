@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Miscellaneous::sRecordId = REC_MISC;
 
+    Miscellaneous::Miscellaneous()
+        : mIsDeleted(false)
+    {}
+
     void Miscellaneous::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

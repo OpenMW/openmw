@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int NPC::sRecordId = REC_NPC_;
 
+    NPC::NPC()
+        : mIsDeleted(false)
+    {}
+
     void NPC::load(ESMReader &esm)
     {
         mPersistent = (esm.getRecordFlags() & 0x0400) != 0;

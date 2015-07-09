@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Ingredient::sRecordId = REC_INGR;
 
+    Ingredient::Ingredient()
+        : mIsDeleted(false)
+    {}
+
     void Ingredient::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

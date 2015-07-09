@@ -44,6 +44,8 @@ struct Enchantment
 
     bool mIsDeleted;
 
+    Enchantment();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Lockpick::sRecordId = REC_LOCK;
 
+    Lockpick::Lockpick()
+        : mIsDeleted(false)
+    {}
+
     void Lockpick::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

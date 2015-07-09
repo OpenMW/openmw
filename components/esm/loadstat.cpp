@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Static::sRecordId = REC_STAT;
 
+    Static::Static()
+        : mIsDeleted(false)
+    {}
+
     void Static::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

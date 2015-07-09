@@ -29,6 +29,8 @@ struct Repair
 
     bool mIsDeleted;
 
+    Repair();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

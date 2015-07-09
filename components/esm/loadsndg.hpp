@@ -38,6 +38,8 @@ struct SoundGenerator
 
     bool mIsDeleted;
 
+    SoundGenerator();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

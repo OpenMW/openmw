@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Light::sRecordId = REC_LIGH;
 
+    Light::Light()
+        : mIsDeleted(false)
+    {}
+
     void Light::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

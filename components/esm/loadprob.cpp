@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Probe::sRecordId = REC_PROB;
 
+    Probe::Probe()
+        : mIsDeleted(false)
+    {}
+
     void Probe::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

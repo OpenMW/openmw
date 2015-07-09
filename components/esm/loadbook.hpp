@@ -30,6 +30,8 @@ struct Book
 
     bool mIsDeleted;
 
+    Book();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

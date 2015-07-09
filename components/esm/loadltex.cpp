@@ -9,29 +9,32 @@ namespace ESM
 {
     unsigned int LandTexture::sRecordId = REC_LTEX;
 
-void LandTexture::load(ESMReader &esm)
-{
-    mIsDeleted = readDeleSubRecord(esm);
-    mId = esm.getHNString("NAME");
-    esm.getHNT(mIndex, "INTV");
-    mTexture = esm.getHNString("DATA");
-}
-void LandTexture::save(ESMWriter &esm) const
-{
-    if (mIsDeleted)
+    LandTexture::LandTexture()
+        : mIsDeleted(false)
+    {}
+
+    void LandTexture::load(ESMReader &esm)
     {
-        writeDeleSubRecord(esm);
+        mIsDeleted = readDeleSubRecord(esm);
+        mId = esm.getHNString("NAME");
+        esm.getHNT(mIndex, "INTV");
+        mTexture = esm.getHNString("DATA");
     }
-    esm.writeHNCString("NAME", mId);
-    esm.writeHNT("INTV", mIndex);
-    esm.writeHNCString("DATA", mTexture);
-}
+    void LandTexture::save(ESMWriter &esm) const
+    {
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+        }
+        esm.writeHNCString("NAME", mId);
+        esm.writeHNT("INTV", mIndex);
+        esm.writeHNCString("DATA", mTexture);
+    }
 
-void LandTexture::blank()
-{
-    mTexture.clear();
-    mIndex = -1;
-    mIsDeleted = false;
-}
-
+    void LandTexture::blank()
+    {
+        mTexture.clear();
+        mIndex = -1;
+        mIsDeleted = false;
+    }
 }
