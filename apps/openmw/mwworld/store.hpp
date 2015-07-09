@@ -217,9 +217,9 @@ namespace MWWorld
         void load(ESM::ESMReader &esm) {
             T record;
             record.load(esm);
+            Misc::StringUtils::toLower(record.mId);
 
-            std::string idLower = Misc::StringUtils::lowerCase(record.mId);
-            std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, record));
+            std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
             if (inserted.second)
                 mShared.push_back(&inserted.first->second);
 
@@ -359,6 +359,7 @@ namespace MWWorld
 
     template <>
     inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
+        // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
         dialogue.load(esm);
 
@@ -380,9 +381,9 @@ namespace MWWorld
     inline void Store<ESM::Script>::load(ESM::ESMReader &esm) {
         ESM::Script script;
         script.load(esm);
+        Misc::StringUtils::toLower(script.mId);
 
-        std::string idLower = Misc::StringUtils::toLower(script.mId);
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, script));
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
         else
@@ -396,9 +397,9 @@ namespace MWWorld
     {
         ESM::StartScript script;
         script.load(esm);
+        Misc::StringUtils::toLower(script.mId);
 
-        std::string idLower = Misc::StringUtils::toLower(script.mId);
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, script));
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
         else
