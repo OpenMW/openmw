@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Sound::sRecordId = REC_SOUN;
 
+    Sound::Sound()
+        : mIsDeleted(false)
+    {}
+
     void Sound::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

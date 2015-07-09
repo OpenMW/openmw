@@ -34,6 +34,8 @@ struct Miscellaneous
 
     bool mIsDeleted;
 
+    Miscellaneous();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

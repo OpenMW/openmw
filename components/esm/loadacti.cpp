@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Activator::sRecordId = REC_ACTI;
 
+    Activator::Activator()
+        : mIsDeleted(false)
+    {}
+
     void Activator::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

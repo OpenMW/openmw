@@ -29,6 +29,8 @@ struct Lockpick
 
     bool mIsDeleted;
 
+    Lockpick();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

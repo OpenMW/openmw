@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Spell::sRecordId = REC_SPEL;
 
+    Spell::Spell()
+        : mIsDeleted(false)
+    {}
+
     void Spell::load(ESMReader &esm)
     {
         mEffects.mList.clear();

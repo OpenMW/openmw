@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Book::sRecordId = REC_BOOK;
 
+    Book::Book()
+        : mIsDeleted(false)
+    {}
+
     void Book::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

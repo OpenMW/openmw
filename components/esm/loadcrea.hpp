@@ -98,6 +98,8 @@ struct Creature
 
     bool mIsDeleted;
 
+    Creature();
+
     const std::vector<Transport::Dest>& getTransport() const;
 
     void load(ESMReader &esm);

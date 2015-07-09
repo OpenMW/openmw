@@ -7,6 +7,9 @@
 
 namespace ESM
 {
+    LevelledListBase::LevelledListBase()
+        : mIsDeleted(false)
+    {}
 
     void LevelledListBase::load(ESMReader &esm)
     {

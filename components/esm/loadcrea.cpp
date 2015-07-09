@@ -9,6 +9,10 @@ namespace ESM {
 
     unsigned int Creature::sRecordId = REC_CREA;
 
+    Creature::Creature()
+        : mIsDeleted(false)
+    {}
+
     void Creature::load(ESMReader &esm)
     {
         mPersistent = (esm.getRecordFlags() & 0x0400) != 0;

@@ -71,6 +71,8 @@ struct Weapon
 
     bool mIsDeleted;
 
+    Weapon();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

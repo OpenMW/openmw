@@ -9,50 +9,54 @@ namespace ESM
 {
     unsigned int BirthSign::sRecordId = REC_BSGN;
 
-void BirthSign::load(ESMReader &esm)
-{
-    mPowers.mList.clear();
+    BirthSign::BirthSign()
+        : mIsDeleted(false)
+    {}
 
-    mIsDeleted = readDeleSubRecord(esm);
-    mId = esm.getHNString("NAME");
-
-    while (esm.hasMoreSubs())
+    void BirthSign::load(ESMReader &esm)
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        mPowers.mList.clear();
+
+        mIsDeleted = readDeleSubRecord(esm);
+        mId = esm.getHNString("NAME");
+
+        while (esm.hasMoreSubs())
         {
-            case ESM::FourCC<'F','N','A','M'>::value:
-                mName = esm.getHString();
-                break;
-            case ESM::FourCC<'T','N','A','M'>::value:
-                mTexture = esm.getHString();
-                break;
-            case ESM::FourCC<'D','E','S','C'>::value:
-                mDescription = esm.getHString();
-                break;
-            case ESM::FourCC<'N','P','C','S'>::value:
-                mPowers.add(esm);
-                break;
-            default:
-                esm.fail("Unknown subrecord");
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'T','N','A','M'>::value:
+                    mTexture = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','P','C','S'>::value:
+                    mPowers.add(esm);
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
         }
     }
-}
 
-void BirthSign::save(ESMWriter &esm) const
-{
-    if (mIsDeleted)
+    void BirthSign::save(ESMWriter &esm) const
     {
-        writeDeleSubRecord(esm);
-    }
-    esm.writeHNCString("NAME", mId);
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNOCString("TNAM", mTexture);
-    esm.writeHNOCString("DESC", mDescription);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+        }
+        esm.writeHNCString("NAME", mId);
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNOCString("TNAM", mTexture);
+        esm.writeHNOCString("DESC", mDescription);
 
-    mPowers.save(esm);
-}
+        mPowers.save(esm);
+    }
 
     void BirthSign::blank()
     {

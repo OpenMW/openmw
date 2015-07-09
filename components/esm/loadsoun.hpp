@@ -25,6 +25,8 @@ struct Sound
 
     bool mIsDeleted;
 
+    Sound();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

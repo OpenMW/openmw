@@ -85,7 +85,8 @@ struct Cell
            mWater(0),
            mWaterInt(false),
            mMapColor(0),
-           mRefNumCounter(0)
+           mRefNumCounter(0),
+           mIsDeleted(false)
   {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior

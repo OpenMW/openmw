@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Potion::sRecordId = REC_ALCH;
 
+    Potion::Potion()
+        : mIsDeleted(false)
+    {}
+
     void Potion::load(ESMReader &esm)
     {
         mEffects.mList.clear();

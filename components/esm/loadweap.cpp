@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Weapon::sRecordId = REC_WEAP;
 
+    Weapon::Weapon()
+        : mIsDeleted(false)
+    {}
+
     void Weapon::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

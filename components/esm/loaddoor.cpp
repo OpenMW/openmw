@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int Door::sRecordId = REC_DOOR;
 
+    Door::Door()
+        : mIsDeleted(false)
+    {}
+
     void Door::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

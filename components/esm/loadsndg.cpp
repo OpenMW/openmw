@@ -9,6 +9,10 @@ namespace ESM
 {
     unsigned int SoundGenerator::sRecordId = REC_SNDG;
 
+    SoundGenerator::SoundGenerator()
+        : mIsDeleted(false)
+    {}
+
     void SoundGenerator::load(ESMReader &esm)
     {
         mId = esm.getHNString("NAME");

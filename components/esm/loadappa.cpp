@@ -9,60 +9,64 @@ namespace ESM
 {
     unsigned int Apparatus::sRecordId = REC_APPA;
 
-void Apparatus::load(ESMReader &esm)
-{
-    mId = esm.getHNString("NAME");
-    if (mIsDeleted = readDeleSubRecord(esm))
-    {
-        return;
-    }
+    Apparatus::Apparatus()
+        : mIsDeleted(false)
+    {}
 
-    bool hasData = false;
-    while (esm.hasMoreSubs())
+    void Apparatus::load(ESMReader &esm)
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        mId = esm.getHNString("NAME");
+        if (mIsDeleted = readDeleSubRecord(esm))
         {
-            case ESM::FourCC<'M','O','D','L'>::value:
-                mModel = esm.getHString();
-                break;
-            case ESM::FourCC<'F','N','A','M'>::value:
-                mName = esm.getHString();
-                break;
-            case ESM::FourCC<'A','A','D','T'>::value:
-                esm.getHT(mData);
-                hasData = true;
-                break;
-            case ESM::FourCC<'S','C','R','I'>::value:
-                mScript = esm.getHString();
-                break;
-            case ESM::FourCC<'I','T','E','X'>::value:
-                mIcon = esm.getHString();
-                break;
-            default:
-                esm.fail("Unknown subrecord");
+            return;
         }
-    }
-    if (!hasData)
-        esm.fail("Missing AADT");
-}
 
-void Apparatus::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("NAME", mId);
-    if (mIsDeleted)
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'A','A','D','T'>::value:
+                    esm.getHT(mData);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'S','C','R','I'>::value:
+                    mScript = esm.getHString();
+                    break;
+                case ESM::FourCC<'I','T','E','X'>::value:
+                    mIcon = esm.getHString();
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
+        }
+        if (!hasData)
+            esm.fail("Missing AADT");
+    }
+
+    void Apparatus::save(ESMWriter &esm) const
     {
-        writeDeleSubRecord(esm);
-        return;
-    }
+        esm.writeHNCString("NAME", mId);
+        if (mIsDeleted)
+        {
+            writeDeleSubRecord(esm);
+            return;
+        }
 
-    esm.writeHNCString("MODL", mModel);
-    esm.writeHNCString("FNAM", mName);
-    esm.writeHNT("AADT", mData, 16);
-    esm.writeHNOCString("SCRI", mScript);
-    esm.writeHNCString("ITEX", mIcon);
-}
+        esm.writeHNCString("MODL", mModel);
+        esm.writeHNCString("FNAM", mName);
+        esm.writeHNT("AADT", mData, 16);
+        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNCString("ITEX", mIcon);
+    }
 
     void Apparatus::blank()
     {

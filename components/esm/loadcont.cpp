@@ -25,6 +25,10 @@ namespace ESM
 
     unsigned int Container::sRecordId = REC_CONT;
 
+    Container::Container()
+        : mIsDeleted(false)
+    {}
+
     void Container::load(ESMReader &esm)
     {
         mInventory.mList.clear();

@@ -40,6 +40,8 @@ struct Apparatus
 
     bool mIsDeleted;
 
+    Apparatus();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

@@ -98,6 +98,8 @@ struct Armor
 
     bool mIsDeleted;
 
+    Armor();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
