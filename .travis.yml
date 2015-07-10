@@ -5,6 +5,7 @@ language: cpp
 branches:
   only:
     - master
+    - c++11
     - coverity_scan
     - /openmw-.*$/
 env:
