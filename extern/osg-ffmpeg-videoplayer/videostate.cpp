@@ -1,6 +1,9 @@
 #include "videostate.hpp"
 
 #include <iostream>
+#include <mutex>
+#include <cassert>
+#include <chrono>
 
 #include <osg/Texture2D>
 
@@ -116,7 +119,7 @@ void PacketQueue::put(AVPacket *pkt)
 
 int PacketQueue::get(AVPacket *pkt, VideoState *is)
 {
-    boost::unique_lock<boost::mutex> lock(this->mutex);
+    std::unique_lock<std::mutex> lock(this->mutex);
     while(!is->mQuit)
     {
         AVPacketList *pkt1 = this->first_pkt;
@@ -240,7 +243,7 @@ void VideoState::video_display(VideoPicture *vp)
 
 void VideoState::video_refresh()
 {
-    boost::mutex::scoped_lock lock(this->pictq_mutex);
+    std::lock_guard<std::mutex> lock(this->pictq_mutex);
     if(this->pictq_size == 0)
         return;
 
@@ -293,9 +296,9 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     /* wait until we have a new pic */
     {
-        boost::unique_lock<boost::mutex> lock(this->pictq_mutex);
+        std::unique_lock<std::mutex> lock(this->pictq_mutex);
         while(this->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !this->mQuit)
-            this->pictq_cond.timed_wait(lock, boost::posix_time::milliseconds(1));
+            this->pictq_cond.wait_for(lock, std::chrono::milliseconds(1));
     }
     if(this->mQuit)
         return -1;
@@ -508,7 +511,7 @@ void VideoState::decode_thread_loop(VideoState *self)
             if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
                (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
             {
-                boost::this_thread::sleep(boost::posix_time::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
             }
 
@@ -591,7 +594,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
 
         codecCtx->get_buffer = our_get_buffer;
         codecCtx->release_buffer = our_release_buffer;
-        this->video_thread = boost::thread(video_thread_loop, this);
+        this->video_thread = std::thread(video_thread_loop, this);
         break;
 
     default:
@@ -673,7 +676,7 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     }
 
 
-    this->parse_thread = boost::thread(decode_thread_loop, this);
+    this->parse_thread = std::thread(decode_thread_loop, this);
 }
 
 void VideoState::deinit()
@@ -783,7 +786,7 @@ ExternalClock::ExternalClock()
 
 void ExternalClock::setPaused(bool paused)
 {
-    boost::mutex::scoped_lock lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     if (mPaused == paused)
         return;
     if (paused)
@@ -797,7 +800,7 @@ void ExternalClock::setPaused(bool paused)
 
 uint64_t ExternalClock::get()
 {
-    boost::mutex::scoped_lock lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     if (mPaused)
         return mPausedAt;
     else
@@ -806,7 +809,7 @@ uint64_t ExternalClock::get()
 
 void ExternalClock::set(uint64_t time)
 {
-    boost::mutex::scoped_lock lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     mTimeBase = av_gettime() - time;
     mPausedAt = time;
 }

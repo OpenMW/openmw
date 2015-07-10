@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <condition_variable>
 
 #include <osg/ref_ptr>
 namespace osg
@@ -43,7 +46,7 @@ struct ExternalClock
     uint64_t mPausedAt;
     bool mPaused;
 
-    boost::mutex mMutex;
+    std::mutex mMutex;
 
     void setPaused(bool paused);
     uint64_t get();
@@ -62,8 +65,8 @@ struct PacketQueue {
     int nb_packets;
     int size;
 
-    boost::mutex mutex;
-    boost::condition_variable cond;
+    std::mutex mutex;
+    std::condition_variable cond;
 
     void put(AVPacket *pkt);
     int get(AVPacket *pkt, VideoState *is);
@@ -141,11 +144,11 @@ struct VideoState {
     VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
     AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
-    boost::mutex pictq_mutex;
-    boost::condition_variable pictq_cond;
+    std::mutex pictq_mutex;
+    std::condition_variable pictq_cond;
 
-    boost::thread parse_thread;
-    boost::thread video_thread;
+    std::thread parse_thread;
+    std::thread video_thread;
 
     volatile bool mSeekRequested;
     uint64_t mSeekPos;

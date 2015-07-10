@@ -2,7 +2,6 @@
 
 #include <map>
 #include <sstream>
-#include <boost/make_shared.hpp>
 
 #include <MyGUI_LanguageManager.h>
 

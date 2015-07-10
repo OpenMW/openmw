@@ -1,13 +1,15 @@
 #include <algorithm>
 #include <stdexcept>
+#include <cstring>
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include <stdint.h>
 
 #include <components/vfs/manager.hpp>
-
-#include <boost/thread.hpp>
 
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
@@ -211,24 +213,32 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
-    boost::recursive_mutex mMutex;
-    boost::thread mThread;
+    std::mutex mMutex;
+    std::thread mThread;
+    std::condition_variable mCondition;
+    volatile bool mExit;
 
     StreamThread()
-      : mThread(boost::ref(*this))
+      : mThread(std::ref(*this))
+      , mExit(false)
     {
     }
     ~StreamThread()
     {
-        mThread.interrupt();
+        mMutex.lock();
+        mExit = true;
+        mMutex.unlock();
+        mCondition.notify_one();
+
+        mThread.join();
     }
 
-    // boost::thread entry point
+    // std::thread entry point
     void operator()()
     {
-        while(1)
+        while(!mExit)
         {
-            mMutex.lock();
+            std::unique_lock<std::mutex> lock (mMutex);
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
             {
@@ -237,8 +247,7 @@ struct OpenAL_Output::StreamThread {
                 else
                     ++iter;
             }
-            mMutex.unlock();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            mCondition.wait_for(lock, std::chrono::milliseconds(50));
         }
     }
 

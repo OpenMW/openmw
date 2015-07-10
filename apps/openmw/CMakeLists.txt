@@ -117,7 +117,6 @@ include_directories(${SOUND_INPUT_INCLUDES})
 target_link_libraries(openmw
     ${OPENSCENEGRAPH_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${OPENAL_LIBRARY}

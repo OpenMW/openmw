@@ -9,8 +9,6 @@
 #include <stdint.h>
 #include <boost/function.hpp>
 
-#include <boost/make_shared.hpp>
-
 #include <components/misc/utf8stream.hpp>
 
 namespace MWGui
