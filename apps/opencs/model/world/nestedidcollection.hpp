@@ -161,8 +161,19 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     int NestedIdCollection<ESXRecordT, IdAccessorT>::getNestedColumnsCount(int row, int column) const
     {
-        return getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).getColumnsCount(
-                Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+        const ColumnBase &nestedColumn = Collection<ESXRecordT, IdAccessorT>::getColumn(column);
+        int numRecords = Collection<ESXRecordT, IdAccessorT>::getSize();
+        if (row >= 0 && row < numRecords)
+        {
+            const Record<ESXRecordT>& record = Collection<ESXRecordT, IdAccessorT>::getRecord(row);
+            return getAdapter(nestedColumn).getColumnsCount(record);
+        }
+        else
+        {
+            // If the row is invalid (or there no records), retrieve the column count using a blank record
+            const Record<ESXRecordT> record;
+            return getAdapter(nestedColumn).getColumnsCount(record);
+        }
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

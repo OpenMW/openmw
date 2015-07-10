@@ -6,6 +6,7 @@
 #include "../world/dragrecordtable.hpp"
 
 class QAction;
+class QSortFilterProxyModel;
 
 namespace CSMTools
 {
@@ -30,7 +31,8 @@ namespace CSVTools
                 Action_Remove,
                 Action_EditAndRemove
             };
-            
+
+            QSortFilterProxyModel *mProxyModel;
             CSMTools::ReportModel *mModel;
             CSVWorld::CommandDelegate *mIdTypeDelegate;
             QAction *mShowAction;
@@ -63,11 +65,14 @@ namespace CSVTools
 
             void clear();
 
-            // Return indices of rows that are suitable for replacement.
-            //
-            // \param selection Only list selected rows.
+            /// Return indices of rows that are suitable for replacement.
+            ///
+            /// \param selection Only list selected rows.
+            ///
+            /// \return rows in the original model
             std::vector<int> getReplaceIndices (bool selection) const;
 
+            /// \param index row in the original model
             void flagAsReplaced (int index);
 
         private slots:
@@ -78,8 +83,8 @@ namespace CSVTools
 
         public slots:
 
-            void stateChanged (int state, CSMDoc::Document *document);        
-            
+            void stateChanged (int state, CSMDoc::Document *document);
+
         signals:
 
             void editRequest (const CSMWorld::UniversalId& id, const std::string& hint);

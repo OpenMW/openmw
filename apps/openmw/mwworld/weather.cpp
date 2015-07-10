@@ -5,6 +5,7 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -66,6 +67,10 @@ void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name
     weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
     weather.mCloudTexture = mFallback->getFallbackString("Weather_"+upper+"_Cloud_Texture");
 
+    static const float fStromWindSpeed = mStore->get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
+
+    weather.mIsStorm = weather.mWindSpeed > fStromWindSpeed;
+
     bool usesPrecip = mFallback->getFallbackBool("Weather_"+upper+"_Using_Precip");
     if (usesPrecip)
         weather.mRainEffect = "meshes\\raindrop.nif";
@@ -79,7 +84,6 @@ Rain Height Max=700 ?
 Rain Threshold=0.6 ?
 Max Raindrops=650 ?
 */
-    weather.mIsStorm = (name == "ashstorm" || name == "blight");
 
     mWeatherSettings[name] = weather;
 }
@@ -112,8 +116,8 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
         return 1.f;
 }
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
-     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mFallback(fallback),
+WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Fallback* fallback, MWWorld::ESMStore* store) :
+     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mFallback(fallback), mStore(store),
      mRendering(rendering), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mRemainingTransitionTime(0), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
      mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0)

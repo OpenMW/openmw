@@ -1,7 +1,6 @@
 #include "inputmanagerimp.hpp"
 
 #include <cmath>
-#include <iostream>
 
 #include <boost/lexical_cast.hpp>
 
@@ -22,7 +21,6 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -30,8 +28,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-
-#include "../mwdialogue/dialoguemanagerimp.hpp"
 
 using namespace ICS;
 
@@ -207,7 +203,7 @@ namespace MWInput
         if (mControlSwitch["playercontrols"])
         {
             if (action == A_Use)
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue != 0);
+                mPlayer->setAttackingOrSpell(currentValue != 0);
             else if (action == A_Jump)
                 mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }

@@ -180,6 +180,9 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
+
+    bool mAttackingOrSpell;
+
     void determineAttackType();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
@@ -235,6 +238,13 @@ public:
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
 
+    void setAttackingOrSpell(bool attackingOrSpell);
+
+    bool readyToPrepareAttack() const;
+    bool readyToStartAttack() const;
+
+    float getAttackStrength() const;
+
     /// @see Animation::setActive
     void setActive(bool active);
 
@@ -242,7 +252,6 @@ public:
     void setHeadTrackTarget(const MWWorld::Ptr& target);
 };
 
-    void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 

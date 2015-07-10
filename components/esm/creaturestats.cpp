@@ -1,4 +1,6 @@
 #include "creaturestats.hpp"
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 
 void ESM::CreatureStats::load (ESMReader &esm)
 {
@@ -39,8 +41,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
     if (esm.isNextSub("HOST"))
         esm.skipHSub(); // Hostile, no longer used
 
-    mAttackingOrSpell = false;
-    esm.getHNOT (mAttackingOrSpell, "ATCK");
+    if (esm.isNextSub("ATCK"))
+        esm.skipHSub(); // attackingOrSpell, no longer used
 
     mKnockdown = false;
     esm.getHNOT (mKnockdown, "KNCK");
@@ -149,9 +151,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mAttacked)
         esm.writeHNT ("ATKD", mAttacked);
 
-    if (mAttackingOrSpell)
-        esm.writeHNT ("ATCK", mAttackingOrSpell);
-
     if (mKnockdown)
         esm.writeHNT ("KNCK", mKnockdown);
 
@@ -232,7 +231,6 @@ void ESM::CreatureStats::blank()
     mTalkedTo = false;
     mAlarmed = false;
     mAttacked = false;
-    mAttackingOrSpell = false;
     mKnockdown = false;
     mKnockdownOneFrame = false;
     mKnockdownOverOneFrame = false;

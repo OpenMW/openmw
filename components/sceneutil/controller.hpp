@@ -11,6 +11,7 @@ namespace SceneUtil
     class ControllerSource
     {
     public:
+        virtual ~ControllerSource() { }
         virtual float getValue(osg::NodeVisitor* nv) = 0;
     };
 

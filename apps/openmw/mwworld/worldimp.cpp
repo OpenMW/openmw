@@ -12,11 +12,15 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/PositionAttitudeTransform>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/esmreader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
@@ -163,8 +167,6 @@ namespace MWWorld
         mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback);
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
-
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -192,6 +194,8 @@ namespace MWWorld
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->getFloat();
 
         mGlobalVariables.fill (mStore);
+
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
@@ -265,7 +269,7 @@ namespace MWWorld
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
         mWeatherManager = 0;
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
 
         if (!mStartupScript.empty())
             MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
@@ -2045,7 +2049,7 @@ namespace MWWorld
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");
         if (!mPlayer)
-            mPlayer = new MWWorld::Player(player, *this);
+            mPlayer = new MWWorld::Player(player);
         else
         {
             // Remove the old CharacterController

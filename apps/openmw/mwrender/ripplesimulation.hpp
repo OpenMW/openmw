@@ -65,10 +65,6 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
 
         std::vector<Emitter> mEmitters;
-
-        float mRippleLifeTime;
-        float mRippleRotSpeed;
-
     };
 
 }

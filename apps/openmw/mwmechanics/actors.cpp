@@ -4,7 +4,10 @@
 
 #include <osg/PositionAttitudeTransform>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/esm/esmreader.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -1085,6 +1088,9 @@ namespace MWMechanics
                         <= sqrProcessingDistance;
 
                 iter->second->getCharacterController()->setActive(inProcessingRange);
+
+                if (iter->first == player)
+                    iter->second->getCharacterController()->setAttackingOrSpell(MWBase::Environment::get().getWorld()->getPlayer().getAttackingOrSpell());
 
                 if (!iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {

@@ -798,27 +798,25 @@ namespace MWClass
 
         const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
 
-        ensureCustomData(ptr);
-
-        // If we do the following instead we get a sizable speedup, but this causes compatibility issues
-        // with 0.30 savegames, where some state in CreatureStats was not saved yet,
-        // and therefore needs to be loaded from ESM records. TODO: re-enable this in a future release.
-        /*
-        if (!ptr.getRefData().getCustomData())
+        if (state.mVersion > 0)
         {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
+            if (!ptr.getRefData().getCustomData())
+            {
+                // Create a CustomData, but don't fill it from ESM records (not needed)
+                std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
 
-            MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+                MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
-            if (ref->mBase->mFlags & ESM::Creature::Weapon)
-                data->mContainerStore = new MWWorld::InventoryStore();
-            else
-                data->mContainerStore = new MWWorld::ContainerStore();
+                if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                    data->mContainerStore = new MWWorld::InventoryStore();
+                else
+                    data->mContainerStore = new MWWorld::ContainerStore();
 
-            ptr.getRefData().setCustomData (data.release());
+                ptr.getRefData().setCustomData (data.release());
+            }
         }
-        */
+        else
+            ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 

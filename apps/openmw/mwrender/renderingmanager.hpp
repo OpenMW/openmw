@@ -190,6 +190,7 @@ namespace MWRender
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
+        float mFogDepth;
         osg::Vec4f mFogColor;
 
         osg::Vec4f mAmbientColor;
