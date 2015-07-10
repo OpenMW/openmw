@@ -3,6 +3,8 @@
 
 #include <QVariant>
 
+#include <stdexcept>
+
 #include <components/esm/loadpgrd.hpp>
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadmgef.hpp> // for converting magic effect id to string & back
