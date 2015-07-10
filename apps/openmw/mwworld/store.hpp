@@ -319,7 +319,7 @@ namespace MWWorld
 
     public:
 
-        Store<ESM::Pathgrid>();
+        Store();
 
         void setCells(Store<ESM::Cell>& cells);
         void load(ESM::ESMReader &esm, const std::string &id);
