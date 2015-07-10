@@ -167,8 +167,6 @@ namespace MWWorld
         mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback);
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
-
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
@@ -196,6 +194,8 @@ namespace MWWorld
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->getFloat();
 
         mGlobalVariables.fill (mStore);
+
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
@@ -269,7 +269,7 @@ namespace MWWorld
         // we don't want old weather to persist on a new game
         delete mWeatherManager;
         mWeatherManager = 0;
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback);
+        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
 
         if (!mStartupScript.empty())
             MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);

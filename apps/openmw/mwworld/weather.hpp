@@ -156,7 +156,8 @@ namespace MWWorld
     class WeatherManager
     {
     public:
-        WeatherManager(MWRender::RenderingManager*,MWWorld::Fallback* fallback);
+        // Have to pass fallback and Store, can't use singleton since World isn't fully constructed yet at the time
+        WeatherManager(MWRender::RenderingManager*, MWWorld::Fallback* fallback, MWWorld::ESMStore* store);
         ~WeatherManager();
 
         /**
@@ -210,6 +211,7 @@ namespace MWWorld
         std::string mPlayingSoundID;
 
         MWWorld::Fallback* mFallback;
+        MWWorld::ESMStore* mStore;
         void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 
