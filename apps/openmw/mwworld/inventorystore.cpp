@@ -6,6 +6,7 @@
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/inventorystate.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

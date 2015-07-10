@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <components/nif/niffile.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>

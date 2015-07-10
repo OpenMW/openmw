@@ -523,12 +523,8 @@ void RenderManager::destroyAllResources()
 
 bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
 {
-    for (MapTexture::const_iterator item = mTextures.begin(); item != mTextures.end(); ++item)
-    {
-        if (item->second == _texture)
-            return true;
-    }
-    return false;
+    // We support external textures that aren't registered via this manager, so can't implement this method sensibly.
+    return true;
 }
 
 }

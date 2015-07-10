@@ -5,6 +5,7 @@
 
 #include <components/esm/loadspel.hpp>
 #include <components/esm/spellstate.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

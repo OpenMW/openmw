@@ -10,6 +10,7 @@
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
 #include <components/esm/dialoguestate.hpp>
+#include <components/esm/esmwriter.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
