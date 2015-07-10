@@ -12,11 +12,15 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/PositionAttitudeTransform>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include <components/misc/rng.hpp>
 
 #include <components/files/collections.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/esmreader.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 
