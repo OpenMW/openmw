@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/array.hpp>
+#include <array>
 
 #include "defs.hpp"
 
@@ -76,7 +76,7 @@ struct Skill
   static const std::string sSkillNames[Length];
   static const std::string sSkillNameIds[Length];
   static const std::string sIconNames[Length];
-  static const boost::array<SkillEnum, Length> sSkillIds;
+  static const std::array<SkillEnum, Length> sSkillIds;
 
   void load(ESMReader &esm);
   void save(ESMWriter &esm) const;
