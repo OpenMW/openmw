@@ -7,7 +7,7 @@
 #include "MyGUI_FactoryManager.h"
 
 #include <stdint.h>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <components/misc/utf8stream.hpp>
 
@@ -864,7 +864,7 @@ public:
     Style* mFocusItem;
     bool mItemActive;
     MyGUI::MouseButton mLastDown;
-    boost::function <void (intptr_t)> mLinkClicked;
+    std::function <void (intptr_t)> mLinkClicked;
 
 
     std::shared_ptr <TypesetBookImpl> mBook;
@@ -1214,7 +1214,7 @@ public:
             throw std::runtime_error ("The main sub-widget for a BookPage must be a PageDisplay.");
     }
 
-    void adviseLinkClicked (boost::function <void (InteractiveId)> linkClicked)
+    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked)
     {
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
@@ -1226,7 +1226,7 @@ public:
     {
         if (PageDisplay* pd = dynamic_cast <PageDisplay*> (getSubWidgetText ()))
         {
-            pd->mLinkClicked = boost::function <void (InteractiveId)> ();
+            pd->mLinkClicked = std::function <void (InteractiveId)> ();
         }
     }
 

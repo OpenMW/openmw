@@ -1,5 +1,7 @@
 #include "tradewindow.hpp"
 
+#include <climits>
+
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>

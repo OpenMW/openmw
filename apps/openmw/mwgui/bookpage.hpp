@@ -6,7 +6,6 @@
 
 #include <functional>
 #include <stdint.h>
-#include <boost/function.hpp>
 
 
 namespace MWGui
@@ -102,7 +101,7 @@ namespace MWGui
     public:
 
         typedef TypesetBook::InteractiveId InteractiveId;
-        typedef boost::function <void (InteractiveId)> ClickCallback;
+        typedef std::function <void (InteractiveId)> ClickCallback;
 
         /// Make the widget display the specified page from the specified book.
         virtual void showPage (TypesetBook::Ptr Book, size_t Page) = 0;
