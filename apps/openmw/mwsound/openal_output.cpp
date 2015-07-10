@@ -216,7 +216,7 @@ struct OpenAL_Output::StreamThread {
     std::mutex mMutex;
     std::thread mThread;
     std::condition_variable mCondition;
-    volatile bool mExit;
+    bool mExit;
 
     StreamThread()
       : mThread(std::ref(*this))
@@ -236,9 +236,9 @@ struct OpenAL_Output::StreamThread {
     // std::thread entry point
     void operator()()
     {
+        std::unique_lock<std::mutex> lock (mMutex);
         while(!mExit)
         {
-            std::unique_lock<std::mutex> lock (mMutex);
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
             {
