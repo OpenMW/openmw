@@ -15,26 +15,20 @@
 #include "../../model/settings/usersettings.hpp"
 
 #include "scriptedit.hpp"
+#include "recordbuttonbar.hpp"
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0)
+: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0),
+  mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
+    std::vector<std::string> selection (1, id.getId());
+    mCommandDispatcher.setSelection (selection);
+
     QVBoxLayout *layout = new QVBoxLayout;
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
 
-    mBottom = new QWidget(this);
-    QStackedLayout *bottmLayout = new QStackedLayout(mBottom);
-    bottmLayout->setContentsMargins (0, 0, 0, 0);
-    QStatusBar *statusBar = new QStatusBar(mBottom);
-    mStatus = new QLabel(mBottom);
-    statusBar->addWidget (mStatus);
-    bottmLayout->addWidget (statusBar);
-    mBottom->setLayout (bottmLayout);
+    layout->addWidget (mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
 
-    layout->addWidget (mBottom, 0);
-    layout->insertWidget (0, mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
-
-    QWidget *widget = new QWidget;
+    QWidget *widget = new QWidget (this);;
     widget->setLayout (layout);
     setWidget (widget);
 
@@ -54,6 +48,25 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     mEditor->setPlainText (mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString());
 
+    // buttons
+    mButtons = new RecordButtonBar (id, *mModel, 0, &mCommandDispatcher, this);
+
+    layout->addWidget (mButtons);
+
+    // status bar
+    QStatusBar *statusBar = new QStatusBar(mBottom);
+    mStatus = new QLabel(mBottom);
+    statusBar->addWidget (mStatus);
+
+    mBottom = new QWidget(this);
+    QStackedLayout *bottmLayout = new QStackedLayout(mBottom);
+    bottmLayout->setContentsMargins (0, 0, 0, 0);
+    bottmLayout->addWidget (statusBar);
+    mBottom->setLayout (bottmLayout);
+
+    layout->addWidget (mBottom, 0);
+
+    // signals
     connect (mEditor, SIGNAL (textChanged()), this, SLOT (textChanged()));
 
     connect (mModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
@@ -61,6 +74,11 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
+
+    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+
+    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
+        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
 
     updateStatusBar();
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
@@ -78,6 +96,8 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
     {
         mEditor->setMonoFont(value.at(0).toStdString() == "true");
     }
+
+    mButtons->updateUserSetting (name, value);
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()
@@ -93,6 +113,8 @@ void CSVWorld::ScriptSubView::updateStatusBar ()
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
 {
     mEditor->setReadOnly (locked);
+    mButtons->setEditLock (locked);
+    mCommandDispatcher.setEditLock (locked);
 }
 
 void CSVWorld::ScriptSubView::useHint (const std::string& hint)
@@ -159,3 +181,14 @@ void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, i
         emit closeRequest();
 }
 
+void CSVWorld::ScriptSubView::switchToRow (int row)
+{
+    int idColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    std::string id = mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData();
+    setUniversalId (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Script, id));
+
+    mEditor->setPlainText (mModel->data (mModel->index (row, mColumn)).toString());
+
+    std::vector<std::string> selection (1, id);
+    mCommandDispatcher.setSelection (selection);
+}
