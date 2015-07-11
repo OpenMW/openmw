@@ -42,10 +42,10 @@ namespace MWInput
         : mWindow(window)
         , mViewer(viewer)
         , mJoystickLastUsed(false)
-        , mPlayer(NULL)
+        , mPlayer(nullptr)
         , mEngine(engine)
-        , mInputManager(NULL)
-        , mVideoWrapper(NULL)
+        , mInputManager(nullptr)
+        , mVideoWrapper(nullptr)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
@@ -82,7 +82,7 @@ namespace MWInput
                                         Settings::Manager::getFloat("contrast", "Video"));
 
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
+        mInputBinder = new ICS::InputControlSystem(file, true, this, nullptr, A_Last);
 
         loadKeyDefaults();
         loadControllerDefaults();

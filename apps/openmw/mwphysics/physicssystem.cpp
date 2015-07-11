@@ -587,7 +587,7 @@ namespace MWPhysics
         }
 
     private:
-        std::auto_ptr<btCollisionObject> mCollisionObject;
+        std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<NifBullet::BulletShapeInstance> mShapeInstance;
     };
 
@@ -668,7 +668,7 @@ namespace MWPhysics
         btScalar mLeastDistSqr;
 
         DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const btVector3 &origin)
-          : mMe(me), mOrigin(origin), mObject(NULL), mContactPoint(0,0,0),
+          : mMe(me), mOrigin(origin), mObject(nullptr), mContactPoint(0,0,0),
             mLeastDistSqr(std::numeric_limits<float>::max())
         { }
 
@@ -718,7 +718,7 @@ namespace MWPhysics
         object.setCollisionShape(&shape);
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         Actor* physactor = getActor(actor);
         if (physactor)
             me = physactor->getCollisionObject();
@@ -761,7 +761,7 @@ namespace MWPhysics
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
 
-        const btCollisionObject* me = NULL;
+        const btCollisionObject* me = nullptr;
         if (!ignore.isEmpty())
         {
             Actor* actor = getActor(ignore);
@@ -903,7 +903,7 @@ namespace MWPhysics
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)
     {
-        btCollisionObject* me = NULL;
+        btCollisionObject* me = nullptr;
 
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -1023,7 +1023,7 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
-        return NULL;
+        return nullptr;
     }
 
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)

@@ -2,7 +2,6 @@
 
 #include <map>
 #include <sstream>
-#include <boost/make_shared.hpp>
 
 #include <MyGUI_LanguageManager.h>
 
@@ -44,7 +43,7 @@ struct JournalViewModelImpl : JournalViewModel
     static Utf8Span toUtf8Span (std::string const & str)
     {
         if (str.size () == 0)
-            return Utf8Span (Utf8Point (NULL), Utf8Point (NULL));
+            return Utf8Span (Utf8Point (nullptr), Utf8Point (nullptr));
 
         Utf8Point point = reinterpret_cast <Utf8Point> (str.c_str ());
 
@@ -155,7 +154,7 @@ struct JournalViewModelImpl : JournalViewModel
             return toUtf8Span (utf8text);
         }
 
-        void visitSpans (boost::function < void (TopicId, size_t, size_t)> visitor) const
+        void visitSpans (std::function < void (TopicId, size_t, size_t)> visitor) const
         {
             ensureLoaded ();
             mModel->ensureKeyWordSearchLoaded ();
@@ -199,7 +198,7 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, boost::function <void (const std::string&, bool)> visitor) const
+    void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
@@ -274,7 +273,7 @@ struct JournalViewModelImpl : JournalViewModel
         }
     };
 
-    void visitJournalEntries (const std::string& questName, boost::function <void (JournalEntry const &)> visitor) const
+    void visitJournalEntries (const std::string& questName, std::function <void (JournalEntry const &)> visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -307,13 +306,13 @@ struct JournalViewModelImpl : JournalViewModel
         }
     }
 
-    void visitTopicName (TopicId topicId, boost::function <void (Utf8Span)> visitor) const
+    void visitTopicName (TopicId topicId, std::function <void (Utf8Span)> visitor) const
     {
         MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (char character, boost::function < void (const std::string&) > visitor) const
+    void visitTopicNamesStartingWith (char character, std::function < void (const std::string&) > visitor) const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -347,7 +346,7 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitTopicEntries (TopicId topicId, boost::function <void (TopicEntry const &)> visitor) const
+    void visitTopicEntries (TopicId topicId, std::function <void (TopicEntry const &)> visitor) const
     {
         typedef MWDialogue::Topic::TEntryIter iterator_t;
 
@@ -360,7 +359,7 @@ struct JournalViewModelImpl : JournalViewModel
 
 JournalViewModel::Ptr JournalViewModel::create ()
 {
-    return boost::make_shared <JournalViewModelImpl> ();
+    return std::make_shared <JournalViewModelImpl> ();
 }
 
 }

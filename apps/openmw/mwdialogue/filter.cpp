@@ -596,7 +596,7 @@ const ESM::DialInfo* MWDialogue::Filter::search (const ESM::Dialogue& dialogue, 
     std::vector<const ESM::DialInfo *> suitableInfos = list (dialogue, fallbackToInfoRefusal, false);
 
     if (suitableInfos.empty())
-        return NULL;
+        return nullptr;
     else
         return suitableInfos[0];
 }

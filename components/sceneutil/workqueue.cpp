@@ -99,7 +99,7 @@ WorkItem *WorkQueue::removeWorkItem()
         return item;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 WorkThread::WorkThread(WorkQueue *workQueue)

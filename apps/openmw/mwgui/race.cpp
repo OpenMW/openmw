@@ -112,6 +112,8 @@ namespace MWGui
         updateSpellPowers();
     }
 
+    RaceDialog::~RaceDialog() {}
+
     void RaceDialog::setNextButtonShow(bool shown)
     {
         MyGUI::Button* okButton;
@@ -131,10 +133,10 @@ namespace MWGui
         updateSkills();
         updateSpellPowers();
 
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreview.reset(NULL);
-        mPreviewTexture.reset(NULL);
+        mPreview.reset(nullptr);
+        mPreviewTexture.reset(nullptr);
 
         mPreview.reset(new MWRender::RaceSelectionPreview(mViewer, mResourceSystem));
         mPreview->rebuild();
@@ -187,10 +189,10 @@ namespace MWGui
 
     void RaceDialog::close()
     {
-        mPreviewImage->setRenderItemTexture(NULL);
+        mPreviewImage->setRenderItemTexture(nullptr);
 
-        mPreviewTexture.reset(NULL);
-        mPreview.reset(NULL);
+        mPreviewTexture.reset(nullptr);
+        mPreview.reset(nullptr);
     }
 
     // widget controls

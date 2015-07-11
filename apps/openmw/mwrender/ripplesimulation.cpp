@@ -41,7 +41,7 @@ namespace
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 0.3f/rippleFrameCount, textures));
-        controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+        controller->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
         node->addUpdateCallback(controller);
 
         osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
@@ -131,7 +131,7 @@ void RippleSimulation::update(float dt)
             if (mParticleSystem->numParticles()-mParticleSystem->numDeadParticles() > 500)
                 continue; // TODO: remove the oldest particle to make room?
 
-            osgParticle::Particle* p = mParticleSystem->createParticle(NULL);
+            osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
             p->setPosition(currentPos);
             p->setAngle(osg::Vec3f(0,0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
         }

@@ -36,7 +36,7 @@ namespace MWWorld
         osg::Vec3f mLastKnownExteriorPosition;
 
         ESM::Position           mMarkedPosition;
-        // If no position was marked, this is NULL
+        // If no position was marked, this is nullptr
         CellStore*              mMarkedCell;
 
         bool                    mAutoMove;

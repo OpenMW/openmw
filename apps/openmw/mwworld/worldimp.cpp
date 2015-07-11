@@ -1030,12 +1030,12 @@ namespace MWWorld
         osg::Vec3f pos (posdata.asVec3());
 
         MWRender::Animation* anim = mRendering->getAnimation(ptr);
-        if (anim != NULL)
+        if (anim != nullptr)
         {
             const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
+            if (node == nullptr)
                 node = anim->getNode("Bip01 Head");
-            if (node != NULL)
+            if (node != nullptr)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())
@@ -1098,7 +1098,7 @@ namespace MWWorld
 
         osg::Vec3f vec(x, y, z);
 
-        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
+        CellStore *currCell = ptr.isInCell() ? ptr.getCell() : nullptr; // currCell == nullptr should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
         MWWorld::Ptr newPtr = ptr;
@@ -1153,7 +1153,7 @@ namespace MWWorld
                     newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
 
                     mRendering->updatePtr(ptr, newPtr);
-                    ptr.getRefData().setBaseNode(NULL);
+                    ptr.getRefData().setBaseNode(nullptr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
 
@@ -2634,12 +2634,12 @@ namespace MWWorld
         osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
 
         MWRender::Animation* anim = mRendering->getAnimation(actor);
-        if (anim != NULL)
+        if (anim != nullptr)
         {
             const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
+            if (node == nullptr)
                 node = anim->getNode("Bip01 Head");
-            if (node != NULL)
+            if (node != nullptr)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())

@@ -3,8 +3,8 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
-#include <boost/bind.hpp>
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -122,8 +122,9 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
         }
     }
 
+    using namespace std::placeholders;
     dataDirs.erase(std::remove_if(dataDirs.begin(), dataDirs.end(),
-        boost::bind(&boost::filesystem::path::empty, _1)), dataDirs.end());
+        std::bind(&boost::filesystem::path::empty, _1)), dataDirs.end());
 }
 
 void ConfigurationManager::loadConfig(const boost::filesystem::path& path,

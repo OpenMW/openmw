@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "node.hpp"
 
@@ -12,12 +12,12 @@ namespace CSMFilter
 {
     class NAryNode : public Node
     {
-            std::vector<boost::shared_ptr<Node> > mNodes;
+            std::vector<std::shared_ptr<Node> > mNodes;
             std::string mName;
 
         public:
 
-            NAryNode (const std::vector<boost::shared_ptr<Node> >& nodes, const std::string& name);
+            NAryNode (const std::vector<std::shared_ptr<Node> >& nodes, const std::string& name);
 
             int getSize() const;
 

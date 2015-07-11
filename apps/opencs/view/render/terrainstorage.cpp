@@ -18,7 +18,7 @@ namespace CSVRender
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
         int index = mData.getLand().searchId(stream.str());
         if (index == -1)
-            return NULL;
+            return nullptr;
 
         ESM::Land* land = mData.getLand().getRecord(index).get().mLand.get();
         int mask = ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX;

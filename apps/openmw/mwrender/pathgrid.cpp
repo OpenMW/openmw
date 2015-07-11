@@ -127,8 +127,8 @@ osg::ref_ptr<osg::Geometry> Pathgrid::createPathgridPoints(const ESM::Pathgrid *
 Pathgrid::Pathgrid(osg::ref_ptr<osg::Group> root)
     : mPathgridEnabled(false)
     , mRootNode(root)
-    , mPathGridRoot(NULL)
-    , mInteriorPathgridNode(NULL)
+    , mPathGridRoot(nullptr)
+    , mInteriorPathgridNode(nullptr)
 {
 }
 
@@ -194,7 +194,7 @@ void Pathgrid::togglePathgrid()
         if (mPathGridRoot)
         {
             mRootNode->removeChild(mPathGridRoot);
-            mPathGridRoot = NULL;
+            mPathGridRoot = nullptr;
         }
     }
 }
@@ -235,7 +235,7 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     }
     else
     {
-        assert(mInteriorPathgridNode == NULL);
+        assert(mInteriorPathgridNode == nullptr);
         mInteriorPathgridNode = cellPathGrid;
     }
 }
@@ -257,7 +257,7 @@ void Pathgrid::disableCellPathgrid(const MWWorld::CellStore *store)
         if (mInteriorPathgridNode)
         {
             mPathGridRoot->removeChild(mInteriorPathgridNode);
-            mInteriorPathgridNode = NULL;
+            mInteriorPathgridNode = nullptr;
         }
     }
 }

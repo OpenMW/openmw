@@ -17,7 +17,7 @@ namespace MWMechanics
                          bool closed = true);
 
     /// Returns door pointer within range. No guarentee is given as too which one
-    /** \return Pointer to the door, or NULL if none exists **/
+    /** \return Pointer to the door, or nullptr if none exists **/
     MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor,
                          float minSqr = MIN_DIST_TO_DOOR_SQUARED,
                          bool closed = true);

@@ -19,22 +19,22 @@
 
 LowLevelFile::LowLevelFile ()
 {
-    mHandle = NULL;
+    mHandle = nullptr;
 }
 
 LowLevelFile::~LowLevelFile ()
 {
-    if (mHandle != NULL)
+    if (mHandle != nullptr)
         fclose (mHandle);
 }
 
 void LowLevelFile::open (char const * filename)
 {
-    assert (mHandle == NULL);
+    assert (mHandle == nullptr);
 
     mHandle = fopen (filename, "rb");
 
-    if (mHandle == NULL)
+    if (mHandle == nullptr)
     {
         std::ostringstream os;
         os << "Failed to open '" << filename << "' for reading.";
@@ -44,16 +44,16 @@ void LowLevelFile::open (char const * filename)
 
 void LowLevelFile::close ()
 {
-    assert (mHandle != NULL);
+    assert (mHandle != nullptr);
 
     fclose (mHandle);
 
-    mHandle = NULL;
+    mHandle = nullptr;
 }
 
 size_t LowLevelFile::size ()
 {
-    assert (mHandle != NULL);
+    assert (mHandle != nullptr);
 
     long oldPosition = ftell (mHandle);
 
@@ -76,7 +76,7 @@ size_t LowLevelFile::size ()
 
 void LowLevelFile::seek (size_t Position)
 {
-    assert (mHandle != NULL);
+    assert (mHandle != nullptr);
 
     if (fseek (mHandle, Position, SEEK_SET) != 0)
         throw std::runtime_error ("A seek operation on a file failed.");
@@ -84,7 +84,7 @@ void LowLevelFile::seek (size_t Position)
 
 size_t LowLevelFile::tell ()
 {
-    assert (mHandle != NULL);
+    assert (mHandle != nullptr);
 
     long Position = ftell (mHandle);
 
@@ -96,7 +96,7 @@ size_t LowLevelFile::tell ()
 
 size_t LowLevelFile::read (void * data, size_t size)
 {
-    assert (mHandle != NULL);
+    assert (mHandle != nullptr);
 
     int amount = fread (data, 1, size, mHandle);
 
@@ -270,7 +270,7 @@ void LowLevelFile::seek (size_t Position)
 {
     assert (mHandle != INVALID_HANDLE_VALUE);
 
-    if (SetFilePointer (mHandle, Position, NULL, SEEK_SET) == INVALID_SET_FILE_POINTER)
+    if (SetFilePointer (mHandle, Position, nullptr, SEEK_SET) == INVALID_SET_FILE_POINTER)
         if (GetLastError () != NO_ERROR)
             throw std::runtime_error ("A seek operation on a file failed.");
 }
@@ -279,7 +279,7 @@ size_t LowLevelFile::tell ()
 {
     assert (mHandle != INVALID_HANDLE_VALUE);
 
-    DWORD value = SetFilePointer (mHandle, 0, NULL, SEEK_CUR);
+    DWORD value = SetFilePointer (mHandle, 0, nullptr, SEEK_CUR);
 
     if (value == INVALID_SET_FILE_POINTER && GetLastError () != NO_ERROR)
         throw std::runtime_error ("A query operation on a file failed.");
@@ -293,7 +293,7 @@ size_t LowLevelFile::read (void * data, size_t size)
 
     DWORD read;
 
-    if (!ReadFile (mHandle, data, size, &read, NULL))
+    if (!ReadFile (mHandle, data, size, &read, nullptr))
         throw std::runtime_error ("A read operation on a file failed.");
 
     return read;

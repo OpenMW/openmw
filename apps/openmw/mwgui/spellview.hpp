@@ -56,7 +56,7 @@ namespace MWGui
     private:
         MyGUI::ScrollView* mScrollView;
 
-        std::auto_ptr<SpellModel> mModel;
+        std::unique_ptr<SpellModel> mModel;
 
         /// tracks a row in the spell view
         struct LineInfo

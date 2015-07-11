@@ -1,13 +1,15 @@
 #include <algorithm>
 #include <stdexcept>
+#include <cstring>
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 #include <stdint.h>
 
 #include <components/vfs/manager.hpp>
-
-#include <boost/thread.hpp>
 
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
@@ -211,24 +213,32 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
-    boost::recursive_mutex mMutex;
-    boost::thread mThread;
+    std::mutex mMutex;
+    std::thread mThread;
+    std::condition_variable mCondition;
+    bool mExit;
 
     StreamThread()
-      : mThread(boost::ref(*this))
+      : mThread(std::ref(*this))
+      , mExit(false)
     {
     }
     ~StreamThread()
     {
-        mThread.interrupt();
+        mMutex.lock();
+        mExit = true;
+        mMutex.unlock();
+        mCondition.notify_one();
+
+        mThread.join();
     }
 
-    // boost::thread entry point
+    // std::thread entry point
     void operator()()
     {
-        while(1)
+        std::unique_lock<std::mutex> lock (mMutex);
+        while(!mExit)
         {
-            mMutex.lock();
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
             {
@@ -237,8 +247,7 @@ struct OpenAL_Output::StreamThread {
                 else
                     ++iter;
             }
-            mMutex.unlock();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            mCondition.wait_for(lock, std::chrono::milliseconds(50));
         }
     }
 
@@ -655,10 +664,10 @@ std::vector<std::string> OpenAL_Output::enumerate()
     std::vector<std::string> devlist;
     const ALCchar *devnames;
 
-    if(alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT"))
-        devnames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+    if(alcIsExtensionPresent(nullptr, "ALC_ENUMERATE_ALL_EXT"))
+        devnames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
     else
-        devnames = alcGetString(NULL, ALC_DEVICE_SPECIFIER);
+        devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
         devlist.push_back(devnames);
@@ -681,7 +690,7 @@ void OpenAL_Output::init(const std::string &devname)
     }
     else
     {
-        const ALCchar *name = NULL;
+        const ALCchar *name = nullptr;
         if(alcIsExtensionPresent(mDevice, "ALC_ENUMERATE_ALL_EXT"))
             name = alcGetString(mDevice, ALC_ALL_DEVICES_SPECIFIER);
         if(alcGetError(mDevice) != AL_NO_ERROR || !name)
@@ -689,7 +698,7 @@ void OpenAL_Output::init(const std::string &devname)
         std::cout << "Opened \""<<name<<"\"" << std::endl;
     }
 
-    mContext = alcCreateContext(mDevice, NULL);
+    mContext = alcCreateContext(mDevice, nullptr);
     if(!mContext || alcMakeContextCurrent(mContext) == ALC_FALSE)
     {
         if(mContext)
@@ -856,7 +865,7 @@ void OpenAL_Output::bufferFinished(ALuint buf)
 
 MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, float basevol, float pitch, int flags,float offset)
 {
-    boost::shared_ptr<OpenAL_Sound> sound;
+    std::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -895,7 +904,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(const std::string &fname, float vol, f
 MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const osg::Vec3f &pos, float vol, float basevol, float pitch,
                                             float min, float max, int flags, float offset, bool extractLoudness)
 {
-    boost::shared_ptr<OpenAL_Sound> sound;
+    std::shared_ptr<OpenAL_Sound> sound;
     ALuint src=0, buf=0;
 
     if(mFreeSources.empty())
@@ -940,7 +949,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(const std::string &fname, const osg:
 
 MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, float pitch, int flags)
 {
-    boost::shared_ptr<OpenAL_SoundStream> sound;
+    std::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
 
     if(mFreeSources.empty())

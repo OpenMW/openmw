@@ -712,7 +712,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 CharacterController::~CharacterController()
 {
     if (mAnimation)
-        mAnimation->setTextKeyListener(NULL);
+        mAnimation->setTextKeyListener(nullptr);
 }
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -1914,7 +1914,7 @@ void CharacterController::skipAnim()
 
 bool CharacterController::isAnimPlaying(const std::string &groupName)
 {
-    if(mAnimation == NULL)
+    if(mAnimation == nullptr)
         return false;
     return mAnimation->isPlaying(groupName);
 }
@@ -2102,9 +2102,9 @@ void CharacterController::updateHeadTracking(float duration)
         if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
             const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
+            if (node == nullptr)
                 node = anim->getNode("Bip01 Head");
-            if (node != NULL)
+            if (node != nullptr)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())

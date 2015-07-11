@@ -9,7 +9,7 @@
 namespace ESM
 {
     ESMWriter::ESMWriter()
-        : mStream(NULL)
+        : mStream(nullptr)
         , mEncoder (0)
         , mRecordCount (0)
         , mCounting (true)

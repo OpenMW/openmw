@@ -26,7 +26,7 @@ namespace
 
 osg::Matrixf getWorldTransform(const Nif::Node *node)
 {
-    if(node->parent != NULL)
+    if(node->parent != nullptr)
         return node->trafo.toMatrix() * getWorldTransform(node->parent);
     return node->trafo.toMatrix();
 }
@@ -57,8 +57,8 @@ struct TriangleMeshShape : public btBvhTriangleMeshShape
 };
 
 BulletNifLoader::BulletNifLoader()
-    : mCompoundShape(NULL)
-    , mStaticMesh(NULL)
+    : mCompoundShape(nullptr)
+    , mStaticMesh(nullptr)
 {
 }
 
@@ -70,8 +70,8 @@ osg::ref_ptr<BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
 {
     mShape = new BulletShape;
 
-    mCompoundShape = NULL;
-    mStaticMesh = NULL;
+    mCompoundShape = nullptr;
+    mStaticMesh = nullptr;
 
     if (nif->numRoots() < 1)
     {
@@ -80,10 +80,10 @@ osg::ref_ptr<BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
     }
 
     Nif::Record *r = nif->getRoot(0);
-    assert(r != NULL);
+    assert(r != nullptr);
 
     Nif::Node *node = dynamic_cast<Nif::Node*>(r);
-    if (node == NULL)
+    if (node == nullptr)
     {
         warn("First root in file was not a node, but a " +
              r->recName + ". Skipping file.");
@@ -92,7 +92,7 @@ osg::ref_ptr<BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
 
     if (findBoundingBox(node))
     {
-        std::auto_ptr<btCompoundShape> compound (new btCompoundShape);
+        std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
 
         btBoxShape* boxShape = new btBoxShape(getbtVector(mShape->mCollisionBoxHalfExtents));
         btTransform transform = btTransform::getIdentity();
@@ -212,7 +212,7 @@ void BulletNifLoader::handleNode(const Nif::Node *node, int flags,
     {
         // Get the next extra data in the list
         e = e->extra.getPtr();
-        assert(e != NULL);
+        assert(e != nullptr);
 
         if (e->recType == Nif::RC_NiStringExtraData)
         {
@@ -261,7 +261,7 @@ void BulletNifLoader::handleNode(const Nif::Node *node, int flags,
 
 void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf &transform, bool isAnimated)
 {
-    assert(shape != NULL);
+    assert(shape != nullptr);
 
     // Interpret flags
     bool hidden    = (flags&Nif::NiNode::Flag_Hidden) != 0;
@@ -348,7 +348,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 }
 
 BulletShape::BulletShape()
-    : mCollisionShape(NULL)
+    : mCollisionShape(nullptr)
 {
 
 }
@@ -360,7 +360,7 @@ BulletShape::~BulletShape()
 
 void BulletShape::deleteShape(btCollisionShape* shape)
 {
-    if(shape!=NULL)
+    if(shape!=nullptr)
     {
         if(shape->isCompound())
         {

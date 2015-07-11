@@ -285,7 +285,7 @@ namespace NifOsg
             }
 
             const Nif::Record *r = nif->getRoot(0);
-            assert(r != NULL);
+            assert(r != nullptr);
 
             if(r->recType != Nif::RC_NiSequenceStreamHelper)
             {
@@ -325,7 +325,7 @@ namespace NifOsg
                     continue;
 
                 osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
-                callback->setFunction(boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
+                callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 target.mKeyframeControllers[strdata->string] = callback;
             }
@@ -339,12 +339,12 @@ namespace NifOsg
             const Nif::Record* r = nif->getRoot(0);
 
             const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-            if (nifNode == NULL)
+            if (nifNode == nullptr)
                 nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, nullptr, textureManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -371,9 +371,9 @@ namespace NifOsg
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
-                toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+                toSetup->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
-            toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
+            toSetup->setFunction(std::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
         }
 
         void optimize (const Nif::Node* nifNode, osg::Group* node, bool skipMeshes)
@@ -412,7 +412,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
-                                std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
+                                std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
         {
             osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
 
@@ -714,7 +714,7 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
         void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            const Nif::NiAutoNormalParticlesData *particledata = NULL;
+            const Nif::NiAutoNormalParticlesData *particledata = nullptr;
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
                 particledata = static_cast<const Nif::NiAutoNormalParticles*>(nifNode)->data.getPtr();
             else if(nifNode->recType == Nif::RC_NiRotatingParticles)
@@ -791,7 +791,7 @@ namespace NifOsg
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
-            const Nif::NiParticleSystemController* partctrl = NULL;
+            const Nif::NiParticleSystemController* partctrl = nullptr;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -975,7 +975,7 @@ namespace NifOsg
             // No normals available in the MorphData
             morphGeom->setMorphNormals(false);
 
-            morphGeom->setUpdateCallback(NULL);
+            morphGeom->setUpdateCallback(nullptr);
             morphGeom->setCullCallback(new UpdateMorphGeometry);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;

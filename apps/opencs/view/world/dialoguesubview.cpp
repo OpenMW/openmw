@@ -66,7 +66,7 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
 
     CSMWorld::Columns::ColumnId columnId = static_cast<CSMWorld::Columns::ColumnId> (
         mTable->getColumnId (index.column()));
-    
+
     if (QVariant::String == v.type())
     {
         label->setText(v.toString());
@@ -75,7 +75,7 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
     {
         int data = v.toInt();
         std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (columnId));
-   
+
         label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
     }
     else
@@ -116,7 +116,7 @@ mIndex(index)
 CSVWorld::DialogueDelegateDispatcherProxy::DialogueDelegateDispatcherProxy(QWidget* editor, CSMWorld::ColumnBase::Display display) :
 mEditor(editor),
 mDisplay(display),
-mIndexWrapper(NULL)
+mIndexWrapper(nullptr)
 {
 }
 
@@ -154,7 +154,7 @@ mNotEditableDelegate(table, parent)
 
 CSVWorld::CommandDelegate* CSVWorld::DialogueDelegateDispatcher::makeDelegate(CSMWorld::ColumnBase::Display display)
 {
-    CommandDelegate *delegate = NULL;
+    CommandDelegate *delegate = nullptr;
     std::map<int, CommandDelegate*>::const_iterator delegateIt(mDelegates.find(display));
     if (delegateIt == mDelegates.end())
     {
@@ -247,11 +247,11 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(CSMWorld::ColumnBase::
         variant = index.data(Qt::DisplayRole);
         if (!variant.isValid())
         {
-            return NULL;
+            return nullptr;
         }
     }
 
-    QWidget* editor = NULL;
+    QWidget* editor = nullptr;
     if (! (mTable->flags (index) & Qt::ItemIsEditable))
     {
         return mNotEditableDelegate.createEditor(qobject_cast<QWidget*>(mParent),
@@ -321,21 +321,21 @@ CSVWorld::IdContextMenu::IdContextMenu(QWidget *widget, CSMWorld::ColumnBase::Di
       mWidget(widget),
       mIdType(CSMWorld::TableMimeData::convertEnums(display))
 {
-    Q_ASSERT(mWidget != NULL);
+    Q_ASSERT(mWidget != nullptr);
     Q_ASSERT(CSMWorld::ColumnBase::isId(display));
     Q_ASSERT(mIdType != CSMWorld::UniversalId::Type_None);
-    
+
     mWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(mWidget, 
-            SIGNAL(customContextMenuRequested(const QPoint &)), 
-            this, 
+    connect(mWidget,
+            SIGNAL(customContextMenuRequested(const QPoint &)),
+            this,
             SLOT(showContextMenu(const QPoint &)));
 
     mEditIdAction = new QAction(this);
     connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editIdRequest()));
 
     QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
-    if (lineEdit != NULL)
+    if (lineEdit != nullptr)
     {
         mContextMenu = lineEdit->createStandardContextMenu();
     }
@@ -352,15 +352,15 @@ void CSVWorld::IdContextMenu::excludeId(const std::string &id)
 
 QString CSVWorld::IdContextMenu::getWidgetValue() const
 {
-    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);   
+    QLineEdit *lineEdit = qobject_cast<QLineEdit *>(mWidget);
     QLabel *label = qobject_cast<QLabel *>(mWidget);
 
     QString value = "";
-    if (lineEdit != NULL)
+    if (lineEdit != nullptr)
     {
         value = lineEdit->text();
     }
-    else if (label != NULL)
+    else if (label != nullptr)
     {
         value = label->text();
     }
@@ -411,7 +411,7 @@ void CSVWorld::IdContextMenu::showContextMenu(const QPoint &pos)
     {
         removeEditIdActionFromMenu();
     }
-    
+
     if (!mContextMenu->actions().isEmpty())
     {
         mContextMenu->exec(mWidget->mapToGlobal(pos));
@@ -432,7 +432,7 @@ void CSVWorld::EditWidget::createEditorContextMenu(QWidget *editor,
                                                    CSMWorld::ColumnBase::Display display,
                                                    int currentRow) const
 {
-    Q_ASSERT(editor != NULL);
+    Q_ASSERT(editor != nullptr);
 
     if (CSMWorld::ColumnBase::isId(display) &&
         CSMWorld::TableMimeData::convertEnums(display) != CSMWorld::UniversalId::Type_None)
@@ -466,11 +466,11 @@ CSVWorld::EditWidget::EditWidget(QWidget *parent,
         int row, CSMWorld::IdTable* table, CSMWorld::CommandDispatcher& commandDispatcher,
         CSMDoc::Document& document, bool createAndDelete) :
 QScrollArea(parent),
-mWidgetMapper(NULL),
-mNestedTableMapper(NULL),
-mDispatcher(NULL),
-mNestedTableDispatcher(NULL),
-mMainWidget(NULL),
+mWidgetMapper(nullptr),
+mNestedTableMapper(nullptr),
+mDispatcher(nullptr),
+mNestedTableDispatcher(nullptr),
+mMainWidget(nullptr),
 mTable(table),
 mCommandDispatcher (commandDispatcher),
 mDocument (document)
@@ -588,9 +588,9 @@ void CSVWorld::EditWidget::remake(int row)
                 tablesLayout->addWidget(label);
                 tablesLayout->addWidget(table);
 
-                connect(table, 
-                        SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)), 
-                        this, 
+                connect(table,
+                        SIGNAL(editRequest(const CSMWorld::UniversalId &, const std::string &)),
+                        this,
                         SIGNAL(editIdRequest(const CSMWorld::UniversalId &, const std::string &)));
             }
             else if (!(flags & CSMWorld::ColumnBase::Flag_Dialogue_List))
@@ -725,7 +725,7 @@ bool CSVWorld::SimpleDialogueSubView::isLocked() const
 CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) :
     SubView (id),
     mEditWidget(0),
-    mMainLayout(NULL),
+    mMainLayout(nullptr),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
     mLocked(false),
     mDocument(document),
@@ -854,7 +854,7 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     connect (mButtons, SIGNAL (showPreview()), this, SLOT (showPreview()));
     connect (mButtons, SIGNAL (viewRecord()), this, SLOT (viewRecord()));
     connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
-    
+
     connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
         mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
 }
@@ -908,7 +908,7 @@ void CSVWorld::DialogueSubView::switchToRow (int row)
 
     setUniversalId (CSMWorld::UniversalId (type, id));
     updateCurrentId();
-    
+
     getEditWidget().remake (row);
 
     int stateColumn = getTable().findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
@@ -923,5 +923,5 @@ void CSVWorld::DialogueSubView::requestFocus (const std::string& id)
     QModelIndex index = getTable().getModelIndex (id, 0);
 
     if (index.isValid())
-        switchToRow (index.row());    
+        switchToRow (index.row());
 }

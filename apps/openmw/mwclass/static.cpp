@@ -34,7 +34,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Static> *ref =
             ptr.get<ESM::Static>();
-        assert(ref->mBase != NULL);
+        assert(ref->mBase != nullptr);
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -50,7 +50,7 @@ namespace MWClass
 
     void Static::registerSelf()
     {
-        boost::shared_ptr<Class> instance (new Static);
+        std::shared_ptr<Class> instance (new Static);
 
         registerClass (typeid (ESM::Static).name(), instance);
     }

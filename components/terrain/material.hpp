@@ -36,15 +36,15 @@ namespace Terrain
 
         virtual const char *effectName() const
         {
-            return NULL;
+            return nullptr;
         }
         virtual const char *effectDescription() const
         {
-            return NULL;
+            return nullptr;
         }
         virtual const char *effectAuthor() const
         {
-            return NULL;
+            return nullptr;
         }
 
     private:

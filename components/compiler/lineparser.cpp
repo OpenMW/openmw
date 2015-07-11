@@ -299,7 +299,7 @@ namespace Compiler
                     {
                         // workaround for broken positioncell instructions.
                         /// \todo add option to disable this
-                        std::auto_ptr<ErrorDowngrade> errorDowngrade (0);
+                        std::unique_ptr<ErrorDowngrade> errorDowngrade;
                         if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
                             errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
 

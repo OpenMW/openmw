@@ -73,7 +73,7 @@ namespace MWGui
 
     void CountDialog::onOkButtonClicked(MyGUI::Widget* _sender)
     {
-        eventOkClicked(NULL, mSlider->getScrollPosition()+1);
+        eventOkClicked(nullptr, mSlider->getScrollPosition()+1);
 
         setVisible(false);
     }
@@ -82,7 +82,7 @@ namespace MWGui
     // Enter key
     void CountDialog::onEnterKeyPressed(MyGUI::EditBox* _sender)
     {
-        eventOkClicked(NULL, mSlider->getScrollPosition()+1);
+        eventOkClicked(nullptr, mSlider->getScrollPosition()+1);
 
         setVisible(false);
     }

@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <map>
 
@@ -17,7 +17,7 @@ namespace CSMWorld
     {
             Q_OBJECT
 
-            boost::shared_ptr<CSMFilter::Node> mFilter;
+            std::shared_ptr<CSMFilter::Node> mFilter;
             std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
 
         private:
@@ -30,7 +30,7 @@ namespace CSMWorld
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
+            void setFilter (const std::shared_ptr<CSMFilter::Node>& filter);
 
             void refreshFilter();
 

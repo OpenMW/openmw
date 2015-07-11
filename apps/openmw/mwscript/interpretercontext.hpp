@@ -1,7 +1,7 @@
 #ifndef GAME_SCRIPT_INTERPRETERCONTEXT_H
 #define GAME_SCRIPT_INTERPRETERCONTEXT_H
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <components/interpreter/context.hpp>
 

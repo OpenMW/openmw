@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <map>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "columnbase.hpp"
 #include "universalid.hpp"
@@ -20,7 +19,7 @@ namespace CSMWorld
     {
             static const std::map<ColumnBase::Display, UniversalId::Type> sCompleterModelTypes;
 
-            std::map<ColumnBase::Display, boost::shared_ptr<QCompleter> > mCompleters;
+            std::map<ColumnBase::Display, std::shared_ptr<QCompleter> > mCompleters;
 
             // Don't allow copying
             IdCompletionManager(const IdCompletionManager &);
@@ -34,7 +33,7 @@ namespace CSMWorld
             IdCompletionManager(Data &data);
 
             bool hasCompleterFor(ColumnBase::Display display) const;
-            boost::shared_ptr<QCompleter> getCompleter(ColumnBase::Display display);
+            std::shared_ptr<QCompleter> getCompleter(ColumnBase::Display display);
     };
 }
 

@@ -59,7 +59,7 @@ int MWMechanics::AiActivate::getTypeId() const
 
 void MWMechanics::AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
 {
-    std::auto_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
+    std::unique_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());
     activate->mTargetId = mObjectId;
 
     ESM::AiSequence::AiPackageContainer package;

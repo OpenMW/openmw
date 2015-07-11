@@ -12,7 +12,7 @@ const CSMWorld::TableMimeData *CSVWorld::DragDropUtils::getTableMimeData(const Q
 bool CSVWorld::DragDropUtils::canAcceptData(const QDropEvent &event, CSMWorld::ColumnBase::Display type)
 {
     const CSMWorld::TableMimeData *data = getTableMimeData(event);
-    return data != NULL && data->holdsType(type);
+    return data != nullptr && data->holdsType(type);
 }
 
 CSMWorld::UniversalId CSVWorld::DragDropUtils::getAcceptedData(const QDropEvent &event, 

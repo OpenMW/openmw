@@ -24,7 +24,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
 {
     if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
     {
-        return NULL;
+        return nullptr;
     }
 
     CSMWorld::IdCompletionManager &completionManager = getDocument().getIdCompletionManager();

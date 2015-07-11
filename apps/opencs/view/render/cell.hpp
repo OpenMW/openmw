@@ -5,7 +5,7 @@
 #include <map>
 #include <memory>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <osg/ref_ptr>
 
@@ -35,7 +35,7 @@ namespace CSVRender
             std::string mId;
             osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
-            std::auto_ptr<Terrain::TerrainGrid> mTerrain;
+            std::unique_ptr<Terrain::TerrainGrid> mTerrain;
             int mX;
             int mY;
 

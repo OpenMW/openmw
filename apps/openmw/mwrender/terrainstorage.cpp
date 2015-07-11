@@ -57,7 +57,7 @@ namespace MWRender
             MWBase::Environment::get().getWorld()->getStore();
         ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
         if (!land)
-            return NULL;
+            return nullptr;
 
         const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
         if (!land->isDataLoaded(flags))

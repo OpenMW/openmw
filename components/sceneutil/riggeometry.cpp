@@ -59,7 +59,7 @@ public:
 };
 
 RigGeometry::RigGeometry()
-    : mSkeleton(NULL)
+    : mSkeleton(nullptr)
     , mFirstFrame(true)
     , mBoundsFirstFrame(true)
 {
@@ -70,7 +70,7 @@ RigGeometry::RigGeometry()
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     : osg::Geometry(copy, copyop)
-    , mSkeleton(NULL)
+    , mSkeleton(nullptr)
     , mInfluenceMap(copy.mInfluenceMap)
     , mFirstFrame(copy.mFirstFrame)
     , mBoundsFirstFrame(copy.mBoundsFirstFrame)

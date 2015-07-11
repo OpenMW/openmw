@@ -135,7 +135,7 @@ void CompositeViewer::update()
 SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, Qt::WindowFlags f)
     : RenderWidget(parent, f)
     , mSceneManager(sceneManager)
-    , mLighting(NULL)
+    , mLighting(nullptr)
     , mHasDefaultAmbient(false)
 {
     // we handle lighting manually

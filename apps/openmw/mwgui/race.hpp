@@ -36,6 +36,8 @@ namespace MWGui
     public:
         RaceDialog(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem);
 
+        ~RaceDialog();
+
         enum Gender
         {
             GM_Male,
@@ -115,8 +117,8 @@ namespace MWGui
 
         float mCurrentAngle;
 
-        std::auto_ptr<MWRender::RaceSelectionPreview> mPreview;
-        std::auto_ptr<MyGUI::ITexture> mPreviewTexture;
+        std::unique_ptr<MWRender::RaceSelectionPreview> mPreview;
+        std::unique_ptr<MyGUI::ITexture> mPreviewTexture;
 
         bool mPreviewDirty;
     };

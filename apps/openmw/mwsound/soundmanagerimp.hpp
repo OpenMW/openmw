@@ -5,7 +5,7 @@
 #include <utility>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <components/settings/settings.hpp>
 
@@ -31,7 +31,7 @@ namespace MWSound
     {
         const VFS::Manager* mVFS;
 
-        std::auto_ptr<Sound_Output> mOutput;
+        std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
         std::map<std::string, std::vector<std::string> > mMusicFiles;
@@ -43,7 +43,7 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        boost::shared_ptr<Sound> mMusic;
+        std::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
         typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;

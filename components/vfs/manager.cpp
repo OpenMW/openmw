@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <locale>
+#include <algorithm>
 
 #include "archive.hpp"
 

@@ -1,7 +1,7 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
-#include <boost/shared_ptr.hpp>
+
 
 #include <osg/ref_ptr>
 
@@ -89,7 +89,7 @@ namespace MWWorld
 
             std::string mCurrentWorldSpace;
 
-            boost::shared_ptr<ProjectileManager> mProjectileManager;
+            std::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mGodMode;
             bool mScriptsEnabled;

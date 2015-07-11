@@ -53,7 +53,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
         updateParts();
     }
 
-    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 }
 
 void CreatureWeaponAnimation::showWeapons(bool showWeapon)
@@ -130,7 +130,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     else
         mAmmunition.reset();
 
-    boost::shared_ptr<SceneUtil::ControllerSource> source;
+    std::shared_ptr<SceneUtil::ControllerSource> source;
 
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
         source = mWeaponAnimationTime;
@@ -154,7 +154,7 @@ void CreatureWeaponAnimation::releaseArrow(float attackStrength)
 osg::Group *CreatureWeaponAnimation::getArrowBone()
 {
     if (!mWeapon)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     mWeapon->getNode()->accept(findVisitor);
@@ -164,7 +164,7 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
 
 osg::Node *CreatureWeaponAnimation::getWeaponNode()
 {
-    return mWeapon ? mWeapon->getNode().get() : NULL;
+    return mWeapon ? mWeapon->getNode().get() : nullptr;
 }
 
 Resource::ResourceSystem *CreatureWeaponAnimation::getResourceSystem()

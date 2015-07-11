@@ -62,8 +62,8 @@ private:
 
     osg::Vec3f mFirstPersonOffset;
 
-    boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
-    boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
+    std::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
+    std::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     float mAlpha;
     bool mSoundsDisabled;
@@ -71,16 +71,16 @@ private:
     void updateNpcBase();
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
-                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=NULL);
+                                        const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
 
     void removeIndividualPart(ESM::PartReferenceType type);
     void reserveIndividualPart(ESM::PartReferenceType type, int group, int priority);
 
     bool addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh,
-                                    bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
     void removePartGroup(int group);
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
-                                    bool enchantedGlow=false, osg::Vec4f* glowColor=NULL);
+                                    bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
 

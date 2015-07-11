@@ -9,7 +9,7 @@ namespace CSMFilter
     {
         public:
 
-            NotNode (boost::shared_ptr<Node> child);
+            NotNode (std::shared_ptr<Node> child);
 
             virtual bool test (const CSMWorld::IdTableBase& table, int row,
                 const std::map<int, int>& columns) const;

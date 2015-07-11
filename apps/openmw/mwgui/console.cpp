@@ -156,7 +156,7 @@ namespace MWGui
     {
         // Apparently, hidden widgets can retain key focus
         // Remove for MyGUI 3.2.2
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
     }
 
     void Console::exit()

@@ -335,7 +335,6 @@ namespace MWWorld
         const ESM::Pathgrid *find(const ESM::Cell &cell) const;
     };
 
-
     template <>
     struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
     {

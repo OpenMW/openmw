@@ -217,12 +217,12 @@ namespace MWMechanics
 
         float baseMagicka = fPCbaseMagickaMult * creatureStats.getAttribute(ESM::Attribute::Intelligence).getBase();
         bool reachedLimit = false;
-        const ESM::Spell* weakestSpell = NULL;
+        const ESM::Spell* weakestSpell = nullptr;
         int minCost = INT_MAX;
 
         std::vector<std::string> selectedSpells;
 
-        const ESM::Race* race = NULL;
+        const ESM::Race* race = nullptr;
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
 

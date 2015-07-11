@@ -26,7 +26,7 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
-        , mSortModel(NULL)
+        , mSortModel(nullptr)
         , mAlchemy(new MWMechanics::Alchemy())
         , mApparatus (4)
         , mIngredients (4)
@@ -58,6 +58,8 @@ namespace MWGui
 
         center();
     }
+
+    AlchemyWindow::~AlchemyWindow() {}
 
     void AlchemyWindow::onCancelButtonClicked(MyGUI::Widget* _sender)
     {

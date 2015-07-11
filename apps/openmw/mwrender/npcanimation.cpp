@@ -61,7 +61,7 @@ std::string getVampireHead(const std::string& race, bool female)
     }
 
     if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
-        sVampireMapping[thisCombination] = NULL;
+        sVampireMapping[thisCombination] = nullptr;
 
     const ESM::BodyPart* bodyPart = sVampireMapping[thisCombination];
     if (!bodyPart)
@@ -267,7 +267,7 @@ NpcAnimation::~NpcAnimation()
             // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
             // all from within this destructor. ouch!
            && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getListener() == this)
-        mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
+        mPtr.getClass().getInventoryStore(mPtr).setListener(nullptr, mPtr);
 }
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener, bool disableSounds, ViewMode viewMode)
@@ -282,8 +282,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    mHeadAnimationTime = boost::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
-    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mHeadAnimationTime = std::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mWeaponAnimationTime = std::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -459,7 +459,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = 0;//(mAmmunition.get() != NULL);
+    bool wasArrowAttached = 0;//(mAmmunition.get() != nullptr);
 
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
@@ -582,7 +582,7 @@ void NpcAnimation::updateParts()
         }
 
         std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
-        parts.resize(ESM::PRT_Count, NULL);
+        parts.resize(ESM::PRT_Count, nullptr);
 
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
@@ -756,7 +756,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         }
     }
 
-    boost::shared_ptr<SceneUtil::ControllerSource> src;
+    std::shared_ptr<SceneUtil::ControllerSource> src;
     if (type == ESM::PRT_Head)
     {
         src = mHeadAnimationTime;
@@ -817,7 +817,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
                 std::cerr << "Failed to find body part '" << part->mFemale << "'" << std::endl;
@@ -832,7 +832,7 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Wrist ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Forearm ||
                                  bodypart->mData.mPart == ESM::BodyPart::MP_Upperarm))
-                    bodypart = NULL;
+                    bodypart = nullptr;
             }
             else if (!bodypart)
                 std::cerr << "Failed to find body part '" << part->mMale << "'" << std::endl;
@@ -849,7 +849,7 @@ void NpcAnimation::addControllers()
 {
     Animation::addControllers();
 
-    mFirstPersonNeckController = NULL;
+    mFirstPersonNeckController = nullptr;
     WeaponAnimation::deleteControllers();
 
     if (mViewMode == VM_FirstPerson)
@@ -938,7 +938,7 @@ osg::Group* NpcAnimation::getArrowBone()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
 
     SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
     part->getNode()->accept(findVisitor);
@@ -950,7 +950,7 @@ osg::Node* NpcAnimation::getWeaponNode()
 {
     PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
     if (!part)
-        return NULL;
+        return nullptr;
     return part->getNode();
 }
 
@@ -1014,7 +1014,7 @@ void NpcAnimation::setAlpha(float alpha)
     }
     else
     {
-        mObjectRoot->setStateSet(NULL);
+        mObjectRoot->setStateSet(nullptr);
     }
 }
 

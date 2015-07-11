@@ -51,7 +51,7 @@ class Drawable : public osg::Drawable {
     {
     public:
         FrameUpdate()
-            : mRenderManager(NULL)
+            : mRenderManager(nullptr)
         {
         }
 
@@ -75,7 +75,7 @@ class Drawable : public osg::Drawable {
     {
     public:
         CollectDrawCalls()
-            : mRenderManager(NULL)
+            : mRenderManager(nullptr)
         {
         }
 
@@ -123,9 +123,9 @@ class Drawable : public osg::Drawable {
             {
                 state->bindVertexBufferObject(bufferobject);
 
-                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL);
-                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)NULL + 12);
-                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)NULL + 16);
+                glVertexPointer(3, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr);
+                glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(MyGUI::Vertex), (char*)nullptr + 12);
+                glTexCoordPointer(2, GL_FLOAT, sizeof(MyGUI::Vertex), (char*)nullptr + 16);
             }
             else
             {
@@ -502,7 +502,7 @@ void RenderManager::destroyTexture(MyGUI::ITexture *texture)
 MyGUI::ITexture* RenderManager::getTexture(const std::string &name)
 {
     if (name.empty())
-        return NULL;
+        return nullptr;
 
     MapTexture::const_iterator item = mTextures.find(name);
     if(item == mTextures.end())

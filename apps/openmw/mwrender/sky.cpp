@@ -727,7 +727,7 @@ public:
             {
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
-                    SceneUtil::CompositeStateSetUpdater* composite = NULL;
+                    SceneUtil::CompositeStateSetUpdater* composite = nullptr;
 #if OSG_MIN_VERSION_REQUIRED(3,3,3)
                     osg::Callback* callback = node.getUpdateCallback();
 #else
@@ -838,10 +838,10 @@ void SkyManager::destroyRain()
         return;
 
     mRootNode->removeChild(mRainNode);
-    mRainNode = NULL;
-    mRainParticleSystem = NULL;
-    mRainShooter = NULL;
-    mRainFader = NULL;
+    mRainNode = nullptr;
+    mRainParticleSystem = nullptr;
+    mRainShooter = nullptr;
+    mRainFader = nullptr;
 }
 
 SkyManager::~SkyManager()
@@ -849,7 +849,7 @@ SkyManager::~SkyManager()
     if (mRootNode)
     {
         mRootNode->getParent(0)->removeChild(mRootNode);
-        mRootNode = NULL;
+        mRootNode = nullptr;
     }
 }
 
@@ -982,10 +982,10 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
             if (mParticleNode)
             {
                 mRootNode->removeChild(mParticleNode);
-                mParticleNode = NULL;
+                mParticleNode = nullptr;
             }
-            mParticleEffect = NULL;
-            mParticleFader = NULL;
+            mParticleEffect = nullptr;
+            mParticleFader = nullptr;
         }
         else
         {
@@ -996,7 +996,7 @@ void SkyManager::setWeather(const MWWorld::WeatherResult& weather)
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
 
-            SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+            SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
 
             AlphaFader::SetupVisitor alphaFaderSetupVisitor;

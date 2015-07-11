@@ -3,7 +3,10 @@
 
 #include <stdint.h>
 
-#include <boost/thread.hpp>
+#include <thread>
+#include <mutex>
+#include <vector>
+#include <condition_variable>
 
 #include <osg/ref_ptr>
 namespace osg
@@ -43,7 +46,7 @@ struct ExternalClock
     uint64_t mPausedAt;
     bool mPaused;
 
-    boost::mutex mMutex;
+    std::mutex mMutex;
 
     void setPaused(bool paused);
     uint64_t get();
@@ -52,7 +55,7 @@ struct ExternalClock
 
 struct PacketQueue {
     PacketQueue()
-      : first_pkt(NULL), last_pkt(NULL), flushing(false), nb_packets(0), size(0)
+      : first_pkt(nullptr), last_pkt(nullptr), flushing(false), nb_packets(0), size(0)
     { }
     ~PacketQueue()
     { clear(); }
@@ -62,8 +65,8 @@ struct PacketQueue {
     int nb_packets;
     int size;
 
-    boost::mutex mutex;
-    boost::condition_variable cond;
+    std::mutex mutex;
+    std::condition_variable cond;
 
     void put(AVPacket *pkt);
     int get(AVPacket *pkt, VideoState *is);
@@ -86,7 +89,7 @@ struct VideoState {
 
     void setAudioFactory(MovieAudioFactory* factory);
 
-    void init(boost::shared_ptr<std::istream> inputstream, const std::string& name);
+    void init(std::shared_ptr<std::istream> inputstream, const std::string& name);
     void deinit();
 
     void setPaused(bool isPaused);
@@ -119,11 +122,11 @@ struct VideoState {
     osg::ref_ptr<osg::Texture2D> mTexture;
 
     MovieAudioFactory* mAudioFactory;
-    boost::shared_ptr<MovieAudioDecoder> mAudioDecoder;
+    std::shared_ptr<MovieAudioDecoder> mAudioDecoder;
 
     ExternalClock mExternalClock;
 
-    boost::shared_ptr<std::istream> stream;
+    std::shared_ptr<std::istream> stream;
     AVFormatContext* format_ctx;
 
     int av_sync_type;
@@ -141,11 +144,11 @@ struct VideoState {
     VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
     AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
-    boost::mutex pictq_mutex;
-    boost::condition_variable pictq_cond;
+    std::mutex pictq_mutex;
+    std::condition_variable pictq_cond;
 
-    boost::thread parse_thread;
-    boost::thread video_thread;
+    std::thread parse_thread;
+    std::thread video_thread;
 
     volatile bool mSeekRequested;
     uint64_t mSeekPos;

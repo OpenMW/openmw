@@ -32,7 +32,7 @@ CSMSettings::UserSettings *CSMSettings::UserSettings::sUserSettingsInstance = 0;
 
     CSMSettings::UserSettings::UserSettings (const Files::ConfigurationManager& configurationManager)
     : mCfgMgr (configurationManager)
-    , mSettingDefinitions(NULL)
+    , mSettingDefinitions(nullptr)
 {
     assert(!sUserSettingsInstance);
     sUserSettingsInstance = this;

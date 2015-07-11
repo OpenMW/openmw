@@ -123,7 +123,7 @@ namespace ICS
 		}
 
 		ControlChannelBinderItem nullBinderItem;
-		nullBinderItem.control = NULL;
+		nullBinderItem.control = nullptr;
 		nullBinderItem.direction = Channel/*::ChannelDirection*/::DIRECT;
 		nullBinderItem.percentage = 0;
 		return nullBinderItem;

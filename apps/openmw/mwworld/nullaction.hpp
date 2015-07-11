@@ -1,5 +1,5 @@
-#ifndef GAME_MWWORLD_NULLACTION_H
-#define GAME_MWWORLD_NULLACTION_H
+#ifndef GAME_MWWORLD_nullptrACTION_H
+#define GAME_MWWORLD_nullptrACTION_H
 
 #include "action.hpp"
 

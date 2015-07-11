@@ -27,9 +27,9 @@ namespace MWGui
 {
 
     ItemWidget::ItemWidget()
-        : mItem(NULL)
-        , mFrame(NULL)
-        , mText(NULL)
+        : mItem(nullptr)
+        , mFrame(nullptr)
+        , mText(nullptr)
     {
 
     }

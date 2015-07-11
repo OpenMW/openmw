@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 CSMWorld::ResourcesManager::ResourcesManager()
-    : mVFS(NULL)
+    : mVFS(nullptr)
 {
 }
 

@@ -90,7 +90,7 @@ namespace MWMechanics
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
-        boost::shared_ptr<Action> mCurrentAction;
+        std::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
         bool mForceNoShortcut;
@@ -107,7 +107,7 @@ namespace MWMechanics
         mFollowTarget(false),
         mCombatMove(false),
         mLastTargetPos(0,0,0),
-        mCell(NULL),
+        mCell(nullptr),
         mCurrentAction(),
         mActionCooldown(0),
         mStrength(),
@@ -273,7 +273,7 @@ namespace MWMechanics
 
         float rangeAttack = 0;
         float rangeFollow = 0;
-        boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
+        std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
         if (characterController.readyToPrepareAttack())
         {
             currentAction = prepareNextAction(actor, target);
@@ -284,7 +284,7 @@ namespace MWMechanics
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
         // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
-        const ESM::Weapon *weapon = NULL;
+        const ESM::Weapon *weapon = nullptr;
         MWMechanics::WeaponType weaptype = WeapType_None;
         float weapRange = 1.0f;
 
@@ -632,7 +632,7 @@ namespace MWMechanics
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
-        std::auto_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
+        std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());
         combat->mTargetActorId = mTargetActorId;
 
         ESM::AiSequence::AiPackageContainer package;
@@ -650,7 +650,7 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
 {
     ESM::Weapon::AttackType attackType;
 
-    if (weapon == NULL)
+    if (weapon == nullptr)
     {
         //hand-to-hand deal equal damage for each type
         float roll = Misc::Rng::rollClosedProbability();

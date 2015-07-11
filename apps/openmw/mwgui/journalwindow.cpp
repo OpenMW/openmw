@@ -5,12 +5,10 @@
 #include <stack>
 #include <string>
 #include <utility>
+#include <functional>
 
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Button.h>
-
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 #include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
@@ -120,10 +118,11 @@ namespace
             Gui::MWList* topicsList = getWidget<Gui::MWList>(TopicsList);
             topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
 
+            using namespace std::placeholders;
             {
                 MWGui::BookPage::ClickCallback callback;
                 
-                callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
+                callback = std::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
                 getPage (RightBookPage)->adviseLinkClicked (callback);
@@ -135,7 +134,7 @@ namespace
             {
                 MWGui::BookPage::ClickCallback callback;
                 
-                callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
+                callback = std::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);

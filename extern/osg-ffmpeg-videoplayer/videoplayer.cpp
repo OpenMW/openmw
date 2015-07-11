@@ -11,7 +11,7 @@ namespace Video
 {
 
 VideoPlayer::VideoPlayer()
-    : mState(NULL)
+    : mState(nullptr)
 {
 
 }
@@ -27,7 +27,7 @@ void VideoPlayer::setAudioFactory(MovieAudioFactory *factory)
     mAudioFactory.reset(factory);
 }
 
-void VideoPlayer::playVideo(boost::shared_ptr<std::istream> inputstream, const std::string& name)
+void VideoPlayer::playVideo(std::shared_ptr<std::istream> inputstream, const std::string& name)
 {
     if(mState)
         close();
@@ -87,13 +87,13 @@ void VideoPlayer::close()
         mState->deinit();
 
         delete mState;
-        mState = NULL;
+        mState = nullptr;
     }
 }
 
 bool VideoPlayer::hasAudioStream()
 {
-    return mState && mState->audio_st != NULL;
+    return mState && mState->audio_st != nullptr;
 }
 
 void VideoPlayer::play()

@@ -111,7 +111,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 
         if (segment.mFogOfWarImage && segment.mHasFogState)
         {
-            std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
+            std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
             fog->mFogTextures.push_back(ESM::FogTexture());
 
             segment.saveFogOfWar(fog->mFogTextures.back());
@@ -128,7 +128,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
         const int segsX = static_cast<int>(std::ceil(length.x() / mMapWorldSize));
         const int segsY = static_cast<int>(std::ceil(length.y() / mMapWorldSize));
 
-        std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
+        std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
 
         fog->mBounds.mMinX = mBounds.xMin();
         fog->mBounds.mMaxX = mBounds.xMax();
@@ -289,7 +289,7 @@ void LocalMap::cleanupCameras()
     for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
     {
         (*it)->removeChildren(0, (*it)->getNumChildren());
-        (*it)->setGraphicsContext(NULL);
+        (*it)->setGraphicsContext(nullptr);
         mRoot->removeChild(*it);
     }
 
@@ -390,7 +390,7 @@ void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
                 || std::abs(mAngle - fog->mNorthMarkerAngle) > osg::DegreesToRadians(5.f))
         {
             // Nuke it
-            cell->setFog(NULL);
+            cell->setFog(nullptr);
         }
         else
         {

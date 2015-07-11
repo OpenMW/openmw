@@ -29,8 +29,8 @@ namespace Resource
         const VFS::Manager* getVFS() const;
 
     private:
-        std::auto_ptr<SceneManager> mSceneManager;
-        std::auto_ptr<TextureManager> mTextureManager;
+        std::unique_ptr<SceneManager> mSceneManager;
+        std::unique_ptr<TextureManager> mTextureManager;
 
         const VFS::Manager* mVFS;
 

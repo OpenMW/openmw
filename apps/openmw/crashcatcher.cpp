@@ -63,7 +63,7 @@ static const struct {
 { "Illegal instruction", SIGILL },
 { "FPU exception", SIGFPE },
 { "System BUS error", SIGBUS },
-{ NULL, 0 }
+{ nullptr, 0 }
 };
 
 static const struct {
@@ -80,7 +80,7 @@ static const struct {
     { ILL_COPROC, "Coprocessor error" },
     { ILL_BADSTK, "Internal stack error" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -95,7 +95,7 @@ static const struct {
     { FPE_FLTRES, "Floating point inexact result" },
     { FPE_FLTINV, "Floating point invalid operation" },
     { FPE_FLTSUB, "Subscript out of range" },
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -106,7 +106,7 @@ static const struct {
     { SEGV_MAPERR, "Address not mapped to object" },
     { SEGV_ACCERR, "Invalid permissions for mapped object" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static const struct {
@@ -118,7 +118,7 @@ static const struct {
     { BUS_ADRERR, "Non-existent physical address" },
     { BUS_OBJERR, "Object specific hardware error" },
     #endif
-    { 0, NULL }
+    { 0, nullptr }
 };
 
 static int (*cc_user_info)(char*, char*);
@@ -132,7 +132,7 @@ static void gdb_info(pid_t pid)
 
     /* Create a temp file to put gdb commands into */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
-    if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != NULL)
+    if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
     {
         fprintf(f, "attach %d\n"
                 "shell echo \"\"\n"
@@ -255,7 +255,7 @@ static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
         close(fd[0]);
         close(fd[1]);
 
-        execl(argv0, argv0, crash_switch, NULL);
+        execl(argv0, argv0, crash_switch, nullptr);
 
         safe_write(STDERR_FILENO, exec_err, sizeof(exec_err)-1);
         _exit(1);
@@ -390,7 +390,7 @@ static void crash_handler(const char *logfile)
     if(logfile)
     {
         std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile) + "'.\n Please report this to https://bugs.openmw.org !";
-        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), NULL);
+        SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
     exit(0);
 }
@@ -426,7 +426,7 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     altss.ss_sp = altstack;
     altss.ss_flags = 0;
     altss.ss_size = sizeof(altstack);
-    sigaltstack(&altss, NULL);
+    sigaltstack(&altss, nullptr);
 
     memset(&sa, 0, sizeof(sa));
     sa.sa_sigaction = crash_catcher;
@@ -437,7 +437,7 @@ int cc_install_handlers(int argc, char **argv, int num_signals, int *signals, co
     while(num_signals--)
     {
         if((*signals != SIGSEGV && *signals != SIGILL && *signals != SIGFPE && *signals != SIGABRT &&
-            *signals != SIGBUS) || sigaction(*signals, &sa, NULL) == -1)
+            *signals != SIGBUS) || sigaction(*signals, &sa, nullptr) == -1)
         {
             *signals = 0;
             retval = -1;

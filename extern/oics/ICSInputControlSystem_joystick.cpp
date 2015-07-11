@@ -288,7 +288,7 @@ namespace ICS
                 {
                     ControlAxisBinderItem controlJoystickBinderItem;
                     controlJoystickBinderItem.direction = Control::STOP;
-                    controlJoystickBinderItem.control = NULL;
+                    controlJoystickBinderItem.control = nullptr;
                     mControlsJoystickAxisBinderMap[deviceID][j] = controlJoystickBinderItem;
                 }
             }

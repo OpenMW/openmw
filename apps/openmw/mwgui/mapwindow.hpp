@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "windowpinnablebase.hpp"
 
@@ -111,7 +111,7 @@ namespace MWGui
         std::vector<MyGUI::ImageBox*> mMapWidgets;
         std::vector<MyGUI::ImageBox*> mFogWidgets;
 
-        typedef std::vector<boost::shared_ptr<MyGUI::ITexture> > TextureVector;
+        typedef std::vector<std::shared_ptr<MyGUI::ITexture> > TextureVector;
         TextureVector mMapTextures;
         TextureVector mFogTextures;
 
@@ -217,8 +217,8 @@ namespace MWGui
         void globalMapUpdatePlayer();
 
         MyGUI::ScrollView* mGlobalMap;
-        std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
-        std::auto_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
+        std::unique_ptr<MyGUI::ITexture> mGlobalMapTexture;
+        std::unique_ptr<MyGUI::ITexture> mGlobalMapOverlayTexture;
         MyGUI::ImageBox* mGlobalMapImage;
         MyGUI::ImageBox* mGlobalMapOverlay;
         MyGUI::ImageBox* mPlayerArrowLocal;

@@ -43,16 +43,16 @@ namespace
 
 namespace MWWorld
 {
-    template<typename T> 
+    template<typename T>
     IndexedStore<T>::IndexedStore()
     {
     }
-    template<typename T>        
+    template<typename T>
     typename IndexedStore<T>::iterator IndexedStore<T>::begin() const
     {
         return mStatic.begin();
     }
-    template<typename T>    
+    template<typename T>
     typename IndexedStore<T>::iterator IndexedStore<T>::end() const
     {
         return mStatic.end();
@@ -83,7 +83,7 @@ namespace MWWorld
         typename Static::const_iterator it = mStatic.find(index);
         if (it != mStatic.end())
             return &(it->second);
-        return NULL;
+        return nullptr;
     }
     template<typename T>
     const T *IndexedStore<T>::find(int index) const
@@ -153,7 +153,7 @@ namespace MWWorld
         std::for_each(mShared.begin(), mShared.end(), GetRecords<T>(id, &results));
         if(!results.empty())
             return results[Misc::Rng::rollDice(results.size())];
-        return NULL;
+        return nullptr;
     }
     template<typename T>
     const T *Store<T>::find(const std::string &id) const
@@ -179,7 +179,7 @@ namespace MWWorld
         return ptr;
     }
     template<typename T>
-    void Store<T>::load(ESM::ESMReader &esm, const std::string &id) 
+    void Store<T>::load(ESM::ESMReader &esm, const std::string &id)
     {
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
@@ -198,7 +198,7 @@ namespace MWWorld
     template<typename T>
     typename Store<T>::iterator Store<T>::begin() const
     {
-        return mShared.begin(); 
+        return mShared.begin();
     }
     template<typename T>
     typename Store<T>::iterator Store<T>::end() const
@@ -394,7 +394,7 @@ namespace MWWorld
         return mStatic[plugin].end();
     }
 
-    
+
     // Land
     //=========================================================================
     Store<ESM::Land>::~Store()
@@ -825,12 +825,12 @@ namespace MWWorld
         return true;
     }
 
-    
+
     // Pathgrid
     //=========================================================================
 
     Store<ESM::Pathgrid>::Store()
-        : mCells(NULL)
+        : mCells(nullptr)
     {
     }
 
@@ -925,7 +925,7 @@ namespace MWWorld
 
     // Skill
     //=========================================================================
-    
+
     Store<ESM::Skill>::Store()
     {
     }
@@ -989,7 +989,7 @@ namespace MWWorld
         return mStatic.end();
     }
 
-    
+
     // Dialogue
     //=========================================================================
 
@@ -1103,4 +1103,3 @@ template class MWWorld::Store<ESM::Spell>;
 template class MWWorld::Store<ESM::StartScript>;
 template class MWWorld::Store<ESM::Static>;
 template class MWWorld::Store<ESM::Weapon>;
-

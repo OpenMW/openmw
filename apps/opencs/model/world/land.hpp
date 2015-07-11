@@ -2,7 +2,8 @@
 #define CSM_WORLD_LAND_H
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <components/esm/loadland.hpp>
 
 namespace CSMWorld
@@ -15,7 +16,7 @@ namespace CSMWorld
     {
         Land();
 
-        boost::shared_ptr<ESM::Land> mLand;
+        std::shared_ptr<ESM::Land> mLand;
 
         std::string mId;
 

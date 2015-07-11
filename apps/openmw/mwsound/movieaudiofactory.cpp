@@ -17,7 +17,7 @@ namespace MWSound
     {
     public:
         MWSoundDecoderBridge(MWSound::MovieAudioDecoder* decoder)
-            : Sound_Decoder(NULL)
+            : Sound_Decoder(nullptr)
             , mDecoder(decoder)
         {
         }
@@ -90,7 +90,7 @@ namespace MWSound
         }
 
         MWBase::SoundPtr mAudioTrack;
-        boost::shared_ptr<MWSoundDecoderBridge> mDecoderBridge;
+        std::shared_ptr<MWSoundDecoderBridge> mDecoderBridge;
     };
 
 
@@ -155,9 +155,9 @@ namespace MWSound
 
 
 
-    boost::shared_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
+    std::shared_ptr<Video::MovieAudioDecoder> MovieAudioFactory::createDecoder(Video::VideoState* videoState)
     {
-        boost::shared_ptr<MWSound::MovieAudioDecoder> decoder(new MWSound::MovieAudioDecoder(videoState));
+        std::shared_ptr<MWSound::MovieAudioDecoder> decoder(new MWSound::MovieAudioDecoder(videoState));
         decoder->setupFormat();
 
         MWBase::SoundPtr sound = MWBase::Environment::get().getSoundManager()->playTrack(decoder->mDecoderBridge, MWBase::SoundManager::Play_TypeMovie);

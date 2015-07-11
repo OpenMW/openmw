@@ -52,7 +52,7 @@ void MWState::CharacterManager::deleteSlot(const MWState::Character *character, 
         // All slots deleted, cleanup and remove this character
         it->cleanup();
         if (character == mCurrent)
-            mCurrent = NULL;
+            mCurrent = nullptr;
         mCharacters.erase(it);
     }
 }

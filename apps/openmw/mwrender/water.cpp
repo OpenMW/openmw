@@ -95,7 +95,7 @@ namespace
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 2/32.f, textures));
-        controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+        controller->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
         node->addUpdateCallback(controller);
         node->setStateSet(stateset);
         stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);

@@ -470,7 +470,7 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                    MWWorld::CellStore* store = NULL;
+                    MWWorld::CellStore* store = nullptr;
                     if (player.getCell()->isExterior())
                     {
                         int cx,cy;

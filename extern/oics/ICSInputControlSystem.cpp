@@ -34,7 +34,7 @@ namespace ICS
 		: mFileName(file)
 		, mLog(log)
 		, mDetectingBindingListener(detectingBindingListener)
-		, mDetectingBindingControl(NULL)
+		, mDetectingBindingControl(nullptr)
         , mDetectingBindingDirection(Control::STOP)
         , mXmouseAxisBinded(false), mYmouseAxisBinded(false)
         , mClientWidth(1)
@@ -677,7 +677,7 @@ namespace ICS
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	void InputControlSystem::enableDetectingBindingState(Control* control
@@ -691,12 +691,12 @@ namespace ICS
 
     bool InputControlSystem::detectingBindingState()
     {
-        return mDetectingBindingControl != NULL;
+        return mDetectingBindingControl != nullptr;
     }
 
 	void InputControlSystem::cancelDetectingBindingState()
 	{
-		mDetectingBindingControl = NULL;
+		mDetectingBindingControl = nullptr;
 	}
 
     std::string InputControlSystem::scancodeToString(SDL_Scancode key)

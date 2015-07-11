@@ -19,8 +19,8 @@ namespace MWGui
 
     MessageBoxManager::MessageBoxManager (float timePerChar)
     {
-        mInterMessageBoxe = NULL;
-        mStaticMessageBox = NULL;
+        mInterMessageBoxe = nullptr;
+        mStaticMessageBox = nullptr;
         mLastButtonPressed = -1;
         mMessageBoxSpeed = timePerChar;
     }
@@ -37,13 +37,13 @@ namespace MWGui
     void MessageBoxManager::clear()
     {
         delete mInterMessageBoxe;
-        mInterMessageBoxe = NULL;
+        mInterMessageBoxe = nullptr;
 
         std::vector<MessageBox*>::iterator it(mMessageBoxes.begin());
         for (; it != mMessageBoxes.end(); ++it)
         {
             if (*it == mStaticMessageBox)
-                mStaticMessageBox = NULL;
+                mStaticMessageBox = nullptr;
             delete *it;
         }
         mMessageBoxes.clear();
@@ -75,10 +75,10 @@ namespace MWGui
                 ++it;
         }
 
-        if(mInterMessageBoxe != NULL && mInterMessageBoxe->mMarkedToDelete) {
+        if(mInterMessageBoxe != nullptr && mInterMessageBoxe->mMarkedToDelete) {
             mLastButtonPressed = mInterMessageBoxe->readPressedButton();
             delete mInterMessageBoxe;
-            mInterMessageBoxe = NULL;
+            mInterMessageBoxe = nullptr;
             MWBase::Environment::get().getInputManager()->changeInputMode(
                         MWBase::Environment::get().getWindowManager()->isGuiMode());
         }
@@ -112,12 +112,12 @@ namespace MWGui
     void MessageBoxManager::removeStaticMessageBox ()
     {
         removeMessageBox(mStaticMessageBox);
-        mStaticMessageBox = NULL;
+        mStaticMessageBox = nullptr;
     }
 
     bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
     {
-        if(mInterMessageBoxe != NULL) {
+        if(mInterMessageBoxe != nullptr) {
             throw std::runtime_error("There is a message box already");
         }
 
@@ -129,7 +129,7 @@ namespace MWGui
 
     bool MessageBoxManager::isInteractiveMessageBox ()
     {
-        return mInterMessageBoxe != NULL;
+        return mInterMessageBoxe != nullptr;
     }
 
 

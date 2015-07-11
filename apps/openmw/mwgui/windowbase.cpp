@@ -32,11 +32,11 @@ void WindowBase::setVisible(bool visible)
     if (!visible)
     {
         MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        while (keyFocus != mMainWidget && keyFocus != NULL)
+        while (keyFocus != mMainWidget && keyFocus != nullptr)
             keyFocus = keyFocus->getParent();
 
         if (keyFocus == mMainWidget)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(NULL);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
     }
 }
 
@@ -78,7 +78,7 @@ NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
     : mWidget(widget), mDrag(drag), mTransparent(false)
 {
     if (!mWidget)
-        throw std::runtime_error("NoDrop needs a non-NULL widget!");
+        throw std::runtime_error("NoDrop needs a non-nullptr widget!");
 }
 
 void NoDrop::onFrame(float dt)

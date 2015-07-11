@@ -257,7 +257,7 @@ namespace MWRender
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
-        , mTextKeyListener(NULL)
+        , mTextKeyListener(nullptr)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
     {
@@ -341,7 +341,7 @@ namespace MWRender
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
-        boost::shared_ptr<AnimSource> animsrc;
+        std::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
         animsrc->mKeyframes = mResourceSystem->getSceneManager()->getKeyframes(kfname);
 
@@ -391,9 +391,9 @@ namespace MWRender
         mStates.clear();
 
         for(size_t i = 0;i < sNumGroups;i++)
-            mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
+            mAnimationTimePtr[i]->setTimePtr(std::shared_ptr<float>());
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         mAnimSources.clear();
     }
@@ -636,12 +636,12 @@ namespace MWRender
             node->removeUpdateCallback(it->second);
 
             // Should be no longer needed with OSG 3.4
-            it->second->setNestedCallback(NULL);
+            it->second->setNestedCallback(nullptr);
         }
 
         mActiveControllers.clear();
 
-        mAccumCtrl = NULL;
+        mAccumCtrl = nullptr;
 
         for(size_t grp = 0;grp < sNumGroups;grp++)
         {
@@ -657,12 +657,12 @@ namespace MWRender
                     active = state;
             }
 
-            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
+            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? std::shared_ptr<float>() : active->second.mTime);
 
             // add external controllers for the AnimSource active in this group
             if (active != mStates.end())
             {
-                boost::shared_ptr<AnimSource> animsrc = active->second.mSource;
+                std::shared_ptr<AnimSource> animsrc = active->second.mSource;
 
                 for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[grp].begin(); it != animsrc->mControllerMap[grp].end(); ++it)
                 {
@@ -923,12 +923,12 @@ namespace MWRender
         {
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
-        mObjectRoot = NULL;
+        mObjectRoot = nullptr;
 
         mNodeMap.clear();
         mActiveControllers.clear();
-        mAccumRoot = NULL;
-        mAccumCtrl = NULL;
+        mAccumRoot = nullptr;
+        mAccumCtrl = nullptr;
 
         if (!forceskeleton)
             mObjectRoot = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
@@ -1015,7 +1015,7 @@ namespace MWRender
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         parent->accept(visitor);
 
-        osg::Group* attachTo = NULL;
+        osg::Group* attachTo = nullptr;
         if (visitor.mFoundNode)
         {
             attachTo = visitor.mFoundNode;
@@ -1146,9 +1146,9 @@ namespace MWRender
         params.mEffectId = effectId;
         params.mBoneName = bonename;
 
-        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = std::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
 
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideTexture(texture, mResourceSystem, node);
@@ -1221,7 +1221,7 @@ namespace MWRender
         std::string lowerName = Misc::StringUtils::lowerCase(name);
         NodeMap::const_iterator found = mNodeMap.find(lowerName);
         if (found == mNodeMap.end())
-            return NULL;
+            return nullptr;
         else
             return found->second;
     }
@@ -1233,7 +1233,7 @@ namespace MWRender
             if (mGlowLight)
             {
                 mInsert->removeChild(mGlowLight);
-                mGlowLight = NULL;
+                mGlowLight = nullptr;
             }
         }
         else
@@ -1258,7 +1258,7 @@ namespace MWRender
 
     void Animation::addControllers()
     {
-        mHeadController = NULL;
+        mHeadController = nullptr;
 
         NodeMap::iterator found = mNodeMap.find("bip01 head");
         if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))

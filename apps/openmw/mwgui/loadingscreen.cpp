@@ -114,7 +114,7 @@ namespace MWGui
 
             // Callback removes itself when done
             if (renderInfo.getCurrentCamera())
-                renderInfo.getCurrentCamera()->setInitialDrawCallback(NULL);
+                renderInfo.getCurrentCamera()->setInitialDrawCallback(nullptr);
         }
 
     private:

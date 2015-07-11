@@ -62,7 +62,7 @@ public:
 private:
     osg::ref_ptr<osg::Node> mNode;
 };
-typedef boost::shared_ptr<PartHolder> PartHolderPtr;
+typedef std::shared_ptr<PartHolder> PartHolderPtr;
 
 class Animation
 {
@@ -95,13 +95,13 @@ protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
     private:
-        boost::shared_ptr<float> mTimePtr;
+        std::shared_ptr<float> mTimePtr;
 
     public:
 
-        void setTimePtr(boost::shared_ptr<float> time)
+        void setTimePtr(std::shared_ptr<float> time)
         { mTimePtr = time; }
-        boost::shared_ptr<float> getTimePtr() const
+        std::shared_ptr<float> getTimePtr() const
         { return mTimePtr; }
 
         virtual float getValue(osg::NodeVisitor* nv);
@@ -119,13 +119,13 @@ protected:
     struct AnimSource;
 
     struct AnimState {
-        boost::shared_ptr<AnimSource> mSource;
+        std::shared_ptr<AnimSource> mSource;
         float mStartTime;
         float mLoopStartTime;
         float mLoopStopTime;
         float mStopTime;
 
-        typedef boost::shared_ptr<float> TimePtr;
+        typedef std::shared_ptr<float> TimePtr;
         TimePtr mTime;
         float mSpeedMult;
 
@@ -155,7 +155,7 @@ protected:
     typedef std::map<std::string,AnimState> AnimStateMap;
     AnimStateMap mStates;
 
-    typedef std::vector<boost::shared_ptr<AnimSource> > AnimSourceList;
+    typedef std::vector<std::shared_ptr<AnimSource> > AnimSourceList;
     AnimSourceList mAnimSources;
 
     osg::ref_ptr<osg::Group> mInsert;
@@ -176,7 +176,7 @@ protected:
     typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
     ControllerMap mActiveControllers;
 
-    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumGroups];
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
@@ -192,7 +192,7 @@ protected:
     {
         std::string mModelName; // Just here so we don't add the same effect twice
         PartHolderPtr mObjects;
-        boost::shared_ptr<EffectAnimationTime> mAnimTime;
+        std::shared_ptr<EffectAnimationTime> mAnimTime;
         float mMaxControllerLength;
         int mEffectId;
         bool mLoop;
@@ -343,7 +343,7 @@ public:
      * \param speedmult Stores the animation speed multiplier
      * \return True if the animation is active, false otherwise.
      */
-    bool getInfo(const std::string &groupname, float *complete=NULL, float *speedmult=NULL) const;
+    bool getInfo(const std::string &groupname, float *complete=nullptr, float *speedmult=nullptr) const;
 
     /// Get the absolute position in the animation track of the first text key with the given group.
     float getStartTime(const std::string &groupname) const;
@@ -368,7 +368,7 @@ public:
     /// This is typically called as part of runAnimation, but may be called manually if needed.
     void updateEffects(float duration);
 
-    /// Return a node with the specified name, or NULL if not existing.
+    /// Return a node with the specified name, or nullptr if not existing.
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 

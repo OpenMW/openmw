@@ -115,7 +115,7 @@ namespace CSMWorld
 
             Resource::ResourceSystem mResourceSystem;
 
-            std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
+            std::vector<std::shared_ptr<ESM::ESMReader> > mReaders;
 
             // not implemented
             Data (const Data&);

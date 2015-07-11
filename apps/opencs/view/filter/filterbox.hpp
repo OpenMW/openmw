@@ -41,7 +41,7 @@ namespace CSVFilter
             void dragMoveEvent(QDragMoveEvent *event);
 
         signals:
-            void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
+            void recordFilterChanged (std::shared_ptr<CSMFilter::Node> filter);
             void recordDropped (std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
     };
 

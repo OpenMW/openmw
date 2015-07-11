@@ -544,7 +544,7 @@ void WeatherManager::update(float duration, bool paused)
                 {
                     // pick a random sound
                     int sound = Misc::Rng::rollDice(4);
-                    std::string* soundName = NULL;
+                    std::string* soundName = nullptr;
                     if (sound == 0) soundName = &mThunderSoundID0;
                     else if (sound == 1) soundName = &mThunderSoundID1;
                     else if (sound == 2) soundName = &mThunderSoundID2;

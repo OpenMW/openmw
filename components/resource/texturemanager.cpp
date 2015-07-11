@@ -2,6 +2,8 @@
 
 #include <osgDB/Registry>
 
+#include <cassert>
+
 #include <stdexcept>
 
 #include <components/vfs/manager.hpp>

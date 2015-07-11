@@ -7,7 +7,7 @@ namespace Misc
 
     void Rng::init()
     {
-        std::srand(static_cast<unsigned int>(std::time(NULL)));
+        std::srand(static_cast<unsigned int>(std::time(nullptr)));
     }
 
     float Rng::rollProbability()

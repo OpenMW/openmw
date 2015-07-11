@@ -96,7 +96,7 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
                 tr("Select master file"),
                 QDir::currentPath(),
                 QString(tr("Morrowind master file (*.esm)")),
-                NULL,
+                nullptr,
                 QFileDialog::DontResolveSymlinks);
 
     if (selectedFile.isEmpty())
