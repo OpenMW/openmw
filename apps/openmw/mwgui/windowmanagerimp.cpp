@@ -896,6 +896,9 @@ namespace MWGui
 
     void WindowManager::updateMap()
     {
+        if (!mLocalMapRender)
+            return;
+
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();
