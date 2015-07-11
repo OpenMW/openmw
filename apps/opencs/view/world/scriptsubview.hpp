@@ -1,6 +1,8 @@
 #ifndef CSV_WORLD_SCRIPTSUBVIEW_H
 #define CSV_WORLD_SCRIPTSUBVIEW_H
 
+#include "../../model/world/commanddispatcher.hpp"
+
 #include "../doc/subview.hpp"
 
 class QModelIndex;
@@ -19,6 +21,7 @@ namespace CSMWorld
 namespace CSVWorld
 {
     class ScriptEdit;
+    class RecordButtonBar;
 
     class ScriptSubView : public CSVDoc::SubView
     {
@@ -30,6 +33,8 @@ namespace CSVWorld
             int mColumn;
             QWidget *mBottom;
             QLabel *mStatus;
+            RecordButtonBar *mButtons;
+            CSMWorld::CommandDispatcher mCommandDispatcher;
 
         public:
 
@@ -52,6 +57,8 @@ namespace CSVWorld
         private slots:
 
             void updateStatusBar();
+
+            void switchToRow (int row);
     };
 }
 
