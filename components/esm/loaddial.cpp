@@ -32,6 +32,7 @@ namespace ESM
             int32_t empty;
             esm.getT(empty); // Skip an empty DATA
             mIsDeleted = readDeleSubRecord(esm);
+            mType = Unknown;
         }
         else
             esm.fail("Unknown sub record size");
@@ -54,6 +55,7 @@ namespace ESM
     void Dialogue::blank()
     {
         mInfo.clear();
+        mIsDeleted = false;
     }
 
     void Dialogue::readInfo(ESMReader &esm, bool merge)

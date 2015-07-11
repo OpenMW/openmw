@@ -371,7 +371,8 @@ namespace MWWorld
         }
         else
         {
-            found->second = dialogue;
+            found->second.mIsDeleted = dialogue.mIsDeleted;
+            found->second.mType = dialogue.mType;
         }
         
         mLastAddedRecord = dialogue;
