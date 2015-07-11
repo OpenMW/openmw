@@ -30,7 +30,8 @@ struct Dialogue
         Voice = 1,
         Greeting = 2,
         Persuasion = 3,
-        Journal = 4
+        Journal = 4,
+        Unknown = -1 // Used for deleted dialogues
     };
 
     std::string mId;

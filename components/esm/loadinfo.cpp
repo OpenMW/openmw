@@ -17,6 +17,7 @@ namespace ESM
     {
         mQuestStatus = QS_None;
         mFactionLess = false;
+        mIsDeleted = false;
 
         mPrev = esm.getHNString("PNAM");
         mNext = esm.getHNString("NNAM");
@@ -142,6 +143,7 @@ namespace ESM
     {
         esm.writeHNCString("PNAM", mPrev);
         esm.writeHNCString("NNAM", mNext);
+
         if (mIsDeleted)
         {
             esm.writeHNCString("NAME", mResponse);
@@ -200,5 +202,6 @@ namespace ESM
         mResultScript.clear();
         mFactionLess = false;
         mQuestStatus = QS_None;
+        mIsDeleted = false;
     }
 }
