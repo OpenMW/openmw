@@ -133,7 +133,7 @@ namespace ESM
     {
         for (InfoContainer::iterator it = mInfo.begin(); it != mInfo.end(); )
         {
-            if (it->mQuestStatus == DialInfo::QS_Deleted)
+            if (it->mIsDeleted || it->mQuestStatus == DialInfo::QS_Deleted)
                 it = mInfo.erase(it);
             else
                 ++it;
