@@ -53,7 +53,7 @@ struct Dialogue
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
-    /// Remove all INFOs marked as QS_Deleted from mInfos.
+    /// Remove all INFOs that are deleted or marked as QS_Deleted from mInfos.
     void clearDeletedInfos();
 
     /// Read the next info record
