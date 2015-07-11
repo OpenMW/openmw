@@ -407,7 +407,8 @@ FlipController::FlipController(int texSlot, float delta, std::vector<osg::ref_pt
 }
 
 FlipController::FlipController()
-    : mDelta(0.f)
+    : mTexSlot(0)
+    , mDelta(0.f)
 {
 }
 
