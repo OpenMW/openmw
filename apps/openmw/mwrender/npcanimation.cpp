@@ -622,7 +622,7 @@ void NpcAnimation::updateParts()
                 continue;
             }
 
-            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            if ((!mNpc->isMale()) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
             {
                 // Allow opposite gender's parts as fallback if parts for our gender are missing
                 BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
