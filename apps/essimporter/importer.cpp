@@ -331,9 +331,9 @@ namespace ESSImport
             {
                 if (unknownRecords.insert(n.val).second)
                 {
-                    std::ios::fmtflags f(std::cout.flags());
+                    std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
-                    std::cout.flags(f);
+                    std::cerr.flags(f);
                 }
 
                 esm.skipRecord();
