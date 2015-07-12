@@ -504,39 +504,46 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
             {
-                assert(mAllowedNodes.size());
-                unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
-                ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
-                ToWorldCoordinates(dest, currentCell->getCell());
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-                // don't take shortcuts for wandering
-                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
-
-                if(storage.mPathFinder.isPathConstructed())
+                if (mAllowedNodes.size())
                 {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
-                    ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-                    // check if mCurrentNode was taken out of mAllowedNodes
-                    if(mTrimCurrentNode && mAllowedNodes.size() > 1)
-                        mTrimCurrentNode = false;
-                    else
-                        mAllowedNodes.push_back(mCurrentNode);
-                    mCurrentNode = temp;
-
-                    moveNow = false;
-                    walking = true;
+                    setPathToAnAllowedNode(actor, storage, pos);
                 }
-                // Choose a different node and delete this one from possible nodes because it is uncreachable:
-                else
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
             } 
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
+    {
+        unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
+        ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
+        ToWorldCoordinates(dest, storage.mCell->getCell());
+
+        // actor position is already in world co-ordinates
+        ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
+
+        // don't take shortcuts for wandering
+        storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
+
+        if (storage.mPathFinder.isPathConstructed())
+        {
+            // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+            ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+            // check if mCurrentNode was taken out of mAllowedNodes
+            if (mTrimCurrentNode && mAllowedNodes.size() > 1)
+                mTrimCurrentNode = false;
+            else
+                mAllowedNodes.push_back(mCurrentNode);
+            mCurrentNode = temp;
+
+            storage.mMoveNow = false;
+            storage.mWalking = true;
+        }
+        // Choose a different node and delete this one from possible nodes because it is uncreachable:
+        else
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
     }
 
     void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
