@@ -225,8 +225,6 @@ namespace MWMechanics
             storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
-            moveNow = false;
-            walking = false;
             chooseAction = true;
             mHasReturnPosition = false;
         }
@@ -329,17 +327,8 @@ namespace MWMechanics
         {
             // End package if duration is complete or mid-night hits:
             MWWorld::TimeStamp currentTime = world->getTimeStamp();
-            if(currentTime.getHour() >= mStartTime.getHour() + mDuration)
-            {
-                if(!mRepeat)
-                {
-                    stopWalking(actor, storage);
-                    return true;
-                }
-                else
-                    mStartTime = currentTime;
-            }
-            else if(int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay())
+            if((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
+                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
             {
                 if(!mRepeat)
                 {
@@ -447,8 +436,6 @@ namespace MWMechanics
             mObstacleCheck.clear();
 
             stopWalking(actor, storage);
-            storage.mMoveNow = false;
-            storage.mWalking = false;
             storage.mChooseAction = true;
             mStuckCount = 0;
         }
@@ -494,8 +481,6 @@ namespace MWMechanics
             if (storage.mWalking)
             {
                 stopWalking(actor, storage);
-                storage.mMoveNow = false;
-                storage.mWalking = false;
                 mObstacleCheck.clear();
                 storage.mIdleNow = true;
                 getRandomIdle(storage.mPlayedIdle);
@@ -601,6 +586,8 @@ namespace MWMechanics
     {
         storage.mPathFinder.clearPath();
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        storage.mMoveNow = false;
+        storage.mWalking = false;
     }
 
     void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
