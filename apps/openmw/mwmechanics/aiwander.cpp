@@ -239,45 +239,7 @@ namespace MWMechanics
             zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
-            // Returns true if evasive action needs to be taken
-            if(mObstacleCheck.check(actor, duration))
-            {
-                // first check if we're walking into a door
-                if(proximityToDoor(actor)) // NOTE: checks interior cells only
-                {
-                    // remove allowed points then select another random destination
-                    mTrimCurrentNode = true;
-                    trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
-                    mObstacleCheck.clear();
-                    storage.mPathFinder.clearPath();
-                    walking = false;
-                    moveNow = true;
-                }
-                else // probably walking into another NPC
-                {
-                    // TODO: diagonal should have same animation as walk forward
-                    //       but doesn't seem to do that?
-                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-                    // change the angle a bit, too
-                    zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-                }
-                mStuckCount++;  // TODO: maybe no longer needed
-            }
-//#if 0
-            // TODO: maybe no longer needed
-            if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
-            {
-                //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
-                mObstacleCheck.clear();
-
-                stopWalking(actor, storage);
-                moveNow = false;
-                walking = false;
-                chooseAction = true;
-                mStuckCount = 0;
-            }
-//#endif
+            evadeObstacles(actor, storage, duration);
         }
         
         
@@ -448,6 +410,49 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
+    {
+        if (mObstacleCheck.check(actor, duration))
+        {
+            // first check if we're walking into a door
+            if (proximityToDoor(actor)) // NOTE: checks interior cells only
+            {
+                // remove allowed points then select another random destination
+                mTrimCurrentNode = true;
+                trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
+                mObstacleCheck.clear();
+                storage.mPathFinder.clearPath();
+                storage.mWalking = false;
+                storage.mMoveNow = true;
+            }
+            else // probably walking into another NPC
+            {
+                // TODO: diagonal should have same animation as walk forward
+                //       but doesn't seem to do that?
+                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                // change the angle a bit, too
+                const ESM::Position& pos = actor.getRefData().getPosition();
+                zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+            }
+            mStuckCount++;  // TODO: maybe no longer needed
+        }
+//#if 0
+        // TODO: maybe no longer needed
+        if (mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+        {
+            //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
+            mObstacleCheck.clear();
+
+            stopWalking(actor, storage);
+            storage.mMoveNow = false;
+            storage.mWalking = false;
+            storage.mChooseAction = true;
+            mStuckCount = 0;
+        }
+//#endif
     }
 
     void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)
