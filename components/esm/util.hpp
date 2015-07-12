@@ -59,12 +59,6 @@ bool readDeleSubRecord(ESMReader &esm);
 void writeDeleSubRecord(ESMWriter &esm);
 
 template <class RecordT>
-std::string getRecordId(const RecordT &record)
-{
-    return record.mId;
-}
-
-template <class RecordT>
 bool isRecordDeleted(const RecordT &record)
 {
     return record.mIsDeleted;

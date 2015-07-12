@@ -95,22 +95,21 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 throw std::runtime_error(error.str());
             }
         } else {
-            it->second->load(esm);
-            std::string id = it->second->getLastAddedRecordId();
-            if (it->second->isLastAddedRecordDeleted())
+            RecordId id = it->second->load(esm);
+            if (id.mIsDeleted)
             {
-                it->second->eraseStatic(id);
+                it->second->eraseStatic(id.mId);
                 continue;
             }
 
             if (n.val==ESM::REC_DIAL) {
-                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
+                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
             } else {
                 dialogue = 0;
             }
             // Insert the reference into the global lookup
-            if (!id.empty() && isCacheableRecord(n.val)) {
-                mIds[Misc::StringUtils::lowerCase (id)] = n.val;
+            if (!id.mId.empty() && isCacheableRecord(n.val)) {
+                mIds[Misc::StringUtils::lowerCase (id.mId)] = n.val;
             }
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
@@ -183,13 +182,12 @@ void ESMStore::setUp()
             case ESM::REC_LEVC:
 
                 {
-                    StoreBase *store = mStores[type];
-                    store->read (reader);
+                    RecordId id = mStores[type]->read (reader);
 
                     // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
                     // that really should be cleared instead of just overwritten
 
-                    mIds[store->getLastAddedRecordId()] = type;
+                    mIds[id.mId] = type;
                 }
 
                 if (type==ESM::REC_NPC_)
