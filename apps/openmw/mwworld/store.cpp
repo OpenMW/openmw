@@ -44,6 +44,10 @@ namespace
 
 namespace MWWorld
 {
+    RecordId::RecordId(const std::string &id, bool isDeleted)
+        : mId(id), mIsDeleted(isDeleted)
+    {}
+
     template<typename T> 
     IndexedStore<T>::IndexedStore()
     {
@@ -180,7 +184,7 @@ namespace MWWorld
         return ptr;
     }
     template<typename T>
-    void Store<T>::load(ESM::ESMReader &esm) 
+    RecordId Store<T>::load(ESM::ESMReader &esm) 
     {
         T record;
         record.load(esm);
@@ -190,7 +194,7 @@ namespace MWWorld
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
 
-        mLastAddedRecord = record;
+        return RecordId(record.mId, ESM::isRecordDeleted(record));
     }
     template<typename T>
     void Store<T>::setUp()
@@ -317,25 +321,13 @@ namespace MWWorld
         }
     }
     template<typename T>
-    void Store<T>::read(ESM::ESMReader& reader)
+    RecordId Store<T>::read(ESM::ESMReader& reader)
     {
         T record;
         record.load (reader);
         insert (record);
 
-        mLastAddedRecord = record;
-    }
-
-    
-    template<typename T>
-    std::string Store<T>::getLastAddedRecordId() const
-    {
-        return ESM::getRecordId(mLastAddedRecord);
-    }
-    template<typename T>
-    bool Store<T>::isLastAddedRecordDeleted() const
-    {
-        return ESM::isRecordDeleted(mLastAddedRecord);
+        return RecordId(record.mId, ESM::isRecordDeleted(record));
     }
 
     // LandTexture
@@ -375,7 +367,7 @@ namespace MWWorld
         assert(plugin < mStatic.size());
         return mStatic[plugin].size();
     }
-    void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, size_t plugin)
+    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm, size_t plugin)
     {
         ESM::LandTexture lt;
         lt.load(esm);
@@ -389,11 +381,13 @@ namespace MWWorld
             ltexl.resize(lt.mIndex+1);
 
         // Store it
-        ltexl[lt.mIndex] = mLastAddedRecord = lt;
+        ltexl[lt.mIndex] = lt;
+
+        return RecordId(lt.mId, lt.mIsDeleted);
     }
-    void Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
+    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
-        load(esm, esm.getIndex());
+        return load(esm, esm.getIndex());
     }
     Store<ESM::LandTexture>::iterator Store<ESM::LandTexture>::begin(size_t plugin) const
     {
@@ -404,16 +398,6 @@ namespace MWWorld
     {
         assert(plugin < mStatic.size());
         return mStatic[plugin].end();
-    }
-        
-    std::string Store<ESM::LandTexture>::getLastAddedRecordId() const
-    {
-        return ESM::getRecordId(mLastAddedRecord);
-    }
-
-    bool Store<ESM::LandTexture>::isLastAddedRecordDeleted() const
-    {
-        return ESM::isRecordDeleted(mLastAddedRecord);
     }
     
     // Land
@@ -462,7 +446,7 @@ namespace MWWorld
         }
         return ptr;
     }
-    void Store<ESM::Land>::load(ESM::ESMReader &esm)
+    RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
         ESM::Land *ptr = new ESM::Land();
         ptr->load(esm);
@@ -480,6 +464,8 @@ namespace MWWorld
         }
 
         mStatic.push_back(ptr);
+
+        return RecordId(); // No ID and can't be deleted (for now)
     }
     void Store<ESM::Land>::setUp()
     {
@@ -622,7 +608,7 @@ namespace MWWorld
             mSharedExt.push_back(&(it->second));
         }
     }
-    void Store<ESM::Cell>::load(ESM::ESMReader &esm)
+    RecordId Store<ESM::Cell>::load(ESM::ESMReader &esm)
     {
         // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
         //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
@@ -704,6 +690,7 @@ namespace MWWorld
                 mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
             }
         }
+        return RecordId("", cell.mIsDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -859,7 +846,7 @@ namespace MWWorld
     {
         mCells = &cells;
     }
-    void Store<ESM::Pathgrid>::load(ESM::ESMReader &esm)
+    RecordId Store<ESM::Pathgrid>::load(ESM::ESMReader &esm)
     {
         ESM::Pathgrid pathgrid;
         pathgrid.load(esm);
@@ -884,6 +871,8 @@ namespace MWWorld
             if (!ret.second)
                 ret.first->second = pathgrid;
         }
+
+        return RecordId(); // No ID and can't be deleted (for now)
     }
     size_t Store<ESM::Pathgrid>::getSize() const
     {
@@ -1035,7 +1024,7 @@ namespace MWWorld
     }
 
     template <>
-    inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
+    inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
         dialogue.load(esm);
@@ -1053,7 +1042,7 @@ namespace MWWorld
             found->second.mType = dialogue.mType;
         }
         
-        mLastAddedRecord = dialogue;
+        return RecordId(dialogue.mId, dialogue.mIsDeleted);
     }
 
 
@@ -1061,7 +1050,7 @@ namespace MWWorld
     //=========================================================================
 
     template <>
-    inline void Store<ESM::Script>::load(ESM::ESMReader &esm) {
+    inline RecordId Store<ESM::Script>::load(ESM::ESMReader &esm) {
         ESM::Script script;
         script.load(esm);
         Misc::StringUtils::toLower(script.mId);
@@ -1072,7 +1061,7 @@ namespace MWWorld
         else
             inserted.first->second = script;
         
-        mLastAddedRecord = script;
+        return RecordId(script.mId, script.mIsDeleted);
     }
 
 
@@ -1080,7 +1069,7 @@ namespace MWWorld
     //=========================================================================
 
     template <>
-    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm)
+    inline RecordId Store<ESM::StartScript>::load(ESM::ESMReader &esm)
     {
         ESM::StartScript script;
         script.load(esm);
@@ -1092,7 +1081,7 @@ namespace MWWorld
         else
             inserted.first->second = script;
         
-        mLastAddedRecord = script;
+        return RecordId(script.mId);
     }
 }
 

@@ -19,6 +19,14 @@ namespace Loading
 
 namespace MWWorld
 {
+    struct RecordId
+    {
+        std::string mId;
+        bool mIsDeleted;
+
+        RecordId(const std::string &id = "", bool isDeleted = false);
+    };
+
     struct StoreBase
     {
         virtual ~StoreBase() {}
@@ -28,19 +36,15 @@ namespace MWWorld
 
         virtual size_t getSize() const = 0;
         virtual int getDynamicSize() const { return 0; }
-        virtual void load(ESM::ESMReader &esm) = 0;
+        virtual RecordId load(ESM::ESMReader &esm) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
         virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual void read (ESM::ESMReader& reader) {}
+        virtual RecordId read (ESM::ESMReader& reader) { return RecordId(); }
         ///< Read into dynamic storage
-
-        virtual std::string getLastAddedRecordId() const { return ""; }
-        ///< Returns the last loaded/read ID or empty string if a loaded record has no ID
-        virtual bool isLastAddedRecordDeleted() const { return false; }
     };
 
     template <class T>
@@ -137,8 +141,6 @@ namespace MWWorld
                                      // for heads/hairs in the character creation)
         std::map<std::string, T> mDynamic;
 
-        T mLastAddedRecord;
-
         typedef std::map<std::string, T> Dynamic;
         typedef std::map<std::string, T> Static;
 
@@ -185,12 +187,9 @@ namespace MWWorld
         bool erase(const std::string &id);
         bool erase(const T &item);
 
-        void load(ESM::ESMReader &esm);
+        RecordId load(ESM::ESMReader &esm);
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
-        void read(ESM::ESMReader& reader);
-
-        std::string getLastAddedRecordId() const;
-        bool isLastAddedRecordDeleted() const;
+        RecordId read(ESM::ESMReader& reader);
     };
 
     template <>
@@ -199,7 +198,6 @@ namespace MWWorld
         // For multiple ESM/ESP files we need one list per file.
         typedef std::vector<ESM::LandTexture> LandTextureList;
         std::vector<LandTextureList> mStatic;
-        ESM::LandTexture mLastAddedRecord;
 
     public:
         Store();
@@ -214,14 +212,11 @@ namespace MWWorld
         size_t getSize() const;
         size_t getSize(size_t plugin) const;
 
-        void load(ESM::ESMReader &esm, size_t plugin);
-        void load(ESM::ESMReader &esm);
+        RecordId load(ESM::ESMReader &esm, size_t plugin);
+        RecordId load(ESM::ESMReader &esm);
 
         iterator begin(size_t plugin) const;
         iterator end(size_t plugin) const;
-
-        std::string getLastAddedRecordId() const;
-        bool isLastAddedRecordDeleted() const;
     };
 
     template <>
@@ -243,7 +238,7 @@ namespace MWWorld
         ESM::Land *search(int x, int y) const;
         ESM::Land *find(int x, int y) const;
 
-        void load(ESM::ESMReader &esm);
+        RecordId load(ESM::ESMReader &esm);
         void setUp();
     };
 
@@ -293,7 +288,7 @@ namespace MWWorld
 
         void setUp();
 
-        void load(ESM::ESMReader &esm);
+        RecordId load(ESM::ESMReader &esm);
 
         iterator intBegin() const;
         iterator intEnd() const;
@@ -335,7 +330,7 @@ namespace MWWorld
         Store();
 
         void setCells(Store<ESM::Cell>& cells);
-        void load(ESM::ESMReader &esm);
+        RecordId load(ESM::ESMReader &esm);
         size_t getSize() const;
 
         void setUp();
