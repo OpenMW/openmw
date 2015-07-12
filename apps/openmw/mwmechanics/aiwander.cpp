@@ -285,32 +285,7 @@ namespace MWMechanics
             }
         }
 
-        // Play idle voiced dialogue entries randomly
-        int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
-                && MWBase::Environment::get().getSoundManager()->sayDone(actor))
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-
-            float roll = Misc::Rng::rollProbability() * 10000.0f;
-
-            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
-            // due to the roll being an integer.
-            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
-            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
-            float x = fVoiceIdleOdds * 0.6f * (MWBase::Environment::get().getFrameDuration() / 0.1f);
-
-            // Only say Idle voices when player is in LOS
-            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
-            // voices going through walls?
-            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
-                    < 3000*3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
-                    && MWBase::Environment::get().getWorld()->getLOS(player, actor))
-                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
-        }
+        playIdleDialogueRandomly(actor);
 
         float& lastReaction = storage.mReaction;
         lastReaction += duration;
@@ -440,6 +415,36 @@ namespace MWMechanics
             mStuckCount = 0;
         }
 //#endif
+    }
+
+    void AiWander::playIdleDialogueRandomly(const MWWorld::Ptr& actor)
+    {
+        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
+            && MWBase::Environment::get().getSoundManager()->sayDone(actor))
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+
+            float roll = Misc::Rng::rollProbability() * 10000.0f;
+
+            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
+            // due to the roll being an integer.
+            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
+            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
+            float x = fVoiceIdleOdds * 0.6f * (MWBase::Environment::get().getFrameDuration() / 0.1f);
+
+            // Only say Idle voices when player is in LOS
+            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+            // voices going through walls?
+            const ESM::Position& pos = actor.getRefData().getPosition();
+            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
+                < 3000 * 3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
+                && MWBase::Environment::get().getWorld()->getLOS(player, actor))
+                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+        }
     }
 
     void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)

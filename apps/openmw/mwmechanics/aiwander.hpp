@@ -74,6 +74,7 @@ namespace MWMechanics
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
+            void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
