@@ -49,7 +49,7 @@ namespace CSMWorld
 
         virtual void insertRecord (RecordBase& record) = 0;
 
-        virtual void load (int index,  ESM::ESMReader& reader, bool base) = 0;
+        virtual void load (ESM::ESMReader& reader, bool base) = 0;
 
         virtual void erase (int index, int count) = 0;
 
@@ -73,7 +73,7 @@ namespace CSMWorld
 
         virtual void insertRecord (RecordBase& record);
 
-        virtual void load (int index,  ESM::ESMReader& reader, bool base);
+        virtual void load (ESM::ESMReader& reader, bool base);
 
         virtual void erase (int index, int count);
 
@@ -122,9 +122,67 @@ namespace CSMWorld
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::load (int index,  ESM::ESMReader& reader, bool base)
+    void RefIdDataContainer<RecordT>::load (ESM::ESMReader& reader, bool base)
     {
-        (base ? mContainer.at (index).mBase : mContainer.at (index).mModified).load (reader);
+        RecordT record;
+        record.load(reader);
+
+        typename std::vector<Record<RecordT> >::iterator found = mContainer.begin();
+        for (; found != mContainer.end(); ++found)
+        {
+            if (found->get().mId == record.mId)
+            {
+                break;
+            }
+        }
+
+        if (record.mIsDeleted)
+        {
+            if (found == mContainer.end())
+            {
+                // deleting a record that does not exist
+                // ignore it for now
+                /// \todo report the problem to the user
+                return;
+            }
+
+            if (base)
+            {
+                mContainer.erase(found);
+            }
+            else
+            {
+                found->mState = RecordBase::State_Deleted;
+            }
+        }
+        else
+        {
+            if (found == mContainer.end())
+            {
+                appendRecord(record.mId, base);
+                if (base)
+                {
+                    mContainer.back().mBase = record;
+                }
+                else
+                {
+                    mContainer.back().mModified = record;
+                }
+            }
+            else
+            {
+                if (!base)
+                {
+                    if (found->mState == RecordBase::State_Erased)
+                    {
+                        throw std::logic_error("Attempt to access a deleted record");
+                    }
+
+                    found->mState = RecordBase::State_Modified;
+                    found->mModified = record;
+                }
+            }
+        }
     }
 
     template<typename RecordT>
@@ -145,20 +203,26 @@ namespace CSMWorld
     template<typename RecordT>
     void RefIdDataContainer<RecordT>::save (int index, ESM::ESMWriter& writer) const
     {
-        CSMWorld::RecordBase::State state = mContainer.at (index).mState;
+        Record<RecordT> record = mContainer.at(index);
+        RecordT esmRecord;
 
-        if (state==CSMWorld::RecordBase::State_Modified ||
-            state==CSMWorld::RecordBase::State_ModifiedOnly)
+        switch (record.mState)
         {
-            writer.startRecord (mContainer.at (index).mModified.sRecordId);
-            writer.writeHNCString ("NAME", getId (index));
-            mContainer.at (index).mModified.save (writer);
-            writer.endRecord (mContainer.at (index).mModified.sRecordId);
+            case RecordBase::State_Modified:
+            case RecordBase::State_ModifiedOnly:
+                esmRecord = record.mModified;
+                break;
+            case RecordBase::State_Deleted:
+                esmRecord = record.mBase;
+                esmRecord.mIsDeleted = true;
+                break;
+            default:
+                break;
         }
-        else if (state==CSMWorld::RecordBase::State_Deleted)
-        {
-            /// \todo write record with delete flag
-        }
+
+        writer.startRecord(esmRecord.sRecordId);
+        esmRecord.save(writer);
+        writer.endRecord(esmRecord.sRecordId);
     }
 
 
@@ -221,7 +285,7 @@ namespace CSMWorld
 
             int getAppendIndex (UniversalId::Type type) const;
 
-            void load (const LocalIndex& index, ESM::ESMReader& reader, bool base);
+            void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
             int getSize() const;
 
