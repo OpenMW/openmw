@@ -88,8 +88,8 @@ namespace MWMechanics
 
            
 
-            // if false triggers calculating allowed nodes based on mDistance
-            bool mStoredAvailableNodes;
+            // do we need to calculate allowed nodes based on mDistance
+            bool mPopulateAvailableNodes;
 
 
             

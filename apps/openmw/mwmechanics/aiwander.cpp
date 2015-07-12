@@ -117,7 +117,7 @@ namespace MWMechanics
 
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
 
-        mStoredAvailableNodes = false;
+        mPopulateAvailableNodes = true;
 
     }
 
@@ -191,7 +191,7 @@ namespace MWMechanics
         if(!currentCell || cellChange)
         {
             currentCell = actor.getCell();
-            mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
+            mPopulateAvailableNodes = true;
         }
 
         cStats.setDrawState(DrawState_Nothing);
@@ -390,7 +390,7 @@ namespace MWMechanics
         }
 
         // Initialization to discover & store allowed node points for this actor.
-        if(!mStoredAvailableNodes)
+        if (mPopulateAvailableNodes)
         {
             getAllowedNodes(actor, currentCell->getCell());
         }
@@ -640,7 +640,7 @@ namespace MWMechanics
         if (mDistance == 0)
             return;
 
-        if (!mStoredAvailableNodes)
+        if (mPopulateAvailableNodes)
             getAllowedNodes(actor, actor.getCell()->getCell());
 
         if (mAllowedNodes.empty())
@@ -660,7 +660,7 @@ namespace MWMechanics
         actor.getClass().adjustPosition(actor, false);
 
         // may have changed cell
-        mStoredAvailableNodes = false;
+        mPopulateAvailableNodes = true;
     }
 
     int AiWander::OffsetToPreventOvercrowding()
@@ -722,8 +722,9 @@ namespace MWMechanics
             {
                 SetCurrentNodeToClosestAllowedNode(npcPos);
             }
-            mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
+
+        mPopulateAvailableNodes = false;
     }
 
     // When only one path grid point in wander distance, 
