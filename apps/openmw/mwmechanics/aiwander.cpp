@@ -432,71 +432,7 @@ namespace MWMechanics
         // Allow interrupting a walking actor to trigger a greeting
         if(idleNow || walking)
         {
-            // Play a random voice greeting if the player gets too close
-            int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-            float helloDistance = static_cast<float>(hello);
-            static int iGreetDistanceMultiplier =MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
-
-            helloDistance *= iGreetDistanceMultiplier;
-
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-            osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-            float playerDistSqr = (playerPos - actorPos).length2();
-
-            int& greetingTimer = storage.mGreetingTimer;
-            if (greetingState == Greet_None)
-            {
-                if ((playerDistSqr <= helloDistance*helloDistance) &&
-                        !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
-                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                    greetingTimer++;
-                
-                if (greetingTimer >= GREETING_SHOULD_START)
-                {
-                    greetingState = Greet_InProgress;
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    greetingTimer = 0;
-                }
-            }
-            
-            if(greetingState == Greet_InProgress)
-            {
-                greetingTimer++;
-                
-                if(walking)
-                {
-                    stopWalking(actor, storage);
-                    moveNow = false;
-                    walking = false;
-                    mObstacleCheck.clear();
-                    idleNow = true;
-                    getRandomIdle(playedIdle);
-                }
-
-                if(!rotate)
-                {
-                    osg::Vec3f dir = playerPos - actorPos;
-
-                    float faceAngleRadians = std::atan2(dir.x(), dir.y());
-                    targetAngleRadians = faceAngleRadians;
-                    rotate = true;
-                }
-                
-                if (greetingTimer >= GREETING_SHOULD_END)
-                {
-                    greetingState = Greet_Done;
-                    greetingTimer = 0;
-                }
-            }
-            
-            if (greetingState == MWMechanics::AiWander::Greet_Done)
-            {
-                float resetDist = 2*helloDistance;
-                if (playerDistSqr >= resetDist*resetDist)
-                    greetingState = Greet_None;
-            }
+            playGreetingIfPlayerGetsTooClose(actor, storage);
         }
 
         if(moveNow && mDistance)
@@ -512,6 +448,76 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+        // Play a random voice greeting if the player gets too close
+        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+        float helloDistance = static_cast<float>(hello);
+        static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
+            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+
+        helloDistance *= iGreetDistanceMultiplier;
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        float playerDistSqr = (playerPos - actorPos).length2();
+
+        int& greetingTimer = storage.mGreetingTimer;
+        GreetingState& greetingState = storage.mSaidGreeting;
+        if (greetingState == Greet_None)
+        {
+            if ((playerDistSqr <= helloDistance*helloDistance) &&
+                !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
+                greetingTimer++;
+
+            if (greetingTimer >= GREETING_SHOULD_START)
+            {
+                greetingState = Greet_InProgress;
+                MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                greetingTimer = 0;
+            }
+        }
+
+        if (greetingState == Greet_InProgress)
+        {
+            greetingTimer++;
+
+            if (storage.mWalking)
+            {
+                stopWalking(actor, storage);
+                storage.mMoveNow = false;
+                storage.mWalking = false;
+                mObstacleCheck.clear();
+                storage.mIdleNow = true;
+                getRandomIdle(storage.mPlayedIdle);
+            }
+
+            if (!storage.mRotate)
+            {
+                osg::Vec3f dir = playerPos - actorPos;
+
+                float faceAngleRadians = std::atan2(dir.x(), dir.y());
+                storage.mTargetAngleRadians = faceAngleRadians;
+                storage.mRotate = true;
+            }
+
+            if (greetingTimer >= GREETING_SHOULD_END)
+            {
+                greetingState = Greet_Done;
+                greetingTimer = 0;
+            }
+        }
+
+        if (greetingState == MWMechanics::AiWander::Greet_Done)
+        {
+            float resetDist = 2 * helloDistance;
+            if (playerDistSqr >= resetDist*resetDist)
+                greetingState = Greet_None;
+        }
     }
 
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)

@@ -72,6 +72,7 @@ namespace MWMechanics
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             void getRandomIdle(unsigned short& playedIdle);
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
+            void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
