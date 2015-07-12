@@ -161,15 +161,15 @@ int CSMWorld::RefIdData::getAppendIndex (UniversalId::Type type) const
     return index;
 }
 
-void CSMWorld::RefIdData::load (const LocalIndex& index, ESM::ESMReader& reader, bool base)
+void CSMWorld::RefIdData::load (ESM::ESMReader& reader, bool base, CSMWorld::UniversalId::Type type)
 {
-    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
-        mRecordContainers.find (index.second);
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator found =
+        mRecordContainers.find (type);
 
-    if (iter==mRecordContainers.end())
-        throw std::logic_error ("invalid local index type");
+    if (found == mRecordContainers.end())
+        throw std::logic_error ("Invalid type for an Object (Reference ID)");
 
-    iter->second->load (index.first, reader, base);
+    found->second->load(reader, base);
 }
 
 void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)
