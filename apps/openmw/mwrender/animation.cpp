@@ -267,6 +267,8 @@ namespace MWRender
 
     Animation::~Animation()
     {
+        setLightEffect(0.f);
+
         if (mObjectRoot)
             mInsert->removeChild(mObjectRoot);
     }
@@ -1222,6 +1224,36 @@ namespace MWRender
             return NULL;
         else
             return found->second;
+    }
+
+    void Animation::setLightEffect(float effect)
+    {
+        if (effect == 0)
+        {
+            if (mGlowLight)
+            {
+                mInsert->removeChild(mGlowLight);
+                mGlowLight = NULL;
+            }
+        }
+        else
+        {
+            if (!mGlowLight)
+            {
+                mGlowLight = new SceneUtil::LightSource;
+                mGlowLight->setLight(new osg::Light);
+                osg::Light* light = mGlowLight->getLight();
+                light->setDiffuse(osg::Vec4f(0,0,0,0));
+                light->setSpecular(osg::Vec4f(0,0,0,0));
+                light->setAmbient(osg::Vec4f(1.5f,1.5f,1.5f,1.f));
+                mInsert->addChild(mGlowLight);
+            }
+
+            effect += 3;
+            osg::Light* light = mGlowLight->getLight();
+            mGlowLight->setRadius(effect * 66.f);
+            light->setLinearAttenuation(0.5f/effect);
+        }
     }
 
     void Animation::addControllers()

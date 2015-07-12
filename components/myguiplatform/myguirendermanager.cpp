@@ -119,7 +119,7 @@ class Drawable : public osg::Drawable {
 
             // VBOs disabled due to crash in OSG: http://forum.openscenegraph.org/viewtopic.php?t=14909
             osg::GLBufferObject* bufferobject = 0;//state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
-            if (bufferobject)
+            if (0)//bufferobject)
             {
                 state->bindVertexBufferObject(bufferobject);
 
@@ -165,6 +165,8 @@ public:
     Drawable(const Drawable &copy, const osg::CopyOp &copyop=osg::CopyOp::SHALLOW_COPY)
         : osg::Drawable(copy, copyop)
         , mParent(copy.mParent)
+        , mWriteTo(0)
+        , mReadFrom(0)
     {
     }
 
@@ -521,12 +523,8 @@ void RenderManager::destroyAllResources()
 
 bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
 {
-    for (MapTexture::const_iterator item = mTextures.begin(); item != mTextures.end(); ++item)
-    {
-        if (item->second == _texture)
-            return true;
-    }
-    return false;
+    // We support external textures that aren't registered via this manager, so can't implement this method sensibly.
+    return true;
 }
 
 }

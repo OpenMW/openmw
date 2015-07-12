@@ -8,6 +8,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
@@ -162,6 +163,12 @@ protected:
 class CloudUpdater : public SceneUtil::StateSetUpdater
 {
 public:
+    CloudUpdater()
+        : mAnimationTimer(0.f)
+        , mOpacity(0.f)
+    {
+    }
+
     void setAnimationTimer(float timer)
     {
         mAnimationTimer = timer;
@@ -721,7 +728,11 @@ public:
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
+#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+                    osg::Callback* callback = node.getUpdateCallback();
+#else
                     osg::NodeCallback* callback = node.getUpdateCallback();
+#endif
                     while (callback)
                     {
                         if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
@@ -762,9 +773,6 @@ public:
         mat->setColorMode(osg::Material::OFF);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
-
-private:
-    float mAlpha;
 };
 
 void SkyManager::createRain()

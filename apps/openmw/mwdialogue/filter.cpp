@@ -203,6 +203,8 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
                 return false; // script does not have a variable of this name.
 
             int index = localDefs.getIndex (name);
+            if (index < 0)
+                return false; // shouldn't happen, we checked that variable has a type above, so must exist
 
             const MWScript::Locals& locals = mActor.getRefData().getLocals();
 

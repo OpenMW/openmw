@@ -22,6 +22,9 @@
 
 #include <components/sdlutil/sdlcursormanager.hpp>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>
@@ -893,6 +896,9 @@ namespace MWGui
 
     void WindowManager::updateMap()
     {
+        if (!mLocalMapRender)
+            return;
+
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
         osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();

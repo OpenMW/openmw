@@ -2,6 +2,7 @@
 
 #include <osg/PositionAttitudeTransform>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/projectilestate.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>

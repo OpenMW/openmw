@@ -407,6 +407,8 @@ FlipController::FlipController(int texSlot, float delta, std::vector<osg::ref_pt
 }
 
 FlipController::FlipController()
+    : mTexSlot(0)
+    , mDelta(0.f)
 {
 }
 
@@ -434,6 +436,7 @@ ParticleSystemController::ParticleSystemController(const Nif::NiParticleSystemCo
 }
 
 ParticleSystemController::ParticleSystemController()
+    : mEmitStart(0.f), mEmitStop(0.f)
 {
 }
 

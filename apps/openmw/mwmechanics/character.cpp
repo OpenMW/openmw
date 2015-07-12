@@ -1259,6 +1259,8 @@ bool CharacterController::updateWeaponState()
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
+        if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && mHitState != CharState_KnockDown)
+            mAttackStrength = complete;
     }
     else
     {
@@ -1789,7 +1791,8 @@ void CharacterController::update(float duration)
             }
         }
 
-        if(cls.isBipedal(mPtr))
+        // bipedal means hand-to-hand could be used (which is handled in updateWeaponState). an existing InventoryStore means an actual weapon could be used.
+        if(cls.isBipedal(mPtr) || cls.hasInventoryStore(mPtr))
             forcestateupdate = updateWeaponState() || forcestateupdate;
         else
             forcestateupdate = updateCreatureState() || forcestateupdate;
@@ -2045,6 +2048,27 @@ bool CharacterController::isKnockedOut() const
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 {
     mAttackingOrSpell = attackingOrSpell;
+}
+
+bool CharacterController::readyToPrepareAttack() const
+{
+    return mHitState == CharState_None && mUpperBodyState  <= UpperCharState_WeapEquiped;
+}
+
+bool CharacterController::readyToStartAttack() const
+{
+    if (mHitState != CharState_None)
+        return false;
+
+    if (mPtr.getClass().hasInventoryStore(mPtr) || mPtr.getClass().isBipedal(mPtr))
+        return mUpperBodyState == UpperCharState_WeapEquiped;
+    else
+        return mUpperBodyState == UpperCharState_Nothing;
+}
+
+float CharacterController::getAttackStrength() const
+{
+    return mAttackStrength;
 }
 
 void CharacterController::setActive(bool active)
