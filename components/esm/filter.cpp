@@ -9,12 +9,14 @@ unsigned int ESM::Filter::sRecordId = REC_FILT;
 
 void ESM::Filter::load (ESMReader& esm)
 {
+    mId = esm.getHNString ("NAME");
     mFilter = esm.getHNString ("FILT");
     mDescription = esm.getHNString ("DESC");
 }
 
 void ESM::Filter::save (ESMWriter& esm) const
 {
+    esm.writeHNCString ("NAME", mId);
     esm.writeHNCString ("FILT", mFilter);
     esm.writeHNCString ("DESC", mDescription);
 }
