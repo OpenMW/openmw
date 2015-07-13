@@ -87,6 +87,8 @@ namespace osgMyGUI
             throw std::runtime_error("No texturemanager set");
 
         mTexture = mTextureManager->getTexture2D(fname, osg::Texture2D::CLAMP_TO_EDGE, osg::Texture2D::CLAMP_TO_EDGE);
+        // disable mip-maps
+        mTexture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
 
         // FIXME
         mFormat = MyGUI::PixelFormat::R8G8B8;

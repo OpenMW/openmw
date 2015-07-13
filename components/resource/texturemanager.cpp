@@ -64,7 +64,30 @@ namespace Resource
         for (std::map<MapKey, osg::ref_ptr<osg::Texture2D> >::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
         {
             osg::ref_ptr<osg::Texture2D> tex = it->second;
-            tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+
+            // Keep mip-mapping disabled if the texture creator explicitely requested it.
+            osg::Texture::FilterMode oldMin = tex->getFilter(osg::Texture::MIN_FILTER);
+            if (oldMin == osg::Texture::LINEAR || oldMin == osg::Texture::NEAREST)
+            {
+                osg::Texture::FilterMode newMin = osg::Texture::LINEAR;
+                switch (mMinFilter)
+                {
+                case osg::Texture::LINEAR:
+                case osg::Texture::LINEAR_MIPMAP_LINEAR:
+                case osg::Texture::LINEAR_MIPMAP_NEAREST:
+                    newMin = osg::Texture::LINEAR;
+                    break;
+                case osg::Texture::NEAREST:
+                case osg::Texture::NEAREST_MIPMAP_LINEAR:
+                case osg::Texture::NEAREST_MIPMAP_NEAREST:
+                    newMin = osg::Texture::NEAREST;
+                    break;
+                }
+                tex->setFilter(osg::Texture::MIN_FILTER, newMin);
+            }
+            else
+                tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+
             tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
             tex->setMaxAnisotropy(static_cast<float>(mMaxAnisotropy));
         }
