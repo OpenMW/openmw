@@ -988,41 +988,41 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
         case ESM::REC_DIAL:
         {
-            std::string id = mReader->getHNOString ("NAME");
-
             ESM::Dialogue record;
-            record.mId = id;
             record.load (*mReader);
 
-            if (record.mType==ESM::Dialogue::Journal)
+            if (record.mIsDeleted)
             {
-                mJournals.load (record, mBase);
-                mDialogue = &mJournals.getRecord (id).get();
-            }
-            else if (record.mType==ESM::Dialogue::Deleted)
-            {
-                mDialogue = 0; // record vector can be shuffled around which would make pointer
-                               // to record invalid
+                // record vector can be shuffled around which would make pointer to record invalid
+                mDialogue = 0;
 
-                if (mJournals.tryDelete (id))
+                if (mJournals.tryDelete (record.mId))
                 {
                     /// \todo handle info records
                 }
-                else if (mTopics.tryDelete (id))
+                else if (mTopics.tryDelete (record.mId))
                 {
                     /// \todo handle info records
                 }
                 else
                 {
                     messages.add (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist",
+                        "Trying to delete dialogue record " + record.mId + " which does not exist",
                         "", CSMDoc::Message::Severity_Warning);
                 }
             }
             else
             {
-                mTopics.load (record, mBase);
-                mDialogue = &mTopics.getRecord (id).get();
+                if (record.mType == ESM::Dialogue::Journal)
+                {
+                    mJournals.load (record, mBase);
+                    mDialogue = &mJournals.getRecord (record.mId).get();
+                }
+                else
+                {
+                    mTopics.load (record, mBase);
+                    mDialogue = &mTopics.getRecord (record.mId).get();   
+                }
             }
 
             break;

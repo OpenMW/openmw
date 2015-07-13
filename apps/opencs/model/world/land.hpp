@@ -4,6 +4,7 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 #include <components/esm/loadland.hpp>
+#include <components/esm/util.hpp>
 
 namespace CSMWorld
 {
@@ -24,6 +25,15 @@ namespace CSMWorld
 
         void blank();
     };
+}
+
+namespace ESM
+{
+    template <>
+    bool isRecordDeleted<CSMWorld::Land>(const CSMWorld::Land &land)
+    {
+        return false;
+    }
 }
 
 #endif
