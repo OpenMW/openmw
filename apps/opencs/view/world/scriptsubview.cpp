@@ -17,19 +17,32 @@
 #include "scriptedit.hpp"
 #include "recordbuttonbar.hpp"
 
+void CSVWorld::ScriptSubView::addButtonBar()
+{
+    if (mButtons)
+        return;
+
+    mButtons = new RecordButtonBar (getUniversalId(), *mModel, 0, &mCommandDispatcher, this);
+
+    mLayout.insertWidget (1, mButtons);
+
+    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+
+    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
+        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+}
+
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0),
+: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0), mButtons (0),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     std::vector<std::string> selection (1, id.getId());
     mCommandDispatcher.setSelection (selection);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-
-    layout->addWidget (mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
+    mLayout.addWidget (mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
 
     QWidget *widget = new QWidget (this);;
-    widget->setLayout (layout);
+    widget->setLayout (&mLayout);
     setWidget (widget);
 
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
@@ -49,9 +62,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     mEditor->setPlainText (mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString());
 
     // buttons
-    mButtons = new RecordButtonBar (id, *mModel, 0, &mCommandDispatcher, this);
-
-    layout->addWidget (mButtons);
+    if (CSMSettings::UserSettings::instance().setting ("script-editor/toolbar", QString("true")) == "true")
+        addButtonBar();
 
     // status bar
     QStatusBar *statusBar = new QStatusBar(mBottom);
@@ -64,7 +76,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     bottmLayout->addWidget (statusBar);
     mBottom->setLayout (bottmLayout);
 
-    layout->addWidget (mBottom, 0);
+    mLayout.addWidget (mBottom, 0);
 
     // signals
     connect (mEditor, SIGNAL (textChanged()), this, SLOT (textChanged()));
@@ -75,11 +87,6 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
-
-    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
-        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
-
     updateStatusBar();
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
 }
@@ -88,16 +95,33 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
 {
     if (name == "script-editor/show-linenum")
     {
-        std::string showLinenum = value.at(0).toStdString();
+        std::string showLinenum = value.at(0).toUtf8().constData();
         mEditor->showLineNum(showLinenum == "true");
         mBottom->setVisible(showLinenum == "true");
     }
     else if (name == "script-editor/mono-font")
     {
-        mEditor->setMonoFont(value.at(0).toStdString() == "true");
+        mEditor->setMonoFont (value.at(0)==QString ("true"));
+    }
+    else if (name=="script-editor/toolbar")
+    {
+        if (value.at(0)==QString ("true"))
+        {
+            addButtonBar();
+        }
+        else
+        {
+            if (mButtons)
+            {
+                mLayout.removeWidget (mButtons);
+                delete mButtons;
+                mButtons = 0;
+            }
+        }
     }
 
-    mButtons->updateUserSetting (name, value);
+    if (mButtons)
+        mButtons->updateUserSetting (name, value);
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()
@@ -113,7 +137,10 @@ void CSVWorld::ScriptSubView::updateStatusBar ()
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
 {
     mEditor->setReadOnly (locked);
-    mButtons->setEditLock (locked);
+
+    if (mButtons)
+        mButtons->setEditLock (locked);
+
     mCommandDispatcher.setEditLock (locked);
 }
 

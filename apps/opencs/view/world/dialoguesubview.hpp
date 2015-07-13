@@ -195,8 +195,8 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             std::vector<CSMWorld::NestedTableProxyModel*> mNestedModels; //Plain, raw C pointers, deleted in the dtor
 
-            void createEditorContextMenu(QWidget *editor, 
-                                         CSMWorld::ColumnBase::Display display, 
+            void createEditorContextMenu(QWidget *editor,
+                                         CSMWorld::ColumnBase::Display display,
                                          int currentRow) const;
         public:
 
@@ -236,7 +236,7 @@ namespace CSVWorld
             void updateCurrentId();
 
             bool isLocked() const;
-        
+
         public:
 
             SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
@@ -256,9 +256,13 @@ namespace CSVWorld
     class DialogueSubView : public SimpleDialogueSubView
     {
             Q_OBJECT
-            
+
             TableBottomBox* mBottom;
             RecordButtonBar *mButtons;
+
+        private:
+
+            void addButtonBar();
 
         public:
 
@@ -268,14 +272,14 @@ namespace CSVWorld
             virtual void setEditLock (bool locked);
 
             virtual void updateUserSetting (const QString& name, const QStringList& value);
-            
+
         private slots:
 
             void showPreview();
 
             void viewRecord();
 
-            void switchToRow (int row);            
+            void switchToRow (int row);
 
             void requestFocus (const std::string& id);
     };
