@@ -19,6 +19,10 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 
+#if OPENGLES
+#include <components/shadergen/GLES2ShaderGenVisitor.h>
+#endif
+
 namespace
 {
 
@@ -113,10 +117,16 @@ namespace Resource
                 mIncrementalCompileOperation->add(loaded);
 
             mIndex[normalized] = loaded;
+#if OPENGLES
+            osgUtil::GLES2ShaderGenVisitor shaderGen;
+            loaded->accept(shaderGen);
+#endif
             return loaded;
         }
-        else
+        else{
+
             return it->second;
+}
     }
 
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name)

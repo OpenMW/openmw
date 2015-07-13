@@ -40,6 +40,12 @@ add_component_dir (resource
     scenemanager texturemanager resourcesystem
     )
 
+if (OPENGLES)
+    add_component_dir (shadergen
+        GLES2ShaderGenVisitor
+        )
+endif ()
+
 add_component_dir (sceneutil
     clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller workqueue
     )
