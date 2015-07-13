@@ -31,6 +31,7 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/doc/document.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "../widget/coloreditor.hpp"
 #include "../widget/droplineedit.hpp"
@@ -863,25 +864,15 @@ void CSVWorld::SimpleDialogueSubView::refreshNpcDialogue (int type, const std::s
     }
 }
 
-CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
-    CSMDoc::Document& document, const CreatorFactoryBase& creatorFactory, bool sorting)
-: SimpleDialogueSubView (id, document)
+void CSVWorld::DialogueSubView::addButtonBar()
 {
-    // bottom box
-    mBottom = new TableBottomBox (creatorFactory, document, id, this);
+    if (mButtons)
+        return;
 
-    mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-
-    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
-        this, SLOT (requestFocus (const std::string&)));
-
-    // button bar
-    mButtons = new RecordButtonBar (id, getTable(), mBottom,
+    mButtons = new RecordButtonBar (getUniversalId(), getTable(), mBottom,
         &getCommandDispatcher(), this);
 
-    // layout
-    getMainLayout().addWidget (mButtons);
-    getMainLayout().addWidget (mBottom);
+    getMainLayout().insertWidget (1, mButtons);
 
     // connections
     connect (mButtons, SIGNAL (showPreview()), this, SLOT (showPreview()));
@@ -892,15 +883,56 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
         mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
 }
 
+CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
+    CSMDoc::Document& document, const CreatorFactoryBase& creatorFactory, bool sorting)
+: SimpleDialogueSubView (id, document), mButtons (0)
+{
+    // bottom box
+    mBottom = new TableBottomBox (creatorFactory, document, id, this);
+
+    mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+
+    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
+        this, SLOT (requestFocus (const std::string&)));
+
+    // button bar
+    if (CSMSettings::UserSettings::instance().setting ("dialogues/toolbar", QString("true")) == "true")
+        addButtonBar();
+
+    // layout
+    getMainLayout().addWidget (mBottom);
+}
+
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
 {
     SimpleDialogueSubView::setEditLock (locked);
+
+    if (mButtons)
     mButtons->setEditLock (locked);
 }
 
 void CSVWorld::DialogueSubView::updateUserSetting (const QString& name, const QStringList& value)
 {
     SimpleDialogueSubView::updateUserSetting (name, value);
+
+    if (name=="dialogues/toolbar")
+    {
+        if (value.at(0)==QString ("true"))
+        {
+            addButtonBar();
+        }
+        else
+        {
+            if (mButtons)
+            {
+                getMainLayout().removeWidget (mButtons);
+                delete mButtons;
+                mButtons = 0;
+            }
+        }
+    }
+
+    if (mButtons)
     mButtons->updateUserSetting (name, value);
 }
 

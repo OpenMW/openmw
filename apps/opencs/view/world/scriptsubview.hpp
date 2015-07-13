@@ -1,12 +1,15 @@
 #ifndef CSV_WORLD_SCRIPTSUBVIEW_H
 #define CSV_WORLD_SCRIPTSUBVIEW_H
 
+#include <QVBoxLayout>
+
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../doc/subview.hpp"
 
 class QModelIndex;
 class QLabel;
+class QVBoxLayout;
 
 namespace CSMDoc
 {
@@ -35,6 +38,11 @@ namespace CSVWorld
             QLabel *mStatus;
             RecordButtonBar *mButtons;
             CSMWorld::CommandDispatcher mCommandDispatcher;
+            QVBoxLayout mLayout;
+
+        private:
+
+            void addButtonBar();
 
         public:
 

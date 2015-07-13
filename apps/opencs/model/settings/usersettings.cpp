@@ -244,6 +244,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDeclaredValues (jumpValues);
     }
 
+    declareSection ("dialogues", "ID Dialogues");
+    {
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
+    }
+
     declareSection ("report-input", "Reports");
     {
         QString none ("None");
@@ -336,6 +342,9 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         "<li>Normal: Report warning as a warning</li>"
         "<li>Strict: Promote warning to an error</li>"
         "</ul>");
+
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
 
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
