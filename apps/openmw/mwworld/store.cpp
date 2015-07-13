@@ -1027,19 +1027,19 @@ namespace MWWorld
     inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
-        dialogue.load(esm);
+        dialogue.loadId(esm);
 
         std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
         std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
         if (found == mStatic.end())
         {
+            dialogue.loadData(esm);
             mStatic.insert(std::make_pair(idLower, dialogue));
         }
         else
         {
-            // Update only read fields (don't touching the Info list)
-            found->second.mIsDeleted = dialogue.mIsDeleted;
-            found->second.mType = dialogue.mType;
+            found->second.loadData(esm);
+            dialogue = found->second;
         }
         
         return RecordId(dialogue.mId, dialogue.mIsDeleted);

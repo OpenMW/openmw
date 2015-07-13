@@ -111,6 +111,12 @@ struct DialInfo
     DialInfo();
 
     void load(ESMReader &esm);
+    ///< Loads all sub-records of Info record
+    void loadId(ESMReader &esm);
+    ///< Loads only Id of Info record (INAM sub-record)
+    void loadInfo(ESMReader &esm);
+    ///< Loads all sub-records of Info record, except INAM sub-record
+
     void save(ESMWriter &esm) const;
 
     void blank();

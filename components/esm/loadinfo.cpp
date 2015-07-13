@@ -15,9 +15,20 @@ namespace ESM
 
     void DialInfo::load(ESMReader &esm)
     {
+        loadId(esm);
+        loadInfo(esm);
+    }
+
+    void DialInfo::loadId(ESMReader &esm)
+    {
+        mIsDeleted = false;
+        mId = esm.getHNString("INAM");
+    }
+
+    void DialInfo::loadInfo(ESMReader &esm)
+    {
         mQuestStatus = QS_None;
         mFactionLess = false;
-        mIsDeleted = false;
 
         mPrev = esm.getHNString("PNAM");
         mNext = esm.getHNString("NNAM");
@@ -141,6 +152,7 @@ namespace ESM
 
     void DialInfo::save(ESMWriter &esm) const
     {
+        esm.writeHNCString("INAM", mId);
         esm.writeHNCString("PNAM", mPrev);
         esm.writeHNCString("NNAM", mNext);
 
