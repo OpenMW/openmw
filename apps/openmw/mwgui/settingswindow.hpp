@@ -59,6 +59,7 @@ namespace MWGui
             void onResolutionSelected(MyGUI::ListBox* _sender, size_t index);
             void onResolutionAccept();
             void onResolutionCancel();
+            void highlightCurrentResolution();
 
             void onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
