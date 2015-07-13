@@ -51,6 +51,12 @@ struct Dialogue
     Dialogue();
 
     void load(ESMReader &esm);
+    ///< Loads all sub-records of Dialogue record
+    void loadId(ESMReader &esm);
+    ///< Loads NAME sub-record of Dialogue record
+    void loadData(ESMReader &esm);
+    ///< Loads all sub-records of Dialogue record, except NAME sub-record
+
     void save(ESMWriter &esm) const;
 
     /// Remove all INFOs that are deleted or marked as QS_Deleted from mInfos.
