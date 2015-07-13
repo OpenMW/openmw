@@ -235,8 +235,9 @@ namespace MWGui
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
+        // Create all cursors in advance
+        createCursors();
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-
         mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
@@ -1181,31 +1182,7 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
-        if(!mCursorManager->cursorChanged(name))
-            return; //the cursor manager doesn't want any more info about this cursor
-        //See if we can get the information we need out of the cursor resource
-        ResourceImageSetPointerFix* imgSetPtr = dynamic_cast<ResourceImageSetPointerFix*>(MyGUI::PointerManager::getInstance().getByName(name));
-        if(imgSetPtr != NULL)
-        {
-            MyGUI::ResourceImageSet* imgSet = imgSetPtr->getImageSet();
-
-            std::string tex_name = imgSet->getIndexInfo(0,0).texture;
-
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
-            tex->setUnRefImageDataAfterApply(false); // FIXME?
-
-            //everything looks good, send it to the cursor manager
-            if(tex.valid())
-            {
-                Uint8 size_x = imgSetPtr->getSize().width;
-                Uint8 size_y = imgSetPtr->getSize().height;
-                Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
-                Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
-                int rotation = imgSetPtr->getRotation();
-
-                mCursorManager->receiveCursorInfo(name, rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
-            }
-        }
+        mCursorManager->cursorChanged(name);
     }
 
     void WindowManager::popGuiMode()
@@ -1961,6 +1938,33 @@ namespace MWGui
     std::string WindowManager::correctTexturePath(const std::string& path)
     {
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
+    }
+
+    void WindowManager::createCursors()
+    {
+        MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
+        while (enumerator.next())
+        {
+            MyGUI::IResource* resource = enumerator.current().second;
+            ResourceImageSetPointerFix* imgSetPointer = dynamic_cast<ResourceImageSetPointerFix*>(resource);
+            if (!imgSetPointer)
+                continue;
+            std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
+
+            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
+
+            if(tex.valid())
+            {
+                //everything looks good, send it to the cursor manager
+                Uint8 size_x = imgSetPointer->getSize().width;
+                Uint8 size_y = imgSetPointer->getSize().height;
+                Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
+                Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
+                int rotation = imgSetPointer->getRotation();
+
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
+            }
+        }
     }
 
     void WindowManager::createTextures()
