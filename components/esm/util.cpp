@@ -36,4 +36,40 @@ namespace ESM
     {
         return false;
     }
+
+    template <>
+    bool isRecordDeleted<Skill>(const Skill &skill)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<MagicEffect>(const MagicEffect &mgef)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<Pathgrid>(const Pathgrid &pgrd)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<Land>(const Land &land)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<DebugProfile>(const DebugProfile &profile)
+    {
+        return false;
+    }
+
+    template <>
+    bool isRecordDeleted<Filter>(const Filter &filter)
+    {
+        return false;
+    }
 }

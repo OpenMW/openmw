@@ -12,6 +12,12 @@
 #include "loadglob.hpp"
 #include "loadrace.hpp"
 #include "loadgmst.hpp"
+#include "loadskil.hpp"
+#include "loadmgef.hpp"
+#include "loadland.hpp"
+#include "loadpgrd.hpp"
+#include "debugprofile.hpp"
+#include "filter.hpp"
 
 namespace ESM
 {
@@ -73,6 +79,24 @@ bool isRecordDeleted<Race>(const Race &race);
 
 template <>
 bool isRecordDeleted<GameSetting>(const GameSetting &gmst);
+
+template <>
+bool isRecordDeleted<Skill>(const Skill &skill);
+
+template <>
+bool isRecordDeleted<MagicEffect>(const MagicEffect &mgef);
+
+template <>
+bool isRecordDeleted<Pathgrid>(const Pathgrid &pgrd);
+
+template <>
+bool isRecordDeleted<Land>(const Land &land);
+
+template <>
+bool isRecordDeleted<DebugProfile>(const DebugProfile &profile);
+
+template <>
+bool isRecordDeleted<Filter>(const Filter &filter);
 
 }
 
