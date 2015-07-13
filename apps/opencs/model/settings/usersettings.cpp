@@ -162,7 +162,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
-    declareSection ("table-input", "Table Input");
+    declareSection ("table-input", "ID Tables");
     {
         QString inPlaceEdit ("Edit in Place");
         QString editRecord ("Edit Record");
@@ -217,7 +217,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         jumpToAdded->setDeclaredValues (jumpValues);
     }
 
-    declareSection ("report-input", "Report Input");
+    declareSection ("report-input", "Reports");
     {
         QString none ("None");
         QString edit ("Edit");
@@ -257,7 +257,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         shiftCtrlDoubleClick->setDefaultValue (none);
         shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in report table:<p>" + toolTip);
     }
-    
+
     declareSection ("search", "Search & Replace");
     {
         Setting *before = createSetting (Type_SpinBox, "char-before",
@@ -299,7 +299,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         QStringList modes;
         modes << "Ignore" << modeNormal << "Strict";
-            
+
         Setting *warnings = createSetting (Type_ComboBox, "warnings",
             "Warning Mode");
         warnings->setDeclaredValues (modes);
@@ -309,7 +309,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         "<li>Normal: Report warning as a warning</li>"
         "<li>Strict: Promote warning to an error</li>"
         "</ul>");
-        
+
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
@@ -346,7 +346,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         cycle->setToolTip ("When using next/previous functions at the last/first item of a "
             "list go to the first/last item");
     }
-    
+
     {
         /******************************************************************
         * There are three types of values:
