@@ -106,21 +106,18 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
 
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
-    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" +
-        reader.getHNOString ("INAM");
+    Info info;
+    info.load (reader);
+    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" + info.mId;
 
-    if (reader.isNextSub ("DELE"))
+    if (info.mIsDeleted)
     {
         int index = searchId (id);
-
-        reader.skipRecord();
 
         if (index==-1)
         {
             // deleting a record that does not exist
-
             // ignore it for now
-
             /// \todo report the problem to the user
         }
         else if (base)
@@ -136,12 +133,9 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
     }
     else
     {
-        Info record;
-        record.mTopicId = dialogue.mId;
-        record.mId = id;
-        record.load (reader);
-
-        load (record, base);
+        info.mTopicId = dialogue.mId;
+        info.mId = id;
+        load (info, base);
     }
 }
 
