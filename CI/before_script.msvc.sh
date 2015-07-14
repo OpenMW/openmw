@@ -495,6 +495,8 @@ fi
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
+
+		echo AppVeyor.
 	fi
 }
 cd $DEPS
