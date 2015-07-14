@@ -25,6 +25,7 @@ namespace CSVWorld
 {
     class ScriptEdit;
     class RecordButtonBar;
+    class TableBottomBox;
 
     class ScriptSubView : public CSVDoc::SubView
     {
@@ -34,8 +35,7 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             CSMWorld::IdTable *mModel;
             int mColumn;
-            QWidget *mBottom;
-            QLabel *mStatus;
+            TableBottomBox *mBottom;
             RecordButtonBar *mButtons;
             CSMWorld::CommandDispatcher mCommandDispatcher;
             QVBoxLayout mLayout;
@@ -53,6 +53,8 @@ namespace CSVWorld
             virtual void useHint (const std::string& hint);
 
             virtual void updateUserSetting (const QString& name, const QStringList& value);
+
+            virtual void setStatusBar (bool show);
 
         public slots:
 
