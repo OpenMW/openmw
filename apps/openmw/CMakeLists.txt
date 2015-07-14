@@ -123,11 +123,11 @@ target_link_libraries(openmw
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
-    ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    ${MYGUI_LIBRARIES}
 )
 
 if (ANDROID)
