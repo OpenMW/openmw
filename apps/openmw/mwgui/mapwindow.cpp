@@ -12,6 +12,7 @@
 #include <MyGUI_FactoryManager.h>
 
 #include <components/esm/globalmap.hpp>
+#include <components/esm/esmwriter.hpp>
 #include <components/settings/settings.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 

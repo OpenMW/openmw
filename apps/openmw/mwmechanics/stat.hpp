@@ -1,9 +1,14 @@
 #ifndef GAME_MWMECHANICS_STAT_H
 #define GAME_MWMECHANICS_STAT_H
 
+#include <algorithm>
 #include <limits>
 
-#include <components/esm/statstate.hpp>
+namespace ESM
+{
+    template<typename T>
+    struct StatState;
+}
 
 namespace MWMechanics
 {
@@ -16,87 +21,28 @@ namespace MWMechanics
         public:
             typedef T Type;
 
-            Stat() : mBase (0), mModified (0) {}
-            Stat(T base) : mBase (base), mModified (base) {}
-            Stat(T base, T modified) : mBase (base), mModified (modified) {}
+            Stat();
+            Stat(T base);
+            Stat(T base, T modified);
 
-            const T& getBase() const
-            {
-                return mBase;
-            }
+            const T& getBase() const;
 
-            T getModified() const
-            {
-                return std::max(static_cast<T>(0), mModified);
-            }
-
-            T getModifier() const
-            {
-                return mModified-mBase;
-            }
+            T getModified() const;
+            T getModifier() const;
 
             /// Set base and modified to \a value.
-            void set (const T& value)
-            {
-                mBase = mModified = value;
-            }
-
-            void modify(const T& diff)
-            {
-                mBase += diff;
-                if(mBase >= static_cast<T>(0))
-                    mModified += diff;
-                else
-                {
-                    mModified += diff - mBase;
-                    mBase = static_cast<T>(0);
-                }
-            }
+            void set (const T& value);
+            void modify(const T& diff);
 
             /// Set base and adjust modified accordingly.
-            void setBase (const T& value)
-            {
-                T diff = value - mBase;
-                mBase = value;
-                mModified += diff;
-            }
+            void setBase (const T& value);
 
             /// Set modified value an adjust base accordingly.
-            void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max())
-            {
-                T diff = value - mModified;
+            void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max());
+            void setModifier (const T& modifier);
 
-                if (mBase+diff<min)
-                {
-                    value = min + (mModified - mBase);
-                    diff = value - mModified;
-                }
-                else if (mBase+diff>max)
-                {
-                    value = max + (mModified - mBase);
-                    diff = value - mModified;
-                }
-
-                mModified = value;
-                mBase += diff;
-            }
-
-            void setModifier (const T& modifier)
-            {
-                mModified = mBase + modifier;
-            }
-
-            void writeState (ESM::StatState<T>& state) const
-            {
-                state.mBase = mBase;
-                state.mMod = mModified;
-            }
-
-            void readState (const ESM::StatState<T>& state)
-            {
-                mBase = state.mBase;
-                mModified = state.mMod;
-            }
+            void writeState (ESM::StatState<T>& state) const;
+            void readState (const ESM::StatState<T>& state);
     };
 
     template<typename T>
@@ -121,98 +67,32 @@ namespace MWMechanics
         public:
             typedef T Type;
 
-            DynamicStat() : mStatic (0), mCurrent (0) {}
-            DynamicStat(T base) : mStatic (base), mCurrent (base) {}
-            DynamicStat(T base, T modified, T current) : mStatic(base, modified), mCurrent (current) {}
-            DynamicStat(const Stat<T> &stat, T current) : mStatic(stat), mCurrent (current) {}
+            DynamicStat();
+            DynamicStat(T base);
+            DynamicStat(T base, T modified, T current);
+            DynamicStat(const Stat<T> &stat, T current);
 
-            const T& getBase() const
-            {
-                return mStatic.getBase();
-            }
-
-            T getModified() const
-            {
-                return mStatic.getModified();
-            }
-
-            const T& getCurrent() const
-            {
-                return mCurrent;
-            }
+            const T& getBase() const;
+            T getModified() const;
+            const T& getCurrent() const;
 
             /// Set base, modified and current to \a value.
-            void set (const T& value)
-            {
-                mStatic.set (value);
-                mCurrent = value;
-            }
+            void set (const T& value);
 
             /// Set base and adjust modified accordingly.
-            void setBase (const T& value)
-            {
-                mStatic.setBase (value);
-
-                if (mCurrent>getModified())
-                    mCurrent = getModified();
-            }
+            void setBase (const T& value);
 
             /// Set modified value an adjust base accordingly.
-            void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max())
-            {
-                mStatic.setModified (value, min, max);
-
-                if (mCurrent>getModified())
-                    mCurrent = getModified();
-            }
+            void setModified (T value, const T& min, const T& max = std::numeric_limits<T>::max());
 
             /// Change modified relatively.
-            void modify (const T& diff, bool allowCurrentDecreaseBelowZero=false)
-            {
-                mStatic.modify (diff);
-                setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
-            }
+            void modify (const T& diff, bool allowCurrentDecreaseBelowZero=false);
 
-            void setCurrent (const T& value, bool allowDecreaseBelowZero = false)
-            {
-                if (value > mCurrent)
-                {
-                    // increase
-                    mCurrent = value;
+            void setCurrent (const T& value, bool allowDecreaseBelowZero = false);
+            void setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero=false);
 
-                    if (mCurrent > getModified())
-                        mCurrent = getModified();
-                }
-                else if (value > 0 || allowDecreaseBelowZero)
-                {
-                    // allowed decrease
-                    mCurrent = value;
-                }
-                else if (mCurrent > 0)
-                {
-                    // capped decrease
-                    mCurrent = 0;
-                }
-            }
-
-            void setModifier (const T& modifier, bool allowCurrentDecreaseBelowZero=false)
-            {
-                T diff =  modifier - mStatic.getModifier();
-                mStatic.setModifier (modifier);
-                setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
-            }
-
-            void writeState (ESM::StatState<T>& state) const
-            {
-                mStatic.writeState (state);
-                state.mCurrent = mCurrent;
-            }
-
-            void readState (const ESM::StatState<T>& state)
-            {
-                mStatic.readState (state);
-                mCurrent = state.mCurrent;
-            }
+            void writeState (ESM::StatState<T>& state) const;
+            void readState (const ESM::StatState<T>& state);
     };
 
     template<typename T>
@@ -236,26 +116,25 @@ namespace MWMechanics
         float mDamage; // needs to be float to allow continuous damage
 
     public:
-        AttributeValue() : mBase(0), mModifier(0), mDamage(0) {}
+        AttributeValue();
 
-        int getModified() const { return std::max(0, mBase - (int) mDamage + mModifier); }
-        int getBase() const { return mBase; }
-        int getModifier() const {  return mModifier; }
+        int getModified() const;
+        int getBase() const;
+        int getModifier() const;
 
-        void setBase(int base) { mBase = std::max(0, base); }
+        void setBase(int base);
 
-        void setModifier(int mod) { mModifier = mod; }
+        void setModifier(int mod);
 
         // Maximum attribute damage is limited to the modified value.
         // Note: I think MW applies damage directly to mModified, since you can also
         // "restore" drained attributes. We need to rewrite the magic effect system to support this.
-        void damage(float damage) { mDamage += std::min(damage, (float)getModified()); }
-        void restore(float amount) { mDamage -= std::min(mDamage, amount); }
+        void damage(float damage);
+        void restore(float amount);
 
-        float getDamage() const { return mDamage; }
+        float getDamage() const;
 
         void writeState (ESM::StatState<int>& state) const;
-
         void readState (const ESM::StatState<int>& state);
     };
 
@@ -263,12 +142,11 @@ namespace MWMechanics
     {
         float mProgress;
     public:
-        SkillValue() : mProgress(0) {}
-        float getProgress() const { return mProgress; }
-        void setProgress(float progress) { mProgress = progress; }
+        SkillValue();
+        float getProgress() const;
+        void setProgress(float progress);
 
         void writeState (ESM::StatState<int>& state) const;
-
         void readState (const ESM::StatState<int>& state);
     };
 

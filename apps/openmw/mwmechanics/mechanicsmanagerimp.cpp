@@ -6,6 +6,7 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
 
 #include "../mwworld/esmstore.hpp"

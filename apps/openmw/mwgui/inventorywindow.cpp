@@ -10,9 +10,13 @@
 
 #include <osg/Texture2D>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/settings/settings.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

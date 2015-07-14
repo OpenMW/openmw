@@ -6,6 +6,8 @@
 #include <components/esm/cellid.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>

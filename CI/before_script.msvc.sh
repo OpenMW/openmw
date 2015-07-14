@@ -124,6 +124,11 @@ add_runtime_dlls() {
 	RUNTIME_DLLS="$RUNTIME_DLLS $@"
 }
 
+OSG_PLUGINS=""
+add_osg_dlls() {
+	OSG_PLUGINS="$OSG_PLUGINS $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM=`uname -m`
 fi
@@ -250,279 +255,283 @@ mkdir -p Build_$BITS/deps
 cd Build_$BITS/deps
 
 DEPS_INSTALL=`pwd`
+cd $DEPS
 
 echo
 echo "Extracting dependencies..."
 
 
 # Boost
-if [ -z $APPVEYOR ]; then
-	printf "Boost 1.58.0... "
-	cd $DEPS_INSTALL
+printf "Boost 1.58.0... "
+{
+	if [ -z $APPVEYOR ]; then
+		cd $DEPS_INSTALL
 
-	BOOST_SDK="`real_pwd`/Boost"
+		BOOST_SDK="`real_pwd`/Boost"
 
-	if [ -d Boost ] && grep "BOOST_VERSION 105800" Boost/boost/version.hpp > /dev/null; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf Boost
-		$DEPS/boost-1.58.0-win$BITS.exe //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
+		if [ -d Boost ] && grep "BOOST_VERSION 105800" Boost/boost/version.hpp > /dev/null; then
+			printf "Exists. "
+		elif [ -z $SKIP_EXTRACT ]; then
+			rm -rf Boost
+			$DEPS/boost-1.58.0-win$BITS.exe //dir="$(echo $BOOST_SDK | sed s,/,\\\\,g)" //verysilent
+		fi
+
+		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
+			-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
+
+		echo Done.
+	else
+		# Appveyor unstable has all the boost we need already
+		BOOST_SDK="c:/Libraries/boost"
+		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
+			-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
+
+		echo AppVeyor.
 	fi
-
-	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
-
-	cd $DEPS
-
-	echo Done.
-else
-	# Appveyor unstable has all the boost we need already
-	BOOST_SDK="c:/Libraries/boost"
-	add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-		-DBOOST_LIBRARYDIR="$BOOST_SDK/lib$BITS-msvc-12.0"
-fi
-
+}
+cd $DEPS
 
 # Bullet
 printf "Bullet 2.83.5... "
-cd $DEPS_INSTALL
+{
+	cd $DEPS_INSTALL
 
-if [ -d Bullet ]; then
-	printf "Exists. (No version checking) "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf Bullet
-	eval 7z x -y $DEPS/Bullet-2.83.5-win$BITS.7z $STRIP
-	mv Bullet-2.83.5-win$BITS Bullet
-fi
+	if [ -d Bullet ]; then
+		printf "Exists. (No version checking) "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf Bullet
+		eval 7z x -y $DEPS/Bullet-2.83.5-win$BITS.7z $STRIP
+		mv Bullet-2.83.5-win$BITS Bullet
+	fi
 
-BULLET_SDK="`real_pwd`/Bullet"
-add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
-	-DBULLET_COLLISION_LIBRARY="$BULLET_SDK/lib/BulletCollision.lib" \
-	-DBULLET_COLLISION_LIBRARY_DEBUG="$BULLET_SDK/lib/BulletCollision_Debug.lib" \
-	-DBULLET_DYNAMICS_LIBRARY="$BULLET_SDK/lib/BulletDynamics.lib" \
-	-DBULLET_DYNAMICS_LIBRARY_DEBUG="$BULLET_SDK/lib/BulletDynamics_Debug.lib" \
-	-DBULLET_MATH_LIBRARY="$BULLET_SDK/lib/LinearMath.lib" \
-	-DBULLET_MATH_LIBRARY_DEBUG="$BULLET_SDK/lib/LinearMath_Debug.lib"
+	BULLET_SDK="`real_pwd`/Bullet"
+	add_cmake_opts -DBULLET_INCLUDE_DIR="$BULLET_SDK/include/bullet" \
+		-DBULLET_COLLISION_LIBRARY="$BULLET_SDK/lib/BulletCollision.lib" \
+		-DBULLET_COLLISION_LIBRARY_DEBUG="$BULLET_SDK/lib/BulletCollision_Debug.lib" \
+		-DBULLET_MATH_LIBRARY="$BULLET_SDK/lib/LinearMath.lib" \
+		-DBULLET_MATH_LIBRARY_DEBUG="$BULLET_SDK/lib/LinearMath_Debug.lib"
 
+	echo Done.
+}
 cd $DEPS
-
-echo Done.
-
 
 # FFmpeg
 printf "FFmpeg 2.5.2... "
-cd $DEPS_INSTALL
+{
+	cd $DEPS_INSTALL
 
-if [ -d FFmpeg ] && grep "FFmpeg version: 2.5.2" FFmpeg/README.txt > /dev/null; then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf FFmpeg
+	if [ -d FFmpeg ] && grep "FFmpeg version: 2.5.2" FFmpeg/README.txt > /dev/null; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf FFmpeg
 
-	eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2.7z $STRIP
-	eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2-dev.7z $STRIP
+		eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2.7z $STRIP
+		eval 7z x -y $DEPS/ffmpeg$BITS-2.5.2-dev.7z $STRIP
 
-	mv ffmpeg-2.5.2-win$BITS-shared FFmpeg
-	cp -r ffmpeg-2.5.2-win$BITS-dev/* FFmpeg/
-	rm -rf ffmpeg-2.5.2-win$BITS-dev
-fi
+		mv ffmpeg-2.5.2-win$BITS-shared FFmpeg
+		cp -r ffmpeg-2.5.2-win$BITS-dev/* FFmpeg/
+		rm -rf ffmpeg-2.5.2-win$BITS-dev
+	fi
 
-FFMPEG_SDK="`real_pwd`/FFmpeg"
-add_cmake_opts -DAVCODEC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DAVCODEC_LIBRARIES="$FFMPEG_SDK/lib/avcodec.lib" \
-	-DAVDEVICE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DAVDEVICE_LIBRARIES="$FFMPEG_SDK/lib/avdevice.lib" \
-	-DAVFORMAT_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DAVFORMAT_LIBRARIES="$FFMPEG_SDK/lib/avformat.lib" \
-	-DAVUTIL_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DAVUTIL_LIBRARIES="$FFMPEG_SDK/lib/avutil.lib" \
-	-DPOSTPROC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DPOSTPROC_LIBRARIES="$FFMPEG_SDK/lib/postproc.lib" \
-	-DSWRESAMPLE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DSWRESAMPLE_LIBRARIES="$FFMPEG_SDK/lib/swresample.lib" \
-	-DSWSCALE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
-	-DSWSCALE_LIBRARIES="$FFMPEG_SDK/lib/swscale.lib"
+	FFMPEG_SDK="`real_pwd`/FFmpeg"
+	add_cmake_opts -DAVCODEC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DAVCODEC_LIBRARIES="$FFMPEG_SDK/lib/avcodec.lib" \
+		-DAVDEVICE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DAVDEVICE_LIBRARIES="$FFMPEG_SDK/lib/avdevice.lib" \
+		-DAVFORMAT_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DAVFORMAT_LIBRARIES="$FFMPEG_SDK/lib/avformat.lib" \
+		-DAVUTIL_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DAVUTIL_LIBRARIES="$FFMPEG_SDK/lib/avutil.lib" \
+		-DPOSTPROC_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DPOSTPROC_LIBRARIES="$FFMPEG_SDK/lib/postproc.lib" \
+		-DSWRESAMPLE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DSWRESAMPLE_LIBRARIES="$FFMPEG_SDK/lib/swresample.lib" \
+		-DSWSCALE_INCLUDE_DIRS="$FFMPEG_SDK/include" \
+		-DSWSCALE_LIBRARIES="$FFMPEG_SDK/lib/swscale.lib"
 
-add_runtime_dlls `pwd`/FFmpeg/bin/{avcodec-56,avformat-56,avutil-54,swresample-1,swscale-3}.dll
+	add_runtime_dlls `pwd`/FFmpeg/bin/{avcodec-56,avformat-56,avutil-54,swresample-1,swscale-3}.dll
 
-if [ $BITS -eq 32 ]; then
-	add_cmake_opts "-DCMAKE_EXE_LINKER_FLAGS=\"/machine:X86 /safeseh:no\""
-fi
+	if [ $BITS -eq 32 ]; then
+		add_cmake_opts "-DCMAKE_EXE_LINKER_FLAGS=\"/machine:X86 /safeseh:no\""
+	fi
 
+	echo Done.
+}
 cd $DEPS
-
-echo Done.
-
 
 # MyGUI
 printf "MyGUI 3.2.2... "
-cd $DEPS_INSTALL
+{
+	cd $DEPS_INSTALL
 
-if [ -d MyGUI ] && \
-	grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-	grep "MYGUI_VERSION_MINOR 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-	grep "MYGUI_VERSION_PATCH 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
-then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf MyGUI
-	eval 7z x -y $DEPS/MyGUI-3.2.2-win$BITS.7z $STRIP
-	mv MyGUI-3.2.2-win$BITS MyGUI
-fi
+	if [ -d MyGUI ] && \
+		grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
+		grep "MYGUI_VERSION_MINOR 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
+		grep "MYGUI_VERSION_PATCH 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
+	then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf MyGUI
+		eval 7z x -y $DEPS/MyGUI-3.2.2-win$BITS.7z $STRIP
+		mv MyGUI-3.2.2-win$BITS MyGUI
+	fi
 
-MYGUI_SDK="`real_pwd`/MyGUI"
+	MYGUI_SDK="`real_pwd`/MyGUI"
 
-add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
-	-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include" \
-	-DMYGUI_PLATFORM_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
-	-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
+	add_cmake_opts -DMYGUISDK="$MYGUI_SDK" \
+		-DMYGUI_INCLUDE_DIRS="$MYGUI_SDK/include/MYGUI" \
+		-DMYGUI_PREQUEST_FILE="$MYGUI_SDK/include/MYGUI/MyGUI_Prerequest.h"
 
-if [ $CONFIGURATION == "Debug" ]; then
-	SUFFIX="_d"
-else
-	SUFFIX=""
-fi
-add_runtime_dlls `pwd`/MyGUI/bin/$CONFIGURATION/MyGUIEngine$SUFFIX.dll
+	if [ $CONFIGURATION == "Debug" ]; then
+		SUFFIX="_d"
+	else
+		SUFFIX=""
+	fi
+	add_runtime_dlls `pwd`/MyGUI/bin/$CONFIGURATION/MyGUIEngine$SUFFIX.dll
 
+	echo Done.
+}
 cd $DEPS
-
-echo Done.
-
 
 # OpenAL
 printf "OpenAL-Soft 1.16.0... "
-if [ -d openal-soft-1.16.0-bin ]; then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf openal-soft-1.16.0-bin
-	eval 7z x -y OpenAL-Soft-1.16.0.zip $STRIP
-fi
+{
+	if [ -d openal-soft-1.16.0-bin ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf openal-soft-1.16.0-bin
+		eval 7z x -y OpenAL-Soft-1.16.0.zip $STRIP
+	fi
 
-OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
+	OPENAL_SDK="`real_pwd`/openal-soft-1.16.0-bin"
 
-add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
-	-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
+	add_cmake_opts -DOPENAL_INCLUDE_DIR="$OPENAL_SDK/include/AL" \
+		-DOPENAL_LIBRARY="$OPENAL_SDK/libs/Win$BITS/OpenAL32.lib"
 
-echo Done.
-
+	echo Done.
+}
+cd $DEPS
 
 # OSG
 printf "OSG 3.3.8... "
-cd $DEPS_INSTALL
+{
+	cd $DEPS_INSTALL
 
-if [ -d OSG ] && \
-	grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
-	grep "OPENSCENEGRAPH_MINOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
-	grep "OPENSCENEGRAPH_PATCH_VERSION    8" OSG/include/osg/Version > /dev/null
-then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf OSG
-	eval 7z x -y $DEPS/OSG-3.3.8-win$BITS.7z $STRIP
-	mv OSG-3.3.8-win$BITS OSG
-fi
+	if [ -d OSG ] && \
+		grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
+		grep "OPENSCENEGRAPH_MINOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
+		grep "OPENSCENEGRAPH_PATCH_VERSION    8" OSG/include/osg/Version > /dev/null
+	then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf OSG
+		eval 7z x -y $DEPS/OSG-3.3.8-win$BITS.7z $STRIP
+		mv OSG-3.3.8-win$BITS OSG
+	fi
 
-OSG_SDK="`real_pwd`/OSG"
+	OSG_SDK="`real_pwd`/OSG"
 
-add_cmake_opts -DOSG_DIR="$OSG_SDK"
+	add_cmake_opts -DOSG_DIR="$OSG_SDK"
 
-if [ $CONFIGURATION == "Debug" ]; then
-	SUFFIX="d"
-else
-	SUFFIX=""
-fi
-add_runtime_dlls `pwd`/OSG/bin/{OpenThreads,zlib}$SUFFIX.dll \
-	`pwd`/OSG/bin/osg{,Animation,DB,FX,GA,Particle,Qt,Text,Util,Viewer}$SUFFIX.dll
+	if [ $CONFIGURATION == "Debug" ]; then
+		SUFFIX="d"
+	else
+		SUFFIX=""
+	fi
 
-OSG_PLUGINS=""
-add_osg_dlls() {
-	OSG_PLUGINS="$OSG_PLUGINS $@"
+	add_runtime_dlls `pwd`/OSG/bin/{OpenThreads,zlib}$SUFFIX.dll \
+		`pwd`/OSG/bin/osg{,Animation,DB,FX,GA,Particle,Qt,Text,Util,Viewer}$SUFFIX.dll
+
+	add_osg_dlls `pwd`/OSG/bin/osgPlugins-3.3.8/osgdb_{bmp,dds,gif,jpeg,png,tga}$SUFFIX.dll
+
+	echo Done.
 }
-
-add_osg_dlls `pwd`/OSG/bin/osgPlugins-3.3.8/osgdb_{bmp,dds,gif,jpeg,png,tga}$SUFFIX.dll
-
 cd $DEPS
-
-echo Done.
-
 
 # Qt
 if [ -z $APPVEYOR ]; then
 	printf "Qt 4.8.6... "
-	cd $DEPS_INSTALL
-
-	if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
-		printf "Exists. "
-	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf Qt
-		eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
-		mv qt-4.8.6-* Qt
-	fi
-
-	QT_SDK="`real_pwd`/Qt"
-
-	cd $QT_SDK
-	eval qtbinpatcher.exe $STRIP
-
-	add_cmake_opts -DDESIRED_QT_VERSION=4 \
-		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
-
-	if [ $CONFIGURATION == "Debug" ]; then
-		SUFFIX="d4"
-	else
-		SUFFIX="4"
-	fi
-	add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
-
-	cd $DEPS
-
-	echo Done.
 else
-	echo "Using Appveyor Qt 5 version."
-	if [ $PLATFORM == "win32" ]; then
-		QT_SDK="C:/Qt/5.4/msvc2013_opengl"
-	else
-		QT_SDK="C:/Qt/5.4/msvc2013_64_opengl"
-	fi
-
-	add_cmake_opts -DDESIRED_QT_VERSION=5 \
-		-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+	printf "Qt 5.4... "
 fi
+{
+	if [ -z $APPVEYOR ]; then
+		cd $DEPS_INSTALL
+		QT_SDK="`real_pwd`/Qt"
 
+		if [ -d Qt ] && head -n2 Qt/BUILDINFO.txt | grep "4.8.6" > /dev/null; then
+			printf "Exists. "
+		elif [ -z $SKIP_EXTRACT ]; then
+			rm -rf Qt
+			eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
+			mv qt-4.8.6-* Qt
+			(
+				cd $QT_SDK
+				eval qtbinpatcher.exe $STRIP
+			)
+		fi
+
+		cd $QT_SDK
+
+		add_cmake_opts -DDESIRED_QT_VERSION=4 \
+			-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe"
+
+		if [ $CONFIGURATION == "Debug" ]; then
+			SUFFIX="d4"
+		else
+			SUFFIX="4"
+		fi
+
+		add_runtime_dlls `pwd`/bin/Qt{Core,Gui,Network,OpenGL}$SUFFIX.dll
+
+		echo Done.
+	else
+		if [ $BITS -eq 32 ]; then
+			QT_SDK="C:/Qt/5.4/msvc2013_opengl"
+		else
+			QT_SDK="C:/Qt/5.4/msvc2013_64_opengl"
+		fi
+
+		add_cmake_opts -DDESIRED_QT_VERSION=5 \
+			-DQT_QMAKE_EXECUTABLE="$QT_SDK/bin/qmake.exe" \
+			-DCMAKE_PREFIX_PATH="$QT_SDK"
+	fi
+}
+cd $DEPS
 
 # SDL2
 printf "SDL 2.0.3... "
+{
+	if [ -d SDL2-2.0.3 ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf SDL2-2.0.3
+		eval 7z x -y SDL2-2.0.3.zip $STRIP
+	fi
 
-if [ -d SDL2-2.0.3 ]; then
-	printf "Exists. "
-elif [ -z $SKIP_EXTRACT ]; then
-	rm -rf SDL2-2.0.3
-	eval 7z x -y SDL2-2.0.3.zip $STRIP
-fi
+	SDL_SDK="`real_pwd`/SDL2-2.0.3"
+	add_cmake_opts -DSDL2_INCLUDE_DIR="$SDL_SDK/include" \
+		-DSDL2MAIN_LIBRARY="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2main.lib" \
+		-DSDL2_LIBRARY_PATH="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib"
 
-SDL_SDK="`real_pwd`/SDL2-2.0.3"
-add_cmake_opts  -DSDL2_INCLUDE_DIR="$SDL_SDK/include" \
-	-DSDL2MAIN_LIBRARY="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2main.lib" \
-	-DSDL2_LIBRARY_PATH="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib" \
-	-DSDL2_LIBRARY_ONLY="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib"
+	add_runtime_dlls `pwd`/SDL2-2.0.3/lib/x$ARCHSUFFIX/SDL2.dll
 
-add_runtime_dlls `pwd`/SDL2-2.0.3/lib/x$ARCHSUFFIX/SDL2.dll
+	echo Done.
+}
 
-cd $DEPS
-
-echo Done.
-echo
 
 cd $DEPS_INSTALL/..
 
+echo
 echo "Setting up OpenMW build..."
 
 add_cmake_opts -DBUILD_BSATOOL=no \
 	-DBUILD_ESMTOOL=no \
 	-DBUILD_MYGUI_PLUGIN=no \
-	-DOPENMW_MP_BUILD=yes
+	-DOPENMW_MP_BUILD=on
 
-if [ -z $APPVEYOR ]; then
-	echo "  (Outside of AppVeyor, doing full build.)"
+if [ -z $CI ]; then
+	echo "  (Outside of CI, doing full build.)"
 else
 	case $STEP in
 		components )
@@ -533,7 +542,6 @@ else
 				-DBUILD_OPENCS=no \
 				-DBUILD_OPENMW=no \
 				-DBUILD_WIZARD=no
-			rm -rf components
 			;;
 		openmw )
 			echo "  Subproject: OpenMW."
@@ -575,7 +583,8 @@ fi
 
 echo
 
-if [ -z $APPVEYOR ]; then
+# NOTE: Disable this when/if we want to run test cases
+if [ -z $CI ]; then
 	echo "Copying Runtime DLLs..."
 	mkdir -p $CONFIGURATION
 	for DLL in $RUNTIME_DLLS; do

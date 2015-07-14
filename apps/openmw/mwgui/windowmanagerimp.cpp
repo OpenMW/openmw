@@ -22,6 +22,9 @@
 
 #include <components/sdlutil/sdlcursormanager.hpp>
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include <components/fontloader/fontloader.hpp>
 
 #include <components/resource/resourcesystem.hpp>

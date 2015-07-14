@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include <components/esm/creaturestats.hpp>
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
