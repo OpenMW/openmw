@@ -180,6 +180,7 @@ target_link_libraries(components
     ${SDL2_LIBRARY}
     # For MyGUI platform
     ${OPENGL_gl_LIBRARY}
+    ${MYGUI_LIBRARIES}
 )
 
 if (WIN32)
