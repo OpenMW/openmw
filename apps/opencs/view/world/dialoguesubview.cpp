@@ -890,8 +890,6 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     // bottom box
     mBottom = new TableBottomBox (creatorFactory, document, id, this);
 
-    mBottom->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         this, SLOT (requestFocus (const std::string&)));
 

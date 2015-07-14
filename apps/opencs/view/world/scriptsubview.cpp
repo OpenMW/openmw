@@ -4,7 +4,6 @@
 
 #include <QStatusBar>
 #include <QStackedLayout>
-#include <QLabel>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
@@ -16,6 +15,8 @@
 
 #include "scriptedit.hpp"
 #include "recordbuttonbar.hpp"
+#include "tablebottombox.hpp"
+#include "genericcreator.hpp"
 
 void CSVWorld::ScriptSubView::addButtonBar()
 {
@@ -33,7 +34,7 @@ void CSVWorld::ScriptSubView::addButtonBar()
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0), mButtons (0),
+: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
 {
     std::vector<std::string> selection (1, id.getId());
@@ -65,18 +66,13 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     if (CSMSettings::UserSettings::instance().setting ("script-editor/toolbar", QString("true")) == "true")
         addButtonBar();
 
-    // status bar
-    QStatusBar *statusBar = new QStatusBar(mBottom);
-    mStatus = new QLabel(mBottom);
-    statusBar->addWidget (mStatus);
+    // bottom box
+    mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
-    mBottom = new QWidget(this);
-    QStackedLayout *bottmLayout = new QStackedLayout(mBottom);
-    bottmLayout->setContentsMargins (0, 0, 0, 0);
-    bottmLayout->addWidget (statusBar);
-    mBottom->setLayout (bottmLayout);
+    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
+        this, SLOT (requestFocus (const std::string&)));
 
-    mLayout.addWidget (mBottom, 0);
+    mLayout.addWidget (mBottom);
 
     // signals
     connect (mEditor, SIGNAL (textChanged()), this, SLOT (textChanged()));
@@ -124,14 +120,15 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
         mButtons->updateUserSetting (name, value);
 }
 
+void CSVWorld::ScriptSubView::setStatusBar (bool show)
+{
+    mBottom->setStatusBar (show);
+}
+
 void CSVWorld::ScriptSubView::updateStatusBar ()
 {
-    std::ostringstream stream;
-
-    stream << "(" << mEditor->textCursor().blockNumber() + 1 << ", "
-        << mEditor->textCursor().columnNumber() + 1 << ")";
-
-    mStatus->setText (QString::fromUtf8 (stream.str().c_str()));
+    mBottom->positionChanged (mEditor->textCursor().blockNumber() + 1,
+        mEditor->textCursor().columnNumber() + 1);
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
