@@ -25,6 +25,8 @@
 #include <components/esm/loadmisc.hpp>
 #include <components/esm/esmwriter.hpp>
 
+#include <components/misc/stringops.hpp>
+
 #include "record.hpp"
 #include "universalid.hpp"
 
@@ -49,7 +51,8 @@ namespace CSMWorld
 
         virtual void insertRecord (RecordBase& record) = 0;
 
-        virtual void load (ESM::ESMReader& reader, bool base) = 0;
+        virtual int load (ESM::ESMReader& reader, bool base) = 0;
+        ///< \return index of a loaded record or -1 if no record was loaded
 
         virtual void erase (int index, int count) = 0;
 
@@ -73,7 +76,8 @@ namespace CSMWorld
 
         virtual void insertRecord (RecordBase& record);
 
-        virtual void load (ESM::ESMReader& reader, bool base);
+        virtual int load (ESM::ESMReader& reader, bool base);
+        ///< \return index of a loaded record or -1 if no record was loaded
 
         virtual void erase (int index, int count);
 
@@ -122,15 +126,16 @@ namespace CSMWorld
     }
 
     template<typename RecordT>
-    void RefIdDataContainer<RecordT>::load (ESM::ESMReader& reader, bool base)
+    int RefIdDataContainer<RecordT>::load (ESM::ESMReader& reader, bool base)
     {
         RecordT record;
         record.load(reader);
 
-        typename std::vector<Record<RecordT> >::iterator found = mContainer.begin();
-        for (; found != mContainer.end(); ++found)
+        int index = 0;
+        int numRecords = static_cast<int>(mContainer.size());
+        for (; index < numRecords; ++index)
         {
-            if (found->get().mId == record.mId)
+            if (Misc::StringUtils::ciEqual(mContainer[index].get().mId, record.mId))
             {
                 break;
             }
@@ -138,26 +143,21 @@ namespace CSMWorld
 
         if (record.mIsDeleted)
         {
-            if (found == mContainer.end())
+            if (index == numRecords)
             {
                 // deleting a record that does not exist
                 // ignore it for now
                 /// \todo report the problem to the user
-                return;
+                return -1;
             }
 
-            if (base)
-            {
-                mContainer.erase(found);
-            }
-            else
-            {
-                found->mState = RecordBase::State_Deleted;
-            }
+            // Flag the record as Deleted even for a base content file.
+            // RefIdData is responsible for its erasure.
+            mContainer[index].mState = RecordBase::State_Deleted;
         }
         else
         {
-            if (found == mContainer.end())
+            if (index == numRecords)
             {
                 appendRecord(record.mId, base);
                 if (base)
@@ -169,20 +169,13 @@ namespace CSMWorld
                     mContainer.back().mModified = record;
                 }
             }
-            else
+            else if (!base)
             {
-                if (!base)
-                {
-                    if (found->mState == RecordBase::State_Erased)
-                    {
-                        throw std::logic_error("Attempt to access a deleted record");
-                    }
-
-                    found->mState = RecordBase::State_Modified;
-                    found->mModified = record;
-                }
+                mContainer[index].setModified(record);
             }
         }
+
+        return index;
     }
 
     template<typename RecordT>
@@ -204,25 +197,15 @@ namespace CSMWorld
     void RefIdDataContainer<RecordT>::save (int index, ESM::ESMWriter& writer) const
     {
         Record<RecordT> record = mContainer.at(index);
-        RecordT esmRecord;
+        RecordT esmRecord = record.get();
 
-        switch (record.mState)
+        if (record.isModified() || record.mState == RecordBase::State_Deleted)
         {
-            case RecordBase::State_Modified:
-            case RecordBase::State_ModifiedOnly:
-                esmRecord = record.mModified;
-                break;
-            case RecordBase::State_Deleted:
-                esmRecord = record.mBase;
-                esmRecord.mIsDeleted = true;
-                break;
-            default:
-                break;
+            esmRecord.mIsDeleted = (record.mState == RecordBase::State_Deleted);
+            writer.startRecord(esmRecord.sRecordId);
+            esmRecord.save(writer);
+            writer.endRecord(esmRecord.sRecordId);
         }
-
-        writer.startRecord(esmRecord.sRecordId);
-        esmRecord.save(writer);
-        writer.endRecord(esmRecord.sRecordId);
     }
 
 
@@ -261,6 +244,8 @@ namespace CSMWorld
 
             void erase (const LocalIndex& index, int count);
             ///< Must not spill over into another type.
+
+            std::string getRecordId(const LocalIndex &index) const;
 
         public:
 
