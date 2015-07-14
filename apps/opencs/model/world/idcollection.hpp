@@ -61,22 +61,14 @@ namespace CSMWorld
             if (base)
             {
                 removeRows (index, 1);
-            }
-            else
-            {
-                Record<ESXRecordT> baseRecord = getRecord (index);
-                baseRecord.mState = RecordBase::State_Deleted;
-                this->setRecord (index, baseRecord);
+                return -1;
             }
 
-            return -1;
+            Record<ESXRecordT> baseRecord = getRecord (index);
+            baseRecord.mState = RecordBase::State_Deleted;
+            setRecord (index, baseRecord);
+            return index;
         }
-        //
-        //if (index != -1)
-        //{
-        //    ESXRecordT existedRecord = getRecord(index).get();
-        //    IdAccessorT().getId(record) = IdAccessorT().getId(existedRecord);
-        //}
 
         return load (record, base, index);
     }
