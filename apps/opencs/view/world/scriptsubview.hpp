@@ -69,6 +69,8 @@ namespace CSVWorld
             void updateStatusBar();
 
             void switchToRow (int row);
+
+            void switchToId (const std::string& id);
     };
 }
 

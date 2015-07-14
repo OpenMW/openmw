@@ -23,7 +23,7 @@ void CSVWorld::ScriptSubView::addButtonBar()
     if (mButtons)
         return;
 
-    mButtons = new RecordButtonBar (getUniversalId(), *mModel, 0, &mCommandDispatcher, this);
+    mButtons = new RecordButtonBar (getUniversalId(), *mModel, mBottom, &mCommandDispatcher, this);
 
     mLayout.insertWidget (1, mButtons);
 
@@ -61,16 +61,14 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
         throw std::logic_error ("Can't find script column");
 
     mEditor->setPlainText (mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString());
+    // bottom box and buttons
+    mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
-    // buttons
     if (CSMSettings::UserSettings::instance().setting ("script-editor/toolbar", QString("true")) == "true")
         addButtonBar();
 
-    // bottom box
-    mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
-
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
-        this, SLOT (requestFocus (const std::string&)));
+        this, SLOT (switchToId (const std::string&)));
 
     mLayout.addWidget (mBottom);
 
@@ -215,4 +213,9 @@ void CSVWorld::ScriptSubView::switchToRow (int row)
 
     std::vector<std::string> selection (1, id);
     mCommandDispatcher.setSelection (selection);
+}
+
+void CSVWorld::ScriptSubView::switchToId (const std::string& id)
+{
+    switchToRow (mModel->getModelIndex (id, 0).row());
 }
