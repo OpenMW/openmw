@@ -147,7 +147,7 @@ namespace MWWorld
 {
 
     template <typename X>
-    void CellRefList<X>::load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore)
+    void CellRefList<X>::load(ESM::CellRef &ref, const MWWorld::ESMStore &esmStore)
     {
         const MWWorld::Store<X> &store = esmStore.get<X>();
 
@@ -158,7 +158,7 @@ namespace MWWorld
 
             LiveRef liveCellRef (ref, ptr);
 
-            if (deleted)
+            if (ref.mIsDeleted)
                 liveCellRef.mData.setDeleted(true);
 
             if (iter != mList.end())
@@ -374,10 +374,9 @@ namespace MWWorld
             ESM::CellRef ref;
 
             // Get each reference in turn
-            bool deleted = false;
-            while (mCell->getNextRef (esm[index], ref, deleted))
+            while (mCell->getNextRef (esm[index], ref))
             {
-                if (deleted)
+                if (ref.mIsDeleted)
                     continue;
 
                 // Don't list reference if it was moved to a different cell.
@@ -420,8 +419,7 @@ namespace MWWorld
             ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
 
             // Get each reference in turn
-            bool deleted = false;
-            while(mCell->getNextRef(esm[index], ref, deleted))
+            while(mCell->getNextRef(esm[index], ref))
             {
                 // Don't load reference if it was moved to a different cell.
                 ESM::MovedCellRefTracker::const_iterator iter =
@@ -430,7 +428,7 @@ namespace MWWorld
                     continue;
                 }
 
-                loadRef (ref, deleted, store);
+                loadRef (ref, store);
             }
         }
 
@@ -439,7 +437,7 @@ namespace MWWorld
         {
             ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
 
-            loadRef (ref, false, store);
+            loadRef (ref, store);
         }
     }
 
@@ -468,32 +466,32 @@ namespace MWWorld
         return Ptr();
     }
 
-    void CellStore::loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store)
+    void CellStore::loadRef (ESM::CellRef& ref, const ESMStore& store)
     {
         Misc::StringUtils::toLower (ref.mRefID);
 
         switch (store.find (ref.mRefID))
         {
-            case ESM::REC_ACTI: mActivators.load(ref, deleted, store); break;
-            case ESM::REC_ALCH: mPotions.load(ref, deleted, store); break;
-            case ESM::REC_APPA: mAppas.load(ref, deleted, store); break;
-            case ESM::REC_ARMO: mArmors.load(ref, deleted, store); break;
-            case ESM::REC_BOOK: mBooks.load(ref, deleted, store); break;
-            case ESM::REC_CLOT: mClothes.load(ref, deleted, store); break;
-            case ESM::REC_CONT: mContainers.load(ref, deleted, store); break;
-            case ESM::REC_CREA: mCreatures.load(ref, deleted, store); break;
-            case ESM::REC_DOOR: mDoors.load(ref, deleted, store); break;
-            case ESM::REC_INGR: mIngreds.load(ref, deleted, store); break;
-            case ESM::REC_LEVC: mCreatureLists.load(ref, deleted, store); break;
-            case ESM::REC_LEVI: mItemLists.load(ref, deleted, store); break;
-            case ESM::REC_LIGH: mLights.load(ref, deleted, store); break;
-            case ESM::REC_LOCK: mLockpicks.load(ref, deleted, store); break;
-            case ESM::REC_MISC: mMiscItems.load(ref, deleted, store); break;
-            case ESM::REC_NPC_: mNpcs.load(ref, deleted, store); break;
-            case ESM::REC_PROB: mProbes.load(ref, deleted, store); break;
-            case ESM::REC_REPA: mRepairs.load(ref, deleted, store); break;
-            case ESM::REC_STAT: mStatics.load(ref, deleted, store); break;
-            case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
+            case ESM::REC_ACTI: mActivators.load(ref, store); break;
+            case ESM::REC_ALCH: mPotions.load(ref,store); break;
+            case ESM::REC_APPA: mAppas.load(ref, store); break;
+            case ESM::REC_ARMO: mArmors.load(ref, store); break;
+            case ESM::REC_BOOK: mBooks.load(ref, store); break;
+            case ESM::REC_CLOT: mClothes.load(ref, store); break;
+            case ESM::REC_CONT: mContainers.load(ref, store); break;
+            case ESM::REC_CREA: mCreatures.load(ref, store); break;
+            case ESM::REC_DOOR: mDoors.load(ref, store); break;
+            case ESM::REC_INGR: mIngreds.load(ref, store); break;
+            case ESM::REC_LEVC: mCreatureLists.load(ref, store); break;
+            case ESM::REC_LEVI: mItemLists.load(ref, store); break;
+            case ESM::REC_LIGH: mLights.load(ref, store); break;
+            case ESM::REC_LOCK: mLockpicks.load(ref, store); break;
+            case ESM::REC_MISC: mMiscItems.load(ref, store); break;
+            case ESM::REC_NPC_: mNpcs.load(ref, store); break;
+            case ESM::REC_PROB: mProbes.load(ref, store); break;
+            case ESM::REC_REPA: mRepairs.load(ref, store); break;
+            case ESM::REC_STAT: mStatics.load(ref, store); break;
+            case ESM::REC_WEAP: mWeapons.load(ref, store); break;
 
             case 0: std::cerr << "Cell reference " + ref.mRefID + " not found!\n"; break;
 
