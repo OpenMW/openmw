@@ -355,55 +355,55 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     {
         mMovementState = movement;
 
-        std::string movement;
+        std::string movementAnimName;
         MWRender::Animation::BlendMask movemask = MWRender::Animation::BlendMask_All;
         const StateInfo *movestate = std::find_if(sMovementList, sMovementListEnd, FindCharState(mMovementState));
         if(movestate != sMovementListEnd)
         {
-            movement = movestate->groupname;
-            if(weap != sWeaponTypeListEnd && movement.find("swim") == std::string::npos)
+            movementAnimName = movestate->groupname;
+            if(weap != sWeaponTypeListEnd && movementAnimName.find("swim") == std::string::npos)
             {
-                movement += weap->shortgroup;
-                if(!mAnimation->hasAnimation(movement))
+                movementAnimName += weap->shortgroup;
+                if(!mAnimation->hasAnimation(movementAnimName))
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
-                    movement = movestate->groupname;
+                    movementAnimName = movestate->groupname;
                 }
             }
 
-            if(!mAnimation->hasAnimation(movement))
+            if(!mAnimation->hasAnimation(movementAnimName))
             {
-                std::string::size_type swimpos = movement.find("swim");
+                std::string::size_type swimpos = movementAnimName.find("swim");
                 if(swimpos == std::string::npos)
                 {
-                    std::string::size_type runpos = movement.find("run");
+                    std::string::size_type runpos = movementAnimName.find("run");
                     if (runpos != std::string::npos)
                     {
-                        movement.replace(runpos, runpos+3, "walk");
-                        if (!mAnimation->hasAnimation(movement))
-                            movement.clear();
+                        movementAnimName.replace(runpos, runpos+3, "walk");
+                        if (!mAnimation->hasAnimation(movementAnimName))
+                            movementAnimName.clear();
                     }
                     else
-                        movement.clear();
+                        movementAnimName.clear();
                 }
                 else
                 {
                     movemask = MWRender::Animation::BlendMask_LowerBody;
-                    movement.erase(swimpos, 4);
-                    if(!mAnimation->hasAnimation(movement))
-                        movement.clear();
+                    movementAnimName.erase(swimpos, 4);
+                    if(!mAnimation->hasAnimation(movementAnimName))
+                        movementAnimName.clear();
                 }
             }
         }
 
         /* If we're playing the same animation, restart from the loop start instead of the
          * beginning. */
-        int mode = ((movement == mCurrentMovement) ? 2 : 1);
+        int mode = ((movementAnimName == mCurrentMovement) ? 2 : 1);
 
         mMovementAnimationControlled = true;
 
         mAnimation->disable(mCurrentMovement);
-        mCurrentMovement = movement;
+        mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
             float vel, speedmult = 1.0f;
@@ -449,7 +449,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 }
             }
 
-            mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
+            MWRender::Animation::AnimPriority priorityMovement (Priority_Movement);
+            if ((movement == CharState_TurnLeft || movement == CharState_TurnRight)
+                    && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()
+                    && MWBase::Environment::get().getWorld()->isFirstPerson())
+            {
+                priorityMovement.mPriority[MWRender::Animation::BoneGroup_Torso] = 0;
+                priorityMovement.mPriority[MWRender::Animation::BoneGroup_LeftArm] = 0;
+                priorityMovement.mPriority[MWRender::Animation::BoneGroup_RightArm] = 0;
+            }
+
+            mAnimation->play(mCurrentMovement, priorityMovement, movemask, false,
                              speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
@@ -458,7 +468,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming update),
     // the idle animation should be displayed
     if ((mUpperBodyState != UpperCharState_Nothing
-            || mMovementState != CharState_None
+            || (mMovementState != CharState_None && mMovementState != CharState_TurnLeft && mMovementState != CharState_TurnRight)
             || mHitState != CharState_None)
             && !mPtr.getClass().isBipedal(mPtr))
         idle = CharState_None;
