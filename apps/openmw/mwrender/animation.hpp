@@ -67,9 +67,15 @@ typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 class Animation
 {
 public:
+    enum BoneGroup {
+        BoneGroup_LowerBody = 0,
+        BoneGroup_Torso,
+        BoneGroup_LeftArm,
+        BoneGroup_RightArm
+    };
+
     enum BlendMask {
         BlendMask_LowerBody = 1<<0,
-
         BlendMask_Torso = 1<<1,
         BlendMask_LeftArm = 1<<2,
         BlendMask_RightArm = 1<<3,
@@ -78,47 +84,10 @@ public:
 
         BlendMask_All = BlendMask_LowerBody | BlendMask_UpperBody
     };
-
-    class TextKeyListener
-    {
-    public:
-        virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
-                           const std::multimap<float, std::string>& map) = 0;
-    };
-
-    void setTextKeyListener(TextKeyListener* listener);
-
-protected:
-    /* This is the number of *discrete* groups. */
+    /* This is the number of *discrete* blend masks. */
     static const size_t sNumBlendMasks = 4;
 
-    class AnimationTime : public SceneUtil::ControllerSource
-    {
-    private:
-        boost::shared_ptr<float> mTimePtr;
-
-    public:
-
-        void setTimePtr(boost::shared_ptr<float> time)
-        { mTimePtr = time; }
-        boost::shared_ptr<float> getTimePtr() const
-        { return mTimePtr; }
-
-        virtual float getValue(osg::NodeVisitor* nv);
-    };
-
-    class NullAnimationTime : public SceneUtil::ControllerSource
-    {
-    public:
-        virtual float getValue(osg::NodeVisitor *nv)
-        {
-            return 0.f;
-        }
-    };
-
-    struct AnimSource;
-
-    /// Holds an animation priority value for each distinct bone blendmask.
+    /// Holds an animation priority value for each BoneGroup.
     struct AnimPriority
     {
         /// Convenience constructor, initialises all priorities to the same value.
@@ -146,6 +115,42 @@ protected:
 
         int mPriority[sNumBlendMasks];
     };
+
+    class TextKeyListener
+    {
+    public:
+        virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                           const std::multimap<float, std::string>& map) = 0;
+    };
+
+    void setTextKeyListener(TextKeyListener* listener);
+
+protected:
+    class AnimationTime : public SceneUtil::ControllerSource
+    {
+    private:
+        boost::shared_ptr<float> mTimePtr;
+
+    public:
+
+        void setTimePtr(boost::shared_ptr<float> time)
+        { mTimePtr = time; }
+        boost::shared_ptr<float> getTimePtr() const
+        { return mTimePtr; }
+
+        virtual float getValue(osg::NodeVisitor* nv);
+    };
+
+    class NullAnimationTime : public SceneUtil::ControllerSource
+    {
+    public:
+        virtual float getValue(osg::NodeVisitor *nv)
+        {
+            return 0.f;
+        }
+    };
+
+    struct AnimSource;
 
     struct AnimState {
         boost::shared_ptr<AnimSource> mSource;

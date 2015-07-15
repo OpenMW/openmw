@@ -1051,6 +1051,9 @@ bool CharacterController::updateWeaponState()
         }
     }
 
+    MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
+    priorityWeapon.mPriority[MWRender::Animation::BoneGroup_LowerBody] = 0;
+
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
                                 && mHitState != CharState_Hit)
@@ -1063,8 +1066,8 @@ bool CharacterController::updateWeaponState()
         if(weaptype == WeapType_None)
         {
             getWeaponGroup(mWeaponType, weapgroup);
-            mAnimation->play(weapgroup, Priority_Weapon,
-                             MWRender::Animation::BlendMask_UpperBody, true,
+            mAnimation->play(weapgroup, priorityWeapon,
+                             MWRender::Animation::BlendMask_All, true,
                              1.0f, "unequip start", "unequip stop", 0.0f, 0);
             mUpperBodyState = UpperCharState_UnEquipingWeap;
         }
@@ -1074,8 +1077,8 @@ bool CharacterController::updateWeaponState()
             mAnimation->showWeapons(false);
             mAnimation->setWeaponGroup(weapgroup);
 
-            mAnimation->play(weapgroup, Priority_Weapon,
-                             MWRender::Animation::BlendMask_UpperBody, true,
+            mAnimation->play(weapgroup, priorityWeapon,
+                             MWRender::Animation::BlendMask_All, true,
                              1.0f, "equip start", "equip stop", 0.0f, 0);
             mUpperBodyState = UpperCharState_EquipingWeap;
 
@@ -1191,8 +1194,8 @@ bool CharacterController::updateWeaponState()
                         case 2: mAttackType = "target"; break;
                     }
 
-                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                     MWRender::Animation::BlendMask_UpperBody, true,
+                    mAnimation->play(mCurrentWeapon, priorityWeapon,
+                                     MWRender::Animation::BlendMask_All, true,
                                      weapSpeed, mAttackType+" start", mAttackType+" stop",
                                      0.0f, 0);
                     mUpperBodyState = UpperCharState_CastingSpell;
@@ -1223,8 +1226,8 @@ bool CharacterController::updateWeaponState()
                     else if(item.getTypeName() == typeid(ESM::Probe).name())
                         Security(mPtr).probeTrap(target, item, resultMessage, resultSound);
                 }
-                mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::BlendMask_UpperBody, true,
+                mAnimation->play(mCurrentWeapon, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, true,
                                  1.0f, "start", "stop", 0.0, 0);
                 mUpperBodyState = UpperCharState_FollowStartToFollowStop;
 
@@ -1250,8 +1253,8 @@ bool CharacterController::updateWeaponState()
                         determineAttackType();
                 }
 
-                mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::BlendMask_UpperBody, false,
+                mAnimation->play(mCurrentWeapon, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, false,
                                  weapSpeed, mAttackType+" start", mAttackType+" min attack",
                                  0.0f, 0);
                 mUpperBodyState = UpperCharState_StartToMinAttack;
@@ -1301,8 +1304,8 @@ bool CharacterController::updateWeaponState()
             mAttackStrength = attackStrength;
 
             mAnimation->disable(mCurrentWeapon);
-            mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                             MWRender::Animation::BlendMask_UpperBody, false,
+            mAnimation->play(mCurrentWeapon, priorityWeapon,
+                             MWRender::Animation::BlendMask_All, false,
                              weapSpeed, mAttackType+" max attack", mAttackType+" min hit",
                              1.0f-complete, 0);
 
@@ -1397,8 +1400,8 @@ bool CharacterController::updateWeaponState()
             case UpperCharState_MinAttackToMaxAttack:
                 //hack to avoid body pos desync when jumping/sneaking in 'max attack' state
                 if(!mAnimation->isPlaying(mCurrentWeapon))
-                    mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                        MWRender::Animation::BlendMask_UpperBody, false,
+                    mAnimation->play(mCurrentWeapon, priorityWeapon,
+                        MWRender::Animation::BlendMask_All, false,
                         0, mAttackType+" min attack", mAttackType+" max attack", 0.999f, 0);
                 break;
             case UpperCharState_MaxAttackToMinHit:
@@ -1440,30 +1443,13 @@ bool CharacterController::updateWeaponState()
         {
             mAnimation->disable(mCurrentWeapon);
             if (mUpperBodyState == UpperCharState_FollowStartToFollowStop)
-                mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::BlendMask_UpperBody, true,
+                mAnimation->play(mCurrentWeapon, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, true,
                                  weapSpeed, start, stop, 0.0f, 0);
             else
-                mAnimation->play(mCurrentWeapon, Priority_Weapon,
-                                 MWRender::Animation::BlendMask_UpperBody, false,
+                mAnimation->play(mCurrentWeapon, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, false,
                                  weapSpeed, start, stop, 0.0f, 0);
-        }
-    }
-
-     //if playing combat animation and lowerbody is not busy switch to whole body animation
-    if((weaptype != WeapType_None || mUpperBodyState == UpperCharState_UnEquipingWeap) && animPlaying)
-    {
-        if( mMovementState != CharState_None ||
-             mJumpState != JumpState_None ||
-             mHitState != CharState_None ||
-             MWBase::Environment::get().getWorld()->isSwimming(mPtr) ||
-             cls.getCreatureStats(mPtr).getMovementFlag(CreatureStats::Flag_Sneak))
-        {
-            mAnimation->changeBlendMask(mCurrentWeapon, MWRender::Animation::BlendMask_UpperBody);
-        }
-        else
-        {
-            mAnimation->changeBlendMask(mCurrentWeapon, MWRender::Animation::BlendMask_All);
         }
     }
 
