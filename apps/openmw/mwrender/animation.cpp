@@ -461,7 +461,7 @@ namespace MWRender
             mTextKeyListener->handleTextKey(groupname, key, map);
     }
 
-    void Animation::play(const std::string &groupname, int priority, int blendMask, bool autodisable, float speedmult,
+    void Animation::play(const std::string &groupname, AnimPriority priority, int blendMask, bool autodisable, float speedmult,
                          const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
     {
         if(!mObjectRoot || mAnimSources.empty())
@@ -472,8 +472,6 @@ namespace MWRender
             resetActiveGroups();
             return;
         }
-
-        priority = std::max(0, priority);
 
         AnimStateMap::iterator stateiter = mStates.begin();
         while(stateiter != mStates.end())
@@ -653,7 +651,7 @@ namespace MWRender
                 if(!(state->second.mBlendMask&(1<<blendMask)))
                     continue;
 
-                if(active == mStates.end() || active->second.mPriority < state->second.mPriority)
+                if(active == mStates.end() || active->second.mPriority.mPriority[blendMask] < state->second.mPriority.mPriority[blendMask])
                     active = state;
             }
 
@@ -690,6 +688,7 @@ namespace MWRender
         addControllers();
     }
 
+    // TODO: remove
     void Animation::changeBlendMask(const std::string &groupname, int mask)
     {
         AnimStateMap::iterator stateiter = mStates.find(groupname);
@@ -1208,9 +1207,10 @@ namespace MWRender
     {
         for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
         {
-            if((stateiter->second.mPriority > MWMechanics::Priority_Movement
-                    && stateiter->second.mPriority < MWMechanics::Priority_Torch)
-                    || stateiter->second.mPriority == MWMechanics::Priority_Death)
+            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Hit))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Weapon))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Knockdown))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Death)))
                 return false;
         }
         return true;

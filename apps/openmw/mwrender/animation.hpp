@@ -118,6 +118,35 @@ protected:
 
     struct AnimSource;
 
+    /// Holds an animation priority value for each distinct bone blendmask.
+    struct AnimPriority
+    {
+        /// Convenience constructor, initialises all priorities to the same value.
+        AnimPriority(int priority)
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                mPriority[i] = priority;
+        }
+
+        bool operator == (const AnimPriority& other) const
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                if (other.mPriority[i] != mPriority[i])
+                    return false;
+            return true;
+        }
+
+        bool contains(int priority) const
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                if (priority == mPriority[i])
+                    return true;
+            return false;
+        }
+
+        int mPriority[sNumBlendMasks];
+    };
+
     struct AnimState {
         boost::shared_ptr<AnimSource> mSource;
         float mStartTime;
@@ -132,7 +161,7 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
-        int mPriority;
+        AnimPriority mPriority;
         int mBlendMask;
         bool mAutoDisable;
 
@@ -319,7 +348,7 @@ public:
      * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
      *                     the "start" and "stop" keys for looping?
      */
-    void play(const std::string &groupname, int priority, int blendMask, bool autodisable,
+    void play(const std::string &groupname, AnimPriority priority, int blendMask, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops, bool loopfallback=false);
 
