@@ -688,21 +688,6 @@ namespace MWRender
         addControllers();
     }
 
-    // TODO: remove
-    void Animation::changeBlendMask(const std::string &groupname, int mask)
-    {
-        AnimStateMap::iterator stateiter = mStates.find(groupname);
-        if(stateiter != mStates.end())
-        {
-            if(stateiter->second.mBlendMask != mask)
-            {
-                stateiter->second.mBlendMask = mask;
-                resetActiveGroups();
-            }
-            return;
-        }
-    }
-
     void Animation::stopLooping(const std::string& groupname)
     {
         AnimStateMap::iterator stateiter = mStates.find(groupname);

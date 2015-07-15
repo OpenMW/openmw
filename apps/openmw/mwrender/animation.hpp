@@ -392,7 +392,6 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
-    void changeBlendMask(const std::string &groupname, int mask);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
