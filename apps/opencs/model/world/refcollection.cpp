@@ -19,12 +19,10 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
 
     CellRef ref;
-
-    bool deleted = false;
     ESM::MovedCellRef mref;
 
     // hack to initialise mindex
-    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef(reader, ref, deleted, true, &mref))
+    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef(reader, ref, true, &mref))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
@@ -48,17 +46,6 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 // see the forum discussions here for more details:
                 // https://forum.openmw.org/viewtopic.php?f=6&t=577&start=30
                 ref.mOriginalCell = cell2.mId;
-
-                if (deleted)
-                {
-                    // FIXME: how to mark the record deleted?
-                    CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
-                        mCells.getId (cellIndex));
-
-                    messages.add (id, "Moved reference "+ref.mRefID+" is in DELE state");
-
-                    continue;
-                }
 
                 // It is not always possibe to ignore moved references sub-record and
                 // calculate from coordinates. Some mods may place the ref in positions
@@ -91,7 +78,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 break;
         }
 
-        if (deleted)
+        if (ref.mIsDeleted)
         {
             if (iter==cache.end())
             {
@@ -99,7 +86,6 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                     mCells.getId (cellIndex));
 
                 messages.add (id, "Attempt to delete a non-existing reference");
-
                 continue;
             }
 
@@ -107,7 +93,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             Record<CellRef> record = getRecord (index);
 
-            if (record.mState==RecordBase::State_BaseOnly)
+            if (base)
             {
                 removeRows (index, 1);
                 cache.erase (iter);
