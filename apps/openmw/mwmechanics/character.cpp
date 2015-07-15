@@ -1374,15 +1374,6 @@ bool CharacterController::updateWeaponState()
                 mAnimation->attachArrow();
 
             mUpperBodyState = UpperCharState_WeapEquiped;
-            //don't allow to continue playing hit animation on UpperBody after actor had attacked during it
-            if(mHitState == CharState_Hit)
-            {
-                mAnimation->changeBlendMask(mCurrentHit, MWRender::Animation::BlendMask_LowerBody);
-                //commenting out following 2 lines will give a bit different combat dynamics(slower)
-                mHitState = CharState_None;
-                mCurrentHit.clear();
-                mPtr.getClass().getCreatureStats(mPtr).setHitRecovery(false);
-            }
         }
         else if(mUpperBodyState == UpperCharState_UnEquipingWeap)
             mUpperBodyState = UpperCharState_Nothing;
