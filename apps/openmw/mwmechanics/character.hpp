@@ -32,6 +32,7 @@ enum Priority {
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Block,
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,

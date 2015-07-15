@@ -270,7 +270,9 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             {
                 mHitState = CharState_Block;
                 mCurrentHit = "shield";
-                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
+                MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
+                priorityBlock.mPriority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+                mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
             }
 
             // Cancel upper body animations
@@ -1148,7 +1150,7 @@ bool CharacterController::updateWeaponState()
     bool animPlaying;
     if(mAttackingOrSpell)
     {
-        if(mUpperBodyState == UpperCharState_WeapEquiped && mHitState == CharState_None)
+        if(mUpperBodyState == UpperCharState_WeapEquiped && (mHitState == CharState_None || mHitState == CharState_Block))
         {
             MWBase::Environment::get().getWorld()->breakInvisibility(mPtr);
             mAttackType.clear();
@@ -2029,12 +2031,13 @@ void CharacterController::setAttackingOrSpell(bool attackingOrSpell)
 
 bool CharacterController::readyToPrepareAttack() const
 {
-    return mHitState == CharState_None && mUpperBodyState  <= UpperCharState_WeapEquiped;
+    return (mHitState == CharState_None || mHitState == CharState_Block)
+            && mUpperBodyState  <= UpperCharState_WeapEquiped;
 }
 
 bool CharacterController::readyToStartAttack() const
 {
-    if (mHitState != CharState_None)
+    if (mHitState != CharState_None && mHitState != CharState_Block)
         return false;
 
     if (mPtr.getClass().hasInventoryStore(mPtr) || mPtr.getClass().isBipedal(mPtr))
