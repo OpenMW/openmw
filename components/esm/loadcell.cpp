@@ -177,7 +177,7 @@ std::string Cell::getDescription() const
     }
 }
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves, MovedCellRef *mref)
+bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves, MovedCellRef *mref)
 {
     // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
     if (!esm.hasMoreSubs())
@@ -205,14 +205,6 @@ bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMo
 
     // Identify references belonging to a parent file and adapt the ID accordingly.
     adjustRefNum (ref.mRefNum, esm);
-
-    if (esm.isNextSub("DELE"))
-    {
-        esm.skipHSub();
-        deleted = true;
-    }
-    else
-        deleted = false;
 
     return true;
 }
@@ -244,6 +236,8 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
         mAmbi.mFogDensity = 0;
+
+        mIsDeleted = false;
     }
 
     CellId Cell::getCellId() const

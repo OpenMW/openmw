@@ -163,8 +163,7 @@ struct Cell
      reuse one memory location without blanking it between calls.
   */
   /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
-  static bool getNextRef(ESMReader &esm,
-          CellRef &ref, bool& deleted, bool ignoreMoves = false, MovedCellRef *mref = 0);
+  static bool getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves = false, MovedCellRef *mref = 0);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.

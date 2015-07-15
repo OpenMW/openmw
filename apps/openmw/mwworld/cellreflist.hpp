@@ -22,7 +22,7 @@ namespace MWWorld
         /// and the build will fail with an ugly three-way cyclic header dependence
         /// so we need to pass the instantiation of the method to the linker, when
         /// all methods are known.
-        void load (ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
+        void load (ESM::CellRef &ref, const MWWorld::ESMStore &esmStore);
 
         LiveRef *find (const std::string& name)
         {

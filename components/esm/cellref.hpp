@@ -99,6 +99,10 @@ namespace ESM
             // Position and rotation of this object within the cell
             Position mPos;
 
+            bool mIsDeleted;
+
+            CellRef();
+
             /// Calls loadId and loadData
             void load (ESMReader& esm, bool wideRefNum = false);
 

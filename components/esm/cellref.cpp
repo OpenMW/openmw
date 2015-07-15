@@ -2,6 +2,17 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "util.hpp"
+
+ESM::CellRef::CellRef()
+    : mScale(1.0f),
+      mFactionRank(-2),
+      mEnchantmentCharge(-1),
+      mGoldValue(1),
+      mChargeInt(-1),
+      mLockLevel(0),
+      mIsDeleted(false)
+{}
 
 void ESM::RefNum::load (ESMReader& esm, bool wide)
 {
@@ -26,6 +37,7 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
+    mIsDeleted = false;
     loadId(esm, wideRefNum);
     loadData(esm);
 }
@@ -96,6 +108,8 @@ void ESM::CellRef::loadData(ESMReader &esm)
 
     if (esm.isNextSub("NAM0"))
         esm.skipHSub();
+
+    mIsDeleted = readDeleSubRecord (esm);
 }
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
@@ -148,6 +162,11 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
 
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
+
+    if (mIsDeleted)
+    {
+        writeDeleSubRecord(esm);
+    }
 }
 
 void ESM::CellRef::blank()
@@ -177,6 +196,8 @@ void ESM::CellRef::blank()
         mPos.pos[i] = 0;
         mPos.rot[i] = 0;
     }
+
+    mIsDeleted = false;
 }
 
 bool ESM::operator== (const RefNum& left, const RefNum& right)
