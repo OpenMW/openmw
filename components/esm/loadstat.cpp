@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -15,24 +14,46 @@ namespace ESM
 
     void Static::load(ESMReader &esm)
     {
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
+        mIsDeleted = false;
+
+        bool hasName = false;
+        while (esm.hasMoreSubs())
         {
-            return;
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
+                case ESM::FourCC<'M','O','D','L'>::value:
+                    mModel = esm.getHString();
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
 
-        mModel = esm.getHNString("MODL");
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
     }
     void Static::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
-            return;
+            esm.writeHNCString("DELE", "");
         }
-
-        esm.writeHNCString("MODL", mModel);
+        else
+        {
+            esm.writeHNCString("MODL", mModel);
+        }
     }
 
     void Static::blank()

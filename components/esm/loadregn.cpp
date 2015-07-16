@@ -3,64 +3,95 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
     unsigned int Region::sRecordId = REC_REGN;
 
     Region::Region()
-        : mIsDeleted(false)
+        : mMapColor(0),
+          mIsDeleted(false)
     {}
 
     void Region::load(ESMReader &esm)
     {
-        mIsDeleted = readDeleSubRecord(esm);
-        mId = esm.getHNString("NAME");
-        mName = esm.getHNOString("FNAM");
+        mIsDeleted = false;
 
-        esm.getSubNameIs("WEAT");
-        esm.getSubHeader();
-        if (esm.getVer() == VER_12)
-        {
-            mData.mA = 0;
-            mData.mB = 0;
-            esm.getExact(&mData, sizeof(mData) - 2);
-        }
-        else if (esm.getVer() == VER_13)
-        {
-            // May include the additional two bytes (but not necessarily)
-            if (esm.getSubSize() == sizeof(mData))
-                esm.getExact(&mData, sizeof(mData));
-            else
-            {
-                mData.mA = 0;
-                mData.mB = 0;
-                esm.getExact(&mData, sizeof(mData)-2);
-            }
-        }
-        else
-            esm.fail("Don't know what to do in this version");
-
-        mSleepList = esm.getHNOString("BNAM");
-
-        esm.getHNT(mMapColor, "CNAM");
-
-        mSoundList.clear();
+        bool hasName = false;
         while (esm.hasMoreSubs())
         {
-            SoundRef sr;
-            esm.getHNT(sr, "SNAM", 33);
-            mSoundList.push_back(sr);
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'W','E','A','T'>::value:
+                {
+                    esm.getSubHeader();
+                    if (esm.getVer() == VER_12)
+                    {
+                        mData.mA = 0;
+                        mData.mB = 0;
+                        esm.getExact(&mData, sizeof(mData) - 2);
+                    }
+                    else if (esm.getVer() == VER_13)
+                    {
+                        // May include the additional two bytes (but not necessarily)
+                        if (esm.getSubSize() == sizeof(mData))
+                        {
+                            esm.getExact(&mData, sizeof(mData));
+                        }
+                        else
+                        {
+                            mData.mA = 0;
+                            mData.mB = 0;
+                            esm.getExact(&mData, sizeof(mData)-2);
+                        }
+                    }
+                    else
+                    {
+                        esm.fail("Don't know what to do in this version");
+                    }
+                    break;
+                }
+                case ESM::FourCC<'B','N','A','M'>::value:
+                    mSleepList = esm.getHString();
+                    break;
+                case ESM::FourCC<'C','N','A','M'>::value:
+                    esm.getHT(mMapColor);
+                    break;
+                case ESM::FourCC<'S','N','A','M'>::value:
+                    SoundRef sr;
+                    esm.getHT(sr, 33);
+                    mSoundList.push_back(sr);
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
     }
 
     void Region::save(ESMWriter &esm) const
     {
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
         }
+
         esm.writeHNString("NAME", mId);
         esm.writeHNOCString("FNAM", mName);
 

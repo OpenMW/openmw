@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -15,30 +14,38 @@ namespace ESM
 
     void Global::load (ESMReader &esm)
     {
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
-        {
-            return;
-        }
+        mIsDeleted = false;
+        mId = esm.getHNString ("NAME");
 
-        mValue.read (esm, ESM::Variant::Format_Global);
+        if (esm.isNextSub ("DELE"))
+        {
+            esm.skipHSub();
+            mIsDeleted = true;
+        }
+        else
+        {
+            mValue.read (esm, ESM::Variant::Format_Global);
+        }
     }
 
     void Global::save (ESMWriter &esm) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString ("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
-            return;
+            esm.writeHNCString ("DELE", "");
         }
-
-        mValue.write (esm, ESM::Variant::Format_Global);
+        else
+        {
+            mValue.write (esm, ESM::Variant::Format_Global);
+        }
     }
 
     void Global::blank()
     {
         mValue.setType (ESM::VT_None);
+        mIsDeleted = false;
     }
 
     bool operator== (const Global& left, const Global& right)

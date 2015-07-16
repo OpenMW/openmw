@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -16,13 +15,9 @@ namespace ESM
     void Clothing::load(ESMReader &esm)
     {
         mParts.mParts.clear();
+        mIsDeleted = false;
 
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
-        {
-            return;
-        }
-
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -30,6 +25,14 @@ namespace ESM
             uint32_t name = esm.retSubName().val;
             switch (name)
             {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -54,18 +57,23 @@ namespace ESM
                     break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !mIsDeleted)
             esm.fail("Missing CTDT subrecord");
     }
 
     void Clothing::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
             return;
         }
 

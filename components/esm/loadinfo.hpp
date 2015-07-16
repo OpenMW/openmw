@@ -59,8 +59,7 @@ struct DialInfo
         QS_None = 0,
         QS_Name = 1,
         QS_Finished = 2,
-        QS_Restart = 3,
-        QS_Deleted
+        QS_Restart = 3
     };
 
     // Rules for when to include this item in the final list of options

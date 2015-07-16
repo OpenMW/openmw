@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -16,13 +15,9 @@ namespace ESM
     void Spell::load(ESMReader &esm)
     {
         mEffects.mList.clear();
+        mIsDeleted = false;
 
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
-        {
-            return;
-        }
-
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -31,6 +26,14 @@ namespace ESM
 
             switch (val)
             {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
                     break;
@@ -43,18 +46,25 @@ namespace ESM
                     esm.getHT(s, 24);
                     mEffects.mList.push_back(s);
                     break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !mIsDeleted)
             esm.fail("Missing SPDT subrecord");
     }
 
     void Spell::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
             return;
         }
 
@@ -70,9 +80,7 @@ namespace ESM
         mData.mFlags = 0;
 
         mName.clear();
-
         mEffects.mList.clear();
-
         mIsDeleted = false;
     }
 }

@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -13,49 +12,67 @@ namespace ESM
 
     void LevelledListBase::load(ESMReader &esm)
     {
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
+        mIsDeleted = false;
+
+        bool hasName = false;
+        while (esm.hasMoreSubs())
         {
-            return;
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    esm.getHT(mFlags);
+                    break;
+                case ESM::FourCC<'N','N','A','M'>::value:
+                    esm.getHT(mChanceNone);
+                    break;
+                case ESM::FourCC<'I','N','D','X'>::value:
+                {
+                    int length = 0;
+                    esm.getHT(length);
+                    mList.resize(length);
+
+                    // If this levelled list was already loaded by a previous content file,
+                    // we overwrite the list. Merging lists should probably be left to external tools,
+                    // with the limited amount of information there is in the records, all merging methods
+                    // will be flawed in some way. For a proper fix the ESM format would have to be changed
+                    // to actually track list changes instead of including the whole list for every file
+                    // that does something with that list.
+                    for (size_t i = 0; i < mList.size(); i++)
+                    {
+                        LevelItem &li = mList[i];
+                        li.mId = esm.getHNString(mRecName);
+                        esm.getHNT(li.mLevel, "INTV");
+                    }
+                    break;
+                }
+                default:
+                    mList.clear();
+                    esm.skipRecord();
+                    break;
+            }
         }
 
-        esm.getHNT(mFlags, "DATA");
-        esm.getHNT(mChanceNone, "NNAM");
-
-        if (esm.isNextSub("INDX"))
-        {
-            int len;
-            esm.getHT(len);
-            mList.resize(len);
-        }
-        else
-        {
-            // Original engine ignores rest of the record, even if there are items following
-            mList.clear();
-            esm.skipRecord();
-            return;
-        }
-
-        // If this levelled list was already loaded by a previous content file,
-        // we overwrite the list. Merging lists should probably be left to external tools,
-        // with the limited amount of information there is in the records, all merging methods
-        // will be flawed in some way. For a proper fix the ESM format would have to be changed
-        // to actually track list changes instead of including the whole list for every file
-        // that does something with that list.
-
-        for (size_t i = 0; i < mList.size(); i++)
-        {
-            LevelItem &li = mList[i];
-            li.mId = esm.getHNString(mRecName);
-            esm.getHNT(li.mLevel, "INTV");
-        }
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
     }
+
     void LevelledListBase::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
             return;
         }
 

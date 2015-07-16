@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -26,19 +25,17 @@ namespace ESM
     unsigned int Container::sRecordId = REC_CONT;
 
     Container::Container()
-        : mIsDeleted(false)
+        : mWeight(0),
+          mFlags(0x8),
+          mIsDeleted(false)
     {}
 
     void Container::load(ESMReader &esm)
     {
         mInventory.mList.clear();
+        mIsDeleted = false;
 
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
-        {
-            return;
-        }
-
+        bool hasName = false;
         bool hasWeight = false;
         bool hasFlags = false;
         while (esm.hasMoreSubs())
@@ -47,6 +44,14 @@ namespace ESM
             uint32_t name = esm.retSubName().val;
             switch (name)
             {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -73,20 +78,25 @@ namespace ESM
                     break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasWeight)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasWeight && !mIsDeleted)
             esm.fail("Missing CNDT subrecord");
-        if (!hasFlags)
+        if (!hasFlags && !mIsDeleted)
             esm.fail("Missing FLAG subrecord");
     }
 
     void Container::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
             return;
         }
 
