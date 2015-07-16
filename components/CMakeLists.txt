@@ -46,6 +46,12 @@ if (OPENGLES)
         )
 endif ()
 
+if (ANDROID)
+    add_component_dir (glesextensions
+        texturecompression
+        )
+endif ()
+
 add_component_dir (sceneutil
     clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller workqueue
     )
