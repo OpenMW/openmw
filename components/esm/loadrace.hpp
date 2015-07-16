@@ -68,6 +68,10 @@ struct Race
     std::string mId, mName, mDescription;
     SpellList mPowers;
 
+    bool mIsDeleted;
+
+    Race();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 

@@ -8,8 +8,14 @@ namespace ESM
 {
     unsigned int StartScript::sRecordId = REC_SSCR;
 
+    StartScript::StartScript()
+        : mIsDeleted(false)
+    {}
+
     void StartScript::load(ESMReader &esm)
     {
+        mIsDeleted = false;
+
         bool hasData = false;
         bool hasName = false;
         while (esm.hasMoreSubs())
@@ -26,10 +32,16 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
+
         if (!hasData)
             esm.fail("Missing DATA");
         if (!hasName)
@@ -39,10 +51,16 @@ namespace ESM
     {
         esm.writeHNString("DATA", mData);
         esm.writeHNString("NAME", mId);
+
+        if (mIsDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+        }
     }
 
     void StartScript::blank()
     {
         mData.clear();
+        mIsDeleted = false;
     }
 }

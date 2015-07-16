@@ -53,6 +53,10 @@ struct Pathgrid
     typedef std::vector<Edge> EdgeList;
     EdgeList mEdges;
 
+    bool mIsDeleted;
+
+    Pathgrid();
+
     void load(ESMReader &esm);
     void save(ESMWriter &esm) const;
 
