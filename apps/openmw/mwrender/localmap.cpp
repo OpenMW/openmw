@@ -23,6 +23,10 @@
 
 #include "vismask.hpp"
 
+#ifdef ANDROID
+#include <GLES/gl.h>
+#endif
+
 namespace
 {
 
