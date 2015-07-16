@@ -3,7 +3,6 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
-#include "util.hpp"
 
 ESM::CellRef::CellRef()
     : mScale(1.0f),
@@ -38,7 +37,6 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 
 void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
 {
-    mIsDeleted = false;
     loadId(esm, wideRefNum);
     loadData(esm);
 }
@@ -55,62 +53,90 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     mRefNum.load (esm, wideRefNum);
 
     mRefID = esm.getHNString ("NAME");
+    mIsDeleted = false;
 }
 
 void ESM::CellRef::loadData(ESMReader &esm)
 {
-    // Again, UNAM sometimes appears after NAME and sometimes later.
-    // Or perhaps this UNAM means something different?
-    mReferenceBlocked = -1;
-    esm.getHNOT (mReferenceBlocked, "UNAM");
-
-    mScale = 1.0;
-    esm.getHNOT (mScale, "XSCL");
-
-    mOwner = esm.getHNOString ("ANAM");
-    mGlobalVariable = esm.getHNOString ("BNAM");
-    mSoul = esm.getHNOString ("XSOL");
-
-    mFaction = esm.getHNOString ("CNAM");
+    mScale = 1.0f;
     mFactionRank = -2;
-    esm.getHNOT (mFactionRank, "INDX");
-
-    mGoldValue = 1;
     mChargeInt = -1;
     mEnchantmentCharge = -1;
+    mGoldValue = 1;
+    mLockLevel = 0;
+    mReferenceBlocked = -1;
+    mTeleport = false;
+    mIsDeleted = false;
 
-    esm.getHNOT (mEnchantmentCharge, "XCHG");
-
-    esm.getHNOT (mChargeInt, "INTV");
-
-    esm.getHNOT (mGoldValue, "NAM9");
-
-    // Present for doors that teleport you to another cell.
-    if (esm.isNextSub ("DODT"))
+    bool isLoaded = false;
+    while (!isLoaded && esm.hasMoreSubs())
     {
-        mTeleport = true;
-        esm.getHT (mDoorDest);
-        mDestCell = esm.getHNOString ("DNAM");
+        esm.getSubName();
+        uint32_t name = esm.retSubName().val;
+        switch (name)
+        {
+            case ESM::FourCC<'U','N','A','M'>::value:
+                esm.getHT(mReferenceBlocked);
+                break;
+            case ESM::FourCC<'X','S','C','L'>::value:
+                esm.getHT(mScale);
+                break;
+            case ESM::FourCC<'A','N','A','M'>::value:
+                mOwner = esm.getHString();
+                break;
+            case ESM::FourCC<'B','N','A','M'>::value:
+                mGlobalVariable = esm.getHString();
+                break;
+            case ESM::FourCC<'X','S','O','L'>::value:
+                mSoul = esm.getHString();
+                break;
+            case ESM::FourCC<'C','N','A','M'>::value:
+                mFaction = esm.getHString();
+                break;
+            case ESM::FourCC<'I','N','D','X'>::value:
+                esm.getHT(mFactionRank);
+                break;
+            case ESM::FourCC<'X','C','H','G'>::value:
+                esm.getHT(mEnchantmentCharge);
+                break;
+            case ESM::FourCC<'I','N','T','V'>::value:
+                esm.getHT(mChargeInt);
+                break;
+            case ESM::FourCC<'N','A','M','9'>::value:
+                esm.getHT(mGoldValue);
+                break;
+            case ESM::FourCC<'D','O','D','T'>::value:
+                esm.getHT(mDoorDest);
+                mTeleport = true;
+                break;
+            case ESM::FourCC<'D','N','A','M'>::value:
+                mDestCell = esm.getHString();
+                break;
+            case ESM::FourCC<'F','L','T','V'>::value:
+                esm.getHT(mLockLevel);
+                break;
+            case ESM::FourCC<'K','N','A','M'>::value:
+                mKey = esm.getHString();
+                break;
+            case ESM::FourCC<'T','N','A','M'>::value:
+                mTrap = esm.getHString();
+                break;
+            case ESM::FourCC<'D','A','T','A'>::value:
+                esm.getHT(mPos, 24);
+                break;
+            case ESM::FourCC<'N','A','M','0'>::value:
+                esm.skipHSub();
+                break;
+            case ESM::FourCC<'D','E','L','E'>::value:
+                esm.skipHSub();
+                mIsDeleted = true;
+                break;
+            default:
+                esm.cacheSubName();
+                isLoaded = true;
+                break;
+        }
     }
-    else
-        mTeleport = false;
-
-    mLockLevel = 0; //Set to 0 to indicate no lock
-    esm.getHNOT (mLockLevel, "FLTV");
-
-    mKey = esm.getHNOString ("KNAM");
-    mTrap = esm.getHNOString ("TNAM");
-
-    esm.getHNOT (mReferenceBlocked, "UNAM");
-    if (esm.isNextSub("FLTV")) // no longer used
-        esm.skipHSub();
-
-    esm.getHNOT(mPos, "DATA", 24);
-
-    if (esm.isNextSub("NAM0"))
-        esm.skipHSub();
-
-    mIsDeleted = readDeleSubRecord (esm);
 }
 
 void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
@@ -149,7 +175,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     }
 
     if (!inInventory && mLockLevel != 0) {
-            esm.writeHNT("FLTV", mLockLevel);
+        esm.writeHNT("FLTV", mLockLevel);
     }
 
     if (!inInventory)
@@ -166,7 +192,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
 
     if (mIsDeleted)
     {
-        writeDeleSubRecord(esm);
+        esm.writeHNCString("DELE", "");
     }
 }
 

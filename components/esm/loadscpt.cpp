@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 #include <iostream>
 
@@ -64,23 +63,27 @@ namespace ESM
 
     void Script::load(ESMReader &esm)
     {
-        SCHD data;
-        esm.getHNT(data, "SCHD", 52);
-        mData = data.mData;
-        mId = data.mName.toString();
-
-        // In scripts DELE sub-record appears after a header.
-        // The script data is following after DELE in this case.
-        mIsDeleted = readDeleSubRecord(esm);
-
         mVarNames.clear();
+        mIsDeleted = false;
 
+        bool hasHeader = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
             uint32_t name = esm.retSubName().val;
             switch (name)
             {
+                case ESM::FourCC<'S','C','H','D'>::value:
+                    SCHD data;
+                    esm.getHT(data, 52);
+                    mData = data.mData;
+                    mId = data.mName.toString();
+                    hasHeader = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 case ESM::FourCC<'S','C','V','R'>::value:
                     // list of local variables
                     loadSCVR(esm);
@@ -95,8 +98,12 @@ namespace ESM
                     break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
+
+        if (!hasHeader)
+            esm.fail("Missing SCHD subrecord");
     }
 
     void Script::save(ESMWriter &esm) const
@@ -116,7 +123,7 @@ namespace ESM
 
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
         }
 
         if (!mVarNames.empty())

@@ -7,7 +7,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -31,20 +30,36 @@ namespace ESM
 
     void Dialogue::loadData(ESMReader &esm)
     {
-        esm.getSubNameIs("DATA");
-        esm.getSubHeader();
-        int si = esm.getSubSize();
-        if (si == 1)
-            esm.getT(mType);
-        else if (si == 4) // The dialogue is deleted
+        while (esm.hasMoreSubs())
         {
-            int32_t empty;
-            esm.getT(empty); // Skip an empty DATA
-            mIsDeleted = readDeleSubRecord(esm);
-            mType = Unknown;
+            esm.getSubName();
+            uint32_t name = esm.retSubName().val;
+            switch (name)
+            {
+                case ESM::FourCC<'D','A','T','A'>::value:
+                {
+                    esm.getSubHeader();
+                    int size = esm.getSubSize();
+                    if (size == 1)
+                    {
+                        esm.getT(mType);
+                    }
+                    else
+                    {
+                        esm.skip(size);
+                    }
+                    break;
+                }
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mType = Unknown;
+                    mIsDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
-        else
-            esm.fail("Unknown sub record size");
     }
 
     void Dialogue::save(ESMWriter &esm) const
@@ -52,8 +67,7 @@ namespace ESM
         esm.writeHNCString("NAME", mId);
         if (mIsDeleted)
         {
-            esm.writeHNT("DATA", static_cast<int32_t>(0));
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
         }
         else
         {
@@ -138,7 +152,7 @@ namespace ESM
     {
         for (InfoContainer::iterator it = mInfo.begin(); it != mInfo.end(); )
         {
-            if (it->mIsDeleted || it->mQuestStatus == DialInfo::QS_Deleted)
+            if (it->mIsDeleted)
                 it = mInfo.erase(it);
             else
                 ++it;

@@ -3,7 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
-#include "util.hpp"
 
 namespace ESM
 {
@@ -15,12 +14,9 @@ namespace ESM
 
     void Sound::load(ESMReader &esm)
     {
-        mId = esm.getHNString("NAME");
-        if (mIsDeleted = readDeleSubRecord(esm))
-        {
-            return;
-        }
+        mIsDeleted = false;
 
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
@@ -28,6 +24,14 @@ namespace ESM
             uint32_t name = esm.retSubName().val;
             switch (name)
             {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    mIsDeleted = true;
+                    break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mSound = esm.getHString();
                     break;
@@ -37,18 +41,23 @@ namespace ESM
                     break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
-            esm.fail("Missing DATA");
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !mIsDeleted)
+            esm.fail("Missing DATA subrecord");
     }
 
     void Sound::save(ESMWriter &esm) const
     {
         esm.writeHNCString("NAME", mId);
+
         if (mIsDeleted)
         {
-            writeDeleSubRecord(esm);
+            esm.writeHNCString("DELE", "");
             return;
         }
 
