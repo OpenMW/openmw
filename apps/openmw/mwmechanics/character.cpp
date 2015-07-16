@@ -237,7 +237,7 @@ std::string CharacterController::chooseRandomGroup (const std::string& prefix, i
     return prefix + toString(roll);
 }
 
-void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force)
+void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force)
 {
     // hit recoils/knockdown animations handling
     if(mPtr.getClass().isActor())
@@ -314,40 +314,41 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     if (!mPtr.getClass().isBipedal(mPtr))
         weap = sWeaponTypeListEnd;
 
-    if(force && mJumpState != JumpState_None)
+    if(force || jump != mJumpState)
     {
-        std::string jump;
+        bool startAtLoop = (jump == mJumpState);
+        mJumpState = jump;
+
+        std::string jumpAnimName;
         MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
         if(mJumpState != JumpState_None)
         {
-            jump = "jump";
+            jumpAnimName = "jump";
             if(weap != sWeaponTypeListEnd)
             {
-                jump += weap->shortgroup;
-                if(!mAnimation->hasAnimation(jump))
+                jumpAnimName += weap->shortgroup;
+                if(!mAnimation->hasAnimation(jumpAnimName))
                 {
                     jumpmask = MWRender::Animation::BlendMask_LowerBody;
-                    jump = "jump";
+                    jumpAnimName = "jump";
                 }
             }
         }
 
         if(mJumpState == JumpState_InAir)
         {
-            int mode = ((jump == mCurrentJump) ? 2 : 1);
-
             mAnimation->disable(mCurrentJump);
-            mCurrentJump = jump;
+            mCurrentJump = jumpAnimName;
             if (mAnimation->hasAnimation("jump"))
                 mAnimation->play(mCurrentJump, Priority_Jump, jumpmask, false,
-                             1.0f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+                             1.0f, (startAtLoop?"loop start":"start"), "stop", 0.0f, ~0ul);
         }
         else
         {
             mAnimation->disable(mCurrentJump);
             mCurrentJump.clear();
             if (mAnimation->hasAnimation("jump"))
-                mAnimation->play(jump, Priority_Jump, jumpmask, true,
+                mAnimation->play(jumpAnimName, Priority_Jump, jumpmask, true,
                              1.0f, "loop stop", "stop", 0.0f, 0);
         }
     }
@@ -717,7 +718,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
 
 
     if(mDeathState == CharState_None)
-        refreshCurrentAnims(mIdleState, mMovementState, true);
+        refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 
     mAnimation->runAnimation(0.f);
 }
@@ -1556,6 +1557,8 @@ void CharacterController::update(float duration)
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
+        JumpingState jumpstate = JumpState_None;
+
         bool forcestateupdate = false;
 
         mHasMovedInXY = std::abs(vec.x())+std::abs(vec.y()) > 0.0f;
@@ -1638,7 +1641,7 @@ void CharacterController::update(float duration)
             }
 
             forcestateupdate = (mJumpState != JumpState_InAir);
-            mJumpState = JumpState_InAir;
+            jumpstate = JumpState_InAir;
 
             static const float fJumpMoveBase = gmst.find("fJumpMoveBase")->getFloat();
             static const float fJumpMoveMult = gmst.find("fJumpMoveMult")->getFloat();
@@ -1683,7 +1686,7 @@ void CharacterController::update(float duration)
         else if(mJumpState == JumpState_InAir)
         {
             forcestateupdate = true;
-            mJumpState = JumpState_Landing;
+            jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
 
             float height = cls.getCreatureStats(mPtr).land();
@@ -1714,7 +1717,7 @@ void CharacterController::update(float duration)
         }
         else
         {
-            mJumpState = JumpState_None;
+            jumpstate = JumpState_None;
             vec.z() = 0.0f;
 
             inJump = false;
@@ -1792,7 +1795,7 @@ void CharacterController::update(float duration)
             forcestateupdate = updateCreatureState() || forcestateupdate;
 
         if (!mSkipAnim)
-            refreshCurrentAnims(idlestate, movestate, forcestateupdate);
+            refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
         if (inJump)
             mMovementAnimationControlled = false;
 
@@ -1928,7 +1931,7 @@ void CharacterController::forceStateUpdate()
         return;
     clearAnimQueue();
 
-    refreshCurrentAnims(mIdleState, mMovementState, true);
+    refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
     if(mDeathState != CharState_None)
     {
         playRandomDeath();

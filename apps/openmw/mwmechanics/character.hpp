@@ -186,7 +186,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
 
     void clearAnimQueue();
 
