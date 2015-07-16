@@ -43,6 +43,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/player.hpp"
 
 namespace
 {
@@ -1169,6 +1170,10 @@ bool CharacterController::updateWeaponState()
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
                 mAttackingOrSpell = false;
+                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
+                }
 
                 const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
