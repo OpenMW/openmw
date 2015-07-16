@@ -10,6 +10,7 @@
 class QModelIndex;
 class QLabel;
 class QVBoxLayout;
+class QSplitter;
 
 namespace CSMDoc
 {
@@ -26,6 +27,7 @@ namespace CSVWorld
     class ScriptEdit;
     class RecordButtonBar;
     class TableBottomBox;
+    class ScriptErrorTable;
 
     class ScriptSubView : public CSVDoc::SubView
     {
@@ -39,6 +41,8 @@ namespace CSVWorld
             RecordButtonBar *mButtons;
             CSMWorld::CommandDispatcher mCommandDispatcher;
             QVBoxLayout mLayout;
+            QSplitter *mMain;
+            ScriptErrorTable *mErrors;
 
         private:
 

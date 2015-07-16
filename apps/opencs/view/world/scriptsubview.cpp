@@ -4,6 +4,7 @@
 
 #include <QStatusBar>
 #include <QStackedLayout>
+#include <QSplitter>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
@@ -17,6 +18,7 @@
 #include "recordbuttonbar.hpp"
 #include "tablebottombox.hpp"
 #include "genericcreator.hpp"
+#include "scripterrortable.hpp"
 
 void CSVWorld::ScriptSubView::addButtonBar()
 {
@@ -40,7 +42,16 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     std::vector<std::string> selection (1, id.getId());
     mCommandDispatcher.setSelection (selection);
 
-    mLayout.addWidget (mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
+    mMain = new QSplitter (this);
+    mMain->setOrientation (Qt::Vertical);
+    mLayout.addWidget (mMain, 2);
+
+    mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this);
+    mMain->addWidget (mEditor);
+    mMain->setCollapsible (0, false);
+
+    mErrors = new ScriptErrorTable (document, this);
+    mMain->addWidget (mErrors);
 
     QWidget *widget = new QWidget (this);;
     widget->setLayout (&mLayout);
@@ -60,7 +71,9 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     if (mColumn==-1)
         throw std::logic_error ("Can't find script column");
 
-    mEditor->setPlainText (mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString());
+    QString source = mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString();
+
+    mEditor->setPlainText (source);
     // bottom box and buttons
     mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
@@ -83,6 +96,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     updateStatusBar();
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
+
+    mErrors->update (source.toUtf8().constData());
 }
 
 void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
@@ -116,6 +131,8 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
 
     if (mButtons)
         mButtons->updateUserSetting (name, value);
+
+    mErrors->updateUserSetting (name, value);
 }
 
 void CSVWorld::ScriptSubView::setStatusBar (bool show)
@@ -173,8 +190,12 @@ void CSVWorld::ScriptSubView::textChanged()
 
     ScriptEdit::ChangeLock lock (*mEditor);
 
+    QString source = mEditor->toPlainText();
+
     mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*mModel,
-        mModel->getModelIndex (getUniversalId().getId(), mColumn), mEditor->toPlainText()));
+        mModel->getModelIndex (getUniversalId().getId(), mColumn), source));
+
+    mErrors->update (source.toUtf8().constData());
 }
 
 void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -189,9 +210,13 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
     if (index.row()>=topLeft.row() && index.row()<=bottomRight.row() &&
         index.column()>=topLeft.column() && index.column()<=bottomRight.column())
     {
+        QString source = mModel->data (index).toString();
+
         QTextCursor cursor = mEditor->textCursor();
-        mEditor->setPlainText (mModel->data (index).toString());
+        mEditor->setPlainText (source);
         mEditor->setTextCursor (cursor);
+
+        mErrors->update (source.toUtf8().constData());
     }
 }
 
