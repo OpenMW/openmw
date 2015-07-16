@@ -598,23 +598,20 @@ namespace MWRender
         state.setTime(state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint));
 
         // mLoopStartTime and mLoopStopTime normally get assigned when encountering these keys while playing the animation
-        // (see handleTextKey). But if startpoint is already past these keys, we need to assign them now.
-        if(state.getTime() > state.mStartTime)
+        // (see handleTextKey). But if startpoint is already past these keys, or start time is == stop time, we need to assign them now.
+        const std::string loopstarttag = groupname+": loop start";
+        const std::string loopstoptag = groupname+": loop stop";
+
+        NifOsg::TextKeyMap::const_reverse_iterator key(groupend);
+        for (; key != startkey && key != keys.rend(); ++key)
         {
-            const std::string loopstarttag = groupname+": loop start";
-            const std::string loopstoptag = groupname+": loop stop";
+            if (key->first > state.getTime())
+                continue;
 
-            NifOsg::TextKeyMap::const_reverse_iterator key(groupend);
-            for (; key != startkey && key != keys.rend(); ++key)
-            {
-                if (key->first > state.getTime())
-                    continue;
-
-                if (key->second == loopstarttag)
-                    state.mLoopStartTime = key->first;
-                else if (key->second == loopstoptag)
-                    state.mLoopStopTime = key->first;
-            }
+            if (key->second == loopstarttag)
+                state.mLoopStartTime = key->first;
+            else if (key->second == loopstoptag)
+                state.mLoopStopTime = key->first;
         }
 
         return true;
