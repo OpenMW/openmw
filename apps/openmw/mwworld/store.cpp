@@ -194,7 +194,7 @@ namespace MWWorld
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
 
-        return RecordId(record.mId, ESM::isRecordDeleted(record));
+        return RecordId(record.mId, record.mIsDeleted);
     }
     template<typename T>
     void Store<T>::setUp()
@@ -327,7 +327,7 @@ namespace MWWorld
         record.load (reader);
         insert (record);
 
-        return RecordId(record.mId, ESM::isRecordDeleted(record));
+        return RecordId(record.mId, record.mIsDeleted);
     }
 
     // LandTexture
@@ -1082,6 +1082,35 @@ namespace MWWorld
             inserted.first->second = script;
         
         return RecordId(script.mId);
+    }
+
+    // GameSetting
+    // Need to specialize load() and read() methods, because GameSetting can't
+    // be deleted (has no mIsDeleted flag)
+    //=========================================================================
+
+    template <>
+    inline RecordId Store<ESM::GameSetting>::load(ESM::ESMReader &reader)
+    {
+        ESM::GameSetting setting;
+        setting.load(reader);
+        Misc::StringUtils::toLower(setting.mId);
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(setting.mId, setting));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
+
+        return RecordId(setting.mId);
+    }
+
+    template <>
+    inline RecordId Store<ESM::GameSetting>::read(ESM::ESMReader &reader)
+    {
+        ESM::GameSetting setting;
+        setting.load(reader);
+        insert(setting);
+
+        return RecordId(setting.mId);
     }
 }
 
