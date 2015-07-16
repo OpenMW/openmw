@@ -34,7 +34,7 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
 
     setRowCount (row+1);
 
-    setItem (row, 0, new QTableWidgetItem (""));
+    setItem (row, 0, new QTableWidgetItem (QString::fromUtf8 (CSMDoc::Message::toString (severity).c_str())));
 
     if (line!=-1)
     {
