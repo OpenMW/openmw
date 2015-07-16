@@ -14,7 +14,10 @@
 
 void CSVWorld::ScriptErrorTable::report (const std::string& message, const Compiler::TokenLoc& loc, Type type)
 {
-    addMessage (message, type==Compiler::ErrorHandler::WarningMessage ?
+    std::ostringstream stream;
+    stream << message << " (" << loc.mLiteral << ")";
+
+    addMessage (stream.str(), type==Compiler::ErrorHandler::WarningMessage ?
         CSMDoc::Message::Severity_Warning : CSMDoc::Message::Severity_Error, loc.mLine);
 }
 
