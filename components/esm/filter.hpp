@@ -18,6 +18,10 @@ namespace ESM
 
         std::string mFilter;
 
+        bool mIsDeleted;
+
+        Filter();
+
         void load (ESMReader& esm);
         void save (ESMWriter& esm) const;
 

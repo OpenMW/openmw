@@ -27,6 +27,10 @@ namespace ESM
 
         unsigned int mFlags;
 
+        bool mIsDeleted;
+
+        DebugProfile();
+
         void load (ESMReader& esm);
         void save (ESMWriter& esm) const;
 
