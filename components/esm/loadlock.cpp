@@ -26,6 +26,7 @@ namespace ESM
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
+                    hasName = true;
                     break;
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();

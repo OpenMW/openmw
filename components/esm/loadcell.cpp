@@ -12,7 +12,6 @@
 #include "esmwriter.hpp"
 #include "defs.hpp"
 #include "cellid.hpp"
-#include "util.hpp"
 
 namespace
 {
@@ -53,171 +52,178 @@ namespace ESM
         return ref.mRefNum == refNum;
     }
 
-void Cell::load(ESMReader &esm, bool saveContext)
-{
-    loadName(esm);
-    loadData(esm);
-    loadCell(esm, saveContext);
-}
-
-void Cell::loadName(ESMReader &esm)
-{
-    mName = esm.getHNString("NAME");
-    mIsDeleted = readDeleSubRecord(esm);
-}
-
-void Cell::loadCell(ESMReader &esm, bool saveContext)
-{
-    mRefNumCounter = 0;
-
-    if (mData.mFlags & Interior)
+    void Cell::load(ESMReader &esm, bool saveContext)
     {
-        // Interior cells
-        if (esm.isNextSub("INTV"))
-        {
-            int waterl;
-            esm.getHT(waterl);
-            mWater = (float) waterl;
-            mWaterInt = true;
-        }
-        else if (esm.isNextSub("WHGT"))
-        {
-            esm.getHT(mWater);
-        }
+        loadName(esm);
+        loadData(esm);
+        loadCell(esm, saveContext);
+    }
 
-        // Quasi-exterior cells have a region (which determines the
-        // weather), pure interior cells have ambient lighting
-        // instead.
-        if (mData.mFlags & QuasiEx)
+    void Cell::loadName(ESMReader &esm)
+    {
+        mName = esm.getHNString("NAME");
+
+        mIsDeleted = false;
+        if (esm.isNextSub("DELE"))
+        {
+            esm.skipHSub();
+            mIsDeleted = true;
+        }
+    }
+
+    void Cell::loadCell(ESMReader &esm, bool saveContext)
+    {
+        mRefNumCounter = 0;
+
+        if (mData.mFlags & Interior)
+        {
+            // Interior cells
+            if (esm.isNextSub("INTV"))
+            {
+                int waterl;
+                esm.getHT(waterl);
+                mWater = (float) waterl;
+                mWaterInt = true;
+            }
+            else if (esm.isNextSub("WHGT"))
+            {
+                esm.getHT(mWater);
+            }
+
+            // Quasi-exterior cells have a region (which determines the
+            // weather), pure interior cells have ambient lighting
+            // instead.
+            if (mData.mFlags & QuasiEx)
+                mRegion = esm.getHNOString("RGNN");
+            else if (esm.isNextSub("AMBI"))
+                esm.getHT(mAmbi);
+        }
+        else
+        {
+            // Exterior cells
             mRegion = esm.getHNOString("RGNN");
-        else if (esm.isNextSub("AMBI"))
-            esm.getHT(mAmbi);
+
+            mMapColor = 0;
+            esm.getHNOT(mMapColor, "NAM5");
+        }
+        if (esm.isNextSub("NAM0")) {
+            esm.getHT(mRefNumCounter);
+        }
+
+        if (saveContext) {
+            mContextList.push_back(esm.getContext());
+            esm.skipRecord();
+        }
     }
-    else
+
+    void Cell::loadData(ESMReader &esm)
     {
-        // Exterior cells
-        mRegion = esm.getHNOString("RGNN");
-
-        mMapColor = 0;
-        esm.getHNOT(mMapColor, "NAM5");
-    }
-    if (esm.isNextSub("NAM0")) {
-        esm.getHT(mRefNumCounter);
+        esm.getHNT(mData, "DATA", 12);
     }
 
-    if (saveContext) {
+    void Cell::postLoad(ESMReader &esm)
+    {
+        // Save position of the cell references and move on
         mContextList.push_back(esm.getContext());
         esm.skipRecord();
     }
-}
 
-void Cell::loadData(ESMReader &esm)
-{
-    esm.getHNT(mData, "DATA", 12);
-}
-
-void Cell::postLoad(ESMReader &esm)
-{
-    // Save position of the cell references and move on
-    mContextList.push_back(esm.getContext());
-    esm.skipRecord();
-}
-
-void Cell::save(ESMWriter &esm) const
-{
-    esm.writeHNCString("NAME", mName);
-    if (mIsDeleted)
+    void Cell::save(ESMWriter &esm) const
     {
-        writeDeleSubRecord(esm);
-    }
+        esm.writeHNCString("NAME", mName);
 
-    esm.writeHNT("DATA", mData, 12);
-    if (mData.mFlags & Interior)
-    {
-        if (mWaterInt) {
-            int water =
-                (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
-            esm.writeHNT("INTV", water);
-        } else {
-            esm.writeHNT("WHGT", mWater);
+        if (mIsDeleted)
+        {
+            esm.writeHNCString("DELE", "");
         }
 
-        if (mData.mFlags & QuasiEx)
+        esm.writeHNT("DATA", mData, 12);
+        if (mData.mFlags & Interior)
+        {
+            if (mWaterInt) {
+                int water =
+                    (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
+                esm.writeHNT("INTV", water);
+            } else {
+                esm.writeHNT("WHGT", mWater);
+            }
+
+            if (mData.mFlags & QuasiEx)
+                esm.writeHNOCString("RGNN", mRegion);
+            else
+                esm.writeHNT("AMBI", mAmbi, 16);
+        }
+        else
+        {
             esm.writeHNOCString("RGNN", mRegion);
-        else
-            esm.writeHNT("AMBI", mAmbi, 16);
-    }
-    else
-    {
-        esm.writeHNOCString("RGNN", mRegion);
-        if (mMapColor != 0)
-            esm.writeHNT("NAM5", mMapColor);
+            if (mMapColor != 0)
+                esm.writeHNT("NAM5", mMapColor);
+        }
+
+        if (mRefNumCounter != 0)
+            esm.writeHNT("NAM0", mRefNumCounter);
     }
 
-    if (mRefNumCounter != 0 && !mIsDeleted)
-        esm.writeHNT("NAM0", mRefNumCounter);
-}
-
-void Cell::restore(ESMReader &esm, int iCtx) const
-{
-    esm.restoreContext(mContextList.at (iCtx));
-}
-
-std::string Cell::getDescription() const
-{
-    if (mData.mFlags & Interior)
+    void Cell::restore(ESMReader &esm, int iCtx) const
     {
-        return mName;
+        esm.restoreContext(mContextList.at (iCtx));
     }
-    else
-    {
-        std::ostringstream stream;
-        stream << mData.mX << ", " << mData.mY;
-        return stream.str();
-    }
-}
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves, MovedCellRef *mref)
-{
-    // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
-    if (!esm.hasMoreSubs())
-        return false;
-
-    // NOTE: We should not need this check. It is a safety check until we have checked
-    // more plugins, and how they treat these moved references.
-    if (esm.isNextSub("MVRF"))
+    std::string Cell::getDescription() const
     {
-        if (ignoreMoves)
+        if (mData.mFlags & Interior)
         {
-            esm.getHT (mref->mRefNum.mIndex);
-            esm.getHNOT (mref->mTarget, "CNDT");
-            adjustRefNum (mref->mRefNum, esm);
+            return mName;
         }
         else
         {
-            // skip rest of cell record (moved references), they are handled elsewhere
-            esm.skipRecord(); // skip MVRF, CNDT
+            std::ostringstream stream;
+            stream << mData.mX << ", " << mData.mY;
+            return stream.str();
+        }
+    }
+
+    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves, MovedCellRef *mref)
+    {
+        // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
+        if (!esm.hasMoreSubs())
             return false;
+
+        // NOTE: We should not need this check. It is a safety check until we have checked
+        // more plugins, and how they treat these moved references.
+        if (esm.isNextSub("MVRF"))
+        {
+            if (ignoreMoves)
+            {
+                esm.getHT (mref->mRefNum.mIndex);
+                esm.getHNOT (mref->mTarget, "CNDT");
+                adjustRefNum (mref->mRefNum, esm);
+            }
+            else
+            {
+                // skip rest of cell record (moved references), they are handled elsewhere
+                esm.skipRecord(); // skip MVRF, CNDT
+                return false;
+            }
         }
+
+        ref.load (esm);
+
+        // Identify references belonging to a parent file and adapt the ID accordingly.
+        adjustRefNum (ref.mRefNum, esm);
+
+        return true;
     }
 
-    ref.load (esm);
+    bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
+    {
+        esm.getHT(mref.mRefNum.mIndex);
+        esm.getHNOT(mref.mTarget, "CNDT");
 
-    // Identify references belonging to a parent file and adapt the ID accordingly.
-    adjustRefNum (ref.mRefNum, esm);
+        adjustRefNum (mref.mRefNum, esm);
 
-    return true;
-}
-
-bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
-{
-    esm.getHT(mref.mRefNum.mIndex);
-    esm.getHNOT(mref.mTarget, "CNDT");
-
-    adjustRefNum (mref.mRefNum, esm);
-
-    return true;
-}
+        return true;
+    }
 
     void Cell::blank()
     {
