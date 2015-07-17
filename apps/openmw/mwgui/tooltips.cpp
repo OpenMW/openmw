@@ -354,22 +354,25 @@ namespace MWGui
     
     void ToolTips::checkOwned()
     {
-        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-        
-        if(!mFocusObject.isEmpty())
+        if(Settings::Manager::getBool("show owned", "Game"))
         {
-            MWWorld::CellRef& cellref = mFocusObject.getCellRef();
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            MWWorld::Ptr victim;
+            MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
             
-            MWMechanics::MechanicsManager* mm = new MWMechanics::MechanicsManager;
-            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); // 0 - owned, 1 - not owned
+            if(!mFocusObject.isEmpty())
+            {
+                MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr victim;
+                
+                MWMechanics::MechanicsManager* mm = new MWMechanics::MechanicsManager;
+                bool allowed = mm->isAllowedToUse(ptr, cellref, victim); // 0 - owned, 1 - not owned
 
-            wm->setCrosshairOwned(!allowed);
-        }
-        else
-        {
-            wm->setCrosshairOwned(false);
+                wm->setCrosshairOwned(!allowed);
+            }
+            else
+            {
+                wm->setCrosshairOwned(false);
+            }
         }
     }
 
