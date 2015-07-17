@@ -126,7 +126,7 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
 
-        void updateCustomMarkers();
+        virtual void updateCustomMarkers();
 
         void applyFogOfWar();
 
@@ -203,6 +203,8 @@ namespace MWGui
 
         void onFrame(float dt);
 
+        virtual void updateCustomMarkers();
+
         /// Clear all savegame-specific data
         void clear();
 
@@ -221,6 +223,7 @@ namespace MWGui
         void onNoteDoubleClicked(MyGUI::Widget* sender);
         void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
+        void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
 
         MyGUI::ScrollView* mGlobalMap;
         std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
@@ -248,7 +251,7 @@ namespace MWGui
 
         MWRender::GlobalMap* mGlobalMapRender;
 
-        std::vector<MyGUI::Widget*> mGlobalMapMarkers;
+        std::map<std::pair<int, int>, MyGUI::Widget*> mGlobalMapMarkers;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;

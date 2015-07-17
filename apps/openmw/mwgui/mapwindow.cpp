@@ -783,15 +783,19 @@ namespace MWGui
 
             MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
                 widgetCoord, MyGUI::Align::Default);
+
+            markerWidget->setUserString("Caption_TextOneLine", name);
+
+            setGlobalMapMarkerTooltip(markerWidget, x, y);
+
+            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+
             markerWidget->setNeedMouseFocus(true);
             markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
-            markerWidget->setUserString("ToolTipType", "Layout");
-            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-            markerWidget->setUserString("Caption_TextOneLine", name);
             markerWidget->setDepth(Global_MarkerLayer);
             markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
             markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
-            mGlobalMapMarkers.push_back(markerWidget);
+            mGlobalMapMarkers[std::make_pair(x,y)] = markerWidget;
         }
     }
 
@@ -814,6 +818,45 @@ namespace MWGui
         mQueuedToExplore.clear();
 
         NoDrop::onFrame(dt);
+    }
+
+    void MapWindow::setGlobalMapMarkerTooltip(MyGUI::Widget* markerWidget, int x, int y)
+    {
+        ESM::CellId cellId;
+        cellId.mIndex.mX = x;
+        cellId.mIndex.mY = y;
+        cellId.mWorldspace = "sys::default";
+        cellId.mPaged = true;
+        CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellId);
+        std::vector<std::string> destNotes;
+        for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
+            destNotes.push_back(it->second.mNote);
+
+        if (!destNotes.empty())
+        {
+            MarkerUserData data (NULL);
+            data.notes = destNotes;
+            data.caption = markerWidget->getUserString("Caption_TextOneLine");
+            markerWidget->setUserData(data);
+            markerWidget->setUserString("ToolTipType", "MapMarker");
+        }
+        else
+        {
+            markerWidget->setUserString("ToolTipType", "Layout");
+        }
+    }
+
+    void MapWindow::updateCustomMarkers()
+    {
+        LocalMapBase::updateCustomMarkers();
+
+        for (std::map<std::pair<int, int>, MyGUI::Widget*>::iterator widgetIt = mGlobalMapMarkers.begin(); widgetIt != mGlobalMapMarkers.end(); ++widgetIt)
+        {
+            int x = widgetIt->first.first;
+            int y = widgetIt->first.second;
+            MyGUI::Widget* markerWidget = widgetIt->second;
+            setGlobalMapMarkerTooltip(markerWidget, x, y);
+        }
     }
 
     void MapWindow::onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -913,8 +956,8 @@ namespace MWGui
         mGlobalMapRender->clear();
         mChanged = true;
 
-        for (std::vector<MyGUI::Widget*>::iterator it = mGlobalMapMarkers.begin(); it != mGlobalMapMarkers.end(); ++it)
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+        for (std::map<std::pair<int, int>, MyGUI::Widget*>::iterator it = mGlobalMapMarkers.begin(); it != mGlobalMapMarkers.end(); ++it)
+            MyGUI::Gui::getInstance().destroyWidget(it->second);
         mGlobalMapMarkers.clear();
     }
 
@@ -1034,6 +1077,8 @@ namespace MWGui
 
     bool LocalMapBase::MarkerUserData::isPositionExplored() const
     {
+        if (!mLocalMapRender)
+            return true;
         return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY, interior);
     }
 
