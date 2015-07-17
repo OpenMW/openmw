@@ -10,7 +10,7 @@
 #include <components/compiler/extensions0.hpp>
 
 #include "../../model/doc/document.hpp"
-
+#include "../../model/settings/usersettings.hpp"
 
 void CSVWorld::ScriptErrorTable::report (const std::string& message, const Compiler::TokenLoc& loc, Type type)
 {
@@ -44,6 +44,18 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
     }
 
     setItem (row, 2, new QTableWidgetItem (QString::fromUtf8 (message.c_str())));
+
+
+}
+
+void CSVWorld::ScriptErrorTable::setWarningsMode (const QString& value)
+{
+    if (value=="Ignore")
+        Compiler::ErrorHandler::setWarningsMode (0);
+    else if (value=="Normal")
+        Compiler::ErrorHandler::setWarningsMode (1);
+    else if (value=="Strict")
+        Compiler::ErrorHandler::setWarningsMode (2);
 }
 
 CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, QWidget *parent)
@@ -58,11 +70,14 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
 
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
+
+    setWarningsMode (CSMSettings::UserSettings::instance().settingValue ("script-editor/warnings"));
 }
 
 void CSVWorld::ScriptErrorTable::updateUserSetting (const QString& name, const QStringList& value)
 {
-
+    if (name=="script-editor/warnings" && !value.isEmpty())
+        setWarningsMode (value.at (0));
 }
 
 void CSVWorld::ScriptErrorTable::update (const std::string& source)
