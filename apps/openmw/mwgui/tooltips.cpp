@@ -298,7 +298,6 @@ namespace MWGui
                         tooltipSize.height);
 
                 mDynamicToolTipBox->setVisible(true);
-                
             }
         }
     }
@@ -343,7 +342,6 @@ namespace MWGui
             if (!image)
                 info.icon = "";
             tooltipSize = createToolTip(info);
-            
         }
 
         return tooltipSize;
@@ -351,10 +349,9 @@ namespace MWGui
     
     bool ToolTips::checkOwned()
     {
-        // true=owned, false=notOwned
         if(!mFocusObject.isEmpty())
         {
-            MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
             MWWorld::Ptr victim;
             

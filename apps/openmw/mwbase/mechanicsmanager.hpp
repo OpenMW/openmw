@@ -6,8 +6,6 @@
 #include <list>
 #include <stdint.h>
 
-#include "../mwworld/ptr.hpp"
-
 namespace osg
 {
     class Vec3f;
@@ -25,6 +23,7 @@ namespace MWWorld
 {
     class Ptr;
     class CellStore;
+    class CellRef;
 }
 
 namespace Loading

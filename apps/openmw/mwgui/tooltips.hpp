@@ -89,8 +89,8 @@ namespace MWGui
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
         
         bool checkOwned();
-        /// Checks if object is owned and sets correct crosshair mode 
-
+        /// Returns True if taking mFocusObject would be crime
+ 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 

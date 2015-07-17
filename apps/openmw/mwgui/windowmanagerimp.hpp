@@ -486,6 +486,8 @@ namespace MWGui
     float mFPS;
 
     std::map<std::string, std::string> mFallbackMap;
+    
+    bool mShowOwned;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
