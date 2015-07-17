@@ -17,7 +17,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
-#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
@@ -364,7 +363,7 @@ namespace MWGui
                 MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
                 MWWorld::Ptr victim;
                 
-                MWMechanics::MechanicsManager* mm = new MWMechanics::MechanicsManager;
+                MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
                 bool allowed = mm->isAllowedToUse(ptr, cellref, victim); // 0 - owned, 1 - not owned
 
                 wm->setCrosshairOwned(!allowed);
