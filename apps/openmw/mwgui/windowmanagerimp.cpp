@@ -104,6 +104,10 @@
 #include "controllers.hpp"
 #include "jailscreen.hpp"
 
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
+
 namespace MWGui
 {
 
@@ -1187,7 +1191,9 @@ namespace MWGui
 
             osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
             tex->setUnRefImageDataAfterApply(false); // FIXME?
-
+#if ANDROID
+            tex->setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
             //everything looks good, send it to the cursor manager
             if(tex.valid())
             {

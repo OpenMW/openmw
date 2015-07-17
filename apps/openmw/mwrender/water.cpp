@@ -19,6 +19,10 @@
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
+
 
 namespace
 {
@@ -92,6 +96,9 @@ namespace
             std::ostringstream texname;
             texname << "textures/water/water" << std::setw(2) << std::setfill('0') << i << ".dds";
             textures.push_back(resourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+#if ANDROID
+            textures[i]-> setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
         }
 
         osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 2/32.f, textures));

@@ -5,7 +5,9 @@
 #include <stdexcept>
 
 #include <components/vfs/manager.hpp>
-
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
 namespace
 {
 
@@ -67,6 +69,9 @@ namespace Resource
             tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
             tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
             tex->setMaxAnisotropy(static_cast<float>(mMaxAnisotropy));
+#if ANDROID
+            tex-> setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
         }
     }
 
@@ -137,7 +142,9 @@ namespace Resource
             texture->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
             texture->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
             texture->setMaxAnisotropy(mMaxAnisotropy);
-
+#if ANDROID
+            texture-> setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
             texture->setUnRefImageDataAfterApply(mUnRefImageDataAfterApply);
 
             mTextures.insert(std::make_pair(key, texture));

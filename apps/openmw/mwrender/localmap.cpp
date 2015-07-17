@@ -25,6 +25,7 @@
 
 #ifdef ANDROID
 #include <GLES/gl.h>
+#include <components/glesextensions/texturecompression.h>
 #endif
 
 namespace
@@ -607,6 +608,9 @@ void LocalMap::MapSegment::createFogOfWarTexture()
     mFogOfWarTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     mFogOfWarTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     mFogOfWarTexture->setUnRefImageDataAfterApply(false);
+#if ANDROID
+    mFogOfWarTexture->setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
 }
 
 void LocalMap::MapSegment::initFogOfWar()

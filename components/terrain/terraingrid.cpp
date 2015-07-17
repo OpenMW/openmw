@@ -18,7 +18,9 @@
 
 #include "material.hpp"
 #include "storage.hpp"
-
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
 namespace
 {
     class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
@@ -140,6 +142,10 @@ void TerrainGrid::loadCell(int x, int y)
         texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+#if ANDROID
+        texture-> setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
+
         texture->setResizeNonPowerOfTwoHint(false);
         blendmapTextures.push_back(texture);
 

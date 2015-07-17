@@ -23,6 +23,9 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "vismask.hpp"
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
 
 namespace
 {
@@ -220,7 +223,9 @@ namespace MWRender
         mBaseTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mBaseTexture->setImage(image);
         mBaseTexture->setResizeNonPowerOfTwoHint(false);
-
+#if ANDROID
+        mBaseTexture->setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
         clear();
 
         loadingListener->loadingOff();
@@ -461,7 +466,9 @@ namespace MWRender
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         texture->setResizeNonPowerOfTwoHint(false);
-
+#if ANDROID
+        texture->setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
         if (srcBox == destBox && imageWidth == mWidth && imageHeight == mHeight)
         {
             mOverlayImage->copySubImage(0, 0, 0, image);

@@ -27,6 +27,10 @@
 #include "confirmationdialog.hpp"
 #include "widgets.hpp"
 
+#if ANDROID
+#include <components/glesextensions/texturecompression.h>
+#endif
+
 namespace MWGui
 {
     SaveGameDialog::SaveGameDialog()
@@ -390,7 +394,9 @@ namespace MWGui
         texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setUnRefImageDataAfterApply(true);
-
+#if ANDROID
+        texture->setInternalFormatMode(GlesTextureCompression::getGLesOsgTextureCompression());
+#endif
         mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
 
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
