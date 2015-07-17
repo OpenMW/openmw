@@ -32,6 +32,8 @@ namespace CSVWorld
             void addMessage (const std::string& message, CSMDoc::Message::Severity severity,
                 int line = -1);
 
+            void setWarningsMode (const QString& value);
+
         public:
 
             ScriptErrorTable (const CSMDoc::Document& document, QWidget *parent = 0);
