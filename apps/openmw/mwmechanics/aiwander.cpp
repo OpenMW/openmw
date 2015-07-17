@@ -117,7 +117,7 @@ namespace MWMechanics
 
         mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
 
-        mStoredAvailableNodes = false;
+        mPopulateAvailableNodes = true;
 
     }
 
@@ -191,7 +191,7 @@ namespace MWMechanics
         if(!currentCell || cellChange)
         {
             currentCell = actor.getCell();
-            mStoredAvailableNodes = false; // prob. not needed since mDistance = 0
+            mPopulateAvailableNodes = true;
         }
 
         cStats.setDrawState(DrawState_Nothing);
@@ -225,8 +225,6 @@ namespace MWMechanics
             storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
-            moveNow = false;
-            walking = false;
             chooseAction = true;
             mHasReturnPosition = false;
         }
@@ -239,45 +237,7 @@ namespace MWMechanics
             zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
-            // Returns true if evasive action needs to be taken
-            if(mObstacleCheck.check(actor, duration))
-            {
-                // first check if we're walking into a door
-                if(proximityToDoor(actor)) // NOTE: checks interior cells only
-                {
-                    // remove allowed points then select another random destination
-                    mTrimCurrentNode = true;
-                    trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
-                    mObstacleCheck.clear();
-                    storage.mPathFinder.clearPath();
-                    walking = false;
-                    moveNow = true;
-                }
-                else // probably walking into another NPC
-                {
-                    // TODO: diagonal should have same animation as walk forward
-                    //       but doesn't seem to do that?
-                    actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                    actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-                    // change the angle a bit, too
-                    zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-                }
-                mStuckCount++;  // TODO: maybe no longer needed
-            }
-//#if 0
-            // TODO: maybe no longer needed
-            if(mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
-            {
-                //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
-                mObstacleCheck.clear();
-
-                stopWalking(actor, storage);
-                moveNow = false;
-                walking = false;
-                chooseAction = true;
-                mStuckCount = 0;
-            }
-//#endif
+            evadeObstacles(actor, storage, duration);
         }
         
         
@@ -325,32 +285,7 @@ namespace MWMechanics
             }
         }
 
-        // Play idle voiced dialogue entries randomly
-        int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
-                && MWBase::Environment::get().getSoundManager()->sayDone(actor))
-        {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
-            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
-                    .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
-
-            float roll = Misc::Rng::rollProbability() * 10000.0f;
-
-            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
-            // due to the roll being an integer.
-            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
-            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
-            float x = fVoiceIdleOdds * 0.6f * (MWBase::Environment::get().getFrameDuration() / 0.1f);
-
-            // Only say Idle voices when player is in LOS
-            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
-            // voices going through walls?
-            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
-                    < 3000*3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
-                    && MWBase::Environment::get().getWorld()->getLOS(player, actor))
-                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
-        }
+        playIdleDialogueRandomly(actor);
 
         float& lastReaction = storage.mReaction;
         lastReaction += duration;
@@ -367,17 +302,8 @@ namespace MWMechanics
         {
             // End package if duration is complete or mid-night hits:
             MWWorld::TimeStamp currentTime = world->getTimeStamp();
-            if(currentTime.getHour() >= mStartTime.getHour() + mDuration)
-            {
-                if(!mRepeat)
-                {
-                    stopWalking(actor, storage);
-                    return true;
-                }
-                else
-                    mStartTime = currentTime;
-            }
-            else if(int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay())
+            if((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
+                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
             {
                 if(!mRepeat)
                 {
@@ -390,7 +316,7 @@ namespace MWMechanics
         }
 
         // Initialization to discover & store allowed node points for this actor.
-        if(!mStoredAvailableNodes)
+        if (mPopulateAvailableNodes)
         {
             getAllowedNodes(actor, currentCell->getCell());
         }
@@ -432,71 +358,7 @@ namespace MWMechanics
         // Allow interrupting a walking actor to trigger a greeting
         if(idleNow || walking)
         {
-            // Play a random voice greeting if the player gets too close
-            int hello = cStats.getAiSetting(CreatureStats::AI_Hello).getModified();
-            float helloDistance = static_cast<float>(hello);
-            static int iGreetDistanceMultiplier =MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
-
-            helloDistance *= iGreetDistanceMultiplier;
-
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-            osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-            float playerDistSqr = (playerPos - actorPos).length2();
-
-            int& greetingTimer = storage.mGreetingTimer;
-            if (greetingState == Greet_None)
-            {
-                if ((playerDistSqr <= helloDistance*helloDistance) &&
-                        !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
-                    && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                    greetingTimer++;
-                
-                if (greetingTimer >= GREETING_SHOULD_START)
-                {
-                    greetingState = Greet_InProgress;
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                    greetingTimer = 0;
-                }
-            }
-            
-            if(greetingState == Greet_InProgress)
-            {
-                greetingTimer++;
-                
-                if(walking)
-                {
-                    stopWalking(actor, storage);
-                    moveNow = false;
-                    walking = false;
-                    mObstacleCheck.clear();
-                    idleNow = true;
-                    getRandomIdle(playedIdle);
-                }
-
-                if(!rotate)
-                {
-                    osg::Vec3f dir = playerPos - actorPos;
-
-                    float faceAngleRadians = std::atan2(dir.x(), dir.y());
-                    targetAngleRadians = faceAngleRadians;
-                    rotate = true;
-                }
-                
-                if (greetingTimer >= GREETING_SHOULD_END)
-                {
-                    greetingState = Greet_Done;
-                    greetingTimer = 0;
-                }
-            }
-            
-            if (greetingState == MWMechanics::AiWander::Greet_Done)
-            {
-                float resetDist = 2*helloDistance;
-                if (playerDistSqr >= resetDist*resetDist)
-                    greetingState = Greet_None;
-            }
+            playGreetingIfPlayerGetsTooClose(actor, storage);
         }
 
         if(moveNow && mDistance)
@@ -504,39 +366,185 @@ namespace MWMechanics
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
             {
-                assert(mAllowedNodes.size());
-                unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
-                ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
-                ToWorldCoordinates(dest, currentCell->getCell());
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-                // don't take shortcuts for wandering
-                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
-
-                if(storage.mPathFinder.isPathConstructed())
+                if (mAllowedNodes.size())
                 {
-                    // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
-                    ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
-                    // check if mCurrentNode was taken out of mAllowedNodes
-                    if(mTrimCurrentNode && mAllowedNodes.size() > 1)
-                        mTrimCurrentNode = false;
-                    else
-                        mAllowedNodes.push_back(mCurrentNode);
-                    mCurrentNode = temp;
-
-                    moveNow = false;
-                    walking = true;
+                    setPathToAnAllowedNode(actor, storage, pos);
                 }
-                // Choose a different node and delete this one from possible nodes because it is uncreachable:
-                else
-                    mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
             } 
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
+    {
+        if (mObstacleCheck.check(actor, duration))
+        {
+            // first check if we're walking into a door
+            if (proximityToDoor(actor)) // NOTE: checks interior cells only
+            {
+                // remove allowed points then select another random destination
+                mTrimCurrentNode = true;
+                trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
+                mObstacleCheck.clear();
+                storage.mPathFinder.clearPath();
+                storage.mWalking = false;
+                storage.mMoveNow = true;
+            }
+            else // probably walking into another NPC
+            {
+                // TODO: diagonal should have same animation as walk forward
+                //       but doesn't seem to do that?
+                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
+                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                // change the angle a bit, too
+                const ESM::Position& pos = actor.getRefData().getPosition();
+                zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+            }
+            mStuckCount++;  // TODO: maybe no longer needed
+        }
+//#if 0
+        // TODO: maybe no longer needed
+        if (mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
+        {
+            //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
+            mObstacleCheck.clear();
+
+            stopWalking(actor, storage);
+            storage.mChooseAction = true;
+            mStuckCount = 0;
+        }
+//#endif
+    }
+
+    void AiWander::playIdleDialogueRandomly(const MWWorld::Ptr& actor)
+    {
+        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+        if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
+            && MWBase::Environment::get().getSoundManager()->sayDone(actor))
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+            static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
+                .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
+
+            float roll = Misc::Rng::rollProbability() * 10000.0f;
+
+            // In vanilla MW the chance was FPS dependent, and did not allow proper changing of fVoiceIdleOdds
+            // due to the roll being an integer.
+            // Our implementation does not have these issues, so needs to be recalibrated. We chose to
+            // use the chance MW would have when run at 60 FPS with the default value of the GMST for calibration.
+            float x = fVoiceIdleOdds * 0.6f * (MWBase::Environment::get().getFrameDuration() / 0.1f);
+
+            // Only say Idle voices when player is in LOS
+            // A bit counterintuitive, likely vanilla did this to reduce the appearance of
+            // voices going through walls?
+            const ESM::Position& pos = actor.getRefData().getPosition();
+            if (roll < x && (player.getRefData().getPosition().asVec3() - pos.asVec3()).length2()
+                < 3000 * 3000 // maybe should be fAudioVoiceDefaultMaxDistance*fAudioMaxDistanceMult instead
+                && MWBase::Environment::get().getWorld()->getLOS(player, actor))
+                MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+        }
+    }
+
+    void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+        // Play a random voice greeting if the player gets too close
+        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
+        float helloDistance = static_cast<float>(hello);
+        static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
+            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->getInt();
+
+        helloDistance *= iGreetDistanceMultiplier;
+
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        float playerDistSqr = (playerPos - actorPos).length2();
+
+        int& greetingTimer = storage.mGreetingTimer;
+        GreetingState& greetingState = storage.mSaidGreeting;
+        if (greetingState == Greet_None)
+        {
+            if ((playerDistSqr <= helloDistance*helloDistance) &&
+                !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
+                greetingTimer++;
+
+            if (greetingTimer >= GREETING_SHOULD_START)
+            {
+                greetingState = Greet_InProgress;
+                MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
+                greetingTimer = 0;
+            }
+        }
+
+        if (greetingState == Greet_InProgress)
+        {
+            greetingTimer++;
+
+            if (storage.mWalking)
+            {
+                stopWalking(actor, storage);
+                mObstacleCheck.clear();
+                storage.mIdleNow = true;
+                getRandomIdle(storage.mPlayedIdle);
+            }
+
+            if (!storage.mRotate)
+            {
+                osg::Vec3f dir = playerPos - actorPos;
+
+                float faceAngleRadians = std::atan2(dir.x(), dir.y());
+                storage.mTargetAngleRadians = faceAngleRadians;
+                storage.mRotate = true;
+            }
+
+            if (greetingTimer >= GREETING_SHOULD_END)
+            {
+                greetingState = Greet_Done;
+                greetingTimer = 0;
+            }
+        }
+
+        if (greetingState == MWMechanics::AiWander::Greet_Done)
+        {
+            float resetDist = 2 * helloDistance;
+            if (playerDistSqr >= resetDist*resetDist)
+                greetingState = Greet_None;
+        }
+    }
+
+    void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
+    {
+        unsigned int randNode = Misc::Rng::rollDice(mAllowedNodes.size());
+        ESM::Pathgrid::Point dest(mAllowedNodes[randNode]);
+        ToWorldCoordinates(dest, storage.mCell->getCell());
+
+        // actor position is already in world co-ordinates
+        ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actorPos));
+
+        // don't take shortcuts for wandering
+        storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
+
+        if (storage.mPathFinder.isPathConstructed())
+        {
+            // Remove this node as an option and add back the previously used node (stops NPC from picking the same node):
+            ESM::Pathgrid::Point temp = mAllowedNodes[randNode];
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
+            // check if mCurrentNode was taken out of mAllowedNodes
+            if (mTrimCurrentNode && mAllowedNodes.size() > 1)
+                mTrimCurrentNode = false;
+            else
+                mAllowedNodes.push_back(mCurrentNode);
+            mCurrentNode = temp;
+
+            storage.mMoveNow = false;
+            storage.mWalking = true;
+        }
+        // Choose a different node and delete this one from possible nodes because it is uncreachable:
+        else
+            mAllowedNodes.erase(mAllowedNodes.begin() + randNode);
     }
 
     void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
@@ -583,6 +591,8 @@ namespace MWMechanics
     {
         storage.mPathFinder.clearPath();
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        storage.mMoveNow = false;
+        storage.mWalking = false;
     }
 
     void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
@@ -640,7 +650,7 @@ namespace MWMechanics
         if (mDistance == 0)
             return;
 
-        if (!mStoredAvailableNodes)
+        if (mPopulateAvailableNodes)
             getAllowedNodes(actor, actor.getCell()->getCell());
 
         if (mAllowedNodes.empty())
@@ -660,7 +670,7 @@ namespace MWMechanics
         actor.getClass().adjustPosition(actor, false);
 
         // may have changed cell
-        mStoredAvailableNodes = false;
+        mPopulateAvailableNodes = true;
     }
 
     int AiWander::OffsetToPreventOvercrowding()
@@ -722,8 +732,9 @@ namespace MWMechanics
             {
                 SetCurrentNodeToClosestAllowedNode(npcPos);
             }
-            mStoredAvailableNodes = true; // set only if successful in finding allowed nodes
         }
+
+        mPopulateAvailableNodes = false;
     }
 
     // When only one path grid point in wander distance, 

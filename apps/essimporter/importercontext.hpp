@@ -49,6 +49,10 @@ namespace ESSImport
         std::map<std::string, ESM::NPC> mNpcs;
 
         Context()
+            : mDay(0)
+            , mMonth(0)
+            , mYear(0)
+            , mHour(0.f)
         {
             mPlayer.mAutoMove = 0;
             ESM::CellId playerCellId;

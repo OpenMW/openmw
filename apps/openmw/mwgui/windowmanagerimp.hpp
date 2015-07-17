@@ -511,6 +511,7 @@ namespace MWGui
     void onClipboardRequested(const std::string& _type, std::string& _data);
 
     void createTextures();
+    void createCursors();
     void setMenuTransparency(float value);
   };
 }
