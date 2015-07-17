@@ -124,7 +124,10 @@ void CSVWorld::ScriptErrorTable::update (const std::string& source)
 
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
 {
-    int scriptLine = item (row, 1)->data (Qt::DisplayRole).toInt();
-    int scriptColumn = item (row, 3)->data (Qt::DisplayRole).toInt();
-    emit highlightError (scriptLine-1, scriptColumn);
+    if (item (row, 1))
+    {
+        int scriptLine = item (row, 1)->data (Qt::DisplayRole).toInt();
+        int scriptColumn = item (row, 3)->data (Qt::DisplayRole).toInt();
+        emit highlightError (scriptLine-1, scriptColumn);
+    }
 }
