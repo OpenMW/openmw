@@ -92,31 +92,41 @@ namespace MWGui
 
     void CustomMarkerCollection::addMarker(const ESM::CustomMarker &marker, bool triggerEvent)
     {
-        mMarkers.push_back(marker);
+        mMarkers.insert(std::make_pair(marker.mCell, marker));
         if (triggerEvent)
             eventMarkersChanged();
     }
 
     void CustomMarkerCollection::deleteMarker(const ESM::CustomMarker &marker)
     {
-        std::vector<ESM::CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
-        if (it != mMarkers.end())
-            mMarkers.erase(it);
-        else
-            throw std::runtime_error("can't find marker to delete");
+        std::pair<ContainerType::iterator, ContainerType::iterator> range = mMarkers.equal_range(marker.mCell);
 
-        eventMarkersChanged();
+        for (ContainerType::iterator it = range.first; it != range.second; ++it)
+        {
+            if (it->second == marker)
+            {
+                mMarkers.erase(it);
+                eventMarkersChanged();
+                return;
+            }
+        }
+        throw std::runtime_error("can't find marker to delete");
     }
 
     void CustomMarkerCollection::updateMarker(const ESM::CustomMarker &marker, const std::string &newNote)
     {
-        std::vector<ESM::CustomMarker>::iterator it = std::find(mMarkers.begin(), mMarkers.end(), marker);
-        if (it != mMarkers.end())
-            it->mNote = newNote;
-        else
-            throw std::runtime_error("can't find marker to update");
+        std::pair<ContainerType::iterator, ContainerType::iterator> range = mMarkers.equal_range(marker.mCell);
 
-        eventMarkersChanged();
+        for (ContainerType::iterator it = range.first; it != range.second; ++it)
+        {
+            if (it->second == marker)
+            {
+                it->second.mNote = newNote;
+                eventMarkersChanged();
+                return;
+            }
+        }
+        throw std::runtime_error("can't find marker to update");
     }
 
     void CustomMarkerCollection::clear()
@@ -125,14 +135,19 @@ namespace MWGui
         eventMarkersChanged();
     }
 
-    std::vector<ESM::CustomMarker>::const_iterator CustomMarkerCollection::begin() const
+    CustomMarkerCollection::ContainerType::const_iterator CustomMarkerCollection::begin() const
     {
         return mMarkers.begin();
     }
 
-    std::vector<ESM::CustomMarker>::const_iterator CustomMarkerCollection::end() const
+    CustomMarkerCollection::ContainerType::const_iterator CustomMarkerCollection::end() const
     {
         return mMarkers.end();
+    }
+
+    CustomMarkerCollection::RangeType CustomMarkerCollection::getMarkers(const ESM::CellId &cellId) const
+    {
+        return mMarkers.equal_range(cellId);
     }
 
     size_t CustomMarkerCollection::size() const
@@ -299,44 +314,43 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         mCustomMarkerWidgets.clear();
 
-        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (int dX = -1; dX <= 1; ++dX)
         {
-            const ESM::CustomMarker& marker = *it;
-
-            if (marker.mCell.mPaged != !mInterior)
-                continue;
-            if (mInterior)
+            for (int dY =-1; dY <= 1; ++dY)
             {
-                if (marker.mCell.mWorldspace != mPrefix)
-                    continue;
-            }
-            else
-            {
-                if (std::abs(marker.mCell.mIndex.mX - mCurX) > 1)
-                    continue;
-                if (std::abs(marker.mCell.mIndex.mY - mCurY) > 1)
-                    continue;
-            }
+                ESM::CellId cellId;
+                cellId.mPaged = !mInterior;
+                cellId.mWorldspace = (mInterior ? mPrefix : "sys::default");
+                cellId.mIndex.mX = mCurX+dX;
+                cellId.mIndex.mY = mCurY+dY;
 
-            MarkerUserData markerPos (mLocalMapRender);
-            MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
+                CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellId);
+                for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
+                {
+                    const ESM::CustomMarker& marker = it->second;
 
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
-                                        widgetPos.top - 8,
-                                        16, 16);
-            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
-                widgetCoord, MyGUI::Align::Default);
-            markerWidget->setDepth(Local_MarkerAboveFogLayer);
-            markerWidget->setUserString("ToolTipType", "Layout");
-            markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
-            markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
-            markerWidget->setNormalColour(MyGUI::Colour(0.6f, 0.6f, 0.6f));
-            markerWidget->setHoverColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
-            markerWidget->setUserData(marker);
-            markerWidget->setNeedMouseFocus(true);
-            customMarkerCreated(markerWidget);
-            mCustomMarkerWidgets.push_back(markerWidget);
+                    MarkerUserData markerPos (mLocalMapRender);
+                    MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
+
+                    MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
+                                                widgetPos.top - 8,
+                                                16, 16);
+                    MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
+                        widgetCoord, MyGUI::Align::Default);
+                    markerWidget->setDepth(Local_MarkerAboveFogLayer);
+                    markerWidget->setUserString("ToolTipType", "Layout");
+                    markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
+                    markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
+                    markerWidget->setNormalColour(MyGUI::Colour(0.6f, 0.6f, 0.6f));
+                    markerWidget->setHoverColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
+                    markerWidget->setUserData(marker);
+                    markerWidget->setNeedMouseFocus(true);
+                    customMarkerCreated(markerWidget);
+                    mCustomMarkerWidgets.push_back(markerWidget);
+                }
+            }
         }
+
         redraw();
     }
 
@@ -411,11 +425,9 @@ namespace MWGui
             MWBase::World::DoorMarker marker = *it;
 
             std::vector<std::string> destNotes;
-            for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
-            {
-                if (it->mCell == marker.dest)
-                    destNotes.push_back(it->mNote);
-            }
+            CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(marker.dest);
+            for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)
+                destNotes.push_back(it->second.mNote);
 
             MarkerUserData data (mLocalMapRender);
             data.notes = destNotes;

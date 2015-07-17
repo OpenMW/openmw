@@ -42,14 +42,20 @@ namespace MWGui
 
         size_t size() const;
 
-        std::vector<ESM::CustomMarker>::const_iterator begin() const;
-        std::vector<ESM::CustomMarker>::const_iterator end() const;
+        typedef std::multimap<ESM::CellId, ESM::CustomMarker> ContainerType;
+
+        typedef std::pair<ContainerType::const_iterator, ContainerType::const_iterator> RangeType;
+
+        ContainerType::const_iterator begin() const;
+        ContainerType::const_iterator end() const;
+
+        RangeType getMarkers(const ESM::CellId& cellId) const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
-        std::vector<ESM::CustomMarker> mMarkers;
+        ContainerType mMarkers;
     };
 
     class LocalMapBase
