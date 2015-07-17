@@ -41,6 +41,14 @@ namespace CSVWorld
             void updateUserSetting (const QString& name, const QStringList& value);
 
             void update (const std::string& source);
+
+        private slots:
+
+            void cellClicked (int row, int column);
+
+        signals:
+
+            void highlightError (int line);
     };
 }
 

@@ -77,10 +77,14 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
 
+    setSelectionMode (QAbstractItemView::NoSelection);
+
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
 
     setWarningsMode (CSMSettings::UserSettings::instance().settingValue ("script-editor/warnings"));
+
+    connect (this, SIGNAL (cellClicked (int, int)), this, SLOT (cellClicked (int, int)));
 }
 
 void CSVWorld::ScriptErrorTable::updateUserSetting (const QString& name, const QStringList& value)
@@ -111,4 +115,10 @@ void CSVWorld::ScriptErrorTable::update (const std::string& source)
     {
         addMessage (error.what(), CSMDoc::Message::Severity_SeriousError);
     }
+}
+
+void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
+{
+    int line = item (row, 1)->data (Qt::DisplayRole).toInt();
+    emit highlightError (line-1);
 }
