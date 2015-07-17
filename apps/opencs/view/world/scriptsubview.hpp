@@ -75,6 +75,8 @@ namespace CSVWorld
             void switchToRow (int row);
 
             void switchToId (const std::string& id);
+
+            void highlightError (int line);
     };
 }
 

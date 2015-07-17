@@ -98,6 +98,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
 
     mErrors->update (source.toUtf8().constData());
+
+    connect (mErrors, SIGNAL (highlightError (int)), this, SLOT (highlightError (int)));
 }
 
 void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
@@ -243,4 +245,18 @@ void CSVWorld::ScriptSubView::switchToRow (int row)
 void CSVWorld::ScriptSubView::switchToId (const std::string& id)
 {
     switchToRow (mModel->getModelIndex (id, 0).row());
+}
+
+void CSVWorld::ScriptSubView::highlightError (int line)
+{
+    QTextCursor cursor = mEditor->textCursor();
+
+    cursor.movePosition (QTextCursor::Start);
+    if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+    {
+//        cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+    }
+
+    mEditor->setFocus();
+    mEditor->setTextCursor (cursor);
 }
