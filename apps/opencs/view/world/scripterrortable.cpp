@@ -34,16 +34,22 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
 
     setRowCount (row+1);
 
-    setItem (row, 0, new QTableWidgetItem (QString::fromUtf8 (CSMDoc::Message::toString (severity).c_str())));
+    QTableWidgetItem *severityItem = new QTableWidgetItem (
+        QString::fromUtf8 (CSMDoc::Message::toString (severity).c_str()));
+    severityItem->setFlags (severityItem->flags() ^ Qt::ItemIsEditable);
+    setItem (row, 0, severityItem);
 
     if (line!=-1)
     {
-        QTableWidgetItem *item = new QTableWidgetItem;
-        item->setData (Qt::DisplayRole, line+1);
-        setItem (row, 1, item);
+        QTableWidgetItem *lineItem = new QTableWidgetItem;
+        lineItem->setData (Qt::DisplayRole, line+1);
+        lineItem->setFlags (lineItem->flags() ^ Qt::ItemIsEditable);
+        setItem (row, 1, lineItem);
     }
 
-    setItem (row, 2, new QTableWidgetItem (QString::fromUtf8 (message.c_str())));
+    QTableWidgetItem *messageItem = new QTableWidgetItem (QString::fromUtf8 (message.c_str()));
+    messageItem->setFlags (messageItem->flags() ^ Qt::ItemIsEditable);
+    setItem (row, 2, messageItem);
 
 
 }
