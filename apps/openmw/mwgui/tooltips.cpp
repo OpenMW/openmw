@@ -17,6 +17,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/mechanicsmanagerimp.hpp"
 
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
@@ -342,6 +343,27 @@ namespace MWGui
             if (!image)
                 info.icon = "";
             tooltipSize = createToolTip(info);
+            
+            // start owned check
+            MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr victim;
+            
+            MWMechanics::MechanicsManager* mm = new MWMechanics::MechanicsManager;
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); // 0 - owned, 1 - not owned
+            
+            MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+            if(allowed)
+            {
+                // if 'item' is not owned
+                wm->showCrosshair(true);
+            }
+            else
+            {
+                // if 'item' is owned
+                wm->showCrosshair(false);
+            }
+            
         }
 
         return tooltipSize;
