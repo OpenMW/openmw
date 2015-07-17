@@ -66,7 +66,10 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     QStringList headers;
     headers << "Severity" << "Line" << "Description";
     setHorizontalHeaderLabels (headers);
+    horizontalHeader()->setResizeMode (0, QHeaderView::ResizeToContents);
+    horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
     horizontalHeader()->setStretchLastSection (true);
+    verticalHeader()->hide();
 
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
