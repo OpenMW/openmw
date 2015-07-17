@@ -1423,6 +1423,12 @@ namespace MWGui
         if (mHud)
             mHud->setCrosshairVisible (show && mCrosshairEnabled);
     }
+    
+    void WindowManager::setCrosshairOwned (bool owned)
+    {
+        if (mHud)
+            mHud->setCrosshairOwned (owned);
+    }
 
     void WindowManager::activateQuickKey (int index)
     {

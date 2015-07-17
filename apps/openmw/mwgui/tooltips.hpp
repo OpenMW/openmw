@@ -95,6 +95,9 @@ namespace MWGui
 
         MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
+        
+        void checkOwned();
+        /// Checks if object is owned and sets correct crosshair mode 
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info);
         ///< @return requested tooltip size
