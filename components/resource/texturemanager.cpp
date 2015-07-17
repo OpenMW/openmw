@@ -1,23 +1,10 @@
 #include "texturemanager.hpp"
 
 #include <osgDB/Registry>
-#include <osgViewer/GraphicsWindow>
 
 #include <stdexcept>
 
 #include <components/vfs/manager.hpp>
-
-#ifdef OSG_LIBRARY_STATIC
-// This list of plugins should match with the list in the top-level CMakelists.txt.
-USE_OSGPLUGIN(png)
-USE_OSGPLUGIN(tga)
-USE_OSGPLUGIN(dds)
-USE_OSGPLUGIN(jpeg)
-
-// Sets the default windowing system interface according to the OS.
-// Necessary for OpenSceneGraph to do some things, like decompression.
-USE_GRAPHICSWINDOW()
-#endif
 
 namespace
 {
