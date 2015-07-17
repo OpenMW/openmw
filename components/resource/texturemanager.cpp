@@ -6,6 +6,14 @@
 
 #include <components/vfs/manager.hpp>
 
+#ifdef OSG_LIBRARY_STATIC
+// This list of plugins should match with the list in the top-level CMakelists.txt.
+USE_OSGPLUGIN(png)
+USE_OSGPLUGIN(tga)
+USE_OSGPLUGIN(dds)
+USE_OSGPLUGIN(jpeg)
+#endif
+
 namespace
 {
 
