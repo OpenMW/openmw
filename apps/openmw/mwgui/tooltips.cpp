@@ -300,8 +300,6 @@ namespace MWGui
                 mDynamicToolTipBox->setVisible(true);
                 
             }
-            
-            checkOwned();
         }
     }
 
@@ -351,27 +349,23 @@ namespace MWGui
         return tooltipSize;
     }
     
-    void ToolTips::checkOwned()
+    bool ToolTips::checkOwned()
     {
-        if(Settings::Manager::getBool("show owned", "Game"))
+        // true=owned, false=notOwned
+        if(!mFocusObject.isEmpty())
         {
-            MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+            MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr victim;
             
-            if(!mFocusObject.isEmpty())
-            {
-                MWWorld::CellRef& cellref = mFocusObject.getCellRef();
-                MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                MWWorld::Ptr victim;
-                
-                MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-                bool allowed = mm->isAllowedToUse(ptr, cellref, victim); // 0 - owned, 1 - not owned
+            MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
 
-                wm->setCrosshairOwned(!allowed);
-            }
-            else
-            {
-                wm->setCrosshairOwned(false);
-            }
+            return !allowed;
+        }
+        else
+        {
+            return false;
         }
     }
 

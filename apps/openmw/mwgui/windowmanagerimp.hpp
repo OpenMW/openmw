@@ -233,7 +233,6 @@ namespace MWGui
     virtual void unsetSelectedWeapon();
 
     virtual void showCrosshair(bool show);
-    virtual void setCrosshairOwned(bool owned);
     virtual bool getSubtitlesEnabled();
 
     /// Turn visibility of *all* GUI elements on or off (HUD and all windows, except the console)

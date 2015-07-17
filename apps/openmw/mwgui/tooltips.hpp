@@ -87,6 +87,9 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
+        
+        bool checkOwned();
+        /// Checks if object is owned and sets correct crosshair mode 
 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
@@ -95,9 +98,6 @@ namespace MWGui
 
         MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
-        
-        void checkOwned();
-        /// Checks if object is owned and sets correct crosshair mode 
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info);
         ///< @return requested tooltip size

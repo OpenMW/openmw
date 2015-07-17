@@ -1038,6 +1038,12 @@ namespace MWGui
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
     {
         mToolTips->setFocusObject(focus);
+        
+        if(Settings::Manager::getBool("show owned", "Game") && mHud)
+        {
+            bool owned = mToolTips->checkOwned();
+            mHud->setCrosshairOwned(owned);  
+        }
     }
 
     void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
@@ -1422,12 +1428,6 @@ namespace MWGui
     {
         if (mHud)
             mHud->setCrosshairVisible (show && mCrosshairEnabled);
-    }
-    
-    void WindowManager::setCrosshairOwned (bool owned)
-    {
-        if (mHud)
-            mHud->setCrosshairOwned (owned);
     }
 
     void WindowManager::activateQuickKey (int index)
