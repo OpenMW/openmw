@@ -10,7 +10,6 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osgDB/Registry>
 #include <osgViewer/GraphicsWindow>
 
 #include "imagetosurface.hpp"
