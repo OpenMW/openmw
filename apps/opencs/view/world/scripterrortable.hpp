@@ -30,7 +30,7 @@ namespace CSVWorld
             ///< Report a file related error
 
             void addMessage (const std::string& message, CSMDoc::Message::Severity severity,
-                int line = -1);
+                int line = -1, int column = -1);
 
             void setWarningsMode (const QString& value);
 
@@ -48,7 +48,7 @@ namespace CSVWorld
 
         signals:
 
-            void highlightError (int line);
+            void highlightError (int line, int column);
     };
 }
 
