@@ -18,7 +18,8 @@ void CSVWorld::ScriptErrorTable::report (const std::string& message, const Compi
     stream << message << " (" << loc.mLiteral << ")";
 
     addMessage (stream.str(), type==Compiler::ErrorHandler::WarningMessage ?
-        CSMDoc::Message::Severity_Warning : CSMDoc::Message::Severity_Error, loc.mLine);
+        CSMDoc::Message::Severity_Warning : CSMDoc::Message::Severity_Error,
+        loc.mLine, loc.mColumn-loc.mLiteral.length());
 }
 
 void CSVWorld::ScriptErrorTable::report (const std::string& message, Type type)
@@ -28,7 +29,7 @@ void CSVWorld::ScriptErrorTable::report (const std::string& message, Type type)
 }
 
 void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
-    CSMDoc::Message::Severity severity, int line)
+    CSMDoc::Message::Severity severity, int line, int column)
 {
     int row = rowCount();
 
@@ -45,13 +46,16 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
         lineItem->setData (Qt::DisplayRole, line+1);
         lineItem->setFlags (lineItem->flags() ^ Qt::ItemIsEditable);
         setItem (row, 1, lineItem);
+
+        QTableWidgetItem *columnItem = new QTableWidgetItem;
+        columnItem->setData (Qt::DisplayRole, column);
+        columnItem->setFlags (columnItem->flags() ^ Qt::ItemIsEditable);
+        setItem (row, 3, columnItem);
     }
 
     QTableWidgetItem *messageItem = new QTableWidgetItem (QString::fromUtf8 (message.c_str()));
     messageItem->setFlags (messageItem->flags() ^ Qt::ItemIsEditable);
     setItem (row, 2, messageItem);
-
-
 }
 
 void CSVWorld::ScriptErrorTable::setWarningsMode (const QString& value)
@@ -67,7 +71,7 @@ void CSVWorld::ScriptErrorTable::setWarningsMode (const QString& value)
 CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, QWidget *parent)
 : QTableWidget (parent), mContext (document.getData())
 {
-    setColumnCount (3);
+    setColumnCount (4);
 
     QStringList headers;
     headers << "Severity" << "Line" << "Description";
@@ -76,6 +80,7 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
     horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
+    setColumnHidden (3, true);
 
     setSelectionMode (QAbstractItemView::NoSelection);
 
@@ -119,6 +124,7 @@ void CSVWorld::ScriptErrorTable::update (const std::string& source)
 
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
 {
-    int line = item (row, 1)->data (Qt::DisplayRole).toInt();
-    emit highlightError (line-1);
+    int scriptLine = item (row, 1)->data (Qt::DisplayRole).toInt();
+    int scriptColumn = item (row, 3)->data (Qt::DisplayRole).toInt();
+    emit highlightError (scriptLine-1, scriptColumn);
 }
