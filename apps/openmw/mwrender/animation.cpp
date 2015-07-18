@@ -461,7 +461,7 @@ namespace MWRender
             mTextKeyListener->handleTextKey(groupname, key, map);
     }
 
-    void Animation::play(const std::string &groupname, AnimPriority priority, int blendMask, bool autodisable, float speedmult,
+    void Animation::play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
                          const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
     {
         if(!mObjectRoot || mAnimSources.empty())
