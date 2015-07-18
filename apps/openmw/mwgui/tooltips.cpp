@@ -377,7 +377,7 @@ namespace MWGui
         {
             if(checkOwned())
             {
-                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_R");
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
             }
             else
             {
