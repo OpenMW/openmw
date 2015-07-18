@@ -116,7 +116,7 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBaseNode(0), mParentNode(parentNode), mResourceSystem(data.getResourceSystem()), mForceBaseToZero (forceBaseToZero)
+: mData (data), mBaseNode(0), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero)
 {
     mBaseNode = new osg::PositionAttitudeTransform;
     parentNode->addChild(mBaseNode);
