@@ -30,6 +30,9 @@ namespace CSVWorld
             Creator *mCreator;
             bool mCreating;
             QStackedLayout *mLayout;
+            bool mHasPosition;
+            int mRow;
+            int mColumn;
 
         private:
 
@@ -41,9 +44,9 @@ namespace CSVWorld
 
         public:
 
-            TableBottomBox (const CreatorFactoryBase& creatorFactory, 
-                            CSMDoc::Document& document, 
-                            const CSMWorld::UniversalId& id, 
+            TableBottomBox (const CreatorFactoryBase& creatorFactory,
+                            CSMDoc::Document& document,
+                            const CSMWorld::UniversalId& id,
                             QWidget *parent = 0);
 
             virtual ~TableBottomBox();
@@ -76,6 +79,10 @@ namespace CSVWorld
             ///< \param size Number of not deleted records
             /// \param deleted Number of deleted records
             /// \param modified Number of added and modified records
+
+            void positionChanged (int row, int column);
+
+            void noMorePosition();
 
             void createRequest();
             void cloneRequest(const std::string& id,
