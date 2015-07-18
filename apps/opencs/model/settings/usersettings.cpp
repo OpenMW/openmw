@@ -319,6 +319,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
         toolbar->setDefaultValue ("true");
 
+        Setting *delay = createSetting (Type_SpinBox, "compile-delay",
+            "Delay between updating of source errors");
+        delay->setDefaultValue (100);
+        delay->setRange (0, 10000);
+        delay->setToolTip ("Delay in milliseconds");
+
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
