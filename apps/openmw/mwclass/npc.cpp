@@ -751,12 +751,7 @@ namespace MWClass
                 attacker.getClass().getNpcStats(attacker).addWerewolfKill();
             }
 
-            // Simple check for who attacked first: if the player attacked first, a crimeId should be set
-            // Doesn't handle possible edge case where no one reported the assault, but in such a case,
-            // for bystanders it is not possible to tell who attacked first, anyway.
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (attacker == player && ptr.getClass().getNpcStats(ptr).getCrimeId() != -1 && ptr != player)
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
+            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, attacker);
         }
     }
 
