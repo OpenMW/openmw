@@ -31,5 +31,17 @@
         <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
 
     </Resource>
+    
+    <Resource type="ResourceSkin" name="HUD_Box_NoTransp_R" size="40 40">
+
+        <!-- The interior of the box -->
+
+        <Child type="Widget" skin="DialogBG_R" offset="0 0 40 40" align="Stretch" name="Client"/>
+
+        <!-- Borders -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch" name="Client"/>
+
+    </Resource>
 
 </MyGUI>

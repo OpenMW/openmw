@@ -369,6 +369,15 @@ namespace MWGui
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
         mDynamicToolTipBox->setVisible(true);
+        
+        if(checkOwned())
+        {
+            mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_R");
+        }
+        else
+        {
+            mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
+        }
 
         std::string caption = info.caption;
         std::string image = info.icon;
