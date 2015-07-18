@@ -10,8 +10,15 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osgViewer/GraphicsWindow>
 
 #include "imagetosurface.hpp"
+
+#ifdef OSG_LIBRARY_STATIC
+// Sets the default windowing system interface according to the OS.
+// Necessary for OpenSceneGraph to do some things, like decompression.
+USE_GRAPHICSWINDOW()
+#endif
 
 namespace
 {
