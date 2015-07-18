@@ -53,7 +53,7 @@
     
     <!-- Defines owned crosshair color -->
     <Resource type="ResourceSkin" name="HUD_Crosshair_Owned" size="32 32" texture="textures\target.dds">
-        <Property key="Colour" value="0.9 0 0 1"/>
+        <Property key="Colour" value="#{setting=GUI,color crosshair owned}"/>
         <BasisSkin type="MainSkin" offset="0 0 32 32">
             <State name="normal" offset="0 0 32 32"/>
         </BasisSkin>

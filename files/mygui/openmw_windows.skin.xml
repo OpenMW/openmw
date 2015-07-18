@@ -131,8 +131,7 @@
     
     <!-- Defines a owned background -->
     <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="white">
-        <Property key="Colour" value="0.2 0 0 1"/>
-        <!-- <Property key="Colour" value="#{setting=GUI,color background owned}"/> -->
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/> 
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>

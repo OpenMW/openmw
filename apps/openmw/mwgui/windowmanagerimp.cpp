@@ -1095,11 +1095,22 @@ namespace MWGui
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
+        
+        std::string MyGuiPrefix = "setting=";
+        size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
-
-        if (tag.compare(0, tokenLength, tokenToFind) == 0)
+        
+        if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
+        {
+            tag = tag.substr(MyGuiPrefixLength, tag.length());
+            std::string settingSection = tag.substr(0, tag.find(","));
+            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
+            
+            _result = Settings::Manager::getString(settingTag, settingSection);            
+        }
+        else if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
