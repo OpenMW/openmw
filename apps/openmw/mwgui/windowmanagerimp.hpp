@@ -487,7 +487,7 @@ namespace MWGui
 
     std::map<std::string, std::string> mFallbackMap;
     
-    bool mShowOwned;
+    int mShowOwned;
 
     std::string mVersionDescription;
 

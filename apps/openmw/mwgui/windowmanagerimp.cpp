@@ -187,7 +187,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
-      , mShowOwned(false)
+      , mShowOwned(0)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -264,7 +264,7 @@ namespace MWGui
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
 
-        mShowOwned = Settings::Manager::getBool("show owned", "Game");
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void WindowManager::initUI()
@@ -1043,7 +1043,7 @@ namespace MWGui
     {
         mToolTips->setFocusObject(focus);
 
-        if(mShowOwned && mHud)
+        if(mHud && (mShowOwned == 2 || mShowOwned == 3))
         {
             bool owned = mToolTips->checkOwned();
             mHud->setCrosshairOwned(owned);

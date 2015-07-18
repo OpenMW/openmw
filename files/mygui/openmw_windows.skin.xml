@@ -131,7 +131,7 @@
     
     <!-- Defines a red background -->
     <Resource type="ResourceSkin" name="DialogBG_R" size="8 8" texture="white">
-        <Property key="Colour" value="0.3 0 0 1"/>
+        <Property key="Colour" value="0.2 0 0 1"/>
         <BasisSkin type="MainSkin" offset="0 0 8 8">
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>

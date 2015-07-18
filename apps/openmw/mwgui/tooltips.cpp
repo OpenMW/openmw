@@ -38,6 +38,7 @@ namespace MWGui
         , mLastMouseY(0)
         , mEnabled(true)
         , mFullHelp(false)
+        , mShowOwned(0)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -55,6 +56,8 @@ namespace MWGui
         {
             mMainWidget->getChildAt(i)->setVisible(false);
         }
+        
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void ToolTips::setEnabled(bool enabled)
@@ -370,13 +373,16 @@ namespace MWGui
     {
         mDynamicToolTipBox->setVisible(true);
         
-        if(checkOwned())
+        if(mShowOwned == 1 || mShowOwned == 3)
         {
-            mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_R");
-        }
-        else
-        {
-            mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
+            if(checkOwned())
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_R");
+            }
+            else
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
+            }
         }
 
         std::string caption = info.caption;

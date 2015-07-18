@@ -122,6 +122,8 @@ namespace MWGui
         bool mEnabled;
 
         bool mFullHelp;
+        
+        int mShowOwned;
     };
 }
 #endif
