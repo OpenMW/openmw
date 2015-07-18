@@ -1658,10 +1658,10 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (CustomMarkerCollection::ContainerType::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
             writer.startRecord(ESM::REC_MARK);
-            (*it).save(writer);
+            it->second.save(writer);
             writer.endRecord(ESM::REC_MARK);
         }
     }
