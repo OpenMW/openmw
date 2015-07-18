@@ -4,8 +4,6 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_RenderManager.h>
 
-#include <components/version/version.hpp>
-
 #include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
@@ -28,7 +26,7 @@
 namespace MWGui
 {
 
-    MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs)
+    MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
         : Layout("openmw_mainmenu.layout")
         , mWidth (w), mHeight (h)
         , mVFS(vfs), mButtonBox(0)
@@ -38,20 +36,7 @@ namespace MWGui
         , mSaveGameDialog(NULL)
     {
         getWidget(mVersionText, "VersionText");
-        std::stringstream sstream;
-        sstream << "OpenMW Version: " << OPENMW_VERSION;
-
-        // adding info about git hash if available
-        std::string rev = OPENMW_VERSION_COMMITHASH;
-        std::string tag = OPENMW_VERSION_TAGHASH;
-        if (!rev.empty() && !tag.empty())
-        {
-                rev = rev.substr(0,10);
-                sstream << "\nRevision: " <<  rev;
-        }
-
-        std::string output = sstream.str();
-        mVersionText->setCaption(output);
+        mVersionText->setCaption(versionDescription);
 
         mHasAnimatedMenu = mVFS->exists("video/menu_background.bik");
 

@@ -116,7 +116,7 @@ namespace MWGui
 
     WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
 
     void initUI();
@@ -488,6 +488,8 @@ namespace MWGui
     std::map<std::string, std::string> mFallbackMap;
     
     bool mShowOwned;
+
+    std::string mVersionDescription;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.

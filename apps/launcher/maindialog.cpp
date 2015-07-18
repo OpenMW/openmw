@@ -57,26 +57,6 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    // Add version information to bottom of the window
-    QString revision(OPENMW_VERSION_COMMITHASH);
-    QString tag(OPENMW_VERSION_TAGHASH);
-
-    versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    if (!revision.isEmpty() && !tag.isEmpty())
-    {
-        if (revision == tag) {
-            versionLabel->setText(tr("OpenMW %1 release").arg(OPENMW_VERSION));
-        } else {
-            versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
-        }
-
-        // Add the compile date and time
-        versionLabel->setToolTip(tr("Compiled on %1 %2").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
-                                                                                        QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
-                                                             QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
-                                                                                        QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
-    }
-
     createIcons();
 }
 
@@ -186,10 +166,37 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
     return setup() ? FirstRunDialogResultContinue : FirstRunDialogResultFailure;
 }
 
+void Launcher::MainDialog::setVersionLabel()
+{
+    // Add version information to bottom of the window
+    Version::Version v = Version::getOpenmwVersion(mGameSettings.value("resources").toUtf8().constData());
+
+    QString revision(QString::fromUtf8(v.mCommitHash.c_str()));
+    QString tag(QString::fromUtf8(v.mTagHash.c_str()));
+
+    versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    if (!revision.isEmpty() && !tag.isEmpty())
+    {
+        if (revision == tag) {
+            versionLabel->setText(tr("OpenMW %1 release").arg(QString::fromUtf8(v.mVersion.c_str())));
+        } else {
+            versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
+        }
+
+        // Add the compile date and time
+        versionLabel->setToolTip(tr("Compiled on %1 %2").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                        QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                             QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                        QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
+    }
+}
+
 bool Launcher::MainDialog::setup()
 {
     if (!setupGameSettings())
         return false;
+
+    setVersionLabel();
 
     mLauncherSettings.setContentList(mGameSettings);
 
@@ -309,11 +316,11 @@ bool Launcher::MainDialog::setupGameSettings()
         mGameSettings.readUserFile(stream);
     }
 
-    // Now the rest
+    // Now the rest - priority: user > local > global
     QStringList paths;
-    paths.append(userPath + QString("openmw.cfg"));
-    paths.append(QString("openmw.cfg"));
     paths.append(globalPath + QString("openmw.cfg"));
+    paths.append(QString("openmw.cfg"));
+    paths.append(userPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << qPrintable(path);

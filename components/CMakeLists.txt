@@ -1,23 +1,23 @@
 project (Components)
 
 # Version file
-set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
-set (VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp)
+set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
+set (VERSION_FILE "${OpenMW_BINARY_DIR}/resources/version")
 if (GIT_CHECKOUT)
-    add_custom_target (git-version
-        COMMAND ${CMAKE_COMMAND}
-	    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+  add_custom_target (git-version
+       COMMAND ${CMAKE_COMMAND}
+            -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
-	    -DVERSION_HPP_IN=${VERSION_HPP_IN}
-	    -DVERSION_HPP=${VERSION_HPP}
-	    -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
-	    -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
-	    -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
-	    -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DVERSION_IN_FILE=${VERSION_IN_FILE}
+            -DVERSION_FILE=${VERSION_FILE}
+            -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
+            -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
+            -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+            -DOPENMW_VERSION=${OPENMW_VERSION}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-	    VERBATIM)
+            VERBATIM)
 else (GIT_CHECKOUT)
-    configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
+    configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
 find_package(OpenGL REQUIRED)
