@@ -62,7 +62,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(resourcesManager.getVFS())
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
     int index = 0;
 
@@ -537,14 +537,14 @@ CSMWorld::Data::~Data()
     delete mReader;
 }
 
-Resource::ResourceSystem* CSMWorld::Data::getResourceSystem()
+boost::shared_ptr<Resource::ResourceSystem> CSMWorld::Data::getResourceSystem()
 {
-    return &mResourceSystem;
+    return mResourceSystem;
 }
 
-const Resource::ResourceSystem* CSMWorld::Data::getResourceSystem() const
+boost::shared_ptr<const Resource::ResourceSystem> CSMWorld::Data::getResourceSystem() const
 {
-    return &mResourceSystem;
+    return mResourceSystem;
 }
 
 const CSMWorld::IdCollection<ESM::Global>& CSMWorld::Data::getGlobals() const

@@ -13,6 +13,7 @@
 #include <osg/LightModel>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -132,9 +133,9 @@ void CompositeViewer::update()
 
 // ---------------------------------------------------
 
-SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, Qt::WindowFlags f)
+SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f)
     : RenderWidget(parent, f)
-    , mSceneManager(sceneManager)
+    , mResourceSystem(resourceSystem)
     , mLighting(NULL)
     , mHasDefaultAmbient(false)
 {
@@ -147,7 +148,7 @@ SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, 
 SceneWidget::~SceneWidget()
 {
     // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
-    mSceneManager->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+    mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
 
 void SceneWidget::setLighting(Lighting *lighting)
