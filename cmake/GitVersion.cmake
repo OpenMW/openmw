@@ -21,4 +21,4 @@ else (SUCCESS)
     message(WARNING "Failed to get valid version information from Git")
 endif (SUCCESS)
 
-configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
+configure_file(${VERSION_IN_FILE} ${VERSION_FILE})

@@ -27,7 +27,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/version/version.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -493,7 +493,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
+                Version::getOpenmwVersionDescription(mResDir.string()));
     mEnvironment.setWindowManager (window);
 
     // Create sound system

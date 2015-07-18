@@ -113,7 +113,7 @@ namespace MWGui
     WindowManager::WindowManager(
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
       : mResourceSystem(resourceSystem)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
@@ -187,6 +187,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
+      , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
@@ -272,7 +273,7 @@ namespace MWGui
         mDragAndDrop = new DragAndDrop();
 
         mRecharge = new Recharge();
-        mMenu = new MainMenu(w, h, mResourceSystem->getVFS());
+        mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mLocalMapRender = new MWRender::LocalMap(mViewer);
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         trackWindow(mMap, "map");

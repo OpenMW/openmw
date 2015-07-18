@@ -366,6 +366,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
@@ -381,6 +382,7 @@ if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
     INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION ".")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
     INSTALL(FILES
