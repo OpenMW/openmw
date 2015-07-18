@@ -39,7 +39,8 @@ void CSVWorld::ScriptSubView::addButtonBar()
 void CSVWorld::ScriptSubView::recompile()
 {
     if (!mCompileDelay->isActive())
-        mCompileDelay->start (5000);
+        mCompileDelay->start (
+            CSMSettings::UserSettings::instance().setting ("script-editor/compile-delay").toInt());
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
@@ -143,6 +144,10 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
                 mButtons = 0;
             }
         }
+    }
+    else if (name=="script-editor/compile-delay")
+    {
+        mCompileDelay->setInterval (value.at (0).toInt());
     }
 
     if (mButtons)
