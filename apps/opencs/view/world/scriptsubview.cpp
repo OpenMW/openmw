@@ -38,9 +38,29 @@ void CSVWorld::ScriptSubView::addButtonBar()
 
 void CSVWorld::ScriptSubView::recompile()
 {
-    if (!mCompileDelay->isActive())
+    if (!mCompileDelay->isActive() && !isDeleted())
         mCompileDelay->start (
             CSMSettings::UserSettings::instance().setting ("script-editor/compile-delay").toInt());
+}
+
+bool CSVWorld::ScriptSubView::isDeleted() const
+{
+    return mModel->data (mModel->getModelIndex (getUniversalId().getId(), mStateColumn)).toInt()
+        ==CSMWorld::RecordBase::State_Deleted;
+}
+
+void CSVWorld::ScriptSubView::updateDeletedState()
+{
+    if (isDeleted())
+    {
+        mErrors->clear();
+        mEditor->setEnabled (false);
+    }
+    else
+    {
+        mEditor->setEnabled (true);
+        recompile();
+    }
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
@@ -68,16 +88,8 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
 
-    for (int i=0; i<mModel->columnCount(); ++i)
-        if (mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display)==
-            CSMWorld::ColumnBase::Display_ScriptFile)
-        {
-            mColumn = i;
-            break;
-        }
-
-    if (mColumn==-1)
-        throw std::logic_error ("Can't find script column");
+    mColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_ScriptText);
+    mStateColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
 
     QString source = mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString();
 
@@ -114,7 +126,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     mCompileDelay->setSingleShot (true);
     connect (mCompileDelay, SIGNAL (timeout()), this, SLOT (updateRequest()));
 
-    recompile();
+    updateDeletedState();
 }
 
 void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
@@ -231,16 +243,21 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
-    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row() &&
-        index.column()>=topLeft.column() && index.column()<=bottomRight.column())
+    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
     {
-        QString source = mModel->data (index).toString();
+        if (mStateColumn>=topLeft.column() && mStateColumn<=bottomRight.column())
+            updateDeletedState();
 
-        QTextCursor cursor = mEditor->textCursor();
-        mEditor->setPlainText (source);
-        mEditor->setTextCursor (cursor);
+        if (mColumn>=topLeft.column() && mColumn<=bottomRight.column())
+        {
+            QString source = mModel->data (index).toString();
 
-        recompile();
+            QTextCursor cursor = mEditor->textCursor();
+            mEditor->setPlainText (source);
+            mEditor->setTextCursor (cursor);
+
+            recompile();
+        }
     }
 }
 
@@ -262,6 +279,8 @@ void CSVWorld::ScriptSubView::switchToRow (int row)
 
     std::vector<std::string> selection (1, id);
     mCommandDispatcher.setSelection (selection);
+
+    updateDeletedState();
 }
 
 void CSVWorld::ScriptSubView::switchToId (const std::string& id)

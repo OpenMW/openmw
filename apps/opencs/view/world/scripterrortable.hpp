@@ -42,6 +42,8 @@ namespace CSVWorld
 
             void update (const std::string& source);
 
+            void clear();
+
         private slots:
 
             void cellClicked (int row, int column);

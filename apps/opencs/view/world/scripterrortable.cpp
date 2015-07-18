@@ -100,7 +100,7 @@ void CSVWorld::ScriptErrorTable::updateUserSetting (const QString& name, const Q
 
 void CSVWorld::ScriptErrorTable::update (const std::string& source)
 {
-    setRowCount (0);
+    clear();
 
     try
     {
@@ -120,6 +120,11 @@ void CSVWorld::ScriptErrorTable::update (const std::string& source)
     {
         addMessage (error.what(), CSMDoc::Message::Severity_SeriousError);
     }
+}
+
+void CSVWorld::ScriptErrorTable::clear()
+{
+    setRowCount (0);
 }
 
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
