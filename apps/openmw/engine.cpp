@@ -414,7 +414,7 @@ void OMW::Engine::setWindowIcon()
 {
     boost::filesystem::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
-    windowIconStream.open(windowIcon);
+    windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
         std::cerr << "Failed to open " << windowIcon << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
