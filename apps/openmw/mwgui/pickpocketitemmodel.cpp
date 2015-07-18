@@ -1,8 +1,8 @@
 #include "pickpocketitemmodel.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/esm/loadskil.hpp>
 
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 
 namespace MWGui

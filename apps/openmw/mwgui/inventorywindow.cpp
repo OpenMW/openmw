@@ -16,19 +16,17 @@
 
 #include <components/settings/settings.hpp>
 
-#include <components/misc/stringops.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwbase/scriptmanager.hpp"
 #include "../mwrender/characterpreview.hpp"
 
 #include "itemview.hpp"

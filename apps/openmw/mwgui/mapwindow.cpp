@@ -27,7 +27,6 @@
 #include "../mwrender/globalmap.hpp"
 #include "../mwrender/localmap.hpp"
 
-#include "widgets.hpp"
 #include "confirmationdialog.hpp"
 #include "tooltips.hpp"
 

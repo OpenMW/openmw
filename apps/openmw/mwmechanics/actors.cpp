@@ -7,12 +7,10 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
-#include <components/esm/esmreader.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/player.hpp"
 
@@ -22,7 +20,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwrender/animation.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 
 #include "npcstats.hpp"
 #include "creaturestats.hpp"

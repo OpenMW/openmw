@@ -15,18 +15,15 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwgui/inventorywindow.hpp"
 
-#include "windowmanagerimp.hpp"
 #include "itemselection.hpp"
-
 #include "spellview.hpp"
-
-
 #include "itemwidget.hpp"
 #include "sortfilteritemmodel.hpp"
 
