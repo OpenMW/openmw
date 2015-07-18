@@ -1118,11 +1118,11 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
                 if (mJournals.tryDelete (record.mId))
                 {
-                    /// \todo handle info records
+                    mJournalInfos.removeDialogueInfos(record.mId);
                 }
                 else if (mTopics.tryDelete (record.mId))
                 {
-                    /// \todo handle info records
+                    mTopicInfos.removeDialogueInfos(record.mId);
                 }
                 else
                 {

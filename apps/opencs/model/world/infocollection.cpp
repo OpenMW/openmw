@@ -187,3 +187,39 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
 
     return Range (begin, end);
 }
+
+void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId)
+{
+    std::string id = Misc::StringUtils::lowerCase(dialogueId);
+    std::vector<int> erasedRecords;
+
+    std::map<std::string, int>::const_iterator current = getIdMap().lower_bound(id);
+    std::map<std::string, int>::const_iterator end = getIdMap().end();
+    for (; current != end; ++current)
+    {
+        Record<Info> record = getRecord(current->second);
+
+        if (Misc::StringUtils::ciEqual(dialogueId, record.get().mTopicId))
+        {
+            if (record.mState == RecordBase::State_ModifiedOnly)
+            {
+                erasedRecords.push_back(current->second);
+            }
+            else
+            {
+                record.mState = RecordBase::State_Deleted;
+                setRecord(current->second, record);
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    while (!erasedRecords.empty())
+    {
+        removeRows(erasedRecords.back(), 1);
+        erasedRecords.pop_back();
+    }
+}

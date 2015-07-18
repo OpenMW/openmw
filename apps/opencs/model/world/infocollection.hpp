@@ -44,6 +44,8 @@ namespace CSMWorld
             Range getTopicRange (const std::string& topic) const;
             ///< Return iterators that point to the beginning and past the end of the range for
             /// the given topic.
+
+            void removeDialogueInfos(const std::string& dialogueId);
     };
 }
 
