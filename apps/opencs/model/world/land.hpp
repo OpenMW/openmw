@@ -4,7 +4,6 @@
 #include <string>
 
 #include <components/esm/loadland.hpp>
-#include <components/esm/util.hpp>
 
 namespace CSMWorld
 {
@@ -19,15 +18,6 @@ namespace CSMWorld
         /// Loads the metadata and ID
         void load (ESM::ESMReader &esm);
     };
-}
-
-namespace ESM
-{
-    template <>
-    bool isRecordDeleted<CSMWorld::Land>(const CSMWorld::Land &land)
-    {
-        return false;
-    }
 }
 
 #endif

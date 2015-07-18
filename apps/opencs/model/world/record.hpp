@@ -3,6 +3,12 @@
 
 #include <stdexcept>
 
+#include <components/esm/loadgmst.hpp>
+#include <components/esm/loadmgef.hpp>
+#include <components/esm/loadskil.hpp>
+
+#include "land.hpp"
+
 namespace CSMWorld
 {
     struct RecordBase
@@ -154,6 +160,23 @@ namespace CSMWorld
             mState = State_Erased;
         }
     }
+
+    // Not all records can be deleted (may be changed in the future), 
+    // so we need to use a separate method to check whether a record is deleted or not.
+    template<typename ESXRecordT>
+    bool isRecordDeleted(const ESXRecordT &record)
+    {
+        return record.mIsDeleted;
+    }
+
+    template<>
+    bool isRecordDeleted(const Land &land);
+    template<>
+    bool isRecordDeleted(const ESM::GameSetting &setting);
+    template<>
+    bool isRecordDeleted(const ESM::MagicEffect &effect);
+    template<>
+    bool isRecordDeleted(const ESM::Skill &skill);
 }
 
 #endif

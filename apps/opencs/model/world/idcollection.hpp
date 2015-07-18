@@ -2,9 +2,9 @@
 #define CSM_WOLRD_IDCOLLECTION_H
 
 #include <components/esm/esmreader.hpp>
-#include <components/esm/util.hpp>
 
 #include "collection.hpp"
+#include "record.hpp"
 
 namespace CSMWorld
 {
@@ -48,7 +48,7 @@ namespace CSMWorld
         std::string id = IdAccessorT().getId (record);
         int index = searchId (id);
 
-        if (ESM::isRecordDeleted (record))
+        if (isRecordDeleted(record))
         {
             if (index==-1)
             {
