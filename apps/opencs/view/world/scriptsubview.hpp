@@ -38,6 +38,7 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             CSMWorld::IdTable *mModel;
             int mColumn;
+            int mStateColumn;
             TableBottomBox *mBottom;
             RecordButtonBar *mButtons;
             CSMWorld::CommandDispatcher mCommandDispatcher;
@@ -51,6 +52,10 @@ namespace CSVWorld
             void addButtonBar();
 
             void recompile();
+
+            bool isDeleted() const;
+
+            void updateDeletedState();
 
         public:
 
