@@ -5,7 +5,6 @@
 #include <string>
 
 #include <components/esm/loadpgrd.hpp>
-#include <components/esm/util.hpp>
 
 namespace CSMWorld
 {
@@ -25,15 +24,6 @@ namespace CSMWorld
 
         void load (ESM::ESMReader &esm);
     };
-}
-
-namespace ESM
-{
-    template <>
-    bool isRecordDeleted<CSMWorld::Pathgrid>(const CSMWorld::Pathgrid &pgrd)
-    {
-        return false;
-    }
 }
 
 #endif
