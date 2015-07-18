@@ -518,7 +518,21 @@ namespace MWGui
     {
         mCrosshair->setVisible (visible);
     }
-
+    
+    void HUD::setCrosshairOwned(bool owned)
+    {
+        MyGUI::Colour red = MyGUI::Colour(1.0, 0, 0);
+        MyGUI::Colour white = MyGUI::Colour(1.0, 1.0, 1.0);
+        if(owned)
+        {
+            mCrosshair->setColour(red);
+        }
+        else
+        {
+            mCrosshair->setColour(white);
+        }
+    }
+    
     void HUD::setHmsVisible(bool visible)
     {
         mHealth->setVisible(visible);

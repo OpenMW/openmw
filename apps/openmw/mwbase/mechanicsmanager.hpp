@@ -23,6 +23,7 @@ namespace MWWorld
 {
     class Ptr;
     class CellStore;
+    class CellRef;
 }
 
 namespace Loading
@@ -211,6 +212,8 @@ namespace MWBase
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
+            
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
     };
 }
 

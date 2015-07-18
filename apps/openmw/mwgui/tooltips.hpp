@@ -87,7 +87,10 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
-
+        
+        bool checkOwned();
+        /// Returns True if taking mFocusObject would be crime
+ 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 

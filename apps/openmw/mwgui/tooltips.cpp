@@ -346,6 +346,25 @@ namespace MWGui
 
         return tooltipSize;
     }
+    
+    bool ToolTips::checkOwned()
+    {
+        if(!mFocusObject.isEmpty())
+        {
+            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr victim;
+            
+            MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+
+            return !allowed;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
