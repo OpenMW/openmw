@@ -11,6 +11,7 @@ class QModelIndex;
 class QLabel;
 class QVBoxLayout;
 class QSplitter;
+class QTime;
 
 namespace CSMDoc
 {
@@ -43,10 +44,13 @@ namespace CSVWorld
             QVBoxLayout mLayout;
             QSplitter *mMain;
             ScriptErrorTable *mErrors;
+            QTimer *mCompileDelay;
 
         private:
 
             void addButtonBar();
+
+            void recompile();
 
         public:
 
@@ -77,6 +81,8 @@ namespace CSVWorld
             void switchToId (const std::string& id);
 
             void highlightError (int line, int column);
+
+            void updateRequest();
     };
 }
 

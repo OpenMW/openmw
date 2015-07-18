@@ -5,6 +5,7 @@
 #include <QStatusBar>
 #include <QStackedLayout>
 #include <QSplitter>
+#include <QTimer>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
@@ -33,6 +34,12 @@ void CSVWorld::ScriptSubView::addButtonBar()
 
     connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
         mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+}
+
+void CSVWorld::ScriptSubView::recompile()
+{
+    if (!mCompileDelay->isActive())
+        mCompileDelay->start (5000);
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
@@ -101,6 +108,12 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (mErrors, SIGNAL (highlightError (int, int)),
         this, SLOT (highlightError (int, int)));
+
+    mCompileDelay = new QTimer (this);
+    mCompileDelay->setSingleShot (true);
+    connect (mCompileDelay, SIGNAL (timeout()), this, SLOT (updateRequest()));
+
+    recompile();
 }
 
 void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
@@ -136,6 +149,9 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
         mButtons->updateUserSetting (name, value);
 
     mErrors->updateUserSetting (name, value);
+
+    if (name=="script-editor/warnings")
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::setStatusBar (bool show)
@@ -198,7 +214,7 @@ void CSVWorld::ScriptSubView::textChanged()
     mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*mModel,
         mModel->getModelIndex (getUniversalId().getId(), mColumn), source));
 
-    mErrors->update (source.toUtf8().constData());
+    recompile();
 }
 
 void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -219,7 +235,7 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
         mEditor->setPlainText (source);
         mEditor->setTextCursor (cursor);
 
-        mErrors->update (source.toUtf8().constData());
+        recompile();
     }
 }
 
@@ -258,4 +274,13 @@ void CSVWorld::ScriptSubView::highlightError (int line, int column)
 
     mEditor->setFocus();
     mEditor->setTextCursor (cursor);
+}
+
+void CSVWorld::ScriptSubView::updateRequest()
+{
+    QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
+
+    QString source = mModel->data (index).toString();
+
+    mErrors->update (source.toUtf8().constData());
 }
