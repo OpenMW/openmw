@@ -13,6 +13,8 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 
+#include "../mwclass/misc.hpp"
+
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"
@@ -298,11 +300,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100"))
+    if(MWClass::Miscellaneous().isGold(ptr))
     {
         int realCount = count * ptr.getClass().getValue(ptr);
 
