@@ -43,3 +43,27 @@ bool CSMWorld::isRecordDeleted(const ESM::Skill &skill)
 {
     return false;
 }
+
+template<>
+void CSMWorld::setRecordDeleted(CSMWorld::Land &land, bool isDeleted)
+{
+    land.mLand->mIsDeleted = isDeleted;
+}
+
+template<>
+void CSMWorld::setRecordDeleted(ESM::GameSetting &setting, bool isDeleted)
+{
+    // GameSetting doesn't have a Deleted flag
+}
+
+template<>
+void CSMWorld::setRecordDeleted(ESM::MagicEffect &effect, bool isDeleted)
+{
+    // MagicEffect doesn't have a Deleted flag
+}
+
+template<>
+void CSMWorld::setRecordDeleted(ESM::Skill &skill, bool isDeleted)
+{
+    // Skill doesn't have a Deleted flag
+}
