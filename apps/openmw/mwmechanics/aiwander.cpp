@@ -66,7 +66,7 @@ namespace MWMechanics
         // AiWander states
         AiWander::WanderState mState;
         
-        unsigned short mPlayedIdle;
+        unsigned short mIdleAnimation;
 
         PathFinder mPathFinder;
         
@@ -78,7 +78,7 @@ namespace MWMechanics
             mGreetingTimer(0),
             mCell(NULL),
             mState(AiWander::Wander_ChooseAction),
-            mPlayedIdle(0)
+            mIdleAnimation(0)
             {};
     };
     
@@ -240,12 +240,11 @@ namespace MWMechanics
         }
 
         // Check if idle animation finished
-        short unsigned& playedIdle = storage.mPlayedIdle;
+        short unsigned& idleAnimation = storage.mIdleAnimation;
         GreetingState& greetingState = storage.mSaidGreeting;
         if ((wanderState == Wander_IdleNow) &&
-            !checkIdle(actor, playedIdle) && (greetingState == Greet_Done || greetingState == Greet_None))
+            !checkIdle(actor, idleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
-            playedIdle = 0;
             wanderState = Wander_ChooseAction;
         }
 
@@ -253,10 +252,9 @@ namespace MWMechanics
 
         if (wanderState == Wander_ChooseAction)
         {
-            playedIdle = 0;
-            getRandomIdle(playedIdle); // NOTE: sets mPlayedIdle with a random selection
+            idleAnimation = getRandomIdle();
 
-            if(!playedIdle && mDistance)
+            if(!idleAnimation && mDistance)
             {
                 wanderState = Wander_MoveNow;
             }
@@ -265,7 +263,7 @@ namespace MWMechanics
                 // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
                 MWWorld::TimeStamp currentTime = world->getTimeStamp();
                 mStartTime = currentTime;
-                playIdle(actor, playedIdle);
+                playIdle(actor, idleAnimation);
                 wanderState = Wander_IdleNow;
             }
         }
@@ -468,7 +466,6 @@ namespace MWMechanics
                 stopWalking(actor, storage);
                 mObstacleCheck.clear();
                 storage.mState = Wander_IdleNow;
-                getRandomIdle(storage.mPlayedIdle);
             }
 
             turnActorToFacePlayer(actorPos, playerPos, storage);
@@ -605,9 +602,10 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::getRandomIdle(short unsigned& playedIdle)
+    short unsigned AiWander::getRandomIdle()
     {
         unsigned short idleRoll = 0;
+        short unsigned selectedAnimation = 0;
 
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
@@ -618,10 +616,11 @@ namespace MWMechanics
             unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
             if(randSelect < idleChance && randSelect > idleRoll)
             {
-                playedIdle = counter+2;
+                selectedAnimation = counter + GroupIndex_MinIdle;
                 idleRoll = randSelect;
             }
         }
+        return selectedAnimation;
     }
 
     void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)

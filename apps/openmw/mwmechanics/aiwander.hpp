@@ -77,7 +77,7 @@ namespace MWMechanics
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            void getRandomIdle(unsigned short& playedIdle);
+            short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
