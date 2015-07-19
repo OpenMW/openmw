@@ -4,8 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
-#include <components/esm/records.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"

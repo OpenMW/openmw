@@ -45,6 +45,7 @@
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/vismask.hpp"
 
@@ -57,8 +58,6 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include "../mwrender/localmap.hpp"
-
-#include "../mwsound/soundmanagerimp.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"

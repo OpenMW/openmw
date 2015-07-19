@@ -12,11 +12,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/journal.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/statemanager.hpp"
-
-#include "../mwstate/character.hpp"
 
 #include "savegamedialog.hpp"
 #include "confirmationdialog.hpp"

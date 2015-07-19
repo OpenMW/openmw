@@ -7,8 +7,6 @@
 
 #include <components/misc/rng.hpp>
 
-#include <components/esm/records.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"

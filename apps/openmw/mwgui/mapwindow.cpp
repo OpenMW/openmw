@@ -27,7 +27,6 @@
 #include "../mwrender/globalmap.hpp"
 #include "../mwrender/localmap.hpp"
 
-#include "widgets.hpp"
 #include "confirmationdialog.hpp"
 #include "tooltips.hpp"
 
@@ -38,8 +37,8 @@ namespace
 
     enum LocalMapWidgetDepth
     {
-        Local_CompassLayer = 0,
-        Local_MarkerAboveFogLayer = 1,
+        Local_MarkerAboveFogLayer = 0,
+        Local_CompassLayer = 1,
         Local_FogLayer = 2,
         Local_MarkerLayer = 3,
         Local_MapLayer = 4
