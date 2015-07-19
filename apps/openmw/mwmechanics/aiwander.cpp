@@ -51,10 +51,10 @@ namespace MWMechanics
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
     struct AiWanderStorage : AiTemporaryBase
     {
-        // the z rotation angle (degrees) we want to reach
-        // used every frame when mRotate is true
+        // the z rotation angle to reach
+        // when mTurnActorGivingGreetingToFacePlayer is true
         float mTargetAngleRadians;
-        bool mRotate;
+        bool mTurnActorGivingGreetingToFacePlayer;
         float mReaction; // update some actions infrequently
         
         
@@ -75,7 +75,7 @@ namespace MWMechanics
         
         AiWanderStorage():
             mTargetAngleRadians(0),
-            mRotate(false),
+            mTurnActorGivingGreetingToFacePlayer(false),
             mReaction(0),
             mSaidGreeting(AiWander::Greet_None),
             mGreetingTimer(0),
@@ -240,15 +240,13 @@ namespace MWMechanics
             evadeObstacles(actor, storage, duration);
         }
         
-        
-        float& targetAngleRadians = storage.mTargetAngleRadians;
-        bool& rotate = storage.mRotate;
+        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
         if (rotate)
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, targetAngleRadians, osg::DegreesToRadians(5.f)))
+            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
                 rotate = false;
         }
 
@@ -491,14 +489,7 @@ namespace MWMechanics
                 getRandomIdle(storage.mPlayedIdle);
             }
 
-            if (!storage.mRotate)
-            {
-                osg::Vec3f dir = playerPos - actorPos;
-
-                float faceAngleRadians = std::atan2(dir.x(), dir.y());
-                storage.mTargetAngleRadians = faceAngleRadians;
-                storage.mRotate = true;
-            }
+            turnActorToFacePlayer(actorPos, playerPos, storage);
 
             if (greetingTimer >= GREETING_SHOULD_END)
             {
@@ -513,6 +504,15 @@ namespace MWMechanics
             if (playerDistSqr >= resetDist*resetDist)
                 greetingState = Greet_None;
         }
+    }
+
+    void AiWander::turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage)
+    {
+        osg::Vec3f dir = playerPosition - actorPosition;
+
+        float faceAngleRadians = std::atan2(dir.x(), dir.y());
+        storage.mTargetAngleRadians = faceAngleRadians;
+        storage.mTurnActorGivingGreetingToFacePlayer = true;
     }
 
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)

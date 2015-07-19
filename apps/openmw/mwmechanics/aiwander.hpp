@@ -75,6 +75,7 @@ namespace MWMechanics
             void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
             void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
+            void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
