@@ -7,10 +7,12 @@
 ESM::CellRef::CellRef()
     : mScale(1.0f),
       mFactionRank(-2),
-      mEnchantmentCharge(-1),
-      mGoldValue(1),
       mChargeInt(-1),
+      mEnchantmentCharge(-1.0f),
+      mGoldValue(1),
+      mTeleport(false),
       mLockLevel(0),
+      mReferenceBlocked(-1),
       mIsDeleted(false)
 {}
 

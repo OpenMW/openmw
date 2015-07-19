@@ -46,7 +46,7 @@ namespace CSMWorld
         loadRecord (record, reader);
 
         std::string id = IdAccessorT().getId (record);
-        int index = searchId (id);
+        int index = this->searchId (id);
 
         if (isRecordDeleted(record))
         {
@@ -60,13 +60,13 @@ namespace CSMWorld
 
             if (base)
             {
-                removeRows (index, 1);
+                this->removeRows (index, 1);
                 return -1;
             }
 
-            Record<ESXRecordT> baseRecord = getRecord (index);
+            Record<ESXRecordT> baseRecord = this->getRecord (index);
             baseRecord.mState = RecordBase::State_Deleted;
-            setRecord (index, baseRecord);
+            this->setRecord (index, baseRecord);
             return index;
         }
 
