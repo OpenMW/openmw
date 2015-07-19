@@ -302,20 +302,18 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
     if(MWClass::Miscellaneous().isGold(ptr))
     {
-        int realCount = count * ptr.getClass().getValue(ptr);
-
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             {
-                iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
+                iter->getRefData().setCount(iter->getRefData().getCount() + count);
                 flagAsModified();
                 return iter;
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
-        return addNewStack(ref.getPtr(), realCount);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
+        return addNewStack(ref.getPtr(), count);
     }
 
     // determine whether to stack or not
