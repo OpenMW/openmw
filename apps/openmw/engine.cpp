@@ -646,9 +646,6 @@ void OMW::Engine::go()
 
     prepareEngine (settings);
 
-    // Play some good 'ol tunes
-    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
-
     if (!mSaveGameFile.empty())
     {
         MWBase::Environment::get().getStateManager()->loadGame(mSaveGameFile);
