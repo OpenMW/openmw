@@ -1069,18 +1069,18 @@ namespace MWMechanics
             killDeadActors();
 
             // check if we still have any player enemies to switch music
-            static bool isBattleMusic = false;
+            static int currentMusic = 0;
 
-            if (isBattleMusic && hostilesCount == 0 && !(player.getClass().getCreatureStats(player).isDead() &&
+            if (currentMusic != 1 && hostilesCount == 0 && !(player.getClass().getCreatureStats(player).isDead() &&
             MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
             {
                 MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
-                isBattleMusic = false;
+                currentMusic = 1;
             }
-            else if (!isBattleMusic && hostilesCount > 0)
+            else if (currentMusic != 2 && hostilesCount > 0)
             {
                 MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
-                isBattleMusic = true;
+                currentMusic = 2;
             }
 
             static float sneakTimer = 0.f; // times update of sneak icon
