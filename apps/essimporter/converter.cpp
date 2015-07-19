@@ -134,8 +134,6 @@ namespace ESSImport
     void ConvertCell::read(ESM::ESMReader &esm)
     {
         ESM::Cell cell;
-        std::string id = esm.getHNString("NAME");
-        cell.mName = id;
         cell.load(esm, false);
 
         // I wonder what 0x40 does?
@@ -145,7 +143,7 @@ namespace ESSImport
         }
 
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
-        if (id == mContext->mPlayerCellName)
+        if (cell.mName == mContext->mPlayerCellName)
         {
             mContext->mPlayer.mCellId = cell.getCellId();
         }
@@ -253,7 +251,7 @@ namespace ESSImport
         if (cell.isExterior())
             mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = newcell;
         else
-            mIntCells[id] = newcell;
+            mIntCells[cell.mName] = newcell;
     }
 
     void ConvertCell::writeCell(const Cell &cell, ESM::ESMWriter& esm)
