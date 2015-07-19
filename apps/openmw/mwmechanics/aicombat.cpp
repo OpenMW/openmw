@@ -36,13 +36,13 @@ namespace
 
     float getZAngleToDir(const osg::Vec3f& dir)
     {
-        return osg::RadiansToDegrees(std::atan2(dir.x(), dir.y()));
+        return std::atan2(dir.x(), dir.y());
     }
 
     float getXAngleToDir(const osg::Vec3f& dir, float dirLen = 0.0f)
     {
         float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return osg::RadiansToDegrees(-std::asin(dir.z() / len));
+        return -std::asin(dir.z() / len);
     }
 
 
@@ -221,12 +221,12 @@ namespace MWMechanics
 
         if(movement.mRotation[2] != 0)
         {
-            if(zTurn(actor, osg::DegreesToRadians(movement.mRotation[2]))) movement.mRotation[2] = 0;
+            if(zTurn(actor, movement.mRotation[2])) movement.mRotation[2] = 0;
         }
 
         if(movement.mRotation[0] != 0)
         {
-            if(smoothTurn(actor, osg::DegreesToRadians(movement.mRotation[0]), 0)) movement.mRotation[0] = 0;
+            if(smoothTurn(actor, movement.mRotation[0], 0)) movement.mRotation[0] = 0;
         }
         
         bool& attack = storage.mAttack;

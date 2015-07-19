@@ -234,7 +234,7 @@ namespace MWMechanics
         if(walking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
-            zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
             evadeObstacles(actor, storage, duration);
@@ -397,7 +397,7 @@ namespace MWMechanics
                 actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
                 // change the angle a bit, too
                 const ESM::Position& pos = actor.getRefData().getPosition();
-                zTurn(actor, osg::DegreesToRadians(storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
             }
             mStuckCount++;  // TODO: maybe no longer needed
         }

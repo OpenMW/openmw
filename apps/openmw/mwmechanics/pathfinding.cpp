@@ -264,7 +264,7 @@ namespace MWMechanics
         float directionX = nextPoint.mX - x;
         float directionY = nextPoint.mY - y;
 
-        return osg::RadiansToDegrees(std::atan2(directionX, directionY));
+        return std::atan2(directionX, directionY);
     }
 
     bool PathFinder::checkPathCompleted(float x, float y, float tolerance)
