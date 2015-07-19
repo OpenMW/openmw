@@ -177,6 +177,22 @@ namespace CSMWorld
     bool isRecordDeleted(const ESM::MagicEffect &effect);
     template<>
     bool isRecordDeleted(const ESM::Skill &skill);
+
+    // ... and also a separate method for setting the deleted flag of a record
+    template<typename ESXRecordT>
+    void setRecordDeleted(ESXRecordT &record, bool isDeleted = false)
+    {
+        record.mIsDeleted = isDeleted;
+    }
+
+    template<>
+    void setRecordDeleted(Land &land, bool isDeleted);
+    template<>
+    void setRecordDeleted(ESM::GameSetting &setting, bool isDeleted);
+    template<>
+    void setRecordDeleted(ESM::MagicEffect &effect, bool isDeleted);
+    template<>
+    void setRecordDeleted(ESM::Skill &skill, bool isDeleted);
 }
 
 #endif
