@@ -63,6 +63,13 @@ namespace MWMechanics
                 Greet_InProgress,
                 Greet_Done
             };
+
+            enum WanderState {
+                Wander_ChooseAction,
+                Wander_IdleNow,
+                Wander_MoveNow,
+                Wander_Walking,
+            };
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();

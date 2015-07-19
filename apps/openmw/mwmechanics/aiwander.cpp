@@ -64,10 +64,7 @@ namespace MWMechanics
         const MWWorld::CellStore* mCell; // for detecting cell change
 
         // AiWander states
-        bool mChooseAction;
-        bool mIdleNow;
-        bool mMoveNow;
-        bool mWalking;
+        AiWander::WanderState mState;
         
         unsigned short mPlayedIdle;
 
@@ -80,10 +77,7 @@ namespace MWMechanics
             mSaidGreeting(AiWander::Greet_None),
             mGreetingTimer(0),
             mCell(NULL),
-            mChooseAction(true),
-            mIdleNow(false),
-            mMoveNow(false),
-            mWalking(false),
+            mState(AiWander::Wander_ChooseAction),
             mPlayedIdle(0)
             {};
     };
@@ -200,38 +194,33 @@ namespace MWMechanics
         ESM::Position pos = actor.getRefData().getPosition();
         
         
-        bool& idleNow = storage.mIdleNow;
-        bool& moveNow = storage.mMoveNow;
-        bool& walking = storage.mWalking;
+        WanderState& wanderState = storage.mState;
         // Check if an idle actor is  too close to a door - if so start walking
         mDoorCheckDuration += duration;
         if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
         {
             mDoorCheckDuration = 0;    // restart timer
             if(mDistance &&            // actor is not intended to be stationary
-                idleNow &&             // but is in idle
-               !walking &&            // FIXME: some actors are idle while walking
+                (wanderState == Wander_IdleNow) &&             // but is in idle
                proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
             {
-                idleNow = false;
-                moveNow = true;
+                wanderState = Wander_MoveNow;
                 mTrimCurrentNode = false; // just in case
             }
         }
 
         // Are we there yet?
-        bool& chooseAction = storage.mChooseAction;
-        if(walking &&
+        if ((wanderState == Wander_Walking) &&
             storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
         {
             stopWalking(actor, storage);
-            chooseAction = true;
+            wanderState = Wander_ChooseAction;
             mHasReturnPosition = false;
         }
 
 
         
-        if(walking) // have not yet reached the destination
+        if (wanderState == Wander_Walking) // have not yet reached the destination
         {
             // turn towards the next point in mPath
             zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
@@ -253,24 +242,23 @@ namespace MWMechanics
         // Check if idle animation finished
         short unsigned& playedIdle = storage.mPlayedIdle;
         GreetingState& greetingState = storage.mSaidGreeting;
-        if(idleNow && !checkIdle(actor, playedIdle) && (greetingState == Greet_Done || greetingState == Greet_None))
+        if ((wanderState == Wander_IdleNow) &&
+            !checkIdle(actor, playedIdle) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             playedIdle = 0;
-            idleNow = false;
-            chooseAction = true;
+            wanderState = Wander_ChooseAction;
         }
 
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
-        if(chooseAction)
+        if (wanderState == Wander_ChooseAction)
         {
             playedIdle = 0;
             getRandomIdle(playedIdle); // NOTE: sets mPlayedIdle with a random selection
 
             if(!playedIdle && mDistance)
             {
-                chooseAction = false;
-                moveNow = true;
+                wanderState = Wander_MoveNow;
             }
             else
             {
@@ -278,8 +266,7 @@ namespace MWMechanics
                 MWWorld::TimeStamp currentTime = world->getTimeStamp();
                 mStartTime = currentTime;
                 playIdle(actor, playedIdle);
-                chooseAction = false;
-                idleNow = true;
+                wanderState = Wander_IdleNow;
             }
         }
 
@@ -332,9 +319,6 @@ namespace MWMechanics
             mHasReturnPosition = false;
         if (mDistance == 0 && mHasReturnPosition && (pos.asVec3() - mReturnPosition).length2() > 20*20)
         {
-            chooseAction = false;
-            idleNow = false;
-
             if (!storage.mPathFinder.isPathConstructed())
             {
                 ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
@@ -347,19 +331,18 @@ namespace MWMechanics
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
-                    moveNow = false;
-                    walking = true;
+                    wanderState = Wander_Walking;
                 }
             }
         }
 
         // Allow interrupting a walking actor to trigger a greeting
-        if(idleNow || walking)
+        if ((wanderState == Wander_IdleNow) || (wanderState == Wander_Walking))
         {
             playGreetingIfPlayerGetsTooClose(actor, storage);
         }
 
-        if(moveNow && mDistance)
+        if ((wanderState == Wander_MoveNow) && mDistance)
         {
             // Construct a new path if there isn't one
             if(!storage.mPathFinder.isPathConstructed())
@@ -386,8 +369,7 @@ namespace MWMechanics
                 trimAllowedNodes(mAllowedNodes, storage.mPathFinder);
                 mObstacleCheck.clear();
                 storage.mPathFinder.clearPath();
-                storage.mWalking = false;
-                storage.mMoveNow = true;
+                storage.mState = Wander_MoveNow;
             }
             else // probably walking into another NPC
             {
@@ -409,7 +391,7 @@ namespace MWMechanics
             mObstacleCheck.clear();
 
             stopWalking(actor, storage);
-            storage.mChooseAction = true;
+            storage.mState = Wander_ChooseAction;
             mStuckCount = 0;
         }
 //#endif
@@ -481,11 +463,11 @@ namespace MWMechanics
         {
             greetingTimer++;
 
-            if (storage.mWalking)
+            if (storage.mState == Wander_Walking)
             {
                 stopWalking(actor, storage);
                 mObstacleCheck.clear();
-                storage.mIdleNow = true;
+                storage.mState = Wander_IdleNow;
                 getRandomIdle(storage.mPlayedIdle);
             }
 
@@ -539,8 +521,7 @@ namespace MWMechanics
                 mAllowedNodes.push_back(mCurrentNode);
             mCurrentNode = temp;
 
-            storage.mMoveNow = false;
-            storage.mWalking = true;
+            storage.mState = Wander_Walking;
         }
         // Choose a different node and delete this one from possible nodes because it is uncreachable:
         else
@@ -591,8 +572,6 @@ namespace MWMechanics
     {
         storage.mPathFinder.clearPath();
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        storage.mMoveNow = false;
-        storage.mWalking = false;
     }
 
     void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
