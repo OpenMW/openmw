@@ -1049,6 +1049,19 @@ namespace MWMechanics
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
 
+
+    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
+    {
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        {
+            if (out.insert(*it).second)
+            {
+                getFollowers(*it, out);
+            }
+        }
+    }
+
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
@@ -1070,6 +1083,10 @@ namespace MWMechanics
         if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
+        // get the player's followers / allies (works recursively) that will not report crimes
+        std::set<MWWorld::Ptr> playerFollowers;
+        getFollowers(player, playerFollowers);
+
         // Did anyone see it?
         bool crimeSeen = false;
         for (std::vector<MWWorld::Ptr>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
@@ -1085,17 +1102,20 @@ namespace MWMechanics
                     // TODO: Add mod support for stealth executions!
                     || (type == OT_Murder && *it != victim))
             {
-                if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Trespassing)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
-
                 // Crime reporting only applies to NPCs
                 if (!it->getClass().isNpc())
                     continue;
 
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                     continue;
+
+                if (playerFollowers.find(*it) != playerFollowers.end())
+                    continue;
+
+                if (type == OT_Theft || type == OT_Pickpocket)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Trespassing)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
 
                 crimeSeen = true;
             }
