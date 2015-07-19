@@ -102,7 +102,7 @@ namespace CSMDoc
 
         ESM::ESMWriter& writer = mState.getWriter();
         CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
-        CollectionT::ESXRecord record = mCollection.getRecord (stage).get();
+        typename CollectionT::ESXRecord record = mCollection.getRecord (stage).get();
 
         if (state == CSMWorld::RecordBase::State_Modified ||
             state == CSMWorld::RecordBase::State_ModifiedOnly ||
