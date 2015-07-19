@@ -2,8 +2,6 @@
 
 #include <iostream>
 
-#include <cstdint>
-
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
