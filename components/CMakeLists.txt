@@ -201,7 +201,10 @@ if (GIT_CHECKOUT)
 endif (GIT_CHECKOUT)
 
 if (WIN32)
-target_link_libraries(components shlwapi)
+    target_link_libraries(components shlwapi)
+    if(MINGW)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOGDI")
+    endif(MINGW)
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
