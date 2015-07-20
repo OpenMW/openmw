@@ -520,15 +520,13 @@ namespace MWGui
     
     void HUD::setCrosshairOwned(bool owned)
     {
-        MyGUI::Colour red = MyGUI::Colour(1.0, 0, 0);
-        MyGUI::Colour white = MyGUI::Colour(1.0, 1.0, 1.0);
         if(owned)
         {
-            mCrosshair->setColour(red);
+            mCrosshair->changeWidgetSkin("HUD_Crosshair_Owned");
         }
         else
         {
-            mCrosshair->setColour(white);
+            mCrosshair->changeWidgetSkin("HUD_Crosshair");
         }
     }
     

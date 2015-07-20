@@ -186,7 +186,7 @@ namespace MWGui
       , mRestAllowed(true)
       , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
-      , mShowOwned(false)
+      , mShowOwned(0)
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -263,7 +263,7 @@ namespace MWGui
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
 
-        mShowOwned = Settings::Manager::getBool("show owned", "Game");
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void WindowManager::initUI()
@@ -1042,7 +1042,7 @@ namespace MWGui
     {
         mToolTips->setFocusObject(focus);
 
-        if(mShowOwned && mHud)
+        if(mHud && (mShowOwned == 2 || mShowOwned == 3))
         {
             bool owned = mToolTips->checkOwned();
             mHud->setCrosshairOwned(owned);
@@ -1094,11 +1094,22 @@ namespace MWGui
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
+        
+        std::string MyGuiPrefix = "setting=";
+        size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
-
-        if (tag.compare(0, tokenLength, tokenToFind) == 0)
+        
+        if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
+        {
+            tag = tag.substr(MyGuiPrefixLength, tag.length());
+            std::string settingSection = tag.substr(0, tag.find(","));
+            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
+            
+            _result = Settings::Manager::getString(settingTag, settingSection);            
+        }
+        else if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
