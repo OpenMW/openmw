@@ -63,6 +63,13 @@ namespace MWMechanics
                 Greet_InProgress,
                 Greet_Done
             };
+
+            enum WanderState {
+                Wander_ChooseAction,
+                Wander_IdleNow,
+                Wander_MoveNow,
+                Wander_Walking
+            };
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
@@ -70,11 +77,12 @@ namespace MWMechanics
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            void getRandomIdle(unsigned short& playedIdle);
+            short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
             void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
             void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
+            void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;

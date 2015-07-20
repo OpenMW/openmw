@@ -104,7 +104,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
                 actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
                 actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
                 // change the angle a bit, too
-                zTurn(actor, osg::DegreesToRadians(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
+                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
             }
         }
         else { //Not stuck, so reset things
@@ -117,7 +117,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward the rest of the time
     }
 
-    zTurn(actor, osg::DegreesToRadians(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
+    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
 
     return false;
 }

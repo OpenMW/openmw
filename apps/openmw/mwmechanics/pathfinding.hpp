@@ -40,7 +40,7 @@ namespace MWMechanics
             bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
-            /// In degrees
+            /// In radians
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const
