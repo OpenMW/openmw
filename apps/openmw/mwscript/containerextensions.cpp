@@ -56,6 +56,12 @@ namespace MWScript
                     if (count == 0)
                         return;
 
+                    if(Misc::StringUtils::ciEqual(item, "gold_005")
+                            || Misc::StringUtils::ciEqual(item, "gold_010")
+                            || Misc::StringUtils::ciEqual(item, "gold_025")
+                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
@@ -91,6 +97,12 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if(Misc::StringUtils::ciEqual(item, "gold_005")
+                            || Misc::StringUtils::ciEqual(item, "gold_010")
+                            || Misc::StringUtils::ciEqual(item, "gold_025")
+                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+                    
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     runtime.push (store.count(item));
@@ -119,6 +131,12 @@ namespace MWScript
                     if (count == 0)
                         return;
 
+                    if(Misc::StringUtils::ciEqual(item, "gold_005")
+                        || Misc::StringUtils::ciEqual(item, "gold_010")
+                        || Misc::StringUtils::ciEqual(item, "gold_025")
+                        || Misc::StringUtils::ciEqual(item, "gold_100"))
+                    item = "gold_001";
+                        
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
