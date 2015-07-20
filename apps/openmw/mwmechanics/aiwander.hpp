@@ -68,7 +68,7 @@ namespace MWMechanics
                 Wander_ChooseAction,
                 Wander_IdleNow,
                 Wander_MoveNow,
-                Wander_Walking,
+                Wander_Walking
             };
         private:
             // NOTE: mDistance and mDuration must be set already
