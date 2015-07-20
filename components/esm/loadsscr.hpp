@@ -26,13 +26,9 @@ struct StartScript
     std::string mData;
     std::string mId;
 
-    bool mIsDeleted;
-
-    StartScript();
-
     // Load a record and add it to the list
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
 };

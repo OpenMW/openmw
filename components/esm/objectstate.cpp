@@ -8,7 +8,8 @@ void ESM::ObjectState::load (ESMReader &esm)
 {
     mVersion = esm.getFormat();
 
-    mRef.loadData(esm);
+    bool isDeleted;
+    mRef.loadData(esm, isDeleted);
 
     mHasLocals = 0;
     esm.getHNOT (mHasLocals, "HLOC");

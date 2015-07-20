@@ -7,13 +7,9 @@
 
 unsigned int ESM::Filter::sRecordId = REC_FILT;
 
-ESM::Filter::Filter()
-    : mIsDeleted(false)
-{}
-
-void ESM::Filter::load (ESMReader& esm)
+void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
 {
-    mIsDeleted = false;
+    isDeleted = false;
 
     while (esm.hasMoreSubs())
     {
@@ -24,15 +20,15 @@ void ESM::Filter::load (ESMReader& esm)
             case ESM::FourCC<'N','A','M','E'>::value:
                 mId = esm.getHString();
                 break;
-            case ESM::FourCC<'D','E','L','E'>::value:
-                esm.skipHSub();
-                mIsDeleted = true;
-                break;
             case ESM::FourCC<'F','I','L','T'>::value:
                 mFilter = esm.getHString();
                 break;
             case ESM::FourCC<'D','E','S','C'>::value:
                 mDescription = esm.getHString();
+                break;
+            case ESM::FourCC<'D','E','L','E'>::value:
+                esm.skipHSub();
+                isDeleted = true;
                 break;
             default:
                 esm.fail("Unknown subrecord");
@@ -41,11 +37,11 @@ void ESM::Filter::load (ESMReader& esm)
     }
 }
 
-void ESM::Filter::save (ESMWriter& esm) const
+void ESM::Filter::save (ESMWriter& esm, bool isDeleted) const
 {
     esm.writeHNCString ("NAME", mId);
 
-    if (mIsDeleted)
+    if (isDeleted)
     {
         esm.writeHNCString("DELE", "");
         return;
@@ -59,5 +55,4 @@ void ESM::Filter::blank()
 {
     mFilter.clear();
     mDescription.clear();
-    mIsDeleted = false;
 }

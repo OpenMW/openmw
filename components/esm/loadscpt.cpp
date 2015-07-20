@@ -10,10 +10,6 @@ namespace ESM
 {
     unsigned int Script::sRecordId = REC_SCPT;
 
-    Script::Script()
-        : mIsDeleted(false)
-    {}
-
     void Script::loadSCVR(ESMReader &esm)
     {
         int s = mData.mStringTableSize;
@@ -61,17 +57,17 @@ namespace ESM
         }
     }
 
-    void Script::load(ESMReader &esm)
+    void Script::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mVarNames.clear();
-        mIsDeleted = false;
 
         bool hasHeader = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'S','C','H','D'>::value:
                     SCHD data;
@@ -79,10 +75,6 @@ namespace ESM
                     mData = data.mData;
                     mId = data.mName.toString();
                     hasHeader = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'S','C','V','R'>::value:
                     // list of local variables
@@ -96,6 +88,10 @@ namespace ESM
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -106,7 +102,7 @@ namespace ESM
             esm.fail("Missing SCHD subrecord");
     }
 
-    void Script::save(ESMWriter &esm) const
+    void Script::save(ESMWriter &esm, bool isDeleted) const
     {
         std::string varNameString;
         if (!mVarNames.empty())
@@ -121,7 +117,7 @@ namespace ESM
 
         esm.writeHNT("SCHD", data, 52);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -156,8 +152,6 @@ namespace ESM
             mScriptText = "Begin \"" + mId + "\"\n\nEnd " + mId + "\n";
         else
             mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
-
-        mIsDeleted = false;
     }
 
 }

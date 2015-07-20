@@ -8,30 +8,22 @@ namespace ESM
 {
     unsigned int Clothing::sRecordId = REC_CLOT;
 
-    Clothing::Clothing()
-        : mIsDeleted(false)
-    {}
-
-    void Clothing::load(ESMReader &esm)
+    void Clothing::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mParts.mParts.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -55,6 +47,10 @@ namespace ESM
                 case ESM::FourCC<'I','N','D','X'>::value:
                     mParts.add(esm);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -63,15 +59,15 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing CTDT subrecord");
     }
 
-    void Clothing::save(ESMWriter &esm) const
+    void Clothing::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -101,6 +97,5 @@ namespace ESM
         mIcon.clear();
         mEnchant.clear();
         mScript.clear();
-        mIsDeleted = false;
     }
 }

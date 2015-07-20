@@ -22,10 +22,6 @@ namespace ESM
       "sSpecializationStealth"
     };
 
-    Class::Class()
-        : mIsDeleted(false)
-    {}
-
     int& Class::CLDTstruct::getSkill (int index, bool major)
     {
         if (index<0 || index>=5)
@@ -42,25 +38,20 @@ namespace ESM
         return mSkills[index][major ? 1 : 0];
     }
 
-    void Class::load(ESMReader &esm)
+    void Class::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
@@ -74,6 +65,10 @@ namespace ESM
                 case ESM::FourCC<'D','E','S','C'>::value:
                     mDescription = esm.getHString();
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -82,14 +77,14 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing CLDT subrecord");
     }
-    void Class::save(ESMWriter &esm) const
+    void Class::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -113,7 +108,5 @@ namespace ESM
         for (int i=0; i<5; ++i)
             for (int i2=0; i2<2; ++i2)
                 mData.mSkills[i][i2] = 0;
-
-        mIsDeleted = false;
     }
 }

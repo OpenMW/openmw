@@ -85,8 +85,7 @@ struct Cell
            mWater(0),
            mWaterInt(false),
            mMapColor(0),
-           mRefNumCounter(0),
-           mIsDeleted(false)
+           mRefNumCounter(0)
   {}
 
   // Interior cells are indexed by this (it's the 'id'), for exterior
@@ -113,18 +112,15 @@ struct Cell
   CellRefTracker mLeasedRefs;
   MovedCellRefTracker mMovedRefs;
 
-  bool mIsDeleted;
-
   void postLoad(ESMReader &esm);
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
-  void load(ESMReader &esm, bool saveContext = true); // Load everything (except references)
-  void loadName(ESMReader &esm); // Load NAME and checks for DELE
-  void loadData(ESMReader &esm); // Load DATAstruct only
-  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except DATAstruct and references
+  void load(ESMReader &esm, bool &isDeleted, bool saveContext = true); // Load everything (except references)
+  void loadNameAndData(ESMReader &esm, bool &isDeleted); // Load NAME and DATAstruct
+  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except NAME, DATAstruct and references
 
-  void save(ESMWriter &esm) const;
+  void save(ESMWriter &esm, bool isDeleted = false) const;
 
   bool isExterior() const
   {
@@ -163,7 +159,11 @@ struct Cell
      reuse one memory location without blanking it between calls.
   */
   /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
-  static bool getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves = false, MovedCellRef *mref = 0);
+  static bool getNextRef(ESMReader &esm, 
+                         CellRef &ref, 
+                         bool &isDeleted, 
+                         bool ignoreMoves = false, 
+                         MovedCellRef *mref = 0);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.

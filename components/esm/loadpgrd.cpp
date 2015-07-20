@@ -32,12 +32,10 @@ namespace ESM
     {
     }
 
-    Pathgrid::Pathgrid()
-        : mIsDeleted(false)
-    {}
-
-    void Pathgrid::load(ESMReader &esm)
+    void Pathgrid::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mPoints.clear();
         mEdges.clear();
 
@@ -49,8 +47,7 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);
@@ -118,7 +115,7 @@ namespace ESM
                 }
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();
-                    mIsDeleted = true;
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -132,12 +129,12 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void Pathgrid::save(ESMWriter &esm) const
+    void Pathgrid::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNT("DATA", mData, 12);
         esm.writeHNCString("NAME", mCell);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -173,6 +170,5 @@ namespace ESM
         mData.mS2 = 0;
         mPoints.clear();
         mEdges.clear();
-        mIsDeleted = false;
     }
 }

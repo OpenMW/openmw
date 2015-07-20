@@ -105,18 +105,14 @@ struct DialInfo
         REC_DELE = 0x454c4544
     };
 
-    bool mIsDeleted;
-
-    DialInfo();
-
-    void load(ESMReader &esm);
+    void load(ESMReader &esm, bool &isDeleted);
     ///< Loads all sub-records of Info record
     void loadId(ESMReader &esm);
     ///< Loads only Id of Info record (INAM sub-record)
-    void loadInfo(ESMReader &esm);
+    void loadData(ESMReader &esm, bool &isDeleted);
     ///< Loads all sub-records of Info record, except INAM sub-record
 
-    void save(ESMWriter &esm) const;
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

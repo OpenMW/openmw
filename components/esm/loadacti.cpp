@@ -8,28 +8,19 @@ namespace ESM
 {
     unsigned int Activator::sRecordId = REC_ACTI;
 
-    Activator::Activator()
-        : mIsDeleted(false)
-    {}
-
-    void Activator::load(ESMReader &esm)
+    void Activator::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -40,6 +31,10 @@ namespace ESM
                 case ESM::FourCC<'S','C','R','I'>::value:
                     mScript = esm.getHString();
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -49,11 +44,11 @@ namespace ESM
         if (!hasName)
             esm.fail("Missing NAME subrecord");
     }
-    void Activator::save(ESMWriter &esm) const
+    void Activator::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -69,6 +64,5 @@ namespace ESM
         mName.clear();
         mScript.clear();
         mModel.clear();
-        mIsDeleted = false;
     }
 }

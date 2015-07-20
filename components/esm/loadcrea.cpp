@@ -8,14 +8,10 @@ namespace ESM {
 
     unsigned int Creature::sRecordId = REC_CREA;
 
-    Creature::Creature()
-        : mFlags(0),
-          mScale(0.0f),
-          mIsDeleted(false)
-    {}
-
-    void Creature::load(ESMReader &esm)
+    void Creature::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mAiPackage.mList.clear();
@@ -25,7 +21,6 @@ namespace ESM {
 
         mScale = 1.f;
         mHasAI = false;
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasNpdt = false;
@@ -33,16 +28,11 @@ namespace ESM {
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -89,6 +79,10 @@ namespace ESM {
                 case AI_CNDT:
                     mAiPackage.add(esm);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -97,17 +91,17 @@ namespace ESM {
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasNpdt && !mIsDeleted)
+        if (!hasNpdt && !isDeleted)
             esm.fail("Missing NPDT subrecord");
-        if (!hasFlags && !mIsDeleted)
+        if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Creature::save(ESMWriter &esm) const
+    void Creature::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -156,7 +150,6 @@ namespace ESM {
         mAiData.mServices = 0;
         mAiPackage.mList.clear();
         mTransport.mList.clear();
-        mIsDeleted = false;
     }
 
     const std::vector<Transport::Dest>& Creature::getTransport() const
