@@ -13,8 +13,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 
-#include "../mwclass/misc.hpp"
-
 #include "manualref.hpp"
 #include "refdata.hpp"
 #include "class.hpp"

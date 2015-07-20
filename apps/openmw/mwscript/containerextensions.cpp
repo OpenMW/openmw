@@ -132,10 +132,10 @@ namespace MWScript
                         return;
 
                     if(Misc::StringUtils::ciEqual(item, "gold_005")
-                        || Misc::StringUtils::ciEqual(item, "gold_010")
-                        || Misc::StringUtils::ciEqual(item, "gold_025")
-                        || Misc::StringUtils::ciEqual(item, "gold_100"))
-                    item = "gold_001";
+                            || Misc::StringUtils::ciEqual(item, "gold_010")
+                            || Misc::StringUtils::ciEqual(item, "gold_025")
+                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
                         
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
