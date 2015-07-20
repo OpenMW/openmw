@@ -362,8 +362,18 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
 {
     int toRemove = count;
 
+    std::string id = itemId;
+    
+    if(Misc::StringUtils::ciEqual(itemId, "gold_005")
+            || Misc::StringUtils::ciEqual(itemId, "gold_010")
+            || Misc::StringUtils::ciEqual(itemId, "gold_025")
+            || Misc::StringUtils::ciEqual(itemId, "gold_100"))
+    {
+        id = MWWorld::ContainerStore::sGoldId;
+    }
+
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
             toRemove -= remove(*iter, toRemove, actor);
 
     flagAsModified();
