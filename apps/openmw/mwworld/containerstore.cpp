@@ -300,20 +300,22 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if(MWClass::Miscellaneous().isGold(ptr))
+    if(ptr.getClass().isGold(ptr))
     {
+        int realCount = count * ptr.getClass().getValue(ptr);
+
         for (MWWorld::ContainerStoreIterator iter (begin(type)); iter!=end(); ++iter)
         {
             if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             {
-                iter->getRefData().setCount(iter->getRefData().getCount() + count);
+                iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
                 return iter;
             }
         }
 
-        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, count);
-        return addNewStack(ref.getPtr(), count);
+        MWWorld::ManualRef ref(esmStore, MWWorld::ContainerStore::sGoldId, realCount);
+        return addNewStack(ref.getPtr(), realCount);
     }
 
     // determine whether to stack or not
@@ -362,18 +364,8 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
 {
     int toRemove = count;
 
-    std::string id = itemId;
-    
-    if(Misc::StringUtils::ciEqual(itemId, "gold_005")
-            || Misc::StringUtils::ciEqual(itemId, "gold_010")
-            || Misc::StringUtils::ciEqual(itemId, "gold_025")
-            || Misc::StringUtils::ciEqual(itemId, "gold_100"))
-    {
-        id = MWWorld::ContainerStore::sGoldId;
-    }
-
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
+        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
             toRemove -= remove(*iter, toRemove, actor);
 
     flagAsModified();
