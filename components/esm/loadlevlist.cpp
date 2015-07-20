@@ -6,28 +6,20 @@
 
 namespace ESM
 {
-    LevelledListBase::LevelledListBase()
-        : mIsDeleted(false)
-    {}
-
-    void LevelledListBase::load(ESMReader &esm)
+    void LevelledListBase::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
+        bool hasList = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mFlags);
@@ -53,12 +45,28 @@ namespace ESM
                         li.mId = esm.getHNString(mRecName);
                         esm.getHNT(li.mLevel, "INTV");
                     }
+
+                    hasList = true;
                     break;
                 }
-                default:
-                    mList.clear();
-                    esm.skipRecord();
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
                     break;
+                default:
+                {
+                    if (!hasList)
+                    {
+                        // Original engine ignores rest of the record, even if there are items following
+                        mList.clear();
+                        esm.skipRecord();
+                    }
+                    else
+                    {
+                        esm.fail("Unknown subrecord");
+                    }
+                    break;
+                }
             }
         }
 
@@ -66,11 +74,11 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void LevelledListBase::save(ESMWriter &esm) const
+    void LevelledListBase::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -92,7 +100,6 @@ namespace ESM
         mFlags = 0;
         mChanceNone = 0;
         mList.clear();
-        mIsDeleted = false;
     }
 
     unsigned int CreatureLevList::sRecordId = REC_LEVC;

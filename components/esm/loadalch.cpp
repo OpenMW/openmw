@@ -8,30 +8,22 @@ namespace ESM
 {
     unsigned int Potion::sRecordId = REC_ALCH;
 
-    Potion::Potion()
-        : mIsDeleted(false)
-    {}
-
-    void Potion::load(ESMReader &esm)
+    void Potion::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mEffects.mList.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -52,6 +44,10 @@ namespace ESM
                 case ESM::FourCC<'E','N','A','M'>::value:
                     mEffects.add(esm);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -60,14 +56,14 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing ALDT subrecord");
     }
-    void Potion::save(ESMWriter &esm) const
+    void Potion::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -91,6 +87,5 @@ namespace ESM
         mIcon.clear();
         mScript.clear();
         mEffects.mList.clear();
-        mIsDeleted = false;
     }
 }

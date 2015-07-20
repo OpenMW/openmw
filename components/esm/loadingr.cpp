@@ -8,29 +8,20 @@ namespace ESM
 {
     unsigned int Ingredient::sRecordId = REC_INGR;
 
-    Ingredient::Ingredient()
-        : mIsDeleted(false)
-    {}
-
-    void Ingredient::load(ESMReader &esm)
+    void Ingredient::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -48,6 +39,10 @@ namespace ESM
                 case ESM::FourCC<'I','T','E','X'>::value:
                     mIcon = esm.getHString();
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -56,7 +51,7 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing IRDT subrecord");
 
         // horrible hack to fix broken data in records
@@ -83,11 +78,11 @@ namespace ESM
         }
     }
 
-    void Ingredient::save(ESMWriter &esm) const
+    void Ingredient::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -115,7 +110,5 @@ namespace ESM
         mModel.clear();
         mIcon.clear();
         mScript.clear();
-
-        mIsDeleted = false;
     }
 }

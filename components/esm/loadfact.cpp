@@ -10,10 +10,6 @@ namespace ESM
 {
     unsigned int Faction::sRecordId = REC_FACT;
 
-    Faction::Faction()
-        : mIsDeleted(false)
-    {}
-
     int& Faction::FADTstruct::getSkill (int index, bool ignored)
     {
         if (index<0 || index>=7)
@@ -30,9 +26,10 @@ namespace ESM
         return mSkills[index];
     }
 
-    void Faction::load(ESMReader &esm)
+    void Faction::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
+
         mReactions.clear();
         for (int i=0;i<10;++i)
             mRanks[i].clear();
@@ -43,16 +40,11 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
@@ -76,6 +68,10 @@ namespace ESM
                     mReactions[faction] = reaction;
                     break;
                 }
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -84,15 +80,15 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing FADT subrecord");
     }
 
-    void Faction::save(ESMWriter &esm) const
+    void Faction::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -136,7 +132,5 @@ namespace ESM
             mData.mSkills[i] = 0;
 
         mReactions.clear();
-
-        mIsDeleted = false;
     }
 }

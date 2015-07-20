@@ -8,29 +8,20 @@ namespace ESM
 {
     unsigned int Region::sRecordId = REC_REGN;
 
-    Region::Region()
-        : mMapColor(0),
-          mIsDeleted(false)
-    {}
-
-    void Region::load(ESMReader &esm)
+    void Region::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
@@ -75,6 +66,9 @@ namespace ESM
                     esm.getHT(sr, 33);
                     mSoundList.push_back(sr);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -85,9 +79,9 @@ namespace ESM
             esm.fail("Missing NAME subrecord");
     }
 
-    void Region::save(ESMWriter &esm) const
+    void Region::save(ESMWriter &esm, bool isDeleted) const
     {
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -121,7 +115,5 @@ namespace ESM
         mName.clear();
         mSleepList.clear();
         mSoundList.clear();
-
-        mIsDeleted = false;
     }
 }

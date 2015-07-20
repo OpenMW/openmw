@@ -8,29 +8,20 @@ namespace ESM
 {
     unsigned int LandTexture::sRecordId = REC_LTEX;
 
-    LandTexture::LandTexture()
-        : mIsDeleted(false)
-    {}
-
-    void LandTexture::load(ESMReader &esm)
+    void LandTexture::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         bool hasIndex = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'I','N','T','V'>::value:
                     esm.getHT(mIndex);
@@ -38,6 +29,10 @@ namespace ESM
                     break;
                 case ESM::FourCC<'D','A','T','A'>::value:
                     mTexture = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -50,9 +45,9 @@ namespace ESM
         if (!hasIndex)
             esm.fail("Missing INTV subrecord");
     }
-    void LandTexture::save(ESMWriter &esm) const
+    void LandTexture::save(ESMWriter &esm, bool isDeleted) const
     {
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -66,6 +61,5 @@ namespace ESM
     {
         mTexture.clear();
         mIndex = -1;
-        mIsDeleted = false;
     }
 }

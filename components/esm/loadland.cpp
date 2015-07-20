@@ -74,7 +74,6 @@ namespace ESM
         , mDataTypes(0)
         , mDataLoaded(false)
         , mLandData(NULL)
-        , mIsDeleted(false)
     {
     }
 
@@ -83,61 +82,82 @@ namespace ESM
         delete mLandData;
     }
 
-    void Land::load(ESMReader &esm)
+    void Land::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mEsm = &esm;
         mPlugin = mEsm->getIndex();
-        mIsDeleted = false;
 
-        // Get the grid location
-        esm.getSubNameIs("INTV");
-        esm.getSubHeaderIs(8);
-        esm.getT<int>(mX);
-        esm.getT<int>(mY);
-
-        esm.getHNT(mFlags, "DATA");
-
-        if (esm.isNextSub("DELE"))
+        bool hasLocation = false;
+        bool isLoaded = false;
+        while (!isLoaded && esm.hasMoreSubs())
         {
-            esm.skipHSub();
-            mIsDeleted = true;
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::FourCC<'I','N','T','V'>::value:
+                    esm.getSubHeaderIs(8);
+                    esm.getT<int>(mX);
+                    esm.getT<int>(mY);
+                    hasLocation = true;
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    esm.getHT(mFlags);
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.cacheSubName();
+                    isLoaded = true;
+                    break;
+            }
         }
 
-        // Store the file position
+        if (!hasLocation)
+            esm.fail("Missing INTV subrecord");
+
         mContext = esm.getContext();
 
-        // Skip these here. Load the actual data when the cell is loaded.
-        if (esm.isNextSub("VNML"))
+        // Skip the land data here. Load it when the cell is loaded.
+        while (esm.hasMoreSubs())
         {
-            esm.skipHSubSize(12675);
-            mDataTypes |= DATA_VNML;
-        }
-        if (esm.isNextSub("VHGT"))
-        {
-            esm.skipHSubSize(4232);
-            mDataTypes |= DATA_VHGT;
-        }
-        if (esm.isNextSub("WNAM"))
-        {
-            esm.skipHSubSize(81);
-            mDataTypes |= DATA_WNAM;
-        }
-        if (esm.isNextSub("VCLR"))
-        {
-            esm.skipHSubSize(12675);
-            mDataTypes |= DATA_VCLR;
-        }
-        if (esm.isNextSub("VTEX"))
-        {
-            esm.skipHSubSize(512);
-            mDataTypes |= DATA_VTEX;
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::FourCC<'V','N','M','L'>::value:
+                    esm.skipHSub();
+                    mDataTypes |= DATA_VNML;
+                    break;
+                case ESM::FourCC<'V','H','G','T'>::value:
+                    esm.skipHSub();
+                    mDataTypes |= DATA_VHGT;
+                    break;
+                case ESM::FourCC<'W','N','A','M'>::value:
+                    esm.skipHSub();
+                    mDataTypes |= DATA_WNAM;
+                    break;
+                case ESM::FourCC<'V','C','L','R'>::value:
+                    esm.skipHSub();
+                    mDataTypes |= DATA_VCLR;
+                    break;
+                case ESM::FourCC<'V','T','E','X'>::value:
+                    esm.skipHSub();
+                    mDataTypes |= DATA_VTEX;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
         }
 
         mDataLoaded = 0;
         mLandData = NULL;
     }
 
-    void Land::save(ESMWriter &esm) const
+    void Land::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.startSubRecord("INTV");
         esm.writeT(mX);
@@ -146,20 +166,15 @@ namespace ESM
 
         esm.writeHNT("DATA", mFlags);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
 
-        if (mLandData != NULL)
+        if (mLandData)
         {
             mLandData->save(esm);
         }
-    }
-
-    void Land::blank()
-    {
-        mIsDeleted = false;
     }
 
     void Land::loadData(int flags) const

@@ -3,18 +3,6 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
-ESM::CellRef::CellRef()
-    : mScale(1.0f),
-      mFactionRank(-2),
-      mChargeInt(-1),
-      mEnchantmentCharge(-1.0f),
-      mGoldValue(1),
-      mTeleport(false),
-      mLockLevel(0),
-      mReferenceBlocked(-1),
-      mIsDeleted(false)
-{}
-
 void ESM::RefNum::load (ESMReader& esm, bool wide)
 {
     if (wide)
@@ -36,10 +24,37 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 }
 
 
-void ESM::CellRef::load (ESMReader& esm, bool wideRefNum)
+void ESM::CellRef::clearData()
+{
+    mScale = 1;
+    mOwner.clear();
+    mGlobalVariable.clear();
+    mSoul.clear();
+    mFaction.clear();
+    mFactionRank = -2;
+    mChargeInt = -1;
+    mEnchantmentCharge = -1;
+    mGoldValue = 0;
+    mDestCell.clear();
+    mLockLevel = 0;
+    mKey.clear();
+    mTrap.clear();
+    mReferenceBlocked = -1;
+    mTeleport = false;
+    
+    for (int i=0; i<3; ++i)
+    {
+        mDoorDest.pos[i] = 0;
+        mDoorDest.rot[i] = 0;
+        mPos.pos[i] = 0;
+        mPos.rot[i] = 0;
+    }
+}
+
+void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
 {
     loadId(esm, wideRefNum);
-    loadData(esm);
+    loadData(esm, isDeleted);
 }
 
 void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
@@ -54,27 +69,19 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     mRefNum.load (esm, wideRefNum);
 
     mRefID = esm.getHNString ("NAME");
-    mIsDeleted = false;
 }
 
-void ESM::CellRef::loadData(ESMReader &esm)
+void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
 {
-    mScale = 1.0f;
-    mFactionRank = -2;
-    mChargeInt = -1;
-    mEnchantmentCharge = -1;
-    mGoldValue = 1;
-    mLockLevel = 0;
-    mReferenceBlocked = -1;
-    mTeleport = false;
-    mIsDeleted = false;
+    isDeleted = false;
+
+    clearData();
 
     bool isLoaded = false;
     while (!isLoaded && esm.hasMoreSubs())
     {
         esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        switch (esm.retSubName().val)
         {
             case ESM::FourCC<'U','N','A','M'>::value:
                 esm.getHT(mReferenceBlocked);
@@ -130,7 +137,7 @@ void ESM::CellRef::loadData(ESMReader &esm)
                 break;
             case ESM::FourCC<'D','E','L','E'>::value:
                 esm.skipHSub();
-                mIsDeleted = true;
+                isDeleted = true;
                 break;
             default:
                 esm.cacheSubName();
@@ -140,7 +147,7 @@ void ESM::CellRef::loadData(ESMReader &esm)
     }
 }
 
-void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) const
+void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool isDeleted) const
 {
     mRefNum.save (esm, wideRefNum);
 
@@ -191,7 +198,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory) cons
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
 
-    if (mIsDeleted)
+    if (isDeleted)
     {
         esm.writeHNCString("DELE", "");
     }
@@ -201,31 +208,7 @@ void ESM::CellRef::blank()
 {
     mRefNum.unset();
     mRefID.clear();
-    mScale = 1;
-    mOwner.clear();
-    mGlobalVariable.clear();
-    mSoul.clear();
-    mFaction.clear();
-    mFactionRank = -2;
-    mChargeInt = -1;
-    mEnchantmentCharge = -1;
-    mGoldValue = 0;
-    mDestCell.clear();
-    mLockLevel = 0;
-    mKey.clear();
-    mTrap.clear();
-    mReferenceBlocked = -1;
-    mTeleport = false;
-
-    for (int i=0; i<3; ++i)
-    {
-        mDoorDest.pos[i] = 0;
-        mDoorDest.rot[i] = 0;
-        mPos.pos[i] = 0;
-        mPos.rot[i] = 0;
-    }
-
-    mIsDeleted = false;
+    clearData();
 }
 
 bool ESM::operator== (const RefNum& left, const RefNum& right)

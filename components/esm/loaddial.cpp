@@ -10,29 +10,25 @@ namespace ESM
 {
     unsigned int Dialogue::sRecordId = REC_DIAL;
 
-    Dialogue::Dialogue()
-        : mIsDeleted(false)
-    {}
-
-    void Dialogue::load(ESMReader &esm)
+    void Dialogue::load(ESMReader &esm, bool &isDeleted)
     {
         loadId(esm);
-        loadData(esm);
+        loadData(esm, isDeleted);
     }
 
     void Dialogue::loadId(ESMReader &esm)
     {
-        mIsDeleted = false;
         mId = esm.getHNString("NAME");
     }
 
-    void Dialogue::loadData(ESMReader &esm)
+    void Dialogue::loadData(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'D','A','T','A'>::value:
                 {
@@ -51,7 +47,7 @@ namespace ESM
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();
                     mType = Unknown;
-                    mIsDeleted = true;
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -60,10 +56,10 @@ namespace ESM
         }
     }
 
-    void Dialogue::save(ESMWriter &esm) const
+    void Dialogue::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -76,7 +72,6 @@ namespace ESM
     void Dialogue::blank()
     {
         mInfo.clear();
-        mIsDeleted = false;
     }
 
     void Dialogue::readInfo(ESMReader &esm, bool merge)
@@ -84,25 +79,27 @@ namespace ESM
         ESM::DialInfo info;
         info.loadId(esm);
 
+        bool isDeleted = false;
         if (!merge || mInfo.empty())
         {
-            info.loadInfo(esm);
-            mLookup[info.mId] = mInfo.insert(mInfo.end(), info);
+            info.loadData(esm, isDeleted);
+            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
+
             return;
         }
 
-        ESM::Dialogue::InfoContainer::iterator it = mInfo.end();
+        InfoContainer::iterator it = mInfo.end();
 
-        std::map<std::string, ESM::Dialogue::InfoContainer::iterator>::iterator lookup;
+        LookupMap::iterator lookup;
         lookup = mLookup.find(info.mId);
 
         if (lookup != mLookup.end())
         {
-            it = lookup->second;
+            it = lookup->second.first;
 
             // Merge with existing record. Only the subrecords that are present in
             // the new record will be overwritten.
-            it->loadInfo(esm);
+            it->loadData(esm, isDeleted);
             info = *it;
 
             // Since the record merging may have changed the next/prev linked list connection, we need to re-insert the record
@@ -111,35 +108,35 @@ namespace ESM
         }
         else
         {
-            info.loadInfo(esm);
+            info.loadData(esm, isDeleted);
         }
 
         if (info.mNext.empty())
         {
-            mLookup[info.mId] = mInfo.insert(mInfo.end(), info);
+            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
             return;
         }
         if (info.mPrev.empty())
         {
-            mLookup[info.mId] = mInfo.insert(mInfo.begin(), info);
+            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
             return;
         }
 
         lookup = mLookup.find(info.mPrev);
         if (lookup != mLookup.end())
         {
-            it = lookup->second;
+            it = lookup->second.first;
 
-            mLookup[info.mId] = mInfo.insert(++it, info);
+            mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
             return;
         }
 
         lookup = mLookup.find(info.mNext);
         if (lookup != mLookup.end())
         {
-            it = lookup->second;
+            it = lookup->second.first;
 
-            mLookup[info.mId] = mInfo.insert(it, info);
+            mLookup[info.mId] = std::make_pair(mInfo.insert(it, info), isDeleted);
             return;
         }
 
@@ -148,12 +145,15 @@ namespace ESM
 
     void Dialogue::clearDeletedInfos()
     {
-        for (InfoContainer::iterator it = mInfo.begin(); it != mInfo.end(); )
+        LookupMap::const_iterator current = mLookup.begin();
+        LookupMap::const_iterator end = mLookup.end();
+        for (; current != end; ++current)
         {
-            if (it->mIsDeleted)
-                it = mInfo.erase(it);
-            else
-                ++it;
+            if (current->second.second)
+            {
+                mInfo.erase(current->second.first);
+            }
         }
+        mLookup.clear();
     }
 }

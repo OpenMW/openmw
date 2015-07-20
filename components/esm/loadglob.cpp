@@ -8,19 +8,16 @@ namespace ESM
 {
     unsigned int Global::sRecordId = REC_GLOB;
 
-    Global::Global()
-        : mIsDeleted(false)
-    {}
-
-    void Global::load (ESMReader &esm)
+    void Global::load (ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
+
         mId = esm.getHNString ("NAME");
 
         if (esm.isNextSub ("DELE"))
         {
             esm.skipHSub();
-            mIsDeleted = true;
+            isDeleted = true;
         }
         else
         {
@@ -28,11 +25,11 @@ namespace ESM
         }
     }
 
-    void Global::save (ESMWriter &esm) const
+    void Global::save (ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString ("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString ("DELE", "");
         }
@@ -45,7 +42,6 @@ namespace ESM
     void Global::blank()
     {
         mValue.setType (ESM::VT_None);
-        mIsDeleted = false;
     }
 
     bool operator== (const Global& left, const Global& right)

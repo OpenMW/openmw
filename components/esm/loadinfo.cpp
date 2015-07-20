@@ -8,29 +8,23 @@ namespace ESM
 {
     unsigned int DialInfo::sRecordId = REC_INFO;
 
-    DialInfo::DialInfo()
-        : mFactionLess(false),
-          mQuestStatus(QS_None),
-          mIsDeleted(false)
-    {}
-
-    void DialInfo::load(ESMReader &esm)
+    void DialInfo::load(ESMReader &esm, bool &isDeleted)
     {
         loadId(esm);
-        loadInfo(esm);
+        loadData(esm, isDeleted);
     }
 
     void DialInfo::loadId(ESMReader &esm)
     {
-        mIsDeleted = false;
         mId = esm.getHNString("INAM");
     }
 
-    void DialInfo::loadInfo(ESMReader &esm)
+    void DialInfo::loadData(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mQuestStatus = QS_None;
         mFactionLess = false;
-        mIsDeleted = false;
 
         mPrev = esm.getHNString("PNAM");
         mNext = esm.getHNString("NNAM");
@@ -41,13 +35,8 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
-                    break;
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);
                     break;
@@ -104,6 +93,10 @@ namespace ESM
                     mQuestStatus = QS_Restart;
                     esm.skipRecord();
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -111,13 +104,13 @@ namespace ESM
         }
     }
 
-    void DialInfo::save(ESMWriter &esm) const
+    void DialInfo::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("INAM", mId);
         esm.writeHNCString("PNAM", mPrev);
         esm.writeHNCString("NNAM", mNext);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -173,6 +166,5 @@ namespace ESM
         mResultScript.clear();
         mFactionLess = false;
         mQuestStatus = QS_None;
-        mIsDeleted = false;
     }
 }

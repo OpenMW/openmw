@@ -8,21 +8,16 @@ namespace ESM
 {
     unsigned int StartScript::sRecordId = REC_SSCR;
 
-    StartScript::StartScript()
-        : mIsDeleted(false)
-    {}
-
-    void StartScript::load(ESMReader &esm)
+    void StartScript::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasData = false;
         bool hasName = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'D','A','T','A'>::value:
                     mData = esm.getHString();
@@ -34,7 +29,7 @@ namespace ESM
                     break;
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();
-                    mIsDeleted = true;
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -47,12 +42,12 @@ namespace ESM
         if (!hasName)
             esm.fail("Missing NAME");
     }
-    void StartScript::save(ESMWriter &esm) const
+    void StartScript::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNString("DATA", mData);
         esm.writeHNString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -61,6 +56,5 @@ namespace ESM
     void StartScript::blank()
     {
         mData.clear();
-        mIsDeleted = false;
     }
 }

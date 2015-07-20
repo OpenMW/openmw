@@ -24,16 +24,11 @@ namespace ESM
 
     unsigned int Container::sRecordId = REC_CONT;
 
-    Container::Container()
-        : mWeight(0),
-          mFlags(0x8),
-          mIsDeleted(false)
-    {}
-
-    void Container::load(ESMReader &esm)
+    void Container::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mInventory.mList.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasWeight = false;
@@ -41,16 +36,11 @@ namespace ESM
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
@@ -76,6 +66,10 @@ namespace ESM
                 case ESM::FourCC<'N','P','C','O'>::value:
                     mInventory.add(esm);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -84,17 +78,17 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasWeight && !mIsDeleted)
+        if (!hasWeight && !isDeleted)
             esm.fail("Missing CNDT subrecord");
-        if (!hasFlags && !mIsDeleted)
+        if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Container::save(ESMWriter &esm) const
+    void Container::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -118,6 +112,5 @@ namespace ESM
         mWeight = 0;
         mFlags = 0x8; // set default flag value
         mInventory.mList.clear();
-        mIsDeleted = false;
     }
 }

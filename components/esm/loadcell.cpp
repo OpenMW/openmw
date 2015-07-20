@@ -52,73 +52,96 @@ namespace ESM
         return ref.mRefNum == refNum;
     }
 
-    void Cell::load(ESMReader &esm, bool saveContext)
+    void Cell::load(ESMReader &esm, bool &isDeleted, bool saveContext)
     {
-        loadName(esm);
-        loadData(esm);
+        loadNameAndData(esm, isDeleted);
         loadCell(esm, saveContext);
     }
 
-    void Cell::loadName(ESMReader &esm)
+    void Cell::loadNameAndData(ESMReader &esm, bool &isDeleted)
     {
-        mName = esm.getHNString("NAME");
+        isDeleted = false;
 
-        mIsDeleted = false;
-        if (esm.isNextSub("DELE"))
+        bool hasName = false;
+        bool hasData = false;
+        bool isLoaded = false;
+        while (!isLoaded && esm.hasMoreSubs())
         {
-            esm.skipHSub();
-            mIsDeleted = true;
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mName = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    esm.getHT(mData, 12);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.cacheSubName();
+                    isLoaded = true;
+                    break;
+            }
         }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData)
+            esm.fail("Missing DATA subrecord");
     }
 
     void Cell::loadCell(ESMReader &esm, bool saveContext)
     {
+        mWater = 0.0f;
+        mWaterInt = false;
+        mMapColor = 0;
+        mRegion.clear();
         mRefNumCounter = 0;
 
-        if (mData.mFlags & Interior)
+        bool isLoaded = false;
+        while (!isLoaded && esm.hasMoreSubs())
         {
-            // Interior cells
-            if (esm.isNextSub("INTV"))
+            esm.getSubName();
+            switch (esm.retSubName().val)
             {
-                int waterl;
-                esm.getHT(waterl);
-                mWater = (float) waterl;
-                mWaterInt = true;
+                case ESM::FourCC<'I','N','T','V'>::value:
+                    int waterl;
+                    esm.getHT(waterl);
+                    mWater = static_cast<float>(waterl);
+                    mWaterInt = true;
+                    break;
+                case ESM::FourCC<'W','H','G','T'>::value:
+                    esm.getHT(mWater);
+                    break;
+                case ESM::FourCC<'A','M','B','I'>::value:
+                    esm.getHT(mAmbi);
+                    break;
+                case ESM::FourCC<'R','G','N','N'>::value:
+                    mRegion = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','A','M','5'>::value:
+                    esm.getHT(mMapColor);
+                    break;
+                case ESM::FourCC<'N','A','M','0'>::value:
+                    esm.getHT(mRefNumCounter);
+                    break;
+                default:
+                    esm.cacheSubName();
+                    isLoaded = true;
+                    break;
             }
-            else if (esm.isNextSub("WHGT"))
-            {
-                esm.getHT(mWater);
-            }
-
-            // Quasi-exterior cells have a region (which determines the
-            // weather), pure interior cells have ambient lighting
-            // instead.
-            if (mData.mFlags & QuasiEx)
-                mRegion = esm.getHNOString("RGNN");
-            else if (esm.isNextSub("AMBI"))
-                esm.getHT(mAmbi);
         }
-        else
+
+        if (saveContext) 
         {
-            // Exterior cells
-            mRegion = esm.getHNOString("RGNN");
-
-            mMapColor = 0;
-            esm.getHNOT(mMapColor, "NAM5");
-        }
-        if (esm.isNextSub("NAM0")) {
-            esm.getHT(mRefNumCounter);
-        }
-
-        if (saveContext) {
             mContextList.push_back(esm.getContext());
             esm.skipRecord();
         }
-    }
-
-    void Cell::loadData(ESMReader &esm)
-    {
-        esm.getHNT(mData, "DATA", 12);
     }
 
     void Cell::postLoad(ESMReader &esm)
@@ -128,11 +151,11 @@ namespace ESM
         esm.skipRecord();
     }
 
-    void Cell::save(ESMWriter &esm) const
+    void Cell::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mName);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
@@ -183,8 +206,10 @@ namespace ESM
         }
     }
 
-    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool ignoreMoves, MovedCellRef *mref)
+    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
     {
+        isDeleted = false;
+
         // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
         if (!esm.hasMoreSubs())
             return false;
@@ -207,12 +232,15 @@ namespace ESM
             }
         }
 
-        ref.load (esm);
+        if (esm.peekNextSub("FRMR"))
+        {
+            ref.load (esm, isDeleted);
 
-        // Identify references belonging to a parent file and adapt the ID accordingly.
-        adjustRefNum (ref.mRefNum, esm);
-
-        return true;
+            // Identify references belonging to a parent file and adapt the ID accordingly.
+            adjustRefNum (ref.mRefNum, esm);
+            return true;
+        }
+        return false;
     }
 
     bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
@@ -242,8 +270,6 @@ namespace ESM
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;
         mAmbi.mFogDensity = 0;
-
-        mIsDeleted = false;
     }
 
     CellId Cell::getCellId() const

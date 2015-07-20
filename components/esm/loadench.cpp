@@ -8,30 +8,21 @@ namespace ESM
 {
     unsigned int Enchantment::sRecordId = REC_ENCH;
 
-    Enchantment::Enchantment()
-        : mIsDeleted(false)
-    {}
-
-    void Enchantment::load(ESMReader &esm)
+    void Enchantment::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
         mEffects.mList.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'E','N','D','T'>::value:
                     esm.getHT(mData, 16);
@@ -39,6 +30,10 @@ namespace ESM
                     break;
                 case ESM::FourCC<'E','N','A','M'>::value:
                     mEffects.add(esm);
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -48,15 +43,15 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing ENDT subrecord");
     }
 
-    void Enchantment::save(ESMWriter &esm) const
+    void Enchantment::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -74,7 +69,5 @@ namespace ESM
         mData.mAutocalc = 0;
 
         mEffects.mList.clear();
-
-        mIsDeleted = false;
     }
 }

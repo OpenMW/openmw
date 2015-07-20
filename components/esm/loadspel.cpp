@@ -8,31 +8,22 @@ namespace ESM
 {
     unsigned int Spell::sRecordId = REC_SPEL;
 
-    Spell::Spell()
-        : mIsDeleted(false)
-    {}
-
-    void Spell::load(ESMReader &esm)
+    void Spell::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mEffects.mList.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t val = esm.retSubName().val;
-
-            switch (val)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
@@ -46,6 +37,10 @@ namespace ESM
                     esm.getHT(s, 24);
                     mEffects.mList.push_back(s);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
@@ -54,15 +49,15 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing SPDT subrecord");
     }
 
-    void Spell::save(ESMWriter &esm) const
+    void Spell::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -81,6 +76,5 @@ namespace ESM
 
         mName.clear();
         mEffects.mList.clear();
-        mIsDeleted = false;
     }
 }

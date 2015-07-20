@@ -8,29 +8,20 @@ namespace ESM
 {
     unsigned int Sound::sRecordId = REC_SOUN;
 
-    Sound::Sound()
-        : mIsDeleted(false)
-    {}
-
-    void Sound::load(ESMReader &esm)
+    void Sound::load(ESMReader &esm, bool &isDeleted)
     {
-        mIsDeleted = false;
+        isDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mSound = esm.getHString();
@@ -38,6 +29,10 @@ namespace ESM
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 3);
                     hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
@@ -47,15 +42,15 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing DATA subrecord");
     }
 
-    void Sound::save(ESMWriter &esm) const
+    void Sound::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
@@ -72,7 +67,5 @@ namespace ESM
         mData.mVolume = 128;
         mData.mMinRange = 0;
         mData.mMaxRange = 255;
-        
-        mIsDeleted = false;
     }
 }

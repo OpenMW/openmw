@@ -6,26 +6,17 @@
 
 unsigned int ESM::DebugProfile::sRecordId = REC_DBGP;
 
-ESM::DebugProfile::DebugProfile()
-    : mIsDeleted(false)
-{}
-
-void ESM::DebugProfile::load (ESMReader& esm)
+void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
 {
-    mIsDeleted = false;
+    isDeleted = false;
 
     while (esm.hasMoreSubs())
     {
         esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        switch (esm.retSubName().val)
         {
             case ESM::FourCC<'N','A','M','E'>::value:
                 mId = esm.getHString();
-                break;
-            case ESM::FourCC<'D','E','L','E'>::value:
-                esm.skipHSub();
-                mIsDeleted = true;
                 break;
             case ESM::FourCC<'D','E','S','C'>::value:
                 mDescription = esm.getHString();
@@ -36,6 +27,10 @@ void ESM::DebugProfile::load (ESMReader& esm)
             case ESM::FourCC<'F','L','A','G'>::value:
                 esm.getHT(mFlags);
                 break;
+            case ESM::FourCC<'D','E','L','E'>::value:
+                esm.skipHSub();
+                isDeleted = true;
+                break;
             default:
                 esm.fail("Unknown subrecord");
                 break;
@@ -43,11 +38,11 @@ void ESM::DebugProfile::load (ESMReader& esm)
     }
 }
 
-void ESM::DebugProfile::save (ESMWriter& esm) const
+void ESM::DebugProfile::save (ESMWriter& esm, bool isDeleted) const
 {
     esm.writeHNCString ("NAME", mId);
 
-    if (mIsDeleted)
+    if (isDeleted)
     {
         esm.writeHNCString("DELE", "");
         return;
@@ -63,5 +58,4 @@ void ESM::DebugProfile::blank()
     mDescription.clear();
     mScriptText.clear();
     mFlags = 0;
-    mIsDeleted = false;
 }

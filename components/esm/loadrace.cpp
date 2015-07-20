@@ -8,10 +8,6 @@ namespace ESM
 {
     unsigned int Race::sRecordId = REC_RACE;
 
-    Race::Race()
-        : mIsDeleted(false)
-    {}
-
     int Race::MaleFemale::getValue (bool male) const
     {
         return male ? mMale : mFemale;
@@ -22,26 +18,22 @@ namespace ESM
         return static_cast<int>(male ? mMale : mFemale);
     }
 
-    void Race::load(ESMReader &esm)
+    void Race::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mPowers.mList.clear();
-        mIsDeleted = false;
 
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
-                    break;
-                case ESM::FourCC<'D','E','L','E'>::value:
-                    esm.skipHSub();
-                    mIsDeleted = true;
                     break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
@@ -56,6 +48,10 @@ namespace ESM
                 case ESM::FourCC<'N','P','C','S'>::value:
                     mPowers.add(esm);
                     break;
+                case ESM::FourCC<'D','E','L','E'>::value:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
             }
@@ -63,14 +59,14 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
-        if (!hasData && !mIsDeleted)
+        if (!hasData && !isDeleted)
             esm.fail("Missing RADT subrecord");
     }
-    void Race::save(ESMWriter &esm) const
+    void Race::save(ESMWriter &esm, bool isDeleted) const
     {
         esm.writeHNCString("NAME", mId);
 
-        if (mIsDeleted)
+        if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
             return;
