@@ -51,6 +51,8 @@ public:
 
     void setContext(Context& context) { mContext = &context; }
 
+    /// @note The load method of ESM records accept the deleted flag as a parameter.
+    /// I don't know can the DELE sub-record appear in saved games, so the deleted flag will be ignored.
     virtual void read(ESM::ESMReader& esm)
     {
     }
@@ -76,7 +78,9 @@ public:
     virtual void read(ESM::ESMReader& esm)
     {
         T record;
-        record.load(esm);
+        bool isDeleted = false;
+
+        record.load(esm, isDeleted);
         mRecords[record.mId] = record;
     }
 
@@ -100,7 +104,9 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         ESM::NPC npc;
-        npc.load(esm);
+        bool isDeleted = false;
+
+        npc.load(esm, isDeleted);
         if (npc.mId != "player")
         {
             // Handles changes to the NPC struct, but since there is no index here
@@ -136,7 +142,9 @@ public:
     {
         // See comment in ConvertNPC
         ESM::Creature creature;
-        creature.load(esm);
+        bool isDeleted = false;
+
+        creature.load(esm, isDeleted);
         mContext->mCreatures[Misc::StringUtils::lowerCase(creature.mId)] = creature;
     }
 };
@@ -151,7 +159,9 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         ESM::Global global;
-        global.load(esm);
+        bool isDeleted = false;
+
+        global.load(esm, isDeleted);
         if (Misc::StringUtils::ciEqual(global.mId, "gamehour"))
             mContext->mHour = global.mValue.getFloat();
         if (Misc::StringUtils::ciEqual(global.mId, "day"))
@@ -170,8 +180,9 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         ESM::Class class_;
-        class_.load(esm);
+        bool isDeleted = false;
 
+        class_.load(esm, isDeleted);
         if (class_.mId == "NEWCLASSID_CHARGEN")
             mContext->mCustomPlayerClassName = class_.mName;
 
@@ -185,7 +196,9 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         ESM::Book book;
-        book.load(esm);
+        bool isDeleted = false;
+
+        book.load(esm, isDeleted);
         if (book.mData.mSkillID == -1)
             mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(Misc::StringUtils::lowerCase(book.mId));
 
@@ -362,7 +375,9 @@ public:
     virtual void read(ESM::ESMReader& esm)
     {
         ESM::Faction faction;
-        faction.load(esm);
+        bool isDeleted = false;
+
+        faction.load(esm, isDeleted);
         std::string id = Misc::StringUtils::toLower(faction.mId);
 
         for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
