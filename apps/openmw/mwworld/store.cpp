@@ -66,7 +66,9 @@ namespace MWWorld
     void IndexedStore<T>::load(ESM::ESMReader &esm)
     {
         T record;
-        record.load(esm);
+        bool isDeleted = false;
+
+        record.load(esm, isDeleted);
 
         // Try to overwrite existing record
         std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(record.mIndex, record));
@@ -187,14 +189,16 @@ namespace MWWorld
     RecordId Store<T>::load(ESM::ESMReader &esm) 
     {
         T record;
-        record.load(esm);
+        bool isDeleted = false;
+
+        record.load(esm, isDeleted);
         Misc::StringUtils::toLower(record.mId);
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
 
-        return RecordId(record.mId, record.mIsDeleted);
+        return RecordId(record.mId, isDeleted);
     }
     template<typename T>
     void Store<T>::setUp()
@@ -324,10 +328,12 @@ namespace MWWorld
     RecordId Store<T>::read(ESM::ESMReader& reader)
     {
         T record;
-        record.load (reader);
+        bool isDeleted = false;
+
+        record.load (reader, isDeleted);
         insert (record);
 
-        return RecordId(record.mId, record.mIsDeleted);
+        return RecordId(record.mId, isDeleted);
     }
 
     // LandTexture
@@ -370,7 +376,9 @@ namespace MWWorld
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm, size_t plugin)
     {
         ESM::LandTexture lt;
-        lt.load(esm);
+        bool isDeleted = false;
+
+        lt.load(esm, isDeleted);
 
         // Make sure we have room for the structure
         if (plugin >= mStatic.size()) {
@@ -383,7 +391,7 @@ namespace MWWorld
         // Store it
         ltexl[lt.mIndex] = lt;
 
-        return RecordId(lt.mId, lt.mIsDeleted);
+        return RecordId(lt.mId, isDeleted);
     }
     RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
@@ -449,7 +457,9 @@ namespace MWWorld
     RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
         ESM::Land *ptr = new ESM::Land();
-        ptr->load(esm);
+        bool isDeleted = false;
+
+        ptr->load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
         // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
@@ -465,7 +475,7 @@ namespace MWWorld
 
         mStatic.push_back(ptr);
 
-        return RecordId(); // No ID and can't be deleted (for now)
+        return RecordId("", isDeleted);
     }
     void Store<ESM::Land>::setUp()
     {
@@ -617,12 +627,12 @@ namespace MWWorld
 
         // All cells have a name record, even nameless exterior cells.
         ESM::Cell cell;
-        cell.loadName(esm);
-        std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
+        bool isDeleted = false;
 
-        // Load the (x,y) coordinates of the cell, if it is an exterior cell,
+        // Load the (x,y) coordinates of the cell, if it is an exterior cell, 
         // so we can find the cell we need to merge with
-        cell.loadData(esm);
+        cell.loadNameAndData(esm, isDeleted);
+        std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
 
         if(cell.mData.mFlags & ESM::Cell::Interior)
         {
@@ -690,7 +700,8 @@ namespace MWWorld
                 mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
             }
         }
-        return RecordId("", cell.mIsDeleted);
+
+        return RecordId(cell.mName, isDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -849,7 +860,9 @@ namespace MWWorld
     RecordId Store<ESM::Pathgrid>::load(ESM::ESMReader &esm)
     {
         ESM::Pathgrid pathgrid;
-        pathgrid.load(esm);
+        bool isDeleted = false;
+
+        pathgrid.load(esm, isDeleted);
 
         // Unfortunately the Pathgrid record model does not specify whether the pathgrid belongs to an interior or exterior cell.
         // For interior cells, mCell is the cell name, but for exterior cells it is either the cell name or if that doesn't exist, the cell's region name.
@@ -872,7 +885,7 @@ namespace MWWorld
                 ret.first->second = pathgrid;
         }
 
-        return RecordId(); // No ID and can't be deleted (for now)
+        return RecordId("", isDeleted);
     }
     size_t Store<ESM::Pathgrid>::getSize() const
     {
@@ -1027,22 +1040,24 @@ namespace MWWorld
     inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
         // The original letter case of a dialogue ID is saved, because it's printed
         ESM::Dialogue dialogue;
+        bool isDeleted = false;
+
         dialogue.loadId(esm);
 
         std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
         std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
         if (found == mStatic.end())
         {
-            dialogue.loadData(esm);
+            dialogue.loadData(esm, isDeleted);
             mStatic.insert(std::make_pair(idLower, dialogue));
         }
         else
         {
-            found->second.loadData(esm);
+            found->second.loadData(esm, isDeleted);
             dialogue = found->second;
         }
         
-        return RecordId(dialogue.mId, dialogue.mIsDeleted);
+        return RecordId(dialogue.mId, isDeleted);
     }
 
 
@@ -1052,7 +1067,9 @@ namespace MWWorld
     template <>
     inline RecordId Store<ESM::Script>::load(ESM::ESMReader &esm) {
         ESM::Script script;
-        script.load(esm);
+        bool isDeleted = false;
+
+        script.load(esm, isDeleted);
         Misc::StringUtils::toLower(script.mId);
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
@@ -1061,7 +1078,7 @@ namespace MWWorld
         else
             inserted.first->second = script;
         
-        return RecordId(script.mId, script.mIsDeleted);
+        return RecordId(script.mId, isDeleted);
     }
 
 
@@ -1072,7 +1089,9 @@ namespace MWWorld
     inline RecordId Store<ESM::StartScript>::load(ESM::ESMReader &esm)
     {
         ESM::StartScript script;
-        script.load(esm);
+        bool isDeleted = false;
+
+        script.load(esm, isDeleted);
         Misc::StringUtils::toLower(script.mId);
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
@@ -1081,36 +1100,7 @@ namespace MWWorld
         else
             inserted.first->second = script;
         
-        return RecordId(script.mId);
-    }
-
-    // GameSetting
-    // Need to specialize load() and read() methods, because GameSetting can't
-    // be deleted (has no mIsDeleted flag)
-    //=========================================================================
-
-    template <>
-    inline RecordId Store<ESM::GameSetting>::load(ESM::ESMReader &reader)
-    {
-        ESM::GameSetting setting;
-        setting.load(reader);
-        Misc::StringUtils::toLower(setting.mId);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(setting.mId, setting));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-
-        return RecordId(setting.mId);
-    }
-
-    template <>
-    inline RecordId Store<ESM::GameSetting>::read(ESM::ESMReader &reader)
-    {
-        ESM::GameSetting setting;
-        setting.load(reader);
-        insert(setting);
-
-        return RecordId(setting.mId);
+        return RecordId(script.mId, isDeleted);
     }
 }
 

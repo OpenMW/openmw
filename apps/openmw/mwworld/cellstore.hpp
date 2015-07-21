@@ -214,7 +214,7 @@ namespace MWWorld
 
             void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
-            void loadRef (ESM::CellRef& ref, const ESMStore& store);
+            void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
