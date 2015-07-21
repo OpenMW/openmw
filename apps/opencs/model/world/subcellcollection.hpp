@@ -20,7 +20,7 @@ namespace CSMWorld
     {
             const IdCollection<Cell>& mCells;
 
-            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader);
+            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted);
 
         public:
 
@@ -29,9 +29,10 @@ namespace CSMWorld
 
     template<typename ESXRecordT, typename IdAccessorT>
     void SubCellCollection<ESXRecordT, IdAccessorT>::loadRecord (ESXRecordT& record,
-        ESM::ESMReader& reader)
+                                                                 ESM::ESMReader& reader,
+                                                                 bool& isDeleted)
     {
-        record.load (reader, mCells);
+        record.load (reader, isDeleted, mCells);
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

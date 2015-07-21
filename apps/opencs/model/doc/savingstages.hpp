@@ -108,9 +108,8 @@ namespace CSMDoc
             state == CSMWorld::RecordBase::State_ModifiedOnly ||
             state == CSMWorld::RecordBase::State_Deleted)
         {
-            CSMWorld::setRecordDeleted (record, state == CSMWorld::RecordBase::State_Deleted);
             writer.startRecord (record.sRecordId);
-            record.save (writer);
+            record.save (writer, state == CSMWorld::RecordBase::State_Deleted);
             writer.endRecord (record.sRecordId);
         }
     }

@@ -107,10 +107,8 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
     {
         // if the topic is deleted, we do not need to bother with INFO records.
         ESM::Dialogue dialogue = topic.get();
-        dialogue.mIsDeleted = true;
-
         writer.startRecord(dialogue.sRecordId);
-        dialogue.save(writer);
+        dialogue.save(writer, true);
         writer.endRecord(dialogue.sRecordId);
         return;
     }
@@ -121,7 +119,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
 
     for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
     {
-        if (topic.isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
+        if (iter->isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
         {
             infoModified = true;
             break;
@@ -131,7 +129,6 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
     if (topic.isModified() || infoModified)
     {
         ESM::Dialogue dialogue = topic.get();
-
         writer.startRecord (dialogue.sRecordId);
         dialogue.save (writer);
         writer.endRecord (dialogue.sRecordId);
@@ -143,7 +140,6 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
             {
                 ESM::DialInfo info = iter->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
-                info.mIsDeleted = (iter->mState == CSMWorld::RecordBase::State_Deleted);
 
                 info.mPrev = "";
                 if (iter!=range.first)
@@ -164,7 +160,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                 }
 
                 writer.startRecord (info.sRecordId);
-                info.save (writer);
+                info.save (writer, iter->mState == CSMWorld::RecordBase::State_Deleted);
                 writer.endRecord (info.sRecordId);
             }
         }
@@ -213,9 +209,7 @@ void CSMDoc::CollectionReferencesStage::perform (int stage, Messages& messages)
         const CSMWorld::Record<CSMWorld::CellRef>& record =
             mDocument.getData().getReferences().getRecord (i);
 
-        if (record.mState==CSMWorld::RecordBase::State_Deleted ||
-            record.mState==CSMWorld::RecordBase::State_Modified ||
-            record.mState==CSMWorld::RecordBase::State_ModifiedOnly)
+        if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
         {
             std::string cellId = record.get().mOriginalCell.empty() ?
                 record.get().mCell : record.get().mOriginalCell;
@@ -284,8 +278,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
             stream >> ignore >> cellRecord.mData.mX >> cellRecord.mData.mY;
         }
 
-        cellRecord.mIsDeleted = (cell.mState == CSMWorld::RecordBase::State_Deleted);
-        cellRecord.save (writer);
+        cellRecord.save (writer, cell.mState == CSMWorld::RecordBase::State_Deleted);
 
         // write references
         if (references!=mState.getSubRecords().end())
@@ -326,8 +319,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         writer.writeHNT ("CNDT", moved.mTarget, 8);
                     }
 
-                    refRecord.mIsDeleted = (ref.mState == CSMWorld::RecordBase::State_Deleted);
-                    refRecord.save (writer);
+                    refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);
                 }
             }
         }
@@ -366,9 +358,8 @@ void CSMDoc::WritePathgridCollectionStage::perform (int stage, Messages& message
         else
             record.mCell = record.mId;
 
-        record.mIsDeleted = (pathgrid.mState == CSMWorld::RecordBase::State_Deleted);
         writer.startRecord (record.sRecordId);
-        record.save (writer);
+        record.save (writer, pathgrid.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord (record.sRecordId);
     }
 }
@@ -393,10 +384,8 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
     if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::Land record = land.get();
-
-        record.mLand->mIsDeleted = (land.mState == CSMWorld::RecordBase::State_Deleted);
         writer.startRecord (record.mLand->sRecordId);
-        record.mLand->save (writer);
+        record.mLand->save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord (record.mLand->sRecordId);
     }
 }
@@ -421,10 +410,8 @@ void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& mess
     if (landTexture.isModified() || landTexture.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::LandTexture record = landTexture.get();
-        record.mIsDeleted = (landTexture.mState == CSMWorld::RecordBase::State_Deleted);
-
         writer.startRecord (record.sRecordId);
-        record.save (writer);
+        record.save (writer, landTexture.mState == CSMWorld::RecordBase::State_Deleted);
         writer.endRecord (record.sRecordId);
     }
 }

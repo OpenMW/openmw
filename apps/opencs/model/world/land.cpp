@@ -10,13 +10,12 @@ namespace CSMWorld
         mLand.reset(new ESM::Land());
     }
 
-    void Land::load(ESM::ESMReader &esm)
+    void Land::load(ESM::ESMReader &esm, bool &isDeleted)
     {
-        mLand->load(esm);
+        mLand->load(esm, isDeleted);
 
         std::ostringstream stream;
         stream << "#" << mLand->mX << " " << mLand->mY;
-
         mId = stream.str();
     }
 

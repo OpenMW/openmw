@@ -108,10 +108,12 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
     Info info;
-    info.load (reader);
+    bool isDeleted = false;
+
+    info.load (reader, isDeleted);
     std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" + info.mId;
 
-    if (info.mIsDeleted)
+    if (isDeleted)
     {
         int index = searchId (id);
 

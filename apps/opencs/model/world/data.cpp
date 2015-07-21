@@ -989,9 +989,11 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         case ESM::REC_DIAL:
         {
             ESM::Dialogue record;
-            record.load (*mReader);
+            bool isDeleted = false;
 
-            if (record.mIsDeleted)
+            record.load (*mReader, isDeleted);
+
+            if (isDeleted)
             {
                 // record vector can be shuffled around which would make pointer to record invalid
                 mDialogue = 0;
