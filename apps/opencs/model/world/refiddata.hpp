@@ -129,7 +129,9 @@ namespace CSMWorld
     int RefIdDataContainer<RecordT>::load (ESM::ESMReader& reader, bool base)
     {
         RecordT record;
-        record.load(reader);
+        bool isDeleted = false;
+
+        record.load(reader, isDeleted);
 
         int index = 0;
         int numRecords = static_cast<int>(mContainer.size());
@@ -141,7 +143,7 @@ namespace CSMWorld
             }
         }
 
-        if (record.mIsDeleted)
+        if (isDeleted)
         {
             if (index == numRecords)
             {
@@ -197,13 +199,12 @@ namespace CSMWorld
     void RefIdDataContainer<RecordT>::save (int index, ESM::ESMWriter& writer) const
     {
         Record<RecordT> record = mContainer.at(index);
-        RecordT esmRecord = record.get();
 
         if (record.isModified() || record.mState == RecordBase::State_Deleted)
         {
-            esmRecord.mIsDeleted = (record.mState == RecordBase::State_Deleted);
+            RecordT esmRecord = record.get();
             writer.startRecord(esmRecord.sRecordId);
-            esmRecord.save(writer);
+            esmRecord.save(writer, record.mState == RecordBase::State_Deleted);
             writer.endRecord(esmRecord.sRecordId);
         }
     }
