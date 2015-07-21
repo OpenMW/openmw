@@ -67,8 +67,13 @@ namespace EsmTool
     class Record : public RecordBase
     {
         T mData;
+        bool mIsDeleted;
 
     public:
+        Record()
+            : mIsDeleted(false)
+        {}
+
         std::string getId() const {
             return mData.mId;
         }
@@ -78,11 +83,11 @@ namespace EsmTool
         }
 
         void save(ESM::ESMWriter &esm) {
-            mData.save(esm);
+            mData.save(esm, mIsDeleted);
         }
 
         void load(ESM::ESMReader &esm) {
-            mData.load(esm);
+            mData.load(esm, mIsDeleted);
         }
 
         void print();

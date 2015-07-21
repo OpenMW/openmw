@@ -405,7 +405,7 @@ void Record<ESM::Activator>::print()
     std::cout << "  Name: " << mData.mName << std::endl;
     std::cout << "  Model: " << mData.mModel << std::endl;
     std::cout << "  Script: " << mData.mScript << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -420,7 +420,7 @@ void Record<ESM::Potion>::print()
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  AutoCalc: " << mData.mData.mAutoCalc << std::endl;
     printEffectList(mData.mEffects);
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -449,7 +449,7 @@ void Record<ESM::Armor>::print()
         if (pit->mFemale != "")
             std::cout << "    Female Name: " << pit->mFemale << std::endl;
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -464,7 +464,7 @@ void Record<ESM::Apparatus>::print()
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -478,7 +478,7 @@ void Record<ESM::BodyPart>::print()
     std::cout << "  Part: " << meshPartLabel(mData.mData.mPart)
               << " (" << (int)mData.mData.mPart << ")" << std::endl;
     std::cout << "  Vampire: " << (int)mData.mData.mVampire << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -507,7 +507,7 @@ void Record<ESM::Book>::print()
     {
         std::cout << "  Text: [skipped]" << std::endl;
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -519,7 +519,7 @@ void Record<ESM::BirthSign>::print()
     std::vector<std::string>::iterator pit;
     for (pit = mData.mPowers.mList.begin(); pit != mData.mPowers.mList.end(); ++pit)
         std::cout << "  Power: " << *pit << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -548,7 +548,7 @@ void Record<ESM::Cell>::print()
         std::cout << "  Map Color: " << boost::format("0x%08X") % mData.mMapColor << std::endl;
     std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
     std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 
 }
 
@@ -571,7 +571,7 @@ void Record<ESM::Class>::print()
     for (int i = 0; i != 5; i++)
         std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][1])
                   << " (" << mData.mData.mSkills[i][1] << ")" << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -598,7 +598,7 @@ void Record<ESM::Clothing>::print()
         if (pit->mFemale != "")
             std::cout << "    Female Name: " << pit->mFemale << std::endl;
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -614,7 +614,7 @@ void Record<ESM::Container>::print()
     for (cit = mData.mInventory.mList.begin(); cit != mData.mInventory.mList.end(); ++cit)
         std::cout << "  Inventory: Count: " << boost::format("%4d") % cit->mCount
                   << " Item: " << cit->mItem.toString() << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -681,7 +681,7 @@ void Record<ESM::Creature>::print()
     std::vector<ESM::AIPackage>::iterator pit;
     for (pit = mData.mAiPackage.mList.begin(); pit != mData.mAiPackage.mList.end(); ++pit)
         printAIPackage(*pit);
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -689,7 +689,7 @@ void Record<ESM::Dialogue>::print()
 {
     std::cout << "  Type: " << dialogTypeLabel(mData.mType)
               << " (" << (int)mData.mType << ")" << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
     // Sadly, there are no DialInfos, because the loader dumps as it
     // loads, rather than loading and then dumping. :-( Anyone mind if
     // I change this?
@@ -706,7 +706,7 @@ void Record<ESM::Door>::print()
     std::cout << "  Script: " << mData.mScript << std::endl;
     std::cout << "  OpenSound: " << mData.mOpenSound << std::endl;
     std::cout << "  CloseSound: " << mData.mCloseSound << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -718,7 +718,7 @@ void Record<ESM::Enchantment>::print()
     std::cout << "  Charge: " << mData.mData.mCharge << std::endl;
     std::cout << "  AutoCalc: " << mData.mData.mAutocalc << std::endl;
     printEffectList(mData.mEffects);
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -752,14 +752,14 @@ void Record<ESM::Faction>::print()
     std::map<std::string, int>::iterator rit;
     for (rit = mData.mReactions.begin(); rit != mData.mReactions.end(); ++rit)
         std::cout << "  Reaction: " << rit->second << " = " << rit->first << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
 void Record<ESM::Global>::print()
 {
     std::cout << "  " << mData.mValue << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -826,7 +826,7 @@ void Record<ESM::DialInfo>::print()
             std::cout << "  Result Script: [skipped]" << std::endl;
         }
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -850,7 +850,7 @@ void Record<ESM::Ingredient>::print()
         std::cout << "  Attribute: " << attributeLabel(mData.mData.mAttributes[i])
                   << " (" << mData.mData.mAttributes[i] << ")" << std::endl;
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -867,7 +867,7 @@ void Record<ESM::Land>::print()
         std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
         std::cout << "  Unknown2: " << data->mUnk2 << std::endl;
     }
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -880,7 +880,7 @@ void Record<ESM::CreatureLevList>::print()
     for (iit = mData.mList.begin(); iit != mData.mList.end(); ++iit)
         std::cout << "  Creature: Level: " << iit->mLevel
                   << " Creature: " << iit->mId << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -893,7 +893,7 @@ void Record<ESM::ItemLevList>::print()
     for (iit = mData.mList.begin(); iit != mData.mList.end(); ++iit)
         std::cout << "  Inventory: Level: " << iit->mLevel
                   << " Item: " << iit->mId << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -914,7 +914,7 @@ void Record<ESM::Light>::print()
     std::cout << "  Duration: " << mData.mData.mTime << std::endl;
     std::cout << "  Radius: " << mData.mData.mRadius << std::endl;
     std::cout << "  Color: " << mData.mData.mColor << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -929,7 +929,7 @@ void Record<ESM::Lockpick>::print()
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
     std::cout << "  Uses: " << mData.mData.mUses << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -944,7 +944,7 @@ void Record<ESM::Probe>::print()
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
     std::cout << "  Uses: " << mData.mData.mUses << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -959,7 +959,7 @@ void Record<ESM::Repair>::print()
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Quality: " << mData.mData.mQuality << std::endl;
     std::cout << "  Uses: " << mData.mData.mUses << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -968,7 +968,7 @@ void Record<ESM::LandTexture>::print()
     std::cout << "  Id: " << mData.mId << std::endl;
     std::cout << "  Index: " << mData.mIndex << std::endl;
     std::cout << "  Texture: " << mData.mTexture << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1019,7 +1019,7 @@ void Record<ESM::Miscellaneous>::print()
     std::cout << "  Weight: " << mData.mData.mWeight << std::endl;
     std::cout << "  Value: " << mData.mData.mValue << std::endl;
     std::cout << "  Is Key: " << mData.mData.mIsKey << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1106,7 +1106,7 @@ void Record<ESM::NPC>::print()
     for (pit = mData.mAiPackage.mList.begin(); pit != mData.mAiPackage.mList.end(); ++pit)
         printAIPackage(*pit);
 
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1142,7 +1142,7 @@ void Record<ESM::Pathgrid>::print()
         i++;
     }
 
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1184,7 +1184,7 @@ void Record<ESM::Race>::print()
     for (sit = mData.mPowers.mList.begin(); sit != mData.mPowers.mList.end(); ++sit)
         std::cout << "  Power: " << *sit << std::endl;
 
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1245,7 +1245,7 @@ void Record<ESM::Script>::print()
         std::cout << "  Script: [skipped]" << std::endl;
     }
 
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1269,7 +1269,7 @@ void Record<ESM::SoundGenerator>::print()
     std::cout << "  Sound: " << mData.mSound << std::endl;
     std::cout << "  Type: " << soundTypeLabel(mData.mType)
               << " (" << mData.mType << ")" << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1280,7 +1280,7 @@ void Record<ESM::Sound>::print()
     if (mData.mData.mMinRange != 0 && mData.mData.mMaxRange != 0)
         std::cout << "  Range: " << (int)mData.mData.mMinRange << " - "
                   << (int)mData.mData.mMaxRange << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1292,7 +1292,7 @@ void Record<ESM::Spell>::print()
     std::cout << "  Flags: " << spellFlags(mData.mData.mFlags) << std::endl;
     std::cout << "  Cost: " << mData.mData.mCost << std::endl;
     printEffectList(mData.mEffects);
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1300,7 +1300,7 @@ void Record<ESM::StartScript>::print()
 {
     std::cout << "  Start Script: " << mData.mId << std::endl;
     std::cout << "  Start Data: " << mData.mData << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<>
@@ -1341,7 +1341,7 @@ void Record<ESM::Weapon>::print()
     if (mData.mData.mThrust[0] != 0 && mData.mData.mThrust[1] != 0)
         std::cout << "  Thrust: " << (int)mData.mData.mThrust[0] << "-"
                   << (int)mData.mData.mThrust[1] << std::endl;
-    std::cout << "  Deleted: " << mData.mIsDeleted << std::endl;
+    std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
 template<> 
