@@ -158,7 +158,9 @@ namespace ESSImport
     void ConvertCell::read(ESM::ESMReader &esm)
     {
         ESM::Cell cell;
-        cell.load(esm, false);
+        bool isDeleted = false;
+
+        cell.load(esm, isDeleted, false);
 
         // I wonder what 0x40 does?
         if (cell.isExterior() && cell.mData.mFlags & 0x20)
