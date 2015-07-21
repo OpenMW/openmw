@@ -27,7 +27,8 @@ struct ESMData
     std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
-    std::map<ESM::Cell *, std::deque<ESM::CellRef> > mCellRefs;
+    // Value: (Reference, Deleted flag)
+    std::map<ESM::Cell *, std::deque<std::pair<ESM::CellRef, bool> > > mCellRefs;
     std::map<int, int> mRecordStats;
 
     static const std::set<int> sLabeledRec;
@@ -251,10 +252,11 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     ESM::CellRef ref;
     if(!quiet) std::cout << "  References:\n";
 
-    while(cell.getNextRef(esm, ref))
+    bool deleted = false;
+    while(cell.getNextRef(esm, ref, deleted))
     {
         if (save) {
-            info.data.mCellRefs[&cell].push_back(ref);
+            info.data.mCellRefs[&cell].push_back(std::make_pair(ref, deleted));
         }
 
         if(quiet) continue;
@@ -269,7 +271,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
         std::cout << "    Uses/health: '" << ref.mChargeInt << "'\n";
         std::cout << "    Gold value: '" << ref.mGoldValue << "'\n";
         std::cout << "    Blocked: '" << static_cast<int>(ref.mReferenceBlocked) << "'" << std::endl;
-        std::cout << "    Deleted: " << ref.mIsDeleted << std::endl;
+        std::cout << "    Deleted: " << deleted << std::endl;
         if (!ref.mKey.empty())
             std::cout << "    Key: '" << ref.mKey << "'" << std::endl;
     }
@@ -497,11 +499,11 @@ int clone(Arguments& info)
         if (name.val == ESM::REC_CELL) {
             ESM::Cell *ptr = &record->cast<ESM::Cell>()->get();
             if (!info.data.mCellRefs[ptr].empty()) {
-                typedef std::deque<ESM::CellRef> RefList;
+                typedef std::deque<std::pair<ESM::CellRef, bool> > RefList;
                 RefList &refs = info.data.mCellRefs[ptr];
                 for (RefList::iterator refIt = refs.begin(); refIt != refs.end(); ++refIt)
                 {
-                    refIt->save(esm);
+                    refIt->first.save(esm, refIt->second);
                 }
             }
         }
