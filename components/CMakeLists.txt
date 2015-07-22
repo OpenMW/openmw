@@ -188,12 +188,14 @@ if (WIN32)
     ${Boost_LOCALE_LIBRARY})
 endif()
 
-if (DESIRED_QT_VERSION MATCHES 4)
-    target_link_libraries(components
-    ${QT_QTCORE_LIBRARY}
-    ${QT_QTGUI_LIBRARY})
-else()
-    qt5_use_modules(components Widgets Core)
+if (NOT ANDROID)
+    if (DESIRED_QT_VERSION MATCHES 4)
+        target_link_libraries(components
+        ${QT_QTCORE_LIBRARY}
+        ${QT_QTGUI_LIBRARY})
+    else()
+        qt5_use_modules(components Widgets Core)
+    endif()
 endif()
 
 if (GIT_CHECKOUT)
