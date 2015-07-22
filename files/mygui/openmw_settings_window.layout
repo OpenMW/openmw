@@ -345,7 +345,7 @@
                             <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="2000"/>
-                            <UserString key="SettingMax" value="6666"/>
+                            <UserString key="SettingMax" value="30000"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
