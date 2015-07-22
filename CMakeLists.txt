@@ -47,7 +47,21 @@ include(OpenMWMacros)
 
 if (ANDROID)
     set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
+    set(OSG_PLUGINS_DIR ${OSG_PLUGINS_DIR})
+    add_definitions (-DOSG_PLUGINS_DIR)
+    set(OPENGLES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
 endif (ANDROID)
+
+option(OPENGLES "enable opengl es support" FALSE )
+
+#gles settings
+
+if (OPENGLES)
+  INCLUDE(cmake/FindOpenGLES.cmake)
+  INCLUDE(cmake/FindOpenGLES2.cmake)
+  add_definitions (-DOPENGLES)
+  INCLUDE_DIRECTORIES(${OPENGLES_INCLUDE_DIR})
+endif (OPENGLES)
 
 # doxygen main page
 
@@ -157,19 +171,20 @@ if (WIN32)
 endif()
 
 # Dependencies
+if (NOT ANDROID)
+    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    message(STATUS "Using Qt${DESIRED_QT_VERSION}")
 
-set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
-message(STATUS "Using Qt${DESIRED_QT_VERSION}")
-
-if (DESIRED_QT_VERSION MATCHES 4)
-    find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
-else()
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5Network REQUIRED)
-    find_package(Qt5OpenGL REQUIRED)
-    # Instruct CMake to run moc automatically when needed.
-    #set(CMAKE_AUTOMOC ON)
+    if (DESIRED_QT_VERSION MATCHES 4)
+        find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
+    else()
+        find_package(Qt5Widgets REQUIRED)
+        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Network REQUIRED)
+        find_package(Qt5OpenGL REQUIRED)
+        # Instruct CMake to run moc automatically when needed.
+        #set(CMAKE_AUTOMOC ON)
+    endif()
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
