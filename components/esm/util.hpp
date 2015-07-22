@@ -1,13 +1,8 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
-#include <string>
-
 #include <osg/Vec3f>
 #include <osg/Quat>
-
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
 
 namespace ESM
 {
