@@ -166,7 +166,9 @@ namespace ESSImport
 
             if (i >= file2.mRecords.size())
             {
+                std::ios::fmtflags f(std::cout.flags());
                 std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset << std::endl;
+                std::cout.flags(f);
                 return;
             }
 
@@ -174,7 +176,9 @@ namespace ESSImport
 
             if (rec.mName != rec2.mName)
             {
+                std::ios::fmtflags f(std::cout.flags());
                 std::cout << "Different record name at (2) 0x" << std::hex << rec2.mFileOffset << std::endl;
+                std::cout.flags(f);
                 return; // TODO: try to recover
             }
 
@@ -185,7 +189,9 @@ namespace ESSImport
 
                 if (j >= rec2.mSubrecords.size())
                 {
+                    std::ios::fmtflags f(std::cout.flags());
                     std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset << std::endl;
+                    std::cout.flags(f);
                     return;
                 }
 
@@ -193,8 +199,10 @@ namespace ESSImport
 
                 if (sub.mName != sub2.mName)
                 {
+                    std::ios::fmtflags f(std::cout.flags());
                     std::cout << "Different subrecord name (" << rec.mName << "." << sub.mName << " vs. " << sub2.mName << ") at (1) 0x" << std::hex << sub.mFileOffset
                               << " (2) 0x" << sub2.mFileOffset << std::endl;
+                    std::cout.flags(f);
                     break; // TODO: try to recover
                 }
 
@@ -202,6 +210,8 @@ namespace ESSImport
                 {
                     if (blacklist.find(std::make_pair(rec.mName, sub.mName)) != blacklist.end())
                         continue;
+
+                    std::ios::fmtflags f(std::cout.flags());
 
                     std::cout << "Different subrecord data for " << rec.mName << "." << sub.mName << " at (1) 0x" << std::hex << sub.mFileOffset
                               << " (2) 0x" << sub2.mFileOffset << std::endl;
@@ -235,6 +245,7 @@ namespace ESSImport
                             std::cout << "\033[0m";
                     }
                     std::cout << std::endl;
+                    std::cout.flags(f);
                 }
             }
         }
@@ -319,7 +330,11 @@ namespace ESSImport
             else
             {
                 if (unknownRecords.insert(n.val).second)
+                {
+                    std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
+                    std::cerr.flags(f);
+                }
 
                 esm.skipRecord();
             }
@@ -327,7 +342,7 @@ namespace ESSImport
 
         ESM::ESMWriter writer;
 
-        writer.setFormat (ESM::Header::CurrentFormat);
+        writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
         std::ofstream stream(mOutFile.c_str(), std::ios::binary);
         // all unused

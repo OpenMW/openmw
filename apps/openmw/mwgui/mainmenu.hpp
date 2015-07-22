@@ -29,7 +29,7 @@ namespace MWGui
 
         public:
 
-            MainMenu(int w, int h, const VFS::Manager* vfs);
+            MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription);
             ~MainMenu();
 
             void onResChange(int w, int h);

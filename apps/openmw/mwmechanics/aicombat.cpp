@@ -31,20 +31,18 @@ namespace
     //chooses an attack depending on probability to avoid uniformity
     ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics::Movement &movement);
 
-    void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations)[2]);
-
     osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,
         float duration, int weapType, float strength);
 
     float getZAngleToDir(const osg::Vec3f& dir)
     {
-        return osg::RadiansToDegrees(std::atan2(dir.x(), dir.y()));
+        return std::atan2(dir.x(), dir.y());
     }
 
     float getXAngleToDir(const osg::Vec3f& dir, float dirLen = 0.0f)
     {
         float len = (dirLen > 0.0f)? dirLen : dir.length();
-        return osg::RadiansToDegrees(-std::asin(dir.z() / len));
+        return -std::asin(dir.z() / len);
     }
 
 
@@ -83,7 +81,7 @@ namespace MWMechanics
     /// \brief This class holds the variables AiCombat needs which are deleted if the package becomes inactive.
     struct AiCombatStorage : AiTemporaryBase
     {
-        float mTimerAttack;
+        float mAttackCooldown;
         float mTimerReact;
         float mTimerCombatMove;
         bool mReadyToAttack;
@@ -95,15 +93,13 @@ namespace MWMechanics
         boost::shared_ptr<Action> mCurrentAction;
         float mActionCooldown;
         float mStrength;
-        float mMinMaxAttackDuration[3][2];
-        bool mMinMaxAttackDurationInitialised;
         bool mForceNoShortcut;
         ESM::Position mShortcutFailPos;
         osg::Vec3f mLastActorPos;
         MWMechanics::Movement mMovement;
         
         AiCombatStorage():
-        mTimerAttack(0),
+        mAttackCooldown(0),
         mTimerReact(0),
         mTimerCombatMove(0),
         mReadyToAttack(false),
@@ -115,7 +111,6 @@ namespace MWMechanics
         mCurrentAction(),
         mActionCooldown(0),
         mStrength(),
-        mMinMaxAttackDurationInitialised(false),
         mForceNoShortcut(false),
         mLastActorPos(0,0,0),
         mMovement(){}    
@@ -226,51 +221,21 @@ namespace MWMechanics
 
         if(movement.mRotation[2] != 0)
         {
-            if(zTurn(actor, osg::DegreesToRadians(movement.mRotation[2]))) movement.mRotation[2] = 0;
+            if(zTurn(actor, movement.mRotation[2])) movement.mRotation[2] = 0;
         }
 
         if(movement.mRotation[0] != 0)
         {
-            if(smoothTurn(actor, osg::DegreesToRadians(movement.mRotation[0]), 0)) movement.mRotation[0] = 0;
+            if(smoothTurn(actor, movement.mRotation[0], 0)) movement.mRotation[0] = 0;
         }
-
-        float attacksPeriod = 1.0f;
-
-        ESM::Weapon::AttackType attackType;
-
-
-        
         
         bool& attack = storage.mAttack;
         bool& readyToAttack = storage.mReadyToAttack;
-        float& timerAttack = storage.mTimerAttack;
-        
-        bool& minMaxAttackDurationInitialised = storage.mMinMaxAttackDurationInitialised;
-        float (&minMaxAttackDuration)[3][2] = storage.mMinMaxAttackDuration;
-        
-        if(readyToAttack)
-        {
 
-            if (!minMaxAttackDurationInitialised)
-            {
-                // TODO: this must be updated when a different weapon is equipped
-                // TODO: it would be much easier to ask the CharacterController about the current % completion of the weapon wind-up animation
-                getMinMaxAttackDuration(actor, minMaxAttackDuration);
-                minMaxAttackDurationInitialised = true;
-            }
-
-            if (timerAttack < 0) attack = false;
-
-            timerAttack -= duration;
-        }
-        else
-        {
-            timerAttack = -attacksPeriod;
+        if (attack && (characterController.getAttackStrength() >= storage.mStrength || characterController.readyToPrepareAttack()))
             attack = false;
-        }
 
-        actorClass.getCreatureStats(actor).setAttackingOrSpell(attack);
-
+        characterController.setAttackingOrSpell(attack);
 
         float& actionCooldown = storage.mActionCooldown;
         actionCooldown -= duration;
@@ -301,10 +266,6 @@ namespace MWMechanics
             currentCell = actor.getCell();
         }
 
-        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
-        if (!anim) // shouldn't happen
-            return false;
-
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         if (actionCooldown > 0)
@@ -313,11 +274,7 @@ namespace MWMechanics
         float rangeAttack = 0;
         float rangeFollow = 0;
         boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
-        // TODO: upperBodyReady() works fine for checking if we can start an attack,
-        // but doesn't work properly for checking if the attack is finished (as things like hit recovery or knockdown also play on the upper body)
-        // Only a minor problem, but can mess with the actionCooldown timer.
-        // To fix this the AI needs to be brought closer to the CharacterController, so we can simply check if a weapon animation is playing.
-        if (anim->upperBodyReady())
+        if (characterController.readyToPrepareAttack())
         {
             currentAction = prepareNextAction(actor, target);
             actionCooldown = currentAction->getActionCooldown();
@@ -334,9 +291,6 @@ namespace MWMechanics
         // Get weapon characteristics
         if (actorClass.hasInventoryStore(actor))
         {
-            // TODO: Check equipped weapon and equip a different one if we can't attack with it
-            // (e.g. no ammunition, or wrong type of ammunition equipped, etc. autoEquip is not very smart in this regard))
-
             //Get weapon speed and range
             MWWorld::ContainerStoreIterator weaponSlot =
                 MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
@@ -384,34 +338,38 @@ namespace MWMechanics
         }
 
         
-        float& strength = storage.mStrength;      
+        float& strength = storage.mStrength;
         // start new attack
-        if(readyToAttack)
+        if(readyToAttack && characterController.readyToStartAttack())
         {
-            if(timerAttack <= -attacksPeriod)
+            if (storage.mAttackCooldown <= 0)
             {
                 attack = true; // attack starts just now
+                characterController.setAttackingOrSpell(attack);
 
-                if (!distantCombat) attackType = chooseBestAttack(weapon, movement);
-                else attackType = ESM::Weapon::AT_Chop; // cause it's =0
+                if (!distantCombat)
+                    chooseBestAttack(weapon, movement);
 
                 strength = Misc::Rng::rollClosedProbability();
 
-                // Note: may be 0 for some animations
-                timerAttack = minMaxAttackDuration[attackType][0] + 
-                    (minMaxAttackDuration[attackType][1] - minMaxAttackDuration[attackType][0]) * strength;
+                const MWWorld::ESMStore &store = world->getStore();
 
                 //say a provoking combat phrase
                 if (actor.getClass().isNpc())
                 {
-                    const MWWorld::ESMStore &store = world->getStore();
                     int chance = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->getInt();
                     if (Misc::Rng::roll0to99() < chance)
                     {
                         MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
                     }
                 }
+                float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->getFloat();
+                if (actor.getClass().isNpc())
+                    baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayNPC")->getFloat();
+                storage.mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(), baseDelay + 0.9);
             }
+            else
+                storage.mAttackCooldown -= tReaction;
         }
 
 
@@ -476,7 +434,7 @@ namespace MWMechanics
             movement.mPosition[1] = 0;
             movement.mPosition[2] = 0;
             readyToAttack = false;
-            actorClass.getCreatureStats(actor).setAttackingOrSpell(false);
+            characterController.setAttackingOrSpell(false);
             return false;
         }
 
@@ -619,57 +577,6 @@ namespace MWMechanics
             readyToAttack = false;
         }
 
-        if(!isStuck && distToTarget > rangeAttack && !distantCombat)
-        {
-            //special run attack; it shouldn't affect melee combat tactics
-            if(actorClass.getMovementSettings(actor).mPosition[1] == 1)
-            {
-                /*  check if actor can overcome the distance = distToTarget - attackerWeapRange
-                    less than in time of swinging with weapon (t_swing), then start attacking 
-                */
-                float speed1 = actorClass.getSpeed(actor);
-                float speed2 = target.getClass().getSpeed(target);
-                if(target.getClass().getMovementSettings(target).mPosition[0] == 0
-                        && target.getClass().getMovementSettings(target).mPosition[1] == 0)
-                    speed2 = 0;
-
-                float s1 = distToTarget - weapRange;
-                float t = s1/speed1;
-                float s2 = speed2 * t;
-                float t_swing = 
-                    minMaxAttackDuration[ESM::Weapon::AT_Thrust][0] + 
-                    (minMaxAttackDuration[ESM::Weapon::AT_Thrust][1] - minMaxAttackDuration[ESM::Weapon::AT_Thrust][0]) * Misc::Rng::rollClosedProbability();
-
-                if (t + s2/speed1 <= t_swing)
-                {
-                    readyToAttack = true;
-                    if(timerAttack <= -attacksPeriod)
-                    {
-                        timerAttack = t_swing;
-                        attack = true;
-                    }
-                }
-            }
-        }
-
-        // TODO: Add a parameter to vary DURATION_SAME_SPOT?
-        if((distToTarget > rangeAttack || followTarget) &&
-            mObstacleCheck.check(actor, tReaction)) // check if evasive action needed
-        {
-            // probably walking into another NPC TODO: untested in combat situation
-            // TODO: diagonal should have same animation as walk forward
-            //       but doesn't seem to do that?
-            actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-            // change the angle a bit, too
-            if(mPathFinder.isPathConstructed())
-                zTurn(actor, osg::DegreesToRadians(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-
-            if(followTarget)
-                followTarget = false;
-            // FIXME: can fool actors to stay behind doors, etc.
-            // Related to Bug#1102 and to some degree #1155 as well
-        }
         return false;
     }
 
@@ -793,70 +700,6 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
     }
 
     return attackType;
-}
-
-void getMinMaxAttackDuration(const MWWorld::Ptr& actor, float (*fMinMaxDurations)[2])
-{
-    if (!actor.getClass().hasInventoryStore(actor)) // creatures
-    {
-        fMinMaxDurations[0][0] = fMinMaxDurations[0][1] = 0.1f;
-        fMinMaxDurations[1][0] = fMinMaxDurations[1][1] = 0.1f;
-        fMinMaxDurations[2][0] = fMinMaxDurations[2][1] = 0.1f;
-
-        return;
-    }
-
-    // get weapon information: type and speed
-    const ESM::Weapon *weapon = NULL;
-    MWMechanics::WeaponType weaptype = MWMechanics::WeapType_None;
-
-    MWWorld::ContainerStoreIterator weaponSlot =
-        MWMechanics::getActiveWeapon(actor.getClass().getCreatureStats(actor), actor.getClass().getInventoryStore(actor), &weaptype);
-
-    float weapSpeed;
-    if (weaptype != MWMechanics::WeapType_HandToHand
-            && weaptype != MWMechanics::WeapType_Spell
-            && weaptype != MWMechanics::WeapType_None)
-    {
-        weapon = weaponSlot->get<ESM::Weapon>()->mBase;
-        weapSpeed = weapon->mData.mSpeed;
-    }
-    else  weapSpeed = 1.0f;
-
-    MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(actor);
-
-    std::string weapGroup;
-    MWMechanics::getWeaponGroup(weaptype, weapGroup);
-    weapGroup = weapGroup + ": ";
-
-    bool bRangedWeap = (weaptype >= MWMechanics::WeapType_BowAndArrow && weaptype <= MWMechanics::WeapType_Thrown);
-
-    const char *attackType[] = {"chop ", "slash ", "thrust ", "shoot "};
-
-    std::string textKey = "start";
-    std::string textKey2;
-
-    // get durations for each attack type
-    for (int i = 0; i < (bRangedWeap ? 1 : 3); i++)
-    {
-        float start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey);
-
-        if (start1 < 0) 
-        {
-            fMinMaxDurations[i][0] = fMinMaxDurations[i][1] = 0.1f;
-            continue;
-        }
-
-        textKey2 = "min attack";
-        float start2 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
-
-        fMinMaxDurations[i][0] = (start2 - start1) / weapSpeed;
-
-        textKey2 = "max attack";
-        start1 = anim->getTextKeyTime(weapGroup + (bRangedWeap ? attackType[3] : attackType[i]) + textKey2);
-
-        fMinMaxDurations[i][1] = fMinMaxDurations[i][0] + (start1 - start2) / weapSpeed;
-    }
 }
 
 osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, const osg::Vec3f& vLastTargetPos,

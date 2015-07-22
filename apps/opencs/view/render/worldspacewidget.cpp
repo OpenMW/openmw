@@ -24,7 +24,7 @@
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (document.getData().getResourceSystem()->getSceneManager(), parent), mSceneElements(0), mRun(0), mDocument(document),
+: SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
   mInteractionMask (0)
 {
     setAcceptDrops(true);

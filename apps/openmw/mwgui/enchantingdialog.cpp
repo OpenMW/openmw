@@ -7,7 +7,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 
-#include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>
 
 #include "../mwbase/environment.hpp"

@@ -27,7 +27,7 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/translation/translation.hpp>
 
-#include <components/esm/loadcell.hpp>
+#include <components/version/version.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -414,7 +414,7 @@ void OMW::Engine::setWindowIcon()
 {
     boost::filesystem::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
-    windowIconStream.open(windowIcon);
+    windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
     if (windowIconStream.fail())
         std::cerr << "Failed to open " << windowIcon << std::endl;
     osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
@@ -493,7 +493,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap);
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
+                Version::getOpenmwVersionDescription(mResDir.string()));
     mEnvironment.setWindowManager (window);
 
     // Create sound system
@@ -644,9 +645,6 @@ void OMW::Engine::go()
     mEncoder = &encoder;
 
     prepareEngine (settings);
-
-    // Play some good 'ol tunes
-    MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
 
     if (!mSaveGameFile.empty())
     {

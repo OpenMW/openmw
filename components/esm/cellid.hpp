@@ -26,6 +26,7 @@ namespace ESM
 
     bool operator== (const CellId& left, const CellId& right);
     bool operator!= (const CellId& left, const CellId& right);
+    bool operator< (const CellId& left, const CellId& right);
 }
 
 #endif

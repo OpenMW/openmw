@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <components/misc/stringops.hpp>
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/globalscript.hpp>
 
 #include "../mwworld/esmstore.hpp"

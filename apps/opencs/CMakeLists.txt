@@ -64,7 +64,7 @@ opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
-    dialoguespinbox recordbuttonbar
+    dialoguespinbox recordbuttonbar tableeditidaction scripterrortable
     )
 
 opencs_units_noqt (view/world

@@ -20,7 +20,7 @@ message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 36)
-set(OPENMW_VERSION_RELEASE 0)
+set(OPENMW_VERSION_RELEASE 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -70,6 +70,8 @@ configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
+option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
+option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
@@ -214,8 +216,66 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
+find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+if(OSG_STATIC)
+   macro(use_static_osg_plugin_library PLUGIN_NAME)
+      set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
+
+      # For now, users wishing to do a static build will need to pass the path to where the plugins reside
+      # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
+      find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      make_library_set(${PLUGIN_NAME}_LIBRARY)
+
+      if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
+         message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
+      endif()
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
+   endmacro()
+
+   macro(use_static_osg_plugin_dep DEPENDENCY)
+      find_package(${DEPENDENCY} REQUIRED)
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
+   endmacro()
+
+   add_definitions(-DOSG_LIBRARY_STATIC)
+
+   set(PLUGIN_LIST
+       osgdb_png # depends on libpng, zlib
+       osgdb_tga
+       osgdb_dds
+       osgdb_jpeg # depends on libjpeg
+       )
+
+   foreach(PLUGIN ${PLUGIN_LIST})
+      use_static_osg_plugin_library(${PLUGIN})
+   endforeach()
+
+   # OSG static plugins need to linked against their respective dependencies
+   set(PLUGIN_DEPS_LIST
+       PNG # needed by osgdb_png
+       ZLIB # needed by osgdb_png
+       JPEG # needed by osgdb_jpeg
+       )
+
+   foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
+      use_static_osg_plugin_dep(${DEPENDENCY})
+   endforeach()
+endif()
+
+if(QT_STATIC)
+   if(WIN32)
+      if(DESIRED_QT_VERSION MATCHES 4)
+         # QtCore needs WSAAsyncSelect from Ws2_32.lib
+         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
+         message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
+      endif()
+   endif()
+endif()
 
 find_package(MyGUI REQUIRED)
 if (${MYGUI_VERSION} VERSION_LESS "3.2.1")
@@ -381,6 +441,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
@@ -396,6 +457,7 @@ if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
     INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION ".")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
     INSTALL(FILES

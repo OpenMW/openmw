@@ -38,6 +38,7 @@ namespace MWGui
         , mLastMouseY(0)
         , mEnabled(true)
         , mFullHelp(false)
+        , mShowOwned(0)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -55,6 +56,8 @@ namespace MWGui
         {
             mMainWidget->getChildAt(i)->setVisible(false);
         }
+        
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void ToolTips::setEnabled(bool enabled)
@@ -346,10 +349,41 @@ namespace MWGui
 
         return tooltipSize;
     }
+    
+    bool ToolTips::checkOwned()
+    {
+        if(!mFocusObject.isEmpty())
+        {
+            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr victim;
+            
+            MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+
+            return !allowed;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
         mDynamicToolTipBox->setVisible(true);
+        
+        if(mShowOwned == 1 || mShowOwned == 3)
+        {
+            if(checkOwned())
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
+            }
+            else
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
+            }
+        }
 
         std::string caption = info.caption;
         std::string image = info.icon;

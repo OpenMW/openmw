@@ -88,7 +88,8 @@ namespace MWRender
         struct ImageDest
         {
             ImageDest()
-                : mFramesUntilDone(3) // wait an extra frame to ensure the draw thread has completed its frame.
+                : mX(0), mY(0)
+                , mFramesUntilDone(3) // wait an extra frame to ensure the draw thread has completed its frame.
             {
             }
 

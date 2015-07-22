@@ -52,6 +52,11 @@ namespace MWRender
     class Camera;
 }
 
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
+
 struct ContentLoader;
 
 namespace MWWorld

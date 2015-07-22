@@ -17,18 +17,17 @@ void CSVWorld::RecordButtonBar::updateModificationButtons()
 
     mCloneButton->setDisabled (createAndDeleteDisabled);
     mAddButton->setDisabled (createAndDeleteDisabled);
-    mDeleteButton->setDisabled (createAndDeleteDisabled);
 
     bool commandDisabled = !mCommandDispatcher || mLocked;
-    
+
     mRevertButton->setDisabled (commandDisabled);
-    mDeleteButton->setDisabled (commandDisabled);
+    mDeleteButton->setDisabled (commandDisabled || createAndDeleteDisabled);
 }
 
 void CSVWorld::RecordButtonBar::updatePrevNextButtons()
 {
     int rows = mTable.rowCount();
-    
+
     if (rows<=1)
     {
         mPrevButton->setDisabled (true);
@@ -62,12 +61,12 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     mPrevButton->setIcon(QIcon(":/go-previous.png"));
     mPrevButton->setToolTip ("Switch to previous record");
     buttonsLayout->addWidget (mPrevButton, 0);
-    
+
     mNextButton = new QToolButton (this);
     mNextButton->setIcon(QIcon(":/go-next.png"));
     mNextButton->setToolTip ("Switch to next record");
     buttonsLayout->addWidget (mNextButton, 1);
-    
+
     buttonsLayout->addStretch(2);
 
     // optional buttons of the right section
@@ -94,22 +93,22 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     mCloneButton->setIcon(QIcon(":/edit-clone.png"));
     mCloneButton->setToolTip ("Clone record");
     buttonsLayout->addWidget(mCloneButton);
-    
+
     mAddButton = new QToolButton (this);
     mAddButton->setIcon(QIcon(":/add.png"));
     mAddButton->setToolTip ("Add new record");
     buttonsLayout->addWidget(mAddButton);
-    
+
     mDeleteButton = new QToolButton (this);
     mDeleteButton->setIcon(QIcon(":/edit-delete.png"));
     mDeleteButton->setToolTip ("Delete record");
     buttonsLayout->addWidget(mDeleteButton);
-    
+
     mRevertButton = new QToolButton (this);
     mRevertButton->setIcon(QIcon(":/edit-undo.png"));
     mRevertButton->setToolTip ("Revert record");
     buttonsLayout->addWidget(mRevertButton);
-    
+
     setLayout (buttonsLayout);
 
     // connections
@@ -132,7 +131,7 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
         this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
     connect (&mTable, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
-    
+
     updateModificationButtons();
     updatePrevNextButtons();
 }
@@ -170,7 +169,7 @@ void CSVWorld::RecordButtonBar::cloneRequest()
 }
 
 void CSVWorld::RecordButtonBar::nextId()
-{    
+{
     int newRow = mTable.getModelIndex (mId.getId(), 0).row() + 1;
 
     if (newRow >= mTable.rowCount())
@@ -180,8 +179,8 @@ void CSVWorld::RecordButtonBar::nextId()
             newRow = 0;
         else
             return;
-    }    
-    
+    }
+
     emit switchToRow (newRow);
 }
 
@@ -197,7 +196,7 @@ void CSVWorld::RecordButtonBar::prevId()
         else
             return;
     }
-    
+
     emit switchToRow (newRow);
 }
 

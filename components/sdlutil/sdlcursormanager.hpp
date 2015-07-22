@@ -27,11 +27,9 @@ namespace SDLUtil
 
         /// \brief Tell the manager that the cursor has changed, giving the
         ///        name of the cursor we changed to ("arrow", "ibeam", etc)
-        /// \return Whether the manager is interested in more information about the cursor
-        virtual bool cursorChanged(const std::string &name);
+        virtual void cursorChanged(const std::string &name);
 
-        /// \brief Follow up a cursorChanged() call with enough info to create an cursor.
-        virtual void receiveCursorInfo(const std::string &name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
+        virtual void createCursor(const std::string &name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);
 
     private:
         void _createCursorFromResource(const std::string &name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y);

@@ -27,6 +27,7 @@
 #include "../../model/settings/usersettings.hpp"
 
 #include "recordstatusdelegate.hpp"
+#include "tableeditidaction.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
@@ -58,33 +59,13 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
     ///  \todo add menu items for select all and clear selection
 
+    int currentRow = rowAt(event->y());
+    int currentColumn = columnAt(event->x());
+    if (mEditIdAction->isValidIdCell(currentRow, currentColumn))
     {
-        // Request UniversalId editing from table columns.
-
-        int currRow = rowAt( event->y() ),
-            currCol = columnAt( event->x() );
-
-        currRow = mProxyModel->mapToSource(mProxyModel->index( currRow, 0 )).row();
-
-        CSMWorld::ColumnBase::Display colDisplay =
-            static_cast<CSMWorld::ColumnBase::Display>(
-                mModel->headerData(
-                    currCol,
-                    Qt::Horizontal,
-                    CSMWorld::ColumnBase::Role_Display ).toInt());
-
-        QString cellData = mModel->data(mModel->index( currRow, currCol )).toString();
-        CSMWorld::UniversalId::Type colType = CSMWorld::TableMimeData::convertEnums( colDisplay );
-
-        if (    !cellData.isEmpty()
-                && colType != CSMWorld::UniversalId::Type_None )
-        {
-            mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
-
-            menu.addAction( mEditCellAction );
-
-            mEditCellId = CSMWorld::UniversalId( colType, cellData.toUtf8().constData() );
-        }
+        mEditIdAction->setCell(currentRow, currentColumn);
+        menu.addAction(mEditIdAction);
+        menu.addSeparator();
     }
 
     if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
@@ -363,10 +344,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
 
-    mEditCellAction = new QAction( tr("Edit Cell"), this );
-    connect( mEditCellAction, SIGNAL(triggered()), this, SLOT(editCell()) );
-    addAction( mEditCellAction );
-
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
     addAction (mViewAction);
@@ -386,6 +363,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
     connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
+
+    mEditIdAction = new TableEditIdAction (*this, this);
+    connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
+    addAction (mEditIdAction);
 
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
@@ -522,7 +503,7 @@ void CSVWorld::Table::moveDownRecord()
 
 void CSVWorld::Table::editCell()
 {
-    emit editRequest( mEditCellId, std::string() );
+    emit editRequest(mEditIdAction->getCurrentId(), "");
 }
 
 void CSVWorld::Table::viewRecord()

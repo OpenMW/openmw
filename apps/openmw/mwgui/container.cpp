@@ -11,13 +11,11 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerstore.hpp"
 
 #include "../mwmechanics/pickpocket.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "countdialog.hpp"
-#include "tradewindow.hpp"
 #include "inventorywindow.hpp"
 
 #include "itemview.hpp"

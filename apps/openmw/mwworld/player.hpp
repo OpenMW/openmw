@@ -17,12 +17,6 @@ namespace ESM
     class ESMReader;
 }
 
-namespace MWBase
-{
-    class World;
-    class Ptr;
-}
-
 namespace Loading
 {
     class Listener;
@@ -56,9 +50,11 @@ namespace MWWorld
         MWMechanics::SkillValue mSaveSkills[ESM::Skill::Length];
         MWMechanics::AttributeValue mSaveAttributes[ESM::Attribute::Length];
 
+        bool mAttackingOrSpell;
+
     public:
 
-        Player(const ESM::NPC *player, const MWBase::World& world);
+        Player(const ESM::NPC *player);
 
         void saveSkillsAttributes();
         void restoreSkillsAttributes();
@@ -103,6 +99,9 @@ namespace MWWorld
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
+
+        void setAttackingOrSpell(bool attackingOrSpell);
+        bool getAttackingOrSpell() const;
 
         ///Checks all nearby actors to see if anyone has an aipackage against you
         bool isInCombat();

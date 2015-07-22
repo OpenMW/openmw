@@ -6,6 +6,7 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -1327,6 +1328,27 @@ namespace MWMechanics
         }
 
         return true;
+    }
+
+    void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
+    {
+        if (attacker.isEmpty() || attacker != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
+        if (victim == attacker)
+            return; // known to happen
+
+        if (!victim.getClass().isNpc())
+            return; // TODO: implement animal rights
+
+        const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
+
+        // Simple check for who attacked first: if the player attacked first, a crimeId should be set
+        // Doesn't handle possible edge case where no one reported the assault, but in such a case,
+        // for bystanders it is not possible to tell who attacked first, anyway.
+        if (victimStats.getCrimeId() != -1)
+            MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
+
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)

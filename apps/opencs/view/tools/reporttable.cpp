@@ -11,6 +11,7 @@
 #include <QPainter>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
+#include <QSortFilterProxyModel>
 
 #include "../../model/tools/reportmodel.hpp"
 
@@ -23,7 +24,7 @@ namespace CSVTools
         public:
 
             RichTextDelegate (QObject *parent = 0);
-            
+
             virtual void paint(QPainter *painter, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const;
     };
@@ -63,7 +64,7 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
         for (QModelIndexList::const_iterator iter (selectedRows.begin());
             iter!=selectedRows.end(); ++iter)
         {
-            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+            QString hint = mProxyModel->data (mProxyModel->index (iter->row(), 2)).toString();
 
             if (!hint.isEmpty() && hint[0]=='R')
             {
@@ -78,7 +79,7 @@ void CSVTools::ReportTable::contextMenuEvent (QContextMenuEvent *event)
 
     if (mRefreshAction)
         menu.addAction (mRefreshAction);
-    
+
     menu.exec (event->globalPos());
 }
 
@@ -106,14 +107,14 @@ void CSVTools::ReportTable::mouseDoubleClickEvent (QMouseEvent *event)
         event->accept();
         return;
     }
-        
+
     switch (iter->second)
     {
         case Action_None:
 
             event->accept();
             break;
-            
+
         case Action_Edit:
 
             event->accept();
@@ -152,7 +153,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-    setModel (mModel);
+    mProxyModel = new QSortFilterProxyModel (this);
+    mProxyModel->setSourceModel (mModel);
+
+    setModel (mProxyModel);
     setColumnHidden (2, true);
 
     mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (0,
@@ -162,7 +166,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 
     if (richTextDescription)
         setItemDelegateForColumn (mModel->columnCount()-1, new RichTextDelegate (this));
-    
+
     mShowAction = new QAction (tr ("Show"), this);
     connect (mShowAction, SIGNAL (triggered()), this, SLOT (showSelection()));
     addAction (mShowAction);
@@ -182,10 +186,10 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
         connect (mRefreshAction, SIGNAL (triggered()), this, SIGNAL (refreshRequest()));
         addAction (mRefreshAction);
     }
-    
+
     mDoubleClickActions.insert (std::make_pair (Qt::NoModifier, Action_Edit));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_Remove));
-    mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_EditAndRemove));    
+    mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_EditAndRemove));
 }
 
 std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() const
@@ -197,7 +201,7 @@ std::vector<CSMWorld::UniversalId> CSVTools::ReportTable::getDraggedRecords() co
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
     {
-        ids.push_back (mModel->getUniversalId (iter->row()));
+        ids.push_back (mModel->getUniversalId (mProxyModel->mapToSource (*iter).row()));
     }
 
     return ids;
@@ -234,7 +238,7 @@ void CSVTools::ReportTable::updateUserSetting (const QString& name, const QStrin
         mDoubleClickActions[modifiers] = action;
 
         return;
-    }    
+    }
 }
 
 std::vector<int> CSVTools::ReportTable::getReplaceIndices (bool selection) const
@@ -245,13 +249,22 @@ std::vector<int> CSVTools::ReportTable::getReplaceIndices (bool selection) const
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
 
+        std::vector<int> rows;
+
         for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
             ++iter)
         {
-            QString hint = mModel->data (mModel->index (iter->row(), 2)).toString();
+            rows.push_back (mProxyModel->mapToSource (*iter).row());
+        }
+
+        std::sort (rows.begin(), rows.end());
+
+        for (std::vector<int>::const_iterator iter (rows.begin()); iter!=rows.end(); ++iter)
+        {
+            QString hint = mModel->data (mModel->index (*iter, 2)).toString();
 
             if (!hint.isEmpty() && hint[0]=='R')
-                indices.push_back (iter->row());
+                indices.push_back (*iter);
         }
     }
     else
@@ -272,25 +285,35 @@ void CSVTools::ReportTable::flagAsReplaced (int index)
 {
     mModel->flagAsReplaced (index);
 }
-            
+
 void CSVTools::ReportTable::showSelection()
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
-        emit editRequest (mModel->getUniversalId (iter->row()), mModel->getHint (iter->row()));
+    {
+        int row = mProxyModel->mapToSource (*iter).row();
+        emit editRequest (mModel->getUniversalId (row), mModel->getHint (row));
+    }
 }
 
 void CSVTools::ReportTable::removeSelection()
 {
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
-    std::reverse (selectedRows.begin(), selectedRows.end());
+    std::vector<int> rows;
 
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
+    for (QModelIndexList::iterator iter (selectedRows.begin()); iter!=selectedRows.end();
         ++iter)
-        mModel->removeRows (iter->row(), 1);
+    {
+        rows.push_back (mProxyModel->mapToSource (*iter).row());
+    }
+
+    std::sort (rows.begin(), rows.end());
+
+    for (std::vector<int>::const_reverse_iterator iter (rows.rbegin()); iter!=rows.rend(); ++iter)
+        mProxyModel->removeRows (*iter, 1);
 
     selectionModel()->clear();
 }

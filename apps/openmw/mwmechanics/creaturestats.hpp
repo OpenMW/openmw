@@ -40,7 +40,6 @@ namespace MWMechanics
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
         bool mKnockdownOverOneFrame;

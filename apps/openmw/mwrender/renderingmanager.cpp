@@ -46,7 +46,8 @@ namespace MWRender
     {
     public:
         StateUpdater()
-            : mFogEnd(0.f)
+            : mFogStart(0.f)
+            , mFogEnd(0.f)
             , mWireframe(false)
         {
         }
@@ -56,7 +57,6 @@ namespace MWRender
             osg::LightModel* lightModel = new osg::LightModel;
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
             osg::Fog* fog = new osg::Fog;
-            fog->setStart(1);
             fog->setMode(osg::Fog::LINEAR);
             stateset->setAttributeAndModes(fog, osg::StateAttribute::ON);
             if (mWireframe)
@@ -75,6 +75,7 @@ namespace MWRender
             lightModel->setAmbientIntensity(mAmbientColor);
             osg::Fog* fog = static_cast<osg::Fog*>(stateset->getAttribute(osg::StateAttribute::FOG));
             fog->setColor(mFogColor);
+            fog->setStart(mFogStart);
             fog->setEnd(mFogEnd);
         }
 
@@ -86,6 +87,11 @@ namespace MWRender
         void setFogColor(const osg::Vec4f& col)
         {
             mFogColor = col;
+        }
+
+        void setFogStart(float start)
+        {
+            mFogStart = start;
         }
 
         void setFogEnd(float end)
@@ -110,6 +116,7 @@ namespace MWRender
     private:
         osg::Vec4f mAmbientColor;
         osg::Vec4f mFogColor;
+        float mFogStart;
         float mFogEnd;
         bool mWireframe;
     };
@@ -118,6 +125,7 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mFogDepth(0.f)
         , mNightEyeFactor(0.f)
     {
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
@@ -338,8 +346,9 @@ namespace MWRender
         configureFog (cell->mAmbi.mFogDensity, color);
     }
 
-    void RenderingManager::configureFog(float /* fogDepth */, const osg::Vec4f &color)
+    void RenderingManager::configureFog(float fogDepth, const osg::Vec4f &color)
     {
+        mFogDepth = fogDepth;
         mFogColor = color;
     }
 
@@ -364,11 +373,13 @@ namespace MWRender
         if (mWater->isUnderwater(cameraPos))
         {
             setFogColor(osg::Vec4f(0.090195f, 0.115685f, 0.12745f, 1.f));
+            mStateUpdater->setFogStart(0.f);
             mStateUpdater->setFogEnd(1000);
         }
         else
         {
             setFogColor(mFogColor);
+            mStateUpdater->setFogStart(mViewDistance * (1 - mFogDepth));
             mStateUpdater->setFogEnd(mViewDistance);
         }
     }

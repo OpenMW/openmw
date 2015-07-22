@@ -21,16 +21,16 @@ namespace MWGui
         // Events
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
-        ///Unhides the window
+        /// Notify that window has been made visible
         virtual void open() {}
-        ///Hides the window
+        /// Notify that window has been hidden
         virtual void close () {}
-        ///Gracefully exits the window
+        /// Gracefully exits the window
         virtual void exit() {}
-        ///Sets the visibility of the window
+        /// Sets the visibility of the window
         virtual void setVisible(bool visible);
-        ///Returns the visibility state of the window
-        virtual bool isVisible();
+        /// Returns the visibility state of the window
+        bool isVisible();
         void center();
     };
 

@@ -23,8 +23,6 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
     layout->addWidget (mBottom =
         new TableBottomBox (creatorFactory, document, id, this), 0);
 
@@ -166,4 +164,3 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     }
     return false;
 }
-

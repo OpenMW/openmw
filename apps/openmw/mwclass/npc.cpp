@@ -751,12 +751,7 @@ namespace MWClass
                 attacker.getClass().getNpcStats(attacker).addWerewolfKill();
             }
 
-            // Simple check for who attacked first: if the player attacked first, a crimeId should be set
-            // Doesn't handle possible edge case where no one reported the assault, but in such a case,
-            // for bystanders it is not possible to tell who attacked first, anyway.
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (attacker == player && ptr.getClass().getNpcStats(ptr).getCrimeId() != -1 && ptr != player)
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
+            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, attacker);
         }
     }
 
@@ -1233,18 +1228,17 @@ namespace MWClass
 
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
-        ensureCustomData(ptr);
-        // If we do the following instead we get a sizable speedup, but this causes compatibility issues
-        // with 0.30 savegames, where some state in CreatureStats was not saved yet,
-        // and therefore needs to be loaded from ESM records. TODO: re-enable this in a future release.
-        /*
-        if (!ptr.getRefData().getCustomData())
+        if (state.mVersion > 0)
         {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::auto_ptr<NpcCustomData> data (new NpcCustomData);
-            ptr.getRefData().setCustomData (data.release());
+            if (!ptr.getRefData().getCustomData())
+            {
+                // Create a CustomData, but don't fill it from ESM records (not needed)
+                std::auto_ptr<NpcCustomData> data (new NpcCustomData);
+                ptr.getRefData().setCustomData (data.release());
+            }
         }
-        */
+        else
+            ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 

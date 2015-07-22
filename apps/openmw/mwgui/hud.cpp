@@ -10,7 +10,6 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -518,7 +517,19 @@ namespace MWGui
     {
         mCrosshair->setVisible (visible);
     }
-
+    
+    void HUD::setCrosshairOwned(bool owned)
+    {
+        if(owned)
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair_Owned");
+        }
+        else
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair");
+        }
+    }
+    
     void HUD::setHmsVisible(bool visible)
     {
         mHealth->setVisible(visible);

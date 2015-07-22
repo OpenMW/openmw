@@ -313,27 +313,27 @@ namespace MWMechanics
             return path; // for some reason couldn't build a path
 
         // reconstruct path to return, using world co-ordinates
-        float xCell = 0;
-        float yCell = 0;
+        int xCell = 0;
+        int yCell = 0;
         if (mIsExterior)
         {
-            xCell = static_cast<float>(mPathgrid->mData.mX * ESM::Land::REAL_SIZE);
-            yCell = static_cast<float>(mPathgrid->mData.mY * ESM::Land::REAL_SIZE);
+            xCell = mPathgrid->mData.mX * ESM::Land::REAL_SIZE;
+            yCell = mPathgrid->mData.mY * ESM::Land::REAL_SIZE;
         }
 
         while(graphParent[current] != -1)
         {
             ESM::Pathgrid::Point pt = mPathgrid->mPoints[current];
-            pt.mX += static_cast<int>(xCell);
-            pt.mY += static_cast<int>(yCell);
+            pt.mX += xCell;
+            pt.mY += yCell;
             path.push_front(pt);
             current = graphParent[current];
         }
 
         // add first node to path explicitly
         ESM::Pathgrid::Point pt = mPathgrid->mPoints[start];
-        pt.mX += static_cast<int>(xCell);
-        pt.mY += static_cast<int>(yCell);
+        pt.mX += xCell;
+        pt.mY += yCell;
         path.push_front(pt);
         return path;
     }

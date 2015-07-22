@@ -59,16 +59,11 @@ namespace MWRender
 
     private:
         osg::ref_ptr<osg::Group> mParent;
-        Resource::ResourceSystem* mResourceSystem;
 
         osg::ref_ptr<osgParticle::ParticleSystem> mParticleSystem;
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
 
         std::vector<Emitter> mEmitters;
-
-        float mRippleLifeTime;
-        float mRippleRotSpeed;
-
     };
 
 }
