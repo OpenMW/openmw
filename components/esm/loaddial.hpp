@@ -4,7 +4,6 @@
 #include <string>
 #include <list>
 #include <map>
-#include <set>
 
 #include "loadinfo.hpp"
 

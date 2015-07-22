@@ -1,13 +1,8 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
-#include <string>
-
 #include <OgreVector3.h>
 #include <OgreQuaternion.h>
-
-#include "esmreader.hpp"
-#include "esmwriter.hpp"
 
 namespace ESM
 {

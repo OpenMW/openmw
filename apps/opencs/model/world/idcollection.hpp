@@ -4,7 +4,6 @@
 #include <components/esm/esmreader.hpp>
 
 #include "collection.hpp"
-#include "record.hpp"
 
 namespace CSMWorld
 {
