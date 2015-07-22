@@ -72,6 +72,7 @@ option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_NIFTEST "build nif file tester" OFF)
 option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
 
 # OS X deployment
@@ -396,6 +397,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_ESMTOOL)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_NIFTEST)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_NIFTEST)
     IF(BUILD_MWINIIMPORTER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-iniimporter" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_MWINIIMPORTER)
@@ -580,6 +584,10 @@ endif()
 if (BUILD_WIZARD)
    add_subdirectory(apps/wizard)
 endif()
+
+if (BUILD_NIFTEST)
+    add_subdirectory(apps/niftest)
+endif(BUILD_NIFTEST)
 
 # UnitTests
 if (BUILD_UNITTESTS)
