@@ -50,6 +50,24 @@ QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, i
     return mapFromSource (dynamic_cast<IdTableBase&> (*sourceModel()).getModelIndex (id, column));
 }
 
+void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel *model)
+{
+    QSortFilterProxyModel::setSourceModel(model);
+
+    connect(sourceModel(), 
+            SIGNAL(rowsRemoved(const QModelIndex &, int, int)), 
+            this, 
+            SLOT(sourceRowsChanged(const QModelIndex &, int, int)));
+    connect(sourceModel(), 
+            SIGNAL(rowsInserted(const QModelIndex &, int, int)), 
+            this, 
+            SLOT(sourceRowsChanged(const QModelIndex &, int, int)));
+    connect(sourceModel(), 
+            SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), 
+            this, 
+            SLOT(sourceDataChanged(const QModelIndex &, const QModelIndex &)));
+}
+
 void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::Node>& filter)
 {
     beginResetModel();
@@ -81,4 +99,14 @@ void CSMWorld::IdTableProxyModel::refreshFilter()
 {
     updateColumnMap();
     invalidateFilter();
+}
+
+void CSMWorld::IdTableProxyModel::sourceRowsChanged(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
+{
+    refreshFilter();
+}
+
+void CSMWorld::IdTableProxyModel::sourceDataChanged(const QModelIndex &/*topLeft*/, const QModelIndex &/*bottomRight*/)
+{
+    refreshFilter();
 }
