@@ -388,9 +388,44 @@ namespace MWMechanics
             const ESM::MagicEffect *magicEffect =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
                 effectIt->mEffectID);
-
+            
             if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
+            
+            if (magicEffect->mIndex == ESM::MagicEffect::WaterWalking)
+            {
+                MWWorld::Ptr ptr = caster;
+                if (target != caster)
+                    ptr = target;
+                
+                if (!ptr.getClass().isActor() || ptr.getClass().isPureWaterCreature(ptr))
+                    continue;
+                
+                const MWWorld::CellStore *cell = ptr.getCell();
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                
+                if (cell->getCell()->hasWater())
+                {
+                    const ESM::Position position = ptr.getRefData().getPosition();
+                    //const float casterHeight = ptr.getCellRef().getScale();  // FIXME: need PhysicsSystem::getHalfExtents * getScale()
+
+                    if (world->isSwimming(ptr) &&
+                            MWBase::Environment::get().getWorld()->castRay(
+                            position.pos[0], position.pos[1], position.pos[2],
+                            position.pos[0], position.pos[1], cell->getWaterLevel() /*+ casterHeight*/ ))
+                    {
+                        // not enough space to place caster
+                        MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
+                        continue;
+                    }
+                    else if (world->isUnderwater(cell, position.asVec3()))
+                    {
+                        // move target to surface
+                        // FIXME: need to check ToggleCollisionMode
+                        world->moveObject(ptr, position.pos[0], position.pos[1], cell->getWaterLevel());
+                    }
+                }
+            }
 
             // If player is healing someone, show the target's HP bar
             if (castByPlayer && target != caster
@@ -762,35 +797,6 @@ namespace MWMechanics
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         int school = 0;
-
-        if(mCaster.getClass().isActor()
-                && MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>()
-                .find(ESM::MagicEffect::WaterWalking))
-        {
-            const MWWorld::CellStore *cell = mCaster.getCell();
-            
-            if(cell->getCell()->hasWater())
-            {
-                const ESM::Position casterPosition = mCaster.getRefData().getPosition();
-                const float casterHeight = mCaster.getCellRef().getScale();
-
-                if(MWBase::Environment::get().getWorld()->castRay(
-                        casterPosition.pos[0], casterPosition.pos[1], casterPosition.pos[2],
-                        casterPosition.pos[0], casterPosition.pos[1], cell->getWaterLevel() + casterHeight ))
-                {
-                    // not enough space to place caster
-                    MWBase::Environment::get().getWindowManager()->messageBox ("#{sMagicInvalidEffect}");
-                    return 0;
-                }
-                else if(MWBase::Environment::get().getWorld()->isUnderwater(cell, casterPosition.asVec3()))
-                {
-                    // move the caster to surface
-                    ESM::Position newCasterPosition = casterPosition;
-                    newCasterPosition.pos[2] = cell->getWaterLevel();
-                    mCaster.getRefData().setPosition(newCasterPosition);
-                }
-            }
-        }
         
         if (mCaster.getClass().isActor() && !mAlwaysSucceed)
         {
