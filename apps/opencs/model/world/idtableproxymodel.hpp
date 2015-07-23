@@ -11,6 +11,8 @@
 
 #include "../filter/node.hpp"
 
+#include "columns.hpp"
+
 namespace CSMWorld
 {
     class IdTableProxyModel : public QSortFilterProxyModel
@@ -19,6 +21,11 @@ namespace CSMWorld
 
             boost::shared_ptr<CSMFilter::Node> mFilter;
             std::map<int, int> mColumnMap; // column ID, column index in this model (or -1)
+
+            // Cache of enum values for enum columns (e.g. Modified, Record Type).
+            // Used to speed up comparisons during the sort by such columns.
+            typedef std::map<Columns::ColumnId, std::vector<std::string> > EnumColumnCache;
+            mutable EnumColumnCache mEnumColumnCache;
 
         private:
 

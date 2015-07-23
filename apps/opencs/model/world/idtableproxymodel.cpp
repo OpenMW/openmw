@@ -60,6 +60,20 @@ void CSMWorld::IdTableProxyModel::setFilter (const boost::shared_ptr<CSMFilter::
 
 bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
+    Columns::ColumnId id = static_cast<Columns::ColumnId>(left.data(ColumnBase::Role_ColumnId).toInt());
+    EnumColumnCache::const_iterator valuesIt = mEnumColumnCache.find(id);
+    if (valuesIt == mEnumColumnCache.end())
+    {
+        if (Columns::hasEnums(id))
+        {
+            valuesIt = mEnumColumnCache.insert(std::make_pair(id, Columns::getEnums(id))).first;
+        }
+    }
+
+    if (valuesIt != mEnumColumnCache.end())
+    {
+        return valuesIt->second[left.data().toInt()] < valuesIt->second[right.data().toInt()];
+    }
     return QSortFilterProxyModel::lessThan(left, right);
 }
 
