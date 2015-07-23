@@ -37,6 +37,8 @@ namespace CSMWorld
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
+            virtual void setSourceModel(QAbstractItemModel *model);
+
             void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
 
             void refreshFilter();
@@ -46,6 +48,12 @@ namespace CSMWorld
             bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
             virtual bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
+
+        private slots:
+
+            void sourceRowsChanged(const QModelIndex &parent, int start, int end);
+
+            void sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
     };
 }
 
