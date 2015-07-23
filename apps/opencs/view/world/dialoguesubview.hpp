@@ -197,12 +197,14 @@ namespace CSVWorld
             void updateCurrentId();
 
             bool isLocked() const;
+
+			int GetColumnIndex(CSMWorld::Columns::ColumnId column);
         
         public:
 
             SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+	    virtual void setEditLock (bool locked);
 
         private slots:
 
