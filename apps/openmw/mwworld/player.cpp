@@ -22,7 +22,6 @@
 
 #include "class.hpp"
 #include "ptr.hpp"
-#include "inventorystore.hpp"
 #include "cellstore.hpp"
 
 namespace MWWorld

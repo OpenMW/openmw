@@ -1,7 +1,6 @@
 #include "manualref.hpp"
 
 #include "esmstore.hpp"
-#include "cellstore.hpp"
 
 namespace
 {

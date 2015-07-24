@@ -10,7 +10,6 @@
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
-#include <components/esm/fogstate.hpp>
 #include <components/esm/records.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
