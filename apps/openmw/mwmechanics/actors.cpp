@@ -699,7 +699,9 @@ namespace MWMechanics
             {
                 // If drowning, apply 3 points of damage per second
                 static const float fSuffocationDamage = world->getStore().get<ESM::GameSetting>().find("fSuffocationDamage")->getFloat();
-                ptr.getClass().setActorHealth(ptr, stats.getHealth().getCurrent() - fSuffocationDamage*duration);
+                DynamicStat<float> health = stats.getHealth();
+                health.setCurrent(health.getCurrent() - fSuffocationDamage*duration);
+                stats.setHealth(health);
 
                 // Play a drowning sound
                 MWBase::SoundManager *sndmgr = MWBase::Environment::get().getSoundManager();

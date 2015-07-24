@@ -394,8 +394,10 @@ namespace MWClass
                     damage = scaleDamage(damage, attacker, ptr);
 
                 MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
-                float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-                setActorHealth(ptr, health, attacker);
+
+                MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+                health.setCurrent(health.getCurrent() - damage);
+                getCreatureStats(ptr).setHealth(health);
             }
             else
             {
@@ -429,26 +431,6 @@ namespace MWClass
                 return;
         }
     }
-
-    void Creature::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
-    {
-        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        bool wasDead = crstats.isDead();
-
-        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
-        stat.setCurrent(health);
-        crstats.setHealth(stat);
-
-        if(!wasDead && crstats.isDead())
-        {
-            // actor was just killed
-        }
-        else if(wasDead && !crstats.isDead())
-        {
-            // actor was just resurrected
-        }
-    }
-
 
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const

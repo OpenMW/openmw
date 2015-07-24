@@ -136,12 +136,6 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
-            virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
-            ///< Sets a new current health value for the actor, optionally specifying the object causing
-            /// the change. Use this instead of using CreatureStats directly as this will make sure the
-            /// correct dialog and actor states are properly handled when being hurt or healed.
-            /// (default implementation: throw an exception)
-
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 

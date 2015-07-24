@@ -87,8 +87,6 @@ namespace MWClass
 
             virtual void block(const MWWorld::Ptr &ptr) const;
 
-            virtual void setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const;
-
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
