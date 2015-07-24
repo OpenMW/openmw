@@ -20,7 +20,7 @@
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
-#include "character.hpp" // fixme: for getActiveWeapon
+#include "character.hpp"
 
 #include "aicombataction.hpp"
 #include "combat.hpp"
@@ -291,7 +291,7 @@ namespace MWMechanics
         // Get weapon characteristics
         if (actorClass.hasInventoryStore(actor))
         {
-            //Get weapon speed and range
+            //Get weapon range
             MWWorld::ContainerStoreIterator weaponSlot =
                 MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
 
