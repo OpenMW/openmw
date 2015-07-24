@@ -2,7 +2,6 @@
 #define CSM_WOLRD_REFIDADAPTERIMP_H
 
 #include <map>
-#include <iostream>
 
 #include <QVariant>
 

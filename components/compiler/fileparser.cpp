@@ -1,7 +1,5 @@
 #include "fileparser.hpp"
 
-#include <iostream>
-
 #include "tokenloc.hpp"
 #include "scanner.hpp"
 

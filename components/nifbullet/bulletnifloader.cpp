@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <vector>
 #include <list>
-#include <iostream>
 #include <stdexcept>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>

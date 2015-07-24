@@ -1,7 +1,5 @@
 #include "aifollow.hpp"
 
-#include <iostream>
-
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/world.hpp"

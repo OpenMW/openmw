@@ -5,17 +5,12 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwrender/animation.hpp"
-
 
 #include "creaturestats.hpp"
 #include "steering.hpp"
