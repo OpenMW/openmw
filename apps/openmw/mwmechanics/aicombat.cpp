@@ -181,13 +181,15 @@ namespace MWMechanics
         // get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
         
+        const MWWorld::Class& actorClass = actor.getClass();
 
         
         //General description
-        if(actor.getClass().getCreatureStats(actor).isDead())
+        if (actorClass.getCreatureStats(actor).isDead())
             return true;
 
-        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        MWWorld::Ptr target = world->searchPtrViaActorId(mTargetActorId);
         if (target.isEmpty())
             return false;
 
@@ -195,9 +197,6 @@ namespace MWMechanics
                                                                                 // with the MechanicsManager
                 || target.getClass().getCreatureStats(target).isDead())
             return true;
-
-        const MWWorld::Class& actorClass = actor.getClass();
-        MWBase::World* world = MWBase::Environment::get().getWorld();
 
 
         //Update every frame
