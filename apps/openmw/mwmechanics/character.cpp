@@ -1052,7 +1052,7 @@ bool CharacterController::updateWeaponState()
     }
 
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    priorityWeapon.mPriority[MWRender::Animation::BoneGroup_LowerBody] = 0;
+    priorityWeapon.mPriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
