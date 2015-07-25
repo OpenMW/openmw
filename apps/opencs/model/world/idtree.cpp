@@ -171,10 +171,10 @@ QModelIndex CSMWorld::IdTree::index (int row, int column, const QModelIndex& par
         encodedId = this->foldIndexAddress(parent);
     }
 
-    if (row<0 || row>=idCollection()->getSize())
+    if (row < 0 || row >= rowCount(parent))
         return QModelIndex();
 
-    if (column<0 || column>=idCollection()->getColumns())
+    if (column < 0 || column >= columnCount(parent))
         return QModelIndex();
 
     return createIndex(row, column, encodedId); // store internal id
