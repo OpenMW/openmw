@@ -567,7 +567,8 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                    runtime.push((ptr.getClass().hasInventoryStore(ptr) || ptr.getClass().isBipedal(ptr)) &&
+                                ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
                 }
         };
 
@@ -580,7 +581,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push(ptr.getClass().getNpcStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
+                    runtime.push(ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Spell);
                 }
         };
 
