@@ -408,14 +408,13 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
-            float vel, speedmult = 1.0f;
-
             bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
                     && !MWBase::Environment::get().getWorld()->isFlying(mPtr);
 
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
+            mAdjustMovementAnimSpeed = true;
             if (mPtr.getClass().getTypeName() == typeid(ESM::Creature).name()
                     && !(mPtr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Flies))
             {
@@ -423,30 +422,28 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 const StateInfo *stateinfo = std::find_if(sMovementList, sMovementListEnd, FindCharState(walkState));
                 anim = stateinfo->groupname;
 
-                if (mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
-                    speedmult = mMovementSpeed / vel;
-                else
+                mMovementAnimSpeed = mAnimation->getVelocity(anim);
+                if (mMovementAnimSpeed <= 1.0f)
+                {
                     // Another bug: when using a fallback animation (e.g. RunForward as fallback to SwimRunForward),
                     // then the equivalent Walk animation will not use a fallback, and if that animation doesn't exist
                     // we will play without any scaling.
                     // Makes the speed attribute of most water creatures totally useless.
                     // And again, this can not be fixed without patching game data.
-                    speedmult = 1.f;
+                    mAdjustMovementAnimSpeed = false;
+                    mMovementAnimSpeed = 1.f;
+                }
             }
             else
             {
-                if(mMovementSpeed > 0.0f && (vel=mAnimation->getVelocity(anim)) > 1.0f)
-                {
-                    speedmult = mMovementSpeed / vel;
-                }
-                else if (mMovementState == CharState_TurnLeft || mMovementState == CharState_TurnRight)
-                    speedmult = 1.f; // adjusted each frame
-                else if (mMovementSpeed > 0.0f)
+                mMovementAnimSpeed = mAnimation->getVelocity(anim);
+
+                if (mMovementAnimSpeed <= 1.0f)
                 {
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
                     // We use the third person velocities instead.
                     // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    speedmult = mMovementSpeed / (isrunning ? 222.857f : 154.064f);
+                    mMovementAnimSpeed = (isrunning ? 222.857f : 154.064f);
                     mMovementAnimationControlled = false;
                 }
             }
@@ -462,7 +459,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             }
 
             mAnimation->play(mCurrentMovement, priorityMovement, movemask, false,
-                             speedmult, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
+                             1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
 
@@ -655,7 +652,6 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAnimation(anim)
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
-    , mMovementSpeed(0.0f)
     , mHasMovedInXY(false)
     , mMovementAnimationControlled(true)
     , mDeathState(CharState_None)
@@ -1487,6 +1483,7 @@ void CharacterController::update(float duration)
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
     osg::Vec3f movement(0.f, 0.f, 0.f);
+    float speed = 0.f;
 
     updateMagicEffects();
 
@@ -1550,10 +1547,10 @@ void CharacterController::update(float duration)
             vec = osg::Vec3f(0.f, 0.f, 0.f);
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
-        mMovementSpeed = cls.getSpeed(mPtr);
+        speed = cls.getSpeed(mPtr);
 
-        vec.x() *= mMovementSpeed;
-        vec.y() *= mMovementSpeed;
+        vec.x() *= speed;
+        vec.y() *= speed;
 
         CharacterState movestate = CharState_None;
         CharacterState idlestate = CharState_SpecialIdle;
@@ -1807,6 +1804,11 @@ void CharacterController::update(float duration)
             if (duration > 0)
                 mAnimation->adjustSpeedMult(mCurrentMovement, std::min(1.5f, std::abs(rot.z()) / duration / static_cast<float>(osg::PI)));
         }
+        else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
+        {
+            float speedmult = speed / mMovementAnimSpeed;
+            mAnimation->adjustSpeedMult(mCurrentMovement, speedmult);
+        }
 
         if (!mSkipAnim)
         {
@@ -1845,7 +1847,7 @@ void CharacterController::update(float duration)
         moved = osg::Vec3f(0.f, 0.f, 0.f);
 
     // Ensure we're moving in generally the right direction...
-    if(mMovementSpeed > 0.f)
+    if(speed > 0.f)
     {
         float l = moved.length();
 
@@ -1926,7 +1928,6 @@ void CharacterController::clearAnimQueue()
         mAnimation->disable(mAnimQueue.front().first);
     mAnimQueue.clear();
 }
-
 
 void CharacterController::forceStateUpdate()
 {

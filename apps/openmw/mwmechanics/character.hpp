@@ -150,7 +150,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     CharacterState mMovementState;
     std::string mCurrentMovement;
-    float mMovementSpeed;
+    float mMovementAnimSpeed;
+    bool mAdjustMovementAnimSpeed;
     bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 
