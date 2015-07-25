@@ -1,12 +1,12 @@
 #include "aipursue.hpp"
 
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
-#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 

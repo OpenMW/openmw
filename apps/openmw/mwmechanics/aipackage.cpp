@@ -1,7 +1,10 @@
-
 #include "aipackage.hpp"
 
 #include <cmath>
+
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadland.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"

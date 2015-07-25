@@ -17,6 +17,8 @@
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>
 
+#include <components/esm/loadcell.hpp>
+
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 

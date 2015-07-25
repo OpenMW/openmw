@@ -1,6 +1,7 @@
 #include "aifollow.hpp"
 
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

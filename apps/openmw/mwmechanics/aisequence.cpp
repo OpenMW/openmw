@@ -1,5 +1,6 @@
-
 #include "aisequence.hpp"
+
+#include <limits>
 
 #include "aipackage.hpp"
 #include "aistate.hpp"
@@ -14,9 +15,6 @@
 
 #include <components/esm/aisequence.hpp>
 
-#include "../mwworld/class.hpp"
-#include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 

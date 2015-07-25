@@ -12,6 +12,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/esm/fogstate.hpp>
+#include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/files/memorystream.hpp>
