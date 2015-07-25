@@ -448,17 +448,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 }
             }
 
-            MWRender::Animation::AnimPriority priorityMovement (Priority_Movement);
-            if ((movement == CharState_TurnLeft || movement == CharState_TurnRight)
-                    && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()
-                    && MWBase::Environment::get().getWorld()->isFirstPerson())
-            {
-                priorityMovement.mPriority[MWRender::Animation::BoneGroup_Torso] = 0;
-                priorityMovement.mPriority[MWRender::Animation::BoneGroup_LeftArm] = 0;
-                priorityMovement.mPriority[MWRender::Animation::BoneGroup_RightArm] = 0;
-            }
-
-            mAnimation->play(mCurrentMovement, priorityMovement, movemask, false,
+            mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
                              1.f, ((mode!=2)?"start":"loop start"), "stop", 0.0f, ~0ul);
         }
     }
@@ -1741,10 +1731,7 @@ void CharacterController::update(float duration)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            // Don't play turning animations during attack. It would break positioning of the arrow bone when releasing a shot.
-            // Actually, in vanilla the turning animation is not even played when merely having equipped the weapon,
-            // but I don't think we need to go as far as that.
-            else if(rot.z() != 0.0f && !inwater && !sneak && mUpperBodyState < UpperCharState_StartToMinAttack)
+            else if(rot.z() != 0.0f && !inwater && !sneak && !MWBase::Environment::get().getWorld()->isFirstPerson())
             {
                 if(rot.z() > 0.0f)
                     movestate = CharState_TurnRight;
