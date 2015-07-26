@@ -45,6 +45,7 @@ namespace
         return -std::asin(dir.z() / len);
     }
 
+    const float REACTION_INTERVAL = 0.25f;
 
     const float PATHFIND_Z_REACH = 50.0f;
     // distance at which actor pays more attention to decide whether to shortcut or stick to pathgrid
@@ -181,15 +182,11 @@ namespace MWMechanics
         // get or create temporary storage
         AiCombatStorage& storage = state.get<AiCombatStorage>();
         
-        const MWWorld::Class& actorClass = actor.getClass();
-
-        
         //General description
-        if (actorClass.getCreatureStats(actor).isDead())
+        if (actor.getClass().getCreatureStats(actor).isDead())
             return true;
 
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWWorld::Ptr target = world->searchPtrViaActorId(mTargetActorId);
+        MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         if (target.isEmpty())
             return false;
 
@@ -217,8 +214,6 @@ namespace MWMechanics
         UpdateActorsMovement(actor, movement);
 
         bool& attack = storage.mAttack;
-        bool& readyToAttack = storage.mReadyToAttack;
-
         if (attack && (characterController.getAttackStrength() >= storage.mStrength || characterController.readyToPrepareAttack()))
             attack = false;
 
@@ -228,14 +223,22 @@ namespace MWMechanics
         actionCooldown -= duration;
         
         float& timerReact = storage.mTimerReact;
-        float tReaction = 0.25f;
-        if(timerReact < tReaction)
+        if(timerReact < REACTION_INTERVAL)
         {
             timerReact += duration;
             return false;
         }
+        else
+        {
+            timerReact = 0;
+            return reactionTimeActions(actor, characterController, storage, target);
+        }
+    }
 
-        //Update with period = tReaction
+    bool AiCombat::reactionTimeActions(const MWWorld::Ptr& actor, CharacterController& characterController, 
+        AiCombatStorage& storage, MWWorld::Ptr target)
+    {
+        MWMechanics::Movement& movement = storage.mMovement;
 
         // Stop attacking if target is not seen
         if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
@@ -245,7 +248,6 @@ namespace MWMechanics
             return false; // TODO: run away instead of doing nothing
         }
 
-        timerReact = 0;
         const MWWorld::CellStore*& currentCell = storage.mCell;
         bool cellChange = currentCell && (actor.getCell() != currentCell);
         if(!currentCell || cellChange)
@@ -253,8 +255,10 @@ namespace MWMechanics
             currentCell = actor.getCell();
         }
 
+        const MWWorld::Class& actorClass = actor.getClass();
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
+        float& actionCooldown = storage.mActionCooldown;
         if (actionCooldown > 0)
             return false;
 
@@ -276,6 +280,7 @@ namespace MWMechanics
         float weapRange = 1.0f;
 
         // Get weapon characteristics
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         if (actorClass.hasInventoryStore(actor))
         {
             //Get weapon speed and range
@@ -326,13 +331,14 @@ namespace MWMechanics
 
         
         float& strength = storage.mStrength;
+        bool& readyToAttack = storage.mReadyToAttack;
         // start new attack
         if(readyToAttack && characterController.readyToStartAttack())
         {
             if (storage.mAttackCooldown <= 0)
             {
-                attack = true; // attack starts just now
-                characterController.setAttackingOrSpell(attack);
+                storage.mAttack = true; // attack starts just now
+                characterController.setAttackingOrSpell(true);
 
                 if (!distantCombat)
                     chooseBestAttack(weapon, movement);
@@ -356,7 +362,7 @@ namespace MWMechanics
                 storage.mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(), baseDelay + 0.9);
             }
             else
-                storage.mAttackCooldown -= tReaction;
+                storage.mAttackCooldown -= REACTION_INTERVAL;
         }
 
 
@@ -400,7 +406,7 @@ namespace MWMechanics
 
         bool isStuck = false;
         float speed = 0.0f;
-        if(movement.mPosition[1] && (lastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * tReaction / 2)
+        if(movement.mPosition[1] && (lastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * REACTION_INTERVAL / 2)
             isStuck = true;
 
         lastActorPos = vActorPos;
@@ -437,7 +443,7 @@ namespace MWMechanics
             if (distantCombat)
             {
                 osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-                osg::Vec3f vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, tReaction, weaptype, strength);
+                osg::Vec3f vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, REACTION_INTERVAL, weaptype, strength);
                 lastTargetPos = vTargetPos;
                 movement.mRotation[0] = getXAngleToDir(vAimDir);
                 movement.mRotation[2] = getZAngleToDir(vAimDir);
@@ -458,8 +464,8 @@ namespace MWMechanics
             {
                 if(movement.mPosition[0] || movement.mPosition[1])
                 {
-                    timerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
-                    combatMove = true;
+                    storage.mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
+                    storage.mCombatMove = true;
                 }
                 // only NPCs are smart enough to use dodge movements
                 else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
@@ -468,8 +474,8 @@ namespace MWMechanics
                     if (Misc::Rng::rollClosedProbability() < 0.25)
                     {
                         movement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
-                        timerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
-                        combatMove = true;
+                        storage.mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
+                        storage.mCombatMove = true;
                     }
                 }
 
@@ -497,7 +503,7 @@ namespace MWMechanics
             {
                 if(speed == 0.0f) speed = actorClass.getSpeed(actor);
                 // maximum dist before pit/obstacle for actor to avoid them depending on his speed
-                float maxAvoidDist = tReaction * speed + speed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
+                float maxAvoidDist = REACTION_INTERVAL * speed + speed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
                 preferShortcut = checkWayIsClear(vActorPos, vTargetPos, osg::Vec3f(vDirToTarget.x(), vDirToTarget.y(), 0).length() > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
             }
 
@@ -558,8 +564,8 @@ namespace MWMechanics
             if (readyToAttack)
             {
                 // to stop possible sideway moving after target moved out of attack range
-                combatMove = true;
-                timerCombatMove = 0;
+                storage.mCombatMove = true;
+                storage.mTimerCombatMove = 0;
             }
             readyToAttack = false;
         }
