@@ -22,7 +22,6 @@ namespace ESM
                     mId = esm.getHString();
                     hasName = true;
                     break;
-                    break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
                     break;
@@ -69,6 +68,7 @@ namespace ESM
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();
                     isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
