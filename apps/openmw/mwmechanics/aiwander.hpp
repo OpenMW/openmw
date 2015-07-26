@@ -84,6 +84,7 @@ namespace MWMechanics
             void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+            void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;

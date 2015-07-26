@@ -201,26 +201,11 @@ namespace MWMechanics
             onIdleStatePerFrameActions(actor, duration, storage);
         }
 
-        // Are we there yet?
-        if ((wanderState == Wander_Walking) &&
-            storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
+        if (wanderState == Wander_Walking)
         {
-            stopWalking(actor, storage);
-            wanderState = Wander_ChooseAction;
-            mHasReturnPosition = false;
+            onWalkingStatePerFrameActions(actor, duration, storage, pos);
         }
 
-
-        
-        if (wanderState == Wander_Walking) // have not yet reached the destination
-        {
-            // turn towards the next point in mPath
-            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-
-            evadeObstacles(actor, storage, duration);
-        }
-        
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         if (wanderState == Wander_ChooseAction)
@@ -360,6 +345,27 @@ namespace MWMechanics
         if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             storage.mState = Wander_ChooseAction;
+        }
+    }
+
+    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, 
+        float duration, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        // Are we there yet?
+        if (storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
+        {
+            stopWalking(actor, storage);
+            storage.mState = Wander_ChooseAction;
+            mHasReturnPosition = false;
+        }
+        else
+        {
+            // have not yet reached the destination
+            //... turn towards the next point in mPath
+            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+
+            evadeObstacles(actor, storage, duration);
         }
     }
 
