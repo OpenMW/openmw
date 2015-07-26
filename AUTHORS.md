@@ -88,6 +88,7 @@ Programmers
     Nolan Poe (nopoe)
     Paul McElroy (Greendogo)
     Pieter van der Kloet (pvdk)
+    pkubik
     Radu-Marius Popovici (rpopovici)
     rdimesio
     riothamus
