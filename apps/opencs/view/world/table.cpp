@@ -374,8 +374,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
-    connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    //connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+    //    this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
+        this, SLOT (rowAdded (const std::string &)));
 
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
     /// the records status column (for permanence reasons)
@@ -793,12 +795,13 @@ void CSVWorld::Table::globalFilterModifiedChanged(int state)
     recordFilterChanged(mFilter);
 }
 
-void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)
+void CSVWorld::Table::rowAdded(const std::string &id)
 {
     tableSizeUpdate();
     if(mJumpToAddedRecord)
     {
-        selectRow(end);
+        int idColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+        selectRow(mProxyModel->getModelIndex(id, idColumn).row());
 
         if(mUnselectAfterJump)
             clearSelection();

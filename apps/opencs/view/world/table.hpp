@@ -148,7 +148,7 @@ namespace CSVWorld
 
             void globalFilterModifiedChanged (int state);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void rowAdded(const std::string &id);
     };
 }
 
