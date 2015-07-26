@@ -211,21 +211,9 @@ namespace MWMechanics
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
         const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
     {
-        if(mDuration)
+        if (isPackageCompleted(actor, storage))
         {
-            // End package if duration is complete or mid-night hits:
-            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            if((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
-                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
-            {
-                if(!mRepeat)
-                {
-                    stopWalking(actor, storage);
-                    return true;
-                }
-                else
-                    mStartTime = currentTime;
-            }
+            return true;
         }
 
         // Initialization to discover & store allowed node points for this actor.
@@ -284,6 +272,30 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+        if (mDuration)
+        {
+            // End package if duration is complete or mid-night hits:
+            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            if ((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
+                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
+            {
+                if (!mRepeat)
+                {
+                    stopWalking(actor, storage);
+                    return true;
+                }
+                else
+                {
+                    mStartTime = currentTime;
+                }
+            }
+        }
+        // if get here, not yet completed
+        return false;
     }
 
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)
