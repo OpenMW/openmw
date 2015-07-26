@@ -199,15 +199,18 @@ namespace MWMechanics
 
         float& lastReaction = storage.mReaction;
         lastReaction += duration;
-        if(lastReaction < REACTION_INTERVAL)
+        if (REACTION_INTERVAL <= lastReaction)
         {
-            return false;
+            lastReaction = 0;
+            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
         }
         else
-            lastReaction = 0;
+            return false;
+    }
 
-        // NOTE: everything below get updated every REACTION_INTERVAL seconds
-
+    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
+        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
+    {
         if(mDuration)
         {
             // End package if duration is complete or mid-night hits:

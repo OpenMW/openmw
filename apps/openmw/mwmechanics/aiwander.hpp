@@ -87,6 +87,8 @@ namespace MWMechanics
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
+                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
