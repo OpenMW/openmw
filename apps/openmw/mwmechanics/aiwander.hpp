@@ -83,8 +83,10 @@ namespace MWMechanics
             void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
             void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
+            void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
+            void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;

@@ -193,39 +193,7 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
         
-        
-        WanderState& wanderState = storage.mState;
-
-        if (wanderState == Wander_IdleNow)
-        {
-            onIdleStatePerFrameActions(actor, duration, storage);
-        }
-
-        if (wanderState == Wander_Walking)
-        {
-            onWalkingStatePerFrameActions(actor, duration, storage, pos);
-        }
-
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
-        if (wanderState == Wander_ChooseAction)
-        {
-            short unsigned& idleAnimation = storage.mIdleAnimation;
-            idleAnimation = getRandomIdle();
-
-            if(!idleAnimation && mDistance)
-            {
-                wanderState = Wander_MoveNow;
-            }
-            else
-            {
-                // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
-                MWWorld::TimeStamp currentTime = world->getTimeStamp();
-                mStartTime = currentTime;
-                playIdle(actor, idleAnimation);
-                wanderState = Wander_IdleNow;
-            }
-        }
+        doPerFrameActionsForState(actor, duration, storage, pos);
 
         playIdleDialogueRandomly(actor);
 
@@ -243,7 +211,7 @@ namespace MWMechanics
         if(mDuration)
         {
             // End package if duration is complete or mid-night hits:
-            MWWorld::TimeStamp currentTime = world->getTimeStamp();
+            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
             if((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
                 (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
             {
@@ -288,12 +256,13 @@ namespace MWMechanics
 
                 if(storage.mPathFinder.isPathConstructed())
                 {
-                    wanderState = Wander_Walking;
+                    storage.mState = Wander_Walking;
                 }
             }
         }
 
         // Allow interrupting a walking actor to trigger a greeting
+        WanderState& wanderState = storage.mState;
         if ((wanderState == Wander_IdleNow) || (wanderState == Wander_Walking))
         {
             playGreetingIfPlayerGetsTooClose(actor, storage);
@@ -312,6 +281,32 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        switch (storage.mState)
+        {
+            case Wander_IdleNow:
+                onIdleStatePerFrameActions(actor, duration, storage);
+                break;
+
+            case Wander_Walking:
+                onWalkingStatePerFrameActions(actor, duration, storage, pos);
+                break;
+
+            case Wander_ChooseAction:
+                onChooseActionStatePerFrameActions(actor, storage);
+                break;
+
+            case Wander_MoveNow:
+                break;  // nothing to do
+
+            default:
+                // should never get here
+                assert(false);
+                break;
+        }
     }
 
     void AiWander::onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
@@ -366,6 +361,26 @@ namespace MWMechanics
             actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
 
             evadeObstacles(actor, storage, duration);
+        }
+    }
+
+    void AiWander::onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+
+        short unsigned& idleAnimation = storage.mIdleAnimation;
+        idleAnimation = getRandomIdle();
+
+        if (!idleAnimation && mDistance)
+        {
+            storage.mState = Wander_MoveNow;
+        }
+        else
+        {
+            // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
+            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            mStartTime = currentTime;
+            playIdle(actor, idleAnimation);
+            storage.mState = Wander_IdleNow;
         }
     }
 
