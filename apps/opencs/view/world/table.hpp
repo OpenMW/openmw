@@ -140,7 +140,7 @@ namespace CSVWorld
 
             void updateUserSetting (const QString &name, const QStringList &list);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void rowAdded(const std::string &id);
     };
 }
 
