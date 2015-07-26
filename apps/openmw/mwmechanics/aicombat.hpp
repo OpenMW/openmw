@@ -60,6 +60,11 @@ namespace MWMechanics
 
 
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+
+            /// Transfer desired movement (from AiCombatStorage) to Actor
+            void UpdateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& movement);
+            void RotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
+                MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement);
     };
     
     

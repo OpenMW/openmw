@@ -214,20 +214,8 @@ namespace MWMechanics
             }
         }
 
-        actorClass.getMovementSettings(actor) = movement;
-        actorClass.getMovementSettings(actor).mRotation[0] = 0;
-        actorClass.getMovementSettings(actor).mRotation[2] = 0;
+        UpdateActorsMovement(actor, movement);
 
-        if(movement.mRotation[2] != 0)
-        {
-            if(zTurn(actor, movement.mRotation[2])) movement.mRotation[2] = 0;
-        }
-
-        if(movement.mRotation[0] != 0)
-        {
-            if(smoothTurn(actor, movement.mRotation[0], 0)) movement.mRotation[0] = 0;
-        }
-        
         bool& attack = storage.mAttack;
         bool& readyToAttack = storage.mReadyToAttack;
 
@@ -577,6 +565,29 @@ namespace MWMechanics
         }
 
         return false;
+    }
+
+    void AiCombat::UpdateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& desiredMovement)
+    {
+        MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
+        actorMovementSettings = desiredMovement;
+        RotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
+        RotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
+    }
+
+    void AiCombat::RotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
+        MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement)
+    {
+        actorMovementSettings.mRotation[axis] = 0;
+        float& targetAngleRadians = desiredMovement.mRotation[axis];
+        if (targetAngleRadians != 0)
+        {
+            if (smoothTurn(actor, targetAngleRadians, axis))
+            {
+                // actor now facing desired direction, no need to turn any more
+                targetAngleRadians = 0;
+            }
+        }
     }
 
     bool AiCombat::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
