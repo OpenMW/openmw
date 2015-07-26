@@ -27,6 +27,10 @@ namespace CSMWorld
             typedef std::map<Columns::ColumnId, std::vector<std::string> > EnumColumnCache;
             mutable EnumColumnCache mEnumColumnCache;
 
+        protected:
+
+            IdTableBase *mSourceModel;
+
         private:
 
             void updateColumnMap();
@@ -45,15 +49,23 @@ namespace CSMWorld
 
         protected:
 
-            bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+            virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
             virtual bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
 
-        private slots:
+            QString getRecordId(int sourceRow) const;
 
-            void sourceRowsChanged(const QModelIndex &parent, int start, int end);
+        protected slots:
 
-            void sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+            virtual void sourceRowsInserted(const QModelIndex &parent, int start, int end);
+
+            virtual void sourceRowsRemoved(const QModelIndex &parent, int start, int end);
+
+            virtual void sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+        signals:
+
+            void rowAdded(const std::string &id);
     };
 }
 
