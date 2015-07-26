@@ -112,10 +112,13 @@ void CSMWorld::IdTableProxyModel::refreshFilter()
     invalidateFilter();
 }
 
-void CSMWorld::IdTableProxyModel::sourceRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int end)
+void CSMWorld::IdTableProxyModel::sourceRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
     refreshFilter();
-    emit rowAdded(getRecordId(end).toUtf8().constData());
+    if (!parent.isValid())
+    {
+        emit rowAdded(getRecordId(end).toUtf8().constData());
+    }
 }
 
 void CSMWorld::IdTableProxyModel::sourceRowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
