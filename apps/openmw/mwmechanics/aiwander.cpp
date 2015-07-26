@@ -195,18 +195,10 @@ namespace MWMechanics
         
         
         WanderState& wanderState = storage.mState;
-        // Check if an idle actor is  too close to a door - if so start walking
-        mDoorCheckDuration += duration;
-        if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
+
+        if (wanderState == Wander_IdleNow)
         {
-            mDoorCheckDuration = 0;    // restart timer
-            if(mDistance &&            // actor is not intended to be stationary
-                (wanderState == Wander_IdleNow) &&             // but is in idle
-               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
-            {
-                wanderState = Wander_MoveNow;
-                mTrimCurrentNode = false; // just in case
-            }
+            onIdleStatePerFrameActions(actor, duration, storage);
         }
 
         // Are we there yet?
@@ -229,29 +221,11 @@ namespace MWMechanics
             evadeObstacles(actor, storage, duration);
         }
         
-        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
-        if (rotate)
-        {
-            // Reduce the turning animation glitch by using a *HUGE* value of
-            // epsilon...  TODO: a proper fix might be in either the physics or the
-            // animation subsystem
-            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
-                rotate = false;
-        }
-
-        // Check if idle animation finished
-        short unsigned& idleAnimation = storage.mIdleAnimation;
-        GreetingState& greetingState = storage.mSaidGreeting;
-        if ((wanderState == Wander_IdleNow) &&
-            !checkIdle(actor, idleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
-        {
-            wanderState = Wander_ChooseAction;
-        }
-
         MWBase::World *world = MWBase::Environment::get().getWorld();
 
         if (wanderState == Wander_ChooseAction)
         {
+            short unsigned& idleAnimation = storage.mIdleAnimation;
             idleAnimation = getRandomIdle();
 
             if(!idleAnimation && mDistance)
@@ -353,6 +327,40 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    void AiWander::onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
+    {
+        // Check if an idle actor is  too close to a door - if so start walking
+        mDoorCheckDuration += duration;
+        if (mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
+        {
+            mDoorCheckDuration = 0;    // restart timer
+            if (mDistance &&            // actor is not intended to be stationary
+                proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
+            {
+                storage.mState = Wander_MoveNow;
+                mTrimCurrentNode = false; // just in case
+                return;
+            }
+        }
+
+        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
+        if (rotate)
+        {
+            // Reduce the turning animation glitch by using a *HUGE* value of
+            // epsilon...  TODO: a proper fix might be in either the physics or the
+            // animation subsystem
+            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
+                rotate = false;
+        }
+
+        // Check if idle animation finished
+        GreetingState& greetingState = storage.mSaidGreeting;
+        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
+        {
+            storage.mState = Wander_ChooseAction;
+        }
     }
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
