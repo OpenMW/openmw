@@ -233,23 +233,10 @@ namespace MWMechanics
         // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
         if (cellChange)
             mHasReturnPosition = false;
-        if (mDistance == 0 && mHasReturnPosition && (pos.asVec3() - mReturnPosition).length2() > 20*20)
+        if (mDistance == 0 && mHasReturnPosition 
+            && (pos.asVec3() - mReturnPosition).length2() > (DESTINATION_TOLERANCE * DESTINATION_TOLERANCE))
         {
-            if (!storage.mPathFinder.isPathConstructed())
-            {
-                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-                // don't take shortcuts for wandering
-                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
-
-                if(storage.mPathFinder.isPathConstructed())
-                {
-                    storage.mState = Wander_Walking;
-                }
-            }
+            returnToStartLocation(actor, storage, pos);
         }
 
         // Allow interrupting a walking actor to trigger a greeting
@@ -296,6 +283,25 @@ namespace MWMechanics
         }
         // if get here, not yet completed
         return false;
+    }
+
+    void AiWander::returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        if (!storage.mPathFinder.isPathConstructed())
+        {
+            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
+
+            // actor position is already in world co-ordinates
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
+
+            // don't take shortcuts for wandering
+            storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
+
+            if (storage.mPathFinder.isPathConstructed())
+            {
+                storage.mState = Wander_Walking;
+            }
+        }
     }
 
     void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)

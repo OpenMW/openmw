@@ -90,6 +90,7 @@ namespace MWMechanics
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
                 const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
