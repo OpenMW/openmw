@@ -77,13 +77,17 @@ void CSMWorld::InfoTableProxyModel::sourceRowsRemoved(const QModelIndex &/*paren
     mFirstRowCache.clear();
 }
 
-void CSMWorld::InfoTableProxyModel::sourceRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int end)
+void CSMWorld::InfoTableProxyModel::sourceRowsInserted(const QModelIndex &parent, int /*start*/, int end)
 {
     refreshFilter();
-    mFirstRowCache.clear();
-    // We can't re-sort the model here, because the topic of the added row isn't set yet.
-    // Store the row index for using in the first dataChanged() after this row insertion.
-    mLastAddedSourceRow = end;
+
+    if (!parent.isValid())
+    {
+        mFirstRowCache.clear();
+        // We can't re-sort the model here, because the topic of the added row isn't set yet.
+        // Store the row index for using in the first dataChanged() after this row insertion.
+        mLastAddedSourceRow = end;
+    }
 }
 
 void CSMWorld::InfoTableProxyModel::sourceDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight)
