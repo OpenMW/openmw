@@ -7,23 +7,23 @@
 
 void CSMWorld::IdTableProxyModel::updateColumnMap()
 {
-    mColumnMap.clear();
+    Q_ASSERT(mSourceModel != NULL);
 
+    mColumnMap.clear();
     if (mFilter)
     {
         std::vector<int> columns = mFilter->getReferencedColumns();
-
-        const IdTableBase& table = dynamic_cast<const IdTableBase&> (*sourceModel());
-
         for (std::vector<int>::const_iterator iter (columns.begin()); iter!=columns.end(); ++iter)
-            mColumnMap.insert (std::make_pair (*iter,
-                table.searchColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (*iter))));
+            mColumnMap.insert (std::make_pair (*iter, 
+                mSourceModel->searchColumnIndex (static_cast<CSMWorld::Columns::ColumnId> (*iter))));
     }
 }
 
 bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent)
     const
 {
+    Q_ASSERT(mSourceModel != NULL);
+
     // It is not possible to use filterAcceptsColumn() and check for
     // sourceModel()->headerData (sourceColumn, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags)
     // because the sourceColumn parameter excludes the hidden columns, i.e. wrong columns can
@@ -35,34 +35,37 @@ bool CSMWorld::IdTableProxyModel::filterAcceptsRow (int sourceRow, const QModelI
     if (!mFilter)
         return true;
 
-    return mFilter->test (
-        dynamic_cast<IdTableBase&> (*sourceModel()), sourceRow, mColumnMap);
+    return mFilter->test (*mSourceModel, sourceRow, mColumnMap);
 }
 
 CSMWorld::IdTableProxyModel::IdTableProxyModel (QObject *parent)
-: QSortFilterProxyModel (parent)
+    : QSortFilterProxyModel (parent), 
+      mSourceModel(NULL)
 {
     setSortCaseSensitivity (Qt::CaseInsensitive);
 }
 
 QModelIndex CSMWorld::IdTableProxyModel::getModelIndex (const std::string& id, int column) const
 {
-    return mapFromSource (dynamic_cast<IdTableBase&> (*sourceModel()).getModelIndex (id, column));
+    Q_ASSERT(mSourceModel != NULL);
+
+    return mapFromSource(mSourceModel->getModelIndex (id, column));
 }
 
 void CSMWorld::IdTableProxyModel::setSourceModel(QAbstractItemModel *model)
 {
     QSortFilterProxyModel::setSourceModel(model);
 
-    connect(sourceModel(), 
-            SIGNAL(rowsRemoved(const QModelIndex &, int, int)), 
-            this, 
-            SLOT(sourceRowsChanged(const QModelIndex &, int, int)));
-    connect(sourceModel(), 
+    mSourceModel = dynamic_cast<IdTableBase *>(sourceModel());
+    connect(mSourceModel, 
             SIGNAL(rowsInserted(const QModelIndex &, int, int)), 
             this, 
-            SLOT(sourceRowsChanged(const QModelIndex &, int, int)));
-    connect(sourceModel(), 
+            SLOT(sourceRowsInserted(const QModelIndex &, int, int)));
+    connect(mSourceModel, 
+            SIGNAL(rowsRemoved(const QModelIndex &, int, int)), 
+            this,
+            SLOT(sourceRowsRemoved(const QModelIndex &, int, int)));
+    connect(mSourceModel, 
             SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), 
             this, 
             SLOT(sourceDataChanged(const QModelIndex &, const QModelIndex &)));
@@ -95,13 +98,27 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModel
     return QSortFilterProxyModel::lessThan(left, right);
 }
 
+QString CSMWorld::IdTableProxyModel::getRecordId(int sourceRow) const
+{
+    Q_ASSERT(mSourceModel != NULL);
+
+    int idColumn = mSourceModel->findColumnIndex(Columns::ColumnId_Id);
+    return mSourceModel->data(mSourceModel->index(sourceRow, idColumn)).toString();
+}
+
 void CSMWorld::IdTableProxyModel::refreshFilter()
 {
     updateColumnMap();
     invalidateFilter();
 }
 
-void CSMWorld::IdTableProxyModel::sourceRowsChanged(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
+void CSMWorld::IdTableProxyModel::sourceRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int end)
+{
+    refreshFilter();
+    emit rowAdded(getRecordId(end).toUtf8().constData());
+}
+
+void CSMWorld::IdTableProxyModel::sourceRowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     refreshFilter();
 }
