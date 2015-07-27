@@ -2,7 +2,6 @@
 #include "interpreter.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 

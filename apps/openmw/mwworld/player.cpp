@@ -1,7 +1,7 @@
-
 #include "player.hpp"
 
 #include <stdexcept>
+#include <iostream>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -19,11 +19,9 @@
 
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/actors.hpp"
 
 #include "class.hpp"
 #include "ptr.hpp"
-#include "inventorystore.hpp"
 #include "cellstore.hpp"
 
 namespace MWWorld
@@ -327,6 +325,7 @@ namespace MWWorld
             }
             catch (...)
             {
+                std::cerr << "Player cell '" << player.mCellId.mWorldspace << "' no longer exists" << std::endl;
                 // Cell no longer exists. Place the player in a default cell.
                 ESM::Position pos = mPlayer.mData.getPosition();
                 MWBase::Environment::get().getWorld()->indexToPosition(0, 0, pos.pos[0], pos.pos[1], true);

@@ -28,6 +28,7 @@ class CreatureStats;
 
 enum Priority {
     Priority_Default,
+    Priority_WeaponLowerBody,
     Priority_Jump,
     Priority_Movement,
     Priority_Hit,
@@ -150,7 +151,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     CharacterState mMovementState;
     std::string mCurrentMovement;
-    float mMovementSpeed;
+    float mMovementAnimSpeed;
+    bool mAdjustMovementAnimSpeed;
     bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 

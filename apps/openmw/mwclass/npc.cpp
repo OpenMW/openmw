@@ -733,8 +733,9 @@ namespace MWClass
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
             }
-            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-            setActorHealth(ptr, health, attacker);
+            MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+            health.setCurrent(health.getCurrent() - damage);
+            getCreatureStats(ptr).setHealth(health);
         }
         else
         {
@@ -778,26 +779,6 @@ namespace MWClass
                 return;
         }
     }
-
-    void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
-    {
-        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        bool wasDead = crstats.isDead();
-
-        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
-        stat.setCurrent(health);
-        crstats.setHealth(stat);
-
-        if(!wasDead && crstats.isDead())
-        {
-            // actor was just killed
-        }
-        else if(wasDead && !crstats.isDead())
-        {
-            // actor was just resurrected
-        }
-    }
-
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const

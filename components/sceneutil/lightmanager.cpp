@@ -1,5 +1,7 @@
 #include "lightmanager.hpp"
 
+#include <stdexcept>
+
 #include <osg/NodeVisitor>
 #include <osg/Geode>
 
@@ -8,9 +10,6 @@
 #include <components/sceneutil/util.hpp>
 
 #include <boost/functional/hash.hpp>
-
-#include <iostream>
-#include <stdexcept>
 
 namespace SceneUtil
 {

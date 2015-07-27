@@ -5,22 +5,17 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/cellstore.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
 #include "../mwrender/animation.hpp"
 
-
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
-#include "character.hpp" // fixme: for getActiveWeapon
+#include "character.hpp"
 
 #include "aicombataction.hpp"
 #include "combat.hpp"
@@ -291,7 +286,7 @@ namespace MWMechanics
         // Get weapon characteristics
         if (actorClass.hasInventoryStore(actor))
         {
-            //Get weapon speed and range
+            //Get weapon range
             MWWorld::ContainerStoreIterator weaponSlot =
                 MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
 

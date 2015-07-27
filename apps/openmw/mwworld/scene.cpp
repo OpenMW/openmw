@@ -1,15 +1,12 @@
 #include "scene.hpp"
 
 #include <limits>
+#include <iostream>
 
-#include <components/nif/niffile.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/vfs/manager.hpp>
-
-#include <osg/PositionAttitudeTransform>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

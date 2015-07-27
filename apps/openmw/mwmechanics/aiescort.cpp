@@ -6,7 +6,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"

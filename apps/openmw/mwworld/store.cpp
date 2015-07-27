@@ -1,5 +1,4 @@
 #include "store.hpp"
-#include "esmstore.hpp"
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>

@@ -490,6 +490,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 {
     int retCount = ContainerStore::remove(item, count, actor);
 
+    bool wasEquipped = false;
     if (!item.getRefData().getCount())
     {
         for (int slot=0; slot < MWWorld::InventoryStore::Slots; ++slot)
@@ -500,6 +501,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
             if (*mSlots[slot] == item)
             {
                 unequipSlot(slot, actor);
+                wasEquipped = true;
                 break;
             }
         }
@@ -507,7 +509,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 
     // If an armor/clothing item is removed, try to find a replacement,
     // but not for the player nor werewolves.
-    if ((actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (wasEquipped && (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
             && !(actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf()))
     {
         std::string type = item.getTypeName();

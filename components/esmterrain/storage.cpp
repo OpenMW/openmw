@@ -5,8 +5,6 @@
 #include <osg/Image>
 #include <osg/Plane>
 
-#include <iostream>
-
 #include <boost/algorithm/string.hpp>
 
 #include <components/misc/resourcehelpers.hpp>

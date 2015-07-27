@@ -1,8 +1,6 @@
 
 #include "actioneat.hpp"
 
-#include <cstdlib>
-
 #include <components/esm/loadskil.hpp>
 
 #include "../mwbase/environment.hpp"
