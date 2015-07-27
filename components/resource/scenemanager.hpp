@@ -38,12 +38,16 @@ namespace Resource
         ~SceneManager();
 
         /// Get a read-only copy of this scene "template"
+        /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
+        ///  If even the error marker mesh can not be found, an exception is thrown.
         osg::ref_ptr<const osg::Node> getTemplate(const std::string& name);
 
         /// Create an instance of the given scene template
+        /// @see getTemplate
         osg::ref_ptr<osg::Node> createInstance(const std::string& name);
 
         /// Create an instance of the given scene template and immediately attach it to a parent node
+        /// @see getTemplate
         osg::ref_ptr<osg::Node> createInstance(const std::string& name, osg::Group* parentNode);
 
         /// Attach the given scene instance to the given parent node
