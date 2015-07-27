@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <components/nif/niffile.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -326,7 +327,7 @@ namespace MWWorld
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
 
-        const int halfGridSize = Settings::Manager::getInt("exterior grid size", "Cells")/2;
+        const int halfGridSize = Settings::Manager::getInt("exterior cell load distance", "Cells");
 
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())

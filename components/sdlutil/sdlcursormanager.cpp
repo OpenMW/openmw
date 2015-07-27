@@ -10,8 +10,15 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osgViewer/GraphicsWindow>
 
 #include "imagetosurface.hpp"
+
+#ifdef OSG_LIBRARY_STATIC
+// Sets the default windowing system interface according to the OS.
+// Necessary for OpenSceneGraph to do some things, like decompression.
+USE_GRAPHICSWINDOW()
+#endif
 
 namespace
 {
@@ -175,23 +182,16 @@ namespace SDLUtil
         }
     }
 
-    bool SDLCursorManager::cursorChanged(const std::string& name)
+    void SDLCursorManager::cursorChanged(const std::string& name)
     {
         mCurrentCursor = name;
 
         CursorMap::const_iterator curs_iter = mCursorMap.find(name);
 
-        //we have this cursor
         if(curs_iter != mCursorMap.end())
         {
+            //we have this cursor
             _setGUICursor(name);
-
-            return false;
-        }
-        else
-        {
-            //they should get back to us with more info
-            return true;
         }
     }
 
@@ -200,7 +200,7 @@ namespace SDLUtil
         SDL_SetCursor(mCursorMap.find(name)->second);
     }
 
-    void SDLCursorManager::receiveCursorInfo(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
         _createCursorFromResource(name, rotDegrees, image, size_x, size_y, hotspot_x, hotspot_y);
     }

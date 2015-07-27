@@ -276,11 +276,11 @@ void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     if(textCursor().hasSelection())
     {
         QString str = textCursor().selection().toPlainText();
-        int selectedLines = str.count("\n")+1;
+        int offset = str.count("\n");
         if(textCursor().position() < textCursor().anchor())
-            endBlock += selectedLines;
+            endBlock += offset;
         else
-            startBlock -= selectedLines;
+            startBlock -= offset;
     }
     painter.setBackgroundMode(Qt::OpaqueMode);
     QFont font = painter.font();

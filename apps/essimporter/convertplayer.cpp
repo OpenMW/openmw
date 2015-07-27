@@ -1,5 +1,7 @@
 #include "convertplayer.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace ESSImport
 {
 

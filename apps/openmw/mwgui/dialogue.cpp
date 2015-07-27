@@ -16,11 +16,11 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
-
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
+
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "widgets.hpp"
 #include "bookpage.hpp"

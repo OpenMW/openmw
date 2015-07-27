@@ -5,6 +5,7 @@
 
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/objectstate.hpp>
 #include <components/esm/containerstate.hpp>

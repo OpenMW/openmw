@@ -4,8 +4,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-
 namespace MWGui
 {
 

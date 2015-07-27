@@ -63,6 +63,13 @@ namespace MWMechanics
                 Greet_InProgress,
                 Greet_Done
             };
+
+            enum WanderState {
+                Wander_ChooseAction,
+                Wander_IdleNow,
+                Wander_MoveNow,
+                Wander_Walking
+            };
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
@@ -70,7 +77,12 @@ namespace MWMechanics
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            void getRandomIdle(unsigned short& playedIdle);
+            short unsigned getRandomIdle();
+            void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
+            void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration);
+            void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
+            void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
@@ -88,8 +100,8 @@ namespace MWMechanics
 
            
 
-            // if false triggers calculating allowed nodes based on mDistance
-            bool mStoredAvailableNodes;
+            // do we need to calculate allowed nodes based on mDistance
+            bool mPopulateAvailableNodes;
 
 
             
@@ -118,15 +130,19 @@ namespace MWMechanics
                 GroupIndex_MaxIdle = 9
             };
 
+            /// convert point from local (i.e. cell) to world co-ordinates
+            void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
+
+            void SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos);
+
+            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex);
+
+            void AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end);
+
             /// lookup table for converting idleSelect value to groupName
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
 
-            /// record distances of pathgrid point nodes to actor
-            /// first value is distance between actor and node, second value is PathGrid node
-            typedef std::pair<float, const ESM::Pathgrid::Point*> PathDistance;
-
-            /// used to sort array of PathDistance objects into ascending order
-            static bool sortByDistance(const PathDistance& left, const PathDistance& right);
+            static int OffsetToPreventOvercrowding();
     };
     
     

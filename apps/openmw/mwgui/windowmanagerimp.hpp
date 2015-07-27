@@ -116,7 +116,7 @@ namespace MWGui
 
     WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
-                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap);
+                  Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
 
     void initUI();
@@ -486,11 +486,16 @@ namespace MWGui
     float mFPS;
 
     std::map<std::string, std::string> mFallbackMap;
+    
+    int mShowOwned;
+
+    std::string mVersionDescription;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.
      * Supported syntax:
      * #{GMSTName}: retrieves String value of the GMST called GMSTName
+     * #{setting=CATEGORY_NAME,SETTING_NAME}: retrieves String value of SETTING_NAME under category CATEGORY_NAME from settings.cfg
      * #{sCell=CellID}: retrieves translated name of the given CellID (used only by some Morrowind localisations, in others cell ID is == cell name)
      * #{fontcolour=FontColourName}: retrieves the value of the fallback setting "FontColor_color_<FontColourName>" from openmw.cfg,
      *                              in the format "r g b a", float values in range 0-1. Useful for "Colour" and "TextColour" properties in skins.
@@ -511,6 +516,7 @@ namespace MWGui
     void onClipboardRequested(const std::string& _type, std::string& _data);
 
     void createTextures();
+    void createCursors();
     void setMenuTransparency(float value);
   };
 }

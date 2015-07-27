@@ -122,8 +122,7 @@
         </Widget>
 
         <!-- Crosshair -->
-        <Widget type="ImageBox" skin="ImageBox" position="0 0 32 32" align="Center Center" name="Crosshair">
-            <Property key="ImageTexture" value="textures\target.dds"/>
+        <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 32 32" align="Center Center" name="Crosshair">
         </Widget>
 
         <!-- Basic FPSCounter box -->

@@ -10,6 +10,8 @@
 
 #include <osg/Texture2D>
 
+#include <components/misc/stringops.hpp>
+
 #include <components/myguiplatform/myguitexture.hpp>
 
 #include <components/settings/settings.hpp>
@@ -19,12 +21,12 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwbase/scriptmanager.hpp"
 #include "../mwrender/characterpreview.hpp"
 
 #include "itemview.hpp"
@@ -432,6 +434,20 @@ namespace MWGui
     {
         const std::string& script = ptr.getClass().getScript(ptr);
 
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+
+        // early-out for items that need to be equipped, but can't be equipped: we don't want to set OnPcEquip in that case
+        if (!ptr.getClass().getEquipmentSlots(ptr).first.empty())
+        {
+            std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
+            if (canEquip.first == 0)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                updateItemView();
+                return;
+            }
+        }
+
         // If the item has a script, set its OnPcEquip to 1
         if (!script.empty()
                 // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
@@ -451,7 +467,7 @@ namespace MWGui
         {
             boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
-            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
+            action->execute (player);
 
             mSkippedToEquip = MWWorld::Ptr();
         }

@@ -184,6 +184,11 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                         const ESM::Position &targetPos = target.getRefData().getPosition();
 
                         float distTo = (targetPos.asVec3() - vActorPos).length();
+
+                        // Small threshold for changing target
+                        if (it == mPackages.begin())
+                            distTo = std::max(0.f, distTo - 50.f);
+
                         if (distTo < nearestDist)
                         {
                             nearestDist = distTo;

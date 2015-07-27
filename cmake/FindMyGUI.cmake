@@ -54,6 +54,7 @@ IF (WIN32) #Windows
 
         if ( MYGUI_STATIC )
            set(LIB_SUFFIX "Static")
+           find_package(freetype)
         endif ( MYGUI_STATIC )
 
         find_library ( MYGUI_LIBRARIES_REL NAMES MyGUIEngine${LIB_SUFFIX}.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )

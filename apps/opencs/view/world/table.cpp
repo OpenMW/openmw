@@ -679,10 +679,6 @@ void CSVWorld::Table::tableSizeUpdate()
     }
 
     emit tableSizeChanged (size, deleted, modified);
-
-    // not really related to tableSizeUpdate() but placed here for convenience rather than
-    // creating a bunch of extra connections & slot
-    mProxyModel->refreshFilter();
 }
 
 void CSVWorld::Table::selectionSizeUpdate()

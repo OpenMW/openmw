@@ -113,7 +113,7 @@ namespace CSMWorld
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
 
-            Resource::ResourceSystem mResourceSystem;
+            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
@@ -138,9 +138,9 @@ namespace CSMWorld
 
             const VFS::Manager* getVFS() const;
 
-            Resource::ResourceSystem* getResourceSystem();
+            boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
 
-            const Resource::ResourceSystem* getResourceSystem() const;
+            boost::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 

@@ -32,6 +32,7 @@ enum Priority {
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Block,
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
@@ -185,7 +186,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
 
     void clearAnimQueue();
 

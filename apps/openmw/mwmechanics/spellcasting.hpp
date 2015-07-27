@@ -17,6 +17,7 @@ namespace MWMechanics
 {
     struct EffectKey;
     class MagicEffects;
+    class CreatureStats;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
@@ -59,6 +60,8 @@ namespace MWMechanics
                               const ESM::Spell* spell = NULL, const MagicEffects* effects = NULL);
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
+
+    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
 
     class CastSpell
     {

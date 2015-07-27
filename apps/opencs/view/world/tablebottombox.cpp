@@ -51,6 +51,14 @@ void CSVWorld::TableBottomBox::updateStatus()
             }
         }
 
+        if (mHasPosition)
+        {
+            if (!first)
+                stream << " -- ";
+
+            stream << "(" << mRow << ", " << mColumn << ")";
+        }
+
         mStatus->setText (QString::fromUtf8 (stream.str().c_str()));
     }
 }
@@ -69,7 +77,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
                                           CSMDoc::Document& document, 
                                           const CSMWorld::UniversalId& id, 
                                           QWidget *parent)
-: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None)
+: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None), mHasPosition(false)
 {
     for (int i=0; i<4; ++i)
         mStatusCount[i] = 0;
@@ -206,6 +214,20 @@ void CSVWorld::TableBottomBox::tableSizeChanged (int size, int deleted, int modi
         updateStatus();
 }
 
+void CSVWorld::TableBottomBox::positionChanged (int row, int column)
+{
+    mRow = row;
+    mColumn = column;
+    mHasPosition = true;
+    updateStatus();
+}
+
+void CSVWorld::TableBottomBox::noMorePosition()
+{
+    mHasPosition = false;
+    updateStatus();
+}
+
 void CSVWorld::TableBottomBox::createRequest()
 {
     mCreator->reset();
@@ -216,8 +238,8 @@ void CSVWorld::TableBottomBox::createRequest()
     mCreator->focus();
 }
 
-void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, 
-                                            const CSMWorld::UniversalId::Type type) 
+void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
+                                            const CSMWorld::UniversalId::Type type)
 {
     mCreator->reset();
     mCreator->cloneMode(id, type);
