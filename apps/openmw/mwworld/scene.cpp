@@ -233,7 +233,7 @@ namespace MWWorld
 
         if(result.second)
         {
-            std::cout << "loading cell " << cell->getCell()->getDescription() << std::endl;
+            std::cout << "Loading cell " << cell->getCell()->getDescription() << std::endl;
 
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
