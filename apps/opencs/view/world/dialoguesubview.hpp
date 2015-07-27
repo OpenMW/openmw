@@ -175,16 +175,14 @@ namespace CSVWorld
 
     class SimpleDialogueSubView : public CSVDoc::SubView
     {
-        Q_OBJECT
+            Q_OBJECT
 
-        EditWidget* mEditWidget;
-        QVBoxLayout* mMainLayout;
-        CSMWorld::IdTable* mTable;
-        QUndoStack& mUndoStack;
-        std::string mCurrentId;
-        bool mLocked;
-        const CSMDoc::Document& mDocument;
-        CSMWorld::CommandDispatcher mCommandDispatcher;
+            EditWidget* mEditWidget;
+            QVBoxLayout* mMainLayout;
+            CSMWorld::IdTable* mTable;
+            bool mLocked;
+            const CSMDoc::Document& mDocument;
+            CSMWorld::CommandDispatcher mCommandDispatcher;
 
         protected:
 
@@ -194,11 +192,9 @@ namespace CSVWorld
 
             CSMWorld::CommandDispatcher& getCommandDispatcher();
 
-            std::string getCurrentId() const;
-
             EditWidget& getEditWidget();
 
-            void changeCurrentId(const std::string& newCurrent);
+            void updateCurrentId();
 
             bool isLocked() const;
         
@@ -213,35 +209,38 @@ namespace CSVWorld
             void dataChanged(const QModelIndex & index);
             ///\brief we need to care for deleting currently edited record
 
-            void requestFocus (const std::string& id);
-
             void rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end);
 
             void refreshNpcDialogue (int type, const std::string& id);
     };
+
+    class RecordButtonBar;
 
     class DialogueSubView : public SimpleDialogueSubView
     {
             Q_OBJECT
             
             TableBottomBox* mBottom;
+            RecordButtonBar *mButtons;
 
         public:
 
             DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
                 const CreatorFactoryBase& creatorFactory, bool sorting = false);
 
+            virtual void setEditLock (bool locked);
+
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+            
         private slots:
-
-            void cloneRequest();
-
-            void nextId();
-
-            void prevId();
 
             void showPreview();
 
             void viewRecord();
+
+            void switchToRow (int row);            
+
+            void requestFocus (const std::string& id);
     };
 }
 

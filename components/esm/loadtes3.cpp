@@ -71,7 +71,13 @@ void ESM::Header::save (ESMWriter &esm)
     if (mFormat>0)
         esm.writeHNT ("FORM", mFormat);
 
-    esm.writeHNT ("HEDR", mData, 300);
+    esm.startSubRecord("HEDR");
+    esm.writeT(mData.version);
+    esm.writeT(mData.type);
+    esm.writeFixedSizeString(mData.author.toString(), 32);
+    esm.writeFixedSizeString(mData.desc.toString(), 256);
+    esm.writeT(mData.records);
+    esm.endRecord("HEDR");
 
     for (std::vector<Header::MasterData>::iterator iter = mMaster.begin();
          iter != mMaster.end(); ++iter)

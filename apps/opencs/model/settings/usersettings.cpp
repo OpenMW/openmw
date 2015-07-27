@@ -379,6 +379,14 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
                 " Other records are filterd out.");
     }
 
+    declareSection ("general-input", "General Input");
+    {
+        Setting *cycle = createSetting (Type_CheckBox, "cycle", "Cyclic next/previous");
+        cycle->setDefaultValue ("false");
+        cycle->setToolTip ("When using next/previous functions at the last/first item of a "
+            "list go to the first/last item");
+    }
+
     {
         /******************************************************************
         * There are three types of values:

@@ -174,6 +174,15 @@ namespace ESM
         endRecord(name);
     }
 
+    void ESMWriter::writeFixedSizeString(const std::string &data, int size)
+    {
+        std::string string;
+        if (!data.empty())
+            string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
+        string.resize(size);
+        write(string.c_str(), string.size());
+    }
+
     void ESMWriter::writeHString(const std::string& data)
     {
         if (data.size() == 0)

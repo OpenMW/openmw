@@ -47,6 +47,7 @@ void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 {
     mUniversalId = id;
     setWindowTitle (QString::fromUtf8(mUniversalId.toString().c_str()));
+    emit universalIdChanged (mUniversalId);
 }
 
 void CSVDoc::SubView::closeEvent (QCloseEvent *event)
