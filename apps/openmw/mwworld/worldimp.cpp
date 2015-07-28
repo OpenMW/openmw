@@ -228,6 +228,7 @@ namespace MWWorld
             if (findExteriorPosition (mStartCell, pos))
             {
                 changeToExteriorCell (pos);
+                fixPosition(getPlayerPtr());
             }
             else
             {
