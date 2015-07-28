@@ -69,6 +69,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+
+        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
