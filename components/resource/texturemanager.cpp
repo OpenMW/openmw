@@ -1,6 +1,7 @@
 #include "texturemanager.hpp"
 
 #include <osgDB/Registry>
+#include <osg/GLExtensions>
 
 #include <stdexcept>
 
@@ -73,7 +74,7 @@ namespace Resource
         {
             osg::ref_ptr<osg::Texture2D> tex = it->second;
 
-            // Keep mip-mapping disabled if the texture creator explicitely requested it.
+            // Keep mip-mapping disabled if the texture creator explicitely requested no mipmapping.
             osg::Texture::FilterMode oldMin = tex->getFilter(osg::Texture::MIN_FILTER);
             if (oldMin == osg::Texture::LINEAR || oldMin == osg::Texture::NEAREST)
             {
@@ -107,6 +108,32 @@ namespace Resource
 
     }
     */
+
+    bool checkSupported(osg::Image* image, const std::string& filename)
+    {
+        switch(image->getPixelFormat())
+        {
+            case(GL_COMPRESSED_RGB_S3TC_DXT1_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
+            {
+                osg::Texture::Extensions* exts = osg::Texture::getExtensions(0, false);
+                if (exts && !exts->isTextureCompressionS3TCSupported()
+                        // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
+                        && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+                {
+                    std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
+                    return false;
+                }
+                break;
+            }
+            // not bothering with checks for other compression formats right now, we are unlikely to ever use those anyway
+            default:
+                return true;
+        }
+        return true;
+    }
 
     osg::ref_ptr<osg::Texture2D> TextureManager::getTexture2D(const std::string &filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT)
     {
@@ -152,6 +179,10 @@ namespace Resource
             }
 
             osg::Image* image = result.getImage();
+            if (!checkSupported(image, filename))
+            {
+                return mWarningTexture;
+            }
 
             // We need to flip images, because the Morrowind texture coordinates use the DirectX convention (top-left image origin),
             // but OpenGL uses bottom left as the image origin.
