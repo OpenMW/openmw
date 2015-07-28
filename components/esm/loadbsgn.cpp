@@ -52,12 +52,13 @@ namespace ESM
 
     void BirthSign::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+            return;
         }
-
-        esm.writeHNCString("NAME", mId);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCString("TNAM", mTexture);
         esm.writeHNOCString("DESC", mDescription);

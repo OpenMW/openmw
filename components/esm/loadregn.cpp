@@ -81,12 +81,14 @@ namespace ESM
 
     void Region::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+            return;
         }
 
-        esm.writeHNString("NAME", mId);
         esm.writeHNOCString("FNAM", mName);
 
         if (esm.getVersion() == VER_12)

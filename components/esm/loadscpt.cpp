@@ -123,6 +123,7 @@ namespace ESM
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+            return;
         }
 
         if (!mVarNames.empty())

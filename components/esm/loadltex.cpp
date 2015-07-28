@@ -47,14 +47,14 @@ namespace ESM
     }
     void LandTexture::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+        esm.writeHNT("INTV", mIndex);
+        esm.writeHNCString("DATA", mTexture);
+
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
         }
-
-        esm.writeHNCString("NAME", mId);
-        esm.writeHNT("INTV", mIndex);
-        esm.writeHNCString("DATA", mTexture);
     }
 
     void LandTexture::blank()

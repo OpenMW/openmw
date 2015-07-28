@@ -43,19 +43,17 @@ namespace ESM
         int edgeCount = 0;
 
         bool hasData = false;
-        bool hasName = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
             switch (esm.retSubName().val)
             {
+                case ESM::FourCC<'N','A','M','E'>::value:
+                    mCell = esm.getHString();
+                    break;
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);
                     hasData = true;
-                    break;
-                case ESM::FourCC<'N','A','M','E'>::value:
-                    mCell = esm.getHString();
-                    hasName = true;
                     break;
                 case ESM::FourCC<'P','G','R','P'>::value:
                 {
@@ -125,14 +123,12 @@ namespace ESM
 
         if (!hasData)
             esm.fail("Missing DATA subrecord");
-        if (!hasName)
-            esm.fail("Missing NAME subrecord");
     }
 
     void Pathgrid::save(ESMWriter &esm, bool isDeleted) const
     {
-        esm.writeHNT("DATA", mData, 12);
         esm.writeHNCString("NAME", mCell);
+        esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
         {

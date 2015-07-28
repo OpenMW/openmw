@@ -169,6 +169,7 @@ namespace ESM
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+            return;
         }
 
         if (mLandData)

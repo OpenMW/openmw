@@ -19,13 +19,13 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().val)
             {
-                case ESM::FourCC<'D','A','T','A'>::value:
-                    mData = esm.getHString();
-                    hasData = true;
-                    break;
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mId = esm.getHString();
                     hasName = true;
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    mData = esm.getHString();
+                    hasData = true;
                     break;
                 case ESM::FourCC<'D','E','L','E'>::value:
                     esm.skipHSub();
@@ -37,19 +37,21 @@ namespace ESM
             }
         }
 
-        if (!hasData)
-            esm.fail("Missing DATA");
         if (!hasName)
             esm.fail("Missing NAME");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing DATA");
     }
     void StartScript::save(ESMWriter &esm, bool isDeleted) const
     {
-        esm.writeHNString("DATA", mData);
-        esm.writeHNString("NAME", mId);
-
+        esm.writeHNCString("NAME", mId);
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+        }
+        else
+        {
+            esm.writeHNString("DATA", mData);
         }
     }
 
