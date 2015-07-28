@@ -1159,11 +1159,11 @@ namespace NifOsg
                 osg::FrontFace* frontFace = new osg::FrontFace;
                 switch (stencilprop->data.drawMode)
                 {
-                case 1:
+                case 2:
                     frontFace->setMode(osg::FrontFace::CLOCKWISE);
                     break;
                 case 0:
-                case 2:
+                case 1:
                 default:
                     frontFace->setMode(osg::FrontFace::COUNTER_CLOCKWISE);
                     break;
