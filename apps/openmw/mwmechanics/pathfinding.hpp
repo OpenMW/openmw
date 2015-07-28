@@ -16,6 +16,23 @@ namespace MWMechanics
     float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
     class PathFinder
     {
+        private:
+        
+        /// Detect when actor has overshot a waypoint
+        class OvershootDetector
+        {
+        public:
+            OvershootDetector();
+            void reset(int x, int y, float distanceToWaypointSquared);
+
+            /// \return true if acotr has overshot waypoint
+            bool isOverShot(int x, int y, float distanceToWaypointSquared);
+        private:
+            int mOldX;
+            int mOldY;
+            float mOldDistanceSquared;
+        };
+
         public:
             PathFinder();
 
@@ -98,6 +115,7 @@ namespace MWMechanics
 
             const ESM::Pathgrid *mPathgrid;
             const MWWorld::CellStore* mCell;
+            OvershootDetector mOvershootDetector;
     };
 }
 
