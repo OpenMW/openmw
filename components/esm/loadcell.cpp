@@ -62,7 +62,8 @@ namespace ESM
     {
         isDeleted = false;
 
-        bool hasName = false;
+        blank();
+
         bool hasData = false;
         bool isLoaded = false;
         while (!isLoaded && esm.hasMoreSubs())
@@ -72,7 +73,6 @@ namespace ESM
             {
                 case ESM::FourCC<'N','A','M','E'>::value:
                     mName = esm.getHString();
-                    hasName = true;
                     break;
                 case ESM::FourCC<'D','A','T','A'>::value:
                     esm.getHT(mData, 12);
@@ -89,20 +89,12 @@ namespace ESM
             }
         }
 
-        if (!hasName)
-            esm.fail("Missing NAME subrecord");
         if (!hasData)
             esm.fail("Missing DATA subrecord");
     }
 
     void Cell::loadCell(ESMReader &esm, bool saveContext)
     {
-        mWater = 0.0f;
-        mWaterInt = false;
-        mMapColor = 0;
-        mRegion.clear();
-        mRefNumCounter = 0;
-
         bool isLoaded = false;
         while (!isLoaded && esm.hasMoreSubs())
         {
@@ -117,6 +109,7 @@ namespace ESM
                     break;
                 case ESM::FourCC<'W','H','G','T'>::value:
                     esm.getHT(mWater);
+                    mWaterInt = false;
                     break;
                 case ESM::FourCC<'A','M','B','I'>::value:
                     esm.getHT(mAmbi);
@@ -153,14 +146,15 @@ namespace ESM
 
     void Cell::save(ESMWriter &esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mName);
+        esm.writeHNOCString("NAME", mName);
+        esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
         {
             esm.writeHNCString("DELE", "");
+            return;
         }
 
-        esm.writeHNT("DATA", mData, 12);
         if (mData.mFlags & Interior)
         {
             if (mWaterInt) {

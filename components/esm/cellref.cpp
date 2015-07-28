@@ -25,33 +25,6 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
 }
 
 
-void ESM::CellRef::clearData()
-{
-    mScale = 1;
-    mOwner.clear();
-    mGlobalVariable.clear();
-    mSoul.clear();
-    mFaction.clear();
-    mFactionRank = -2;
-    mChargeInt = -1;
-    mEnchantmentCharge = -1;
-    mGoldValue = 0;
-    mDestCell.clear();
-    mLockLevel = 0;
-    mKey.clear();
-    mTrap.clear();
-    mReferenceBlocked = -1;
-    mTeleport = false;
-    
-    for (int i=0; i<3; ++i)
-    {
-        mDoorDest.pos[i] = 0;
-        mDoorDest.rot[i] = 0;
-        mPos.pos[i] = 0;
-        mPos.rot[i] = 0;
-    }
-}
-
 void ESM::CellRef::load (ESMReader& esm, bool &isDeleted, bool wideRefNum)
 {
     loadId(esm, wideRefNum);
@@ -67,6 +40,8 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     if (esm.isNextSub ("NAM0"))
         esm.skipHSub();
 
+    blank();
+
     mRefNum.load (esm, wideRefNum);
 
     mRefID = esm.getHNString ("NAME");
@@ -75,8 +50,6 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
 {
     isDeleted = false;
-
-    clearData();
 
     bool isLoaded = false;
     while (!isLoaded && esm.hasMoreSubs())
@@ -154,6 +127,11 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
 
     esm.writeHNCString("NAME", mRefID);
 
+    if (isDeleted) {
+        esm.writeHNCString("DELE", "");
+        return;
+    }
+
     if (mScale != 1.0) {
         esm.writeHNT("XSCL", mScale);
     }
@@ -198,18 +176,35 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
 
     if (!inInventory)
         esm.writeHNT("DATA", mPos, 24);
-
-    if (isDeleted)
-    {
-        esm.writeHNCString("DELE", "");
-    }
 }
 
 void ESM::CellRef::blank()
 {
     mRefNum.unset();
-    mRefID.clear();
-    clearData();
+    mRefID.clear();    
+    mScale = 1;
+    mOwner.clear();
+    mGlobalVariable.clear();
+    mSoul.clear();
+    mFaction.clear();
+    mFactionRank = -2;
+    mChargeInt = -1;
+    mEnchantmentCharge = -1;
+    mGoldValue = 0;
+    mDestCell.clear();
+    mLockLevel = 0;
+    mKey.clear();
+    mTrap.clear();
+    mReferenceBlocked = -1;
+    mTeleport = false;
+    
+    for (int i=0; i<3; ++i)
+    {
+        mDoorDest.pos[i] = 0;
+        mDoorDest.rot[i] = 0;
+        mPos.pos[i] = 0;
+        mPos.rot[i] = 0;
+    }
 }
 
 bool ESM::operator== (const RefNum& left, const RefNum& right)

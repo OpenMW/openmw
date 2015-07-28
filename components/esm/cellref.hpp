@@ -33,10 +33,7 @@ namespace ESM
 
     class CellRef
     {
-            void clearData();
-
         public:
-
             // Reference number
             // Note: Currently unused for items in containers
             RefNum mRefNum;
