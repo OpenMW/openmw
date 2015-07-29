@@ -225,7 +225,7 @@ public:
 
     void update(float duration);
 
-    void playGroup(const std::string &groupname, int mode, int count);
+    bool playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 

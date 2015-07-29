@@ -1,5 +1,7 @@
 #include "objects.hpp"
 
+#include <iostream>
+
 #include "movement.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -77,11 +79,18 @@ void Objects::update(float duration, bool paused)
     }
 }
 
-void Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
 {
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
-        iter->second->playGroup(groupName, mode, number);
+    {
+        return iter->second->playGroup(groupName, mode, number);
+    }
+    else
+    {
+        std::cerr<< "Error in Objects::playAnimationGroup:  Unable to find " << ptr.getTypeName() << std::endl;
+        return false;
+    }
 }
 void Objects::skipAnimation(const MWWorld::Ptr& ptr)
 {
