@@ -281,8 +281,10 @@ namespace Compiler
         if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
         {
             name = name.substr (1, name.size()-2);
-            cont = parser.parseName (name, loc, *this);
-            return true;
+// allow keywords enclosed in ""
+/// \todo optionally disable
+//            cont = parser.parseName (name, loc, *this);
+//            return true;
         }
 
         int i = 0;
