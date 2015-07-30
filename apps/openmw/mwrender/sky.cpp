@@ -1,5 +1,8 @@
 #include "sky.hpp"
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <osg/Transform>
 #include <osg/Geode>
 #include <osg/Depth>
@@ -383,26 +386,29 @@ public:
     Moon(osg::Group* parentNode, Resource::SceneManager* sceneManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, sceneManager, scaleFactor, 2)
         , mType(type)
-        , mPhase(Phase_Unspecified)
+        , mPhase(MoonState::Phase_Unspecified)
     {
         mUpdater = new MoonUpdater;
         mGeode->addUpdateCallback(mUpdater);
 
-        setPhase(Phase_WaxingCrescent);
+        setPhase(MoonState::Phase_Full);
+        setVisible(true);
     }
 
-    enum Phase
+    void setState(const MoonState& state)
     {
-        Phase_New = 0,
-        Phase_WaxingCrescent,
-        Phase_WaxingHalf,
-        Phase_WaxingGibbous,
-        Phase_Full,
-        Phase_WaningGibbous,
-        Phase_WaningHalf,
-        Phase_WaningCrescent,
-        Phase_Unspecified
-    };
+        float radsX = ((state.mRotationFromHorizon) * M_PI) / 180.0f;
+        float radsY = 0;
+        float radsZ = ((state.mRotationFromNorth) * M_PI) / 180.0f;
+
+        osg::Quat rotation(radsX, osg::Vec3f(1.0f, 0.0f, 0.0f),
+                           radsY, osg::Vec3f(0.0f, 1.0f, 0.0f),
+                           radsZ, osg::Vec3f(0.0f, 0.0f, 1.0f));
+        setDirection(rotation * osg::Vec3f(0.0f, 1.0f, 0.0f));
+        setPhase(state.mPhase);
+        setTransparency(state.mMoonAlpha);
+        setShadowBlend(state.mShadowBlend);
+    }
 
     void setTextures(const std::string& phaseTex, const std::string& circleTex)
     {
@@ -415,7 +421,7 @@ public:
         mUpdater->setTextures(phaseTexPtr, circleTexPtr);
     }
 
-    void setPhase(const Phase& phase)
+    void setPhase(const MoonState::Phase& phase)
     {
         if (mPhase == phase)
             return;
@@ -426,14 +432,14 @@ public:
         if (mType == Moon::Type_Secunda) textureName += "secunda_";
         else textureName += "masser_";
 
-        if      (phase == Moon::Phase_New)              textureName += "new";
-        else if (phase == Moon::Phase_WaxingCrescent)   textureName += "one_wax";
-        else if (phase == Moon::Phase_WaxingHalf)       textureName += "half_wax";
-        else if (phase == Moon::Phase_WaxingGibbous)    textureName += "three_wax";
-        else if (phase == Moon::Phase_WaningCrescent)   textureName += "one_wan";
-        else if (phase == Moon::Phase_WaningHalf)       textureName += "half_wan";
-        else if (phase == Moon::Phase_WaningGibbous)    textureName += "three_wan";
-        else if (phase == Moon::Phase_Full)             textureName += "full";
+        if      (phase == MoonState::Phase_New)              textureName += "new";
+        else if (phase == MoonState::Phase_WaxingCrescent)   textureName += "one_wax";
+        else if (phase == MoonState::Phase_FirstQuarter)     textureName += "half_wax";
+        else if (phase == MoonState::Phase_WaxingGibbous)    textureName += "three_wax";
+        else if (phase == MoonState::Phase_WaningCrescent)   textureName += "one_wan";
+        else if (phase == MoonState::Phase_ThirdQuarter)     textureName += "half_wan";
+        else if (phase == MoonState::Phase_WaningGibbous)    textureName += "three_wan";
+        else if (phase == MoonState::Phase_Full)             textureName += "full";
 
         textureName += ".dds";
 
@@ -452,7 +458,8 @@ public:
     {
     public:
         MoonUpdater()
-            : mFade(0.f)
+            : mTransparency(1.0f)
+            , mShadowBlend(1.0f)
             , mMoonColor(1,1,1,1)
         {
         }
@@ -464,7 +471,7 @@ public:
             texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
             texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
             texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-            texEnv->setConstantColor(osg::Vec4f(1.f, 0.f, 0.f, 1.f)); // fade * MoonRedColor
+            texEnv->setConstantColor(osg::Vec4f(1.f, 0.f, 0.f, 1.f)); // mShadowBlend * mMoonColor
             stateset->setTextureAttributeAndModes(0, texEnv, osg::StateAttribute::ON);
 
             stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
@@ -475,7 +482,7 @@ public:
             texEnv2->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
             texEnv2->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
             texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
-            texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // atmospherecolor
+            texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
             stateset->setTextureAttributeAndModes(1, texEnv2, osg::StateAttribute::ON);
 
             stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -484,21 +491,20 @@ public:
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor*)
         {
             osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
-            texEnv->setConstantColor(mMoonColor * mFade);
+            texEnv->setConstantColor(mMoonColor * mShadowBlend);
 
             osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-            const float backdropFadeThreshold = 0.03;
-            if (mFade <= backdropFadeThreshold)
-            {
-                texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mFade / backdropFadeThreshold));
-            }
-            else
-                texEnv2->setConstantColor(mAtmosphereColor);
+            texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
         }
 
-        void setFade (const float fade)
+        void setTransparency(const float ratio)
         {
-            mFade = fade;
+            mTransparency = ratio;
+        }
+
+        void setShadowBlend(const float blendFactor)
+        {
+            mShadowBlend = blendFactor;
         }
 
         void setAtmosphereColor(const osg::Vec4f& color)
@@ -519,7 +525,8 @@ public:
         }
 
     private:
-        float mFade;
+        float mTransparency;
+        float mShadowBlend;
         osg::Vec4f mAtmosphereColor;
         osg::Vec4f mMoonColor;
         osg::ref_ptr<osg::Texture2D> mPhaseTex;
@@ -537,27 +544,32 @@ public:
         mUpdater->setMoonColor(color);
     }
 
-    void setFade(const float fade)
+    void setTransparency(const float ratio)
     {
-        mUpdater->setFade(fade);
+        mUpdater->setTransparency(ratio);
+    }
+
+    void setShadowBlend(const float blendFactor)
+    {
+        mUpdater->setShadowBlend(blendFactor);
     }
 
     unsigned int getPhaseInt() const
     {
-        if      (mPhase == Moon::Phase_New)              return 0;
-        else if (mPhase == Moon::Phase_WaxingCrescent)   return 1;
-        else if (mPhase == Moon::Phase_WaningCrescent)   return 1;
-        else if (mPhase == Moon::Phase_WaxingHalf)       return 2;
-        else if (mPhase == Moon::Phase_WaningHalf)       return 2;
-        else if (mPhase == Moon::Phase_WaxingGibbous)    return 3;
-        else if (mPhase == Moon::Phase_WaningGibbous)    return 3;
-        else if (mPhase == Moon::Phase_Full)             return 4;
+        if      (mPhase == MoonState::Phase_New)              return 0;
+        else if (mPhase == MoonState::Phase_WaxingCrescent)   return 1;
+        else if (mPhase == MoonState::Phase_WaningCrescent)   return 1;
+        else if (mPhase == MoonState::Phase_FirstQuarter)     return 2;
+        else if (mPhase == MoonState::Phase_ThirdQuarter)     return 2;
+        else if (mPhase == MoonState::Phase_WaxingGibbous)    return 3;
+        else if (mPhase == MoonState::Phase_WaningGibbous)    return 3;
+        else if (mPhase == MoonState::Phase_Full)             return 4;
         return 0;
     }
 
 private:
     Type mType;
-    Phase mPhase;
+    MoonState::Phase mPhase;
     osg::ref_ptr<MoonUpdater> mUpdater;
 };
 
@@ -886,10 +898,6 @@ void SkyManager::update(float duration)
     mCloudUpdater->setAnimationTimer(mCloudAnimationTimer);
     mCloudUpdater2->setAnimationTimer(mCloudAnimationTimer);
 
-    /// \todo improve this
-    mMasser->setPhase( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
-    mSecunda->setPhase ( static_cast<Moon::Phase>( (int) ((mDay % 32)/4.f)) );
-
     if (mSunEnabled)
     {
         // take 1/10 sec for fading the glare effect from invisible to full
@@ -1128,46 +1136,18 @@ void SkyManager::setSunDirection(const osg::Vec3f& direction)
     //mSunGlare->setPosition(direction);
 }
 
-void SkyManager::setMasserDirection(const osg::Vec3f& direction)
+void SkyManager::setMasserState(const MoonState& state)
 {
-    if (!mCreated) return;
+    if(!mCreated) return;
 
-    mMasser->setDirection(direction);
+    mMasser->setState(state);
 }
 
-void SkyManager::setSecundaDirection(const osg::Vec3f& direction)
+void SkyManager::setSecundaState(const MoonState& state)
 {
-    if (!mCreated) return;
+    if(!mCreated) return;
 
-    mSecunda->setDirection(direction);
-}
-
-void SkyManager::masserEnable()
-{
-    if (!mCreated) return;
-
-    mMasser->setVisible(true);
-}
-
-void SkyManager::secundaEnable()
-{
-    if (!mCreated) return;
-
-    mSecunda->setVisible(true);
-}
-
-void SkyManager::masserDisable()
-{
-    if (!mCreated) return;
-
-    mMasser->setVisible(false);
-}
-
-void SkyManager::secundaDisable()
-{
-    if (!mCreated) return;
-
-    mSecunda->setVisible(false);
+    mSecunda->setState(state);
 }
 
 void SkyManager::setLightningStrength(const float factor)
@@ -1182,18 +1162,6 @@ void SkyManager::setLightningStrength(const float factor)
     else
         mLightning->setVisible(false);
         */
-}
-
-void SkyManager::setMasserFade(const float fade)
-{
-    if (!mCreated) return;
-    mMasser->setFade(fade);
-}
-
-void SkyManager::setSecundaFade(const float fade)
-{
-    if (!mCreated) return;
-    mSecunda->setFade(fade);
 }
 
 void SkyManager::setDate(int day, int month)
