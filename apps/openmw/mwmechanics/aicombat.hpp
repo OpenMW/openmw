@@ -26,6 +26,8 @@ namespace MWMechanics
 {
     class Action;
 
+    struct AiCombatStorage;
+
     /// \brief Causes the actor to fight another actor
     class AiCombat : public AiPackage
     {
@@ -58,8 +60,14 @@ namespace MWMechanics
 
             int mTargetActorId;
 
-
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+            bool reactionTimeActions(const MWWorld::Ptr& actor, CharacterController& characterController,
+                AiCombatStorage& storage, MWWorld::Ptr target);
+
+            /// Transfer desired movement (from AiCombatStorage) to Actor
+            void UpdateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& movement);
+            void RotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
+                MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement);
     };
     
     

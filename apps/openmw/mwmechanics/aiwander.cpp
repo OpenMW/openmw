@@ -193,109 +193,27 @@ namespace MWMechanics
 
         ESM::Position pos = actor.getRefData().getPosition();
         
-        
-        WanderState& wanderState = storage.mState;
-        // Check if an idle actor is  too close to a door - if so start walking
-        mDoorCheckDuration += duration;
-        if(mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
-        {
-            mDoorCheckDuration = 0;    // restart timer
-            if(mDistance &&            // actor is not intended to be stationary
-                (wanderState == Wander_IdleNow) &&             // but is in idle
-               proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
-            {
-                wanderState = Wander_MoveNow;
-                mTrimCurrentNode = false; // just in case
-            }
-        }
-
-        // Are we there yet?
-        if ((wanderState == Wander_Walking) &&
-            storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
-        {
-            stopWalking(actor, storage);
-            wanderState = Wander_ChooseAction;
-            mHasReturnPosition = false;
-        }
-
-
-        
-        if (wanderState == Wander_Walking) // have not yet reached the destination
-        {
-            // turn towards the next point in mPath
-            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-
-            evadeObstacles(actor, storage, duration);
-        }
-        
-        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
-        if (rotate)
-        {
-            // Reduce the turning animation glitch by using a *HUGE* value of
-            // epsilon...  TODO: a proper fix might be in either the physics or the
-            // animation subsystem
-            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
-                rotate = false;
-        }
-
-        // Check if idle animation finished
-        short unsigned& idleAnimation = storage.mIdleAnimation;
-        GreetingState& greetingState = storage.mSaidGreeting;
-        if ((wanderState == Wander_IdleNow) &&
-            !checkIdle(actor, idleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
-        {
-            wanderState = Wander_ChooseAction;
-        }
-
-        MWBase::World *world = MWBase::Environment::get().getWorld();
-
-        if (wanderState == Wander_ChooseAction)
-        {
-            idleAnimation = getRandomIdle();
-
-            if(!idleAnimation && mDistance)
-            {
-                wanderState = Wander_MoveNow;
-            }
-            else
-            {
-                // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
-                MWWorld::TimeStamp currentTime = world->getTimeStamp();
-                mStartTime = currentTime;
-                playIdle(actor, idleAnimation);
-                wanderState = Wander_IdleNow;
-            }
-        }
+        doPerFrameActionsForState(actor, duration, storage, pos);
 
         playIdleDialogueRandomly(actor);
 
         float& lastReaction = storage.mReaction;
         lastReaction += duration;
-        if(lastReaction < REACTION_INTERVAL)
+        if (REACTION_INTERVAL <= lastReaction)
         {
-            return false;
+            lastReaction = 0;
+            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
         }
         else
-            lastReaction = 0;
+            return false;
+    }
 
-        // NOTE: everything below get updated every REACTION_INTERVAL seconds
-
-        if(mDuration)
+    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
+        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
+    {
+        if (isPackageCompleted(actor, storage))
         {
-            // End package if duration is complete or mid-night hits:
-            MWWorld::TimeStamp currentTime = world->getTimeStamp();
-            if((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
-                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
-            {
-                if(!mRepeat)
-                {
-                    stopWalking(actor, storage);
-                    return true;
-                }
-                else
-                    mStartTime = currentTime;
-            }
+            return true;
         }
 
         // Initialization to discover & store allowed node points for this actor.
@@ -315,26 +233,14 @@ namespace MWMechanics
         // For stationary NPCs, move back to the starting location if another AiPackage moved us elsewhere
         if (cellChange)
             mHasReturnPosition = false;
-        if (mDistance == 0 && mHasReturnPosition && (pos.asVec3() - mReturnPosition).length2() > 20*20)
+        if (mDistance == 0 && mHasReturnPosition 
+            && (pos.asVec3() - mReturnPosition).length2() > (DESTINATION_TOLERANCE * DESTINATION_TOLERANCE))
         {
-            if (!storage.mPathFinder.isPathConstructed())
-            {
-                ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
-
-                // actor position is already in world co-ordinates
-                ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
-
-                // don't take shortcuts for wandering
-                storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
-
-                if(storage.mPathFinder.isPathConstructed())
-                {
-                    wanderState = Wander_Walking;
-                }
-            }
+            returnToStartLocation(actor, storage, pos);
         }
 
         // Allow interrupting a walking actor to trigger a greeting
+        WanderState& wanderState = storage.mState;
         if ((wanderState == Wander_IdleNow) || (wanderState == Wander_Walking))
         {
             playGreetingIfPlayerGetsTooClose(actor, storage);
@@ -353,6 +259,150 @@ namespace MWMechanics
         }
 
         return false; // AiWander package not yet completed
+    }
+
+    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+        if (mDuration)
+        {
+            // End package if duration is complete or mid-night hits:
+            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            if ((currentTime.getHour() >= mStartTime.getHour() + mDuration) ||
+                (int(currentTime.getHour()) == 0 && currentTime.getDay() != mStartTime.getDay()))
+            {
+                if (!mRepeat)
+                {
+                    stopWalking(actor, storage);
+                    return true;
+                }
+                else
+                {
+                    mStartTime = currentTime;
+                }
+            }
+        }
+        // if get here, not yet completed
+        return false;
+    }
+
+    void AiWander::returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        if (!storage.mPathFinder.isPathConstructed())
+        {
+            ESM::Pathgrid::Point dest(PathFinder::MakePathgridPoint(mReturnPosition));
+
+            // actor position is already in world co-ordinates
+            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(pos));
+
+            // don't take shortcuts for wandering
+            storage.mPathFinder.buildSyncedPath(start, dest, actor.getCell(), false);
+
+            if (storage.mPathFinder.isPathConstructed())
+            {
+                storage.mState = Wander_Walking;
+            }
+        }
+    }
+
+    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        switch (storage.mState)
+        {
+            case Wander_IdleNow:
+                onIdleStatePerFrameActions(actor, duration, storage);
+                break;
+
+            case Wander_Walking:
+                onWalkingStatePerFrameActions(actor, duration, storage, pos);
+                break;
+
+            case Wander_ChooseAction:
+                onChooseActionStatePerFrameActions(actor, storage);
+                break;
+
+            case Wander_MoveNow:
+                break;  // nothing to do
+
+            default:
+                // should never get here
+                assert(false);
+                break;
+        }
+    }
+
+    void AiWander::onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
+    {
+        // Check if an idle actor is  too close to a door - if so start walking
+        mDoorCheckDuration += duration;
+        if (mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
+        {
+            mDoorCheckDuration = 0;    // restart timer
+            if (mDistance &&            // actor is not intended to be stationary
+                proximityToDoor(actor, MIN_DIST_TO_DOOR_SQUARED*1.6f*1.6f)) // NOTE: checks interior cells only
+            {
+                storage.mState = Wander_MoveNow;
+                mTrimCurrentNode = false; // just in case
+                return;
+            }
+        }
+
+        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
+        if (rotate)
+        {
+            // Reduce the turning animation glitch by using a *HUGE* value of
+            // epsilon...  TODO: a proper fix might be in either the physics or the
+            // animation subsystem
+            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
+                rotate = false;
+        }
+
+        // Check if idle animation finished
+        GreetingState& greetingState = storage.mSaidGreeting;
+        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
+        {
+            storage.mState = Wander_ChooseAction;
+        }
+    }
+
+    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, 
+        float duration, AiWanderStorage& storage, ESM::Position& pos)
+    {
+        // Are we there yet?
+        if (storage.mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1], DESTINATION_TOLERANCE))
+        {
+            stopWalking(actor, storage);
+            storage.mState = Wander_ChooseAction;
+            mHasReturnPosition = false;
+        }
+        else
+        {
+            // have not yet reached the destination
+            //... turn towards the next point in mPath
+            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+
+            evadeObstacles(actor, storage, duration);
+        }
+    }
+
+    void AiWander::onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    {
+
+        short unsigned& idleAnimation = storage.mIdleAnimation;
+        idleAnimation = getRandomIdle();
+
+        if (!idleAnimation && mDistance)
+        {
+            storage.mState = Wander_MoveNow;
+        }
+        else
+        {
+            // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
+            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+            mStartTime = currentTime;
+            playIdle(actor, idleAnimation);
+            storage.mState = Wander_IdleNow;
+        }
     }
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
