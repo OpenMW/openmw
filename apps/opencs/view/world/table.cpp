@@ -30,64 +30,31 @@
 #include "../../model/settings/usersettings.hpp"
 
 #include "recordstatusdelegate.hpp"
+#include "tableeditidaction.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
     // configure dispatcher
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-    std::vector<std::string> records;
-
-    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-        ++iter)
-    {
-        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
-
-        records.push_back (mModel->data (
-            mModel->index (row, columnIndex)).toString().toUtf8().constData());
-    }
-
-    mDispatcher->setSelection (records);
+    mDispatcher->setSelection (getSelectedIds());
 
     std::vector<CSMWorld::UniversalId> extendedTypes = mDispatcher->getExtendedTypes();
 
     mDispatcher->setExtendedTypes (extendedTypes);
 
     // create context menu
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
     QMenu menu (this);
 
     ///  \todo add menu items for select all and clear selection
 
+    int currentRow = rowAt(event->y());
+    int currentColumn = columnAt(event->x());
+    if (mEditIdAction->isValidIdCell(currentRow, currentColumn))
     {
-        // Request UniversalId editing from table columns.
-
-        int currRow = rowAt( event->y() ),
-            currCol = columnAt( event->x() );
-
-        currRow = mProxyModel->mapToSource(mProxyModel->index( currRow, 0 )).row();
-
-        CSMWorld::ColumnBase::Display colDisplay =
-            static_cast<CSMWorld::ColumnBase::Display>(
-                mModel->headerData(
-                    currCol,
-                    Qt::Horizontal,
-                    CSMWorld::ColumnBase::Role_Display ).toInt());
-
-        QString cellData = mModel->data(mModel->index( currRow, currCol )).toString();
-        CSMWorld::UniversalId::Type colType = CSMWorld::TableMimeData::convertEnums( colDisplay );
-
-        if (    !cellData.isEmpty()
-                && colType != CSMWorld::UniversalId::Type_None )
-        {
-            mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
-
-            menu.addAction( mEditCellAction );
-
-            mEditCellId = CSMWorld::UniversalId( colType, cellData.toUtf8().constData() );
-        }
+        mEditIdAction->setCell(currentRow, currentColumn);
+        menu.addAction(mEditIdAction);
+        menu.addSeparator();
     }
 
     if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
@@ -366,10 +333,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
 
-    mEditCellAction = new QAction( tr("Edit Cell"), this );
-    connect( mEditCellAction, SIGNAL(triggered()), this, SLOT(editCell()) );
-    addAction( mEditCellAction );
-
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
     addAction (mViewAction);
@@ -378,23 +341,25 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
     addAction (mPreviewAction);
 
-    /// \todo add a user option, that redirects the extended action to an input panel (in
-    /// the bottom bar) that lets the user select which record collections should be
-    /// modified.
-
     mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
-    connect (mExtendedDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedDelete()));
+    connect (mExtendedDeleteAction, SIGNAL (triggered()), this, SLOT (executeExtendedDelete()));
     addAction (mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
-    connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
+    connect (mExtendedRevertAction, SIGNAL (triggered()), this, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
+
+    mEditIdAction = new TableEditIdAction (*this, this);
+    connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
+    addAction (mEditIdAction);
 
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
-    connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    //connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+    //    this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
+        this, SLOT (rowAdded (const std::string &)));
 
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
     /// the records status column (for permanence reasons)
@@ -451,6 +416,22 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
         mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData());
 }
 
+std::vector<std::string> CSVWorld::Table::getSelectedIds() const
+{
+    std::vector<std::string> ids;
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); 
+         iter != selectedRows.end();
+         ++iter)
+    {
+        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
+        ids.push_back (mModel->data (mModel->index (row, columnIndex)).toString().toUtf8().constData());
+    }
+    return ids;
+}
+
 void CSVWorld::Table::editRecord()
 {
     if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
@@ -468,7 +449,7 @@ void CSVWorld::Table::cloneRecord()
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
         const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
-        if (selectedRows.size()==1 && !mModel->isDeleted (toClone.getId()))
+        if (selectedRows.size() == 1)
         {
             emit cloneRequest (toClone);
         }
@@ -543,7 +524,7 @@ void CSVWorld::Table::moveDownRecord()
 
 void CSVWorld::Table::editCell()
 {
-    emit editRequest( mEditCellId, std::string() );
+    emit editRequest(mEditIdAction->getCurrentId(), "");
 }
 
 void CSVWorld::Table::viewRecord()
@@ -580,6 +561,34 @@ void CSVWorld::Table::previewRecord()
         if (mModel->data (index)!=CSMWorld::RecordBase::State_Deleted)
             emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id),
                 "");
+    }
+}
+
+void CSVWorld::Table::executeExtendedDelete()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedDeleteConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedDelete", Qt::QueuedConnection);
+    }
+}
+
+void CSVWorld::Table::executeExtendedRevert()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedRevertConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedRevert", Qt::QueuedConnection);
     }
 }
 
@@ -693,10 +702,6 @@ void CSVWorld::Table::tableSizeUpdate()
     }
 
     emit tableSizeChanged (size, deleted, modified);
-
-    // not really related to tableSizeUpdate() but placed here for convenience rather than
-    // creating a bunch of extra connections & slot
-    mProxyModel->refreshFilter();
 }
 
 void CSVWorld::Table::selectionSizeUpdate()
@@ -816,12 +821,13 @@ void CSVWorld::Table::globalFilterModifiedChanged(int state)
     recordFilterChanged(mFilter);
 }
 
-void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)
+void CSVWorld::Table::rowAdded(const std::string &id)
 {
     tableSizeUpdate();
     if(mJumpToAddedRecord)
     {
-        selectRow(end);
+        int idColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+        selectRow(mProxyModel->getModelIndex(id, idColumn).row());
 
         if(mUnselectAfterJump)
             clearSelection();

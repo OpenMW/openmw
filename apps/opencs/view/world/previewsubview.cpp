@@ -13,8 +13,6 @@ CSVWorld::PreviewSubView::PreviewSubView (const CSMWorld::UniversalId& id, CSMDo
 {
     QHBoxLayout *layout = new QHBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
     if (document.getData().getReferenceables().searchId (id.getId())==-1)
     {
         std::string referenceableId =

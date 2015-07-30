@@ -58,6 +58,25 @@ void CSMWorld::CreateCommand::applyModifications()
 {
     for (std::map<int, QVariant>::const_iterator iter (mValues.begin()); iter!=mValues.end(); ++iter)
         mModel.setData (mModel.getModelIndex (mId, iter->first), iter->second);
+
+    if (!mNestedValues.empty())
+    {
+        CSMWorld::IdTree *tree = dynamic_cast<CSMWorld::IdTree *>(&mModel);
+        if (tree == NULL)
+        {
+            throw std::logic_error("CSMWorld::CreateCommand: Attempt to add nested values to the non-nested model");
+        }
+
+        std::map<int, std::pair<int, QVariant> >::const_iterator current = mNestedValues.begin();
+        std::map<int, std::pair<int, QVariant> >::const_iterator end = mNestedValues.end();
+        for (; current != end; ++current)
+        {
+            QModelIndex index = tree->index(0,
+                                            current->second.first,
+                                            tree->getNestedModelIndex(mId, current->first));
+            tree->setData(index, current->second.second);
+        }
+    }
 }
 
 CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
@@ -69,6 +88,11 @@ CSMWorld::CreateCommand::CreateCommand (IdTable& model, const std::string& id, Q
 void CSMWorld::CreateCommand::addValue (int column, const QVariant& value)
 {
     mValues[column] = value;
+}
+
+void CSMWorld::CreateCommand::addNestedValue(int parentColumn, int nestedColumn, const QVariant &value)
+{
+    mNestedValues[parentColumn] = std::make_pair(nestedColumn, value);
 }
 
 void CSMWorld::CreateCommand::setType (UniversalId::Type type)

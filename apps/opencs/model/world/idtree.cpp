@@ -171,10 +171,10 @@ QModelIndex CSMWorld::IdTree::index (int row, int column, const QModelIndex& par
         encodedId = this->foldIndexAddress(parent);
     }
 
-    if (row<0 || row>=idCollection()->getSize())
+    if (row < 0 || row >= rowCount(parent))
         return QModelIndex();
 
-    if (column<0 || column>=idCollection()->getColumns())
+    if (column < 0 || column >= columnCount(parent))
         return QModelIndex();
 
     return createIndex(row, column, encodedId); // store internal id
@@ -265,4 +265,14 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelInde
 void CSMWorld::IdTree::updateNpcAutocalc (int type, const std::string& id)
 {
     emit refreshNpcDialogue (type, id);
+}
+
+int CSMWorld::IdTree::searchNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->searchNestedColumnIndex(parentColumn, id);
+}
+
+int CSMWorld::IdTree::findNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->findNestedColumnIndex(parentColumn, id);
 }

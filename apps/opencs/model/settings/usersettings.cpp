@@ -189,7 +189,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
-    declareSection ("table-input", "Table Input");
+    declareSection ("table-input", "ID Tables");
     {
         QString inPlaceEdit ("Edit in Place");
         QString editRecord ("Edit Record");
@@ -242,9 +242,24 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Jump to the added or cloned record.");
         jumpToAdded->setDefaultValue (defaultValue);
         jumpToAdded->setDeclaredValues (jumpValues);
+
+        Setting *extendedConfig = createSetting (Type_CheckBox, "extended-config",
+            "Manually specify affected record types for an extended delete/revert");
+        extendedConfig->setDefaultValue("false");
+        extendedConfig->setToolTip("Delete and revert commands have an extended form that also affects "
+                                   "associated records.\n\n"
+                                   "If this option is enabled, types of affected records are selected "
+                                   "manually before a command execution.\nOtherwise, all associated "
+                                   "records are deleted/reverted immediately.");
     }
 
-    declareSection ("report-input", "Report Input");
+    declareSection ("dialogues", "ID Dialogues");
+    {
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
+    }
+
+    declareSection ("report-input", "Reports");
     {
         QString none ("None");
         QString edit ("Edit");
@@ -284,7 +299,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         shiftCtrlDoubleClick->setDefaultValue (none);
         shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in report table:<p>" + toolTip);
     }
-    
+
     declareSection ("search", "Search & Replace");
     {
         Setting *before = createSetting (Type_SpinBox, "char-before",
@@ -326,7 +341,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         QStringList modes;
         modes << "Ignore" << modeNormal << "Strict";
-            
+
         Setting *warnings = createSetting (Type_ComboBox, "warnings",
             "Warning Mode");
         warnings->setDeclaredValues (modes);
@@ -336,7 +351,16 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         "<li>Normal: Report warning as a warning</li>"
         "<li>Strict: Promote warning to an error</li>"
         "</ul>");
-        
+
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
+
+        Setting *delay = createSetting (Type_SpinBox, "compile-delay",
+            "Delay between updating of source errors");
+        delay->setDefaultValue (100);
+        delay->setRange (0, 10000);
+        delay->setToolTip ("Delay in milliseconds");
+
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);

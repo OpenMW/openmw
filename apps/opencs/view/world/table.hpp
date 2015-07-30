@@ -30,6 +30,7 @@ namespace CSMWorld
 namespace CSVWorld
 {
     class CommandDelegate;
+    class TableEditIdAction;
 
     ///< Table widget
     class Table : public DragRecordTable
@@ -57,15 +58,14 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
-            QAction *mEditCellAction;
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
+            TableEditIdAction *mEditIdAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
-            CSMWorld::UniversalId mEditCellId;
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
@@ -97,6 +97,8 @@ namespace CSVWorld
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
+            std::vector<std::string> getSelectedIds() const;
+
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
@@ -116,6 +118,10 @@ namespace CSVWorld
 
             void closeRequest();
 
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
+
         private slots:
 
             void editCell();
@@ -131,6 +137,10 @@ namespace CSVWorld
             void viewRecord();
 
             void previewRecord();
+
+            void executeExtendedDelete();
+
+            void executeExtendedRevert();
 
         public slots:
 
@@ -148,7 +158,7 @@ namespace CSVWorld
 
             void globalFilterModifiedChanged (int state);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void rowAdded(const std::string &id);
     };
 }
 

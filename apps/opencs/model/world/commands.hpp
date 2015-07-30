@@ -48,6 +48,9 @@ namespace CSMWorld
     class CreateCommand : public QUndoCommand
     {
             std::map<int, QVariant> mValues;
+            std::map<int, std::pair<int, QVariant> > mNestedValues;
+            ///< Parameter order: a parent column, a nested column, a data.
+            ///< A nested row has index of 0.
 
         protected:
 
@@ -67,6 +70,8 @@ namespace CSMWorld
             void setType (UniversalId::Type type);
 
             void addValue (int column, const QVariant& value);
+
+            void addNestedValue(int parentColumn, int nestedColumn, const QVariant &value);
 
             virtual void redo();
 

@@ -59,6 +59,7 @@ Programmers
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
+    Koncord
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)

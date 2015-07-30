@@ -73,6 +73,12 @@ namespace CSMWorld
 
             virtual bool hasChildren (const QModelIndex& index) const;
 
+            virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+            ///< \return the column index or -1 if the requested column wasn't found.
+
+            virtual int findNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+            ///< \return the column index or throws an exception if the requested column wasn't found.
+
         signals:
 
             void resetStart(const QString& id);
