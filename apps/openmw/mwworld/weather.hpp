@@ -159,7 +159,6 @@ namespace MWWorld
         MWRender::MoonState calculateState(unsigned int daysPassed, float gameHour);
 
     private:
-        float mSize;
         float mFadeInStart;
         float mFadeInFinish;
         float mFadeOutStart;
