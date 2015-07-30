@@ -75,7 +75,10 @@ namespace MWMechanics
             void init();
             
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
+
+            ///Have the given actor play an idle animation
+            ///@return Success or error
+            bool playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);

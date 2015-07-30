@@ -1,6 +1,7 @@
 #include "aiwander.hpp"
 
 #include <cfloat>
+#include <iostream>
 
 #include <components/misc/rng.hpp>
 
@@ -621,12 +622,17 @@ namespace MWMechanics
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 
-    void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
+    bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
         {
             const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
+            return MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
+        }
+        else
+        {
+            std::cerr<< "Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
+            return false;
         }
     }
 
