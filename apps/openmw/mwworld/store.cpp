@@ -1060,49 +1060,6 @@ namespace MWWorld
         
         return RecordId(dialogue.mId, isDeleted);
     }
-
-
-    // Script
-    //=========================================================================
-
-    template <>
-    inline RecordId Store<ESM::Script>::load(ESM::ESMReader &esm) {
-        ESM::Script script;
-        bool isDeleted = false;
-
-        script.load(esm, isDeleted);
-        Misc::StringUtils::toLower(script.mId);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = script;
-        
-        return RecordId(script.mId, isDeleted);
-    }
-
-
-    // StartScript
-    //=========================================================================
-
-    template <>
-    inline RecordId Store<ESM::StartScript>::load(ESM::ESMReader &esm)
-    {
-        ESM::StartScript script;
-        bool isDeleted = false;
-
-        script.load(esm, isDeleted);
-        Misc::StringUtils::toLower(script.mId);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(script.mId, script));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = script;
-        
-        return RecordId(script.mId, isDeleted);
-    }
 }
 
 template class MWWorld::Store<ESM::Activator>;
