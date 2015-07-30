@@ -208,6 +208,8 @@ namespace NifOsg
 
         META_Object(NifOsg, MaterialColorController)
 
+        virtual void setDefaults(osg::StateSet* stateset);
+
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
     };
 
