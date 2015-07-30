@@ -57,14 +57,24 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     bool silent = mSilent;
     mSilent = quiet;
 
+    boost::filesystem::path pUser = boost::filesystem::canonical(mFixedPath.getUserConfigPath());
+    boost::filesystem::path pLocal = boost::filesystem::canonical(mFixedPath.getLocalPath());
+    boost::filesystem::path pGlobal = boost::filesystem::canonical(mFixedPath.getGlobalConfigPath());
+
     loadConfig(mFixedPath.getUserConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
-    loadConfig(mFixedPath.getLocalPath(), variables, description);
-    boost::program_options::notify(variables);
-    loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
-    boost::program_options::notify(variables);
+    if (pLocal != pUser)
+    {
+        loadConfig(mFixedPath.getLocalPath(), variables, description);
+        boost::program_options::notify(variables);
+    }
 
+    if (pGlobal != pUser && pGlobal != pLocal)
+    {
+        loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
+        boost::program_options::notify(variables);
+    }
     mSilent = silent;
 }
 
