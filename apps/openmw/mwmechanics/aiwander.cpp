@@ -392,17 +392,23 @@ namespace MWMechanics
         short unsigned& idleAnimation = storage.mIdleAnimation;
         idleAnimation = getRandomIdle();
 
+        //If we should be moving
         if (!idleAnimation && mDistance)
         {
             storage.mState = Wander_MoveNow;
         }
         else
         {
-            // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
+            //Recreate vanilla (broken?) behavior of resetting start time of AIWander:
             MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
             mStartTime = currentTime;
-            playIdle(actor, idleAnimation);
             storage.mState = Wander_IdleNow;
+        }
+
+        //If we aren't going to just stand
+        if(idleAnimation)
+        {
+            playIdle(actor, idleAnimation);
         }
     }
 
