@@ -468,10 +468,14 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mIdleState = idle;
 
         std::string idle;
+        MWRender::Animation::AnimPriority idlePriority (Priority_Default);
         // Only play "idleswim" or "idlesneak" if they exist. Otherwise, fallback to
         // "idle"+weapon or "idle".
         if(mIdleState == CharState_IdleSwim && mAnimation->hasAnimation("idleswim"))
+        {
             idle = "idleswim";
+            idlePriority = Priority_SwimIdle;
+        }
         else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
             idle = "idlesneak";
         else if(mIdleState != CharState_None)
@@ -488,7 +492,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         mAnimation->disable(mCurrentIdle);
         mCurrentIdle = idle;
         if(!mCurrentIdle.empty())
-            mAnimation->play(mCurrentIdle, Priority_Default, MWRender::Animation::BlendMask_All, false,
+            mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
                              1.0f, "start", "stop", 0.0f, ~0ul, true);
     }
 
