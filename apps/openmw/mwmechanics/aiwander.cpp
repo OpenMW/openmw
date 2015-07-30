@@ -58,7 +58,6 @@ namespace MWMechanics
         bool mTurnActorGivingGreetingToFacePlayer;
         float mReaction; // update some actions infrequently
         
-        
         AiWander::GreetingState mSaidGreeting;
         int mGreetingTimer;
 
@@ -68,6 +67,7 @@ namespace MWMechanics
         AiWander::WanderState mState;
         
         unsigned short mIdleAnimation;
+        std::vector<unsigned short> mBadIdles; //Idle animations that when called cause errors
 
         PathFinder mPathFinder;
         
@@ -79,7 +79,8 @@ namespace MWMechanics
             mGreetingTimer(0),
             mCell(NULL),
             mState(AiWander::Wander_ChooseAction),
-            mIdleAnimation(0)
+            mIdleAnimation(0),
+            mBadIdles()
             {};
     };
     
@@ -392,24 +393,31 @@ namespace MWMechanics
         short unsigned& idleAnimation = storage.mIdleAnimation;
         idleAnimation = getRandomIdle();
 
-        //If we should be moving
+        // If we should be moving
         if (!idleAnimation && mDistance)
         {
             storage.mState = Wander_MoveNow;
+            return;
         }
-        else
-        {
-            //Recreate vanilla (broken?) behavior of resetting start time of AIWander:
-            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            mStartTime = currentTime;
-            storage.mState = Wander_IdleNow;
-        }
-
-        //If we aren't going to just stand
+        // If we aren't going to just stand
         if(idleAnimation)
         {
-            playIdle(actor, idleAnimation);
+            // If the idle animation actually exists
+            if(std::find(storage.mBadIdles.begin(), storage.mBadIdles.end(), idleAnimation)==storage.mBadIdles.end())
+            {
+                if(!playIdle(actor, idleAnimation))
+                {
+                    std::cerr<< "Unable to play idle animation "<<idleAnimation<<" for " << actor.getCellRef().getRefId() << std::endl;
+                    storage.mBadIdles.push_back(idleAnimation);
+                    storage.mState = Wander_ChooseAction;
+                    return;
+                }
+            }
         }
+        // Recreate vanilla (broken?) behavior of resetting start time of AIWander:
+        mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+        storage.mState = Wander_IdleNow;
+        return;
     }
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)

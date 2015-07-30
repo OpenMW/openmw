@@ -76,8 +76,8 @@ namespace MWMechanics
             
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
-            ///Have the given actor play an idle animation
-            ///@return Success or error
+            /// Have the given actor play an idle animation
+            /// @return Success or error
             bool playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             short unsigned getRandomIdle();
