@@ -196,6 +196,8 @@ namespace MWWorld
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = record;
 
         return RecordId(record.mId, isDeleted);
     }
