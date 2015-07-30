@@ -390,7 +390,8 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 }
                 else
                 {
-                    movemask = MWRender::Animation::BlendMask_LowerBody;
+                    if (weap != sWeaponTypeListEnd)
+                        movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName.erase(swimpos, 4);
                     if(!mAnimation->hasAnimation(movementAnimName))
                         movementAnimName.clear();
