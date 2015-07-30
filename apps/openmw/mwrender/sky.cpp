@@ -705,6 +705,13 @@ public:
         mAlpha = alpha;
     }
 
+    virtual void setDefaults(osg::StateSet* stateset)
+    {
+        // need to create a deep copy of StateAttributes we will modify
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+    }
+
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
