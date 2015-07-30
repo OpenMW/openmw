@@ -291,6 +291,10 @@ namespace MWMechanics
             return;
         }
 
+        // no combat for totally static creatures (they have no movement or attack animations anyway)
+        if (!actor1.getClass().isMobile(actor1))
+            return;
+
         bool aggressive;
 
         if (againstPlayer)
