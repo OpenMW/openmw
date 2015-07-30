@@ -19,7 +19,7 @@ namespace ESM
 namespace MWRender
 {
     class RenderingManager;
-    class MoonState;
+    struct MoonState;
 }
 
 namespace Loading
