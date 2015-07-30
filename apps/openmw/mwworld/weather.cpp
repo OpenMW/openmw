@@ -37,7 +37,7 @@ namespace
     }
 }
 
-MoonModel::MoonModel(const std::string& name, MWWorld::Fallback& fallback)
+MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
   : mFadeInStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Start"))
   , mFadeInFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Finish"))
   , mFadeOutStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Start"))
@@ -54,7 +54,7 @@ MoonModel::MoonModel(const std::string& name, MWWorld::Fallback& fallback)
     mSpeed = std::min(mSpeed, 180.0f / 23.0f);
 }
 
-MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gameHour)
+MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gameHour) const
 {
     float rotationFromHorizon = angle(daysPassed, gameHour);
     MWRender::MoonState state =
@@ -69,7 +69,7 @@ MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gam
     return state;
 }
 
-inline float MoonModel::angle(unsigned int daysPassed, float gameHour)
+inline float MoonModel::angle(unsigned int daysPassed, float gameHour) const
 {
     // Morrowind's moons start travel on one side of the horizon (let's call it H-rise) and travel 180 degrees to the
     // opposite horizon (let's call it H-set). Upon reaching H-set, they reset to H-rise until the next moon rise.
@@ -108,7 +108,7 @@ inline float MoonModel::angle(unsigned int daysPassed, float gameHour)
     return moonRiseAngleToday;
 }
 
-inline float MoonModel::moonRiseHour(unsigned int daysPassed)
+inline float MoonModel::moonRiseHour(unsigned int daysPassed) const
 {
     // This arises from the start date of 16 Last Seed, 427
     // TODO: Find an alternate formula that doesn't rely on this day being fixed.
@@ -122,7 +122,7 @@ inline float MoonModel::moonRiseHour(unsigned int daysPassed)
     return mDailyIncrement + std::fmod((daysPassed - 1 + startDay) * mDailyIncrement, 24.0f);
 }
 
-inline float MoonModel::rotation(float hours)
+inline float MoonModel::rotation(float hours) const
 {
     // 15 degrees per hour was reverse engineered from the rotation matrices of the Morrowind scene graph.
     // Note that this correlates to 360 / 24, which is a full rotation every 24 hours, so speed is a measure
@@ -130,7 +130,7 @@ inline float MoonModel::rotation(float hours)
     return 15.0f * mSpeed * hours;
 }
 
-inline unsigned int MoonModel::phase(unsigned int daysPassed)
+inline unsigned int MoonModel::phase(unsigned int daysPassed) const
 {
     // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
     // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
@@ -138,7 +138,7 @@ inline unsigned int MoonModel::phase(unsigned int daysPassed)
     return ((daysPassed + 1) / 3) % 8;
 }
 
-inline float MoonModel::shadowBlend(float angle)
+inline float MoonModel::shadowBlend(float angle) const
 {
     // The Fade End Angle and Fade Start Angle describe a region where the moon transitions from a solid disk
     // that is roughly the color of the sky, to a textured surface.
@@ -161,7 +161,7 @@ inline float MoonModel::shadowBlend(float angle)
         return 0.0f;
 }
 
-inline float MoonModel::hourlyAlpha(float gameHour)
+inline float MoonModel::hourlyAlpha(float gameHour) const
 {
     // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
     // appears and disappears.
@@ -180,7 +180,7 @@ inline float MoonModel::hourlyAlpha(float gameHour)
         return 1.0f;
 }
 
-inline float MoonModel::earlyMoonShadowAlpha(float angle)
+inline float MoonModel::earlyMoonShadowAlpha(float angle) const
 {
     // The Moon Shadow Early Fade Angle describes an arc relative to Fade End Angle.
     // Depending on the current angle, the following values describe how transparent the moon is.

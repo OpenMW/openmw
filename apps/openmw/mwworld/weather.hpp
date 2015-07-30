@@ -154,9 +154,9 @@ namespace MWWorld
     class MoonModel
     {
     public:
-        MoonModel(const std::string& name, MWWorld::Fallback& fallback);
+        MoonModel(const std::string& name, const MWWorld::Fallback& fallback);
 
-        MWRender::MoonState calculateState(unsigned int daysPassed, float gameHour);
+        MWRender::MoonState calculateState(unsigned int daysPassed, float gameHour) const;
 
     private:
         float mFadeInStart;
@@ -170,13 +170,13 @@ namespace MWWorld
         float mFadeEndAngle;
         float mMoonShadowEarlyFadeAngle;
 
-        float angle(unsigned int daysPassed, float gameHour);
-        float moonRiseHour(unsigned int daysPassed);
-        float rotation(float hours);
-        unsigned int phase(unsigned int daysPassed);
-        float shadowBlend(float angle);
-        float hourlyAlpha(float gameHour);
-        float earlyMoonShadowAlpha(float angle);
+        float angle(unsigned int daysPassed, float gameHour) const;
+        float moonRiseHour(unsigned int daysPassed) const;
+        float rotation(float hours) const;
+        unsigned int phase(unsigned int daysPassed) const;
+        float shadowBlend(float angle) const;
+        float hourlyAlpha(float gameHour) const;
+        float earlyMoonShadowAlpha(float angle) const;
     };
 
     ///
