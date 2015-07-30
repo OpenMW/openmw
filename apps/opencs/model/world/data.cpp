@@ -552,7 +552,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMetaData.addColumn (new FormatColumn<MetaData>);
     mMetaData.addColumn (new AuthorColumn<MetaData>);
     mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
-    
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -968,7 +968,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
         mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
     }
-    
+
     return mReader->getRecordCount();
 }
 
@@ -1419,8 +1419,14 @@ CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
     if (cachedStats)
         return cachedStats;
 
-    const ESM::Race *race = &mRaces.getRecord(npc.mRace).get();
-    const ESM::Class *class_ = &mClasses.getRecord(npc.mClass).get();
+    int raceIndex = mRaces.searchId(npc.mRace);
+    int classIndex = mClasses.searchId(npc.mClass);
+    // this can happen when creating a new game from scratch
+    if (raceIndex == -1 || classIndex == -1)
+        return 0;
+
+    const ESM::Race *race = &mRaces.getRecord(raceIndex).get();
+    const ESM::Class *class_ = &mClasses.getRecord(classIndex).get();
 
     bool autoCalc = npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
     short level = npc.mNpdt52.mLevel;

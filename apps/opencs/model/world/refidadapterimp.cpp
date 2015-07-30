@@ -638,6 +638,11 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
                 if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                 {
                     CSMWorld::NpcStats *stats = mData.npcAutoCalculate(npc);
+                    if (!stats)
+                    {
+                        record.setModified (npc);
+                        return;
+                    }
 
                     // update npc
                     npc.mNpdtType = ESM::NPC::NPC_DEFAULT;
@@ -755,6 +760,8 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
             CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            if (!stats)
+                return QVariant();
 
             switch (subRowIndex)
             {
@@ -885,6 +892,9 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
             CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            if (!stats)
+                return QVariant();
+
             return static_cast<int>(stats->getBaseSkill(subRowIndex));
         }
         else
@@ -981,17 +991,23 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             }
             case 2:
             {
-                UserInt i(stats->getHealth());
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getHealth());
                 return QVariant(QVariant::fromValue(i));
             }
             case 3:
             {
-                UserInt i(stats->getMana());
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getMana());
                 return QVariant(QVariant::fromValue(i));
             }
             case 4:
             {
-                UserInt i(stats->getFatigue());
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getFatigue());
                 return QVariant(QVariant::fromValue(i));
             }
             case 5: return static_cast<int>(record.get().mNpdt12.mDisposition);
@@ -1164,6 +1180,54 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
 namespace CSMWorld
 {
 
+template<>
+QVariant ActorRefIdAdapter<ESM::NPC>::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::NPC>& record = static_cast<const Record<ESM::NPC>&> (
+        data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::NPC>::getType())));
+
+    if (column==mActors.mHasAi)
+        return record.get().mHasAI!=0;
+
+    if (column==mActors.mHello)
+        return record.get().mAiData.mHello;
+
+    if (column==mActors.mFlee)
+        return record.get().mAiData.mFlee;
+
+    if (column==mActors.mFight)
+        return record.get().mAiData.mFight;
+
+    if (column==mActors.mAlarm)
+        return record.get().mAiData.mAlarm;
+
+    if (column==mActors.mInventory)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    if (column==mActors.mSpells)
+    {
+        if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
+            return QVariant(QVariant::UserType);
+        else
+            return true;
+    }
+
+    if (column==mActors.mDestinations)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    if (column==mActors.mAiPackages)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mActors.mServices.find (column);
+
+    if (iter!=mActors.mServices.end())
+        return (record.get().mAiData.mServices & iter->second)!=0;
+
+    return NameRefIdAdapter<ESM::NPC>::getData (column, data, index);
+}
+
 template <>
 void NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColumn *column,
         RefIdData& data, int index, int position) const
@@ -1259,7 +1323,11 @@ QVariant NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *co
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    const std::vector<SpellInfo>& spells = mData.npcAutoCalculate(record.get())->spells();
+    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    if (!stats)
+        return QVariant();
+
+    const std::vector<SpellInfo>& spells = stats->spells();
 
     if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
         throw std::runtime_error ("index out of range");
@@ -1289,8 +1357,54 @@ int NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *col
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    const std::vector<SpellInfo> spells = mData.npcAutoCalculate(record.get())->spells();
-    return static_cast<int>(spells.size());
+    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    if (!stats)
+        return 0;
+
+    return static_cast<int>(stats->spells().size());
+}
+
+template<>
+QVariant ActorRefIdAdapter<ESM::Creature>::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Creature>& record = static_cast<const Record<ESM::Creature>&> (
+        data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::Creature>::getType())));
+
+    if (column==mActors.mHasAi)
+        return record.get().mHasAI!=0;
+
+    if (column==mActors.mHello)
+        return record.get().mAiData.mHello;
+
+    if (column==mActors.mFlee)
+        return record.get().mAiData.mFlee;
+
+    if (column==mActors.mFight)
+        return record.get().mAiData.mFight;
+
+    if (column==mActors.mAlarm)
+        return record.get().mAiData.mAlarm;
+
+    if (column==mActors.mInventory)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    if (column==mActors.mSpells)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    if (column==mActors.mDestinations)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    if (column==mActors.mAiPackages)
+        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mActors.mServices.find (column);
+
+    if (iter!=mActors.mServices.end())
+        return (record.get().mAiData.mServices & iter->second)!=0;
+
+    return NameRefIdAdapter<ESM::Creature>::getData (column, data, index);
 }
 
 template <>

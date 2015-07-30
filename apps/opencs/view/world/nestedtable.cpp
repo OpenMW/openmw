@@ -22,6 +22,8 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
       mEditIdAction(0),
       mModel(model)
 {
+    mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
+
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
@@ -34,26 +36,23 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
 
     int columns = model->columnCount(QModelIndex());
 
-    setModel(model);
+    for(int i = 0 ; i < columns; ++i)
+    {
+        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
+            model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
 
-    setAcceptDrops(true);
+        CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
+                                                                                         mDispatcher,
+                                                                                         document,
+                                                                                         this);
+
+        setItemDelegateForColumn(i, delegate);
+    }
+
+    setModel(model);
 
     if (editable)
     {
-        mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
-        for(int i = 0 ; i < columns; ++i)
-        {
-            CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display> (
-                model->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-            CommandDelegate *delegate = CommandDelegateFactoryCollection::get().makeDelegate(display,
-                                                                                             mDispatcher,
-                                                                                             document,
-                                                                                             this);
-
-            setItemDelegateForColumn(i, delegate);
-        }
-
         mAddNewRowAction = new QAction (tr ("Add new row"), this);
 
         connect(mAddNewRowAction, SIGNAL(triggered()),
