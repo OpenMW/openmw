@@ -2,6 +2,7 @@
 
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
+#include <osg/Version>
 
 #include <stdexcept>
 
