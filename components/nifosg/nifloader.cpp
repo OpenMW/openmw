@@ -903,7 +903,7 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape " << triShape->name << " in " << mFilename << std::endl;
+                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
                     continue;
                 }
 
@@ -1264,13 +1264,34 @@ namespace NifOsg
                 {
                     if (texprop->textures[i].inUse)
                     {
-                        if (i != Nif::NiTexturingProperty::BaseTexture
-                                && i != Nif::NiTexturingProperty::GlowTexture
-                                && i != Nif::NiTexturingProperty::DarkTexture
-                                && i != Nif::NiTexturingProperty::DetailTexture)
+                        switch(i)
                         {
-                            std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
-                            continue;
+                            //These are handled later on
+                            case Nif::NiTexturingProperty::BaseTexture:
+                            case Nif::NiTexturingProperty::GlowTexture:
+                            case Nif::NiTexturingProperty::DarkTexture:
+                            case Nif::NiTexturingProperty::DetailTexture:
+                                break;
+                            case Nif::NiTexturingProperty::GlossTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            case Nif::NiTexturingProperty::BumpTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::BumpTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            case Nif::NiTexturingProperty::DecalTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::DecalTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            default:
+                            {
+                                std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
+                                continue;
+                            }
                         }
 
                         const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
