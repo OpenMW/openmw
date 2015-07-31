@@ -407,7 +407,6 @@ namespace MWMechanics
             {
                 if(!playIdle(actor, idleAnimation))
                 {
-                    std::cerr<< "Unable to play idle animation "<<idleAnimation<<" for " << actor.getCellRef().getRefId() << std::endl;
                     storage.mBadIdles.push_back(idleAnimation);
                     storage.mState = Wander_ChooseAction;
                     return;
