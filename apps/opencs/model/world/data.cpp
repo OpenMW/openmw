@@ -553,6 +553,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMetaData.addColumn (new AuthorColumn<MetaData>);
     mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
 
+    mLandTextures.addColumn (new StringIdColumn<LandTexture>);
+    mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
+    mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture> (UniversalId::Type_LandTexture));
+
+    mLand.addColumn (new StringIdColumn<Land>);
+    mLand.addColumn (new RecordStateColumn<Land>);
+    mLand.addColumn (new FixedRecordTypeColumn<Land> (UniversalId::Type_Land));
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -594,6 +602,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
     addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
+    addModel (new IdTable (&mLand), UniversalId::Type_Land);
+    addModel (new IdTable (&mLandTextures), UniversalId::Type_LandTexture);
 
     // for autocalc updates when gmst/race/class/skils tables change
     CSMWorld::IdTable *gmsts =

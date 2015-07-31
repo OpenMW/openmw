@@ -43,6 +43,8 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_BodyParts,
         CSMWorld::UniversalId::Type_SoundGens,
         CSMWorld::UniversalId::Type_Pathgrids,
+        CSMWorld::UniversalId::Type_LandTextures,
+        CSMWorld::UniversalId::Type_Lands,
         CSMWorld::UniversalId::Type_StartScripts,
 
         CSMWorld::UniversalId::Type_None // end marker
@@ -172,7 +174,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_MetaData,
         new CSVDoc::SubViewFactory<SimpleDialogueSubView >);
-        
+
     //preview
     manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }

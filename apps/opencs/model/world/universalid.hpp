@@ -133,6 +133,10 @@ namespace CSMWorld
                 Type_Search,
                 Type_MetaDatas,
                 Type_MetaData,
+                Type_LandTextures,
+                Type_LandTexture,
+                Type_Lands,
+                Type_Land,
                 Type_RunLog
             };
 
