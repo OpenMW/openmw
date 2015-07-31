@@ -83,6 +83,7 @@ namespace MWGui
     //Race dialog
     void onRaceDialogDone(WindowBase* parWindow);
     void onRaceDialogBack();
+    void selectRace();
 
     //Class dialogs
     void onClassChoice(int _index);
@@ -94,10 +95,14 @@ namespace MWGui
     void onClassQuestionChosen(int _index);
     void onGenerateClassBack();
     void onGenerateClassDone(WindowBase* parWindow);
+    void selectGeneratedClass();
+    void selectCreatedClass();
+    void selectPickedClass();
 
     //Birthsign dialog
     void onBirthSignDialogDone(WindowBase* parWindow);
     void onBirthSignDialogBack();
+    void selectBirthSign();
 
     //Review dialog
     void onReviewDialogDone(WindowBase* parWindow);
