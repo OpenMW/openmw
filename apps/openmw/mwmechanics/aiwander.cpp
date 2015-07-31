@@ -113,6 +113,8 @@ namespace MWMechanics
 
         mPopulateAvailableNodes = true;
 
+        fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
+
     }
 
     AiPackage * MWMechanics::AiWander::clone() const
@@ -655,22 +657,21 @@ namespace MWMechanics
     short unsigned AiWander::getRandomIdle()
     {
         unsigned short idleRoll = 0;
-        short unsigned selectedAnimation = 0;
+        int selectedAnimation = 0-GroupIndex_MinIdle;
+        int maxIdleRoll = 100 / fIdleChanceMultiplier;
 
         for(unsigned int counter = 0; counter < mIdle.size(); counter++)
         {
-            static float fIdleChanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-                .get<ESM::GameSetting>().find("fIdleChanceMultiplier")->getFloat();
-
             unsigned short idleChance = static_cast<unsigned short>(fIdleChanceMultiplier * mIdle[counter]);
-            unsigned short randSelect = (int)(Misc::Rng::rollProbability() * int(100 / fIdleChanceMultiplier));
+            int randSelect = Misc::Rng::rollDice(maxIdleRoll);
+
             if(randSelect < idleChance && randSelect > idleRoll)
             {
-                selectedAnimation = counter + GroupIndex_MinIdle;
+                selectedAnimation = counter;
                 idleRoll = randSelect;
             }
         }
-        return selectedAnimation;
+        return selectedAnimation + GroupIndex_MinIdle;
     }
 
     void AiWander::fastForward(const MWWorld::Ptr& actor, AiState &state)
@@ -822,7 +823,7 @@ namespace MWMechanics
         wander->mData.mTimeOfDay = mTimeOfDay;
         wander->mStartTime = mStartTime.toEsm();
         assert (mIdle.size() == 8);
-        for (int i=0; i<8; ++i)
+        for (unsigned int i=0; i<mIdle.size(); ++i)
             wander->mData.mIdle[i] = mIdle[i];
         wander->mData.mShouldRepeat = mRepeat;
         wander->mStoredInitialActorPosition = mStoredInitialActorPosition;
