@@ -151,6 +151,8 @@ namespace MWMechanics
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
 
             static int OffsetToPreventOvercrowding();
+
+            float fIdleChanceMultiplier;
     };
     
     
