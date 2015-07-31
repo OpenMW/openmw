@@ -155,6 +155,10 @@ void CSVDoc::View::setupWorldMenu()
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
     world->addAction (grid);
 
+    QAction *land = new QAction (tr ("Lands"), this);
+    connect (land, SIGNAL (triggered()), this, SLOT (addLandSubView()));
+    world->addAction (land);
+
     world->addSeparator(); // items that don't represent single record lists follow here
 
     QAction *regionMap = new QAction (tr ("Region Map"), this);
@@ -273,6 +277,10 @@ void CSVDoc::View::setupAssetsMenu()
     QAction *textures = new QAction (tr ("Textures"), this);
     connect (textures, SIGNAL (triggered()), this, SLOT (addTexturesSubView()));
     assets->addAction (textures);
+
+    QAction *land = new QAction (tr ("Land Textures"), this);
+    connect (land, SIGNAL (triggered()), this, SLOT (addLandTextureSubView()));
+    assets->addAction (land);
 
     QAction *videos = new QAction (tr ("Videos"), this);
     connect (videos, SIGNAL (triggered()), this, SLOT (addVideosSubView()));
@@ -814,6 +822,16 @@ void CSVDoc::View::addRunLogSubView()
 void CSVDoc::View::addPathgridSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_Pathgrids);
+}
+
+void CSVDoc::View::addLandTextureSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_LandTextures);
+}
+
+void CSVDoc::View::addLandSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Lands);
 }
 
 void CSVDoc::View::addStartScriptsSubView()
