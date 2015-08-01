@@ -689,16 +689,14 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
         int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
 
-        float total = static_cast<float>(slash + chop + thrust);
-
-        float roll = Misc::Rng::rollClosedProbability();
-        if(roll <= (slash/total))
+        float roll = Misc::Rng::rollClosedProbability() * (slash + chop + thrust);
+        if(roll <= slash)
         {
             movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
-        else if(roll <= (slash + (thrust/total)))
+        else if(roll <= (slash + thrust))
         {
             movement.mPosition[1] = 1;
             attackType = ESM::Weapon::AT_Thrust;
