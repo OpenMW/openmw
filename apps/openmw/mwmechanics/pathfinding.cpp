@@ -87,14 +87,14 @@ namespace
 
 namespace MWMechanics
 {
-    float sqrDistanceIgnoreZ(ESM::Pathgrid::Point point, float x, float y)
+    float sqrDistanceIgnoreZ(const ESM::Pathgrid::Point& point, float x, float y)
     {
         x -= point.mX;
         y -= point.mY;
         return (x * x + y * y);
     }
 
-    float distance(ESM::Pathgrid::Point point, float x, float y, float z)
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float z)
     {
         x -= point.mX;
         y -= point.mY;
@@ -102,7 +102,7 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
     {
         float x = static_cast<float>(a.mX - b.mX);
         float y = static_cast<float>(a.mY - b.mY);
@@ -272,7 +272,7 @@ namespace MWMechanics
         if(mPath.empty())
             return true;
 
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
+        const ESM::Pathgrid::Point& nextPoint = *mPath.begin();
         if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
         {
             mPath.pop_front();
