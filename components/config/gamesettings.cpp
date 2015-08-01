@@ -291,7 +291,8 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             if (!comments.empty() && index != -1 && settingRegex.captureCount() >= 2 &&
                 mUserSettings.find(settingRegex.cap(1)) != mUserSettings.end())
             {
-                for (std::vector<QString>::const_iterator it = comments.begin(); it != comments.end(); ++it)
+                for (std::vector<QString>::const_iterator it = comments.begin();
+                        it != comments.end() && commentStart != fileCopy.end(); ++it)
                 {
                     *commentStart = *it;
                     ++commentStart;
