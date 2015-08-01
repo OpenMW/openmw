@@ -503,12 +503,14 @@ namespace MWMechanics
             }
 
             // don't use pathgrid when actor can move in 3 dimensions
-            if(canMoveByZ) preferShortcut = true;
+            if (canMoveByZ)
+            {
+                preferShortcut = true;
+                movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
+            }
 
             if(preferShortcut)
             {
-                if (canMoveByZ)
-                    movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
                 movement.mRotation[2] = getZAngleToDir(vDirToTarget);
                 forceNoShortcut = false;
                 shortcutFailPos.pos[0] = shortcutFailPos.pos[1] = shortcutFailPos.pos[2] = 0;
