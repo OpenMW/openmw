@@ -2,6 +2,7 @@
 
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
+#include <osg/Version>
 
 #include <stdexcept>
 
@@ -118,10 +119,17 @@ namespace Resource
             case(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
             case(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
             {
+#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+                osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
+                if (exts && !exts->isTextureCompressionS3TCSupported
+                        // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
+                        && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+#else
                 osg::Texture::Extensions* exts = osg::Texture::getExtensions(0, false);
                 if (exts && !exts->isTextureCompressionS3TCSupported()
                         // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
                         && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+#endif
                 {
                     std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
                     return false;
