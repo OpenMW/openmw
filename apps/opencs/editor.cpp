@@ -159,15 +159,23 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     }
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
+    Files::PathContainer canonicalPaths;
 
     //iterate the data directories and add them to the file dialog for loading
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
+        boost::filesystem::path p = boost::filesystem::canonical(*iter);
+        Files::PathContainer::iterator it = std::find(canonicalPaths.begin(), canonicalPaths.end(), p);
+        if (it == canonicalPaths.end())
+            canonicalPaths.push_back(p);
+        else
+            continue;
+
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
 
-    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
+    return std::make_pair (canonicalPaths, variables["fallback-archive"].as<std::vector<std::string> >());
 }
 
 void CS::Editor::createGame()

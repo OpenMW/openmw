@@ -77,8 +77,13 @@ namespace ESM
                     break;
                 case ESM::FourCC<'S','C','D','T'>::value:
                     // compiled script
-                    mScriptData.resize(mData.mScriptDataSize);
-                    esm.getHExact(&mScriptData[0], mScriptData.size());
+                    if (mData.mScriptDataSize)
+                    {
+                        mScriptData.resize(mData.mScriptDataSize);
+                        esm.getHExact(&mScriptData[0], mScriptData.size());
+                    }
+                    else
+                        esm.skipHSub();
                     break;
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();

@@ -524,49 +524,6 @@ namespace CSMWorld
     {}
 
     template<typename RecordT>
-    QVariant ActorRefIdAdapter<RecordT>::getData (const RefIdColumn *column, const RefIdData& data,
-        int index) const
-    {
-        const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
-            data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
-
-        if (column==mActors.mHasAi)
-            return record.get().mHasAI!=0;
-
-        if (column==mActors.mHello)
-            return record.get().mAiData.mHello;
-
-        if (column==mActors.mFlee)
-            return record.get().mAiData.mFlee;
-
-        if (column==mActors.mFight)
-            return record.get().mAiData.mFight;
-
-        if (column==mActors.mAlarm)
-            return record.get().mAiData.mAlarm;
-
-        if (column==mActors.mInventory)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
-
-        if (column==mActors.mSpells)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
-
-        if (column==mActors.mDestinations)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
-
-        if (column==mActors.mAiPackages)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
-
-        std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
-            mActors.mServices.find (column);
-
-        if (iter!=mActors.mServices.end())
-            return (record.get().mAiData.mServices & iter->second)!=0;
-
-        return NameRefIdAdapter<RecordT>::getData (column, data, index);
-    }
-
-    template<typename RecordT>
     void ActorRefIdAdapter<RecordT>::setData (const RefIdColumn *column, RefIdData& data, int index,
         const QVariant& value) const
     {
