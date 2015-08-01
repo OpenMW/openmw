@@ -398,13 +398,19 @@ public:
     void setState(const MoonState& state)
     {
         float radsX = ((state.mRotationFromHorizon) * M_PI) / 180.0f;
-        float radsY = 0;
         float radsZ = ((state.mRotationFromNorth) * M_PI) / 180.0f;
 
-        osg::Quat rotation(radsX, osg::Vec3f(1.0f, 0.0f, 0.0f),
-                           radsY, osg::Vec3f(0.0f, 1.0f, 0.0f),
-                           radsZ, osg::Vec3f(0.0f, 0.0f, 1.0f));
-        setDirection(rotation * osg::Vec3f(0.0f, 1.0f, 0.0f));
+        osg::Quat rotX(radsX, osg::Vec3f(1.0f, 0.0f, 0.0f));
+        osg::Quat rotZ(radsZ, osg::Vec3f(0.0f, 0.0f, 1.0f));
+
+        osg::Vec3f direction = rotX * rotZ * osg::Vec3f(0.0f, 1.0f, 0.0f);
+        mTransform->setPosition(direction * 1000.0f);
+
+        // The moon quad is initially oriented facing down, so we need to offset its X-axis
+        // rotation to rotate it to face the camera when sitting at the horizon.
+        osg::Quat attX((-M_PI / 2.0f) + radsX, osg::Vec3f(1,0,0));
+        mTransform->setAttitude(attX * rotZ);
+
         setPhase(state.mPhase);
         setTransparency(state.mMoonAlpha);
         setShadowBlend(state.mShadowBlend);
