@@ -96,7 +96,13 @@ bool CSMWorld::IdTree::setData (const QModelIndex &index, const QVariant &value,
 
             mNestedCollection->setNestedData(parentAddress.first, parentAddress.second, value, index.row(), index.column());
 
-            emit dataChanged (index, index);
+            emit dataChanged(index, index);
+
+            // Modifying a value can also change the Modified status of a record (located in the parent row).
+            // To track this, we inform about the change of a whole parent row.
+            QModelIndex parentRowStart = this->index(index.parent().row(), 0);
+            QModelIndex parentRowEnd = this->index(index.parent().row(), columnCount(index.parent()) - 1);
+            emit dataChanged(parentRowStart, parentRowEnd);
 
             return true;
         }
