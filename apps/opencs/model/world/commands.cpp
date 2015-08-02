@@ -33,7 +33,14 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
     {
         mHasRecordState = true;
         int stateColumnIndex = table->findColumnIndex(Columns::ColumnId_Modification);
-        mRecordStateIndex = table->index(mIndex.row(), stateColumnIndex);
+
+        int rowIndex = mIndex.row();
+        if (mIndex.parent().isValid())
+        {
+            rowIndex = mIndex.parent().row();
+        }
+
+        mRecordStateIndex = table->index(rowIndex, stateColumnIndex);
         mOldRecordState = static_cast<CSMWorld::RecordBase::State>(table->data(mRecordStateIndex).toInt());
     }
 }
