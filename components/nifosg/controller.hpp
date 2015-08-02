@@ -189,6 +189,8 @@ namespace NifOsg
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
+        virtual void setDefaults(osg::StateSet* stateset);
+
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
 
         META_Object(NifOsg, AlphaController)
@@ -205,6 +207,8 @@ namespace NifOsg
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, MaterialColorController)
+
+        virtual void setDefaults(osg::StateSet* stateset);
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
     };
