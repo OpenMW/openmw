@@ -811,8 +811,13 @@ void CSVWorld::SimpleDialogueSubView::dataChanged (const QModelIndex & index)
 void CSVWorld::SimpleDialogueSubView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
     QModelIndex currentIndex(mTable->getModelIndex(getUniversalId().getId(), 0));
+    
+    if (!currentIndex.isValid())
+    {
+        return;
+    }
 
-    if (currentIndex.isValid() && currentIndex.row() >= start && currentIndex.row() <= end)
+    if (currentIndex.parent() == parent && currentIndex.row() >= start && currentIndex.row() <= end)
     {
         if(mEditWidget)
         {
