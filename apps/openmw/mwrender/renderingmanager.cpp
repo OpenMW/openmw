@@ -466,9 +466,6 @@ namespace MWRender
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
-        int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getCamera()->setCullMask(oldCullMask & (~Mask_GUI));
-
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
         rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
@@ -492,6 +489,7 @@ namespace MWRender
         image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->addChild(mLightRoot);
+        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
 
@@ -506,8 +504,6 @@ namespace MWRender
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         rttCamera->setGraphicsContext(NULL);
         mRootNode->removeChild(rttCamera);
-
-        mViewer->getCamera()->setCullMask(oldCullMask);
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
