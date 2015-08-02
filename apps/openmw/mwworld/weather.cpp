@@ -37,6 +37,170 @@ namespace
     }
 }
 
+MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
+  : mFadeInStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Start"))
+  , mFadeInFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Finish"))
+  , mFadeOutStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Start"))
+  , mFadeOutFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Finish"))
+  , mAxisOffset(fallback.getFallbackFloat("Moons_" + name + "_Axis_Offset"))
+  , mSpeed(fallback.getFallbackFloat("Moons_" + name + "_Speed"))
+  , mDailyIncrement(fallback.getFallbackFloat("Moons_" + name + "_Daily_Increment"))
+  , mFadeStartAngle(fallback.getFallbackFloat("Moons_" + name + "_Fade_Start_Angle"))
+  , mFadeEndAngle(fallback.getFallbackFloat("Moons_" + name + "_Fade_End_Angle"))
+  , mMoonShadowEarlyFadeAngle(fallback.getFallbackFloat("Moons_" + name + "_Moon_Shadow_Early_Fade_Angle"))
+{
+    // Morrowind appears to have a minimum speed in order to avoid situations where the moon couldn't conceivably
+    // complete a rotation in a single 24 hour period. The value of 180/23 was deduced from reverse engineering.
+    mSpeed = std::min(mSpeed, 180.0f / 23.0f);
+}
+
+MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gameHour) const
+{
+    float rotationFromHorizon = angle(daysPassed, gameHour);
+    MWRender::MoonState state =
+    {
+        rotationFromHorizon,
+        mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
+        static_cast<MWRender::MoonState::Phase>(phase(daysPassed)),
+        shadowBlend(rotationFromHorizon),
+        earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameHour)
+    };
+
+    return state;
+}
+
+inline float MoonModel::angle(unsigned int daysPassed, float gameHour) const
+{
+    // Morrowind's moons start travel on one side of the horizon (let's call it H-rise) and travel 180 degrees to the
+    // opposite horizon (let's call it H-set). Upon reaching H-set, they reset to H-rise until the next moon rise.
+
+    // When calculating the angle of the moon, several cases have to be taken into account:
+    // 1. Moon rises and then sets in one day.
+    // 2. Moon sets and doesn't rise in one day (occurs when the moon rise hour is >= 24).
+    // 3. Moon sets and then rises in one day.
+    float moonRiseHourToday = moonRiseHour(daysPassed);
+    float moonRiseAngleToday = 0;
+
+    if(gameHour < moonRiseHourToday)
+    {
+        float moonRiseHourYesterday = moonRiseHour(daysPassed - 1);
+        if(moonRiseHourYesterday < 24)
+        {
+            float moonRiseAngleYesterday = rotation(24 - moonRiseHourYesterday);
+            if(moonRiseAngleYesterday < 180)
+            {
+                // The moon rose but did not set yesterday, so accumulate yesterday's angle with how much we've travelled today.
+                moonRiseAngleToday = rotation(gameHour) + moonRiseAngleYesterday;
+            }
+        }
+    }
+    else
+    {
+        moonRiseAngleToday = rotation(gameHour - moonRiseHourToday);
+    }
+
+    if(moonRiseAngleToday >= 180)
+    {
+        // The moon set today, reset the angle to the horizon.
+        moonRiseAngleToday = 0;
+    }
+
+    return moonRiseAngleToday;
+}
+
+inline float MoonModel::moonRiseHour(unsigned int daysPassed) const
+{
+    // This arises from the start date of 16 Last Seed, 427
+    // TODO: Find an alternate formula that doesn't rely on this day being fixed.
+    static const unsigned int startDay = 16;
+
+    // This odd formula arises from the fact that on 16 Last Seed, 17 increments have occurred, meaning
+    // that upon starting a new game, it must only calculate the moon phase as far back as 1 Last Seed.
+    // Note that we don't modulo after adding the latest daily increment because other calculations need to
+    // know if doing so would cause the moon rise to be postponed until the next day (which happens when
+    // the moon rise hour is >= 24 in Morrowind).
+    return mDailyIncrement + std::fmod((daysPassed - 1 + startDay) * mDailyIncrement, 24.0f);
+}
+
+inline float MoonModel::rotation(float hours) const
+{
+    // 15 degrees per hour was reverse engineered from the rotation matrices of the Morrowind scene graph.
+    // Note that this correlates to 360 / 24, which is a full rotation every 24 hours, so speed is a measure
+    // of whole rotations that could be completed in a day.
+    return 15.0f * mSpeed * hours;
+}
+
+inline unsigned int MoonModel::phase(unsigned int daysPassed) const
+{
+    // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
+    // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
+    // forward declare it (C++11 strongly typed enums solve this).
+    return ((daysPassed + 1) / 3) % 8;
+}
+
+inline float MoonModel::shadowBlend(float angle) const
+{
+    // The Fade End Angle and Fade Start Angle describe a region where the moon transitions from a solid disk
+    // that is roughly the color of the sky, to a textured surface.
+    // Depending on the current angle, the following values describe the ratio between the textured moon
+    // and the solid disk:
+    // 1. From Fade End Angle 1 to Fade Start Angle 1 (during moon rise): 0..1
+    // 2. From Fade Start Angle 1 to Fade Start Angle 2 (between moon rise and moon set): 1 (textured)
+    // 3. From Fade Start Angle 2 to Fade End Angle 2 (during moon set): 1..0
+    // 4. From Fade End Angle 2 to Fade End Angle 1 (between moon set and moon rise): 0 (solid disk)
+    float fadeAngle = mFadeStartAngle - mFadeEndAngle;
+    float fadeEndAngle2 = 180.0f - mFadeEndAngle;
+    float fadeStartAngle2 = 180.0f - mFadeStartAngle;
+    if((angle >= mFadeEndAngle) && (angle < mFadeStartAngle))
+        return (angle - mFadeEndAngle) / fadeAngle;
+    else if((angle >= mFadeStartAngle) && (angle < fadeStartAngle2))
+        return 1.0f;
+    else if((angle >= fadeStartAngle2) && (angle < fadeEndAngle2))
+        return (fadeEndAngle2 - angle) / fadeAngle;
+    else
+        return 0.0f;
+}
+
+inline float MoonModel::hourlyAlpha(float gameHour) const
+{
+    // The Fade Out Start / Finish and Fade In Start / Finish describe the hours at which the moon
+    // appears and disappears.
+    // Depending on the current hour, the following values describe how transparent the moon is.
+    // 1. From Fade Out Start to Fade Out Finish: 1..0
+    // 2. From Fade Out Finish to Fade In Start: 0 (transparent)
+    // 3. From Fade In Start to Fade In Finish: 0..1
+    // 4. From Fade In Finish to Fade Out Start: 1 (solid)
+    if((gameHour >= mFadeOutStart) && (gameHour < mFadeOutFinish))
+        return (mFadeOutFinish - gameHour) / (mFadeOutFinish - mFadeOutStart);
+    else if((gameHour >= mFadeOutFinish) && (gameHour < mFadeInStart))
+        return 0.0f;
+    else if((gameHour >= mFadeInStart) && (gameHour < mFadeInFinish))
+        return (gameHour - mFadeInStart) / (mFadeInFinish - mFadeInStart);
+    else
+        return 1.0f;
+}
+
+inline float MoonModel::earlyMoonShadowAlpha(float angle) const
+{
+    // The Moon Shadow Early Fade Angle describes an arc relative to Fade End Angle.
+    // Depending on the current angle, the following values describe how transparent the moon is.
+    // 1. From Moon Shadow Early Fade Angle 1 to Fade End Angle 1 (during moon rise): 0..1
+    // 2. From Fade End Angle 1 to Fade End Angle 2 (between moon rise and moon set): 1 (solid)
+    // 3. From Fade End Angle 2 to Moon Shadow Early Fade Angle 2 (during moon set): 1..0
+    // 4. From Moon Shadow Early Fade Angle 2 to Moon Shadow Early Fade Angle 1: 0 (transparent)
+    float moonShadowEarlyFadeAngle1 = mFadeEndAngle - mMoonShadowEarlyFadeAngle;
+    float fadeEndAngle2 = 180.0f - mFadeEndAngle;
+    float moonShadowEarlyFadeAngle2 = fadeEndAngle2 + mMoonShadowEarlyFadeAngle;
+    if((angle >= moonShadowEarlyFadeAngle1) && (angle < mFadeEndAngle))
+        return (angle - moonShadowEarlyFadeAngle1) / mMoonShadowEarlyFadeAngle;
+    else if((angle >= mFadeEndAngle) && (angle < fadeEndAngle2))
+        return 1.0f;
+    else if((angle >= fadeEndAngle2) && (angle < moonShadowEarlyFadeAngle2))
+        return (moonShadowEarlyFadeAngle2 - angle) / mMoonShadowEarlyFadeAngle;
+    else
+        return 0.0f;
+}
+
 void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
 {
     std::string upper=name;
@@ -88,39 +252,12 @@ Max Raindrops=650 ?
     mWeatherSettings[name] = weather;
 }
 
-
-float WeatherManager::calculateHourFade (const std::string& moonName) const
-{
-    float fadeOutStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Start");
-    float fadeOutFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Out_Finish");
-    float fadeInStart=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Start");
-    float fadeInFinish=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_In_Finish");
-
-    if (mHour >= fadeOutStart && mHour <= fadeOutFinish)
-        return (1 - ((mHour - fadeOutStart) / (fadeOutFinish - fadeOutStart)));
-    if (mHour >= fadeInStart && mHour <= fadeInFinish)
-        return (1 - ((mHour - fadeInStart) / (fadeInFinish - fadeInStart)));
-    else
-        return 1;
-}
-
-float WeatherManager::calculateAngleFade (const std::string& moonName, float angle) const
-{
-    float endAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_End_Angle");
-    float startAngle=mFallback->getFallbackFloat("Moons_"+moonName+"_Fade_Start_Angle");
-    if (angle <= startAngle && angle >= endAngle)
-        return (1 - ((angle - endAngle)/(startAngle-endAngle)));
-    else if (angle > startAngle)
-        return 0.f;
-    else
-        return 1.f;
-}
-
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Fallback* fallback, MWWorld::ESMStore* store) :
      mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mFallback(fallback), mStore(store),
      mRendering(rendering), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mRemainingTransitionTime(0), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
-     mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0)
+     mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0),
+     mMasser("Masser", *fallback), mSecunda("Secunda", *fallback)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
@@ -465,72 +602,9 @@ void WeatherManager::update(float duration, bool paused)
         mRendering->setSunDirection( final * -1 );
     }
 
-    /*
-     * TODO: import separated fadeInStart/Finish, fadeOutStart/Finish
-     * for masser and secunda
-     */
-
-    float fadeOutFinish=mFallback->getFallbackFloat("Moons_Masser_Fade_Out_Finish");
-    float fadeInStart=mFallback->getFallbackFloat("Moons_Masser_Fade_In_Start");
-
-    //moon calculations
-    float moonHeight;
-    if (mHour >= fadeInStart)
-        moonHeight = mHour - fadeInStart;
-    else if (mHour <= fadeOutFinish)
-        moonHeight = mHour + fadeOutFinish;
-    else
-        moonHeight = 0;
-
-    moonHeight /= (24.f - (fadeInStart - fadeOutFinish));
-
-    if (moonHeight != 0)
-    {
-        int facing = (moonHeight <= 1) ? 1 : -1;
-        osg::Vec3f masser(
-                (moonHeight - 1) * facing,
-                (1 - moonHeight) * facing,
-                moonHeight);
-
-        osg::Vec3f secunda(
-                (moonHeight - 1) * facing * 1.25f,
-                (1 - moonHeight) * facing * 0.8f,
-                moonHeight);
-
-        mRendering->getSkyManager()->setMasserDirection(masser);
-        mRendering->getSkyManager()->setSecundaDirection(secunda);
-
-        float angle = (1-moonHeight) * 90.f * facing;
-        float masserHourFade = calculateHourFade("Masser");
-        float secundaHourFade = calculateHourFade("Secunda");
-        float masserAngleFade = calculateAngleFade("Masser", angle);
-        float secundaAngleFade = calculateAngleFade("Secunda", angle);
-
-        masserAngleFade *= masserHourFade;
-        secundaAngleFade *= secundaHourFade;
-
-        if (masserAngleFade > 0)
-        {
-            mRendering->getSkyManager()->setMasserFade(masserAngleFade);
-            mRendering->getSkyManager()->masserEnable();
-        }
-        else
-            mRendering->getSkyManager()->masserDisable();
-
-        if (secundaAngleFade > 0)
-        {
-            mRendering->getSkyManager()->setSecundaFade(secundaAngleFade);
-            mRendering->getSkyManager()->secundaEnable();
-        }
-        else
-            mRendering->getSkyManager()->secundaDisable();
-
-    }
-    else
-    {
-        mRendering->getSkyManager()->masserDisable();
-        mRendering->getSkyManager()->secundaDisable();
-    }
+    TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
+    mRendering->getSkyManager()->setMasserState(mMasser.calculateState(time.getDay(), time.getHour()));
+    mRendering->getSkyManager()->setSecundaState(mSecunda.calculateState(time.getDay(), time.getHour()));
 
     if (!paused)
     {

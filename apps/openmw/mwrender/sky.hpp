@@ -33,6 +33,28 @@ namespace MWRender
     class RainFader;
     class AlphaFader;
 
+    struct MoonState
+    {
+        enum Phase
+        {
+            Phase_Full = 0,
+            Phase_WaningGibbous,
+            Phase_ThirdQuarter,
+            Phase_WaningCrescent,
+            Phase_New,
+            Phase_WaxingCrescent,
+            Phase_FirstQuarter,
+            Phase_WaxingGibbous,
+            Phase_Unspecified
+        };
+
+        float mRotationFromHorizon;
+        float mRotationFromNorth;
+        Phase mPhase;
+        float mShadowBlend;
+        float mMoonAlpha;
+    };
+
     class SkyManager
     {
     public:
@@ -72,19 +94,8 @@ namespace MWRender
 
         void setSunDirection(const osg::Vec3f& direction);
 
-        void setMasserDirection(const osg::Vec3f& direction);
-
-        void setSecundaDirection(const osg::Vec3f& direction);
-
-        void setMasserFade(const float fade);
-
-        void setSecundaFade(const float fade);
-
-        void masserEnable();
-        void masserDisable();
-
-        void secundaEnable();
-        void secundaDisable();
+        void setMasserState(const MoonState& state);
+        void setSecundaState(const MoonState& state);
 
         void setLightningStrength(const float factor);
 

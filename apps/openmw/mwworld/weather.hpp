@@ -19,6 +19,7 @@ namespace ESM
 namespace MWRender
 {
     class RenderingManager;
+    struct MoonState;
 }
 
 namespace Loading
@@ -150,6 +151,34 @@ namespace MWWorld
         // is broken in the vanilla game and was disabled.
     };
 
+    class MoonModel
+    {
+    public:
+        MoonModel(const std::string& name, const MWWorld::Fallback& fallback);
+
+        MWRender::MoonState calculateState(unsigned int daysPassed, float gameHour) const;
+
+    private:
+        float mFadeInStart;
+        float mFadeInFinish;
+        float mFadeOutStart;
+        float mFadeOutFinish;
+        float mAxisOffset;
+        float mSpeed;
+        float mDailyIncrement;
+        float mFadeStartAngle;
+        float mFadeEndAngle;
+        float mMoonShadowEarlyFadeAngle;
+
+        float angle(unsigned int daysPassed, float gameHour) const;
+        float moonRiseHour(unsigned int daysPassed) const;
+        float rotation(float hours) const;
+        unsigned int phase(unsigned int daysPassed) const;
+        float shadowBlend(float angle) const;
+        float hourlyAlpha(float gameHour) const;
+        float earlyMoonShadowAlpha(float angle) const;
+    };
+
     ///
     /// Interface for weather settings
     ///
@@ -237,9 +266,6 @@ namespace MWWorld
         void transition(const float factor);
         void setResult(const std::string& weatherType);
 
-        float calculateHourFade (const std::string& moonName) const;
-        float calculateAngleFade (const std::string& moonName, float angle) const;
-
         void setWeather(const std::string& weatherType, bool instant=false);
         std::string nextWeather(const ESM::Region* region) const;
         WeatherResult mResult;
@@ -265,6 +291,8 @@ namespace MWWorld
         std::string mThunderSoundID1;
         std::string mThunderSoundID2;
         std::string mThunderSoundID3;
+        MoonModel mMasser;
+        MoonModel mSecunda;
     };
 }
 
