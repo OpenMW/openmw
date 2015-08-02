@@ -570,8 +570,6 @@ void CSVWorld::EditWidget::remake(int row)
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
                     table->setEnabled(false);
                 }
-                else
-                    table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
 
                 int rows = mTable->rowCount(mTable->index(row, i));
                 int rowHeight = (rows == 0) ? table->horizontalHeader()->height() : table->rowHeight(0);
