@@ -437,12 +437,31 @@ namespace MWRender
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
     {
     public:
+        NotifyDrawCompletedCallback()
+            : mDone(false)
+        {
+        }
+
         virtual void operator () (osg::RenderInfo& renderInfo) const
         {
+            mMutex.lock();
+            mDone = true;
+            mMutex.unlock();
             mCondition.signal();
         }
 
+        void waitTillDone()
+        {
+            mMutex.lock();
+            if (mDone)
+                return;
+            mCondition.wait(&mMutex);
+            mMutex.unlock();
+        }
+
         mutable OpenThreads::Condition mCondition;
+        mutable OpenThreads::Mutex mMutex;
+        mutable bool mDone;
     };
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
@@ -476,15 +495,13 @@ namespace MWRender
 
         mRootNode->addChild(rttCamera);
 
-        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
-
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         rttCamera->setFinalDrawCallback(callback);
-        OpenThreads::Mutex m;
-        m.lock();
-        callback->mCondition.wait(&m);
-        m.unlock();
+
+        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+
+        callback->waitTillDone();
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         rttCamera->setGraphicsContext(NULL);
