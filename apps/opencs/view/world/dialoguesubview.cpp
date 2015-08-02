@@ -571,8 +571,9 @@ void CSVWorld::EditWidget::remake(int row)
                     table->setStyleSheet("QTableView { color: gray; }");
                     table->horizontalHeader()->setStyleSheet("QHeaderView { color: gray; }");
                 }
-                else
-                    table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
+                // Uncomment below two lines to activate editing of nested table cells by a single click
+                //else
+                    //table->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged);
                 table->resizeColumnsToContents();
 
                 int rows = mTable->rowCount(mTable->index(row, i));
