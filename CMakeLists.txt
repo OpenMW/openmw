@@ -736,13 +736,18 @@ if (APPLE)
 
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
-        include(BundleUtilities)
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+        include(BundleUtilitiesWithRPath)
     " COMPONENT Runtime)
 
-    #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
-    set(DIRS "")
+    set(DIRS "${CMAKE_PREFIX_PATH}/lib")
 
-        include(CPack)
+    install(CODE "
+        cmake_policy(SET CMP0009 OLD)
+        fixup_bundle(\"${OPENMW_APP}\" \"\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
+        " COMPONENT Runtime)
+    include(CPack)
 endif (APPLE)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
