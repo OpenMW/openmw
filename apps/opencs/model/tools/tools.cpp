@@ -28,6 +28,7 @@
 #include "searchoperation.hpp"
 #include "pathgridcheck.hpp"
 #include "soundgencheck.hpp"
+#include "magiceffectcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -107,6 +108,12 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         mVerifierOperation->appendStage (new SoundGenCheckStage (mData.getSoundGens(),
                                                                  mData.getSounds(),
                                                                  mData.getReferenceables()));
+
+        mVerifierOperation->appendStage (new MagicEffectCheckStage (mData.getMagicEffects(),
+                                                                    mData.getSounds(),
+                                                                    mData.getReferenceables(),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Icons),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Textures)));
 
         mVerifier.setOperation (mVerifierOperation);
     }
