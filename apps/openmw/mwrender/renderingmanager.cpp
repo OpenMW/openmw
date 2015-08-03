@@ -437,19 +437,35 @@ namespace MWRender
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
     {
     public:
+        NotifyDrawCompletedCallback()
+            : mDone(false)
+        {
+        }
+
         virtual void operator () (osg::RenderInfo& renderInfo) const
         {
+            mMutex.lock();
+            mDone = true;
+            mMutex.unlock();
             mCondition.signal();
         }
 
+        void waitTillDone()
+        {
+            mMutex.lock();
+            if (mDone)
+                return;
+            mCondition.wait(&mMutex);
+            mMutex.unlock();
+        }
+
         mutable OpenThreads::Condition mCondition;
+        mutable OpenThreads::Mutex mMutex;
+        mutable bool mDone;
     };
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
-        int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getCamera()->setCullMask(oldCullMask & (~Mask_GUI));
-
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
         rttCamera->setNodeMask(Mask_RenderToTexture);
         rttCamera->attach(osg::Camera::COLOR_BUFFER, image);
@@ -473,24 +489,21 @@ namespace MWRender
         image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->addChild(mLightRoot);
+        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
-
-        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
 
         // The draw needs to complete before we can copy back our image.
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         rttCamera->setFinalDrawCallback(callback);
-        OpenThreads::Mutex m;
-        m.lock();
-        callback->mCondition.wait(&m);
-        m.unlock();
+
+        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+
+        callback->waitTillDone();
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         rttCamera->setGraphicsContext(NULL);
         mRootNode->removeChild(rttCamera);
-
-        mViewer->getCamera()->setCullMask(oldCullMask);
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
