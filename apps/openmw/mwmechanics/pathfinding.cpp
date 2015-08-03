@@ -87,14 +87,20 @@ namespace
 
 namespace MWMechanics
 {
-    float sqrDistanceIgnoreZ(ESM::Pathgrid::Point point, float x, float y)
+    // only check for overshoot when within 140 units of the waypoint.
+    const float OVERSHOOT_CHECK_THRESHOLD = 140.0f * 140.0f;
+
+    // Has travelled more than 40% further than needed to have reached way point?
+    const float OVERSHOOT_FUDGE_FACTOR = 2.0f;
+
+    float sqrDistanceIgnoreZ(const ESM::Pathgrid::Point& point, float x, float y)
     {
         x -= point.mX;
         y -= point.mY;
         return (x * x + y * y);
     }
 
-    float distance(ESM::Pathgrid::Point point, float x, float y, float z)
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float z)
     {
         x -= point.mX;
         y -= point.mY;
@@ -102,12 +108,36 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
     {
         float x = static_cast<float>(a.mX - b.mX);
         float y = static_cast<float>(a.mY - b.mY);
         float z = static_cast<float>(a.mZ - b.mZ);
         return sqrt(x * x + y * y + z * z);
+    }
+
+    PathFinder::OvershootDetector::OvershootDetector()
+    {
+    }
+
+    void PathFinder::OvershootDetector::reset(int x, int y, float distanceToWaypointSquared)
+    {
+        mOldX = x;
+        mOldY = y;
+        mOldDistanceSquared = distanceToWaypointSquared;
+    }
+
+    bool PathFinder::OvershootDetector::isOverShot(int x, int y, float distanceToWaypointSquared)
+    {
+        bool overshot = false;
+        if (distanceToWaypointSquared < OVERSHOOT_CHECK_THRESHOLD)
+        {
+            float deltaX = static_cast<float>(x - mOldX);
+            float deltaY = static_cast<float>(x - mOldY);
+            float distanceTravelled = (deltaX * deltaX) + (deltaY * deltaY);
+            overshot = ((mOldDistanceSquared * OVERSHOOT_FUDGE_FACTOR) < distanceTravelled);
+        }
+        return overshot;
     }
 
     PathFinder::PathFinder()
@@ -272,15 +302,18 @@ namespace MWMechanics
         if(mPath.empty())
             return true;
 
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
-        if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
+        const ESM::Pathgrid::Point& nextPoint = *mPath.begin();
+        float sqrDistance = sqrDistanceIgnoreZ(nextPoint, x, y);
+        if ((sqrDistance < tolerance*tolerance) || mOvershootDetector.isOverShot(x, y, sqrDistance))
         {
             mPath.pop_front();
             if(mPath.empty())
             {
                 return true;
             }
+            sqrDistance = sqrDistanceIgnoreZ(*mPath.begin(), x, y);
         }
+        mOvershootDetector.reset(x, y, sqrDistance);
 
         return false;
     }
@@ -313,6 +346,11 @@ namespace MWMechanics
                     mPath.pop_front();
                 }
             }
+        }
+        if (isPathConstructed())
+        {
+            float sqrDistance = sqrDistanceIgnoreZ(*mPath.begin(), startPoint.mX, startPoint.mY);
+            mOvershootDetector.reset(startPoint.mX, startPoint.mY, sqrDistance);
         }
     }
 
