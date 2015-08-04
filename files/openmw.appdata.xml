@@ -8,13 +8,13 @@
  <summary>Unofficial open source engine re-implementation of the game Morrowind</summary>
  <description>
   <p>
-  OpenMW is a recreation of the engine for the popular role-playing game Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
+  OpenMW is a new engine for 2002's Game of the Year, The Elder Scrolls 3: Morrowind.
   </p>
   <p>
-  The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare).
+  It aims to be a fully playable (and improved!), open source implementation of the game's engine and functionality (including mods). 
   </p>
   <p>
-  Pre-existing modifications created for the original Morrowind engine can be hit-and-miss, but a mod created for Morrowind may not necessarily run in OpenMW.
+  You will still need the original game data to play OpenMW.
   </p>
  </description>
 
