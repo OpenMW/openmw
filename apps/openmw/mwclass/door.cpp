@@ -207,6 +207,11 @@ namespace MWClass
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
+    bool Door::canLock(const MWWorld::Ptr &ptr) const
+    {
+        return true;
+    }
+
     std::string Door::getScript (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =

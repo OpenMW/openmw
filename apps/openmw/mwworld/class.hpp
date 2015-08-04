@@ -161,6 +161,8 @@ namespace MWWorld
             virtual void unlock (const Ptr& ptr) const;
             ///< Unlock object (default implementation: throw an exception)
 
+            virtual bool canLock (const Ptr& ptr) const;
+
             virtual void setRemainingUsageTime (const Ptr& ptr, float duration) const;
             ///< Sets the remaining duration of the object, such as an equippable light
             /// source. (default implementation: throw an exception)

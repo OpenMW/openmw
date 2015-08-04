@@ -562,7 +562,7 @@ namespace MWMechanics
     void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
     {
         short effectId = effect.mId;
-        if (!target.getClass().isActor())
+        if (target.getClass().canLock(target))
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
@@ -570,7 +570,7 @@ namespace MWMechanics
                 {
                     if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
-                    target.getCellRef().setLockLevel(static_cast<int>(magnitude));
+                    target.getClass().lock(target, static_cast<int>(magnitude));
                 }
             }
             else if (effectId == ESM::MagicEffect::Open)
@@ -586,7 +586,7 @@ namespace MWMechanics
                         if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel()));
+                    target.getClass().unlock(target);
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
