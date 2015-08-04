@@ -208,7 +208,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderIdle, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_YesNo));
+            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
