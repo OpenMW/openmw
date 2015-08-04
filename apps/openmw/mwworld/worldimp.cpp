@@ -2656,10 +2656,6 @@ namespace MWWorld
         target = result.mHitObject;
         hitPosition = result.mHitPos;
 
-        // don't allow casting on non-activatable objects
-        if (!target.isEmpty() && !target.getClass().isActor() && target.getClass().getName(target).empty())
-            target = MWWorld::Ptr();
-
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
         MWMechanics::CastSpell cast(actor, target);
