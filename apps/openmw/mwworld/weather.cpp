@@ -61,7 +61,7 @@ MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gam
     {
         rotationFromHorizon,
         mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
-        static_cast<MWRender::MoonState::Phase>(phase(daysPassed)),
+        static_cast<MWRender::MoonState::Phase>(phase(daysPassed, gameHour)),
         shadowBlend(rotationFromHorizon),
         earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameHour)
     };
@@ -130,12 +130,17 @@ inline float MoonModel::rotation(float hours) const
     return 15.0f * mSpeed * hours;
 }
 
-inline unsigned int MoonModel::phase(unsigned int daysPassed) const
+inline unsigned int MoonModel::phase(unsigned int daysPassed, float gameHour) const
 {
     // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
     // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
     // forward declare it (C++11 strongly typed enums solve this).
-    return ((daysPassed + 1) / 3) % 8;
+
+    // If the moon didn't rise yet today, use yesterday's moon phase.
+    if(gameHour < moonRiseHour(daysPassed))
+        return (daysPassed / 3) % 8;
+    else
+        return ((daysPassed + 1) / 3) % 8;
 }
 
 inline float MoonModel::shadowBlend(float angle) const
@@ -289,44 +294,54 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::F
 
     //Weather
     Weather clear;
+    clear.mObstructsCelestialBodies = false;
     setFallbackWeather(clear,"clear");
 
     Weather cloudy;
+    cloudy.mObstructsCelestialBodies = false;
     setFallbackWeather(cloudy,"cloudy");
 
     Weather foggy;
+    foggy.mObstructsCelestialBodies = false;
     setFallbackWeather(foggy,"foggy");
 
     Weather thunderstorm;
     thunderstorm.mAmbientLoopSoundID = "rain heavy";
     thunderstorm.mRainEffect = "meshes\\raindrop.nif";
+    thunderstorm.mObstructsCelestialBodies = true;
     setFallbackWeather(thunderstorm,"thunderstorm");
 
     Weather rain;
     rain.mAmbientLoopSoundID = "rain";
     rain.mRainEffect = "meshes\\raindrop.nif";
+    rain.mObstructsCelestialBodies = true;
     setFallbackWeather(rain,"rain");
 
     Weather overcast;
+    overcast.mObstructsCelestialBodies = true;
     setFallbackWeather(overcast,"overcast");
 
     Weather ashstorm;
     ashstorm.mAmbientLoopSoundID = "ashstorm";
     ashstorm.mParticleEffect = "meshes\\ashcloud.nif";
+    ashstorm.mObstructsCelestialBodies = true;
     setFallbackWeather(ashstorm,"ashstorm");
 
     Weather blight;
     blight.mAmbientLoopSoundID = "blight";
     blight.mParticleEffect = "meshes\\blightcloud.nif";
+    blight.mObstructsCelestialBodies = true;
     setFallbackWeather(blight,"blight");
 
     Weather snow;
     snow.mParticleEffect = "meshes\\snow.nif";
+    snow.mObstructsCelestialBodies = true;
     setFallbackWeather(snow, "snow");
 
     Weather blizzard;
     blizzard.mAmbientLoopSoundID = "BM Blizzard";
     blizzard.mParticleEffect = "meshes\\blizzard.nif";
+    blizzard.mObstructsCelestialBodies = true;
     setFallbackWeather(blizzard,"blizzard");
 }
 
@@ -460,14 +475,16 @@ void WeatherManager::setResult(const std::string& weatherType)
             mResult.mNightFade = factor;
         }
     }
+
+    mResult.mCelestialBodyTransparency = current.mObstructsCelestialBodies ? 0.0f : 1.0f;
 }
 
 void WeatherManager::transition(float factor)
 {
     setResult(mCurrentWeather);
-    const WeatherResult current = mResult;
+    const MWRender::WeatherResult current = mResult;
     setResult(mNextWeather);
-    const WeatherResult other = mResult;
+    const MWRender::WeatherResult other = mResult;
 
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mNextCloudTexture = other.mCloudTexture;
@@ -513,6 +530,16 @@ void WeatherManager::transition(float factor)
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
     }
+
+    const Weather& currentSettings = mWeatherSettings[mCurrentWeather];
+    const Weather& nextSettings = mWeatherSettings[mNextWeather];
+
+    if(currentSettings.mObstructsCelestialBodies && !nextSettings.mObstructsCelestialBodies)
+        mResult.mCelestialBodyTransparency = factor;
+    else if(!currentSettings.mObstructsCelestialBodies && nextSettings.mObstructsCelestialBodies)
+        mResult.mCelestialBodyTransparency = 1 - factor;
+    else
+        mResult.mCelestialBodyTransparency = current.mCelestialBodyTransparency;
 }
 
 void WeatherManager::update(float duration, bool paused)

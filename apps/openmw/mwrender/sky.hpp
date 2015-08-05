@@ -1,9 +1,11 @@
 #ifndef OPENMW_MWRENDER_SKY_H
 #define OPENMW_MWRENDER_SKY_H
 
-#include <osg/ref_ptr>
+#include <string>
 
-#include "../mwworld/weather.hpp"
+#include <osg/ref_ptr>
+#include <osg/Vec4f>
+#include <osg/PositionAttitudeTransform>
 
 namespace osg
 {
@@ -32,6 +34,50 @@ namespace MWRender
     class RainShooter;
     class RainFader;
     class AlphaFader;
+
+    struct WeatherResult
+    {
+        std::string mCloudTexture;
+        std::string mNextCloudTexture;
+        float mCloudBlendFactor;
+
+        osg::Vec4f mFogColor;
+
+        osg::Vec4f mAmbientColor;
+
+        osg::Vec4f mSkyColor;
+
+        osg::Vec4f mSunColor;
+
+        osg::Vec4f mSunDiscColor;
+
+        float mFogDepth;
+
+        float mWindSpeed;
+
+        float mCloudSpeed;
+
+        float mCloudOpacity;
+
+        float mGlareView;
+
+        bool mNight; // use night skybox
+        float mNightFade; // fading factor for night skybox
+
+        bool mIsStorm;
+
+        std::string mAmbientLoopSoundID;
+        float mAmbientSoundVolume;
+
+        std::string mParticleEffect;
+        std::string mRainEffect;
+        float mEffectFade;
+
+        float mRainSpeed;
+        float mRainFrequency;
+
+        float mCelestialBodyTransparency;
+    };
 
     struct MoonState
     {
@@ -82,7 +128,7 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
 
-        void setWeather(const MWWorld::WeatherResult& weather);
+        void setWeather(const WeatherResult& weather);
 
         void sunEnable();
 
@@ -133,9 +179,9 @@ namespace MWRender
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
 
-        std::auto_ptr<Sun> mSun;
-        std::auto_ptr<Moon> mMasser;
-        std::auto_ptr<Moon> mSecunda;
+        osg::ref_ptr<Sun> mSun;
+        osg::ref_ptr<Moon> mMasser;
+        osg::ref_ptr<Moon> mSecunda;
 
         osg::ref_ptr<osg::Group> mRainNode;
         osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;

@@ -9,6 +9,8 @@
 
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwrender/sky.hpp"
+
 namespace ESM
 {
     struct Region;
@@ -19,7 +21,6 @@ namespace ESM
 namespace MWRender
 {
     class RenderingManager;
-    struct MoonState;
 }
 
 namespace Loading
@@ -30,50 +31,6 @@ namespace Loading
 namespace MWWorld
 {
     class Fallback;
-
-    /// Defines the actual weather that results from weather setting (see below), time of day and weather transition
-    struct WeatherResult
-    {
-        std::string mCloudTexture;
-        std::string mNextCloudTexture;
-        float mCloudBlendFactor;
-
-        osg::Vec4f mFogColor;
-
-        osg::Vec4f mAmbientColor;
-
-        osg::Vec4f mSkyColor;
-
-        osg::Vec4f mSunColor;
-
-        osg::Vec4f mSunDiscColor;
-
-        float mFogDepth;
-
-        float mWindSpeed;
-
-        float mCloudSpeed;
-
-        float mCloudOpacity;
-
-        float mGlareView;
-
-        bool mNight; // use night skybox
-        float mNightFade; // fading factor for night skybox
-
-        bool mIsStorm;
-
-        std::string mAmbientLoopSoundID;
-        float mAmbientSoundVolume;
-
-        std::string mParticleEffect;
-        std::string mRainEffect;
-        float mEffectFade;
-
-        float mRainSpeed;
-        float mRainFrequency;
-    };
-
 
     /// Defines a single weather setting (according to INI)
     struct Weather
@@ -149,6 +106,9 @@ namespace MWWorld
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
+
+        // Some weather patterns will obstruct the moons, sun, and stars.
+        bool mObstructsCelestialBodies;
     };
 
     class MoonModel
@@ -173,7 +133,7 @@ namespace MWWorld
         float angle(unsigned int daysPassed, float gameHour) const;
         float moonRiseHour(unsigned int daysPassed) const;
         float rotation(float hours) const;
-        unsigned int phase(unsigned int daysPassed) const;
+        unsigned int phase(unsigned int daysPassed, float gameHour) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;
@@ -268,7 +228,7 @@ namespace MWWorld
 
         void setWeather(const std::string& weatherType, bool instant=false);
         std::string nextWeather(const ESM::Region* region) const;
-        WeatherResult mResult;
+        MWRender::WeatherResult mResult;
 
         typedef std::map<std::string,std::vector<char> > RegionModMap;
         RegionModMap mRegionMods;
