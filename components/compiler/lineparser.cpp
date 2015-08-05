@@ -222,6 +222,23 @@ namespace Compiler
 
     bool LineParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
     {
+        if (mState==MessageState || mState==MessageCommaState)
+        {
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                std::string argumentType; // ignored
+                bool hasExplicit = false; // ignored
+                if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+                {
+                    // pretend this is not a keyword
+                    std::string name = loc.mLiteral;
+                    if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                        name = name.substr (1, name.size()-2);
+                    return parseName (name, loc, scanner);
+                }
+            }
+        }
+
         if (mState==SetMemberVarState)
         {
             mMemberName = loc.mLiteral;
