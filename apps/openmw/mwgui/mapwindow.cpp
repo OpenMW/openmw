@@ -783,7 +783,7 @@ namespace MWGui
             MyGUI::Widget* markerWidget = mGlobalMap->createWidget<MyGUI::Widget>("MarkerButton",
                 widgetCoord, MyGUI::Align::Default);
 
-            markerWidget->setUserString("Caption_TextOneLine", name);
+            markerWidget->setUserString("Caption_TextOneLine", "#{sCell=" + name + "}");
 
             setGlobalMapMarkerTooltip(markerWidget, x, y);
 
