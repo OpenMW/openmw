@@ -103,11 +103,7 @@ void CSMTools::MagicEffectCheckStage::perform(int stage, CSMDoc::Messages &messa
         messages.push_back(std::make_pair(id, "No such Icon '" + effect.mIcon + "'"));
     }
 
-    if (effect.mParticle.empty())
-    {
-        messages.push_back(std::make_pair(id, "Particle is not specified"));
-    }
-    else if (!isTextureExists(effect.mParticle, false))
+    if (!effect.mParticle.empty() && !isTextureExists(effect.mParticle, false))
     {
         messages.push_back(std::make_pair(id, "No such Particle '" + effect.mParticle + "'"));
     }
