@@ -56,3 +56,11 @@ void CSVDoc::FileWidget::extensionLabelIsVisible(bool visible)
 {
     mType->setVisible(visible);
 }
+
+void CSVDoc::FileWidget::setName (const std::string& text)
+{
+    QString text2 = QString::fromUtf8 (text.c_str());
+
+    mInput->setText (text2);
+    textChanged (text2);
+}

@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include <string>
+
 class QLabel;
 class QString;
 class QLineEdit;
@@ -28,6 +30,8 @@ namespace CSVDoc
             QString getName() const;
 
             void extensionLabelIsVisible(bool visible);
+
+            void setName (const std::string& text);
 
         private slots:
 

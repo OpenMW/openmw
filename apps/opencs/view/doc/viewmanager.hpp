@@ -77,6 +77,8 @@ namespace CSVDoc
 
             void editSettingsRequest();
 
+            void mergeDocument (CSMDoc::Document *document);
+
         public slots:
 
             void exitApplication (CSVDoc::View *view);

@@ -73,6 +73,8 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
     if (iter==mDocuments.end())
         throw std::runtime_error ("removing invalid document");
 
+    emit documentAboutToBeRemoved (document);
+
     mDocuments.erase (iter);
     document->deleteLater();
 

@@ -40,9 +40,12 @@ CS::Editor::Editor ()
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
+    mMerge.setLocalData (mLocal);
 
     connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
         this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (documentAboutToBeRemoved (CSMDoc::Document *)),
+        this, SLOT (documentAboutToBeRemoved (CSMDoc::Document *)));
     connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
         this, SLOT (lastDocumentDeleted()));
 
@@ -50,6 +53,7 @@ CS::Editor::Editor ()
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
     connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+    connect (&mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
@@ -360,7 +364,19 @@ void CS::Editor::documentAdded (CSMDoc::Document *document)
     mViewManager.addView (document);
 }
 
+void CS::Editor::documentAboutToBeRemoved (CSMDoc::Document *document)
+{
+    if (mMerge.getDocument()==document)
+        mMerge.cancel();
+}
+
 void CS::Editor::lastDocumentDeleted()
 {
     QApplication::quit();
+}
+
+void CS::Editor::mergeDocument (CSMDoc::Document *document)
+{
+    mMerge.configure (document);
+    mMerge.show();
 }
