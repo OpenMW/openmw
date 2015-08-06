@@ -104,7 +104,9 @@ QWidget* CSVWorld::NotEditableSubDelegate::createEditor (QWidget *parent,
                                 const QStyleOptionViewItem& option,
                                 const QModelIndex& index) const
 {
-    return new QLabel(parent);
+    QLabel *label = new QLabel(parent);
+    label->setTextInteractionFlags (Qt::TextSelectableByMouse);
+    return label;
 }
 
 /*
@@ -822,7 +824,7 @@ void CSVWorld::SimpleDialogueSubView::dataChanged (const QModelIndex & index)
 void CSVWorld::SimpleDialogueSubView::rowsAboutToBeRemoved(const QModelIndex &parent, int start, int end)
 {
     QModelIndex currentIndex(mTable->getModelIndex(getUniversalId().getId(), 0));
-    
+
     if (!currentIndex.isValid())
     {
         return;
