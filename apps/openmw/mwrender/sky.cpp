@@ -321,12 +321,12 @@ private:
     int mMeshType;
 };
 
-// A base class for the sun and moons. Must be stored in an osg::ref_ptr due to being
-// derived from osg::Referenced.
+/// A base class for the sun and moons.
+/// \note Must be stored in an osg::ref_ptr due to being derived from osg::Referenced.
 class CelestialBody : public SceneUtil::StateSetUpdater
 {
 public:
-    CelestialBody(osg::Group* parentNode, float scaleFactor = 1.f, int numUvSets=1)
+    CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets)
     {
         mGeode = new osg::Geode;
         osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(numUvSets);
@@ -365,35 +365,26 @@ class Sun : public CelestialBody
 public:
     Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
-        , mColor(1.0f, 1.0f, 1.0f, 1.0f)
-        , mDummyTexture(textureManager.getWarningTexture())
+        , mTextureManager(textureManager)
+        , mColor(0.0f, 0.0f, 0.0f, 1.0f)
     {
-        osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_05.dds",
-                                                                       osg::Texture::CLAMP,
-                                                                       osg::Texture::CLAMP);
-
-        mTransform->getOrCreateStateSet()->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
-        mTransform->getOrCreateStateSet()->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
     }
 
     virtual void setDefaults(osg::StateSet* stateset)
     {
-        osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
-        texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
-        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-        texEnv->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
-        texEnv->setCombine_RGB(osg::TexEnvCombine::REPLACE);
-        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-        texEnv->setConstantColor(osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
+        osg::ref_ptr<osg::Texture2D> tex = mTextureManager.getTexture2D("textures/tx_sun_05.dds",
+                                                                        osg::Texture::CLAMP,
+                                                                        osg::Texture::CLAMP);
 
-        stateset->setTextureAttributeAndModes(1, mDummyTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-        stateset->setTextureAttributeAndModes(1, texEnv, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(),
+                                       osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     }
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
     {
-        osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-        texEnv->setConstantColor(mColor);
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, mColor);
     }
 
     virtual void adjustTransparency(const float ratio)
@@ -412,9 +403,8 @@ public:
     }
 
 private:
-
+    Resource::TextureManager& mTextureManager;
     osg::Vec4f mColor;
-    osg::ref_ptr<osg::Texture2D> mDummyTexture;
 };
 
 class Moon : public CelestialBody
@@ -522,7 +512,6 @@ public:
     }
 
 private:
-
     Resource::TextureManager& mTextureManager;
     Type mType;
     MoonState::Phase mPhase;
