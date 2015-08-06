@@ -32,9 +32,16 @@
 #include "view/settings/dialog.hpp"
 #include "view/render/overlaysystem.hpp"
 
+#include "view/tools/merge.hpp"
+
 namespace OgreInit
 {
     class OgreInit;
+}
+
+namespace CSMDoc
+{
+    class Document;
 }
 
 namespace CS
@@ -59,6 +66,7 @@ namespace CS
             boost::interprocess::file_lock mLock;
             boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
+            CSVTools::Merge mMerge;
 
             void showSplashMessage();
 
@@ -103,7 +111,11 @@ namespace CS
 
             void documentAdded (CSMDoc::Document *document);
 
+            void documentAboutToBeRemoved (CSMDoc::Document *document);
+
             void lastDocumentDeleted();
+
+            void mergeDocument (CSMDoc::Document *document);
 
         private:
 

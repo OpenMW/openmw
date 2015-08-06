@@ -83,6 +83,8 @@ namespace CSMDoc
 
             void documentAdded (CSMDoc::Document *document);
 
+            void documentAboutToBeRemoved (CSMDoc::Document *document);
+
             void loadRequest (CSMDoc::Document *document);
 
             void lastDocumentDeleted();
