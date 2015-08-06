@@ -175,20 +175,16 @@ void Launcher::MainDialog::setVersionLabel()
     QString tag(QString::fromUtf8(v.mTagHash.c_str()));
 
     versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    if (!revision.isEmpty() && !tag.isEmpty())
-    {
-        if (revision == tag) {
-            versionLabel->setText(tr("OpenMW %1 release").arg(QString::fromUtf8(v.mVersion.c_str())));
-        } else {
-            versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
-        }
+    if (!v.mVersion.empty() && (revision.isEmpty() || revision == tag))
+        versionLabel->setText(tr("OpenMW %1 release").arg(QString::fromUtf8(v.mVersion.c_str())));
+    else
+        versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
 
-        // Add the compile date and time
-        versionLabel->setToolTip(tr("Compiled on %1 %2").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
-                                                                                        QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
-                                                             QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
-                                                                                        QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
-    }
+    // Add the compile date and time
+    versionLabel->setToolTip(tr("Compiled on %1 %2").arg(QLocale(QLocale::C).toDate(QString(__DATE__).simplified(),
+                                                                                    QLatin1String("MMM d yyyy")).toString(Qt::SystemLocaleLongDate),
+                                                         QLocale(QLocale::C).toTime(QString(__TIME__).simplified(),
+                                                                                    QLatin1String("hh:mm:ss")).toString(Qt::SystemLocaleShortDate)));
 }
 
 bool Launcher::MainDialog::setup()
