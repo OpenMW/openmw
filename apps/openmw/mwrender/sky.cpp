@@ -377,7 +377,7 @@ public:
                                                                         osg::Texture::CLAMP);
 
         stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(),
+        stateset->setAttributeAndModes(createUnlitMaterial(),
                                        osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     }
 
