@@ -449,7 +449,6 @@ if(WIN32)
     FILE(GLOB dll_files "${OpenMW_BINARY_DIR}/Release/*.dll")
     INSTALL(FILES ${dll_files} DESTINATION ".")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "." RENAME "openmw.cfg")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION ".")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/CHANGELOG.md" DESTINATION "." RENAME "CHANGELOG.txt")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/README.md" DESTINATION "." RENAME "README.txt")
     INSTALL(FILES
