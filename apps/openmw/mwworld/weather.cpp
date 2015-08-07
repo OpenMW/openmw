@@ -61,7 +61,7 @@ MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gam
     {
         rotationFromHorizon,
         mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
-        static_cast<MWRender::MoonState::Phase>(phase(daysPassed)),
+        static_cast<MWRender::MoonState::Phase>(phase(daysPassed, gameHour)),
         shadowBlend(rotationFromHorizon),
         earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameHour)
     };
@@ -130,12 +130,17 @@ inline float MoonModel::rotation(float hours) const
     return 15.0f * mSpeed * hours;
 }
 
-inline unsigned int MoonModel::phase(unsigned int daysPassed) const
+inline unsigned int MoonModel::phase(unsigned int daysPassed, float gameHour) const
 {
     // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
     // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
     // forward declare it (C++11 strongly typed enums solve this).
-    return ((daysPassed + 1) / 3) % 8;
+
+    // If the moon didn't rise yet today, use yesterday's moon phase.
+    if(gameHour < moonRiseHour(daysPassed))
+        return (daysPassed / 3) % 8;
+    else
+        return ((daysPassed + 1) / 3) % 8;
 }
 
 inline float MoonModel::shadowBlend(float angle) const
@@ -465,9 +470,9 @@ void WeatherManager::setResult(const std::string& weatherType)
 void WeatherManager::transition(float factor)
 {
     setResult(mCurrentWeather);
-    const WeatherResult current = mResult;
+    const MWRender::WeatherResult current = mResult;
     setResult(mNextWeather);
-    const WeatherResult other = mResult;
+    const MWRender::WeatherResult other = mResult;
 
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mNextCloudTexture = other.mCloudTexture;
