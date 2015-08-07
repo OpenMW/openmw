@@ -2,6 +2,7 @@
 #define OPENMW_MWRENDER_SKY_H
 
 #include <string>
+#include <memory>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
@@ -75,8 +76,6 @@ namespace MWRender
 
         float mRainSpeed;
         float mRainFrequency;
-
-        float mCelestialBodyTransparency;
     };
 
     struct MoonState
@@ -179,9 +178,9 @@ namespace MWRender
 
         osg::ref_ptr<AtmosphereUpdater> mAtmosphereUpdater;
 
-        osg::ref_ptr<Sun> mSun;
-        osg::ref_ptr<Moon> mMasser;
-        osg::ref_ptr<Moon> mSecunda;
+        std::auto_ptr<Sun> mSun;
+        std::auto_ptr<Moon> mMasser;
+        std::auto_ptr<Moon> mSecunda;
 
         osg::ref_ptr<osg::Group> mRainNode;
         osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;

@@ -80,7 +80,8 @@ namespace MWWorld
         // Multiplier for clouds transparency
         float mCloudsMaximumPercent;
 
-        // Value between 0 and 1, defines the strength of the sun glare effect
+        // Value between 0 and 1, defines the strength of the sun glare effect.
+        // Also appears to modify how visible the sun, moons, and stars are for various weather effects.
         float mGlareView;
 
         // Sound effect
@@ -106,9 +107,6 @@ namespace MWWorld
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
-
-        // Some weather patterns will obstruct the moons, sun, and stars.
-        bool mObstructsCelestialBodies;
     };
 
     class MoonModel

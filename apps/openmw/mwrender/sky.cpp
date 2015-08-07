@@ -322,8 +322,7 @@ private:
 };
 
 /// A base class for the sun and moons.
-/// \note Must be stored in an osg::ref_ptr due to being derived from osg::Referenced.
-class CelestialBody : public SceneUtil::StateSetUpdater
+class CelestialBody
 {
 public:
     CelestialBody(osg::Group* parentNode, float scaleFactor, int numUvSets)
@@ -336,14 +335,9 @@ public:
         mTransform->addChild(mGeode);
 
         parentNode->addChild(mTransform);
-
-        mGeode->addUpdateCallback(this);
     }
 
-    virtual ~CelestialBody()
-    {
-        mGeode->removeUpdateCallback(this);
-    }
+    virtual ~CelestialBody() {}
 
     virtual void adjustTransparency(const float ratio) = 0;
 
@@ -365,31 +359,19 @@ class Sun : public CelestialBody
 public:
     Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
-        , mTextureManager(textureManager)
-        , mColor(0.0f, 0.0f, 0.0f, 1.0f)
+        , mUpdater(new Updater(textureManager))
     {
+        mGeode->addUpdateCallback(mUpdater);
     }
 
-    virtual void setDefaults(osg::StateSet* stateset)
+    ~Sun()
     {
-        osg::ref_ptr<osg::Texture2D> tex = mTextureManager.getTexture2D("textures/tx_sun_05.dds",
-                                                                        osg::Texture::CLAMP,
-                                                                        osg::Texture::CLAMP);
-
-        stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(createUnlitMaterial(),
-                                       osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-    }
-
-    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
-    {
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, mColor);
+        mGeode->removeUpdateCallback(mUpdater);
     }
 
     virtual void adjustTransparency(const float ratio)
     {
-        mColor.a() = ratio;
+        mUpdater->mColor.a() = ratio;
     }
 
     void setDirection(const osg::Vec3f& direction)
@@ -403,8 +385,36 @@ public:
     }
 
 private:
-    Resource::TextureManager& mTextureManager;
-    osg::Vec4f mColor;
+    struct Updater : public SceneUtil::StateSetUpdater
+    {
+        Resource::TextureManager& mTextureManager;
+        osg::Vec4f mColor;
+
+        Updater(Resource::TextureManager& textureManager)
+            : mTextureManager(textureManager)
+            , mColor(0.0f, 0.0f, 0.0f, 1.0f)
+        {
+        }
+
+        virtual void setDefaults(osg::StateSet* stateset)
+        {
+            osg::ref_ptr<osg::Texture2D> tex = mTextureManager.getTexture2D("textures/tx_sun_05.dds",
+                                                                            osg::Texture::CLAMP,
+                                                                            osg::Texture::CLAMP);
+
+            stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+            stateset->setAttributeAndModes(createUnlitMaterial(),
+                                           osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        }
+
+        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        {
+            osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            mat->setDiffuse(osg::Material::FRONT_AND_BACK, mColor);
+        }
+    };
+
+    osg::ref_ptr<Updater> mUpdater;
 };
 
 class Moon : public CelestialBody
@@ -418,53 +428,24 @@ public:
 
     Moon(osg::Group* parentNode, Resource::TextureManager& textureManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, scaleFactor, 2)
-        , mTextureManager(textureManager)
         , mType(type)
         , mPhase(MoonState::Phase_Unspecified)
-        , mTransparency(1.0f)
-        , mShadowBlend(1.0f)
-        , mMoonColor(1.0f, 1.0f, 1.0f, 1.0f)
+        , mUpdater(new Updater(textureManager))
     {
         setPhase(MoonState::Phase_Full);
         setVisible(true);
+
+        mGeode->addUpdateCallback(mUpdater);
     }
 
-    virtual void setDefaults(osg::StateSet *stateset)
+    ~Moon()
     {
-        stateset->setTextureAttributeAndModes(0, mPhaseTex, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
-        texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
-        texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
-        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-        texEnv->setConstantColor(osg::Vec4f(1.f, 0.f, 0.f, 1.f)); // mShadowBlend * mMoonColor
-        stateset->setTextureAttributeAndModes(0, texEnv, osg::StateAttribute::ON);
-
-        stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::TexEnvCombine> texEnv2 = new osg::TexEnvCombine;
-        texEnv2->setCombine_RGB(osg::TexEnvCombine::ADD);
-        texEnv2->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
-        texEnv2->setSource0_Alpha(osg::TexEnvCombine::TEXTURE);
-        texEnv2->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
-        texEnv2->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-        texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
-        texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
-        stateset->setTextureAttributeAndModes(1, texEnv2, osg::StateAttribute::ON);
-
-        stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-    }
-
-    virtual void apply(osg::StateSet *stateset, osg::NodeVisitor*)
-    {
-        osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
-        texEnv->setConstantColor(mMoonColor * mShadowBlend);
-
-        osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-        texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
+        mGeode->removeUpdateCallback(mUpdater);
     }
 
     virtual void adjustTransparency(const float ratio)
     {
-        mTransparency *= ratio;
+        mUpdater->mTransparency *= ratio;
     }
 
     void setState(const MoonState& state)
@@ -484,18 +465,18 @@ public:
         mTransform->setAttitude(attX * rotZ);
 
         setPhase(state.mPhase);
-        mTransparency = state.mMoonAlpha;
-        mShadowBlend = state.mShadowBlend;
+        mUpdater->mTransparency = state.mMoonAlpha;
+        mUpdater->mShadowBlend = state.mShadowBlend;
     }
 
     void setAtmosphereColor(const osg::Vec4f& color)
     {
-        mAtmosphereColor = color;
+        mUpdater->mAtmosphereColor = color;
     }
 
     void setColor(const osg::Vec4f& color)
     {
-        mMoonColor = color;
+        mUpdater->mMoonColor = color;
     }
 
     unsigned int getPhaseInt() const
@@ -512,50 +493,102 @@ public:
     }
 
 private:
-    Resource::TextureManager& mTextureManager;
+    struct Updater : public SceneUtil::StateSetUpdater
+    {
+        Resource::TextureManager& mTextureManager;
+        osg::ref_ptr<osg::Texture2D> mPhaseTex;
+        osg::ref_ptr<osg::Texture2D> mCircleTex;
+        float mTransparency;
+        float mShadowBlend;
+        osg::Vec4f mAtmosphereColor;
+        osg::Vec4f mMoonColor;
+
+        Updater(Resource::TextureManager& textureManager)
+            : mTextureManager(textureManager)
+            , mPhaseTex()
+            , mCircleTex()
+            , mTransparency(1.0f)
+            , mShadowBlend(1.0f)
+            , mAtmosphereColor(1.0f, 1.0f, 1.0f, 1.0f)
+            , mMoonColor(1.0f, 1.0f, 1.0f, 1.0f)
+        {
+        }
+
+        virtual void setDefaults(osg::StateSet* stateset)
+        {
+            stateset->setTextureAttributeAndModes(0, mPhaseTex, osg::StateAttribute::ON);
+            osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
+            texEnv->setCombine_RGB(osg::TexEnvCombine::MODULATE);
+            texEnv->setSource0_RGB(osg::TexEnvCombine::CONSTANT);
+            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            texEnv->setConstantColor(osg::Vec4f(1.f, 0.f, 0.f, 1.f)); // mShadowBlend * mMoonColor
+            stateset->setTextureAttributeAndModes(0, texEnv, osg::StateAttribute::ON);
+
+            stateset->setTextureAttributeAndModes(1, mCircleTex, osg::StateAttribute::ON);
+            osg::ref_ptr<osg::TexEnvCombine> texEnv2 = new osg::TexEnvCombine;
+            texEnv2->setCombine_RGB(osg::TexEnvCombine::ADD);
+            texEnv2->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
+            texEnv2->setSource0_Alpha(osg::TexEnvCombine::TEXTURE);
+            texEnv2->setSource1_Alpha(osg::TexEnvCombine::CONSTANT);
+            texEnv2->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+            texEnv2->setSource1_RGB(osg::TexEnvCombine::CONSTANT);
+            texEnv2->setConstantColor(osg::Vec4f(0.f, 0.f, 0.f, 1.f)); // mAtmosphereColor.rgb, mTransparency
+            stateset->setTextureAttributeAndModes(1, texEnv2, osg::StateAttribute::ON);
+
+            stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        }
+
+        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        {
+            osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
+            texEnv->setConstantColor(mMoonColor * mShadowBlend);
+
+            osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
+            texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
+        }
+
+        void setTextures(const std::string& phaseTex, const std::string& circleTex)
+        {
+            mPhaseTex = mTextureManager.getTexture2D(phaseTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            mCircleTex = mTextureManager.getTexture2D(circleTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
+
+            reset();
+        }
+    };
+
     Type mType;
     MoonState::Phase mPhase;
-    float mTransparency;
-    float mShadowBlend;
-    osg::Vec4f mAtmosphereColor;
-    osg::Vec4f mMoonColor;
-    osg::ref_ptr<osg::Texture2D> mPhaseTex;
-    osg::ref_ptr<osg::Texture2D> mCircleTex;
-
-    void setTextures(const std::string& phaseTex, const std::string& circleTex)
-    {
-        mPhaseTex = mTextureManager.getTexture2D(phaseTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
-        mCircleTex = mTextureManager.getTexture2D(circleTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
-
-        reset();
-    }
+    osg::ref_ptr<Updater> mUpdater;
 
     void setPhase(const MoonState::Phase& phase)
     {
-        if (mPhase == phase)
+        if(mPhase == phase)
             return;
+
         mPhase = phase;
 
         std::string textureName = "textures/tx_";
 
-        if (mType == Moon::Type_Secunda) textureName += "secunda_";
-        else textureName += "masser_";
+        if (mType == Moon::Type_Secunda)
+            textureName += "secunda_";
+        else
+            textureName += "masser_";
 
-        if      (phase == MoonState::Phase_New)              textureName += "new";
-        else if (phase == MoonState::Phase_WaxingCrescent)   textureName += "one_wax";
-        else if (phase == MoonState::Phase_FirstQuarter)     textureName += "half_wax";
-        else if (phase == MoonState::Phase_WaxingGibbous)    textureName += "three_wax";
-        else if (phase == MoonState::Phase_WaningCrescent)   textureName += "one_wan";
-        else if (phase == MoonState::Phase_ThirdQuarter)     textureName += "half_wan";
-        else if (phase == MoonState::Phase_WaningGibbous)    textureName += "three_wan";
-        else if (phase == MoonState::Phase_Full)             textureName += "full";
+        if     (phase == MoonState::Phase_New)            textureName += "new";
+        else if(phase == MoonState::Phase_WaxingCrescent) textureName += "one_wax";
+        else if(phase == MoonState::Phase_FirstQuarter)   textureName += "half_wax";
+        else if(phase == MoonState::Phase_WaxingGibbous)  textureName += "three_wax";
+        else if(phase == MoonState::Phase_WaningCrescent) textureName += "one_wan";
+        else if(phase == MoonState::Phase_ThirdQuarter)   textureName += "half_wan";
+        else if(phase == MoonState::Phase_WaningGibbous)  textureName += "three_wan";
+        else if(phase == MoonState::Phase_Full)           textureName += "full";
 
         textureName += ".dds";
 
         if (mType == Moon::Type_Secunda)
-            setTextures(textureName, "textures/tx_mooncircle_full_s.dds");
+            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_s.dds");
         else
-            setTextures(textureName, "textures/tx_mooncircle_full_m.dds");
+            mUpdater->setTextures(textureName, "textures/tx_mooncircle_full_m.dds");
     }
 };
 
@@ -621,11 +654,11 @@ void SkyManager::create()
     mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getTextureManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun = new Sun(mRootNode, *mSceneManager->getTextureManager());
+    mSun.reset(new Sun(mRootNode, *mSceneManager->getTextureManager()));
 
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser = new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser);
-    mSecunda = new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda);
+    mMasser.reset(new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mRootNode->addChild(mCloudNode);
@@ -1067,11 +1100,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     mCloudSpeed = weather.mCloudSpeed;
 
-    mMasser->adjustTransparency(weather.mCelestialBodyTransparency);
-    mSecunda->adjustTransparency(weather.mCelestialBodyTransparency);
-    mSun->adjustTransparency(weather.mCelestialBodyTransparency);
+    mMasser->adjustTransparency(weather.mGlareView);
+    mSecunda->adjustTransparency(weather.mGlareView);
+    mSun->adjustTransparency(weather.mGlareView);
 
-    float nextStarsOpacity = weather.mNightFade * weather.mCelestialBodyTransparency;
+    float nextStarsOpacity = weather.mNightFade * weather.mGlareView;
     if(weather.mNight && mStarsOpacity != nextStarsOpacity)
     {
         mStarsOpacity = nextStarsOpacity;
