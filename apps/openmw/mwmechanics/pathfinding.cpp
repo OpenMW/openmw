@@ -87,14 +87,19 @@ namespace
 
 namespace MWMechanics
 {
-    float sqrDistanceIgnoreZ(ESM::Pathgrid::Point point, float x, float y)
+    float sqrDistanceIgnoreZ(const ESM::Pathgrid::Point& point, float x, float y)
     {
         x -= point.mX;
         y -= point.mY;
         return (x * x + y * y);
     }
 
-    float distance(ESM::Pathgrid::Point point, float x, float y, float z)
+    float sqrDistanceIgnoreZ(const ESM::Pathgrid::Point& point, const ESM::Pathgrid::Point& otherPoint)
+    {
+        return sqrDistanceIgnoreZ(point, otherPoint.mX, otherPoint.mY);
+    }
+
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float z)
     {
         x -= point.mX;
         y -= point.mY;
@@ -102,7 +107,7 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b)
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b)
     {
         float x = static_cast<float>(a.mX - b.mX);
         float y = static_cast<float>(a.mY - b.mY);
@@ -272,7 +277,7 @@ namespace MWMechanics
         if(mPath.empty())
             return true;
 
-        ESM::Pathgrid::Point nextPoint = *mPath.begin();
+        const ESM::Pathgrid::Point& nextPoint = *mPath.begin();
         if (sqrDistanceIgnoreZ(nextPoint, x, y) < tolerance*tolerance)
         {
             mPath.pop_front();
@@ -291,29 +296,28 @@ namespace MWMechanics
         const MWWorld::CellStore* cell,
         bool allowShortcuts)
     {
-        if (mPath.size() < 2)
+        buildPath(startPoint, endPoint, cell, allowShortcuts);
+        // Path building logic will set closest path grid point as first
+        // waypoint, but if actor is between the first two waypoints, then
+        // actor should head to second waypoint.
+        if (mPath.size() >= 2)
         {
-            // if path has one point, then it's the destination.
-            // don't need to worry about bad path for this case
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
-        }
-        else
-        {
-            const ESM::Pathgrid::Point oldStart(*getPath().begin());
-            buildPath(startPoint, endPoint, cell, allowShortcuts);
-            if (mPath.size() >= 2)
+            std::list<ESM::Pathgrid::Point>::iterator iter = mPath.begin();
+            const ESM::Pathgrid::Point &firstWayPoint(*iter);
+            if (isBetweenWaypoints(startPoint, firstWayPoint, *++iter))
             {
-                // if 2nd waypoint of new path == 1st waypoint of old, 
-                // delete 1st waypoint of new path.
-                std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
-                if (iter->mX == oldStart.mX
-                    && iter->mY == oldStart.mY
-                    && iter->mZ == oldStart.mZ)
-                {
-                    mPath.pop_front();
-                }
+                mPath.pop_front();
             }
         }
+    }
+
+    bool PathFinder::isBetweenWaypoints(const ESM::Pathgrid::Point& pointToCheck,
+        const ESM::Pathgrid::Point& firstWayPoint,
+        const ESM::Pathgrid::Point& secondWayPoint)
+    {
+        float distBetweenPoints = sqrDistanceIgnoreZ(firstWayPoint, secondWayPoint);
+        float distTo2ndPoint = sqrDistanceIgnoreZ(pointToCheck, secondWayPoint);
+        return (distTo2ndPoint < distBetweenPoints);
     }
 
 }

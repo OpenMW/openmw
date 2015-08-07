@@ -429,6 +429,7 @@ namespace MWMechanics
         // (within attack dist) || (not quite attack dist while following)
         if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))
         {
+            mPathFinder.clearPath();
             //Melee and Close-up combat
             
             // getXAngleToDir determines vertical angle to target:
@@ -503,12 +504,14 @@ namespace MWMechanics
             }
 
             // don't use pathgrid when actor can move in 3 dimensions
-            if(canMoveByZ) preferShortcut = true;
+            if (canMoveByZ)
+            {
+                preferShortcut = true;
+                movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
+            }
 
             if(preferShortcut)
             {
-                if (canMoveByZ)
-                    movement.mRotation[0] = getXAngleToDir(vDirToTarget, distToTarget);
                 movement.mRotation[2] = getZAngleToDir(vDirToTarget);
                 forceNoShortcut = false;
                 shortcutFailPos.pos[0] = shortcutFailPos.pos[1] = shortcutFailPos.pos[2] = 0;
@@ -526,9 +529,7 @@ namespace MWMechanics
 
                 buildNewPath(actor, target); //may fail to build a path, check before use
 
-                //delete visited path node
-                mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1]);
-
+                // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                 // This works on the borders between the path grid and areas with no waypoints.
                 if(inLOS && mPathFinder.getPath().size() > 1)
                 {
@@ -537,21 +538,16 @@ namespace MWMechanics
                     --pntIter;
                     osg::Vec3f vBeforeTarget(PathFinder::MakeOsgVec3(*pntIter));
 
-                    // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
                     if(distToTarget <= (vTargetPos - vBeforeTarget).length())
                     {
-                        movement.mRotation[2] = getZAngleToDir(vDirToTarget);
-                        preferShortcut = true;
+                        mPathFinder.clearPath();
                     }
                 }
 
                 // if there is no new path, then go straight on target
-                if(!preferShortcut)
+                if (!mPathFinder.isPathConstructed())
                 {
-                    if(!mPathFinder.getPath().empty())
-                        movement.mRotation[2] = mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]);
-                    else
-                        movement.mRotation[2] = getZAngleToDir(vDirToTarget);
+                    movement.mRotation[2] = getZAngleToDir(vDirToTarget);
                 }
             }
 
@@ -571,9 +567,25 @@ namespace MWMechanics
     void AiCombat::UpdateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& desiredMovement)
     {
         MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
-        actorMovementSettings = desiredMovement;
-        RotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
-        RotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
+        if (mPathFinder.isPathConstructed())
+        {
+            const ESM::Position& pos = actor.getRefData().getPosition();
+            if (mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
+            {
+                actorMovementSettings.mPosition[1] = 0;
+            }
+            else
+            {
+                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+                actorMovementSettings.mPosition[1] = 1;
+            }
+        }
+        else
+        {
+            actorMovementSettings = desiredMovement;
+            RotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
+            RotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
+        }
     }
 
     void AiCombat::RotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
@@ -689,16 +701,14 @@ ESM::Weapon::AttackType chooseBestAttack(const ESM::Weapon* weapon, MWMechanics:
         int chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1])/2;
         int thrust = (weapon->mData.mThrust[0] + weapon->mData.mThrust[1])/2;
 
-        float total = static_cast<float>(slash + chop + thrust);
-
-        float roll = Misc::Rng::rollClosedProbability();
-        if(roll <= (slash/total))
+        float roll = Misc::Rng::rollClosedProbability() * (slash + chop + thrust);
+        if(roll <= slash)
         {
             movement.mPosition[0] = (Misc::Rng::rollClosedProbability() < 0.5f) ? 1.0f : -1.0f;
             movement.mPosition[1] = 0;
             attackType = ESM::Weapon::AT_Slash;
         }
-        else if(roll <= (slash + (thrust/total)))
+        else if(roll <= (slash + thrust))
         {
             movement.mPosition[1] = 1;
             attackType = ESM::Weapon::AT_Thrust;

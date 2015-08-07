@@ -12,8 +12,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    float distance(ESM::Pathgrid::Point point, float x, float y, float);
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
     class PathFinder
     {
         public:
@@ -93,6 +93,9 @@ namespace MWMechanics
         private:
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                 const MWWorld::CellStore* cell, bool allowShortcuts = true);
+            bool isBetweenWaypoints(const ESM::Pathgrid::Point &pointToCheck,
+                const ESM::Pathgrid::Point &firstWayPoint,
+                const ESM::Pathgrid::Point &secondWayPoint);
 
             std::list<ESM::Pathgrid::Point> mPath;
 
