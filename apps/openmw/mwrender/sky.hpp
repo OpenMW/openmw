@@ -58,8 +58,6 @@ namespace MWRender
 
         float mCloudSpeed;
 
-        float mCloudOpacity;
-
         float mGlareView;
 
         bool mNight; // use night skybox
@@ -204,7 +202,6 @@ namespace MWRender
         std::string mClouds;
         std::string mNextClouds;
         float mCloudBlendFactor;
-        float mCloudOpacity;
         float mCloudSpeed;
         float mStarsOpacity;
         osg::Vec4f mCloudColour;

@@ -77,7 +77,7 @@ namespace MWWorld
         // Cloud animation speed multiplier
         float mCloudSpeed;
 
-        // Multiplier for clouds transparency
+        // TODO: What is this supposed to do?
         float mCloudsMaximumPercent;
 
         // Value between 0 and 1, defines the strength of the sun glare effect.

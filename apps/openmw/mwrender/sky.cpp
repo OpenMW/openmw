@@ -605,7 +605,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
-    , mCloudOpacity(0.0f)
     , mCloudSpeed(0.0f)
     , mStarsOpacity(0.0f)
     , mRemainingTransitionTime(0.0f)
@@ -666,12 +665,15 @@ void SkyManager::create()
     ModVertexAlphaVisitor modClouds(1);
     mCloudMesh->accept(modClouds);
     mCloudUpdater = new CloudUpdater;
+    mCloudUpdater->setOpacity(1.f);
     mCloudMesh->addUpdateCallback(mCloudUpdater);
 
     mCloudMesh2 = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
     mCloudMesh2->accept(modClouds);
     mCloudUpdater2 = new CloudUpdater;
+    mCloudUpdater2->setOpacity(0.f);
     mCloudMesh2->addUpdateCallback(mCloudUpdater2);
+    mCloudMesh2->setNodeMask(0);
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
@@ -1060,14 +1062,12 @@ void SkyManager::setWeather(const WeatherResult& weather)
                                                                                        osg::Texture::REPEAT, osg::Texture::REPEAT));
     }
 
-    if (mCloudBlendFactor != weather.mCloudBlendFactor
-            || mCloudOpacity != weather.mCloudOpacity)
+    if (mCloudBlendFactor != weather.mCloudBlendFactor)
     {
         mCloudBlendFactor = weather.mCloudBlendFactor;
-        mCloudOpacity = weather.mCloudOpacity;
 
-        mCloudUpdater->setOpacity(mCloudOpacity * (1.f-mCloudBlendFactor));
-        mCloudUpdater2->setOpacity(mCloudOpacity * mCloudBlendFactor);
+        mCloudUpdater->setOpacity((1.f-mCloudBlendFactor));
+        mCloudUpdater2->setOpacity(mCloudBlendFactor);
         mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0 : 0);
     }
 
