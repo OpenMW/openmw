@@ -45,9 +45,9 @@ bool isBSA(std::string filename)
 
 /// Check all the nif files in a given VFS::Archive
 /// \note Takes ownership!
-void readVFS(VFS::Archive* anArchive)
+void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
 {
-    VFS::Manager myManager(false);
+    VFS::Manager myManager(true);
     myManager.addArchive(anArchive);
     myManager.buildIndex();
 
@@ -61,6 +61,15 @@ void readVFS(VFS::Archive* anArchive)
             {
             //           std::cout << "Decoding: " << name << std::endl;
                 Nif::NIFFile temp_nif(myManager.get(name),name);
+            }
+            else if(isBSA(name))
+            {
+                if(!archivePath.empty())
+                {
+                    std::cout << "Reading BSA File: " << name << std::endl;
+                    readVFS(new VFS::BsaArchive(archivePath+name));
+                    std::cout << "Done with BSA File: " << name << std::endl;
+                }
             }
         }
         catch (std::exception& e)
@@ -139,7 +148,7 @@ int main(int argc, char **argv)
              else if(bfs::is_directory(bfs::path(name)))
              {
                 std::cout << "Reading All Files in: " << name << std::endl;
-                readVFS(new VFS::FileSystemArchive(name));
+                readVFS(new VFS::FileSystemArchive(name),name);
              }
              else
              {
