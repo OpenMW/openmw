@@ -398,7 +398,8 @@ void CSVDoc::View::updateActions()
     mGlobalDebugProfileMenu->updateActions (running);
     mStopDebug->setEnabled (running);
 
-    mMerge->setEnabled (mDocument->getContentFiles().size()>1);
+    mMerge->setEnabled (mDocument->getContentFiles().size()>1 &&
+        !(mDocument->getState() & CSMDoc::State_Merging));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
