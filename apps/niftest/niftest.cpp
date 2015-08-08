@@ -2,12 +2,17 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstdlib>
 
 #include <components/nif/niffile.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
 
+#include <boost/program_options.hpp>
+
+// Create local aliases for brevity
+namespace bpo = boost::program_options;
 
 ///See if the file has the named extension
 bool hasExtension(std::string filename, std::string  extensionToFind)
@@ -54,13 +59,68 @@ void readBSA(std::string filename)
     }
 }
 
+std::vector<std::string> parseOptions (int argc, char** argv)
+{
+    bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
+        "Usages:\n"
+        "  niftool <or or morenif or BSA files>\n"
+        "      Scan the file for read errors.\n\n"
+        "Allowed options");
+    desc.add_options()
+        ("help,h", "print help message.")
+        ("input-file", bpo::value< std::vector<std::string> >(), "input file")
+        ;
+
+    //Default option if none provided
+    bpo::positional_options_description p;
+    p.add("input-file", -1);
+
+    bpo::variables_map variables;
+    try
+    {
+        bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).
+            options(desc).positional(p).run();
+        bpo::store(valid_opts, variables);
+    }
+    catch(std::exception &e)
+    {
+        std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
+            << desc << std::endl;
+        exit(1);
+    }
+
+    bpo::notify(variables);
+    if (variables.count ("help"))
+    {
+        std::cout << desc << std::endl;
+        exit(1);
+    }
+    if (variables.count("input-file"))
+    {
+        std::vector<std::string> files = variables["input-file"].as< std::vector<std::string> >();
+
+        std::cout << "Input files are:";
+        for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
+        {
+             std::cout <<" "<< *it;
+        }
+        std::cout << std::endl;
+        return files;
+    }
+
+    std::cout << "No input files or directories specified!" << std::endl;
+    std::cout << desc << std::endl;
+    exit(1);
+}
+
 int main(int argc, char **argv)
 {
+    std::vector<std::string> files = parseOptions (argc, argv);
 
     std::cout << "Reading Files" << std::endl;
-     for(int i = 1; i<argc;i++)
-     {
-         std::string name = argv[i];
+    for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
+    {
+         std::string name = *it;
 
         try{
             if(isNIF(name))
