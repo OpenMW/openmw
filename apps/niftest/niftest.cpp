@@ -45,6 +45,7 @@ bool isBSA(std::string filename)
 
 /// Check all the nif files in a given VFS::Archive
 /// \note Takes ownership!
+/// \note Can not read a bsa file inside of a bsa file.
 void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
 {
     VFS::Manager myManager(true);
@@ -60,15 +61,15 @@ void readVFS(VFS::Archive* anArchive,std::string archivePath = "")
             if(isNIF(name))
             {
             //           std::cout << "Decoding: " << name << std::endl;
-                Nif::NIFFile temp_nif(myManager.get(name),name);
+                Nif::NIFFile temp_nif(myManager.get(name),archivePath+name);
             }
             else if(isBSA(name))
             {
-                if(!archivePath.empty())
+                if(!archivePath.empty() && !isBSA(archivePath))
                 {
-                    std::cout << "Reading BSA File: " << name << std::endl;
-                    readVFS(new VFS::BsaArchive(archivePath+name));
-                    std::cout << "Done with BSA File: " << name << std::endl;
+//                     std::cout << "Reading BSA File: " << name << std::endl;
+                    readVFS(new VFS::BsaArchive(archivePath+name),archivePath+name+"/");
+//                     std::cout << "Done with BSA File: " << name << std::endl;
                 }
             }
         }
@@ -129,7 +130,7 @@ int main(int argc, char **argv)
 {
     std::vector<std::string> files = parseOptions (argc, argv);
 
-    std::cout << "Reading Files" << std::endl;
+//     std::cout << "Reading Files" << std::endl;
     for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
     {
          std::string name = *it;
@@ -142,12 +143,12 @@ int main(int argc, char **argv)
              }
              else if(isBSA(name))
              {
-                std::cout << "Reading BSA File: " << name << std::endl;
+//                 std::cout << "Reading BSA File: " << name << std::endl;
                 readVFS(new VFS::BsaArchive(name));
              }
              else if(bfs::is_directory(bfs::path(name)))
              {
-                std::cout << "Reading All Files in: " << name << std::endl;
+//                 std::cout << "Reading All Files in: " << name << std::endl;
                 readVFS(new VFS::FileSystemArchive(name),name);
              }
              else
