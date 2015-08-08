@@ -8,11 +8,14 @@
 #include <components/files/constrainedfilestream.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/bsaarchive.hpp>
+#include <components/vfs/filesystemarchive.hpp>
 
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
+namespace bfs = boost::filesystem;
 
 ///See if the file has the named extension
 bool hasExtension(std::string filename, std::string  extensionToFind)
@@ -40,22 +43,30 @@ bool isBSA(std::string filename)
     return hasExtension(filename,"bsa");
 }
 
-///Check all the nif files in the given BSA archive
-void readBSA(std::string filename)
+/// Check all the nif files in a given VFS::Archive
+/// \note Takes ownership!
+void readVFS(VFS::Archive* anArchive)
 {
     VFS::Manager myManager(false);
-    myManager.addArchive(new VFS::BsaArchive(filename));
+    myManager.addArchive(anArchive);
     myManager.buildIndex();
 
     std::map<std::string, VFS::File*> files=myManager.getIndex();
     for(std::map<std::string, VFS::File*>::const_iterator it=files.begin(); it!=files.end(); ++it)
     {
-      std::string name = it->first;
-      if(isNIF(name))
-      {
-//           std::cout << "Decoding: " << name << std::endl;
-          Nif::NIFFile temp_nif(myManager.get(name),name);
-      }
+        std::string name = it->first;
+
+        try{
+            if(isNIF(name))
+            {
+            //           std::cout << "Decoding: " << name << std::endl;
+                Nif::NIFFile temp_nif(myManager.get(name),name);
+            }
+        }
+        catch (std::exception& e)
+        {
+            std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
+        }
     }
 }
 
@@ -97,15 +108,7 @@ std::vector<std::string> parseOptions (int argc, char** argv)
     }
     if (variables.count("input-file"))
     {
-        std::vector<std::string> files = variables["input-file"].as< std::vector<std::string> >();
-
-        std::cout << "Input files are:";
-        for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
-        {
-             std::cout <<" "<< *it;
-        }
-        std::cout << std::endl;
-        return files;
+        return variables["input-file"].as< std::vector<std::string> >();
     }
 
     std::cout << "No input files or directories specified!" << std::endl;
@@ -131,11 +134,16 @@ int main(int argc, char **argv)
              else if(isBSA(name))
              {
                 std::cout << "Reading BSA File: " << name << std::endl;
-                readBSA(name);
+                readVFS(new VFS::BsaArchive(name));
+             }
+             else if(bfs::is_directory(bfs::path(name)))
+             {
+                std::cout << "Reading All Files in: " << name << std::endl;
+                readVFS(new VFS::FileSystemArchive(name));
              }
              else
              {
-                 std::cerr << "ERROR:  \"" << name << "\" is not a nif or bsa file!" << std::endl;
+                 std::cerr << "ERROR:  \"" << name << "\" is not a nif file, bsa file, or directory!" << std::endl;
              }
         }
         catch (std::exception& e)
