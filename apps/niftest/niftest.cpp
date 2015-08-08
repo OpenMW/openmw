@@ -74,8 +74,8 @@ std::vector<std::string> parseOptions (int argc, char** argv)
 {
     bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
         "Usages:\n"
-        "  niftool <or or morenif or BSA files>\n"
-        "      Scan the file for read errors.\n\n"
+        "  niftool <nif files, BSA files, or directories>\n"
+        "      Scan the file or directories for nif errors.\n\n"
         "Allowed options");
     desc.add_options()
         ("help,h", "print help message.")
