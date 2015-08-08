@@ -306,6 +306,11 @@ add_subdirectory(files/)
 if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
+
+    if (OPENMW_OSX_DEPLOYMENT)
+        SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+        SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+    endif()
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -740,12 +745,59 @@ if (APPLE)
         include(BundleUtilitiesWithRPath)
     " COMPONENT Runtime)
 
+    set(ABSOLUTE_PLUGINS "")
+    set(USED_OSG_PLUGINS
+                        osgdb_tga
+                        osgdb_dds
+                        osgdb_imageio
+                      )
+
+    foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
+      set(PLUGIN_ABS "${OSG_PLUGIN_LIB_SEARCH_PATH}/${PLUGIN_NAME}.so")
+      set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+    endforeach ()
+
+    get_filename_component(PLUGIN_PREFIX_DIR "${OSG_PLUGIN_LIB_SEARCH_PATH}" NAME)
+
+    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
+    # and returns list of install paths for all installed plugins
+    function (install_plugins_for_bundle bundle_path plugins_var)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/PlugIns/${PLUGIN_PREFIX_DIR}")
+
+        set(PLUGINS "")
+        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
+
+        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
+
+            install(CODE "
+                copy_resolved_item_into_bundle(\"${PLUGIN}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+            " COMPONENT Runtime)
+        endforeach ()
+
+        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
+    endfunction (install_plugins_for_bundle)
+
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
+
     set(DIRS "${CMAKE_PREFIX_PATH}/lib")
 
     install(CODE "
+        function(gp_item_default_embedded_path_override item  default_embedded_path_var)
+            if (\${item} MATCHES ${PLUGIN_PREFIX_DIR})
+              set(path \"@executable_path/../PlugIns/${PLUGIN_PREFIX_DIR}\")
+              set(\${default_embedded_path_var} \"\${path}\" PARENT_SCOPE)
+            endif()
+        endfunction()
+
         cmake_policy(SET CMP0009 OLD)
-        fixup_bundle(\"${OPENMW_APP}\" \"\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"\" \"${DIRS}\")
+        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
         " COMPONENT Runtime)
     include(CPack)
 endif (APPLE)
