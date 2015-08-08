@@ -1871,10 +1871,13 @@ void CharacterController::update(float duration)
 }
 
 
-void CharacterController::playGroup(const std::string &groupname, int mode, int count)
+bool CharacterController::playGroup(const std::string &groupname, int mode, int count)
 {
     if(!mAnimation || !mAnimation->hasAnimation(groupname))
+    {
         std::cerr<< "Animation "<<groupname<<" not found for " << mPtr.getCellRef().getRefId() << std::endl;
+        return false;
+    }
     else
     {
         count = std::max(count, 1);
@@ -1899,6 +1902,7 @@ void CharacterController::playGroup(const std::string &groupname, int mode, int 
             mAnimQueue.push_back(std::make_pair(groupname, count-1));
         }
     }
+    return true;
 }
 
 void CharacterController::skipAnim()

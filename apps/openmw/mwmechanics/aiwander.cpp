@@ -1,6 +1,7 @@
 #include "aiwander.hpp"
 
 #include <cfloat>
+#include <iostream>
 
 #include <components/misc/rng.hpp>
 
@@ -57,7 +58,6 @@ namespace MWMechanics
         bool mTurnActorGivingGreetingToFacePlayer;
         float mReaction; // update some actions infrequently
         
-        
         AiWander::GreetingState mSaidGreeting;
         int mGreetingTimer;
 
@@ -67,6 +67,7 @@ namespace MWMechanics
         AiWander::WanderState mState;
         
         unsigned short mIdleAnimation;
+        std::vector<unsigned short> mBadIdles; // Idle animations that when called cause errors
 
         PathFinder mPathFinder;
         
@@ -78,7 +79,8 @@ namespace MWMechanics
             mGreetingTimer(0),
             mCell(NULL),
             mState(AiWander::Wander_ChooseAction),
-            mIdleAnimation(0)
+            mIdleAnimation(0),
+            mBadIdles()
             {};
     };
     
@@ -394,15 +396,23 @@ namespace MWMechanics
         if (!idleAnimation && mDistance)
         {
             storage.mState = Wander_MoveNow;
+            return;
         }
-        else
+        if(idleAnimation)
         {
-            // Play idle animation and recreate vanilla (broken?) behavior of resetting start time of AIWander:
-            MWWorld::TimeStamp currentTime = MWBase::Environment::get().getWorld()->getTimeStamp();
-            mStartTime = currentTime;
-            playIdle(actor, idleAnimation);
-            storage.mState = Wander_IdleNow;
+            if(std::find(storage.mBadIdles.begin(), storage.mBadIdles.end(), idleAnimation)==storage.mBadIdles.end())
+            {
+                if(!playIdle(actor, idleAnimation))
+                {
+                    storage.mBadIdles.push_back(idleAnimation);
+                    storage.mState = Wander_ChooseAction;
+                    return;
+                }
+            }
         }
+        // Recreate vanilla (broken?) behavior of resetting start time of AIWander:
+        mStartTime = MWBase::Environment::get().getWorld()->getTimeStamp();
+        storage.mState = Wander_IdleNow;
     }
 
     void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
@@ -621,12 +631,17 @@ namespace MWMechanics
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
     }
 
-    void AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
+    bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
     {
         if ((GroupIndex_MinIdle <= idleSelect) && (idleSelect <= GroupIndex_MaxIdle))
         {
             const std::string& groupName = sIdleSelectToGroupName[idleSelect - GroupIndex_MinIdle];
-            MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
+            return MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, groupName, 0, 1);
+        }
+        else
+        {
+            std::cerr<< "Attempted to play out of range idle animation \""<<idleSelect<<"\" for " << actor.getCellRef().getRefId() << std::endl;
+            return false;
         }
     }
 

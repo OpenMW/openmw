@@ -38,7 +38,7 @@ namespace MWMechanics
         void update(float duration, bool paused);
         ///< Update object animations
 
-        void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
 
         void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);

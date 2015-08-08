@@ -1,6 +1,7 @@
 #include "actors.hpp"
 
 #include <typeinfo>
+#include <iostream>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -1245,11 +1246,18 @@ namespace MWMechanics
             iter->second->getCharacterController()->forceStateUpdate();
     }
 
-    void Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    bool Actors::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         PtrActorMap::iterator iter = mActors.find(ptr);
         if(iter != mActors.end())
-            iter->second->getCharacterController()->playGroup(groupName, mode, number);
+        {
+            return iter->second->getCharacterController()->playGroup(groupName, mode, number);
+        }
+        else
+        {
+            std::cerr<< "Error in Actors::playAnimationGroup:  Unable to find " << ptr.getTypeName() << std::endl;
+            return false;
+        }
     }
     void Actors::skipAnimation(const MWWorld::Ptr& ptr)
     {
