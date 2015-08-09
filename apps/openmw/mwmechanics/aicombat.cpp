@@ -199,13 +199,9 @@ namespace MWMechanics
 
         //Update every frame
         storage.updateCombatMove(duration);
-        MWMechanics::Movement& movement = storage.mMovement;
-
-        UpdateActorsMovement(actor, movement);
+        updateActorsMovement(actor, storage.mMovement);
         storage.updateAttack(characterController);
-
-        float& actionCooldown = storage.mActionCooldown;
-        actionCooldown -= duration;
+        storage.mActionCooldown -= duration;
         
         float& timerReact = storage.mTimerReact;
         if(timerReact < REACTION_INTERVAL)
@@ -503,7 +499,7 @@ namespace MWMechanics
         return false;
     }
 
-    void AiCombat::UpdateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& desiredMovement)
+    void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& desiredMovement)
     {
         MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
         if (mPathFinder.isPathConstructed())
@@ -522,12 +518,12 @@ namespace MWMechanics
         else
         {
             actorMovementSettings = desiredMovement;
-            RotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
-            RotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
+            rotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
+            rotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
         }
     }
 
-    void AiCombat::RotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
+    void AiCombat::rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
         MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement)
     {
         actorMovementSettings.mRotation[axis] = 0;
