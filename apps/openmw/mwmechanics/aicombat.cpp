@@ -117,6 +117,7 @@ namespace MWMechanics
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
             const ESM::Weapon* weapon, bool distantCombat);
         void updateAttack(CharacterController& characterController);
+        void stopAttack();
     };
     
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
@@ -221,10 +222,9 @@ namespace MWMechanics
     {
         MWMechanics::Movement& movement = storage.mMovement;
 
-        // Stop attacking if target is not seen
         if (isTargetMagicallyHidden(target))
         {
-            movement.mPosition[1] = movement.mPosition[0] = 0;
+            storage.stopAttack();
             return false; // TODO: run away instead of doing nothing
         }
 
@@ -368,11 +368,7 @@ namespace MWMechanics
                 && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             // TODO: start fleeing?
-            movement.mPosition[0] = 0;
-            movement.mPosition[1] = 0;
-            movement.mPosition[2] = 0;
-            readyToAttack = false;
-            characterController.setAttackingOrSpell(false);
+            storage.stopAttack();
             return false;
         }
 
@@ -685,6 +681,15 @@ namespace MWMechanics
             mAttack = false;
         }
         characterController.setAttackingOrSpell(mAttack);
+    }
+
+    void AiCombatStorage::stopAttack()
+    {
+        mMovement.mPosition[0] = 0;
+        mMovement.mPosition[1] = 0;
+        mMovement.mPosition[2] = 0;
+        mReadyToAttack = false;
+        mAttack = false;
     }
 }
 
