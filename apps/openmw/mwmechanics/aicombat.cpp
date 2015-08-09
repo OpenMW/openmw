@@ -116,6 +116,7 @@ namespace MWMechanics
         void stopCombatMove();
         void startAttackIfReady(const MWWorld::Ptr& actor, CharacterController& characterController, 
             const ESM::Weapon* weapon, bool distantCombat);
+        void updateAttack(CharacterController& characterController);
     };
     
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
@@ -201,12 +202,7 @@ namespace MWMechanics
         MWMechanics::Movement& movement = storage.mMovement;
 
         UpdateActorsMovement(actor, movement);
-
-        bool& attack = storage.mAttack;
-        if (attack && (characterController.getAttackStrength() >= storage.mStrength || characterController.readyToPrepareAttack()))
-            attack = false;
-
-        characterController.setAttackingOrSpell(attack);
+        storage.updateAttack(characterController);
 
         float& actionCooldown = storage.mActionCooldown;
         actionCooldown -= duration;
@@ -685,6 +681,15 @@ namespace MWMechanics
             else
                 mAttackCooldown -= REACTION_INTERVAL;
         }
+    }
+
+    void AiCombatStorage::updateAttack(CharacterController& characterController)
+    {
+        if (mAttack && (characterController.getAttackStrength() >= mStrength || characterController.readyToPrepareAttack()))
+        {
+            mAttack = false;
+        }
+        characterController.setAttackingOrSpell(mAttack);
     }
 }
 
