@@ -222,8 +222,7 @@ namespace MWMechanics
         MWMechanics::Movement& movement = storage.mMovement;
 
         // Stop attacking if target is not seen
-        if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
-                || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+        if (isTargetMagicallyHidden(target))
         {
             movement.mPosition[1] = movement.mPosition[0] = 0;
             return false; // TODO: run away instead of doing nothing

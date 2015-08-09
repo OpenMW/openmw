@@ -43,8 +43,7 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
             )
         return true; //Target doesn't exist
 
-    if (target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
-            || target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 75)
+    if (isTargetMagicallyHidden(target))
         return true;
 
     if(target.getClass().getCreatureStats(target).isDead())

@@ -69,6 +69,8 @@ namespace MWMechanics
             /// Simulates the passing of time
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
 
+            bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
+
         protected:
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
