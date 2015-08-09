@@ -110,6 +110,10 @@ namespace MWMechanics
         mForceNoShortcut(false),
         mLastActorPos(0,0,0),
         mMovement(){}    
+
+        void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
+        void updateCombatMove(float duration);
+        void stopCombatMove();
     };
     
     AiCombat::AiCombat(const MWWorld::Ptr& actor) :
@@ -192,19 +196,8 @@ namespace MWMechanics
 
 
         //Update every frame
-        bool& combatMove = storage.mCombatMove;
-        float& timerCombatMove = storage.mTimerCombatMove; 
+        storage.updateCombatMove(duration);
         MWMechanics::Movement& movement = storage.mMovement;
-        if(combatMove)
-        {
-            timerCombatMove -= duration;
-            if( timerCombatMove <= 0)
-            {
-                timerCombatMove = 0;
-                movement.mPosition[1] = movement.mPosition[0] = 0;
-                combatMove = false;
-            }
-        }
 
         UpdateActorsMovement(actor, movement);
 
@@ -454,31 +447,12 @@ namespace MWMechanics
             if (followTarget && distToTarget > rangeAttack)
             {
                 //Close-up combat: just run up on target
+                storage.stopCombatMove();
                 movement.mPosition[1] = 1;
             }
             else // (within attack dist)
             {
-                if(movement.mPosition[0] || movement.mPosition[1])
-                {
-                    storage.mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
-                    storage.mCombatMove = true;
-                }
-                // only NPCs are smart enough to use dodge movements
-                else if(actorClass.isNpc() && (!distantCombat || (distantCombat && distToTarget < rangeAttack/2)))
-                {
-                    //apply sideway movement (kind of dodging) with some probability
-                    if (Misc::Rng::rollClosedProbability() < 0.25)
-                    {
-                        movement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
-                        storage.mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
-                        storage.mCombatMove = true;
-                    }
-                }
-
-                if(distantCombat && distToTarget < rangeAttack/4)
-                {
-                    movement.mPosition[1] = -1;
-                }
+                storage.startCombatMove(actorClass.isNpc(), distantCombat, distToTarget, rangeAttack);
 
                 readyToAttack = true;
                 //only once got in melee combat, actor is allowed to use close-up shortcutting
@@ -551,14 +525,13 @@ namespace MWMechanics
                 }
             }
 
-            movement.mPosition[1] = 1;
             if (readyToAttack)
             {
                 // to stop possible sideway moving after target moved out of attack range
-                storage.mCombatMove = true;
-                storage.mTimerCombatMove = 0;
+                storage.stopCombatMove();
+                readyToAttack = false;
             }
-            readyToAttack = false;
+            movement.mPosition[1] = 1;
         }
 
         return false;
@@ -662,6 +635,50 @@ namespace MWMechanics
         package.mType = ESM::AiSequence::Ai_Combat;
         package.mPackage = combat.release();
         sequence.mPackages.push_back(package);
+    }
+
+    void AiCombatStorage::startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack)
+    {
+        if (mMovement.mPosition[0] || mMovement.mPosition[1])
+        {
+            mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
+            mCombatMove = true;
+        }
+        // only NPCs are smart enough to use dodge movements
+        else if (isNpc && (!isDistantCombat || (distToTarget < rangeAttack / 2)))
+        {
+            //apply sideway movement (kind of dodging) with some probability
+            if (Misc::Rng::rollClosedProbability() < 0.25)
+            {
+                mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
+                mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
+                mCombatMove = true;
+            }
+        }
+
+        if (isDistantCombat && distToTarget < rangeAttack / 4)
+        {
+            mMovement.mPosition[1] = -1;
+        }
+    }
+
+    void AiCombatStorage::updateCombatMove(float duration)
+    {
+        if (mCombatMove)
+        {
+            mTimerCombatMove -= duration;
+            if (mTimerCombatMove <= 0)
+            {
+                stopCombatMove();
+            }
+        }
+    }
+
+    void AiCombatStorage::stopCombatMove()
+    {
+        mTimerCombatMove = 0;
+        mMovement.mPosition[1] = mMovement.mPosition[0] = 0;
+        mCombatMove = false;
     }
 }
 
