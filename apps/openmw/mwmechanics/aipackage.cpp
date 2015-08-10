@@ -133,7 +133,7 @@ bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const
 
 bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
 {
-    MagicEffects& magicEffects(target.getClass().getCreatureStats(target).getMagicEffects());
+    const MagicEffects& magicEffects(target.getClass().getCreatureStats(target).getMagicEffects());
     return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
         || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
 }
