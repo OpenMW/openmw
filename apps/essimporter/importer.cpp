@@ -1,7 +1,11 @@
 #include "importer.hpp"
+
+#include <iomanip>
+
 #include <boost/shared_ptr.hpp>
 
 #include <OgreRoot.h>
+#include <OgreLogManager.h>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>

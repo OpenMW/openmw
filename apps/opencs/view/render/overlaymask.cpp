@@ -1,5 +1,6 @@
 #include "overlaymask.hpp"
 
+#include <OgreOverlay.h>
 #include <OgreOverlayManager.h>
 #include <OgreOverlayContainer.h>
 

@@ -2,7 +2,11 @@
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
 #if defined(_WIN32) && !defined(__MINGW32__)
-#include <boost/tr1/tr1/unordered_map>
+#if (_MSC_VER >= 1900)
+#include <unordered_map>
+#else
+#include <boost/unordered_map.hpp>
+#endif
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
 #else

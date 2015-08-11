@@ -104,7 +104,7 @@ public:
     void load() {}
     void unload() {}
 
-    DataStreamPtr open(const String& filename, bool readonly = true) const
+    virtual DataStreamPtr open(const String& filename, bool readonly = true)
     {
         index::const_iterator i = lookup_filename (filename);
 
@@ -149,8 +149,8 @@ public:
 
     time_t getModifiedTime(const String&) { return 0; }
 
-    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                            bool dirs = false) const
+    virtual FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                            bool dirs = false)
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
@@ -216,7 +216,7 @@ public:
   void load() {}
   void unload() {}
 
-  DataStreamPtr open(const String& filename, bool readonly = true) const
+  virtual DataStreamPtr open(const String& filename, bool readonly = true)
   {
     // Get a non-const reference to arc. This is a hack and it's all
     // OGRE's fault. You should NOT expect an open() command not to
@@ -262,8 +262,8 @@ public:
         return ptr;
     }
 
-    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                                bool dirs = false) const
+    virtual FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                                bool dirs = false)
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());

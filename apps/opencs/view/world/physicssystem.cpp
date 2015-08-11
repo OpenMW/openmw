@@ -5,6 +5,8 @@
 #include <OgreRay.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreViewport.h>
 
 #include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>

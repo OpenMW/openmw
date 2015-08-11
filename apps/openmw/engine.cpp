@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include <OgreRoot.h>
+#include <OgreTimer.h>
 #include <OgreRenderWindow.h>
 
 #include <MyGUI_WidgetManager.h>
