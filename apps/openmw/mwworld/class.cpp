@@ -381,6 +381,16 @@ namespace MWWorld
         return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
     }
 
+    const MWMechanics::MagicEffects& Class::getMagicEffects(const MWWorld::Ptr& ptr) const
+    {
+        return getCreatureStats(ptr).getMagicEffects();
+    }
+
+    float Class::magicEffectMagnitude(const MWWorld::Ptr& ptr, const MWMechanics::EffectKey& key) const
+    {
+        return getMagicEffects(ptr).magnitude(key);
+    }
+
     int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         throw std::runtime_error("class does not support skills");

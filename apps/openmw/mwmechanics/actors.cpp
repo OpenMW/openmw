@@ -126,7 +126,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    bool stunted = stats.getMagicEffects ().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
+    bool stunted = stats.magicEffectMagnitude(ESM::MagicEffect::StuntedMagicka) > 0;
     int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
     health = 0.1f * endurance;
@@ -406,7 +406,7 @@ namespace MWMechanics
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
 
         double magickaFactor = base +
-            creatureStats.getMagicEffects().get (EffectKey (ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
+            creatureStats.magicEffectMagnitude(ESM::MagicEffect::FortifyMaximumMagicka) * 0.1;
 
         DynamicStat<float> magicka = creatureStats.getMagicka();
         float diff = (static_cast<int>(magickaFactor*intelligence)) - magicka.getBase();
@@ -494,9 +494,9 @@ namespace MWMechanics
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
             AttributeValue stat = creatureStats.getAttribute(i);
-            stat.setModifier(static_cast<int>(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude()));
+            stat.setModifier(static_cast<int>(effects.magnitude(EffectKey(ESM::MagicEffect::FortifyAttribute, i)) -
+                             effects.magnitude(EffectKey(ESM::MagicEffect::DrainAttribute, i)) -
+                             effects.magnitude(EffectKey(ESM::MagicEffect::AbsorbAttribute, i))));
 
             creatureStats.setAttribute(i, stat);
         }
@@ -522,8 +522,8 @@ namespace MWMechanics
         for(int i = 0;i < 3;++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setModifier(effects.get(ESM::MagicEffect::FortifyHealth+i).getMagnitude() -
-                             effects.get(ESM::MagicEffect::DrainHealth+i).getMagnitude(),
+            stat.setModifier(effects.magnitude(ESM::MagicEffect::FortifyHealth+i) -
+                             effects.magnitude(ESM::MagicEffect::DrainHealth+i),
                              // Fatigue can be decreased below zero meaning the actor will be knocked out
                              i == 2);
 
@@ -538,19 +538,19 @@ namespace MWMechanics
         if (!creature || ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Creatures)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Fight);
-            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::FrenzyHumanoid + creature).getMagnitude()
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid+creature).getMagnitude()));
+            stat.setModifier(static_cast<int>(effects.magnitude(ESM::MagicEffect::FrenzyHumanoid + creature)
+                - effects.magnitude(ESM::MagicEffect::CalmHumanoid+creature)));
             creatureStats.setAiSetting(CreatureStats::AI_Fight, stat);
 
             stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::DemoralizeHumanoid + creature).getMagnitude()
-                - creatureStats.getMagicEffects().get(ESM::MagicEffect::RallyHumanoid+creature).getMagnitude()));
+            stat.setModifier(static_cast<int>(effects.magnitude(ESM::MagicEffect::DemoralizeHumanoid + creature)
+                - effects.magnitude(ESM::MagicEffect::RallyHumanoid+creature)));
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
         if (creature && ptr.get<ESM::Creature>()->mBase->mData.mType == ESM::Creature::Undead)
         {
             Stat<int> stat = creatureStats.getAiSetting(CreatureStats::AI_Flee);
-            stat.setModifier(static_cast<int>(creatureStats.getMagicEffects().get(ESM::MagicEffect::TurnUndead).getMagnitude()));
+            stat.setModifier(static_cast<int>(effects.magnitude(ESM::MagicEffect::TurnUndead)));
             creatureStats.setAiSetting(CreatureStats::AI_Flee, stat);
         }
 
@@ -596,8 +596,8 @@ namespace MWMechanics
         // TODO: dirty flag for magic effects to avoid some unnecessary work below?
 
         // any value of calm > 0 will stop the actor from fighting
-        if ((creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() > 0 && ptr.getClass().isNpc())
-                || (creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmCreature).getMagnitude() > 0 && !ptr.getClass().isNpc()))
+        if ((effects.magnitude(ESM::MagicEffect::CalmHumanoid) > 0 && ptr.getClass().isNpc())
+                || (effects.magnitude(ESM::MagicEffect::CalmCreature) > 0 && !ptr.getClass().isNpc()))
         {
             for (std::list<AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); )
             {
@@ -630,7 +630,7 @@ namespace MWMechanics
         for (std::map<int, std::string>::iterator it = boundItemsMap.begin(); it != boundItemsMap.end(); ++it)
         {
             bool found = creatureStats.mBoundItems.find(it->first) != creatureStats.mBoundItems.end();
-            float magnitude = creatureStats.getMagicEffects().get(it->first).getMagnitude();
+            float magnitude = creatureStats.magicEffectMagnitude(it->first);
             if (found != (magnitude > 0))
             {
                 std::string itemGmst = it->second;
@@ -671,9 +671,9 @@ namespace MWMechanics
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
             SkillValue& skill = npcStats.getSkill(i);
-            skill.setModifier(static_cast<int>(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude()));
+            skill.setModifier(static_cast<int>(effects.magnitude(EffectKey(ESM::MagicEffect::FortifySkill, i)) -
+                             effects.magnitude(EffectKey(ESM::MagicEffect::DrainSkill, i)) -
+                             effects.magnitude(EffectKey(ESM::MagicEffect::AbsorbSkill, i))));
         }
     }
 
@@ -688,7 +688,7 @@ namespace MWMechanics
         MWBase::World *world = MWBase::Environment::get().getWorld();
         bool knockedOutUnderwater = (ctrl->isKnockedOut() && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if((world->isSubmerged(ptr) || knockedOutUnderwater)
-           && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+           && stats.magicEffectMagnitude(ESM::MagicEffect::WaterBreathing) == 0)
         {
             float timeLeft = 0.0f;
             if(knockedOutUnderwater)
@@ -1037,8 +1037,7 @@ namespace MWMechanics
                         > sqrProcessingDistance)
                     continue;
 
-                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
-                            ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                if (iter->first.getClass().magicEffectMagnitude(iter->first, ESM::MagicEffect::Paralyze) > 0)
                     iter->second->getCharacterController()->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
@@ -1426,7 +1425,7 @@ namespace MWMechanics
             MWWorld::Ptr ptr = it->first;
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()
                     || !isConscious(ptr)
-                    || ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    || ptr.getClass().magicEffectMagnitude(ptr, ESM::MagicEffect::Paralyze) > 0)
                 continue;
             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             seq.fastForward(ptr, it->second->getAiState());

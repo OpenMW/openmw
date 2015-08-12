@@ -88,8 +88,8 @@ namespace MWMechanics
     float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap)
     {
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
+        const MagicEffects& effects = stats.getMagicEffects();
+        if (effects.magnitude(ESM::MagicEffect::Silence))
             return 0;
 
         float y = FLT_MAX;
@@ -127,7 +127,7 @@ namespace MWMechanics
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
 
-        float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
+        float castBonus = -effects.magnitude(ESM::MagicEffect::Sound);
 
         int actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
@@ -185,16 +185,16 @@ namespace MWMechanics
 
         float resistance = 0;
         if (resistanceEffect != -1)
-            resistance += actorEffects->get(resistanceEffect).getMagnitude();
+            resistance += actorEffects->magnitude(resistanceEffect);
         if (weaknessEffect != -1)
-            resistance -= actorEffects->get(weaknessEffect).getMagnitude();
+            resistance -= actorEffects->magnitude(weaknessEffect);
 
         if (effectId == ESM::MagicEffect::FireDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FireShield).getMagnitude();
+            resistance += actorEffects->magnitude(ESM::MagicEffect::FireShield);
         if (effectId == ESM::MagicEffect::ShockDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).getMagnitude();
+            resistance += actorEffects->magnitude(ESM::MagicEffect::LightningShield);
         if (effectId == ESM::MagicEffect::FrostDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).getMagnitude();
+            resistance += actorEffects->magnitude(ESM::MagicEffect::FrostShield);
 
         return resistance;
     }
@@ -332,9 +332,10 @@ namespace MWMechanics
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
         if (spell && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
         {
+            const MagicEffects& effects = target.getClass().getMagicEffects(target);
             float x = (spell->mData.mType == ESM::Spell::ST_Disease) ?
-                        target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
-                      : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude();
+                        effects.magnitude(ESM::MagicEffect::ResistCommonDisease)
+                      : effects.magnitude(ESM::MagicEffect::ResistBlightDisease);
 
             if (Misc::Rng::roll0to99() <= x)
             {
@@ -365,7 +366,7 @@ namespace MWMechanics
         bool absorbed = false;
         if (spell && caster != target && target.getClass().isActor())
         {
-            float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
+            float absorb = target.getClass().magicEffectMagnitude(target, ESM::MagicEffect::SpellAbsorption);
             absorbed = (Misc::Rng::roll0to99() < absorb);
             if (absorbed)
             {
@@ -413,7 +414,7 @@ namespace MWMechanics
                 // Try reflecting
                 if (!reflected && magnitudeMult > 0 && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
                 {
-                    float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
+                    float reflect = target.getClass().magicEffectMagnitude(target, ESM::MagicEffect::Reflect);
                     bool isReflected = (Misc::Rng::roll0to99() < reflect);
                     if (isReflected)
                     {

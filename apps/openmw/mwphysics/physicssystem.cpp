@@ -1150,7 +1150,7 @@ namespace MWPhysics
                 const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
 
                 bool waterCollision = false;
-                if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
+                if (effects.magnitude(ESM::MagicEffect::WaterWalking)
                         && cell->getCell()->hasWater()
                         && !world->isUnderwater(iter->first.getCell(),
                                                osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
@@ -1163,7 +1163,7 @@ namespace MWPhysics
                 physicActor->setCanWaterWalk(waterCollision);
 
                 // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
-                float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+                float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.magnitude(ESM::MagicEffect::SlowFall) * 0.005f));
 
                 osg::Vec3f newpos = MovementSolver::move(iter->first, physicActor, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),

@@ -524,11 +524,11 @@ namespace MWClass
 
         if(getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
-        else if(canFly(ptr) || (mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
+        else if(canFly(ptr) || (mageffects.magnitude(ESM::MagicEffect::Levitate) > 0 &&
                 world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f*(stats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
+                                    mageffects.magnitude(ESM::MagicEffect::Levitate));
             flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
             const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
@@ -540,7 +540,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
+            swimSpeed *= 1.0f + 0.01f * mageffects.magnitude(ESM::MagicEffect::SwiftSwim);
             swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
                                                     gmst.fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -591,7 +591,7 @@ namespace MWClass
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
         // Note this is currently unused. Creatures do not use armor mitigation.
-        return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
+        return magicEffectMagnitude(ptr, ESM::MagicEffect::Shield);
     }
 
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
@@ -604,11 +604,9 @@ namespace MWClass
     {
         float weight = getContainerStore (ptr).getWeight();
 
-        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).getMagnitude();
-
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).getMagnitude();
+        const MWMechanics::MagicEffects& effects = getMagicEffects(ptr);
+        weight -= effects.magnitude(ESM::MagicEffect::Feather);
+        weight += effects.magnitude(ESM::MagicEffect::Burden);
 
         if (weight<0)
             weight = 0;
