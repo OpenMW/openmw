@@ -306,9 +306,12 @@ namespace CSMWorld
             ColumnId_FileDescription = 276,
             ColumnId_Author = 277,
 
-            ColumnId_SpellSrc = 278,
-            ColumnId_SpellCost = 279,
-            ColumnId_SpellChance = 280,
+            ColumnId_MinMagnitude = 278,
+            ColumnId_MaxMagnitude = 279,
+
+            ColumnId_SpellSrc = 280,
+            ColumnId_SpellCost = 281,
+            ColumnId_SpellChance = 282,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

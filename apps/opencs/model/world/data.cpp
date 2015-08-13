@@ -293,9 +293,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
     mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
@@ -409,9 +409,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);

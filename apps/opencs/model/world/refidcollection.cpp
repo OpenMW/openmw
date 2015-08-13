@@ -94,9 +94,9 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     EnchantableColumns enchantableColumns (inventoryColumns);
 
