@@ -7,14 +7,26 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QLabel>
+#include <QKeyEvent>
 
 #include "../../model/doc/document.hpp"
 
 #include "../doc/filewidget.hpp"
 #include "../doc/adjusterwidget.hpp"
 
+void CSVTools::Merge::keyPressEvent (QKeyEvent *event)
+{
+    if (event->key()==Qt::Key_Escape)
+    {
+        event->accept();
+        cancel();
+    }
+    else
+        QWidget::keyPressEvent (event);
+}
+
 CSVTools::Merge::Merge (QWidget *parent)
-: QDialog (parent), mDocument (0)
+: QWidget (parent), mDocument (0)
 {
     setWindowTitle ("Merge Content Files into a new Game File");
 
@@ -65,7 +77,7 @@ CSVTools::Merge::Merge (QWidget *parent)
     // buttons
     QDialogButtonBox *buttons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
-    connect (buttons->button (QDialogButtonBox::Cancel), SIGNAL (clicked()), this, SLOT (reject()));
+    connect (buttons->button (QDialogButtonBox::Cancel), SIGNAL (clicked()), this, SLOT (cancel()));
 
     mOkay = new QPushButton ("Merge", this);
     connect (mOkay, SIGNAL (clicked()), this, SLOT (accept()));
@@ -110,19 +122,11 @@ void CSVTools::Merge::cancel()
 
 void CSVTools::Merge::accept()
 {
-    QDialog::accept();
-
     if ((mDocument->getState() & CSMDoc::State_Merging)==0)
     {
         mDocument->runMerge (mAdjuster->getPath());
         hide();
     }
-}
-
-void CSVTools::Merge::reject()
-{
-    QDialog::reject();
-    cancel();
 }
 
 void CSVTools::Merge::stateChanged (bool valid)

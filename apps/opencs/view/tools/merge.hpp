@@ -1,7 +1,7 @@
 #ifndef CSV_TOOLS_REPORTTABLE_H
 #define CSV_TOOLS_REPORTTABLE_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include <boost/filesystem/path.hpp>
 
@@ -21,7 +21,7 @@ namespace CSVDoc
 
 namespace CSVTools
 {
-    class Merge : public QDialog
+    class Merge : public QWidget
     {
             Q_OBJECT
 
@@ -30,6 +30,8 @@ namespace CSVTools
             QListWidget *mFiles;
             CSVDoc::FileWidget *mNewFile;
             CSVDoc::AdjusterWidget *mAdjuster;
+
+            void keyPressEvent (QKeyEvent *event);
 
         public:
 
@@ -42,18 +44,15 @@ namespace CSVTools
 
             CSMDoc::Document *getDocument() const;
 
-            void cancel();
-
         public slots:
 
-            virtual void accept();
-
-            virtual void reject();
+            void cancel();
 
         private slots:
 
-            void stateChanged (bool valid);
+            void accept();
 
+            void stateChanged (bool valid);
     };
 }
 

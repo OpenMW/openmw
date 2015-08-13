@@ -379,4 +379,6 @@ void CS::Editor::mergeDocument (CSMDoc::Document *document)
 {
     mMerge.configure (document);
     mMerge.show();
+    mMerge.raise();
+    mMerge.activateWindow();
 }
