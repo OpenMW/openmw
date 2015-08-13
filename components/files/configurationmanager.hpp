@@ -5,7 +5,7 @@
 #if (_MSC_VER >= 1900)
 #include <unordered_map>
 #else
-#include <boost/unordered_map.hpp>
+#include <boost/tr1/tr1/unordered_map>
 #endif
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
