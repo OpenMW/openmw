@@ -134,6 +134,10 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
     connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
     connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
         this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
+
+    connect (&mMerge, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+    connect (&mMerge, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    // don't need to connect report message, since there are no messages for merge
 }
 
 CSMTools::Tools::~Tools()
