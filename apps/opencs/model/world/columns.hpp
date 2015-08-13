@@ -306,6 +306,9 @@ namespace CSMWorld
             ColumnId_FileDescription = 276,
             ColumnId_Author = 277,
 
+            ColumnId_MinMagnitude = 278,
+            ColumnId_MaxMagnitude = 279,
+
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
             ColumnId_UseValue1 = 0x10000,

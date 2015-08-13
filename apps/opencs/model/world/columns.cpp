@@ -35,6 +35,8 @@ namespace CSMWorld
             { ColumnId_Volume, "Volume" },
             { ColumnId_MinRange, "Min Range" },
             { ColumnId_MaxRange, "Max Range" },
+            { ColumnId_MinMagnitude, "Min Magnitude" },
+            { ColumnId_MaxMagnitude, "Max Magnitude" },
             { ColumnId_SoundFile, "Sound File" },
             { ColumnId_MapColour, "Map Colour" },
             { ColumnId_SleepEncounter, "Sleep Encounter" },
