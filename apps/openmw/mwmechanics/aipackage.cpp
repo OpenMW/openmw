@@ -4,6 +4,7 @@
 
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
+#include <components/esm/loadmgef.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -128,4 +129,11 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
 bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
 {
     return distance(mPrevDest, dest) > 10;
+}
+
+bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
+{
+    const MagicEffects& magicEffects(target.getClass().getCreatureStats(target).getMagicEffects());
+    return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+        || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
 }
