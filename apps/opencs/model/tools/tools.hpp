@@ -1,9 +1,11 @@
 #ifndef CSM_TOOLS_TOOLS_H
 #define CSM_TOOLS_TOOLS_H
 
+#include <map>
+
 #include <QObject>
 
-#include <map>
+#include <boost/filesystem/path.hpp>
 
 #include "../doc/operationholder.hpp"
 
@@ -24,6 +26,7 @@ namespace CSMTools
     class ReportModel;
     class Search;
     class SearchOperation;
+    class MergeOperation;
 
     class Tools : public QObject
     {
@@ -35,6 +38,8 @@ namespace CSMTools
             CSMDoc::OperationHolder mVerifier;
             SearchOperation *mSearchOperation;
             CSMDoc::OperationHolder mSearch;
+            MergeOperation *mMergeOperation;
+            CSMDoc::OperationHolder mMerge;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
@@ -67,7 +72,9 @@ namespace CSMTools
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
-            
+
+            void runMerge (const boost::filesystem::path& target);
+
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 

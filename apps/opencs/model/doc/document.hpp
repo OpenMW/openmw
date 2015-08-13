@@ -125,7 +125,9 @@ namespace CSMDoc
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
-            
+
+            void runMerge (const boost::filesystem::path& target);
+
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;
@@ -171,4 +173,3 @@ namespace CSMDoc
 }
 
 #endif
-

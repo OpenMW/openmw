@@ -66,7 +66,9 @@ CSVTools::Merge::Merge (QWidget *parent)
     QDialogButtonBox *buttons = new QDialogButtonBox (QDialogButtonBox::Cancel, Qt::Horizontal, this);
 
     connect (buttons->button (QDialogButtonBox::Cancel), SIGNAL (clicked()), this, SLOT (reject()));
+
     mOkay = new QPushButton ("Merge", this);
+    connect (mOkay, SIGNAL (clicked()), this, SLOT (accept()));
     mOkay->setDefault (true);
     buttons->addButton (mOkay, QDialogButtonBox::AcceptRole);
 
@@ -109,6 +111,12 @@ void CSVTools::Merge::cancel()
 void CSVTools::Merge::accept()
 {
     QDialog::accept();
+
+    if ((mDocument->getState() & CSMDoc::State_Merging)==0)
+    {
+        mDocument->runMerge (mAdjuster->getPath());
+        hide();
+    }
 }
 
 void CSVTools::Merge::reject()

@@ -2385,6 +2385,12 @@ void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const C
     emit stateChanged (getState(), this);
 }
 
+void CSMDoc::Document::runMerge (const boost::filesystem::path& target)
+{
+    mTools.runMerge (target);
+    emit stateChanged (getState(), this);
+}
+
 void CSMDoc::Document::abortOperation (int type)
 {
     if (type==State_Saving)
