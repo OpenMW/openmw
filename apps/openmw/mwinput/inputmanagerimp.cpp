@@ -370,6 +370,9 @@ namespace MWInput
                 float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
                 const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
+                xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+                yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
                 mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
