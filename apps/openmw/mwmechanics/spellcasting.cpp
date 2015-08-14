@@ -941,7 +941,8 @@ namespace MWMechanics
             MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
             MWWorld::ContainerStoreIterator item =
                     inv.getSlot(slot);
-            if (item != inv.end())
+
+            if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor || item.getType() == MWWorld::ContainerStore::Type_Weapon))
             {
                 if (!item->getClass().hasItemHealth(*item))
                     return false;
