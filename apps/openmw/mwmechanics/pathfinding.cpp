@@ -51,8 +51,7 @@ namespace
                                                   const MWWorld::CellStore *cell,
                                                   const osg::Vec3f pos, int start)
     {
-        if(!grid || grid->mPoints.empty())
-            return std::pair<int, bool> (-1, false);
+        assert(grid && !grid->mPoints.empty());
 
         float distanceBetween = distanceSquared(grid->mPoints[0], pos);
         int closestIndex = 0;
@@ -76,8 +75,6 @@ namespace
         // AiWander has logic that depends on whether a path was created, deleting
         // allowed nodes if not.  Hence a path needs to be created even if the start
         // and the end points are the same.
-        //if(start == closestReachableIndex)
-            //closestReachableIndex = -1; // couldn't find anyting other than start
 
         return std::pair<int, bool>
             (closestReachableIndex, closestReachableIndex == closestIndex);
@@ -110,6 +107,11 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
+    osg::Vec3f ToLocalCoordinates(const ESM::Pathgrid::Point &point, float xCell, float yCell)
+    {
+        return osg::Vec3f(point.mX - xCell, point.mY - yCell, static_cast<float>(point.mZ));
+    }
+
     PathFinder::PathFinder()
         : mPathgrid(NULL),
           mCell(NULL)
@@ -138,8 +140,6 @@ namespace MWMechanics
      * point (e.g. combat).  However, if the caller has already chosen a
      * pathgrid point (e.g. wander) then it may be worth while to call
      * pop_back() to remove the redundant entry.
-     *
-     * mPathConstructed is set true if successful, false if not
      *
      * NOTE: co-ordinates must be converted prior to calling getClosestPoint()
      *
@@ -208,46 +208,40 @@ namespace MWMechanics
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
-        int startNode = getClosestPoint(mPathgrid,
-                osg::Vec3f(startPoint.mX - xCell, startPoint.mY - yCell, static_cast<float>(startPoint.mZ)));
-        // Some cells don't have any pathgrids at all
-        if(startNode != -1)
+        osg::Vec3f startPointInLocalCoords(ToLocalCoordinates(startPoint, xCell, yCell));
+        int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
+
+        osg::Vec3f endPointInLocalCoords(ToLocalCoordinates(endPoint, xCell, yCell));
+        std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
+            endPointInLocalCoords,
+                startNode);
+
+        // AiWander has logic that depends on whether a path was created,
+        // deleting allowed nodes if not.  Hence a path needs to be created
+        // even if the start and the end points are the same.
+        // NOTE: aStarSearch will return an empty path if the start and end
+        //       nodes are the same
+        if(startNode == endNode.first)
         {
-            std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
-                osg::Vec3f(endPoint.mX - xCell, endPoint.mY - yCell, static_cast<float>(endPoint.mZ)),
-                    startNode);
+            mPath.push_back(endPoint);
+            return;
+        }
 
-            // this shouldn't really happen, but just in case
-            if(endNode.first != -1)
-            {
-                // AiWander has logic that depends on whether a path was created,
-                // deleting allowed nodes if not.  Hence a path needs to be created
-                // even if the start and the end points are the same.
-                // NOTE: aStarSearch will return an empty path if the start and end
-                //       nodes are the same
-                if(startNode == endNode.first)
-                {
-                    mPath.push_back(endPoint);
-                    return;
-                }
+        mPath = mCell->aStarSearch(startNode, endNode.first);
 
-                mPath = mCell->aStarSearch(startNode, endNode.first);
-
-                if(!mPath.empty())
-                {
-                    // Add the destination (which may be different to the closest
-                    // pathgrid point).  However only add if endNode was the closest
-                    // point to endPoint.
-                    //
-                    // This logic can fail in the opposite situate, e.g. endPoint may
-                    // have been reachable but happened to be very close to an
-                    // unreachable pathgrid point.
-                    //
-                    // The AI routines will have to deal with such situations.
-                    if(endNode.second)
-                        mPath.push_back(endPoint);
-                }
-            }
+        if(!mPath.empty())
+        {
+            // Add the destination (which may be different to the closest
+            // pathgrid point).  However only add if endNode was the closest
+            // point to endPoint.
+            //
+            // This logic can fail in the opposite situate, e.g. endPoint may
+            // have been reachable but happened to be very close to an
+            // unreachable pathgrid point.
+            //
+            // The AI routines will have to deal with such situations.
+            if(endNode.second)
+                mPath.push_back(endPoint);
         }
 
         return;
