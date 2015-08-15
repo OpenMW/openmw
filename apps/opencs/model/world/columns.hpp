@@ -102,7 +102,7 @@ namespace CSMWorld
             ColumnId_OriginalCreature = 87,
             ColumnId_Biped = 88,
             ColumnId_HasWeapon = 89,
-            ColumnId_NoMovement = 90,
+            // unused
             ColumnId_Swims = 91,
             ColumnId_Flies = 92,
             ColumnId_Walks = 93,
