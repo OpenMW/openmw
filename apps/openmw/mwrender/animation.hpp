@@ -273,7 +273,7 @@ protected:
      * @param baseonly If true, then any meshes or particle systems in the model are ignored
      *      (useful for NPCs, where only the skeleton is needed for the root, and the actual NPC parts are then assembled from separate files).
      */
-    void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly);
+    void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif

@@ -208,6 +208,38 @@ namespace
         std::vector<osg::Node*> mToRemove;
     };
 
+    class RemoveTriBipVisitor : public osg::NodeVisitor
+    {
+    public:
+        RemoveTriBipVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Geode &node)
+        {
+            const std::string toFind = "tri bip";
+            if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
+            {
+                // Not safe to remove in apply(), since the visitor is still iterating the child list
+                mToRemove.push_back(&node);
+            }
+        }
+
+        void remove()
+        {
+            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            {
+                osg::Node* node = *it;
+                if (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+            }
+        }
+
+    private:
+        std::vector<osg::Node*> mToRemove;
+    };
+
 }
 
 namespace MWRender
@@ -898,7 +930,7 @@ namespace MWRender
         return movement;
     }
 
-    void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly)
+    void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
         if (mObjectRoot)
         {
@@ -931,6 +963,13 @@ namespace MWRender
             RemoveDrawableVisitor removeDrawableVisitor;
             mObjectRoot->accept(removeDrawableVisitor);
             removeDrawableVisitor.remove();
+        }
+
+        if (isCreature)
+        {
+            RemoveTriBipVisitor removeTriBipVisitor;
+            mObjectRoot->accept(removeTriBipVisitor);
+            removeTriBipVisitor.remove();
         }
 
         NodeMapVisitor visitor;
@@ -1308,7 +1347,7 @@ namespace MWRender
     {
         if (!model.empty())
         {
-            setObjectRoot(model, false, false);
+            setObjectRoot(model, false, false, false);
             if (animated)
                 addAnimSource(model);
 

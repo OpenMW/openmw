@@ -24,7 +24,7 @@ CreatureAnimation::CreatureAnimation(const MWWorld::Ptr &ptr,
 
     if(!model.empty())
     {
-        setObjectRoot(model, false, false);
+        setObjectRoot(model, false, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
             addAnimSource("meshes\\xbase_anim.nif");
@@ -42,7 +42,7 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
 
     if(!model.empty())
     {
-        setObjectRoot(model, true, false);
+        setObjectRoot(model, true, false, true);
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
             addAnimSource("meshes\\xbase_anim.nif");
