@@ -60,7 +60,7 @@ namespace MWMechanics
 
         if (blockerStats.getKnockedDown() // Used for both knockout or knockdown
                 || blockerStats.getHitRecovery()
-                || blockerStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                || blockerStats.isParalyzed())
             return false;
 
         if (!MWBase::Environment::get().getMechanicsManager()->isReadyToBlock(blocker))
@@ -250,7 +250,7 @@ namespace MWMechanics
                     && (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
                     && (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim));
             if (!(victimStats.getKnockedDown() ||
-                    victimStats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+                    victimStats.isParalyzed()
                     || unaware ))
             {
                 defenseTerm = victimStats.getEvasion();
@@ -375,7 +375,7 @@ namespace MWMechanics
         damage *= minstrike + ((maxstrike-minstrike)*attackStrength);
 
         MWMechanics::CreatureStats& otherstats = victim.getClass().getCreatureStats(victim);
-        healthdmg = (otherstats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+        healthdmg = otherstats.isParalyzed()
                 || otherstats.getKnockedDown();
         bool isWerewolf = (attacker.getClass().isNpc() && attacker.getClass().getNpcStats(attacker).isWerewolf());
         if(isWerewolf)
