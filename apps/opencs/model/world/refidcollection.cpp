@@ -331,7 +331,6 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     {
         { Columns::ColumnId_Biped, ESM::Creature::Bipedal },
         { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
-        { Columns::ColumnId_NoMovement, ESM::Creature::None },
         { Columns::ColumnId_Swims, ESM::Creature::Swims },
         { Columns::ColumnId_Flies, ESM::Creature::Flies },
         { Columns::ColumnId_Walks, ESM::Creature::Walks },

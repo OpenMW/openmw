@@ -109,7 +109,6 @@ namespace CSMWorld
             { ColumnId_OriginalCreature, "Original Creature" },
             { ColumnId_Biped, "Biped" },
             { ColumnId_HasWeapon, "Has Weapon" },
-            { ColumnId_NoMovement, "No Movement" },
             { ColumnId_Swims, "Swims" },
             { ColumnId_Flies, "Flies" },
             { ColumnId_Walks, "Walks" },
