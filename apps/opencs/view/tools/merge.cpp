@@ -10,6 +10,7 @@
 #include <QKeyEvent>
 
 #include "../../model/doc/document.hpp"
+#include "../../model/doc/documentmanager.hpp"
 
 #include "../doc/filewidget.hpp"
 #include "../doc/adjusterwidget.hpp"
@@ -25,8 +26,8 @@ void CSVTools::Merge::keyPressEvent (QKeyEvent *event)
         QWidget::keyPressEvent (event);
 }
 
-CSVTools::Merge::Merge (QWidget *parent)
-: QWidget (parent), mDocument (0)
+CSVTools::Merge::Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent)
+: QWidget (parent), mDocument (0), mDocumentManager (documentManager)
 {
     setWindowTitle ("Merge Content Files into a new Game File");
 
@@ -124,7 +125,13 @@ void CSVTools::Merge::accept()
 {
     if ((mDocument->getState() & CSMDoc::State_Merging)==0)
     {
-        mDocument->runMerge (mAdjuster->getPath());
+        std::vector< boost::filesystem::path > files (1, mAdjuster->getPath());
+
+        std::auto_ptr<CSMDoc::Document> target (
+            mDocumentManager.makeDocument (files, files[0], true));
+
+        mDocument->runMerge (target);
+
         hide();
     }
 }

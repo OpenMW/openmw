@@ -2296,6 +2296,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
+    connect (&mTools, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
@@ -2385,7 +2387,7 @@ void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const C
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::runMerge (const boost::filesystem::path& target)
+void CSMDoc::Document::runMerge (std::auto_ptr<CSMDoc::Document> target)
 {
     mTools.runMerge (target);
     emit stateChanged (getState(), this);

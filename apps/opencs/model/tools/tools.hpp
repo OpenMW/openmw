@@ -1,6 +1,7 @@
 #ifndef CSM_TOOLS_TOOLS_H
 #define CSM_TOOLS_TOOLS_H
 
+#include <memory>
 #include <map>
 
 #include <QObject>
@@ -73,7 +74,7 @@ namespace CSMTools
 
             void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
 
-            void runMerge (const boost::filesystem::path& target);
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
@@ -92,6 +93,10 @@ namespace CSMTools
             void progress (int current, int max, int type);
 
             void done (int type, bool failed);
+
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
     };
 }
 
