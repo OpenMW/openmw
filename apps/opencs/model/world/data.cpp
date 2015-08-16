@@ -483,7 +483,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mMetaData.addColumn (new FormatColumn<MetaData>);
     mMetaData.addColumn (new AuthorColumn<MetaData>);
     mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
-    
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -828,6 +828,12 @@ const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
     return mMetaData.getRecord (0).get();
 }
 
+void CSMWorld::Data::setMetaData (const MetaData& metaData)
+{
+    Record<MetaData> record (RecordBase::State_ModifiedOnly, 0, &metaData);
+    mMetaData.setRecord (0, record);
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -880,7 +886,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
 
         mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
     }
-    
+
     return mReader->getRecordCount();
 }
 

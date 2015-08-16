@@ -2250,7 +2250,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
 : mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
-  mTools (*this),
+  mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),

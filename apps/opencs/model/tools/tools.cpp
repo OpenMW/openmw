@@ -116,9 +116,9 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
     return &mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMDoc::Document& document)
+CSMTools::Tools::Tools (CSMDoc::Document& document, ToUTF8::FromType encoding)
 : mDocument (document), mData (document.getData()), mVerifierOperation (0),
-  mSearchOperation (0), mMergeOperation (0), mNextReportNumber (0)
+  mSearchOperation (0), mMergeOperation (0), mNextReportNumber (0), mEncoding (encoding)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
@@ -201,7 +201,7 @@ void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
 
     if (!mMergeOperation)
     {
-        mMergeOperation = new MergeOperation (mDocument);
+        mMergeOperation = new MergeOperation (mDocument, mEncoding);
         mMerge.setOperation (mMergeOperation);
         connect (mMergeOperation, SIGNAL (mergeDone (CSMDoc::Document*)),
             this, SIGNAL (mergeDone (CSMDoc::Document*)));

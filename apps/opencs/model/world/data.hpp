@@ -255,6 +255,8 @@ namespace CSMWorld
 
             const MetaData& getMetaData() const;
 
+            void setMetaData (const MetaData& metaData);
+
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
             ///

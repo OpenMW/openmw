@@ -4,6 +4,8 @@
 #include <memory>
 #include <map>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include <QObject>
 
 #include <boost/filesystem/path.hpp>
@@ -44,6 +46,7 @@ namespace CSMTools
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
+            ToUTF8::FromType mEncoding;
 
             // not implemented
             Tools (const Tools&);
@@ -59,7 +62,7 @@ namespace CSMTools
 
         public:
 
-            Tools (CSMDoc::Document& document);
+            Tools (CSMDoc::Document& document, ToUTF8::FromType encoding);
 
             virtual ~Tools();
 
