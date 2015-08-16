@@ -18,6 +18,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
@@ -1175,6 +1176,9 @@ namespace MWMechanics
 
             if (iter->second->getCharacterController()->kill())
             {
+                // Plays dying grunt.
+                MWBase::Environment::get().getDialogueManager()->say(iter->first, "hit");
+
                 iter->first.getClass().getCreatureStats(iter->first).notifyDied();
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
