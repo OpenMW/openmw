@@ -212,6 +212,10 @@ namespace MWMechanics
         //       nodes are the same
         if(startNode == endNode.first)
         {
+            ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
+            converter.ToWorld(temp);
+            mPath.push_back(temp);
+
             mPath.push_back(endPoint);
             return;
         }
