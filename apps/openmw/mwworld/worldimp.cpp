@@ -2624,12 +2624,10 @@ namespace MWWorld
     {
         MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        // Get the target to use for "on touch" effects
+        // Get the target to use for "on touch" effects, using the facing direction from Head node
         MWWorld::Ptr target;
         float distance = 192.f; // ??
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-
-        // For NPCs use facing direction from Head node
         osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
 
         MWRender::Animation* anim = mRendering->getAnimation(actor);
@@ -2652,9 +2650,33 @@ namespace MWWorld
         osg::Vec3f direction = orient * osg::Vec3f(0,1,0);
         osg::Vec3f dest = origin + direction * distance;
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(origin, dest, actor);
-        target = result.mHitObject;
-        hitPosition = result.mHitPos;
+        // For actor targets, we want to use bounding boxes (physics raycast).
+        // This is to give a slight tolerance for errors, especially with creatures like the Skeleton that would be very hard to aim at otherwise.
+        // For object targets, we want the detailed shapes (rendering raycast).
+        // If we used the bounding boxes for static objects, then we would not be able to target e.g. objects lying on a shelf.
+
+        MWPhysics::PhysicsSystem::RayResult result1 = mPhysics->castRay(origin, dest, actor, MWPhysics::CollisionType_Actor);
+
+        MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
+
+        float dist1 = FLT_MAX;
+        float dist2 = FLT_MAX;
+
+        if (result1.mHit)
+            dist1 = (origin - result1.mHitPos).length();
+        if (result2.mHit)
+            dist2 = (origin - result2.mHitPointWorld).length();
+
+        if (dist1 <= dist2 && result1.mHit)
+        {
+            target = result1.mHitObject;
+            hitPosition = result1.mHitPos;
+        }
+        else if (result2.mHit)
+        {
+            target = result2.mHitObject;
+            hitPosition = result2.mHitPointWorld;
+        }
 
         std::string selectedSpell = stats.getSpells().getSelectedSpell();
 
