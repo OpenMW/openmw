@@ -25,8 +25,7 @@ namespace
     //
     int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
     {
-        if(!grid || grid->mPoints.empty())
-            return -1;
+        assert(grid && !grid->mPoints.empty());
 
         float distanceBetween = distanceSquared(grid->mPoints[0], pos);
         int closestIndex = 0;
@@ -228,21 +227,22 @@ namespace MWMechanics
         }
 
         mPath = mCell->aStarSearch(startNode, endNode.first);
+        assert(!mPath.empty());
 
-        if(!mPath.empty())
-        {
-            // Add the destination (which may be different to the closest
-            // pathgrid point).  However only add if endNode was the closest
-            // point to endPoint.
-            //
-            // This logic can fail in the opposite situate, e.g. endPoint may
-            // have been reachable but happened to be very close to an
-            // unreachable pathgrid point.
-            //
-            // The AI routines will have to deal with such situations.
-            if(endNode.second)
-                mPath.push_back(endPoint);
-        }
+        // If endNode found is NOT the closest PathGrid point to the endPoint,
+        // assume endPoint is not reachable from endNode. In which case, 
+        // path ends at endNode.
+        //
+        // So only add the destination (which may be different to the closest
+        // pathgrid point) when endNode was the closest point to endPoint.
+        //
+        // This logic can fail in the opposite situate, e.g. endPoint may
+        // have been reachable but happened to be very close to an
+        // unreachable pathgrid point.
+        //
+        // The AI routines will have to deal with such situations.
+        if(endNode.second)
+            mPath.push_back(endPoint);
 
         return;
     }
