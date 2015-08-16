@@ -460,7 +460,7 @@ namespace MWScript
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    if (MWBase::isPlayer(ptr) &&
                         id == wm->getSelectedSpell())
                     {
                         wm->unsetSelectedSpell();
@@ -1120,7 +1120,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (MWBase::isPlayer(ptr))
                         ptr.getClass().getCreatureStats(ptr).resurrect();
                     else if (ptr.getClass().getCreatureStats(ptr).isDead())
                     {

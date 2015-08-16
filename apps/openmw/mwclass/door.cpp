@@ -127,7 +127,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if(MWBase::isPlayer(actor))
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap

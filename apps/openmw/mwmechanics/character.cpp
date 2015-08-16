@@ -614,7 +614,7 @@ void CharacterController::playDeath(float startpoint, CharacterState death)
 
 void CharacterController::playRandomDeath(float startpoint)
 {
-    if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (MWBase::isPlayer(mPtr))
     {
         // The first-person animations do not include death, so we need to
         // force-switch to third person before playing the death animation.
@@ -1162,18 +1162,14 @@ bool CharacterController::updateWeaponState()
                 // Unset casting flag, otherwise pressing the mouse button down would
                 // continue casting every frame if there is no animation
                 mAttackingOrSpell = false;
-                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (MWBase::isPlayer(mPtr))
                 {
                     MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
-                }
 
-                const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
 
-                // For the player, set the spell we want to cast
-                // This has to be done at the start of the casting animation,
-                // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                {
+                    // For the player, set the spell we want to cast
+                    // This has to be done at the start of the casting animation,
+                    // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
                     std::string selectedSpell = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
@@ -1183,6 +1179,7 @@ bool CharacterController::updateWeaponState()
                 {
                     castSpell(spellid);
 
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
                     const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
                     const ESM::ENAMstruct &effectentry = spell->mEffects.mList.at(0);
 
@@ -1252,7 +1249,7 @@ bool CharacterController::updateWeaponState()
                     mAttackType = "shoot";
                 else
                 {
-                    if(isWeapon && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    if(isWeapon && MWBase::isPlayer(mPtr) &&
                             Settings::Manager::getBool("best attack", "Game"))
                     {
                         MWWorld::ContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
@@ -1558,7 +1555,7 @@ void CharacterController::update(float duration)
 
 
         // advance athletics
-        if(mHasMovedInXY && mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(mHasMovedInXY && MWBase::isPlayer(mPtr))
         {
             if(inwater)
             {
@@ -1659,7 +1656,7 @@ void CharacterController::update(float duration)
                 }
 
                 // advance acrobatics
-                if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (MWBase::isPlayer(mPtr))
                     cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
 
                 // decrease fatigue
@@ -1702,7 +1699,7 @@ void CharacterController::update(float duration)
                 else
                 {
                     // report acrobatics progression
-                    if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (MWBase::isPlayer(mPtr))
                         cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 1);
                 }
             }
@@ -1944,7 +1941,7 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        if( mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr() && !isAnimPlaying(mCurrentDeath) )
+        if (MWBase::isPlayer(mPtr) && !isAnimPlaying(mCurrentDeath))
         {
             //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
@@ -1960,7 +1957,7 @@ bool CharacterController::kill()
     mCurrentIdle.clear();
 
     // Play Death Music if it was the player dying
-    if(mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if(MWBase::isPlayer(mPtr))
         MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
 
     return true;
@@ -2001,7 +1998,7 @@ void CharacterController::updateMagicEffects()
     float alpha = 1.f;
     if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude())
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::isPlayer(mPtr))
             alpha = 0.4f;
         else
             alpha = 0.f;

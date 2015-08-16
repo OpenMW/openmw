@@ -541,6 +541,7 @@ namespace MWBase
 
             virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
     };
+    bool isPlayer(const MWWorld::Ptr& ptr);
 }
 
 #endif

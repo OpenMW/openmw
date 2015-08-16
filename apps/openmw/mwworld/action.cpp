@@ -20,7 +20,7 @@ void MWWorld::Action::execute (const Ptr& actor)
 {
     if (!mSoundId.empty())
     {
-        if (mKeepSound && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (mKeepSound && MWBase::isPlayer(actor))
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
                     MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Normal,mSoundOffset);
         else

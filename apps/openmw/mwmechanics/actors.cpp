@@ -55,7 +55,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
             action.execute(actor);
             MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
-            if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr()
+            if (MWBase::isPlayer(actor)
                     && rightHand != store.end() && newPtr == *rightHand)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
@@ -202,7 +202,7 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
-            if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (MWBase::isPlayer(caster))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
@@ -400,7 +400,7 @@ namespace MWMechanics
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::isPlayer(ptr))
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
         else
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
@@ -511,7 +511,7 @@ namespace MWMechanics
                     {
                         spells.worsenCorprus(it->first);
 
-                        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        if (MWBase::isPlayer(ptr))
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
                     }
                 }
@@ -726,7 +726,7 @@ namespace MWMechanics
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
     {
-        bool isPlayer = (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr());
+        bool isPlayer = MWBase::isPlayer(ptr);
 
         MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
@@ -1042,7 +1042,7 @@ namespace MWMechanics
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (iter->first == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (MWBase::isPlayer(iter->first))
                 {
                     playerCharacter = iter->second->getCharacterController();
                     continue;
@@ -1423,7 +1423,7 @@ namespace MWMechanics
         for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
         {
             MWWorld::Ptr ptr = it->first;
-            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()
+            if (MWBase::isPlayer(ptr)
                     || !isConscious(ptr)
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;

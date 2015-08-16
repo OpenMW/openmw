@@ -345,7 +345,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(setOnPcHitMe && !attacker.isEmpty() && MWBase::isPlayer(attacker))
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */

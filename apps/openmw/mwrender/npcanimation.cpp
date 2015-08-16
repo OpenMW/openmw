@@ -1039,7 +1039,7 @@ void NpcAnimation::setVampire(bool vampire)
         return;
     if ((mNpcType == Type_Vampire) != vampire)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::isPlayer(mPtr))
             MWBase::Environment::get().getWorld()->reattachPlayerCamera();
         else
             rebuild();

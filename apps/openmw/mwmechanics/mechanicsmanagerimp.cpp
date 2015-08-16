@@ -1010,7 +1010,7 @@ namespace MWMechanics
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
                                      int count)
     {
-        if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!MWBase::isPlayer(ptr))
             return;
 
         MWWorld::Ptr victim;
@@ -1067,7 +1067,7 @@ namespace MWMechanics
         // NOTE: victim may be empty
 
         // Only player can commit crime
-        if (player != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!MWBase::isPlayer(player))
             return false;
 
         // Find all the actors within the alarm radius
@@ -1306,7 +1306,7 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
     {
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::isPlayer(ptr))
             return false;
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
@@ -1339,7 +1339,7 @@ namespace MWMechanics
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
-                                    || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                                    || MWBase::isPlayer(attacker))
                 && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
@@ -1352,7 +1352,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (attacker.isEmpty() || !MWBase::isPlayer(attacker))
             return;
 
         if (victim == attacker)
@@ -1449,7 +1449,7 @@ namespace MWMechanics
         if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
             return;
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
-        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::isPlayer(target))
         {
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
@@ -1546,7 +1546,7 @@ namespace MWMechanics
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
             if (target.getClass().getNpcStats(target).isWerewolf() ||
-                    (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    (MWBase::isPlayer(target) &&
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
                 const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
