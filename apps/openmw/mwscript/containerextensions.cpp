@@ -147,8 +147,8 @@ namespace MWScript
                     int numRemoved = store.remove(item, count, ptr);
 
                     // Spawn a messagebox (only for items removed from player's inventory)
-                    if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
+                    if ((numRemoved > 0) 
+                        && MWBase::isPlayer(ptr))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
@@ -193,7 +193,7 @@ namespace MWScript
                     MWWorld::ActionEquip action (*it);
                     action.execute(ptr);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() && !ptr.getClass().getScript(ptr).empty())
+                    if (MWBase::isPlayer(ptr) && !ptr.getClass().getScript(ptr).empty())
                         ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
                 }
         };

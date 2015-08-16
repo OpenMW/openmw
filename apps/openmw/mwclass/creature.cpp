@@ -345,7 +345,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(setOnPcHitMe && !attacker.isEmpty() && MWBase::isPlayer(attacker))
         {
             const std::string &script = ptr.get<ESM::Creature>()->mBase->mScript;
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -604,11 +604,9 @@ namespace MWClass
     {
         float weight = getContainerStore (ptr).getWeight();
 
-        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).getMagnitude();
-
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).getMagnitude();
+        const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
+        weight -= effects.get(ESM::MagicEffect::Feather).getMagnitude();
+        weight += effects.get(ESM::MagicEffect::Burden).getMagnitude();
 
         if (weight<0)
             weight = 0;

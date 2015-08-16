@@ -221,6 +221,11 @@ namespace MWMechanics
         setAiSetting(index, stat);
     }
 
+    bool CreatureStats::isParalyzed() const
+    {
+        return mMagicEffects.get(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
+    }
+
     bool CreatureStats::isDead() const
     {
         return mDead;

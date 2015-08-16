@@ -490,7 +490,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
-               snditer->second.first != MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                !MWBase::isPlayer(snditer->second.first) &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();

@@ -504,7 +504,7 @@ namespace MWClass
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(MWBase::isPlayer(ptr))
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::HandToHand;
@@ -543,7 +543,7 @@ namespace MWClass
         {
             MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
         }
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(MWBase::isPlayer(ptr))
         {
             skillUsageSucceeded(ptr, weapskill, 0);
 
@@ -609,7 +609,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(setOnPcHitMe && !attacker.isEmpty() && MWBase::isPlayer(attacker))
         {
             const std::string &script = ptr.getClass().getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -701,7 +701,7 @@ namespace MWClass
                     if (armorhealth == 0)
                         armor = *inv.unequipItem(armor, ptr);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (MWBase::isPlayer(ptr))
                         skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
 
                     switch(armor.getClass().getEquipmentSkill(armor))
@@ -717,7 +717,7 @@ namespace MWClass
                             break;
                     }
                 }
-                else if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                else if (MWBase::isPlayer(ptr))
                     skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
             }
         }
@@ -730,7 +730,7 @@ namespace MWClass
             if(damage > 0.0f)
             {
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
-                if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (MWBase::isPlayer(ptr))
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
             }
             MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
@@ -784,7 +784,7 @@ namespace MWClass
         const MWWorld::Ptr& actor) const
     {
         // player got activated by another NPC
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(MWBase::isPlayer(ptr))
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
         // Werewolfs can't activate NPCs

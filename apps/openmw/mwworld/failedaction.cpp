@@ -13,7 +13,7 @@ namespace MWWorld
 
     void FailedAction::executeImp(const Ptr &actor)
     {
-        if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr() && !mMessage.empty())
+        if(MWBase::isPlayer(actor) && !mMessage.empty())
             MWBase::Environment::get().getWindowManager()->messageBox(mMessage);
     }
 }

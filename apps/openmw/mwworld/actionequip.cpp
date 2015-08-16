@@ -24,7 +24,7 @@ namespace MWWorld
         std::pair <int, std::string> result = object.getClass().canBeEquipped (object, actor);
 
         // display error message if the player tried to equip something
-        if (!result.second.empty() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!result.second.empty() && MWBase::isPlayer(actor))
             MWBase::Environment::get().getWindowManager()->messageBox(result.second);
 
         switch(result.first)

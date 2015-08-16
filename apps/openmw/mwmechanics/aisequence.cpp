@@ -150,7 +150,7 @@ bool AiSequence::isPackageDone() const
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
-    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if(!MWBase::isPlayer(actor))
     {
         if (!mPackages.empty())
         {
@@ -242,7 +242,7 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
-    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (MWBase::isPlayer(actor))
         throw std::runtime_error("Can't add AI packages to player");
 
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)

@@ -1421,7 +1421,7 @@ namespace MWWorld
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
-                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
+                        if (!MWBase::isPlayer(ptr)) {
                             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
@@ -1926,16 +1926,15 @@ namespace MWWorld
     bool World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0);
 
         if(!ptr.getClass().isActor())
             return false;
 
-        if (ptr.getClass().getCreatureStats(ptr).isDead())
+        if (stats.isDead())
             return false;
 
         if (ptr.getClass().canFly(ptr))
-            return !isParalyzed;
+            return !stats.isParalyzed();
 
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
                 && isLevitationEnabled())
@@ -3262,5 +3261,13 @@ namespace MWWorld
         if (physicActor && physicActor->isWalkingOnWater())
             return true;
         return false;
+    }
+}
+
+namespace MWBase
+{
+    bool isPlayer(const MWWorld::Ptr& ptr)
+    {
+        return ptr == MWBase::Environment::get().getWorld()->getPlayerPtr();
     }
 }
