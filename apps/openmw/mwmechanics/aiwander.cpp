@@ -20,6 +20,7 @@
 #include "creaturestats.hpp"
 #include "steering.hpp"
 #include "movement.hpp"
+#include "coordinateconverter.hpp"
 
 
 
@@ -587,11 +588,7 @@ namespace MWMechanics
 
     void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
     {
-        if (cell->isExterior())
-        {
-            point.mX += cell->mData.mX * ESM::Land::REAL_SIZE;
-            point.mY += cell->mData.mY * ESM::Land::REAL_SIZE;
-        }
+        CoordinateConverter(cell).ToWorld(point);
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
@@ -749,11 +746,7 @@ namespace MWMechanics
         {
             // get NPC's position in local (i.e. cell) co-ordinates
             osg::Vec3f npcPos(mInitialActorPosition);
-            if(cell->isExterior())
-            {
-                npcPos[0] = npcPos[0] - static_cast<float>(cell->mData.mX * ESM::Land::REAL_SIZE);
-                npcPos[1] = npcPos[1] - static_cast<float>(cell->mData.mY * ESM::Land::REAL_SIZE);
-            }
+            CoordinateConverter(cell).ToLocal(npcPos);
 
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // NOTE: mPoints and mAllowedNodes are in local co-ordinates

@@ -5,6 +5,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "coordinateconverter.hpp"
 
 namespace
 {
@@ -106,11 +107,6 @@ namespace MWMechanics
         return sqrt(x * x + y * y + z * z);
     }
 
-    osg::Vec3f ToLocalCoordinates(const ESM::Pathgrid::Point &point, float xCell, float yCell)
-    {
-        return osg::Vec3f(point.mX - xCell, point.mY - yCell, static_cast<float>(point.mZ));
-    }
-
     PathFinder::PathFinder()
         : mPathgrid(NULL),
           mCell(NULL)
@@ -194,23 +190,17 @@ namespace MWMechanics
         }
 
         // NOTE: getClosestPoint expects local co-ordinates
-        float xCell = 0;
-        float yCell = 0;
-        if (mCell->isExterior())
-        {
-            xCell = static_cast<float>(mCell->getCell()->mData.mX * ESM::Land::REAL_SIZE);
-            yCell = static_cast<float>(mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE);
-        }
+        CoordinateConverter converter(mCell->getCell());
 
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
-        osg::Vec3f startPointInLocalCoords(ToLocalCoordinates(startPoint, xCell, yCell));
+        osg::Vec3f startPointInLocalCoords(converter.ToLocalVec3(startPoint));
         int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
 
-        osg::Vec3f endPointInLocalCoords(ToLocalCoordinates(endPoint, xCell, yCell));
+        osg::Vec3f endPointInLocalCoords(converter.ToLocalVec3(endPoint));
         std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
             endPointInLocalCoords,
                 startNode);
@@ -228,6 +218,12 @@ namespace MWMechanics
 
         mPath = mCell->aStarSearch(startNode, endNode.first);
         assert(!mPath.empty());
+
+        // convert supplied path to world co-ordinates
+        for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
+        {
+            converter.ToWorld(*iter);
+        }
 
         // If endNode found is NOT the closest PathGrid point to the endPoint,
         // assume endPoint is not reachable from endNode. In which case, 
