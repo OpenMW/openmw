@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <components/to_utf8/to_utf8.hpp>
+
 #include "../doc/operation.hpp"
 
 #include "mergestate.hpp"
@@ -22,7 +24,7 @@ namespace CSMTools
 
         public:
 
-            MergeOperation (CSMDoc::Document& document);
+            MergeOperation (CSMDoc::Document& document, ToUTF8::FromType encoding);
 
             /// \attention Do not call this function while a merge is running.
             void setTarget (std::auto_ptr<CSMDoc::Document> document);

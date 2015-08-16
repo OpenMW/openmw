@@ -6,10 +6,10 @@
 
 #include "mergestages.hpp"
 
-CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document)
+CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::FromType encoding)
 : CSMDoc::Operation (CSMDoc::State_Merging, true), mState (document)
 {
-    appendStage (new FinishMergedDocumentStage (mState));
+    appendStage (new FinishMergedDocumentStage (mState, encoding));
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
