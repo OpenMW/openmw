@@ -1310,11 +1310,12 @@ namespace MWMechanics
             return false;
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
         {
-            ptr.getClass().getCreatureStats(ptr).friendlyHit();
+            targetStats.friendlyHit();
 
-            if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
+            if (targetStats.getFriendlyHits() < 4)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
                 return false;
@@ -1322,7 +1323,7 @@ namespace MWMechanics
         }
 
         // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        AiSequence& seq = targetStats.getAiSequence();
         bool isFightingNpc = false;
         for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
         {
@@ -1334,13 +1335,13 @@ namespace MWMechanics
             }
         }
 
-        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
                 && !isAggressive(ptr, attacker) && !isFightingNpc)
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
                                     || MWBase::isPlayer(attacker))
-                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+                && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
