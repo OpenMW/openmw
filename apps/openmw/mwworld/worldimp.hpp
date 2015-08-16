@@ -336,7 +336,9 @@ namespace MWWorld
             /// use the "Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
+            /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const Ptr& ptr);
+
             virtual void undeleteObject (const Ptr& ptr);
 
             virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);

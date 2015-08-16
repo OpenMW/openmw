@@ -1050,7 +1050,7 @@ namespace MWWorld
 
     void World::deleteObject (const Ptr& ptr)
     {
-        if (!ptr.getRefData().isDeleted())
+        if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == NULL)
         {
             ptr.getRefData().setCount(0);
 
