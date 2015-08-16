@@ -120,6 +120,11 @@ namespace MWGui
     }
 
 
+    ProxyItemModel::ProxyItemModel()
+        : mSourceModel(NULL)
+    {
+    }
+
     ProxyItemModel::~ProxyItemModel()
     {
         delete mSourceModel;
@@ -162,6 +167,20 @@ namespace MWGui
     ItemModel::ModelIndex ProxyItemModel::getIndex (ItemStack item)
     {
         return mSourceModel->getIndex(item);
+    }
+
+    void ProxyItemModel::setSourceModel(ItemModel *sourceModel)
+    {
+        if (mSourceModel == sourceModel)
+            return;
+
+        if (mSourceModel)
+        {
+            delete mSourceModel;
+            mSourceModel = NULL;
+        }
+
+        mSourceModel = sourceModel;
     }
 
 }

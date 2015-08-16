@@ -119,7 +119,12 @@ namespace MWGui
     {
         mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
-        mSortModel = new SortFilterItemModel(mTradeModel);
+
+        if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
+            mSortModel->setSourceModel(mTradeModel);
+        else
+            mSortModel = new SortFilterItemModel(mTradeModel);
+
         mItemView->setModel(mSortModel);
 
         mPreview->updatePtr(mPtr);
