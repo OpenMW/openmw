@@ -21,7 +21,8 @@
 CS::Editor::Editor ()
 : mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
-  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mLock(), mMerge (mDocumentManager),
+  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 

@@ -130,7 +130,7 @@ namespace CSMDoc
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
 
-            void runMerge (const boost::filesystem::path& target);
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
 
             void abortOperation (int type);
 
@@ -157,6 +157,10 @@ namespace CSMDoc
             void stateChanged (int state, CSMDoc::Document *document);
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
+
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
 
         private slots:
 

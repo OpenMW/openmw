@@ -195,7 +195,7 @@ void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Se
     mSearch.start();
 }
 
-void CSMTools::Tools::runMerge (const boost::filesystem::path& target)
+void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
 {
     // not setting an active report, because merge does not produce messages
 
@@ -203,6 +203,8 @@ void CSMTools::Tools::runMerge (const boost::filesystem::path& target)
     {
         mMergeOperation = new MergeOperation (mDocument);
         mMerge.setOperation (mMergeOperation);
+        connect (mMergeOperation, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
     }
 
     mMergeOperation->setTarget (target);

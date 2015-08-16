@@ -57,9 +57,23 @@ bool CSMDoc::DocumentManager::isEmpty()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+    Document *document = makeDocument (files, savePath, new_);
+    insertDocument (document);
+}
 
+CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
+    const std::vector< boost::filesystem::path >& files,
+    const boost::filesystem::path& savePath, bool new_)
+{
+    return new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+}
+
+void CSMDoc::DocumentManager::insertDocument (CSMDoc::Document *document)
+{
     mDocuments.push_back (document);
+
+    connect (document, SIGNAL (mergeDone (CSMDoc::Document*)),
+        this, SLOT (insertDocument (CSMDoc::Document*)));
 
     emit loadRequest (document);
 

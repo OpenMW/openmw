@@ -11,6 +11,7 @@ class QListWidget;
 namespace CSMDoc
 {
     class Document;
+    class DocumentManager;
 }
 
 namespace CSVDoc
@@ -30,12 +31,13 @@ namespace CSVTools
             QListWidget *mFiles;
             CSVDoc::FileWidget *mNewFile;
             CSVDoc::AdjusterWidget *mAdjuster;
+            CSMDoc::DocumentManager& mDocumentManager;
 
             void keyPressEvent (QKeyEvent *event);
 
         public:
 
-            Merge (QWidget *parent = 0);
+            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = 0);
 
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);

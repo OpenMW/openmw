@@ -2,14 +2,25 @@
 #include "mergeoperation.hpp"
 
 #include "../doc/state.hpp"
+#include "../doc/document.hpp"
+
+#include "mergestages.hpp"
 
 CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document)
-: CSMDoc::Operation (CSMDoc::State_Merging, true)
+: CSMDoc::Operation (CSMDoc::State_Merging, true), mState (document)
 {
-
+    appendStage (new FinishMergedDocumentStage (mState));
 }
 
-void CSMTools::MergeOperation::setTarget (const boost::filesystem::path& target)
+void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
 {
+    mState.mTarget = document;
+}
 
+void CSMTools::MergeOperation::operationDone()
+{
+    CSMDoc::Operation::operationDone();
+
+    if (mState.mCompleted)
+        emit mergeDone (mState.mTarget.release());
 }

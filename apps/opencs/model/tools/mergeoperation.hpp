@@ -1,9 +1,11 @@
 #ifndef CSM_TOOLS_MERGEOPERATION_H
 #define CSM_TOOLS_MERGEOPERATION_H
 
-#include <boost/filesystem/path.hpp>
+#include <memory>
 
 #include "../doc/operation.hpp"
+
+#include "mergestate.hpp"
 
 namespace CSMDoc
 {
@@ -14,14 +16,27 @@ namespace CSMTools
 {
     class MergeOperation : public CSMDoc::Operation
     {
+            Q_OBJECT
 
+            MergeState mState;
 
         public:
 
             MergeOperation (CSMDoc::Document& document);
 
             /// \attention Do not call this function while a merge is running.
-            void setTarget (const boost::filesystem::path& target);
+            void setTarget (std::auto_ptr<CSMDoc::Document> document);
+
+        protected slots:
+
+            virtual void operationDone();
+
+        signals:
+
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
+
     };
 }
 
