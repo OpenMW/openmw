@@ -390,7 +390,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
         { Columns::ColumnId_Portable, ESM::Light::Carry },
         { Columns::ColumnId_NegativeLight, ESM::Light::Negative },
         { Columns::ColumnId_Flickering, ESM::Light::Flicker },
-        { Columns::ColumnId_SlowFlickering, ESM::Light::Flicker },
+        { Columns::ColumnId_SlowFlickering, ESM::Light::FlickerSlow },
         { Columns::ColumnId_Pulsing, ESM::Light::Pulse },
         { Columns::ColumnId_SlowPulsing, ESM::Light::PulseSlow },
         { Columns::ColumnId_Fire, ESM::Light::Fire },
