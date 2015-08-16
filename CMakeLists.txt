@@ -289,7 +289,7 @@ if(MYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)
-    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw-Info.plist.in
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
