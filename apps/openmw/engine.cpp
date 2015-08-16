@@ -704,7 +704,7 @@ void OMW::Engine::activate()
         return;
 
     MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-    if (player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0
+    if (player.getClass().magicEffectMagnitude(player, ESM::MagicEffect::Paralyze) > 0
             || player.getClass().getCreatureStats(player).getKnockedDown())
         return;
 

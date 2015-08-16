@@ -90,6 +90,11 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
+    float CreatureStats::magicEffectMagnitude(const MWMechanics::EffectKey& key) const
+    {
+        return mMagicEffects.magnitude(key);
+    }
+
     int CreatureStats::getLevel() const
     {
         return mLevel;
@@ -321,7 +326,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f) +
                         (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += std::min(100.f, mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude());
+        evasion += std::min(100.f, mMagicEffects.magnitude(ESM::MagicEffect::Sanctuary));
 
         return evasion;
     }

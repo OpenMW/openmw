@@ -1008,8 +1008,7 @@ namespace MWWorld
         else
         {
             float telekinesisRangeBonus =
-                    mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).getMagicEffects()
-                    .get(ESM::MagicEffect::Telekinesis).getMagnitude();
+                    mPlayer->getPlayer().getClass().magicEffectMagnitude(mPlayer->getPlayer(), ESM::MagicEffect::Telekinesis);
             telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 
             float activationDistance = getMaxActivationDistance() + telekinesisRangeBonus;
@@ -1593,10 +1592,11 @@ namespace MWWorld
         else
             mRendering->getCamera()->setSneakOffset(0.f);
 
-        int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
+        const MWMechanics::MagicEffects &effects = player.getClass().getMagicEffects(player);
+        int blind = static_cast<int>(effects.magnitude(ESM::MagicEffect::Blind));
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
 
-        int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
+        float nightEye = effects.magnitude(ESM::MagicEffect::NightEye);
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
 
         mRendering->getCamera()->setCameraDistance();
@@ -1926,7 +1926,7 @@ namespace MWWorld
     bool World::isFlying(const MWWorld::Ptr &ptr) const
     {
         const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        bool isParalyzed = (stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0);
+        bool isParalyzed = (stats.magicEffectMagnitude(ESM::MagicEffect::Paralyze) > 0);
 
         if(!ptr.getClass().isActor())
             return false;
@@ -1937,7 +1937,7 @@ namespace MWWorld
         if (ptr.getClass().canFly(ptr))
             return !isParalyzed;
 
-        if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
+        if(stats.magicEffectMagnitude(ESM::MagicEffect::Levitate) > 0
                 && isLevitationEnabled())
             return true;
 
@@ -1953,11 +1953,7 @@ namespace MWWorld
         if(!ptr.getClass().isActor())
             return false;
 
-        const MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-        if(stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
-            return true;
-
-        return false;
+        return ptr.getClass().magicEffectMagnitude(ptr, ESM::MagicEffect::SlowFall) > 0;
     }
 
     bool World::isSubmerged(const MWWorld::Ptr &object) const
@@ -2956,11 +2952,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist=0;
         if (type == World::Detect_Creature)
-            dist = effects.get(ESM::MagicEffect::DetectAnimal).getMagnitude();
+            dist = effects.magnitude(ESM::MagicEffect::DetectAnimal);
         else if (type == World::Detect_Key)
-            dist = effects.get(ESM::MagicEffect::DetectKey).getMagnitude();
+            dist = effects.magnitude(ESM::MagicEffect::DetectKey);
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(ESM::MagicEffect::DetectEnchantment).getMagnitude();
+            dist = effects.magnitude(ESM::MagicEffect::DetectEnchantment);
 
         if (!dist)
             return;

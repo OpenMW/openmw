@@ -417,8 +417,7 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    runtime.push(ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(
-                                      MWMechanics::EffectKey(key)).getMagnitude() > 0);
+                    runtime.push(ptr.getClass().magicEffectMagnitude(ptr, key) > 0);
                 }
         };
 

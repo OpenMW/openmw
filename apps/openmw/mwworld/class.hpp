@@ -29,6 +29,8 @@ namespace MWMechanics
     class CreatureStats;
     class NpcStats;
     struct Movement;
+    struct EffectKey;
+    class MagicEffects;
 }
 
 namespace MWGui
@@ -303,6 +305,10 @@ namespace MWWorld
             virtual bool canWalk(const MWWorld::Ptr& ptr) const;
             bool isPureWaterCreature(const MWWorld::Ptr& ptr) const;
             bool isMobile(const MWWorld::Ptr& ptr) const;
+
+            const MWMechanics::MagicEffects& getMagicEffects(const MWWorld::Ptr& ptr) const;
+
+            float magicEffectMagnitude(const MWWorld::Ptr& ptr, const MWMechanics::EffectKey& key) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 

@@ -862,11 +862,11 @@ namespace MWClass
         float moveSpeed;
         if(getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
-        else if(mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 &&
+        else if(mageffects.magnitude(ESM::MagicEffect::Levitate) > 0 &&
                 world->isLevitationEnabled())
         {
             float flySpeed = 0.01f*(npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified() +
-                                    mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
+                                    mageffects.magnitude(ESM::MagicEffect::Levitate));
             flySpeed = gmst.fMinFlySpeed->getFloat() + flySpeed*(gmst.fMaxFlySpeed->getFloat() - gmst.fMinFlySpeed->getFloat());
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->getFloat() * normalizedEncumbrance;
             flySpeed = std::max(0.0f, flySpeed);
@@ -877,7 +877,7 @@ namespace MWClass
             float swimSpeed = walkSpeed;
             if(running)
                 swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
+            swimSpeed *= 1.0f + 0.01f * mageffects.magnitude(ESM::MagicEffect::SwiftSwim);
             swimSpeed *= gmst.fSwimRunBase->getFloat() + 0.01f*npcdata->mNpcStats.getSkill(ESM::Skill::Athletics).getModified()*
                                                     gmst.fSwimRunAthleticsMult->getFloat();
             moveSpeed = swimSpeed;
@@ -918,7 +918,7 @@ namespace MWClass
         float x = gmst.fJumpAcrobaticsBase->getFloat() +
                   std::pow(a / 15.0f, gmst.fJumpAcroMultiplier->getFloat());
         x += 3.0f * b * gmst.fJumpAcroMultiplier->getFloat();
-        x += mageffects.get(ESM::MagicEffect::Jump).getMagnitude() * 64;
+        x += mageffects.magnitude(ESM::MagicEffect::Jump) * 64;
         x *= encumbranceTerm;
 
         if(ptr.getClass().getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
@@ -1004,8 +1004,8 @@ namespace MWClass
         if(!stats.isWerewolf())
         {
             weight  = getContainerStore(ptr).getWeight();
-            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).getMagnitude();
-            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).getMagnitude();
+            weight -= stats.magicEffectMagnitude(ESM::MagicEffect::Feather);
+            weight += stats.magicEffectMagnitude(ESM::MagicEffect::Burden);
             if(weight < 0.0f)
                 weight = 0.0f;
         }
@@ -1064,7 +1064,7 @@ namespace MWClass
             }
         }
 
-        float shield = stats.getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
+        float shield = stats.magicEffectMagnitude(ESM::MagicEffect::Shield);
 
         return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3f
                 + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]

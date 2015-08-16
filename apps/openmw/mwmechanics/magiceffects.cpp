@@ -160,6 +160,11 @@ namespace MWMechanics
         }
     }
 
+    float MagicEffects::magnitude(const EffectKey& key) const
+    {
+        return get(key).getMagnitude();
+    }
+
     MagicEffects MagicEffects::diff (const MagicEffects& prev, const MagicEffects& now)
     {
         MagicEffects result;

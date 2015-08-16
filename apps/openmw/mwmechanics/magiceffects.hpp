@@ -112,6 +112,8 @@ namespace MWMechanics
             EffectParam get (const EffectKey& key) const;
             ///< This function can safely be used for keys that are not present.
 
+            float magnitude(const EffectKey& key) const;
+
             static MagicEffects diff (const MagicEffects& prev, const MagicEffects& now);
             ///< Return changes from \a prev to \a now.
     };

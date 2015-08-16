@@ -39,14 +39,14 @@ namespace MWMechanics
 
             float resist = 0.f;
             if (spells.hasCorprusEffect(spell))
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
+                resist = 1.f - 0.01f * (actorEffects.magnitude(ESM::MagicEffect::ResistCorprusDisease)
+                                        - actorEffects.magnitude(ESM::MagicEffect::WeaknessToCorprusDisease));
             else if (spell->mData.mType == ESM::Spell::ST_Disease)
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToCommonDisease).getMagnitude());
+                resist = 1.f - 0.01f * (actorEffects.magnitude(ESM::MagicEffect::ResistCommonDisease)
+                                        - actorEffects.magnitude(ESM::MagicEffect::WeaknessToCommonDisease));
             else if (spell->mData.mType == ESM::Spell::ST_Blight)
-                resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistBlightDisease).getMagnitude()
-                                        - actorEffects.get(ESM::MagicEffect::WeaknessToBlightDisease).getMagnitude());
+                resist = 1.f - 0.01f * (actorEffects.magnitude(ESM::MagicEffect::ResistBlightDisease)
+                                        - actorEffects.magnitude(ESM::MagicEffect::WeaknessToBlightDisease));
             else
                 continue;
 

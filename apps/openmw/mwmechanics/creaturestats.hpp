@@ -108,6 +108,8 @@ namespace MWMechanics
 
         const MagicEffects & getMagicEffects() const;
 
+        float magicEffectMagnitude(const MWMechanics::EffectKey& key) const;
+
         bool getAttackingOrSpell() const;
 
         int getLevel() const;
