@@ -1421,7 +1421,7 @@ namespace MWWorld
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
-                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
+                        if(ptr != getPlayerPtr() ) {
                             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
@@ -1738,7 +1738,7 @@ namespace MWWorld
                 else
                 {
                     cellid.mPaged = true;
-                    MWBase::Environment::get().getWorld()->positionToIndex(
+                    positionToIndex(
                                 ref.mRef.getDoorDest().pos[0],
                                 ref.mRef.getDoorDest().pos[1],
                                 cellid.mIndex.mX,
@@ -2516,7 +2516,7 @@ namespace MWWorld
                 if (reported)
                 {
                     npcStats.setBounty(npcStats.getBounty()+
-                                       MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
+                                       mStore.get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
                     windowManager->messageBox("#{sCrimeMessage}");
                 }
             }

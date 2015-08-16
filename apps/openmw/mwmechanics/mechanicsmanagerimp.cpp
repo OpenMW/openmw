@@ -1367,7 +1367,7 @@ namespace MWMechanics
         // Doesn't handle possible edge case where no one reported the assault, but in such a case,
         // for bystanders it is not possible to tell who attacked first, anyway.
         if (victimStats.getCrimeId() != -1)
-            MWBase::Environment::get().getMechanicsManager()->commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
+            commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
 
     }
 
