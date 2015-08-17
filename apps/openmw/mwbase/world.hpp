@@ -256,6 +256,7 @@ namespace MWBase
             virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
 
+            /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
             virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
