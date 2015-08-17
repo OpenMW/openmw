@@ -33,52 +33,54 @@ namespace MWWorld
     class Fallback;
 
     /// Defines a single weather setting (according to INI)
-    struct Weather
+    class Weather
     {
+    public:
+        Weather(const std::string& name,
+                const MWWorld::Fallback& fallback,
+                float stormWindSpeed,
+                float rainSpeed,
+                const std::string& ambientLoopSoundID,
+                const std::string& particleEffect);
+
         std::string mCloudTexture;
 
         // Sky (atmosphere) colors
-        osg::Vec4f   mSkySunriseColor,
-                            mSkyDayColor,
-                            mSkySunsetColor,
-                            mSkyNightColor;
+        osg::Vec4f mSkySunriseColor;
+        osg::Vec4f mSkyDayColor;
+        osg::Vec4f mSkySunsetColor;
+        osg::Vec4f mSkyNightColor;
 
         // Fog colors
-        osg::Vec4f   mFogSunriseColor,
-                            mFogDayColor,
-                            mFogSunsetColor,
-                            mFogNightColor;
+        osg::Vec4f mFogSunriseColor;
+        osg::Vec4f mFogDayColor;
+        osg::Vec4f mFogSunsetColor;
+        osg::Vec4f mFogNightColor;
 
         // Ambient lighting colors
-        osg::Vec4f   mAmbientSunriseColor,
-                            mAmbientDayColor,
-                            mAmbientSunsetColor,
-                            mAmbientNightColor;
+        osg::Vec4f mAmbientSunriseColor;
+        osg::Vec4f mAmbientDayColor;
+        osg::Vec4f mAmbientSunsetColor;
+        osg::Vec4f mAmbientNightColor;
 
         // Sun (directional) lighting colors
-        osg::Vec4f   mSunSunriseColor,
-                            mSunDayColor,
-                            mSunSunsetColor,
-                            mSunNightColor;
+        osg::Vec4f mSunSunriseColor;
+        osg::Vec4f mSunDayColor;
+        osg::Vec4f mSunSunsetColor;
+        osg::Vec4f mSunNightColor;
 
         // Fog depth/density
-        float   mLandFogDayDepth,
-                mLandFogNightDepth;
+        float mLandFogDayDepth;
+        float mLandFogNightDepth;
 
         // Color modulation for the sun itself during sunset (not completely sure)
         osg::Vec4f mSunDiscSunsetColor;
-
-        // Duration of weather transition (in days)
-        float mTransitionDelta;
 
         // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
         float mWindSpeed;
 
         // Cloud animation speed multiplier
         float mCloudSpeed;
-
-        // TODO: What is this supposed to do?
-        float mCloudsMaximumPercent;
 
         // Value between 0 and 1, defines the strength of the sun glare effect.
         // Also appears to modify how visible the sun, moons, and stars are for various weather effects.
@@ -107,6 +109,13 @@ namespace MWWorld
 
         // Note: For Weather Blight, there is a "Disease Chance" (=0.1) setting. But according to MWSFD this feature
         // is broken in the vanilla game and was disabled.
+
+        float transitionSeconds() const;
+        float cloudBlendFactor(float transitionRatio) const;
+
+    private:
+        float mTransitionDelta;
+        float mCloudsMaximumPercent;
     };
 
     class MoonModel
@@ -197,9 +206,7 @@ namespace MWWorld
         MWBase::SoundPtr mAmbientSound;
         std::string mPlayingSoundID;
 
-        MWWorld::Fallback* mFallback;
         MWWorld::ESMStore* mStore;
-        void setFallbackWeather(Weather& weather,const std::string& name);
         MWRender::RenderingManager* mRendering;
 
         std::map<std::string, Weather> mWeatherSettings;
@@ -251,6 +258,13 @@ namespace MWWorld
         std::string mThunderSoundID3;
         MoonModel mMasser;
         MoonModel mSecunda;
+
+        void addWeather(const std::string& name,
+                        const MWWorld::Fallback& fallback,
+                        const std::string& ambientLoopSoundID = "",
+                        const std::string& particleEffect = "");
+
+        Weather& findWeather(const std::string& name);
     };
 }
 

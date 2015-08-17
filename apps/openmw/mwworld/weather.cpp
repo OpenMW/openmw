@@ -37,6 +37,68 @@ namespace
     }
 }
 
+Weather::Weather(const std::string& name,
+                 const MWWorld::Fallback& fallback,
+                 float stormWindSpeed,
+                 float rainSpeed,
+                 const std::string& ambientLoopSoundID,
+                 const std::string& particleEffect)
+    : mCloudTexture(fallback.getFallbackString("Weather_" + name + "_Cloud_Texture"))
+    , mSkySunriseColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"))
+    , mSkyDayColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Day_Color"))
+    , mSkySunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Sunset_Color"))
+    , mSkyNightColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Night_Color"))
+    , mFogSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunrise_Color"))
+    , mFogDayColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Day_Color"))
+    , mFogSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunset_Color"))
+    , mFogNightColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Night_Color"))
+    , mAmbientSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunrise_Color"))
+    , mAmbientDayColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Day_Color"))
+    , mAmbientSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunset_Color"))
+    , mAmbientNightColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Night_Color"))
+    , mSunSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunrise_Color"))
+    , mSunDayColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Day_Color"))
+    , mSunSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunset_Color"))
+    , mSunNightColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Night_Color"))
+    , mLandFogDayDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"))
+    , mLandFogNightDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
+    , mSunDiscSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
+    , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
+    , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
+    , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
+    , mAmbientLoopSoundID(ambientLoopSoundID)
+    , mIsStorm(mWindSpeed > stormWindSpeed)
+    , mRainSpeed(rainSpeed)
+    , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mParticleEffect(particleEffect)
+    , mRainEffect(fallback.getFallbackBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
+    , mTransitionDelta(fallback.getFallbackFloat("Weather_" + name + "_Transition_Delta"))
+    , mCloudsMaximumPercent(fallback.getFallbackFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
+{
+/*
+Unhandled:
+Rain Diameter=600 ?
+Rain Height Min=200 ?
+Rain Height Max=700 ?
+Rain Threshold=0.6 ?
+Max Raindrops=650 ?
+*/
+}
+
+float Weather::transitionSeconds() const
+{
+   // This formula is reversed from Morrowind by observing different Transition Delta values with Clouds
+   // Maximum Percent set to 1.0, and watching for when the light from the sun was no longer visible.
+   static const float deltasPerHour = 0.00835;
+   return (deltasPerHour / mTransitionDelta) * 60.0f * 60.0f;
+}
+
+float Weather::cloudBlendFactor(float transitionRatio) const
+{
+    // Clouds Maximum Percent affects how quickly the sky transitions from one sky texture to the next.
+    return transitionRatio / mCloudsMaximumPercent;
+}
+
 MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
   : mFadeInStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Start"))
   , mFadeInFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Finish"))
@@ -206,80 +268,29 @@ inline float MoonModel::earlyMoonShadowAlpha(float angle) const
         return 0.0f;
 }
 
-void WeatherManager::setFallbackWeather(Weather& weather,const std::string& name)
-{
-    std::string upper=name;
-    upper[0]=toupper(name[0]);
-    weather.mCloudsMaximumPercent = mFallback->getFallbackFloat("Weather_"+upper+"_Clouds_Maximum_Percent");
-    weather.mTransitionDelta = mFallback->getFallbackFloat("Weather_"+upper+"_Transition_Delta");
-    weather.mSkySunriseColor=mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunrise_Color");
-    weather.mSkyDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Day_Color");
-    weather.mSkySunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Sunset_Color");
-    weather.mSkyNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sky_Night_Color");
-    weather.mFogSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunrise_Color");
-    weather.mFogDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Day_Color");
-    weather.mFogSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Sunset_Color");
-    weather.mFogNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Fog_Night_Color");
-    weather.mAmbientSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunrise_Color");
-    weather.mAmbientDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Day_Color");
-    weather.mAmbientSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Sunset_Color");
-    weather.mAmbientNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Ambient_Night_Color");
-    weather.mSunSunriseColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunrise_Color");
-    weather.mSunDayColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Day_Color");
-    weather.mSunSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Sunset_Color");
-    weather.mSunNightColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Night_Color");
-    weather.mSunDiscSunsetColor = mFallback->getFallbackColour("Weather_"+upper+"_Sun_Disc_Sunset_Color");
-    weather.mLandFogDayDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Day_Depth");
-    weather.mLandFogNightDepth = mFallback->getFallbackFloat("Weather_"+upper+"_Land_Fog_Night_Depth");
-    weather.mWindSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Wind_Speed");
-    weather.mCloudSpeed = mFallback->getFallbackFloat("Weather_"+upper+"_Cloud_Speed");
-    weather.mGlareView = mFallback->getFallbackFloat("Weather_"+upper+"_Glare_View");
-    weather.mCloudTexture = mFallback->getFallbackString("Weather_"+upper+"_Cloud_Texture");
-
-    static const float fStromWindSpeed = mStore->get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
-
-    weather.mIsStorm = weather.mWindSpeed > fStromWindSpeed;
-
-    bool usesPrecip = mFallback->getFallbackBool("Weather_"+upper+"_Using_Precip");
-    if (usesPrecip)
-        weather.mRainEffect = "meshes\\raindrop.nif";
-    weather.mRainSpeed = mRainSpeed;
-    weather.mRainFrequency = mFallback->getFallbackFloat("Weather_"+upper+"_Rain_Entrance_Speed");
-    /*
-Unhandled:
-Rain Diameter=600 ?
-Rain Height Min=200 ?
-Rain Height Max=700 ?
-Rain Threshold=0.6 ?
-Max Raindrops=650 ?
-*/
-
-    mWeatherSettings[name] = weather;
-}
-
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Fallback* fallback, MWWorld::ESMStore* store) :
-     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mFallback(fallback), mStore(store),
+     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mStore(store),
      mRendering(rendering), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
      mRemainingTransitionTime(0), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
      mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0),
      mMasser("Masser", *fallback), mSecunda("Secunda", *fallback)
 {
     //Globals
-    mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
-    mThunderSoundID1 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
-    mThunderSoundID2 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
-    mThunderSoundID3 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
-    mSunriseTime = mFallback->getFallbackFloat("Weather_Sunrise_Time");
-    mSunsetTime = mFallback->getFallbackFloat("Weather_Sunset_Time");
-    mSunriseDuration = mFallback->getFallbackFloat("Weather_Sunrise_Duration");
-    mSunsetDuration = mFallback->getFallbackFloat("Weather_Sunset_Duration");
-    mHoursBetweenWeatherChanges = mFallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
+    mThunderSoundID0 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
+    mThunderSoundID1 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
+    mThunderSoundID2 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
+    mThunderSoundID3 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
+    mSunriseTime = fallback->getFallbackFloat("Weather_Sunrise_Time");
+    mSunsetTime = fallback->getFallbackFloat("Weather_Sunset_Time");
+    mSunriseDuration = fallback->getFallbackFloat("Weather_Sunrise_Duration");
+    mSunsetDuration = fallback->getFallbackFloat("Weather_Sunset_Duration");
+    mHoursBetweenWeatherChanges = fallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
     mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-    mThunderFrequency = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
-    mThunderThreshold = mFallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
+    mThunderFrequency = fallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
+    mThunderThreshold = fallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
     mThunderSoundDelay = 0.25;
 
-    mRainSpeed = mFallback->getFallbackFloat("Weather_Precip_Gravity");
+    mRainSpeed = fallback->getFallbackFloat("Weather_Precip_Gravity");
 
     //Some useful values
     /* TODO: Use pre-sunrise_time, pre-sunset_time,
@@ -292,47 +303,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::F
     mDayStart = mSunriseTime + mSunriseDuration;
     mDayEnd = mSunsetTime;
 
-    //Weather
-    Weather clear;
-    setFallbackWeather(clear,"clear");
-
-    Weather cloudy;
-    setFallbackWeather(cloudy,"cloudy");
-
-    Weather foggy;
-    setFallbackWeather(foggy,"foggy");
-
-    Weather thunderstorm;
-    thunderstorm.mAmbientLoopSoundID = "rain heavy";
-    thunderstorm.mRainEffect = "meshes\\raindrop.nif";
-    setFallbackWeather(thunderstorm,"thunderstorm");
-
-    Weather rain;
-    rain.mAmbientLoopSoundID = "rain";
-    rain.mRainEffect = "meshes\\raindrop.nif";
-    setFallbackWeather(rain,"rain");
-
-    Weather overcast;
-    setFallbackWeather(overcast,"overcast");
-
-    Weather ashstorm;
-    ashstorm.mAmbientLoopSoundID = "ashstorm";
-    ashstorm.mParticleEffect = "meshes\\ashcloud.nif";
-    setFallbackWeather(ashstorm,"ashstorm");
-
-    Weather blight;
-    blight.mAmbientLoopSoundID = "blight";
-    blight.mParticleEffect = "meshes\\blightcloud.nif";
-    setFallbackWeather(blight,"blight");
-
-    Weather snow;
-    snow.mParticleEffect = "meshes\\snow.nif";
-    setFallbackWeather(snow, "snow");
-
-    Weather blizzard;
-    blizzard.mAmbientLoopSoundID = "BM Blizzard";
-    blizzard.mParticleEffect = "meshes\\blizzard.nif";
-    setFallbackWeather(blizzard,"blizzard");
+    addWeather("Clear", *fallback);
+    addWeather("Cloudy", *fallback);
+    addWeather("Foggy", *fallback);
+    addWeather("Overcast", *fallback);
+    addWeather("Rain", *fallback, "rain");
+    addWeather("Thunderstorm", *fallback, "rain heavy");
+    addWeather("Ashstorm", *fallback, "ashstorm", "meshes\\ashcloud.nif");
+    addWeather("Blight", *fallback, "blight", "meshes\\blightcloud.nif");
+    addWeather("Snow", *fallback, "", "meshes\\snow.nif");
+    addWeather("Blizzard", *fallback, "BM Blizzard", "meshes\\blizzard.nif");
 }
 
 WeatherManager::~WeatherManager()
@@ -358,19 +338,19 @@ void WeatherManager::setWeather(const std::string& weather, bool instant)
         if (mNextWeather != "")
         {
             // transition more than 50% finished?
-            if (mRemainingTransitionTime/(mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600) <= 0.5)
+            if (mRemainingTransitionTime / (findWeather(mCurrentWeather).transitionSeconds()) <= 0.5)
                 mCurrentWeather = mNextWeather;
         }
 
         mNextWeather = weather;
-        mRemainingTransitionTime = mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600.f;
+        mRemainingTransitionTime = findWeather(mCurrentWeather).transitionSeconds();
     }
     mFirstUpdate = false;
 }
 
 void WeatherManager::setResult(const std::string& weatherType)
 {
-    const Weather& current = mWeatherSettings[weatherType];
+    const Weather& current = findWeather(weatherType);
 
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mCloudBlendFactor = 0;
@@ -473,9 +453,11 @@ void WeatherManager::transition(float factor)
     setResult(mNextWeather);
     const MWRender::WeatherResult other = mResult;
 
+    const Weather& nextWeather = findWeather(mNextWeather);
+
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mNextCloudTexture = other.mCloudTexture;
-    mResult.mCloudBlendFactor = factor;
+    mResult.mCloudBlendFactor = nextWeather.cloudBlendFactor(factor);
 
     mResult.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
     mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
@@ -547,7 +529,7 @@ void WeatherManager::update(float duration, bool paused)
     }
 
     if (mNextWeather != "")
-        transition(1 - (mRemainingTransitionTime / (mWeatherSettings[mCurrentWeather].mTransitionDelta * 24.f * 3600)));
+        transition(1 - (mRemainingTransitionTime / (findWeather(mCurrentWeather).transitionSeconds())));
     else
         setResult(mCurrentWeather);
 
@@ -945,3 +927,23 @@ void WeatherManager::advanceTime(double hours)
 {
     mTimePassed += hours*3600;
 }
+
+inline void WeatherManager::addWeather(const std::string& name,
+                                       const MWWorld::Fallback& fallback,
+                                       const std::string& ambientLoopSoundID,
+                                       const std::string& particleEffect)
+{
+    static const float fStromWindSpeed = mStore->get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
+
+    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, ambientLoopSoundID, particleEffect);
+
+    std::string lower = name;
+    lower[0] = tolower(lower[0]);
+    mWeatherSettings.insert(std::make_pair(lower, weather));
+}
+
+inline Weather& WeatherManager::findWeather(const std::string& name)
+{
+    return mWeatherSettings.at(name);
+}
+
