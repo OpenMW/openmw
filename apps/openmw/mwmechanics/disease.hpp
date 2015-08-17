@@ -21,7 +21,7 @@ namespace MWMechanics
     /// @param carrier The disease carrier.
     inline void diseaseContact (MWWorld::Ptr actor, MWWorld::Ptr carrier)
     {
-        if (!carrier.getClass().isActor() || !MWMechanics::isPlayer(actor))
+        if (!carrier.getClass().isActor() || !isPlayer(actor))
             return;
 
         float fDiseaseXferChance =

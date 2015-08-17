@@ -203,7 +203,7 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
-            if (MWMechanics::isPlayer(caster))
+            if (isPlayer(caster))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
@@ -401,7 +401,7 @@ namespace MWMechanics
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
-        if (MWMechanics::isPlayer(ptr))
+        if (isPlayer(ptr))
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
         else
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
@@ -512,7 +512,7 @@ namespace MWMechanics
                     {
                         spells.worsenCorprus(it->first);
 
-                        if (MWMechanics::isPlayer(ptr))
+                        if (isPlayer(ptr))
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
                     }
                 }
@@ -1043,7 +1043,7 @@ namespace MWMechanics
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (MWMechanics::isPlayer(iter->first))
+                if (isPlayer(iter->first))
                 {
                     playerCharacter = iter->second->getCharacterController();
                     continue;
@@ -1424,7 +1424,7 @@ namespace MWMechanics
         for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
         {
             MWWorld::Ptr ptr = it->first;
-            if (MWMechanics::isPlayer(ptr)
+            if (isPlayer(ptr)
                     || !isConscious(ptr)
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;

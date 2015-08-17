@@ -138,7 +138,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (MWMechanics::isPlayer(blocker))
+            if (isPlayer(blocker))
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;
@@ -162,7 +162,7 @@ namespace MWMechanics
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
-        if (damage == 0 && MWMechanics::isPlayer(attacker))
+        if (damage == 0 && isPlayer(attacker))
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
@@ -179,7 +179,7 @@ namespace MWMechanics
             return;
         }
 
-        if (MWMechanics::isPlayer(attacker))
+        if (isPlayer(attacker))
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::Marksman;
@@ -208,7 +208,7 @@ namespace MWMechanics
         adjustWeaponDamage(damage, weapon, attacker);
         reduceWeaponCondition(damage, true, weapon, attacker);
 
-        if (MWMechanics::isPlayer(attacker))
+        if (isPlayer(attacker))
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())
@@ -223,7 +223,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
-        if (!MWMechanics::isPlayer(victim)
+        if (!isPlayer(victim)
                 && !appliedEnchantment)
         {
             float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
@@ -248,7 +248,7 @@ namespace MWMechanics
         {
             // Maybe we should keep an aware state for actors updated every so often instead of testing every time
             bool unaware = (!victimStats.getAiSequence().isInCombat())
-                    && MWMechanics::isPlayer(attacker)
+                    && isPlayer(attacker)
                     && (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim));
             if (!(victimStats.getKnockedDown() ||
                     victimStats.isParalyzed()
