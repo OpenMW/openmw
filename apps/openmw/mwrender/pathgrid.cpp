@@ -17,6 +17,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/pathfinding.hpp"
+#include "../mwmechanics/coordinateconverter.hpp"
 
 #include "vismask.hpp"
 
@@ -207,11 +208,7 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     if (!pathgrid) return;
 
     osg::Vec3f cellPathGridPos(0, 0, 0);
-    if (store->getCell()->isExterior())
-    {
-        cellPathGridPos.x() = static_cast<float>(store->getCell()->mData.mX * ESM::Land::REAL_SIZE);
-        cellPathGridPos.y() = static_cast<float>(store->getCell()->mData.mY * ESM::Land::REAL_SIZE);
-    }
+    MWMechanics::CoordinateConverter(store->getCell()).ToWorld(cellPathGridPos);
 
     osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
     cellPathGrid->setPosition(cellPathGridPos);

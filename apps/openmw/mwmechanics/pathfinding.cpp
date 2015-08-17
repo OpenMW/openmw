@@ -5,6 +5,7 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "coordinateconverter.hpp"
 
 namespace
 {
@@ -25,8 +26,7 @@ namespace
     //
     int getClosestPoint(const ESM::Pathgrid* grid, const osg::Vec3f& pos)
     {
-        if(!grid || grid->mPoints.empty())
-            return -1;
+        assert(grid && !grid->mPoints.empty());
 
         float distanceBetween = distanceSquared(grid->mPoints[0], pos);
         int closestIndex = 0;
@@ -105,11 +105,6 @@ namespace MWMechanics
         float y = static_cast<float>(a.mY - b.mY);
         float z = static_cast<float>(a.mZ - b.mZ);
         return sqrt(x * x + y * y + z * z);
-    }
-
-    osg::Vec3f ToLocalCoordinates(const ESM::Pathgrid::Point &point, float xCell, float yCell)
-    {
-        return osg::Vec3f(point.mX - xCell, point.mY - yCell, static_cast<float>(point.mZ));
     }
 
     PathFinder::PathFinder()
@@ -195,23 +190,17 @@ namespace MWMechanics
         }
 
         // NOTE: getClosestPoint expects local co-ordinates
-        float xCell = 0;
-        float yCell = 0;
-        if (mCell->isExterior())
-        {
-            xCell = static_cast<float>(mCell->getCell()->mData.mX * ESM::Land::REAL_SIZE);
-            yCell = static_cast<float>(mCell->getCell()->mData.mY * ESM::Land::REAL_SIZE);
-        }
+        CoordinateConverter converter(mCell->getCell());
 
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
-        osg::Vec3f startPointInLocalCoords(ToLocalCoordinates(startPoint, xCell, yCell));
+        osg::Vec3f startPointInLocalCoords(converter.ToLocalVec3(startPoint));
         int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
 
-        osg::Vec3f endPointInLocalCoords(ToLocalCoordinates(endPoint, xCell, yCell));
+        osg::Vec3f endPointInLocalCoords(converter.ToLocalVec3(endPoint));
         std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
             endPointInLocalCoords,
                 startNode);
@@ -223,26 +212,37 @@ namespace MWMechanics
         //       nodes are the same
         if(startNode == endNode.first)
         {
+            ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
+            converter.ToWorld(temp);
+            mPath.push_back(temp);
+
             mPath.push_back(endPoint);
             return;
         }
 
         mPath = mCell->aStarSearch(startNode, endNode.first);
+        assert(!mPath.empty());
 
-        if(!mPath.empty())
+        // convert supplied path to world co-ordinates
+        for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
         {
-            // Add the destination (which may be different to the closest
-            // pathgrid point).  However only add if endNode was the closest
-            // point to endPoint.
-            //
-            // This logic can fail in the opposite situate, e.g. endPoint may
-            // have been reachable but happened to be very close to an
-            // unreachable pathgrid point.
-            //
-            // The AI routines will have to deal with such situations.
-            if(endNode.second)
-                mPath.push_back(endPoint);
+            converter.ToWorld(*iter);
         }
+
+        // If endNode found is NOT the closest PathGrid point to the endPoint,
+        // assume endPoint is not reachable from endNode. In which case, 
+        // path ends at endNode.
+        //
+        // So only add the destination (which may be different to the closest
+        // pathgrid point) when endNode was the closest point to endPoint.
+        //
+        // This logic can fail in the opposite situate, e.g. endPoint may
+        // have been reachable but happened to be very close to an
+        // unreachable pathgrid point.
+        //
+        // The AI routines will have to deal with such situations.
+        if(endNode.second)
+            mPath.push_back(endPoint);
 
         return;
     }
