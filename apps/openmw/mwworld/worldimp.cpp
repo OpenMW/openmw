@@ -35,6 +35,7 @@
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -1421,7 +1422,7 @@ namespace MWWorld
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
-                        if(ptr != MWBase::Environment::get().getWorld()->getPlayerPtr() ) {
+                        if (!MWMechanics::isPlayer(ptr)) {
                             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);

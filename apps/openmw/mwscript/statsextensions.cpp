@@ -25,6 +25,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -460,7 +461,7 @@ namespace MWScript
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    if (MWMechanics::isPlayer(ptr) &&
                         id == wm->getSelectedSpell())
                     {
                         wm->unsetSelectedSpell();
@@ -1120,7 +1121,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (MWMechanics::isPlayer(ptr))
                         ptr.getClass().getCreatureStats(ptr).resurrect();
                     else if (ptr.getClass().getCreatureStats(ptr).isDead())
                     {

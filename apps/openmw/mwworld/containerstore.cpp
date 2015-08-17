@@ -12,6 +12,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
@@ -210,10 +211,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
     // a bit pointless to set owner for the player
-    if (actorPtr != MWBase::Environment::get().getWorld()->getPlayerPtr())
-        return add(ref.getPtr(), count, actorPtr, true);
-    else
-        return add(ref.getPtr(), count, actorPtr, false);
+    return add(ref.getPtr(), count, actorPtr, !MWMechanics::isPlayer(actorPtr));
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
@@ -225,7 +223,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     // HACK: Set owner on the original item, then reset it after we have copied it
     // If we set the owner on the copied item, it would not stack correctly...
     std::string oldOwner = itemPtr.getCellRef().getOwner();
-    if (!setOwner || actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()) // No point in setting owner to the player - NPCs will not respect this anyway
+    if (!setOwner || MWMechanics::isPlayer(actorPtr)) // No point in setting owner to the player - NPCs will not respect this anyway
     {
         itemPtr.getCellRef().setOwner("");
     }

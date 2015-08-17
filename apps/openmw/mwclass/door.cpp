@@ -9,6 +9,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/nullaction.hpp"
@@ -127,7 +128,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if(MWMechanics::isPlayer(actor))
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap

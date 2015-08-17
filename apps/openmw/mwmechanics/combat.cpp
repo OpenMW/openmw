@@ -13,6 +13,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
+#include "actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -137,7 +138,7 @@ namespace MWMechanics
 
             blockerStats.setBlock(true);
 
-            if (blocker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (MWMechanics::isPlayer(blocker))
                 blocker.getClass().skillUsageSucceeded(blocker, ESM::Skill::Block, 0);
 
             return true;
@@ -161,7 +162,7 @@ namespace MWMechanics
                 && actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
             damage *= MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fWereWolfSilverWeaponDamageMult")->getFloat();
 
-        if (damage == 0 && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (damage == 0 && MWMechanics::isPlayer(attacker))
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 
@@ -178,7 +179,7 @@ namespace MWMechanics
             return;
         }
 
-        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWMechanics::isPlayer(attacker))
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::Marksman;
@@ -207,7 +208,7 @@ namespace MWMechanics
         adjustWeaponDamage(damage, weapon, attacker);
         reduceWeaponCondition(damage, true, weapon, attacker);
 
-        if(attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWMechanics::isPlayer(attacker))
             attacker.getClass().skillUsageSucceeded(attacker, weapskill, 0);
 
         if (victim.getClass().getCreatureStats(victim).getKnockedDown())
@@ -222,7 +223,7 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->spawnBloodEffect(victim, hitPosition);
 
         // Non-enchanted arrows shot at enemies have a chance to turn up in their inventory
-        if (victim != MWBase::Environment::get().getWorld()->getPlayerPtr()
+        if (!MWMechanics::isPlayer(victim)
                 && !appliedEnchantment)
         {
             float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->getFloat();
@@ -247,7 +248,7 @@ namespace MWMechanics
             MWMechanics::CreatureStats& victimStats = victim.getClass().getCreatureStats(victim);
             // Maybe we should keep an aware state for actors updated every so often instead of testing every time
             bool unaware = (!victimStats.getAiSequence().isInCombat())
-                    && (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    && MWMechanics::isPlayer(attacker)
                     && (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim));
             if (!(victimStats.getKnockedDown() ||
                     victimStats.isParalyzed()
