@@ -25,6 +25,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -460,7 +461,7 @@ namespace MWScript
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    if (MWMechanics::isPlayer(ptr) &&
                         id == wm->getSelectedSpell())
                     {
                         wm->unsetSelectedSpell();
@@ -1120,7 +1121,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (MWMechanics::isPlayer(ptr))
                         ptr.getClass().getCreatureStats(ptr).resurrect();
                     else if (ptr.getClass().getCreatureStats(ptr).isDead())
                     {
@@ -1159,10 +1160,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1185,14 +1186,14 @@ namespace MWScript
             virtual void execute(Interpreter::Runtime &runtime)
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
-                stats.getMagicEffects().modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
+                effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
             }
         };
 

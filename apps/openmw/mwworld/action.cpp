@@ -4,6 +4,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "../mwbase/soundmanager.hpp"
 
 const MWWorld::Ptr& MWWorld::Action::getTarget() const
@@ -20,7 +22,7 @@ void MWWorld::Action::execute (const Ptr& actor)
 {
     if (!mSoundId.empty())
     {
-        if (mKeepSound && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (mKeepSound && MWMechanics::isPlayer(actor))
             MWBase::Environment::get().getSoundManager()->playSound(mSoundId, 1.0, 1.0,
                     MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Normal,mSoundOffset);
         else

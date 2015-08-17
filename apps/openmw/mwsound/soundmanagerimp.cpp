@@ -15,6 +15,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
@@ -490,7 +492,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
-               snditer->second.first != MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                !MWMechanics::isPlayer(snditer->second.first) &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();

@@ -11,6 +11,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {
@@ -20,7 +21,7 @@ namespace MWMechanics
     /// @param carrier The disease carrier.
     inline void diseaseContact (MWWorld::Ptr actor, MWWorld::Ptr carrier)
     {
-        if (!carrier.getClass().isActor() || actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!carrier.getClass().isActor() || !isPlayer(actor))
             return;
 
         float fDiseaseXferChance =
