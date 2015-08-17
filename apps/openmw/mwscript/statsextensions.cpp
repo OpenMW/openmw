@@ -1160,10 +1160,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1186,14 +1186,14 @@ namespace MWScript
             virtual void execute(Interpreter::Runtime &runtime)
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                float currentValue = stats.getMagicEffects().get(mPositiveEffect).getMagnitude();
+                MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                float currentValue = effects.get(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= stats.getMagicEffects().get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
-                stats.getMagicEffects().modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
+                effects.modifyBase(mPositiveEffect, (arg - static_cast<int>(currentValue)));
             }
         };
 

@@ -605,11 +605,9 @@ namespace MWClass
     {
         float weight = getContainerStore (ptr).getWeight();
 
-        const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-
-        weight -= stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Feather)).getMagnitude();
-
-        weight += stats.getMagicEffects().get (MWMechanics::EffectKey (ESM::MagicEffect::Burden)).getMagnitude();
+        const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
+        weight -= effects.get(ESM::MagicEffect::Feather).getMagnitude();
+        weight += effects.get(ESM::MagicEffect::Burden).getMagnitude();
 
         if (weight<0)
             weight = 0;
