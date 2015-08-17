@@ -190,7 +190,8 @@ namespace MWGui
 
         void renderGlobalMap(Loading::Listener* loadingListener);
 
-        // adds the marker to the global map
+        /// adds the marker to the global map
+        /// @param name The ESM::Cell::mName
         void addVisitedLocation(const std::string& name, int x, int y);
 
         // reveals this cell's map on the global map

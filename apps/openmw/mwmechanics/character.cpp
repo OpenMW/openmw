@@ -247,15 +247,16 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
         bool block = mPtr.getClass().getCreatureStats(mPtr).getBlock();
         if(mHitState == CharState_None)
         {
-            if (mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
+            if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
                     || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
+                    && mAnimation->hasAnimation("knockout"))
             {
                 mHitState = CharState_KnockOut;
                 mCurrentHit = "knockout";
                 mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
                 mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(true);
             }
-            else if(knockdown)
+            else if(knockdown && mAnimation->hasAnimation("knockdown"))
             {
                 mHitState = CharState_KnockDown;
                 mCurrentHit = "knockdown";
@@ -263,11 +264,15 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             }
             else if (recovery)
             {
-                mHitState = CharState_Hit;
-                mCurrentHit = chooseRandomGroup("hit");
-                mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+                std::string anim = chooseRandomGroup("hit");
+                if (mAnimation->hasAnimation(anim))
+                {
+                    mHitState = CharState_Hit;
+                    mCurrentHit = anim;
+                    mAnimation->play(mCurrentHit, Priority_Hit, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+                }
             }
-            else if (block)
+            else if (block && mAnimation->hasAnimation("shield"))
             {
                 mHitState = CharState_Block;
                 mCurrentHit = "shield";

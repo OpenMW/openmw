@@ -993,7 +993,7 @@ namespace MWGui
         if (cell->getCell()->isExterior())
         {
             if (!cell->getCell()->mName.empty())
-                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->getCell()->getGridX (), cell->getCell()->getGridY ());
+                mMap->addVisitedLocation (name, cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
             mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }

@@ -97,7 +97,8 @@ namespace MWMechanics
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
         /// @note \a caster can be any type of object, or even an empty object.
-        void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
+        /// @return was the target suitable for the effect?
+        bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
 
 }

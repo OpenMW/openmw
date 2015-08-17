@@ -347,8 +347,8 @@ namespace MWGui
         char buffer[size];
         if (std::strftime(buffer, size, "%x %X", timeinfo) > 0)
             text << buffer << "\n";
-        text << "Level " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
-        text << mCurrentSlot->mProfile.mPlayerCell << "\n";
+        text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
+        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
         // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);

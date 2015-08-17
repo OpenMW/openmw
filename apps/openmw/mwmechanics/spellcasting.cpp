@@ -489,8 +489,8 @@ namespace MWMechanics
                         if (!wasDead && isDead)
                             MWBase::Environment::get().getMechanicsManager()->actorKilled(target, caster);
                     }
-                    else
-                        applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude);
+                    else if (!applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude))
+                        continue;
                 }
 
                 // Re-casting a summon effect will remove the creature from previous castings of that effect.
@@ -559,10 +559,10 @@ namespace MWMechanics
             target.getClass().onHit(target, 0.f, true, MWWorld::Ptr(), caster, true);
     }
 
-    void CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
+    bool CastSpell::applyInstantEffect(const MWWorld::Ptr &target, const MWWorld::Ptr &caster, const MWMechanics::EffectKey& effect, float magnitude)
     {
         short effectId = effect.mId;
-        if (!target.getClass().isActor())
+        if (target.getClass().canLock(target))
         {
             if (effectId == ESM::MagicEffect::Lock)
             {
@@ -570,8 +570,9 @@ namespace MWMechanics
                 {
                     if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
-                    target.getCellRef().setLockLevel(static_cast<int>(magnitude));
+                    target.getClass().lock(target, static_cast<int>(magnitude));
                 }
+                return true;
             }
             else if (effectId == ESM::MagicEffect::Open)
             {
@@ -586,47 +587,59 @@ namespace MWMechanics
                         if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getCellRef().setLockLevel(-abs(target.getCellRef().getLockLevel()));
+                    target.getClass().unlock(target);
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
+                return true;
             }
         }
-        else
+        else if (target.getClass().isActor())
         {
-            if (effectId == ESM::MagicEffect::CurePoison)
+            switch (effectId)
+            {
+            case ESM::MagicEffect::CurePoison:
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
-            else if (effectId == ESM::MagicEffect::CureParalyzation)
+                return true;
+            case ESM::MagicEffect::CureParalyzation:
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
-            else if (effectId == ESM::MagicEffect::CureCommonDisease)
+                return true;
+            case ESM::MagicEffect::CureCommonDisease:
                 target.getClass().getCreatureStats(target).getSpells().purgeCommonDisease();
-            else if (effectId == ESM::MagicEffect::CureBlightDisease)
+                return true;
+            case ESM::MagicEffect::CureBlightDisease:
                 target.getClass().getCreatureStats(target).getSpells().purgeBlightDisease();
-            else if (effectId == ESM::MagicEffect::CureCorprusDisease)
+                return true;
+            case ESM::MagicEffect::CureCorprusDisease:
                 target.getClass().getCreatureStats(target).getSpells().purgeCorprusDisease();
-            else if (effectId == ESM::MagicEffect::Dispel)
+                return true;
+            case ESM::MagicEffect::Dispel:
                 target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude);
-            else if (effectId == ESM::MagicEffect::RemoveCurse)
+                return true;
+            case ESM::MagicEffect::RemoveCurse:
                 target.getClass().getCreatureStats(target).getSpells().purgeCurses();
+                return true;
+            }
 
             if (target != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                return;
-            if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
-                return;
+                return false;
 
             if (effectId == ESM::MagicEffect::DivineIntervention)
             {
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
+                return true;
             }
             else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
                 MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
+                return true;
             }
 
             else if (effectId == ESM::MagicEffect::Mark)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().markPosition(
                             target.getCell(), target.getRefData().getPosition());
+                return true;
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
@@ -640,8 +653,10 @@ namespace MWMechanics
                                             markedPosition, false);
                     action.execute(target);
                 }
+                return true;
             }
         }
+        return false;
     }
 
 
@@ -926,7 +941,8 @@ namespace MWMechanics
             MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
             MWWorld::ContainerStoreIterator item =
                     inv.getSlot(slot);
-            if (item != inv.end())
+
+            if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor || item.getType() == MWWorld::ContainerStore::Type_Weapon))
             {
                 if (!item->getClass().hasItemHealth(*item))
                     return false;

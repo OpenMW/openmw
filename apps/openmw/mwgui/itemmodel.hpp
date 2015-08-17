@@ -80,10 +80,14 @@ namespace MWGui
     class ProxyItemModel : public ItemModel
     {
     public:
+        ProxyItemModel();
         virtual ~ProxyItemModel();
         virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);
+
+        /// @note Takes ownership of the passed pointer.
+        void setSourceModel(ItemModel* sourceModel);
 
         ModelIndex mapToSource (ModelIndex index);
         ModelIndex mapFromSource (ModelIndex index);

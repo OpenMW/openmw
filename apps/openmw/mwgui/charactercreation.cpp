@@ -312,7 +312,7 @@ namespace MWGui
         };
     }
 
-    void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
+    void CharacterCreation::selectPickedClass()
     {
         if (mPickClassDialog)
         {
@@ -332,20 +332,18 @@ namespace MWGui
         }
 
         updatePlayerHealth();
+    }
+
+    void CharacterCreation::onPickClassDialogDone(WindowBase* parWindow)
+    {
+        selectPickedClass();
 
         handleDialogDone(CSE_ClassChosen, GM_Birth);
     }
 
     void CharacterCreation::onPickClassDialogBack()
     {
-        if (mPickClassDialog)
-        {
-            const std::string classId = mPickClassDialog->getClassId();
-            if (!classId.empty())
-                MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
-            MWBase::Environment::get().getWindowManager()->removeDialog(mPickClassDialog);
-            mPickClassDialog = 0;
-        }
+        selectPickedClass();
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
@@ -390,29 +388,7 @@ namespace MWGui
         handleDialogDone(CSE_NameChosen, GM_Race);
     }
 
-    void CharacterCreation::onRaceDialogBack()
-    {
-        if (mRaceDialog)
-        {
-            const ESM::NPC &data = mRaceDialog->getResult();
-            mPlayerRaceId = data.mRace;
-            if (!mPlayerRaceId.empty()) {
-                MWBase::Environment::get().getMechanicsManager()->setPlayerRace(
-                    data.mRace,
-                    data.isMale(),
-                    data.mHead,
-                    data.mHair
-                );
-            }
-            MWBase::Environment::get().getWindowManager()->removeDialog(mRaceDialog);
-            mRaceDialog = 0;
-        }
-
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Name);
-    }
-
-    void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
+    void CharacterCreation::selectRace()
     {
         if (mRaceDialog)
         {
@@ -433,11 +409,24 @@ namespace MWGui
         }
 
         updatePlayerHealth();
+    }
+
+    void CharacterCreation::onRaceDialogBack()
+    {
+        selectRace();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Name);
+    }
+
+    void CharacterCreation::onRaceDialogDone(WindowBase* parWindow)
+    {
+        selectRace();
 
         handleDialogDone(CSE_RaceChosen, GM_Class);
     }
 
-    void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
+    void CharacterCreation::selectBirthSign()
     {
         if (mBirthSignDialog)
         {
@@ -449,24 +438,24 @@ namespace MWGui
         }
 
         updatePlayerHealth();
+    }
+
+    void CharacterCreation::onBirthSignDialogDone(WindowBase* parWindow)
+    {
+        selectBirthSign();
 
         handleDialogDone(CSE_BirthSignChosen, GM_Review);
     }
 
     void CharacterCreation::onBirthSignDialogBack()
     {
-        if (mBirthSignDialog)
-        {
-            MWBase::Environment::get().getMechanicsManager()->setPlayerBirthsign(mBirthSignDialog->getBirthId());
-            MWBase::Environment::get().getWindowManager()->removeDialog(mBirthSignDialog);
-            mBirthSignDialog = 0;
-        }
+        selectBirthSign();
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
     }
 
-    void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
+    void CharacterCreation::selectCreatedClass()
     {
         if (mCreateClassDialog)
         {
@@ -495,19 +484,23 @@ namespace MWGui
             mPlayerClass = klass;
             MWBase::Environment::get().getWindowManager()->setPlayerClass(klass);
 
-            // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
+            // Do not delete dialog, so that choices are remembered in case we want to go back and adjust them later
             mCreateClassDialog->setVisible(false);
         }
-
         updatePlayerHealth();
+    }
+
+    void CharacterCreation::onCreateClassDialogDone(WindowBase* parWindow)
+    {
+        selectCreatedClass();
 
         handleDialogDone(CSE_ClassChosen, GM_Birth);
     }
 
     void CharacterCreation::onCreateClassDialogBack()
     {
-        // Do not delete dialog, so that choices are rembered in case we want to go back and adjust them later
-        mCreateClassDialog->setVisible(false);
+        // not done in MW, but we do it for consistency with the other dialogs
+        selectCreatedClass();
 
         MWBase::Environment::get().getWindowManager()->popGuiMode();
         MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
@@ -631,18 +624,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->say(sGenerateClassSteps(mGenerateClassStep).mSound);
     }
 
-    void CharacterCreation::onGenerateClassBack()
-    {
-        MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassResultDialog);
-        mGenerateClassResultDialog = 0;
-
-        MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
-
-        MWBase::Environment::get().getWindowManager()->popGuiMode();
-        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
-    }
-
-    void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
+    void CharacterCreation::selectGeneratedClass()
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mGenerateClassResultDialog);
         mGenerateClassResultDialog = 0;
@@ -656,6 +638,19 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->setPlayerClass(mPlayerClass);
 
         updatePlayerHealth();
+    }
+
+    void CharacterCreation::onGenerateClassBack()
+    {
+        selectGeneratedClass();
+
+        MWBase::Environment::get().getWindowManager()->popGuiMode();
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(GM_Class);
+    }
+
+    void CharacterCreation::onGenerateClassDone(WindowBase* parWindow)
+    {
+        selectGeneratedClass();
 
         handleDialogDone(CSE_ClassChosen, GM_Birth);
     }
