@@ -155,6 +155,8 @@ namespace MWMechanics
         float getFatigueTerm() const;
         ///< Return effective fatigue
 
+        bool isParalyzed() const;
+
         bool isDead() const;
 
         void notifyDied();
