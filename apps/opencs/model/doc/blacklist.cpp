@@ -1,4 +1,3 @@
-
 #include "blacklist.hpp"
 
 #include <algorithm>

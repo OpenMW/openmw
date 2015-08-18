@@ -1,4 +1,3 @@
-
 #include "scenetool.hpp"
 
 #include <QMouseEvent>

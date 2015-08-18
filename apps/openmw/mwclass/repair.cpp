@@ -1,4 +1,3 @@
-
 #include "repair.hpp"
 
 #include <components/esm/loadrepa.hpp>

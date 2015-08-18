@@ -1,4 +1,3 @@
-
 #include "subviewfactory.hpp"
 
 #include <cassert>

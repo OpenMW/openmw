@@ -1,4 +1,3 @@
-
 #include "filewidget.hpp"
 
 #include <QHBoxLayout>

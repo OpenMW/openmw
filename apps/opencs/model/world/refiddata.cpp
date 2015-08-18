@@ -1,4 +1,3 @@
-
 #include "refiddata.hpp"
 
 #include <cassert>

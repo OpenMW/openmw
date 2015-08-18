@@ -1,4 +1,3 @@
-
 #include "runlogsubview.hpp"
 
 #include <QTextEdit>

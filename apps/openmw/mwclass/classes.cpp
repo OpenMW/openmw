@@ -1,4 +1,3 @@
-
 #include "classes.hpp"
 
 #include "activator.hpp"

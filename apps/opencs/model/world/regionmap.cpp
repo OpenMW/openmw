@@ -1,4 +1,3 @@
-
 #include "regionmap.hpp"
 
 #include <cmath>

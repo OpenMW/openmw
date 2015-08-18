@@ -1,4 +1,3 @@
-
 #include "newgame.hpp"
 
 #include <QApplication>

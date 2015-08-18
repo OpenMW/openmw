@@ -1,4 +1,3 @@
-
 #include "commanddispatcher.hpp"
 
 #include <algorithm>

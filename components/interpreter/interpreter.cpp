@@ -1,4 +1,3 @@
-
 #include "interpreter.hpp"
 
 #include <cassert>

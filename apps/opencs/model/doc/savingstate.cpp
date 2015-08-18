@@ -1,4 +1,3 @@
-
 #include "savingstate.hpp"
 
 #include "operation.hpp"

@@ -1,4 +1,3 @@
-
 #include "reporttable.hpp"
 
 #include <algorithm>

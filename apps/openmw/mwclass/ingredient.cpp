@@ -1,4 +1,3 @@
-
 #include "ingredient.hpp"
 
 #include <components/esm/loadingr.hpp>

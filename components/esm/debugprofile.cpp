@@ -1,4 +1,3 @@
-
 #include "debugprofile.hpp"
 
 #include "esmreader.hpp"

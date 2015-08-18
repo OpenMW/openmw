@@ -1,4 +1,3 @@
-
 #include "journalentry.hpp"
 
 #include <stdexcept>

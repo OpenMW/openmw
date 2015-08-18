@@ -1,4 +1,3 @@
-
 #include "collectionbase.hpp"
 
 #include <stdexcept>

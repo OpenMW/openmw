@@ -1,4 +1,3 @@
-
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>

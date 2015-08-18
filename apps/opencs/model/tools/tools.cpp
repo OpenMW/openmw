@@ -1,4 +1,3 @@
-
 #include "tools.hpp"
 
 #include <QThreadPool>

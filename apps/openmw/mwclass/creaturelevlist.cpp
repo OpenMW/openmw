@@ -1,4 +1,3 @@
-
 #include "creaturelevlist.hpp"
 
 #include <components/esm/loadlevlist.hpp>

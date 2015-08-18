@@ -1,4 +1,3 @@
-
 #include "itemlevlist.hpp"
 
 #include <components/esm/loadlevlist.hpp>

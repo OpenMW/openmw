@@ -1,4 +1,3 @@
-
 #include "cellcreator.hpp"
 
 #include <limits>

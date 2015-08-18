@@ -1,4 +1,3 @@
-
 #include "idtableproxymodel.hpp"
 
 #include <vector>

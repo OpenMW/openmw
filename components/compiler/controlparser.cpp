@@ -1,4 +1,3 @@
-
 #include "controlparser.hpp"
 
 #include <algorithm>

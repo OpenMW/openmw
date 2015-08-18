@@ -1,4 +1,3 @@
-
 #include "selectwrapper.hpp"
 
 #include <cctype>

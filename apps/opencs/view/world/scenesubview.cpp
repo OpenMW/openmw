@@ -1,4 +1,3 @@
-
 #include "scenesubview.hpp"
 
 #include <sstream>

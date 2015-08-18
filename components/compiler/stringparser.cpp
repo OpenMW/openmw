@@ -1,4 +1,3 @@
-
 #include "stringparser.hpp"
 
 #include <algorithm>

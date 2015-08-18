@@ -1,4 +1,3 @@
-
 #include "table.hpp"
 
 #include <QHeaderView>

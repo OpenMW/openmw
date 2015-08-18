@@ -1,4 +1,3 @@
-
 #include "refdata.hpp"
 
 #include <components/esm/objectstate.hpp>

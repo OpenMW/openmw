@@ -1,4 +1,3 @@
-
 #include "factioncheck.hpp"
 
 #include <sstream>

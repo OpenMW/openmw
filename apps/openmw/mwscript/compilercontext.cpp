@@ -1,4 +1,3 @@
-
 #include "compilercontext.hpp"
 
 #include "../mwworld/esmstore.hpp"

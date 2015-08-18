@@ -1,4 +1,3 @@
-
 #include "creature.hpp"
 
 #include <components/misc/rng.hpp>

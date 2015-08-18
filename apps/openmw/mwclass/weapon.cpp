@@ -1,4 +1,3 @@
-
 #include "weapon.hpp"
 
 #include <components/esm/loadweap.hpp>

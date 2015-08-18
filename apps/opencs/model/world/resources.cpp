@@ -1,4 +1,3 @@
-
 #include "resources.hpp"
 
 #include <sstream>

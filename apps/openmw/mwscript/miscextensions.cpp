@@ -1,4 +1,3 @@
-
 #include "miscextensions.hpp"
 
 #include <cstdlib>
