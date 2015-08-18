@@ -745,9 +745,8 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
+        // Get soundgen string, and optional volume and pitch modifiers
         std::string soundgen = evt.substr(10);
-
-        // The event can optionally contain volume and pitch modifiers
         float volume=1.f, pitch=1.f;
         if (soundgen.find(" ") != std::string::npos)
         {
@@ -768,15 +767,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
         }
 
-        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
-        if(!sound.empty())
-        {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
-            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
-                type = MWBase::SoundManager::Play_TypeFoot;
-            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
-        }
+        mPtr.getClass().handleSndGen(mPtr, soundgen, volume, pitch);
         return;
     }
 
