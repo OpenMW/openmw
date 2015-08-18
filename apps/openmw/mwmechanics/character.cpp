@@ -720,14 +720,6 @@ CharacterController::~CharacterController()
         mAnimation->setTextKeyListener(NULL);
 }
 
-void split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-}
-
 void CharacterController::handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key, const std::multimap<float, std::string> &map)
 {
     const std::string &evt = key->second;
@@ -740,38 +732,7 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     }
     if(evt.compare(0, 10, "soundgen: ") == 0)
     {
-        std::string soundgen = evt.substr(10);
-
-        // The event can optionally contain volume and pitch modifiers
-        float volume=1.f, pitch=1.f;
-        if (soundgen.find(" ") != std::string::npos)
-        {
-            std::vector<std::string> tokens;
-            split(soundgen, ' ', tokens);
-            soundgen = tokens[0];
-            if (tokens.size() >= 2)
-            {
-                std::stringstream stream;
-                stream << tokens[1];
-                stream >> volume;
-            }
-            if (tokens.size() >= 3)
-            {
-                std::stringstream stream;
-                stream << tokens[2];
-                stream >> pitch;
-            }
-        }
-
-        std::string sound = mPtr.getClass().getSoundIdFromSndGen(mPtr, soundgen);
-        if(!sound.empty())
-        {
-            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
-            if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
-                type = MWBase::SoundManager::Play_TypeFoot;
-            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
-        }
+        mPtr.getClass().handleSndGen(mPtr, evt);
         return;
     }
 

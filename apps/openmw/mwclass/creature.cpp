@@ -1,10 +1,10 @@
-
 #include "creature.hpp"
 
 #include <components/misc/rng.hpp>
 
 #include <components/esm/loadcrea.hpp>
 #include <components/esm/creaturestate.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -632,11 +632,41 @@ namespace MWClass
         return ref->mBase->mPersistent;
     }
 
-    std::string Creature::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    void Creature::handleSndGen(const MWWorld::Ptr& ptr, const std::string& evtSndGen) const
     {
-        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
+        // Get soundgen string, and optional volume and pitch modifiers
+        std::string soundgen = evtSndGen.substr(10);
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            Misc::StringUtils::split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+            {
+                std::stringstream stream;
+                stream << tokens[1];
+                stream >> volume;
+            }
+            if (tokens.size() >= 3)
+            {
+                std::stringstream stream;
+                stream << tokens[2];
+                stream >> pitch;
+            }
+        }
 
-        int type = getSndGenTypeFromName(ptr, name);
+        // Get play type
+        MWBase::SoundManager::PlayType playType = MWBase::SoundManager::Play_TypeSfx;
+        if (evtSndGen.compare(10, evtSndGen.size()-10, "left")  == 0  ||
+            evtSndGen.compare(10, evtSndGen.size()-10, "right") == 0  || 
+            evtSndGen.compare(10, evtSndGen.size()-10, "land")  == 0  )
+            playType = MWBase::SoundManager::Play_TypeFoot;
+
+        // Get sound
+        std::string sound = "";
+        const MWWorld::Store<ESM::SoundGenerator> &store = MWBase::Environment::get().getWorld()->getStore().get<ESM::SoundGenerator>();
+        int type = getSndGenTypeFromName(ptr, soundgen);
         if(type >= 0)
         {
             std::vector<const ESM::SoundGenerator*> sounds;
@@ -645,21 +675,25 @@ namespace MWClass
 
             const std::string& ourId = (ref->mBase->mOriginal.empty()) ? getId(ptr) : ref->mBase->mOriginal;
 
-            MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
-            while(sound != store.end())
+            MWWorld::Store<ESM::SoundGenerator>::iterator iter = store.begin();
+            while(iter != store.end())
             {
-                if (type == sound->mType && !sound->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, sound->mCreature)))
-                    sounds.push_back(&*sound);
-                ++sound;
+                if (type == iter->mType && !iter->mCreature.empty() && (Misc::StringUtils::ciEqual(ourId, iter->mCreature)))
+                    sounds.push_back(&*iter);
+                ++iter;
             }
             if(!sounds.empty())
-                return sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
+                sound = sounds[Misc::Rng::rollDice(sounds.size())]->mSound;
         }
 
         if (type == ESM::SoundGenerator::Land)
-            return "Body Fall Large";
+            sound = "Body Fall Large";
 
-        return "";
+        if(!sound.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(ptr, sound, volume, pitch, playType);
+        }
     }
 
     MWWorld::Ptr
