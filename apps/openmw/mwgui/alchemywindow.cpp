@@ -1,7 +1,5 @@
 #include "alchemywindow.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <MyGUI_Gui.h>
 
 #include "../mwbase/environment.hpp"
@@ -67,9 +65,6 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
-        std::string name = mNameEdit->getCaption();
-        boost::algorithm::trim(name);
-
         MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
 
         if (result == MWMechanics::Alchemy::Result_NoName)
@@ -118,7 +113,7 @@ namespace MWGui
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
                 if (ingred.getRefData().getCount() == 0)
                     removeIngredient(mIngredients[i]);
-        }
+            }
 
         update();
     }
@@ -136,9 +131,6 @@ namespace MWGui
         mNameEdit->setCaption("");
 
         int index = 0;
-
-        mAlchemy->setAlchemist (MWMechanics::getPlayer());
-
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
             iter!=mAlchemy->endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {
