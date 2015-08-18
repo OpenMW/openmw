@@ -8,6 +8,7 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1108,17 +1109,51 @@ namespace MWClass
             return 0;
     }
 
-
-    std::string Npc::getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const
+    void Npc::handleSndGen(const MWWorld::Ptr& ptr, const std::string& evtSndGen) const
     {
-        if(name == "left" || name == "right")
+        // Get soundgen string, and optional volume and pitch modifiers
+        std::string soundgen = evtSndGen.substr(10);
+        float volume=1.f, pitch=1.f;
+        if (soundgen.find(" ") != std::string::npos)
+        {
+            std::vector<std::string> tokens;
+            Misc::StringUtils::split(soundgen, ' ', tokens);
+            soundgen = tokens[0];
+            if (tokens.size() >= 2)
+            {
+                std::stringstream stream;
+                stream << tokens[1];
+                stream >> volume;
+            }
+            if (tokens.size() >= 3)
+            {
+                std::stringstream stream;
+                stream << tokens[2];
+                stream >> pitch;
+            }
+        }
+
+        // Get play type
+        MWBase::SoundManager::PlayType playType = MWBase::SoundManager::Play_TypeSfx;
+        if (evtSndGen.compare(10, evtSndGen.size()-10, "left")  == 0  ||
+            evtSndGen.compare(10, evtSndGen.size()-10, "right") == 0  || 
+            evtSndGen.compare(10, evtSndGen.size()-10, "land")  == 0  )
+            playType = MWBase::SoundManager::Play_TypeFoot;
+
+        // Get sound
+        std::string sound = "";
+        if(soundgen == "left" || soundgen == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isSwimming(ptr))
-                return (name == "left") ? "Swim Left" : "Swim Right";
+            {
+                sound = (soundgen == "left") ? "Swim Left" : "Swim Right";
+            }
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return (name == "left") ? "FootWaterLeft" : "FootWaterRight";
+            {
+                sound = (soundgen == "left") ? "FootWaterLeft" : "FootWaterRight";
+            }
             if(world->isOnGround(ptr))
             {
                 if (ptr.getClass().getNpcStats(ptr).isWerewolf()
@@ -1127,53 +1162,50 @@ namespace MWClass
                     MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
                     MWMechanics::getActiveWeapon(ptr.getClass().getCreatureStats(ptr), ptr.getClass().getInventoryStore(ptr), &weaponType);
                     if (weaponType == MWMechanics::WeapType_None)
-                        return "";
+                        sound = "";
                 }
 
                 MWWorld::InventoryStore &inv = Npc::getInventoryStore(ptr);
                 MWWorld::ContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if(boots == inv.end() || boots->getTypeName() != typeid(ESM::Armor).name())
-                    return (name == "left") ? "FootBareLeft" : "FootBareRight";
+                    sound = (soundgen == "left") ? "FootBareLeft" : "FootBareRight";
 
                 switch(boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
-                        return (name == "left") ? "FootLightLeft" : "FootLightRight";
+                        sound = (soundgen == "left") ? "FootLightLeft" : "FootLightRight";
                     case ESM::Skill::MediumArmor:
-                        return (name == "left") ? "FootMedLeft" : "FootMedRight";
+                        sound = (soundgen == "left") ? "FootMedLeft" : "FootMedRight";
                     case ESM::Skill::HeavyArmor:
-                        return (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
+                        sound = (soundgen == "left") ? "FootHeavyLeft" : "FootHeavyRight";
                 }
             }
-            return "";
         }
-
-        if(name == "land")
+        if(soundgen == "land")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return "DefaultLandWater";
+                sound = "DefaultLandWater";
             if(world->isOnGround(ptr))
-                return "Body Fall Medium";
-            return "";
+                sound = "Body Fall Medium";
         }
-        if(name == "swimleft")
-            return "Swim Left";
-        if(name == "swimright")
-            return "Swim Right";
-        // TODO: I have no idea what these are supposed to do for NPCs since they use
-        // voiced dialog for various conditions like health loss and combat taunts. Maybe
-        // only for biped creatures?
+        if(soundgen == "swimleft")
+            sound = "Swim Left";
+        if(soundgen == "swimright")
+            sound = "Swim Right";
+        if(soundgen == "moan")
+            sound = "";
+        if(soundgen == "roar")
+            sound = "";
+        if(soundgen == "scream")
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
 
-        if(name == "moan")
-            return "";
-        if(name == "roar")
-            return "";
-        if(name == "scream")
-            return "";
-
-        throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
+        if(!sound.empty())
+        {
+            MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->playSound3D(ptr, sound, volume, pitch, playType);
+        }
     }
 
     MWWorld::Ptr
