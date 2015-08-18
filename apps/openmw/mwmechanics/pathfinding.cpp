@@ -221,7 +221,8 @@ namespace MWMechanics
         }
 
         mPath = mCell->aStarSearch(startNode, endNode.first);
-        assert(!mPath.empty());
+        if (mPath.empty())
+            return;
 
         // convert supplied path to world co-ordinates
         for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
