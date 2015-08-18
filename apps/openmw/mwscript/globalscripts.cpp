@@ -1,4 +1,3 @@
-
 #include "globalscripts.hpp"
 
 #include <cassert>

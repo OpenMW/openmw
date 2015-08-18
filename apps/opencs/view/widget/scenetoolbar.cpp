@@ -1,4 +1,3 @@
-
 #include "scenetoolbar.hpp"
 
 #include <QVBoxLayout>

@@ -1,4 +1,3 @@
-
 #include "unpagedworldspacewidget.hpp"
 
 #include <sstream>

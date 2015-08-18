@@ -1,4 +1,3 @@
-
 #include "creature.hpp"
 
 #include <openengine/misc/rng.hpp>

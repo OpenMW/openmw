@@ -1,4 +1,3 @@
-
 #include "container.hpp"
 
 #include <components/esm/loadcont.hpp>

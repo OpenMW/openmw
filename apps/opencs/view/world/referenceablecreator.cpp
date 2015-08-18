@@ -1,4 +1,3 @@
-
 #include "referenceablecreator.hpp"
 
 #include <QComboBox>

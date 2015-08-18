@@ -1,4 +1,3 @@
-
 #include "extensions.hpp"
 
 #include <cassert>

@@ -1,4 +1,3 @@
-
 #include "statemanagerimp.hpp"
 
 #include <components/esm/esmwriter.hpp>

@@ -1,4 +1,3 @@
-
 #include "savedgame.hpp"
 
 #include "esmreader.hpp"

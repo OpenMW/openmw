@@ -1,4 +1,3 @@
-
 #include "animationextensions.hpp"
 
 #include <stdexcept>

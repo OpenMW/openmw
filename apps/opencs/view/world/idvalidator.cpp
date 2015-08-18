@@ -1,4 +1,3 @@
-
 #include "idvalidator.hpp"
 
 #include <components/misc/stringops.hpp>

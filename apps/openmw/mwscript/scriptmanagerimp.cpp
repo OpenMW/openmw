@@ -1,4 +1,3 @@
-
 #include "scriptmanagerimp.hpp"
 
 #include <cassert>

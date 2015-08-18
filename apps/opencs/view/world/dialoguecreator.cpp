@@ -1,4 +1,3 @@
-
 #include "dialoguecreator.hpp"
 
 #include <components/esm/loaddial.hpp>

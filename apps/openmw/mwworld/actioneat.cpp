@@ -1,4 +1,3 @@
-
 #include "actioneat.hpp"
 
 #include <cstdlib>

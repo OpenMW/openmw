@@ -1,4 +1,3 @@
-
 #include "misc.hpp"
 
 #include <boost/lexical_cast.hpp>

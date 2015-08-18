@@ -1,4 +1,3 @@
-
 #include "discardparser.hpp"
 
 #include "scanner.hpp"

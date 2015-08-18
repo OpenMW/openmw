@@ -1,4 +1,3 @@
-
 #include "soundcheck.hpp"
 
 #include <sstream>

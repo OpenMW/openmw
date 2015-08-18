@@ -1,4 +1,3 @@
-
 #include "containerextensions.hpp"
 
 #include <stdexcept>

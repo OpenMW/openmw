@@ -1,4 +1,3 @@
-
 #include "subviews.hpp"
 
 #include "../doc/subviewfactoryimp.hpp"

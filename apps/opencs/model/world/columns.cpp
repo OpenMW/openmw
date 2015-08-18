@@ -1,4 +1,3 @@
-
 #include "columns.hpp"
 
 #include <components/misc/stringops.hpp>

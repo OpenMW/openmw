@@ -1,4 +1,3 @@
-
 #include "tablebottombox.hpp"
 
 #include <sstream>

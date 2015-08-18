@@ -1,4 +1,3 @@
-
 #include "scope.hpp"
 
 #include <stdexcept>

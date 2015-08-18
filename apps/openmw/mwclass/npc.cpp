@@ -1,4 +1,3 @@
-
 #include "npc.hpp"
 
 #include <memory>

@@ -1,4 +1,3 @@
-
 #include "savingstages.hpp"
 
 #include <fstream>

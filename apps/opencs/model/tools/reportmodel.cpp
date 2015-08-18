@@ -1,4 +1,3 @@
-
 #include "reportmodel.hpp"
 
 #include <stdexcept>

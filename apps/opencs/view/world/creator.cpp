@@ -1,4 +1,3 @@
-
 #include "creator.hpp"
 
 #include <stdexcept>

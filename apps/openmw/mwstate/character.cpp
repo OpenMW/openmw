@@ -1,4 +1,3 @@
-
 #include "character.hpp"
 
 #include <ctime>

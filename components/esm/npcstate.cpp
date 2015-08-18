@@ -1,4 +1,3 @@
-
 #include "npcstate.hpp"
 
 void ESM::NpcState::load (ESMReader &esm)

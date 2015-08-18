@@ -1,4 +1,3 @@
-
 #include "documentmanager.hpp"
 
 #include <algorithm>

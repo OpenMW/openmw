@@ -1,4 +1,3 @@
-
 #include "dialogueextensions.hpp"
 
 #include <components/compiler/extensions.hpp>

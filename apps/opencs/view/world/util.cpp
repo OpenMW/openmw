@@ -1,4 +1,3 @@
-
 #include "util.hpp"
 
 #include <stdexcept>

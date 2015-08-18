@@ -1,4 +1,3 @@
-
 #include "loadtes3.hpp"
 
 #include "esmcommon.hpp"

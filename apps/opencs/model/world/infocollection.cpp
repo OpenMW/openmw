@@ -1,4 +1,3 @@
-
 #include "infocollection.hpp"
 
 #include <stdexcept>
