@@ -37,7 +37,7 @@ namespace ESM
 
         std::string mPlayerCell;
         TimeStamp mInGameTime;
-        double mTimePlayed;
+        double mTimePlayed; // total time played in seconds + miliseconds
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
