@@ -1,5 +1,6 @@
 #include "savegamedialog.hpp"
 
+#include <cmath>
 #include <sstream>
 #include <iomanip>
 
@@ -312,12 +313,13 @@ namespace MWGui
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
-    std::string formatTimeplayed(const long int timeInSeconds)
+    std::string formatTimeplayed(const double timeInSeconds)
     {
-        int days = timeInSeconds / 60 / 60 / 24;
-        int hours = (timeInSeconds / 60 / 60) % 24;
-        int minutes = (timeInSeconds / 60) % 60;
-        int seconds = timeInSeconds % 60;
+        int timePlayed = (int)floor(timeInSeconds);
+        int days = timePlayed / 60 / 60 / 24;
+        int hours = (timePlayed / 60 / 60) % 24;
+        int minutes = (timePlayed / 60) % 60;
+        int seconds = timePlayed % 60;
 
         std::stringstream stream;
         stream << std::setfill('0') << std::setw(2) << days << ":";
@@ -380,7 +382,7 @@ namespace MWGui
 
         if (Settings::Manager::getBool("timeplayed","Saves"))
         {
-            text << "\n" << "Time played: " << formatTimeplayed((int)floor(mCurrentSlot->mProfile.mTimePlayed));
+            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
         }
 
         mInfoText->setCaptionWithReplacing(text.str());
