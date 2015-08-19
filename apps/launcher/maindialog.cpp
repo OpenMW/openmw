@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QDate>
 #include <QTime>
+#include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QFontDatabase>
@@ -28,6 +29,12 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
     setupUi(this);
+
+    QMenu *file = menuBar()->addMenu(tr("&File"));
+    QAction *exit = new QAction(tr("&Exit"), this);
+    connect(exit, SIGNAL (triggered()), this, SLOT(close()));
+
+    file->addAction(exit);
 
     mGameInvoker = new ProcessInvoker();
     mWizardInvoker = new ProcessInvoker();
