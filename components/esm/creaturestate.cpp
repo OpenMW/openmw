@@ -1,4 +1,3 @@
-
 #include "creaturestate.hpp"
 
 void ESM::CreatureState::load (ESMReader &esm)

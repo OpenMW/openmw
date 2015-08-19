@@ -1,4 +1,3 @@
-
 #include "inventorystore.hpp"
 
 #include <iterator>

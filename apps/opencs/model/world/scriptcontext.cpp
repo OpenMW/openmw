@@ -1,4 +1,3 @@
-
 #include "scriptcontext.hpp"
 
 #include <algorithm>

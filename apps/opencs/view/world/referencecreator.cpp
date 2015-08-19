@@ -1,4 +1,3 @@
-
 #include "referencecreator.hpp"
 
 #include <QLabel>

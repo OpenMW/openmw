@@ -1,4 +1,3 @@
-
 #include "scripthighlighter.hpp"
 
 #include <sstream>

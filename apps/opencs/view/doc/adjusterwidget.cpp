@@ -1,4 +1,3 @@
-
 #include "adjusterwidget.hpp"
 
 #include <stdexcept>

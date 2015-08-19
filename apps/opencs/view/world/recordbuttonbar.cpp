@@ -1,4 +1,3 @@
-
 #include "recordbuttonbar.hpp"
 
 #include <QHBoxLayout>

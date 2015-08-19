@@ -1,4 +1,3 @@
-
 #include "worldspacewidget.hpp"
 
 #include <algorithm>

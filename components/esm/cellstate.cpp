@@ -1,4 +1,3 @@
-
 #include "cellstate.hpp"
 
 #include "esmreader.hpp"

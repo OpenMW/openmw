@@ -1,4 +1,3 @@
-
 #include "player.hpp"
 
 #include "esmreader.hpp"

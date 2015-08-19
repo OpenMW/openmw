@@ -1,4 +1,3 @@
-
 #include "loader.hpp"
 
 #include <QVBoxLayout>

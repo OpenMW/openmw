@@ -1,4 +1,3 @@
-
 #include "interpretercontext.hpp"
 
 #include <cmath>

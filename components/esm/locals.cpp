@@ -1,4 +1,3 @@
-
 #include "locals.hpp"
 
 #include "esmreader.hpp"

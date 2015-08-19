@@ -1,4 +1,3 @@
-
 #include "record.hpp"
 
 CSMWorld::RecordBase::~RecordBase() {}

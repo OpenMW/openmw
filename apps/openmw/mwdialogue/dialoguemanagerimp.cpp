@@ -1,4 +1,3 @@
-
 #include "dialoguemanagerimp.hpp"
 
 #include <cctype>

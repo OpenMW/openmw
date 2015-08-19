@@ -1,4 +1,3 @@
-
 #include "previewwidget.hpp"
 
 #include <osgGA/TrackballManipulator>

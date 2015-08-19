@@ -1,4 +1,3 @@
-
 #include "scriptcheck.hpp"
 
 #include <components/compiler/tokenloc.hpp>

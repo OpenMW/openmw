@@ -1,4 +1,3 @@
-
 #include "ptr.hpp"
 
 #include <cassert>

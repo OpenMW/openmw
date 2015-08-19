@@ -1,4 +1,3 @@
-
 #include "infocreator.hpp"
 
 #include <algorithm>

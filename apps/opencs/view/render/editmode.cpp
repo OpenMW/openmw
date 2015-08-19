@@ -1,4 +1,3 @@
-
 #include "editmode.hpp"
 
 #include "worldspacewidget.hpp"

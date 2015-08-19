@@ -1,4 +1,3 @@
-
 #include "universalid.hpp"
 
 #include <ostream>

@@ -1,4 +1,3 @@
-
 #include "filter.hpp"
 
 #include "esmreader.hpp"

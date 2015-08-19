@@ -1,4 +1,3 @@
-
 #include "viewmanager.hpp"
 
 #include <vector>

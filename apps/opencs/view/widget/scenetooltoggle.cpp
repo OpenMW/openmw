@@ -1,4 +1,3 @@
-
 #include "scenetooltoggle.hpp"
 
 #include <stdexcept>

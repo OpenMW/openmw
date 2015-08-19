@@ -126,12 +126,16 @@ namespace
 
         glViewport(0, 0, width, height);
 
+        osg::ref_ptr<osg::Geometry> geom;
+
 #if defined(__APPLE__)
-        // FIXME: why are the extra flips needed on Mac? glReadPixels bug?
-        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,1,0), osg::Vec3(2,0,0), osg::Vec3(0,-2,0));
-#else
-        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+        // Extra flip needed on Intel graphics OS X systems due to a driver bug
+        std::string vendorString = (const char*)glGetString(GL_VENDOR);
+        if (vendorString.find("Intel") != std::string::npos)
+            geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,1,0), osg::Vec3(2,0,0), osg::Vec3(0,-2,0));
+        else
 #endif
+        geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
 
         geom->drawImplementation(renderInfo);
 

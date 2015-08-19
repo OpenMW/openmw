@@ -1,4 +1,3 @@
-
 #include "search.hpp"
 
 #include <stdexcept>

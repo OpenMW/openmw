@@ -1,4 +1,3 @@
-
 #include "actioneat.hpp"
 
 #include <components/esm/loadskil.hpp>

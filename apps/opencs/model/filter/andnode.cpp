@@ -1,4 +1,3 @@
-
 #include "andnode.hpp"
 
 #include <sstream>

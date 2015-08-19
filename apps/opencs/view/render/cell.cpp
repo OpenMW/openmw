@@ -1,4 +1,3 @@
-
 #include "cell.hpp"
 
 #include <osg/Group>

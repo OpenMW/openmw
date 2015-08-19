@@ -1,4 +1,3 @@
-
 #include "reportsubview.hpp"
 
 #include "reporttable.hpp"
