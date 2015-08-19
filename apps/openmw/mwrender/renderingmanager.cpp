@@ -379,8 +379,17 @@ namespace MWRender
         else
         {
             setFogColor(mFogColor);
-            mStateUpdater->setFogStart(mViewDistance * (1 - mFogDepth));
-            mStateUpdater->setFogEnd(mViewDistance);
+
+            if (mFogDepth == 0.f)
+            {
+                mStateUpdater->setFogStart(0.f);
+                mStateUpdater->setFogEnd(FLT_MAX);
+            }
+            else
+            {
+                mStateUpdater->setFogStart(mViewDistance * (1 - mFogDepth));
+                mStateUpdater->setFogEnd(mViewDistance);
+            }
         }
     }
 
