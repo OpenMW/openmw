@@ -18,6 +18,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
@@ -1175,6 +1176,12 @@ namespace MWMechanics
 
             if (iter->second->getCharacterController()->kill())
             {
+                // TODO: It's not known whether the soundgen tags scream, roar, and moan are reliable 
+                // for NPCs since some of the npc death animation files are missing them.
+
+                // Play dying words
+                MWBase::Environment::get().getDialogueManager()->say(iter->first, "hit");
+
                 iter->first.getClass().getCreatureStats(iter->first).notifyDied();
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
