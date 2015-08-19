@@ -135,7 +135,7 @@ namespace MWClass
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
-            virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
+            virtual void handleSndGen(const MWWorld::Ptr& ptr, const std::string& soundgen, float volume=1.f, float pitch=1.f) const;
 
             static void registerSelf();
 

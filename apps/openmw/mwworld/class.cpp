@@ -263,9 +263,9 @@ namespace MWWorld
         throw std::runtime_error ("class does not have an down sound");
     }
 
-    std::string Class::getSoundIdFromSndGen(const Ptr &ptr, const std::string &type) const
+    void Class::handleSndGen(const MWWorld::Ptr& ptr, const std::string& soundgen, float volume, float pitch) const
     {
-        throw std::runtime_error("class does not support soundgen look up");
+        throw std::runtime_error("class does not handle sound generators");
     }
 
     std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
