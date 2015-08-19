@@ -312,12 +312,12 @@ namespace MWGui
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
-    std::string formatTimeplayed(const long int timePlayed)
+    std::string formatTimeplayed(const long int timeInSeconds)
     {
-        int days = timePlayed / 60 / 60 / 24;
-        int hours = (timePlayed / 60 / 60) % 24;
-        int minutes = (timePlayed / 60) % 60;
-        int seconds = timePlayed % 60;
+        int days = timeInSeconds / 60 / 60 / 24;
+        int hours = (timeInSeconds / 60 / 60) % 24;
+        int minutes = (timeInSeconds / 60) % 60;
+        int seconds = timeInSeconds % 60;
 
         std::stringstream stream;
         stream << std::setfill('0') << std::setw(2) << days << ":";
