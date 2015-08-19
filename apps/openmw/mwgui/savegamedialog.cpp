@@ -1,6 +1,5 @@
 #include "savegamedialog.hpp"
 
-#include <cmath>
 #include <sstream>
 #include <iomanip>
 
