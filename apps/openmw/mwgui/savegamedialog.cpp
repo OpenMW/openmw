@@ -376,9 +376,12 @@ namespace MWGui
         text
             << mCurrentSlot->mProfile.mInGameTime.mDay << " "
             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
-            <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}")<< "\n";
+            <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
 
-        text << "Time played: " << formatTimeplayed((int)floor(mCurrentSlot->mProfile.mTimePlayed));
+        if (Settings::Manager::getBool("timeplayed","Saves"))
+        {
+            text << "\n" << "Time played: " << formatTimeplayed((int)floor(mCurrentSlot->mProfile.mTimePlayed));
+        }
 
         mInfoText->setCaptionWithReplacing(text.str());
 
