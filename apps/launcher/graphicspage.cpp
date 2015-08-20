@@ -65,6 +65,8 @@ bool Launcher::GraphicsPage::setupSDL()
         SDL_Quit(); // Safe to call even if SDL fails to initialize
         return false;
     }
+    signal(SIGINT, SIG_DFL);// We don't want to use the SDL event loop in the launcher,
+                            // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
 
     int displays = SDL_GetNumVideoDisplays();
 
@@ -173,6 +175,8 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         SDL_Quit(); // Safe to call even if SDL fails to initialize
         return result;
     }
+    signal(SIGINT, SIG_DFL);// We don't want to use the SDL event loop in the launcher,
+                            // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
 
     SDL_DisplayMode mode;
     int modeIndex, modes = SDL_GetNumDisplayModes(screen);
