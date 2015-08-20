@@ -147,9 +147,9 @@ namespace MWMechanics
 
     void resistNormalWeapon(const MWWorld::Ptr &actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr &weapon, float &damage)
     {
-        MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
-        float resistance = std::min(100.f, stats.getMagicEffects().get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
-                - stats.getMagicEffects().get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
+        const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
+        float resistance = std::min(100.f, effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude()
+                - effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude());
 
         float multiplier = 1.f - resistance / 100.f;
 
@@ -242,9 +242,9 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst = world->getStore().get<ESM::GameSetting>();
 
         float defenseTerm = 0;
-        if (victim.getClass().getCreatureStats(victim).getFatigue().getCurrent() >= 0)
+        MWMechanics::CreatureStats& victimStats = victim.getClass().getCreatureStats(victim);
+        if (victimStats.getFatigue().getCurrent() >= 0)
         {
-            MWMechanics::CreatureStats& victimStats = victim.getClass().getCreatureStats(victim);
             // Maybe we should keep an aware state for actors updated every so often instead of testing every time
             bool unaware = (!victimStats.getAiSequence().isInCombat())
                     && (attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
