@@ -53,13 +53,13 @@ namespace
     {
         assert(grid && !grid->mPoints.empty());
 
-        float closestDistanceBetween = distanceSquared(grid->mPoints[0], pos);
-        float closestDistanceReachable = closestDistanceBetween;
+        float closestDistanceBetween = FLT_MAX;
+        float closestDistanceReachable = FLT_MAX;
         int closestIndex = 0;
         int closestReachableIndex = 0;
         // TODO: if this full scan causes performance problems mapping pathgrid
         //       points to a quadtree may help
-        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+        for(unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
         {
             float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
