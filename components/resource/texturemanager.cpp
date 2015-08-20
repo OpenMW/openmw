@@ -182,7 +182,7 @@ namespace Resource
             osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
             if (!result.success())
             {
-                std::cerr << "Error loading " << filename << ": " << result.message() << std::endl;
+                std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
                 return mWarningTexture;
             }
 

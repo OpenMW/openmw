@@ -645,7 +645,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
     if (!result.success())
     {
-        std::cerr << "Failed to read fog: " << result.message() << std::endl;
+        std::cerr << "Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
 
@@ -677,7 +677,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
     if (!result.success())
     {
-        std::cerr << "Unable to write fog: " << result.message() << std::endl;
+        std::cerr << "Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
     mFogOfWarImage->flipVertical();

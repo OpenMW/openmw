@@ -401,7 +401,7 @@ namespace MWGui
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(instream);
         if (!result.success())
         {
-            std::cerr << "Failed to read savegame screenshot: " << result.message() << std::endl;
+            std::cerr << "Failed to read savegame screenshot: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

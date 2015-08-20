@@ -361,7 +361,7 @@ namespace MWRender
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
         if (!result.success())
         {
-            std::cerr << "Can't write map overlay: " << result.message() << std::endl;
+            std::cerr << "Can't write map overlay: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 
@@ -411,7 +411,7 @@ namespace MWRender
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(istream);
         if (!result.success())
         {
-            std::cerr << "Can't read map overlay: " << result.message() << std::endl;
+            std::cerr << "Can't read map overlay: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

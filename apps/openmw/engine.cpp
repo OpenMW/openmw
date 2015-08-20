@@ -425,7 +425,7 @@ void OMW::Engine::setWindowIcon()
     }
     osgDB::ReaderWriter::ReadResult result = reader->readImage(windowIconStream);
     if (!result.success())
-        std::cerr << "Failed to read " << windowIcon << ": " << result.message() << std::endl;
+        std::cerr << "Failed to read " << windowIcon << ": " << result.message() << " code " << result.status() << std::endl;
     else
     {
         osg::ref_ptr<osg::Image> image = result.getImage();
@@ -602,7 +602,7 @@ public:
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(image, outStream);
         if (!result.success())
         {
-            std::cerr << "Can't write screenshot: " << result.message() << std::endl;
+            std::cerr << "Can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
         }
     }
 

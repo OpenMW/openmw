@@ -606,7 +606,7 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
     if (!result.success())
     {
-        std::cerr << "Unable to write screenshot: " << result.message() << std::endl;
+        std::cerr << "Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
 
