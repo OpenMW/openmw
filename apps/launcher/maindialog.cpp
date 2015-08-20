@@ -1,7 +1,5 @@
 #include "maindialog.hpp"
 
-#include <csignal>
-
 #include <components/version/version.hpp>
 
 #include <QLabel>

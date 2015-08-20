@@ -1,5 +1,7 @@
 #include "graphicspage.hpp"
 
+#include <csignal>
+
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
