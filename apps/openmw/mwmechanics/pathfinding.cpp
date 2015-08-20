@@ -53,7 +53,8 @@ namespace
     {
         assert(grid && !grid->mPoints.empty());
 
-        float distanceBetween = distanceSquared(grid->mPoints[0], pos);
+        float closestDistanceBetween = distanceSquared(grid->mPoints[0], pos);
+        float closestDistanceReachable = closestDistanceBetween;
         int closestIndex = 0;
         int closestReachableIndex = 0;
         // TODO: if this full scan causes performance problems mapping pathgrid
@@ -61,17 +62,25 @@ namespace
         for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
         {
             float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
-            if(potentialDistBetween < distanceBetween)
+            if (potentialDistBetween < closestDistanceReachable)
             {
                 // found a closer one
-                distanceBetween = potentialDistBetween;
-                closestIndex = counter;
                 if (cell->isPointConnected(start, counter))
                 {
+                    closestDistanceReachable = potentialDistBetween;
                     closestReachableIndex = counter;
+                }
+                if (potentialDistBetween < closestDistanceBetween)
+                {
+                    closestDistanceBetween = potentialDistBetween;
+                    closestIndex = counter;
                 }
             }
         }
+
+        // invariant: start and endpoint must be connected
+        assert(cell->isPointConnected(start, closestReachableIndex));
+
         // AiWander has logic that depends on whether a path was created, deleting
         // allowed nodes if not.  Hence a path needs to be created even if the start
         // and the end points are the same.

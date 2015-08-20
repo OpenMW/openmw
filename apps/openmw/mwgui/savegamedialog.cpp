@@ -1,5 +1,8 @@
 #include "savegamedialog.hpp"
 
+#include <sstream>
+#include <iomanip>
+
 #include <MyGUI_ComboBox.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
@@ -309,6 +312,22 @@ namespace MWGui
             onSlotSelected(mSaveList, MyGUI::ITEM_NONE);
     }
 
+    std::string formatTimeplayed(const double timeInSeconds)
+    {
+        int timePlayed = (int)floor(timeInSeconds);
+        int days = timePlayed / 60 / 60 / 24;
+        int hours = (timePlayed / 60 / 60) % 24;
+        int minutes = (timePlayed / 60) % 60;
+        int seconds = timePlayed % 60;
+
+        std::stringstream stream;
+        stream << std::setfill('0') << std::setw(2) << days << ":";
+        stream << std::setfill('0') << std::setw(2) << hours << ":";
+        stream << std::setfill('0') << std::setw(2) << minutes << ":";
+        stream << std::setfill('0') << std::setw(2) << seconds;
+        return stream.str();
+    }
+
     void SaveGameDialog::onSlotSelected(MyGUI::ListBox *sender, size_t pos)
     {
         mOkButton->setEnabled(pos != MyGUI::ITEM_NONE || mSaving);
@@ -349,7 +368,6 @@ namespace MWGui
             text << buffer << "\n";
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
-        // text << "Time played: " << slot->mProfile.mTimePlayed << "\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
@@ -360,6 +378,11 @@ namespace MWGui
             << mCurrentSlot->mProfile.mInGameTime.mDay << " "
             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth)
             <<  " " << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+
+        if (Settings::Manager::getBool("timeplayed","Saves"))
+        {
+            text << "\n" << "Time played: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);
+        }
 
         mInfoText->setCaptionWithReplacing(text.str());
 
