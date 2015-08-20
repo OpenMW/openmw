@@ -1037,8 +1037,7 @@ namespace MWMechanics
                         > sqrProcessingDistance)
                     continue;
 
-                if (iter->first.getClass().getCreatureStats(iter->first).getMagicEffects().get(
-                            ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
                     iter->second->getCharacterController()->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
@@ -1426,7 +1425,7 @@ namespace MWMechanics
             MWWorld::Ptr ptr = it->first;
             if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()
                     || !isConscious(ptr)
-                    || ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Paralyze).getMagnitude() > 0)
+                    || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;
             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             seq.fastForward(ptr, it->second->getAiState());
