@@ -3,6 +3,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
+#include <QDebug>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -11,6 +12,7 @@
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
 #include <SDL_video.h>
+#include <SDL.h>
 
 #include <boost/math/common_factor.hpp>
 
@@ -53,6 +55,17 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsS
 
 bool Launcher::GraphicsPage::setupSDL()
 {
+    // Initialize SDL
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    SDL_SetMainReady();
+    SDL_Init(0);
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
+        SDL_Quit(); // Safe to call even if SDL fails to initialize
+        return false;
+    }
+
     int displays = SDL_GetNumVideoDisplays();
 
     if (displays < 0)
@@ -72,6 +85,8 @@ bool Launcher::GraphicsPage::setupSDL()
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
 
+    // Close SDL
+    SDL_Quit();
     return true;
 }
 
@@ -147,9 +162,20 @@ void Launcher::GraphicsPage::saveSettings()
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
 {
     QStringList result;
+
+    // Initiate SDL
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
+    SDL_SetMainReady();
+    SDL_Init(0);
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
+        SDL_Quit(); // Safe to call even if SDL fails to initialize
+        return result;
+    }
+
     SDL_DisplayMode mode;
     int modeIndex, modes = SDL_GetNumDisplayModes(screen);
-
     if (modes < 0)
     {
         QMessageBox msgBox;
@@ -158,36 +184,41 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
-        return result;
     }
-
-    for (modeIndex = 0; modeIndex < modes; modeIndex++)
+    else
     {
-        if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
+        for (modeIndex = 0; modeIndex < modes; modeIndex++)
         {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error receiving resolutions"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
-            msgBox.exec();
-            return result;
+            if (SDL_GetDisplayMode(screen, modeIndex, &mode) < 0)
+            {
+                QMessageBox msgBox;
+                msgBox.setWindowTitle(tr("Error receiving resolutions"));
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setText(tr("<br><b>SDL_GetDisplayMode failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
+                msgBox.exec();
+                break;
+            }
+
+            QString aspect = getAspect(mode.w, mode.h);
+            QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
+
+            if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
+                resolution.append(tr("\t(Wide ") + aspect + ")");
+
+            } else if (aspect == QLatin1String("4:3")) {
+                resolution.append(tr("\t(Standard 4:3)"));
+            }
+
+            result.append(resolution);
         }
-
-        QString aspect = getAspect(mode.w, mode.h);
-        QString resolution = QString::number(mode.w) + QString(" x ") + QString::number(mode.h);
-
-        if (aspect == QLatin1String("16:9") || aspect == QLatin1String("16:10")) {
-            resolution.append(tr("\t(Wide ") + aspect + ")");
-
-        } else if (aspect == QLatin1String("4:3")) {
-            resolution.append(tr("\t(Standard 4:3)"));
-        }
-
-        result.append(resolution);
     }
 
-    result.removeDuplicates();
+    // Close SDL
+    SDL_Quit();
+
+    if (!result.isEmpty())
+        result.removeDuplicates();
     return result;
 }
 
