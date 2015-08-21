@@ -1,6 +1,7 @@
 #include "spellcasting.hpp"
 
 #include <cfloat>
+#include <limits>
 
 #include <boost/format.hpp>
 

@@ -1,4 +1,5 @@
 #include "pathfinding.hpp"
+#include <limits>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"

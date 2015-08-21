@@ -1,6 +1,7 @@
 #include "autocalcspell.hpp"
 
 #include <climits>
+#include <limits>
 
 #include "../mwworld/esmstore.hpp"
 
