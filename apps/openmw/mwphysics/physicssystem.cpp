@@ -30,6 +30,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -1091,7 +1092,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        ActorMap::iterator found = mActors.find(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        ActorMap::iterator found = mActors.find(MWMechanics::getPlayer());
         if (found != mActors.end())
         {
             bool cmode = found->second->getCollisionMode();

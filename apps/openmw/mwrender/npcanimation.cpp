@@ -21,6 +21,7 @@
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1039,7 +1040,7 @@ void NpcAnimation::setVampire(bool vampire)
         return;
     if ((mNpcType == Type_Vampire) != vampire)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (mPtr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWorld()->reattachPlayerCamera();
         else
             rebuild();

@@ -33,6 +33,7 @@
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "combat.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
@@ -55,7 +56,7 @@ void adjustBoundItem (const std::string& item, bool bound, const MWWorld::Ptr& a
             action.execute(actor);
             MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
-            if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr()
+            if (actor == MWMechanics::getPlayer()
                     && rightHand != store.end() && newPtr == *rightHand)
             {
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState_Weapon);
@@ -81,7 +82,7 @@ public:
                              const std::string& sourceName, const std::string& sourceId, int casterActorId,
                         float magnitude, float remainingTime = -1, float totalTime = -1)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         if (    ((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
                 || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
             && casterActorId == player.getClass().getCreatureStats(player).getActorId()
@@ -202,7 +203,7 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
-            if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
             const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
@@ -400,7 +401,7 @@ namespace MWMechanics
         int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr == getPlayer())
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fPCbaseMagickaMult")->getFloat();
         else
             base = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->getFloat();
@@ -511,7 +512,7 @@ namespace MWMechanics
                     {
                         spells.worsenCorprus(it->first);
 
-                        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        if (ptr == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
                     }
                 }
@@ -559,7 +560,7 @@ namespace MWMechanics
             // The actor was killed by a magic effect. Figure out if the player was responsible for it.
             const ActiveSpells& spells = creatureStats.getActiveSpells();
             bool killedByPlayer = false;
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = getPlayer();
             for (ActiveSpells::TIterator it = spells.begin(); it != spells.end(); ++it)
             {
                 const ActiveSpells::ActiveSpellParams& spell = it->second;
@@ -726,7 +727,7 @@ namespace MWMechanics
 
     void Actors::updateEquippedLight (const MWWorld::Ptr& ptr, float duration)
     {
-        bool isPlayer = (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr());
+        bool isPlayer = (ptr == getPlayer());
 
         MWWorld::InventoryStore &inventoryStore = ptr.getClass().getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator heldIter =
@@ -823,7 +824,7 @@ namespace MWMechanics
 
     void Actors::updateCrimePersuit(const MWWorld::Ptr& ptr, float duration)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         if (ptr != player && ptr.getClass().isNpc())
         {
             // get stats of witness
@@ -945,7 +946,7 @@ namespace MWMechanics
             if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = getPlayer();
 
             int hostilesCount = 0; // need to know this to play Battle music
 
@@ -1042,7 +1043,7 @@ namespace MWMechanics
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
                 // (would invalidate the iterator)
-                if (iter->first == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (iter->first == getPlayer())
                 {
                     playerCharacter = iter->second->getCharacterController();
                     continue;
@@ -1423,7 +1424,7 @@ namespace MWMechanics
         for (PtrActorMap::iterator it = map.begin(); it != map.end(); ++it)
         {
             MWWorld::Ptr ptr = it->first;
-            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()
+            if (ptr == getPlayer()
                     || !isConscious(ptr)
                     || ptr.getClass().getCreatureStats(ptr).isParalyzed())
                 continue;

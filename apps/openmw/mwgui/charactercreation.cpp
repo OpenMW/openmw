@@ -7,6 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/fallback.hpp"
@@ -51,7 +52,7 @@ namespace
 
     void updatePlayerHealth()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
         npcStats.updateHealth();
     }
@@ -228,7 +229,7 @@ namespace MWGui
                     mReviewDialog->setBirthSign(mPlayerBirthSignId);
 
                     {
-                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        MWWorld::Ptr player = MWMechanics::getPlayer();
                         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
                         mReviewDialog->setHealth ( stats.getHealth()  );

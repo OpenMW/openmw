@@ -21,6 +21,7 @@
 #include "steering.hpp"
 #include "movement.hpp"
 #include "coordinateconverter.hpp"
+#include "actorutil.hpp"
 
 
 
@@ -462,7 +463,7 @@ namespace MWMechanics
         if (hello > 0 && !MWBase::Environment::get().getWorld()->isSwimming(actor)
             && MWBase::Environment::get().getSoundManager()->sayDone(actor))
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = getPlayer();
 
             static float fVoiceIdleOdds = MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("fVoiceIdleOdds")->getFloat();
@@ -496,7 +497,7 @@ namespace MWMechanics
 
         helloDistance *= iGreetDistanceMultiplier;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
         osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         float playerDistSqr = (playerPos - actorPos).length2();

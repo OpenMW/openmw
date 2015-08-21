@@ -17,6 +17,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "selectwrapper.hpp"
 
@@ -97,7 +98,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
 
 bool MWDialogue::Filter::testPlayer (const ESM::DialInfo& info) const
 {
-    const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    const MWWorld::Ptr player = MWMechanics::getPlayer();
 
     // check player faction
     if (!info.mPcFaction.empty())
@@ -219,7 +220,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_PcHealthPercent:
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
 
             float ratio = player.getClass().getCreatureStats (player).getHealth().getCurrent() /
                 player.getClass().getCreatureStats (player).getHealth().getModified();
@@ -229,7 +230,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
         case SelectWrapper::Function_PcDynamicStat:
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
 
             float value = player.getClass().getCreatureStats (player).
                 getDynamic (select.getArgument()).getCurrent();
@@ -253,7 +254,7 @@ bool MWDialogue::Filter::testSelectStructNumeric (const SelectWrapper& select) c
 
 int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) const
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
 
     switch (select.getFunction())
     {
@@ -429,7 +430,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
 bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) const
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
 
     switch (select.getFunction())
     {
@@ -532,7 +533,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
         case SelectWrapper::Function_ShouldAttack:
 
             return MWBase::Environment::get().getMechanicsManager()->isAggressive(mActor,
-                    MWBase::Environment::get().getWorld()->getPlayerPtr());
+                    MWMechanics::getPlayer());
 
         case SelectWrapper::Function_Werewolf:
 

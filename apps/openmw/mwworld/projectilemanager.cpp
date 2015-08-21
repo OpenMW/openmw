@@ -20,6 +20,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
@@ -187,7 +188,7 @@ namespace MWWorld
             }
 
             // Explodes when hitting water
-            if (MWBase::Environment::get().getWorld()->isUnderwater(MWBase::Environment::get().getWorld()->getPlayerPtr().getCell(), newPos))
+            if (MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos))
                 hit = true;
 
             if (hit)

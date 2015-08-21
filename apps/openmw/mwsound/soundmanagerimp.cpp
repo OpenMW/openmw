@@ -15,6 +15,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "sound_output.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
@@ -490,7 +492,7 @@ namespace MWSound
         while(snditer != mActiveSounds.end())
         {
             if(snditer->second.first != MWWorld::Ptr() &&
-               snditer->second.first != MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+               snditer->second.first != MWMechanics::getPlayer() &&
                snditer->second.first.getCell() == cell)
             {
                 snditer->first->stop();
@@ -735,7 +737,7 @@ namespace MWSound
         mListenerUp  = up;
 
         MWWorld::Ptr player =
-            MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWMechanics::getPlayer();
         const MWWorld::CellStore *cell = player.getCell();
 
         mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z() < cell->getWaterLevel());

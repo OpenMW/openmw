@@ -17,6 +17,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "widgets.hpp"
 #include "itemwidget.hpp"
@@ -92,7 +93,7 @@ void Recharge::updateView()
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
     for (MWWorld::ContainerStoreIterator iter (store.begin());
          iter!=store.end(); ++iter)
@@ -147,7 +148,7 @@ void Recharge::onItemClicked(MyGUI::Widget *sender)
 
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
     MWMechanics::NpcStats& npcStats = player.getClass().getNpcStats(player);
 

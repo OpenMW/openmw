@@ -11,7 +11,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "creaturestats.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {
@@ -21,7 +22,7 @@ namespace MWMechanics
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = getPlayer();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
         failChance += levItem->mChanceNone;

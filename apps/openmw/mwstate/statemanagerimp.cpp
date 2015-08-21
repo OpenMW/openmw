@@ -36,6 +36,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -472,7 +473,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
             MWBase::Environment::get().getWorld()->togglePOV();
 
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr ptr = MWMechanics::getPlayer();
 
         ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
 
@@ -519,7 +520,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);

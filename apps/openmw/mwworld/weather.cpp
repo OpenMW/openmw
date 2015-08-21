@@ -12,6 +12,8 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "../mwsound/sound.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
@@ -798,7 +800,7 @@ void WeatherManager::changeWeather(const std::string& region, const unsigned int
 
     mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     if (player.isInCell())
     {
         std::string playerRegion = player.getCell()->getCell()->mRegion;

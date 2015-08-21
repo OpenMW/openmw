@@ -18,6 +18,8 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "itemselection.hpp"
 #include "itemwidget.hpp"
 
@@ -160,7 +162,7 @@ namespace MWGui
 
     void EnchantingDialog::startSelfEnchanting(MWWorld::Ptr soulgem)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
 
         mEnchanting.setSelfEnchanting(true);
         mEnchanting.setEnchanter(player);
@@ -208,7 +210,7 @@ namespace MWGui
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onItemSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onItemCancel);
             mItemSelectionDialog->setVisible(true);
-            mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
             mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyEnchantable);
         }
         else
@@ -263,7 +265,7 @@ namespace MWGui
             mItemSelectionDialog->eventItemSelected += MyGUI::newDelegate(this, &EnchantingDialog::onSoulSelected);
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &EnchantingDialog::onSoulCancel);
             mItemSelectionDialog->setVisible(true);
-            mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+            mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
             mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyChargedSoulstones);
 
             //MWBase::Environment::get().getWindowManager()->messageBox("#{sInventorySelectNoSoul}");
@@ -324,7 +326,7 @@ namespace MWGui
         mEnchanting.setNewItemName(mName->getCaption());
         mEnchanting.setEffect(mEffectList);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
         if (mPtr != player && mEnchanting.getEnchantPrice() > playerGold)
         {

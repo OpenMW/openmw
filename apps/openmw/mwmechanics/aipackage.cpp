@@ -15,6 +15,7 @@
 #include "../mwworld/action.hpp"
 
 #include "steering.hpp"
+#include "actorutil.hpp"
 
 MWMechanics::AiPackage::~AiPackage() {}
 
@@ -34,7 +35,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     /// Stops the actor when it gets too close to a unloaded cell
     const ESM::Cell *cell = actor.getCell()->getCell();
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         Movement &movement = actor.getClass().getMovementSettings(actor);
 
         //Ensure pursuer doesn't leave loaded cells

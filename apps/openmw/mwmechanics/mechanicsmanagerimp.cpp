@@ -26,6 +26,7 @@
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
@@ -83,7 +84,7 @@ namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr ptr = getPlayer();
 
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
@@ -361,7 +362,7 @@ namespace MWMechanics
     {
         // Uses ingame time, but scaled to real time
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
@@ -489,7 +490,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr ptr = getPlayer();
             mActors.removeActor(ptr);
             mActors.addActor(ptr, true);
         }
@@ -586,7 +587,7 @@ namespace MWMechanics
         float x = static_cast<float>(npcSkill.getBaseDisposition());
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
@@ -663,7 +664,7 @@ namespace MWMechanics
 
         const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
@@ -707,7 +708,7 @@ namespace MWMechanics
 
         MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         float npcRating1, npcRating2, npcRating3;
@@ -1010,7 +1011,7 @@ namespace MWMechanics
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
                                      int count)
     {
-        if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr != getPlayer())
             return;
 
         MWWorld::Ptr victim;
@@ -1067,7 +1068,7 @@ namespace MWMechanics
         // NOTE: victim may be empty
 
         // Only player can commit crime
-        if (player != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (player != getPlayer())
             return false;
 
         // Find all the actors within the alarm radius
@@ -1306,7 +1307,7 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
     {
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr == getPlayer())
             return false;
 
         std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
@@ -1340,7 +1341,7 @@ namespace MWMechanics
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
-                                    || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                                    || attacker == getPlayer())
                 && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
@@ -1353,7 +1354,7 @@ namespace MWMechanics
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
     {
-        if (attacker.isEmpty() || attacker != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (attacker.isEmpty() || attacker != getPlayer())
             return;
 
         if (victim == attacker)
@@ -1450,7 +1451,7 @@ namespace MWMechanics
         if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
             return;
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
-        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (target == getPlayer())
         {
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
@@ -1547,7 +1548,7 @@ namespace MWMechanics
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
             if (target.getClass().getNpcStats(target).isWerewolf() ||
-                    (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    (target == getPlayer() &&
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
                 const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
@@ -1560,7 +1561,7 @@ namespace MWMechanics
 
     void MechanicsManager::keepPlayerAlive()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         CreatureStats& stats = player.getClass().getCreatureStats(player);
         if (stats.isDead())
         {
