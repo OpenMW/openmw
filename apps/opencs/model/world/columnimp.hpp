@@ -9,6 +9,8 @@
 
 #include <QColor>
 
+#include <components/esm/loadbody.hpp>
+
 #include "columnbase.hpp"
 #include "columns.hpp"
 #include "info.hpp"
@@ -1911,8 +1913,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct MeshTypeColumn : public Column<ESXRecordT>
     {
-        MeshTypeColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType)
+        MeshTypeColumn(int flags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
+        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType, flags)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -2379,7 +2381,18 @@ namespace CSMWorld
         {
             return true;
         }
-    };        
+    };
+    
+    struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
+    {
+        const MeshTypeColumn<ESM::BodyPart> *mMeshType;
+
+        BodyPartRaceColumn(const MeshTypeColumn<ESM::BodyPart> *meshType);
+
+        virtual QVariant get(const Record<ESM::BodyPart> &record) const;
+        virtual void set(Record<ESM::BodyPart> &record, const QVariant &data);
+        virtual bool isEditable() const;
+    };
 }
 
 #endif
