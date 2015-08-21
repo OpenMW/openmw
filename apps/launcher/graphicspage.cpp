@@ -61,14 +61,12 @@ bool Launcher::GraphicsPage::setupSDL()
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
     SDL_SetMainReady();
     SDL_Init(0);
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) != 0)
     {
         qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
         SDL_Quit(); // Safe to call even if SDL fails to initialize
         return false;
     }
-    signal(SIGINT, SIG_DFL);// We don't want to use the SDL event loop in the launcher,
-                            // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
 
     int displays = SDL_GetNumVideoDisplays();
 
@@ -171,15 +169,13 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
     SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software");
     SDL_SetMainReady();
     SDL_Init(0);
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) != 0)
     {
         qDebug() << "SDL_Init failed: " << QString::fromUtf8(SDL_GetError());
         SDL_Quit(); // Safe to call even if SDL fails to initialize
         return result;
     }
-    signal(SIGINT, SIG_DFL);// We don't want to use the SDL event loop in the launcher,
-                            // so reset SIGINT which SDL wants to redirect to an SDL_Quit event.
-
+    
     SDL_DisplayMode mode;
     int modeIndex, modes = SDL_GetNumDisplayModes(screen);
     if (modes < 0)
