@@ -1213,7 +1213,6 @@ namespace MWWorld
     void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
     {
         const float pi = static_cast<float>(osg::PI);
-        const float two_pi = pi*2.f;
 
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
@@ -1243,15 +1242,11 @@ namespace MWWorld
         }
         else
         {
-            while(objRot[0] < -pi) objRot[0] += two_pi;
-            while(objRot[0] >  pi) objRot[0] -= two_pi;
+            wrap(objRot[0]);
         }
 
-        while(objRot[1] < -pi) objRot[1] += two_pi;
-        while(objRot[1] >  pi) objRot[1] -= two_pi;
-
-        while(objRot[2] < -pi) objRot[2] += two_pi;
-        while(objRot[2] >  pi) objRot[2] -= two_pi;
+        wrap(objRot[1]);
+        wrap(objRot[2]);
 
         ptr.getRefData().setPosition(pos);
 
