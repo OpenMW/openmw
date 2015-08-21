@@ -21,12 +21,17 @@ CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelI
         // Replace proxy with actual model
         mIndex = proxy->mapToSource (index);
         mModel = proxy->sourceModel();
+    }
 
+    if (mIndex.parent().isValid())
+    {
         setText ("Modify " + dynamic_cast<CSMWorld::IdTree*>(mModel)->nestedHeaderData (
                     mIndex.parent().column(), mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
     }
     else
+    {
         setText ("Modify " + mModel->headerData (mIndex.column(), Qt::Horizontal, Qt::DisplayRole).toString());
+    }
 
     // Remember record state before the modification
     if (CSMWorld::IdTable *table = dynamic_cast<IdTable *>(mModel))
