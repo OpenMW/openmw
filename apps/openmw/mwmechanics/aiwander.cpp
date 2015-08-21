@@ -806,7 +806,7 @@ namespace MWMechanics
 
     void AiWander::SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos)
     {
-        float distanceToClosestNode = FLT_MAX;
+        float distanceToClosestNode = std::numeric_limits<float>::max();
         unsigned int index = 0;
         for (unsigned int counterThree = 0; counterThree < mAllowedNodes.size(); counterThree++)
         {

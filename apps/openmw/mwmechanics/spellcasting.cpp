@@ -92,7 +92,7 @@ namespace MWMechanics
         if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude())
             return 0;
 
-        float y = FLT_MAX;
+        float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
         for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)

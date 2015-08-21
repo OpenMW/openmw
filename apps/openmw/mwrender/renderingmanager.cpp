@@ -383,7 +383,7 @@ namespace MWRender
             if (mFogDepth == 0.f)
             {
                 mStateUpdater->setFogStart(0.f);
-                mStateUpdater->setFogEnd(FLT_MAX);
+                mStateUpdater->setFogEnd(std::numeric_limits<float>::max());
             }
             else
             {
