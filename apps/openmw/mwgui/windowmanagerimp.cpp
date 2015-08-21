@@ -1686,7 +1686,9 @@ namespace MWGui
         else if (type == ESM::REC_ASPL)
         {
             reader.getSubNameIs("ID__");
-            mSelectedSpell = reader.getHString();
+            std::string spell = reader.getHString();
+            if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell))
+                mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)
         {

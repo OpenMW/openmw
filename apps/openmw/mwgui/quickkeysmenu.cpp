@@ -467,7 +467,8 @@ namespace MWGui
             switch (keyType)
             {
             case Type_Magic:
-                onAssignMagic(id);
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id))
+                    onAssignMagic(id);
                 break;
             case Type_Item:
             case Type_MagicItem:
