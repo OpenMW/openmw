@@ -1,6 +1,7 @@
 #include "renderingmanager.hpp"
 
 #include <stdexcept>
+#include <limits>
 
 #include <osg/Light>
 #include <osg/LightModel>
