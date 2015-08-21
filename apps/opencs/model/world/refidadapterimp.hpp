@@ -1466,7 +1466,7 @@ namespace CSMWorld
                         return QVariant();
                 case 5: // wander repeat
                     if (content.mType == ESM::AI_Wander)
-                        return content.mWander.mShouldRepeat;
+                        return content.mWander.mShouldRepeat != 0;
                     else
                         return QVariant();
                 case 6: // activate name
