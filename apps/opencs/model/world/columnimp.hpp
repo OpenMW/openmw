@@ -10,6 +10,8 @@
 #include <QColor>
 
 #include <components/esm/loadbody.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadrace.hpp>
 
 #include "columnbase.hpp"
 #include "columns.hpp"
