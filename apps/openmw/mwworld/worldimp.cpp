@@ -2654,8 +2654,8 @@ namespace MWWorld
 
         MWRender::RenderingManager::RayResult result2 = mRendering->castRay(origin, dest, true, true);
 
-        float dist1 = FLT_MAX;
-        float dist2 = FLT_MAX;
+        float dist1 = std::numeric_limits<float>::max();
+        float dist2 = std::numeric_limits<float>::max();
 
         if (result1.mHit)
             dist1 = (origin - result1.mHitPos).length();
@@ -2848,7 +2848,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
         MWWorld::Ptr closestMarker;
-        float closestDistance = FLT_MAX;
+        float closestDistance = std::numeric_limits<float>::max();
 
         std::vector<MWWorld::Ptr> markers;
         mCells.getExteriorPtrs(id, markers);

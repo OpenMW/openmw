@@ -1,4 +1,5 @@
 #include "pathfinding.hpp"
+#include <limits>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -53,13 +54,13 @@ namespace
     {
         assert(grid && !grid->mPoints.empty());
 
-        float closestDistanceBetween = distanceSquared(grid->mPoints[0], pos);
-        float closestDistanceReachable = closestDistanceBetween;
+        float closestDistanceBetween = std::numeric_limits<float>::max();
+        float closestDistanceReachable = std::numeric_limits<float>::max();
         int closestIndex = 0;
         int closestReachableIndex = 0;
         // TODO: if this full scan causes performance problems mapping pathgrid
         //       points to a quadtree may help
-        for(unsigned int counter = 1; counter < grid->mPoints.size(); counter++)
+        for(unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
         {
             float potentialDistBetween = distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
@@ -78,7 +79,7 @@ namespace
             }
         }
 
-        // invariant: start and endpoint must be connected
+        // post-condition: start and endpoint must be connected
         assert(cell->isPointConnected(start, closestReachableIndex));
 
         // AiWander has logic that depends on whether a path was created, deleting
