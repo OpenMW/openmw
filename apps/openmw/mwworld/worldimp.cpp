@@ -1496,6 +1496,8 @@ namespace MWWorld
             std::vector<std::string> ids;
             getStore().get<ESM::Race>().listIdentifier(ids);
 
+            std::sort(ids.begin(), ids.end());
+
             unsigned int i=0;
 
             for (; i<ids.size(); ++i)
