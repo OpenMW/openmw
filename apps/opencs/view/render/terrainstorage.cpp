@@ -28,10 +28,18 @@ namespace CSVRender
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
-        std::ostringstream stream;
-        stream << index << "_" << plugin;
+        int numRecords = mData.getLandTextures().getSize();
 
-        return &mData.getLandTextures().getRecord(stream.str()).get();
+        for (int i=0; i<numRecords; ++i)
+        {
+            const CSMWorld::LandTexture* ltex = &mData.getLandTextures().getRecord(i).get();
+            if (ltex->mIndex == index && ltex->mPluginIndex == plugin)
+                return ltex;
+        }
+
+        std::stringstream error;
+        error << "Can't find LandTexture " << index << " from plugin " << plugin;
+        throw std::runtime_error(error.str());
     }
 
     void TerrainStorage::getBounds(float &minX, float &maxX, float &minY, float &maxY)
