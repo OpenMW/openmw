@@ -9,13 +9,7 @@ namespace CSMWorld
     {
         ESM::LandTexture::load(esm);
 
-        int plugin = esm.getIndex();
-
-        std::ostringstream stream;
-
-        stream << mIndex << "_" << plugin;
-
-        mId = stream.str();
+        mPluginIndex = esm.getIndex();
     }
 
 }
