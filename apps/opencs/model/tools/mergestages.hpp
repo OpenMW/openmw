@@ -1,6 +1,8 @@
 #ifndef CSM_TOOLS_MERGESTAGES_H
 #define CSM_TOOLS_MERGESTAGES_H
 
+#include <algorithm>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../doc/stage.hpp"
@@ -33,6 +35,8 @@ namespace CSMTools
             MergeState& mState;
             Collection& (CSMWorld::Data::*mAccessor)();
 
+            static const int stepSize = 1000;
+
         public:
 
             MergeIdCollectionStage (MergeState& state, Collection& (CSMWorld::Data::*accessor)());
@@ -52,7 +56,16 @@ namespace CSMTools
     template<typename RecordType, typename Collection>
     int MergeIdCollectionStage<RecordType, Collection>::setup()
     {
-        return 1;
+        const Collection& source = (mState.mSource.getData().*mAccessor)();
+
+        int size = source.getSize();
+
+        int steps = size / stepSize;
+
+        if (size % stepSize)
+            ++steps;
+
+        return steps;
     }
 
     template<typename RecordType, typename Collection>
@@ -61,9 +74,10 @@ namespace CSMTools
         const Collection& source = (mState.mSource.getData().*mAccessor)();
         Collection& target = (mState.mTarget->getData().*mAccessor)();
 
-        int size = source.getSize();
+        int begin = stage * stepSize;
+        int end = std::min ((stage+1) * stepSize, source.getSize());
 
-        for (int i=0; i<size; ++i)
+        for (int i=begin; i<end; ++i)
         {
             const CSMWorld::Record<RecordType>& record = source.getRecord (i);
 
