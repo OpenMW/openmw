@@ -454,6 +454,8 @@ void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& mess
 
         mState.getWriter().startRecord (record.sRecordId);
 
+        mState.getWriter().writeHNString("NAME", record.mId);
+
         record.save (mState.getWriter());
 
         mState.getWriter().endRecord (record.sRecordId);
