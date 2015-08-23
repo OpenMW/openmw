@@ -2256,7 +2256,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath), mIdCompletionManager(mData)
+  mRunner (mProjectPath), mIdCompletionManager(mData), mDirty (false)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2325,7 +2325,7 @@ int CSMDoc::Document::getState() const
 {
     int state = 0;
 
-    if (!mUndoStack.isClean())
+    if (!mUndoStack.isClean() || mDirty)
         state |= State_Modified;
 
     if (mSaving.isRunning())
@@ -2417,6 +2417,9 @@ void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 
 void CSMDoc::Document::operationDone (int type, bool failed)
 {
+    if (type==CSMDoc::State_Saving && !failed)
+        mDirty = false;
+
     emit stateChanged (getState(), this);
 }
 
@@ -2492,4 +2495,9 @@ void CSMDoc::Document::progress (int current, int max, int type)
 CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
     return mIdCompletionManager;
+}
+
+void CSMDoc::Document::flagAsDirty()
+{
+    mDirty = true;
 }

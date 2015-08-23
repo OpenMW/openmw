@@ -68,6 +68,7 @@ namespace CSMDoc
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
+            bool mDirty;
 
             CSMWorld::IdCompletionManager mIdCompletionManager;
 
@@ -151,6 +152,8 @@ namespace CSMDoc
             QTextDocument *getRunLog();
 
             CSMWorld::IdCompletionManager &getIdCompletionManager();
+
+            void flagAsDirty();
 
         signals:
 
