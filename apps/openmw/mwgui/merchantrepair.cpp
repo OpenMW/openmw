@@ -13,6 +13,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -40,7 +41,7 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
 
     int currentY = 0;
 
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
     int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
     MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
@@ -125,7 +126,7 @@ void MerchantRepair::exit()
 
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = MWMechanics::getPlayer();
 
     int price = MyGUI::utility::parseInt(sender->getUserString("Price"));
     if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))

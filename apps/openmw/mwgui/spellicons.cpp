@@ -16,6 +16,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 
@@ -43,7 +44,7 @@ namespace MWGui
     {
         // TODO: Tracking add/remove/expire would be better than force updating every frame
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
 

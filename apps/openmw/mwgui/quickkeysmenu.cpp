@@ -19,6 +19,7 @@
 
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwgui/inventorywindow.hpp"
 
@@ -147,7 +148,7 @@ namespace MWGui
             mItemSelectionDialog->eventDialogCanceled += MyGUI::newDelegate(this, &QuickKeysMenu::onAssignItemCancel);
         }
         mItemSelectionDialog->setVisible(true);
-        mItemSelectionDialog->openContainer(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mItemSelectionDialog->openContainer(MWMechanics::getPlayer());
         mItemSelectionDialog->setFilter(SortFilterItemModel::Filter_OnlyUsableItems);
 
         mAssignDialog->setVisible (false);
@@ -262,7 +263,7 @@ namespace MWGui
 
         QuickKeyType type = mAssigned[index-1];
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         if (type == Type_Item || type == Type_MagicItem)
@@ -474,7 +475,7 @@ namespace MWGui
             case Type_MagicItem:
             {
                 // Find the item by id
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
                 MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
                 MWWorld::Ptr item;
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
@@ -544,7 +545,7 @@ namespace MWGui
     {
         WindowModal::open();
 
-        mMagicList->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mMagicList->setModel(new SpellModel(MWMechanics::getPlayer()));
         mMagicList->resetScrollbars();
     }
 

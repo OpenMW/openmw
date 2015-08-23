@@ -21,6 +21,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "widgets.hpp"
 #include "bookpage.hpp"
@@ -89,7 +90,7 @@ namespace MWGui
         WindowModal::open();
         center();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mBribe10Button->setEnabled (playerGold >= 10);

@@ -27,6 +27,7 @@
 #include "magiceffects.hpp"
 #include "npcstats.hpp"
 #include "summoning.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
@@ -134,7 +135,7 @@ namespace MWMechanics
         int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
         float castChance = (lowestSkill - spell->mData.mCost + castBonus + 0.2f * actorWillpower + 0.1f * actorLuck) * stats.getFatigueTerm();
-        if (MWBase::Environment::get().getWorld()->getGodModeState() && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (MWBase::Environment::get().getWorld()->getGodModeState() && actor == getPlayer())
             castChance = 100;
 
         if (!cap)
@@ -333,14 +334,15 @@ namespace MWMechanics
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
         if (spell && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
         {
-            float x = (spell->mData.mType == ESM::Spell::ST_Disease) ?
-                        target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistCommonDisease).getMagnitude()
-                      : target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::ResistBlightDisease).getMagnitude();
+            int requiredResistance = (spell->mData.mType == ESM::Spell::ST_Disease) ?
+                ESM::MagicEffect::ResistCommonDisease
+                : ESM::MagicEffect::ResistBlightDisease;
+            float x = target.getClass().getCreatureStats(target).getMagicEffects().get(requiredResistance).getMagnitude();
 
             if (Misc::Rng::roll0to99() <= x)
             {
                 // Fully resisted, show message
-                if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (target == getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
                 return;
             }
@@ -358,7 +360,7 @@ namespace MWMechanics
         if (target.getClass().isActor())
             targetEffects += target.getClass().getCreatureStats(target).getMagicEffects();
 
-        bool castByPlayer = (!caster.isEmpty() && caster == MWBase::Environment::get().getWorld()->getPlayerPtr());
+        bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
         // Try absorbing if it's a spell
         // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
@@ -433,7 +435,7 @@ namespace MWMechanics
                     if (magnitudeMult == 0)
                     {
                         // Fully resisted, show message
-                        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        if (target == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
                         else if (castByPlayer)
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
@@ -569,7 +571,7 @@ namespace MWMechanics
             {
                 if (target.getCellRef().getLockLevel() < magnitude) //If the door is not already locked to a higher value, lock it to spell magnitude
                 {
-                    if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
                     target.getClass().lock(target, static_cast<int>(magnitude));
                 }
@@ -585,7 +587,7 @@ namespace MWMechanics
                         if (!caster.isEmpty() && caster.getClass().isActor())
                             MWBase::Environment::get().getMechanicsManager()->objectOpened(caster, target);
 
-                        if (caster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
                     target.getClass().unlock(target);
@@ -622,7 +624,7 @@ namespace MWMechanics
                 return true;
             }
 
-            if (target != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (target != getPlayer())
                 return false;
 
             if (effectId == ESM::MagicEffect::DivineIntervention)
@@ -701,7 +703,7 @@ namespace MWMechanics
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
-                if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (mCaster == getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
 
                 // Failure sound
@@ -725,14 +727,14 @@ namespace MWMechanics
 
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
         {
-            if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
             item.getContainerStore()->remove(item, 1, mCaster);
         else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
         {
-            if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if (mCaster == getPlayer())
             {
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
             }
@@ -799,7 +801,7 @@ namespace MWMechanics
             float successChance = getSpellSuccessChance(spell, mCaster);
             if (Misc::Rng::roll0to99() >= successChance)
             {
-                if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (mCaster == getPlayer())
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicSkillFail}");
                 fail = true;
             }
@@ -817,7 +819,7 @@ namespace MWMechanics
             }
         }
 
-        if (mCaster == MWBase::Environment::get().getWorld()->getPlayerPtr() && spellIncreasesSkill(spell))
+        if (mCaster == getPlayer() && spellIncreasesSkill(spell))
             mCaster.getClass().skillUsageSucceeded(mCaster,
                 spellSchoolToSkill(school), 0);
 
@@ -962,7 +964,7 @@ namespace MWMechanics
                 if (charge == 0)
                 {
                     // Will unequip the broken item and try to find a replacement
-                    if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (ptr != getPlayer())
                         inv.autoEquip(ptr);
                     else
                         inv.unequipItem(*item, ptr);
@@ -1097,7 +1099,7 @@ namespace MWMechanics
 
         }
 
-        if (receivedMagicDamage && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (receivedMagicDamage && actor == getPlayer())
             MWBase::Environment::get().getWindowManager()->activateHitOverlay(false);
     }
 

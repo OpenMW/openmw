@@ -9,6 +9,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -137,7 +138,7 @@ namespace MWGui
         if (mPtr.getTypeName() == typeid(ESM::NPC).name() && !loot)
         {
             // we are stealing stuff
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             mModel = new PickpocketItemModel(player, new InventoryItemModel(container),
                                              !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown());
         }
@@ -183,7 +184,7 @@ namespace MWGui
                 && !mPickpocketDetected
                 )
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             MWMechanics::Pickpocket pickpocket(player, mPtr);
             if (pickpocket.finish())
             {
@@ -260,7 +261,7 @@ namespace MWGui
 
     bool ContainerWindow::onTakeItem(const ItemStack &item, int count)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         // TODO: move to ItemModels
         if (dynamic_cast<PickpocketItemModel*>(mModel)
                 && !mPtr.getClass().getCreatureStats(mPtr).getKnockedDown())

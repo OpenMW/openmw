@@ -17,6 +17,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 
@@ -295,7 +297,7 @@ namespace MWRender
     // --------------------------------------------------------------------------------------------------
 
     RaceSelectionPreview::RaceSelectionPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
-        : CharacterPreview(viewer, resourceSystem, MWBase::Environment::get().getWorld()->getPlayerPtr(),
+        : CharacterPreview(viewer, resourceSystem, MWMechanics::getPlayer(),
             512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0,0,8))
         , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)

@@ -19,6 +19,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwstate/charactermanager.hpp"
 
@@ -199,7 +200,7 @@ namespace MWGui
     {
         stopWaiting();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::NpcStats &pcstats = player.getClass().getNpcStats(player);
 
         // trigger levelup if possible
@@ -213,7 +214,7 @@ namespace MWGui
 
     void WaitDialog::setCanRest (bool canRest)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         bool full = (stats.getHealth().getCurrent() >= stats.getHealth().getModified())
                 && (stats.getMagicka().getCurrent() >= stats.getMagicka().getModified());

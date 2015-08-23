@@ -27,6 +27,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -156,7 +157,7 @@ namespace MWScript
 
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    context.executeActivation(ptr, MWBase::Environment::get().getWorld()->getPlayerPtr());
+                    context.executeActivation(ptr, MWMechanics::getPlayer());
                 }
         };
 
@@ -976,7 +977,7 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
                 player.getClass().getNpcStats(player).setBounty(0);
                 MWBase::Environment::get().getWorld()->confiscateStolenItems(player);
                 MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
@@ -988,7 +989,7 @@ namespace MWScript
         public:
             virtual void execute(Interpreter::Runtime &runtime)
             {
-                MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                MWWorld::Ptr player = MWMechanics::getPlayer();
                 player.getClass().getNpcStats(player).setBounty(0);
                 MWBase::Environment::get().getWorld()->getPlayer().recordCrimeId();
             }

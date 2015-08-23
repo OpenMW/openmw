@@ -28,6 +28,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 using namespace ICS;
 
@@ -1012,7 +1013,7 @@ namespace MWInput
     {
         if (!mControlSwitch["playercontrols"])
             return;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             // Cannot use items or spells while in werewolf form
@@ -1029,7 +1030,7 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             if (player.getClass().getNpcStats(player).isWerewolf())
             {
                 // Cannot use items or spells while in werewolf form

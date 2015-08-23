@@ -11,6 +11,7 @@
 
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -124,9 +125,9 @@ namespace MWGui
 
     void AlchemyWindow::open()
     {
-        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        InventoryItemModel* model = new InventoryItemModel(MWMechanics::getPlayer());
         mSortModel = new SortFilterItemModel(model);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
@@ -136,7 +137,7 @@ namespace MWGui
 
         int index = 0;
 
-        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
             iter!=mAlchemy->endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)

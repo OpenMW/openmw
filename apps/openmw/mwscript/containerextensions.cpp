@@ -26,6 +26,8 @@
 #include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -147,7 +149,7 @@ namespace MWScript
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
+                        && (ptr == MWMechanics::getPlayer()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
@@ -192,7 +194,7 @@ namespace MWScript
                     MWWorld::ActionEquip action (*it);
                     action.execute(ptr);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() && !ptr.getClass().getScript(ptr).empty())
+                    if (ptr == MWMechanics::getPlayer() && !ptr.getClass().getScript(ptr).empty())
                         ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
                 }
         };
