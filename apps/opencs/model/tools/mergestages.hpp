@@ -27,11 +27,9 @@ namespace CSMTools
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    template<typename RecordType>
+    template<typename RecordType, typename Collection = CSMWorld::IdCollection<RecordType> >
     class MergeIdCollectionStage : public CSMDoc::Stage
     {
-            typedef typename CSMWorld::IdCollection<RecordType> Collection;
-
             MergeState& mState;
             Collection& (CSMWorld::Data::*mAccessor)();
 
@@ -46,19 +44,19 @@ namespace CSMTools
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
-    template<typename RecordType>
-    MergeIdCollectionStage<RecordType>::MergeIdCollectionStage (MergeState& state, Collection& (CSMWorld::Data::*accessor)())
+    template<typename RecordType, typename Collection>
+    MergeIdCollectionStage<RecordType, Collection>::MergeIdCollectionStage (MergeState& state, Collection& (CSMWorld::Data::*accessor)())
     : mState (state), mAccessor (accessor)
     {}
 
-    template<typename RecordType>
-    int MergeIdCollectionStage<RecordType>::setup()
+    template<typename RecordType, typename Collection>
+    int MergeIdCollectionStage<RecordType, Collection>::setup()
     {
         return 1;
     }
 
-    template<typename RecordType>
-    void MergeIdCollectionStage<RecordType>::perform (int stage, CSMDoc::Messages& messages)
+    template<typename RecordType, typename Collection>
+    void MergeIdCollectionStage<RecordType, Collection>::perform (int stage, CSMDoc::Messages& messages)
     {
         const Collection& source = (mState.mSource.getData().*mAccessor)();
         Collection& target = (mState.mTarget->getData().*mAccessor)();
