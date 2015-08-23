@@ -213,6 +213,8 @@ void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
             this, SIGNAL (mergeDone (CSMDoc::Document*)));
     }
 
+    target->flagAsDirty();
+
     mMergeOperation->setTarget (target);
 
     mMerge.start();

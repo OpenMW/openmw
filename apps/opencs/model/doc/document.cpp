@@ -2258,7 +2258,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mSaving (&mSavingOperation),
   mResDir(resDir),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()),
-  mIdCompletionManager(mData)
+  mIdCompletionManager(mData), mDirty (false)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2322,7 +2322,7 @@ int CSMDoc::Document::getState() const
 {
     int state = 0;
 
-    if (!mUndoStack.isClean())
+    if (!mUndoStack.isClean() || mDirty)
         state |= State_Modified;
 
     if (mSaving.isRunning())
@@ -2414,6 +2414,9 @@ void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 
 void CSMDoc::Document::operationDone (int type, bool failed)
 {
+    if (type==CSMDoc::State_Saving && !failed)
+        mDirty = false;
+
     emit stateChanged (getState(), this);
 }
 
@@ -2497,4 +2500,9 @@ boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
 CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
     return mIdCompletionManager;
+}
+
+void CSMDoc::Document::flagAsDirty()
+{
+    mDirty = true;
 }

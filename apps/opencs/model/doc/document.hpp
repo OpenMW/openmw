@@ -67,6 +67,8 @@ namespace CSMDoc
             Blacklist mBlacklist;
             Runner mRunner;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+            bool mDirty;
+
             CSMWorld::IdCompletionManager mIdCompletionManager;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
@@ -149,6 +151,8 @@ namespace CSMDoc
             boost::shared_ptr<CSVWorld::PhysicsSystem> getPhysics();
 
             CSMWorld::IdCompletionManager &getIdCompletionManager();
+
+            void flagAsDirty();
 
         signals:
 
