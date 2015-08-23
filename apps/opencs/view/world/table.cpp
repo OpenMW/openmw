@@ -273,12 +273,16 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
 #endif
     verticalHeader()->hide();
-    setSortingEnabled (sorting);
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-    int columns = mModel->columnCount();
+    setSortingEnabled (sorting);
+    if (sorting)
+    {
+        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
+    }
 
+    int columns = mModel->columnCount();
     for (int i=0; i<columns; ++i)
     {
         int flags = mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();

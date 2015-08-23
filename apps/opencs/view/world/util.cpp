@@ -12,6 +12,7 @@
 #include <QCheckBox>
 #include <QPlainTextEdit>
 #include <QEvent>
+#include <QItemEditorFactory>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
@@ -172,7 +173,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     // TODO: Find a better solution?
     if (display == CSMWorld::ColumnBase::Display_Boolean)
     {
-        return QStyledItemDelegate::createEditor(parent, option, index);
+        return QItemEditorFactory::defaultFactory()->createEditor(QVariant::Bool, parent);
     }
     // For tables the pop-up of the color editor should appear immediately after the editor creation
     // (the third parameter of ColorEditor's constructor)

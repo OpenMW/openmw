@@ -536,11 +536,6 @@ namespace
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
     };
 
-    static const char *sAiWanderRepeat[] =
-    {
-        "No", "Yes", 0
-    };
-
     static const char *sInfoCondFunc[] =
     {
         " ", "Function", "Global", "Local", "Journal",
@@ -580,7 +575,6 @@ namespace
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
-            case CSMWorld::Columns::ColumnId_AiWanderRepeat: return sAiWanderRepeat;
             case CSMWorld::Columns::ColumnId_InfoCondFunc: return sInfoCondFunc;
             // FIXME: don't have dynamic value enum delegate, use Display_String for now
             //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
