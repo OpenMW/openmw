@@ -216,7 +216,6 @@ namespace MWWorld
         {
             // set new game mark
             mGlobalVariables["chargenstate"].setInteger (1);
-            mGlobalVariables["pcrace"].setInteger (3);
         }
         else
             mGlobalVariables["chargenstate"].setInteger (-1);
@@ -1493,19 +1492,6 @@ namespace MWWorld
 
         if (Misc::StringUtils::ciEqual(record.mId, "player"))
         {
-            std::vector<std::string> ids;
-            getStore().get<ESM::Race>().listIdentifier(ids);
-
-            std::sort(ids.begin(), ids.end());
-
-            unsigned int i=0;
-
-            for (; i<ids.size(); ++i)
-                if (Misc::StringUtils::ciEqual (ids[i], record.mRace))
-                    break;
-
-            mGlobalVariables["pcrace"].setInteger (i == ids.size() ? 0 : i+1);
-
             const ESM::NPC *player =
                 mPlayer->getPlayer().get<ESM::NPC>()->mBase;
 
