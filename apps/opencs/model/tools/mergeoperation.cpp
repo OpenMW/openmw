@@ -31,8 +31,11 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeIdCollectionStage<ESM::SoundGenerator> (mState, &CSMWorld::Data::getSoundGens));
     appendStage (new MergeIdCollectionStage<ESM::MagicEffect> (mState, &CSMWorld::Data::getMagicEffects));
     appendStage (new MergeIdCollectionStage<ESM::StartScript> (mState, &CSMWorld::Data::getStartScripts));
+    appendStage (new MergeIdCollectionStage<CSMWorld::Pathgrid, CSMWorld::SubCellCollection<CSMWorld::Pathgrid> > (mState, &CSMWorld::Data::getPathgrids));
+    appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getTopicInfos));
+    appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getJournalInfos));
 
-    /// \todo TopicInfo, JournalInfo, Referencables, References, Land, LandTextures, Pathgrids
+    /// \todo Referencables, References, Land, LandTextures
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
