@@ -74,7 +74,7 @@ add_openmw_dir (mwphysics
 
 add_openmw_dir (mwclass
     classes activator creature npc weapon armor potion apparatus book clothing container door
-    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static
+    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static mobile
     )
 
 add_openmw_dir (mwmechanics

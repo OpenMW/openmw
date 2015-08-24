@@ -402,22 +402,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Npc::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
-    {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
-    }
-
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getObjects().insertNPC(ptr);
-    }
-
-    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        physics.addActor(ptr, model);
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
-        if (getCreatureStats(ptr).isDead())
-            MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
 
     bool Npc::isPersistent(const MWWorld::Ptr &actor) const
@@ -756,30 +743,6 @@ namespace MWClass
         }
     }
 
-    void Npc::block(const MWWorld::Ptr &ptr) const
-    {
-        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end())
-            return;
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        switch(shield->getClass().getEquipmentSkill(*shield))
-        {
-            case ESM::Skill::LightArmor:
-                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::MediumArmor:
-                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::HeavyArmor:
-                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
-                break;
-            default:
-                return;
-        }
-    }
-
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
@@ -937,16 +900,6 @@ namespace MWClass
         return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    osg::Vec3f Npc::getRotationVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
-        movement.mRotation[0] = 0.0f;
-        movement.mRotation[1] = 0.0f;
-        movement.mRotation[2] = 0.0f;
-        return vec;
-    }
-
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
@@ -959,11 +912,6 @@ namespace MWClass
     {
         boost::shared_ptr<Class> instance (new Npc);
         registerClass (typeid (ESM::NPC).name(), instance);
-    }
-
-    bool Npc::hasToolTip (const MWWorld::Ptr& ptr) const
-    {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -996,21 +944,9 @@ namespace MWClass
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        const MWMechanics::NpcStats &stats = getNpcStats(ptr);
-
         // According to UESP, inventory weight is ignored in werewolf form. Does that include
         // feather and burden effects?
-        float weight = 0.0f;
-        if(!stats.isWerewolf())
-        {
-            weight  = getContainerStore(ptr).getWeight();
-            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).getMagnitude();
-            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).getMagnitude();
-            if(weight < 0.0f)
-                weight = 0.0f;
-        }
-
-        return weight;
+        return getNpcStats(ptr).isWerewolf() ? 0.0f : Mobile::getEncumbrance(ptr);
     }
 
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,

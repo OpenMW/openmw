@@ -1,7 +1,7 @@
 #ifndef GAME_MWCLASS_NPC_H
 #define GAME_MWCLASS_NPC_H
 
-#include "../mwworld/class.hpp"
+#include "mobile.hpp"
 
 namespace ESM
 {
@@ -10,7 +10,7 @@ namespace ESM
 
 namespace MWClass
 {
-    class Npc : public MWWorld::Class
+    class Npc : public Mobile
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
@@ -51,12 +51,6 @@ namespace MWClass
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
-
-            virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
-            ///< Adjust position to stand on ground. Must be called post model load
-            /// @param force do this even if the ptr is flying
-
             virtual std::string getName (const MWWorld::Ptr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
@@ -70,9 +64,6 @@ namespace MWClass
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
-            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
-
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
@@ -84,8 +75,6 @@ namespace MWClass
             virtual void hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const;
 
             virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, bool successful) const;
-
-            virtual void block(const MWWorld::Ptr &ptr) const;
 
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
@@ -102,9 +91,6 @@ namespace MWClass
 
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
-
-            virtual osg::Vec3f getRotationVector (const MWWorld::Ptr& ptr) const;
-            ///< Return desired rotations, as euler angles.
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
