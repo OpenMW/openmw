@@ -1,6 +1,7 @@
 #include "refiddata.hpp"
 
 #include <cassert>
+#include <memory>
 
 #include <components/misc/stringops.hpp>
 
@@ -344,7 +345,7 @@ const CSMWorld::RefIdDataContainer< ESM::Static >& CSMWorld::RefIdData::getStati
     return mStatics;
 }
 
-void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
+void CSMWorld::RefIdData::insertRecord (CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id)
 {
   std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
         mRecordContainers.find (type);
@@ -366,5 +367,7 @@ void CSMWorld::RefIdData::copyTo (int index, RefIdData& target) const
 
     std::string id = source->getId (localIndex.first);
 
-    target.insertRecord (source->getRecord (localIndex.first), localIndex.second, id);
+    std::auto_ptr<CSMWorld::RecordBase> newRecord (source->getRecord (localIndex.first).modifiedCopy());
+
+    target.insertRecord (*newRecord, localIndex.second, id);
 }
