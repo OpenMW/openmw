@@ -2258,7 +2258,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
   mSaving (&mSavingOperation),
   mResDir(resDir),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()),
-  mIdCompletionManager(mData), mDirty (false)
+  mDirty (false), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
