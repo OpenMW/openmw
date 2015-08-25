@@ -1,7 +1,7 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
-#include "mobile.hpp"
+#include "actor.hpp"
 
 namespace ESM
 {
@@ -10,7 +10,7 @@ namespace ESM
 
 namespace MWClass
 {
-    class Creature : public Mobile
+    class Creature : public Actor
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 

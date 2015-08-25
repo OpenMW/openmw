@@ -1,7 +1,7 @@
 #ifndef GAME_MWCLASS_NPC_H
 #define GAME_MWCLASS_NPC_H
 
-#include "mobile.hpp"
+#include "actor.hpp"
 
 namespace ESM
 {
@@ -10,7 +10,7 @@ namespace ESM
 
 namespace MWClass
 {
-    class Npc : public Mobile
+    class Npc : public Actor
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 

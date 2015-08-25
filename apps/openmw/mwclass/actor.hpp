@@ -11,14 +11,14 @@ namespace ESM
 namespace MWClass
 {
     /// \brief Class holding functionality common to Creature and NPC
-    class Mobile : public MWWorld::Class
+    class Actor : public MWWorld::Class
     {
     protected:
 
-        Mobile();
+        Actor();
 
     public:
-        ~Mobile();
+        virtual ~Actor();
 
         virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
         ///< Adjust position to stand on ground. Must be called post model load
@@ -39,8 +39,8 @@ namespace MWClass
         /// effects). Throws an exception, if the object can't hold other objects.
 
         // not implemented
-        Mobile(const Mobile&);
-        Mobile& operator= (const Mobile&);
+        Actor(const Actor&);
+        Actor& operator= (const Actor&);
     };
 }
 

@@ -946,7 +946,7 @@ namespace MWClass
     {
         // According to UESP, inventory weight is ignored in werewolf form. Does that include
         // feather and burden effects?
-        return getNpcStats(ptr).isWerewolf() ? 0.0f : Mobile::getEncumbrance(ptr);
+        return getNpcStats(ptr).isWerewolf() ? 0.0f : Actor::getEncumbrance(ptr);
     }
 
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,

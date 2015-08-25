@@ -1,4 +1,4 @@
-#include "mobile.hpp"
+#include "actor.hpp"
 
 #include <components/esm/loadmgef.hpp>
 
@@ -17,16 +17,16 @@
 
 namespace MWClass
 {
-    Mobile::Mobile() {}
+    Actor::Actor() {}
 
-    Mobile::~Mobile() {}
+    Actor::~Actor() {}
 
-    void Mobile::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
+    void Actor::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Mobile::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if (!model.empty())
         {
@@ -37,7 +37,7 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    void Mobile::block(const MWWorld::Ptr &ptr) const
+    void Actor::block(const MWWorld::Ptr &ptr) const
     {
         MWWorld::InventoryStore& inv = getInventoryStore(ptr);
         MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -47,26 +47,26 @@ namespace MWClass
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         switch (shield->getClass().getEquipmentSkill(*shield))
         {
-        case ESM::Skill::LightArmor:
-            sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
-            break;
-        case ESM::Skill::MediumArmor:
-            sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
-            break;
-        case ESM::Skill::HeavyArmor:
-            sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
-            break;
-        default:
-            return;
+            case ESM::Skill::LightArmor:
+                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::MediumArmor:
+                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                break;
+            case ESM::Skill::HeavyArmor:
+                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                break;
+            default:
+                return;
         }
     }
 
-    bool Mobile::hasToolTip(const MWWorld::Ptr& ptr) const
+    bool Actor::hasToolTip(const MWWorld::Ptr& ptr) const
     {
         return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
-    osg::Vec3f Mobile::getRotationVector(const MWWorld::Ptr& ptr) const
+    osg::Vec3f Actor::getRotationVector(const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);
         osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
@@ -76,7 +76,7 @@ namespace MWClass
         return vec;
     }
 
-    float Mobile::getEncumbrance(const MWWorld::Ptr& ptr) const
+    float Actor::getEncumbrance(const MWWorld::Ptr& ptr) const
     {
         float weight = getContainerStore(ptr).getWeight();
         const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
