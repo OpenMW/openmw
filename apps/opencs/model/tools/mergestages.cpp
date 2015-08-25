@@ -39,3 +39,17 @@ void CSMTools::FinishMergedDocumentStage::perform (int stage, CSMDoc::Messages& 
 
     mState.mCompleted = true;
 }
+
+
+CSMTools::MergeRefIdsStage::MergeRefIdsStage (MergeState& state) : mState (state) {}
+
+int CSMTools::MergeRefIdsStage::setup()
+{
+    return mState.mSource.getData().getReferenceables().getSize();
+}
+
+void CSMTools::MergeRefIdsStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    mState.mSource.getData().getReferenceables().copyTo (
+        stage, mState.mTarget->getData().getReferenceables());
+}

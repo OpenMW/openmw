@@ -924,3 +924,8 @@ const CSMWorld::NestedRefIdAdapterBase& CSMWorld::RefIdCollection::getNestedAdap
     }
     throw std::runtime_error("No such column in the nestedadapters");
 }
+
+void CSMWorld::RefIdCollection::copyTo (int index, RefIdCollection& target) const
+{
+    mData.copyTo (index, target.mData);
+}

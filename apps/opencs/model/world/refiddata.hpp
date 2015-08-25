@@ -252,11 +252,9 @@ namespace CSMWorld
             const RefIdDataContainer<ESM::Probe >& getProbes() const;
             const RefIdDataContainer<ESM::Repair>& getRepairs() const;
             const RefIdDataContainer<ESM::Static>& getStatics() const;
+
+            void copyTo (int index, RefIdData& target) const;
     };
 }
 
 #endif
-
-
-
-
