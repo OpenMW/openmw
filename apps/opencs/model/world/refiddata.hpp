@@ -210,7 +210,8 @@ namespace CSMWorld
 
             void erase (int index, int count);
 
-            void insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id);
+            void insertRecord (CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type,
+                const std::string& id);
 
             const RecordBase& getRecord (const LocalIndex& index) const;
 
