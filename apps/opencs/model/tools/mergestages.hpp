@@ -68,6 +68,22 @@ namespace CSMTools
         if (!record.isDeleted())
             target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_BaseOnly, &record.get()));
     }
+
+
+    class MergeRefIdsStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            MergeRefIdsStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
 }
 
 #endif

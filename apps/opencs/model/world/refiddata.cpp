@@ -358,3 +358,14 @@ void CSMWorld::RefIdData::insertRecord(CSMWorld::RecordBase& record, CSMWorld::U
     mIndex.insert (std::make_pair (Misc::StringUtils::lowerCase (id),
         LocalIndex (iter->second->getSize()-1, type)));
 }
+
+void CSMWorld::RefIdData::copyTo (int index, RefIdData& target) const
+{
+    LocalIndex localIndex = globalToLocalIndex (index);
+
+    RefIdDataContainerBase *source = mRecordContainers.find (localIndex.second)->second;
+
+    std::string id = source->getId (localIndex.first);
+
+    target.insertRecord (source->getRecord (localIndex.first), localIndex.second, id);
+}

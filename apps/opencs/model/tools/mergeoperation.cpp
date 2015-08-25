@@ -34,8 +34,9 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeIdCollectionStage<CSMWorld::Pathgrid, CSMWorld::SubCellCollection<CSMWorld::Pathgrid> > (mState, &CSMWorld::Data::getPathgrids));
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getTopicInfos));
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getJournalInfos));
+    appendStage (new MergeRefIdsStage (mState));
 
-    /// \todo Referencables, References, Land, LandTextures
+    /// \todo References, Land, LandTextures
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
