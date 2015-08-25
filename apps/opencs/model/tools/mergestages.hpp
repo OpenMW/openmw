@@ -35,8 +35,6 @@ namespace CSMTools
             MergeState& mState;
             Collection& (CSMWorld::Data::*mAccessor)();
 
-            static const int stepSize = 1000;
-
         public:
 
             MergeIdCollectionStage (MergeState& state, Collection& (CSMWorld::Data::*accessor)());
@@ -56,16 +54,7 @@ namespace CSMTools
     template<typename RecordType, typename Collection>
     int MergeIdCollectionStage<RecordType, Collection>::setup()
     {
-        const Collection& source = (mState.mSource.getData().*mAccessor)();
-
-        int size = source.getSize();
-
-        int steps = size / stepSize;
-
-        if (size % stepSize)
-            ++steps;
-
-        return steps;
+        return (mState.mSource.getData().*mAccessor)().getSize();
     }
 
     template<typename RecordType, typename Collection>
@@ -74,16 +63,10 @@ namespace CSMTools
         const Collection& source = (mState.mSource.getData().*mAccessor)();
         Collection& target = (mState.mTarget->getData().*mAccessor)();
 
-        int begin = stage * stepSize;
-        int end = std::min ((stage+1) * stepSize, source.getSize());
+        const CSMWorld::Record<RecordType>& record = source.getRecord (stage);
 
-        for (int i=begin; i<end; ++i)
-        {
-            const CSMWorld::Record<RecordType>& record = source.getRecord (i);
-
-            if (!record.isDeleted())
-                target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_BaseOnly, &record.get()));
-        }
+        if (!record.isDeleted())
+            target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_BaseOnly, &record.get()));
     }
 }
 
