@@ -2256,7 +2256,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
-  mRunner (mProjectPath), mIdCompletionManager(mData), mDirty (false)
+  mRunner (mProjectPath), mDirty (false), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
