@@ -1,6 +1,8 @@
 
 #include "mergestages.hpp"
 
+#include <components/misc/stringops.hpp>
+
 #include "mergestate.hpp"
 
 #include "../doc/document.hpp"
@@ -52,4 +54,36 @@ void CSMTools::MergeRefIdsStage::perform (int stage, CSMDoc::Messages& messages)
 {
     mState.mSource.getData().getReferenceables().copyTo (
         stage, mState.mTarget->getData().getReferenceables());
+}
+
+
+CSMTools::MergeReferencesStage::MergeReferencesStage (MergeState& state)
+: mState (state)
+{}
+
+int CSMTools::MergeReferencesStage::setup()
+{
+    mIndex.clear();
+    return mState.mSource.getData().getReferences().getSize();
+}
+
+void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::CellRef>& record =
+        mState.mSource.getData().getReferences().getRecord (stage);
+
+    if (!record.isDeleted())
+    {
+        CSMWorld::CellRef ref = record.get();
+
+        ref.mOriginalCell = ref.mCell;
+
+        ref.mRefNum.mIndex = mIndex[Misc::StringUtils::lowerCase (ref.mCell)]++;
+        ref.mRefNum.mContentFile = 0;
+
+        CSMWorld::Record<CSMWorld::CellRef> newRecord (
+            CSMWorld::RecordBase::State_ModifiedOnly, 0, &ref);
+
+        mState.mTarget->getData().getReferences().appendRecord (newRecord);
+    }
 }
