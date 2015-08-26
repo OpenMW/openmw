@@ -35,8 +35,9 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getTopicInfos));
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getJournalInfos));
     appendStage (new MergeRefIdsStage (mState));
+    appendStage (new MergeReferencesStage (mState));
 
-    /// \todo References, Land, LandTextures
+    /// \todo Land, LandTextures
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)

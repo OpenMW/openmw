@@ -2,6 +2,7 @@
 #define CSM_TOOLS_MERGESTAGES_H
 
 #include <algorithm>
+#include <map>
 
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -69,7 +70,6 @@ namespace CSMTools
             target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_ModifiedOnly, 0, &record.get()));
     }
 
-
     class MergeRefIdsStage : public CSMDoc::Stage
     {
             MergeState& mState;
@@ -77,6 +77,22 @@ namespace CSMTools
         public:
 
             MergeRefIdsStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+    class MergeReferencesStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+            std::map<std::string, int> mIndex;
+
+        public:
+
+            MergeReferencesStage (MergeState& state);
 
             virtual int setup();
             ///< \return number of steps
