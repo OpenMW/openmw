@@ -156,28 +156,12 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Creature::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
-    {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
-    }
-
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWRender::Objects& objects = renderingInterface.getObjects();
         objects.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
-    }
-
-    void Creature::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        if(!model.empty())
-        {
-            physics.addActor(ptr, model);
-            if (getCreatureStats(ptr).isDead())
-                MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
-        }
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
     std::string Creature::getModel(const MWWorld::Ptr &ptr) const
@@ -408,30 +392,6 @@ namespace MWClass
         }
     }
 
-    void Creature::block(const MWWorld::Ptr &ptr) const
-    {
-        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end())
-            return;
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        switch(shield->getClass().getEquipmentSkill(*shield))
-        {
-            case ESM::Skill::LightArmor:
-                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::MediumArmor:
-                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::HeavyArmor:
-                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
-                break;
-            default:
-                return;
-        }
-    }
-
     boost::shared_ptr<MWWorld::Action> Creature::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
@@ -499,11 +459,6 @@ namespace MWClass
         registerClass (typeid (ESM::Creature).name(), instance);
     }
 
-    bool Creature::hasToolTip (const MWWorld::Ptr& ptr) const
-    {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
-    }
-
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
     {
         MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
@@ -562,16 +517,6 @@ namespace MWClass
         return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    osg::Vec3f Creature::getRotationVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
-        movement.mRotation[0] = 0.0f;
-        movement.mRotation[1] = 0.0f;
-        movement.mRotation[2] = 0.0f;
-        return vec;
-    }
-
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
@@ -599,21 +544,6 @@ namespace MWClass
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
         return static_cast<float>(stats.getAttribute(0).getModified() * 5);
     }
-
-    float Creature::getEncumbrance (const MWWorld::Ptr& ptr) const
-    {
-        float weight = getContainerStore (ptr).getWeight();
-
-        const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
-        weight -= effects.get(ESM::MagicEffect::Feather).getMagnitude();
-        weight += effects.get(ESM::MagicEffect::Burden).getMagnitude();
-
-        if (weight<0)
-            weight = 0;
-
-        return weight;
-    }
-
 
     int Creature::getServices(const MWWorld::Ptr &actor) const
     {
