@@ -670,19 +670,12 @@ osg::Vec3f WeatherManager::getStormDirection() const
     return mStormDirection;
 }
 
-void WeatherManager::advanceTime(double hours)
+void WeatherManager::advanceTime(double hours, bool incremental)
 {
-    // This is called when the player sleeps/waits, serves jail time, travels, or trains.
-    // In Morrowind, when any of those events occur, all weather transitions are immediately applied, regardless of
-    // whatever transition time might have been remaining.
+    // In Morrowind, when the player sleeps/waits, serves jail time, travels, or trains, all weather transitions are
+    // immediately applied, regardless of whatever transition time might have been remaining.
     mTimePassed += hours;
-    mFastForward = true;
-}
-
-void WeatherManager::advanceTimeByFrame(double hours)
-{
-    // Called when time is advanced by an incremental update for each frame.
-    mTimePassed += hours;
+    mFastForward = (!mFastForward && !incremental) ? true : mFastForward;
 }
 
 unsigned int WeatherManager::getWeatherID() const

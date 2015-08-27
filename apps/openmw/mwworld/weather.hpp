@@ -206,8 +206,7 @@ namespace MWWorld
 
         osg::Vec3f getStormDirection() const;
 
-        void advanceTime(double hours);
-        void advanceTimeByFrame(double hours);
+        void advanceTime(double hours, bool incremental);
 
         unsigned int getWeatherID() const;
 

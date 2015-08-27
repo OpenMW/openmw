@@ -787,30 +787,11 @@ namespace MWWorld
         }
     }
 
-    void World::advanceTime (double hours)
+    void World::advanceTime (double hours, bool incremental)
     {
         MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
 
-        mWeatherManager->advanceTime (hours);
-
-        hours += mGlobalVariables["gamehour"].getFloat();
-
-        setHour (hours);
-
-        int days = static_cast<int>(hours / 24);
-
-        if (days>0)
-            mGlobalVariables["dayspassed"].setInteger (
-                days + mGlobalVariables["dayspassed"].getInteger());
-    }
-
-    void World::advanceTimeByFrame (double frametime)
-    {
-        double hours = (frametime * getTimeScaleFactor()) / 3600.0;
-
-        MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
-
-        mWeatherManager->advanceTimeByFrame (hours);
+        mWeatherManager->advanceTime (hours, incremental);
 
         hours += mGlobalVariables["gamehour"].getFloat();
 
