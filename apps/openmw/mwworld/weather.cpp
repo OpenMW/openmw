@@ -5,7 +5,9 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/esm/savedgame.hpp>
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -723,30 +725,39 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
 {
     if(ESM::REC_WTHR == type)
     {
-        ESM::WeatherState state;
-        state.load(reader);
-
-        mCurrentRegion.swap(state.mCurrentRegion);
-        mTimePassed = state.mTimePassed;
-        mFastForward = state.mFastForward;
-        mWeatherUpdateTime = state.mWeatherUpdateTime;
-        mTransitionFactor = state.mTransitionFactor;
-        mCurrentWeather = state.mCurrentWeather;
-        mNextWeather = state.mCurrentWeather;
-        mQueuedWeather = state.mQueuedWeather;
-
-        mRegions.clear();
-        std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
-        if(it == state.mRegions.end())
+        if(reader.getFormat() < ESM::SavedGame::sCurrentFormat)
         {
-            // When loading an imported save, the region modifiers aren't currently being set, so just reset them.
-            importRegions();
+            // Weather state isn't really all that important, so to preserve older save games, we'll just discard the
+            // older weather records, rather than fail to handle the record.
+            reader.skipRecord();
         }
         else
         {
-            for(; it != state.mRegions.end(); ++it)
+            ESM::WeatherState state;
+            state.load(reader);
+
+            mCurrentRegion.swap(state.mCurrentRegion);
+            mTimePassed = state.mTimePassed;
+            mFastForward = state.mFastForward;
+            mWeatherUpdateTime = state.mWeatherUpdateTime;
+            mTransitionFactor = state.mTransitionFactor;
+            mCurrentWeather = state.mCurrentWeather;
+            mNextWeather = state.mCurrentWeather;
+            mQueuedWeather = state.mQueuedWeather;
+
+            mRegions.clear();
+            std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
+            if(it == state.mRegions.end())
             {
-                mRegions.insert(std::make_pair(it->first, RegionWeather(it->second)));
+                // When loading an imported save, the region modifiers aren't currently being set, so just reset them.
+                importRegions();
+            }
+            else
+            {
+                for(; it != state.mRegions.end(); ++it)
+                {
+                    mRegions.insert(std::make_pair(it->first, RegionWeather(it->second)));
+                }
             }
         }
 
