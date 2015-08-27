@@ -129,7 +129,8 @@ namespace MWClass
             }
 
             // inventory
-            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+            bool hasInventory = hasInventoryStore(ptr);
+            if (hasInventory)
                 data->mContainerStore = new MWWorld::InventoryStore();
             else
                 data->mContainerStore = new MWWorld::ContainerStore();
@@ -143,7 +144,7 @@ namespace MWClass
 
             getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr));
 
-            if (ref->mBase->mFlags & ESM::Creature::Weapon)
+            if (hasInventory)
                 getInventoryStore(ptr).autoEquip(ptr);   
         }
     }
@@ -158,10 +159,8 @@ namespace MWClass
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-
         MWRender::Objects& objects = renderingInterface.getObjects();
-        objects.insertCreature(ptr, model, (ref->mBase->mFlags & ESM::Creature::Weapon) != 0);
+        objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
     std::string Creature::getModel(const MWWorld::Ptr &ptr) const
@@ -422,9 +421,7 @@ namespace MWClass
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-
-        if (ref->mBase->mFlags & ESM::Creature::Weapon)
+        if (hasInventoryStore(ptr))
             return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
         else
             throw std::runtime_error("this creature has no inventory store");
@@ -432,9 +429,7 @@ namespace MWClass
 
     bool Creature::hasInventoryStore(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-
-        return (ref->mBase->mFlags & ESM::Creature::Weapon) != 0;
+        return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
     std::string Creature::getScript (const MWWorld::Ptr& ptr) const
@@ -446,10 +441,7 @@ namespace MWClass
 
     bool Creature::isEssential (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return (ref->mBase->mFlags & ESM::Creature::Essential) != 0;
+        return isFlagBitSet(ptr, ESM::Creature::Essential);
     }
 
     void Creature::registerSelf()
@@ -601,34 +593,22 @@ namespace MWClass
 
     bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return ref->mBase->mFlags & ESM::Creature::Bipedal;
+        return isFlagBitSet(ptr, ESM::Creature::Bipedal);
     }
 
     bool Creature::canFly(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return (ref->mBase->mFlags & ESM::Creature::Flies) != 0;
+        return isFlagBitSet(ptr, ESM::Creature::Flies);
     }
 
     bool Creature::canSwim(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return ref->mBase->mFlags & ESM::Creature::Swims || ref->mBase->mFlags & ESM::Creature::Bipedal;
+        return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Swims | ESM::Creature::Bipedal));
     }
 
     bool Creature::canWalk(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return ref->mBase->mFlags & ESM::Creature::Walks || ref->mBase->mFlags & ESM::Creature::Bipedal;
+        return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Walks | ESM::Creature::Bipedal));
     }
 
     int Creature::getSndGenTypeFromName(const MWWorld::Ptr &ptr, const std::string &name)
@@ -691,11 +671,11 @@ namespace MWClass
 
     int Creature::getBloodTexture(const MWWorld::Ptr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        int flags = ptr.get<ESM::Creature>()->mBase->mFlags;
 
-        if (ref->mBase->mFlags & ESM::Creature::Skeleton)
+        if (flags & ESM::Creature::Skeleton)
             return 1;
-        if (ref->mBase->mFlags & ESM::Creature::Metal)
+        if (flags & ESM::Creature::Metal)
             return 2;
         return 0;
     }
@@ -715,9 +695,7 @@ namespace MWClass
                 // Create a CustomData, but don't fill it from ESM records (not needed)
                 std::auto_ptr<CreatureCustomData> data (new CreatureCustomData);
 
-                MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-
-                if (ref->mBase->mFlags & ESM::Creature::Weapon)
+                if (hasInventoryStore(ptr))
                     data->mContainerStore = new MWWorld::InventoryStore();
                 else
                     data->mContainerStore = new MWWorld::ContainerStore();
@@ -760,7 +738,7 @@ namespace MWClass
 
     void Creature::respawn(const MWWorld::Ptr &ptr) const
     {
-        if (ptr.get<ESM::Creature>()->mBase->mFlags & ESM::Creature::Respawn)
+        if (isFlagBitSet(ptr, ESM::Creature::Respawn))
         {
             // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
             // This also means we cannot respawn dynamically placed references with no content file connection.
@@ -795,5 +773,11 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
+    }
+
+    bool Creature::isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask) const
+    {
+        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        return (ref->mBase->mFlags & bitMask) != 0;
     }
 }
