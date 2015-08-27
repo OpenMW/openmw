@@ -128,8 +128,7 @@ void OMW::Engine::frame(float frametime)
             }
 
             if (!guiActive)
-                mEnvironment.getWorld()->advanceTime(
-                    frametime*mEnvironment.getWorld()->getTimeScaleFactor()/3600);
+                mEnvironment.getWorld()->advanceTimeByFrame(frametime);
         }
         osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
 

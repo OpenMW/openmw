@@ -277,6 +277,9 @@ namespace MWWorld
             virtual void advanceTime (double hours);
             ///< Advance in-game time.
 
+            virtual void advanceTimeByFrame (double frametime);
+            ///< Advance in-game time by the duration of a frame.
+
             virtual void setHour (double hour);
             ///< Set in-game time hour.
 
