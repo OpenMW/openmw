@@ -127,7 +127,7 @@ namespace MWWorld
         explicit RegionWeather(const ESM::Region& region);
         explicit RegionWeather(const ESM::RegionWeatherState& state);
 
-        explicit operator ESM::RegionWeatherState() const;
+        operator ESM::RegionWeatherState() const;
 
         void setChances(const std::vector<char>& chances);
 

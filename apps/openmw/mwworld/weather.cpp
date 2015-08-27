@@ -127,7 +127,13 @@ RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
 
 RegionWeather::operator ESM::RegionWeatherState() const
 {
-    return ESM::RegionWeatherState { mWeather, mChances };
+    ESM::RegionWeatherState state =
+        {
+            mWeather,
+            mChances
+        };
+
+    return state;
 }
 
 void RegionWeather::setChances(const std::vector<char>& chances)
@@ -370,12 +376,12 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mWeatherSettings()
     , mMasser("Masser", fallback)
     , mSecunda("Secunda", fallback)
+    , mThunderFrequency(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency"))
+    , mThunderThreshold(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold"))
     , mThunderSoundID0(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0"))
     , mThunderSoundID1(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1"))
     , mThunderSoundID2(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2"))
     , mThunderSoundID3(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3"))
-    , mThunderFrequency(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency"))
-    , mThunderThreshold(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold"))
     , mWindSpeed(0.f)
     , mIsStorm(false)
     , mStormDirection(0,1,0)
@@ -705,7 +711,7 @@ void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     std::map<std::string, RegionWeather>::iterator it = mRegions.begin();
     for(; it != mRegions.end(); ++it)
     {
-        state.mRegions.insert(std::make_pair(it->first, ESM::RegionWeatherState(it->second)));
+        state.mRegions.insert(std::make_pair(it->first, it->second));
     }
 
     writer.startRecord(ESM::REC_WTHR);
