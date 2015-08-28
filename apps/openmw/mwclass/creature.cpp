@@ -58,6 +58,11 @@ namespace
         cloned->mContainerStore = mContainerStore->clone();
         return cloned;
     }
+
+    bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask)
+    {
+        return (ptr.get<ESM::Creature>()->mBase->mFlags & bitMask) != 0;
+    }
 }
 
 namespace MWClass
@@ -773,11 +778,5 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
-    }
-
-    bool Creature::isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask) const
-    {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-        return (ref->mBase->mFlags & bitMask) != 0;
     }
 }

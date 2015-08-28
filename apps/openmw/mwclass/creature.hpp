@@ -1,8 +1,6 @@
 #ifndef GAME_MWCLASS_CREATURE_H
 #define GAME_MWCLASS_CREATURE_H
 
-#include <components/esm/loadcrea.hpp>
-
 #include "actor.hpp"
 
 namespace ESM
@@ -136,11 +134,6 @@ namespace MWClass
             virtual int getBaseFightRating(const MWWorld::Ptr &ptr) const;
 
             virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const;
-
-        private:
-
-            /// \return true if any of the indicated bits in Creature's mFlags is set
-            bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask) const;
     };
 }
 
