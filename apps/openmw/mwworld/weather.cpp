@@ -675,7 +675,7 @@ void WeatherManager::advanceTime(double hours, bool incremental)
     // In Morrowind, when the player sleeps/waits, serves jail time, travels, or trains, all weather transitions are
     // immediately applied, regardless of whatever transition time might have been remaining.
     mTimePassed += hours;
-    mFastForward = (!mFastForward && !incremental) ? true : mFastForward;
+    mFastForward = !incremental ? true : mFastForward;
 }
 
 unsigned int WeatherManager::getWeatherID() const
