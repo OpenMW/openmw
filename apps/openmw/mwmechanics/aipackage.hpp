@@ -85,6 +85,10 @@ namespace MWMechanics
             float mTimer;
 
             ESM::Pathgrid::Point mPrevDest;
+
+        private:
+            void evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos);
+
     };
 }
 

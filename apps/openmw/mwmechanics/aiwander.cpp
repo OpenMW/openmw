@@ -381,11 +381,7 @@ namespace MWMechanics
         else
         {
             // have not yet reached the destination
-            //... turn towards the next point in mPath
-            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-
-            evadeObstacles(actor, storage, duration);
+            evadeObstacles(actor, storage, duration, pos);
         }
     }
 
@@ -417,8 +413,12 @@ namespace MWMechanics
         storage.mState = Wander_IdleNow;
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
     {
+        // turn towards the next point in mPath
+        zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+
+        MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
         if (mObstacleCheck.check(actor, duration))
         {
             // first check if we're walking into a door
@@ -435,10 +435,14 @@ namespace MWMechanics
             {
                 // TODO: diagonal should have same animation as walk forward
                 //       but doesn't seem to do that?
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
+                movement.mPosition[0] = 1;
+                movement.mPosition[1] = 0.1f;
             }
             mStuckCount++;  // TODO: maybe no longer needed
+        }
+        else
+        {
+            movement.mPosition[1] = 1;
         }
 //#if 0
         // TODO: maybe no longer needed
