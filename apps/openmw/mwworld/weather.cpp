@@ -736,7 +736,7 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
             mWeatherUpdateTime = state.mWeatherUpdateTime;
             mTransitionFactor = state.mTransitionFactor;
             mCurrentWeather = state.mCurrentWeather;
-            mNextWeather = state.mCurrentWeather;
+            mNextWeather = state.mNextWeather;
             mQueuedWeather = state.mQueuedWeather;
 
             mRegions.clear();
@@ -884,6 +884,8 @@ inline void WeatherManager::updateWeatherTransitions(const float elapsedRealSeco
             mCurrentWeather = mNextWeather;
         }
 
+        mNextWeather = invalidWeatherID;
+        mQueuedWeather = invalidWeatherID;
         mFastForward = false;
     }
 }
