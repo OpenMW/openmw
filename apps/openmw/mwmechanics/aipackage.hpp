@@ -83,9 +83,7 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
 
             float mTimer;
-            float mStuckTimer;
 
-            ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;
     };
 }
