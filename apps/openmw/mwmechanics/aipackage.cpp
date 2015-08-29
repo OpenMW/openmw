@@ -109,8 +109,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
             {
                 movement.mPosition[0] = 1;
                 movement.mPosition[1] = 1;
-                // change the angle a bit, too
-                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
             }
         }
         else { //Not stuck, so reset things

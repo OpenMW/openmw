@@ -437,9 +437,6 @@ namespace MWMechanics
                 //       but doesn't seem to do that?
                 actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
                 actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-                // change the angle a bit, too
-                const ESM::Position& pos = actor.getRefData().getPosition();
-                zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
             }
             mStuckCount++;  // TODO: maybe no longer needed
         }
