@@ -114,8 +114,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
         }
         else // probably walking into another NPC
         {
-            movement.mPosition[0] = 1;
-            movement.mPosition[1] = 1;
+            mObstacleCheck.takeEvasiveAction(movement);
         }
     }
     else { //Not stuck, so reset things

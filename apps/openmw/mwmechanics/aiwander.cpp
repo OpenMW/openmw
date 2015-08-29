@@ -435,8 +435,7 @@ namespace MWMechanics
             {
                 // TODO: diagonal should have same animation as walk forward
                 //       but doesn't seem to do that?
-                movement.mPosition[0] = 1;
-                movement.mPosition[1] = 0.1f;
+                mObstacleCheck.takeEvasiveAction(movement);
             }
             mStuckCount++;  // TODO: maybe no longer needed
         }
