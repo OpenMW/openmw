@@ -71,7 +71,7 @@ namespace SceneUtil
             In case of DEEP_COPY_PRIMITIVES=Off, DEEP_COPY_ARRAYS=On, the above code makes a modification to the original const Geometry& we copied from,
             causing problems if we relied on the original Geometry to remain static such as when it was added to an osgUtil::IncrementalCompileOperation.
 
-            TODO: report/fix in upstream OSG
+            Possible fix submitted to osg-submissions ( http://forum.openscenegraph.org/viewtopic.php?t=15217 ).
 
             */
 
