@@ -356,6 +356,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyTopicSelected (const std::string& topic, int id)
@@ -383,6 +385,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
