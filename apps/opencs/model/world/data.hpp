@@ -234,6 +234,8 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
 
+            IdCollection<CSMWorld::LandTexture>& getLandTextures();
+
             const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
             IdCollection<ESM::SoundGenerator>& getSoundGens();

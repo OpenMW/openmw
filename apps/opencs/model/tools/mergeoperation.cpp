@@ -37,10 +37,13 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getJournalInfos));
     appendStage (new MergeRefIdsStage (mState));
     appendStage (new MergeReferencesStage (mState));
+    appendStage (new MergeReferencesStage (mState));
+    appendStage (new ListLandTexturesMergeStage (mState));
+    appendStage (new MergeLandTexturesStage (mState));
 
     appendStage (new FinishMergedDocumentStage (mState, encoding));
 
-    /// \todo Land, LandTextures
+    /// \todo Land
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)
