@@ -27,7 +27,7 @@
 
 namespace MWMechanics
 {
-    static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
+    static const int COUNT_BEFORE_RESET = 10;
     static const float DOOR_CHECK_INTERVAL = 1.5f;
     static const float REACTION_INTERVAL = 0.25f;
     static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
@@ -443,8 +443,8 @@ namespace MWMechanics
         {
             movement.mPosition[1] = 1;
         }
-//#if 0
-        // TODO: maybe no longer needed
+
+        // if stuck for sufficiently long, act like current location was the destination
         if (mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
         {
             //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
@@ -454,7 +454,6 @@ namespace MWMechanics
             storage.mState = Wander_ChooseAction;
             mStuckCount = 0;
         }
-//#endif
     }
 
     void AiWander::playIdleDialogueRandomly(const MWWorld::Ptr& actor)
