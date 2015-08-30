@@ -225,19 +225,16 @@ namespace MWMechanics
             ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
             converter.ToWorld(temp);
             mPath.push_back(temp);
-
-            mPath.push_back(endPoint);
-            return;
         }
-
-        mPath = mCell->aStarSearch(startNode, endNode.first);
-        if (mPath.empty())
-            return;
-
-        // convert supplied path to world co-ordinates
-        for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
+        else
         {
-            converter.ToWorld(*iter);
+            mPath = mCell->aStarSearch(startNode, endNode.first);
+
+            // convert supplied path to world co-ordinates
+            for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
+            {
+                converter.ToWorld(*iter);
+            }
         }
 
         // If endNode found is NOT the closest PathGrid point to the endPoint,
@@ -254,8 +251,6 @@ namespace MWMechanics
         // The AI routines will have to deal with such situations.
         if(endNode.second)
             mPath.push_back(endPoint);
-
-        return;
     }
 
     float PathFinder::getZAngleToNext(float x, float y) const
