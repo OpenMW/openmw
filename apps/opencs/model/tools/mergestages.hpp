@@ -14,6 +14,21 @@
 
 namespace CSMTools
 {
+    class StartMergeStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            StartMergeStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
     class FinishMergedDocumentStage : public CSMDoc::Stage
     {
             MergeState& mState;

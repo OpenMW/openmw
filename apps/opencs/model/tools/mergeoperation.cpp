@@ -9,7 +9,8 @@
 CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::FromType encoding)
 : CSMDoc::Operation (CSMDoc::State_Merging, true), mState (document)
 {
-    appendStage (new FinishMergedDocumentStage (mState, encoding));
+    appendStage (new StartMergeStage (mState));
+
     appendStage (new MergeIdCollectionStage<ESM::Global> (mState, &CSMWorld::Data::getGlobals));
     appendStage (new MergeIdCollectionStage<ESM::GameSetting> (mState, &CSMWorld::Data::getGmsts));
     appendStage (new MergeIdCollectionStage<ESM::Skill> (mState, &CSMWorld::Data::getSkills));
@@ -36,6 +37,8 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeIdCollectionStage<CSMWorld::Info, CSMWorld::InfoCollection> (mState, &CSMWorld::Data::getJournalInfos));
     appendStage (new MergeRefIdsStage (mState));
     appendStage (new MergeReferencesStage (mState));
+
+    appendStage (new FinishMergedDocumentStage (mState, encoding));
 
     /// \todo Land, LandTextures
 }

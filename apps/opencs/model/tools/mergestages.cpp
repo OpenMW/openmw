@@ -8,6 +8,23 @@
 #include "../doc/document.hpp"
 #include "../world/data.hpp"
 
+
+CSMTools::StartMergeStage::StartMergeStage (MergeState& state)
+: mState (state)
+{}
+
+int CSMTools::StartMergeStage::setup()
+{
+    return 1;
+}
+
+void CSMTools::StartMergeStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    mState.mCompleted = false;
+    mState.mTextureIndices.clear();
+}
+
+
 CSMTools::FinishMergedDocumentStage::FinishMergedDocumentStage (MergeState& state, ToUTF8::FromType encoding)
 : mState (state), mEncoder (encoding)
 {}
