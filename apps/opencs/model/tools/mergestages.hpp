@@ -115,6 +115,37 @@ namespace CSMTools
             virtual void perform (int stage, CSMDoc::Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
+
+    class ListLandTexturesMergeStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            ListLandTexturesMergeStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
+
+    class MergeLandTexturesStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+            std::map<std::pair<uint16_t, int>, int>::iterator mNext;
+
+        public:
+
+            MergeLandTexturesStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
 }
 
 #endif

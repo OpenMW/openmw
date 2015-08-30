@@ -878,6 +878,11 @@ const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandText
     return mLandTextures;
 }
 
+CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures()
+{
+    return mLandTextures;
+}
+
 const CSMWorld::IdCollection<ESM::SoundGenerator>& CSMWorld::Data::getSoundGens() const
 {
     return mSoundGens;
