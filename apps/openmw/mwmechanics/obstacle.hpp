@@ -8,6 +8,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    struct Movement;
+
     /// NOTE: determined empirically based on in-game behaviour
     static const float MIN_DIST_TO_DOOR_SQUARED = 128*128;
 
@@ -36,6 +38,9 @@ namespace MWMechanics
             // should be taken
             bool check(const MWWorld::Ptr& actor, float duration);
 
+            // change direction to try to fix "stuck" actor
+            void takeEvasiveAction(MWMechanics::Movement& actorMovement);
+
         private:
 
             // for checking if we're stuck (ignoring Z axis)
@@ -53,6 +58,9 @@ namespace MWMechanics
             float mStuckDuration; // accumulate time here while in same spot
             float mEvadeDuration;
             float mDistSameSpot; // take account of actor's speed
+            float mEvadeDirection;
+
+            void chooseEvasionDirection(bool samePosition);
     };
 }
 

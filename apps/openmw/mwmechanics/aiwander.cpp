@@ -27,7 +27,7 @@
 
 namespace MWMechanics
 {
-    static const int COUNT_BEFORE_RESET = 200; // TODO: maybe no longer needed
+    static const int COUNT_BEFORE_RESET = 10;
     static const float DOOR_CHECK_INTERVAL = 1.5f;
     static const float REACTION_INTERVAL = 0.25f;
     static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
@@ -381,11 +381,7 @@ namespace MWMechanics
         else
         {
             // have not yet reached the destination
-            //... turn towards the next point in mPath
-            zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-
-            evadeObstacles(actor, storage, duration);
+            evadeObstacles(actor, storage, duration, pos);
         }
     }
 
@@ -417,8 +413,12 @@ namespace MWMechanics
         storage.mState = Wander_IdleNow;
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos)
     {
+        // turn towards the next point in mPath
+        zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+
+        MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
         if (mObstacleCheck.check(actor, duration))
         {
             // first check if we're walking into a door
@@ -435,16 +435,16 @@ namespace MWMechanics
             {
                 // TODO: diagonal should have same animation as walk forward
                 //       but doesn't seem to do that?
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 0.1f;
-                // change the angle a bit, too
-                const ESM::Position& pos = actor.getRefData().getPosition();
-                zTurn(actor, storage.mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
+                mObstacleCheck.takeEvasiveAction(movement);
             }
             mStuckCount++;  // TODO: maybe no longer needed
         }
-//#if 0
-        // TODO: maybe no longer needed
+        else
+        {
+            movement.mPosition[1] = 1;
+        }
+
+        // if stuck for sufficiently long, act like current location was the destination
         if (mStuckCount >= COUNT_BEFORE_RESET) // something has gone wrong, reset
         {
             //std::cout << "Reset \""<< cls.getName(actor) << "\"" << std::endl;
@@ -454,7 +454,6 @@ namespace MWMechanics
             storage.mState = Wander_ChooseAction;
             mStuckCount = 0;
         }
-//#endif
     }
 
     void AiWander::playIdleDialogueRandomly(const MWWorld::Ptr& actor)

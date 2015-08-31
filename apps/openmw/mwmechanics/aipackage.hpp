@@ -83,10 +83,12 @@ namespace MWMechanics
             ObstacleCheck mObstacleCheck;
 
             float mTimer;
-            float mStuckTimer;
 
-            ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;
+
+        private:
+            void evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos);
+
     };
 }
 

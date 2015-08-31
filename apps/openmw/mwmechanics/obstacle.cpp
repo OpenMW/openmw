@@ -6,6 +6,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "movement.hpp"
+
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
@@ -67,6 +69,7 @@ namespace MWMechanics
       , mStuckDuration(0)
       , mEvadeDuration(0)
       , mDistSameSpot(-1) // avoid calculating it each time
+      , mEvadeDirection(1.0f)
     {
     }
 
@@ -155,6 +158,7 @@ namespace MWMechanics
                 /* FALL THROUGH */
             case State_Evade:
             {
+                chooseEvasionDirection(samePosition);
                 mEvadeDuration += duration;
                 if(mEvadeDuration < DURATION_TO_EVADE)
                     return true;
@@ -169,4 +173,20 @@ namespace MWMechanics
         }
         return false; // no obstacles to evade (yet)
     }
+
+    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement)
+    {
+        actorMovement.mPosition[0] = mEvadeDirection;
+        actorMovement.mPosition[1] = 0;
+    }
+
+    void ObstacleCheck::chooseEvasionDirection(bool samePosition)
+    {
+        // change direction if attempt didn't work
+        if (samePosition && (0 < mEvadeDuration))
+        {
+            mEvadeDirection = mEvadeDirection == 1.0f ? -1.0f : 1.0f;
+        }
+    }
+
 }

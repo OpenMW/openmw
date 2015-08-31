@@ -19,7 +19,7 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
-MWMechanics::AiPackage::AiPackage() : mTimer(0.26f), mStuckTimer(0) { //mTimer starts at .26 to force initial pathbuild
+MWMechanics::AiPackage::AiPackage() : mTimer(0.26f) { //mTimer starts at .26 to force initial pathbuild
 
 }
 
@@ -28,7 +28,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
 {
     //Update various Timers
     mTimer += duration; //Update timer
-    mStuckTimer += duration;   //Update stuck timer
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
@@ -91,40 +90,36 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //************************
     if(mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1])) //Path finished?
         return true;
-    else if(mStuckTimer>0.5) //Every half second see if we need to take action to avoid something
+    else
     {
-/// TODO (tluppi#1#): Use ObstacleCheck here. Not working for some reason
-        //if(mObstacleCheck.check(actor, duration)) {
-        if(distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < actor.getClass().getSpeed(actor)*0.05 && distance(dest, start) > 20) { //Actually stuck, and far enough away from destination to care
-            // first check if we're walking into a door
-            MWWorld::Ptr door = getNearbyDoor(actor);
-            if(door != MWWorld::Ptr()) // NOTE: checks interior cells only
-            {
-                if(!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
-                    MWBase::Environment::get().getWorld()->activateDoor(door, 1);
-                }
-            }
-            else // probably walking into another NPC
-            {
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-                // change the angle a bit, too
-                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1]));
-            }
-        }
-        else { //Not stuck, so reset things
-            mStuckTimer = 0;
-            mStuckPos = pos;
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward
-        }
+        evadeObstacles(actor, duration, pos);
     }
-    else {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward the rest of the time
-    }
+    return false;
+}
 
+void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos)
+{
     zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
 
-    return false;
+    MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
+    if (mObstacleCheck.check(actor, duration))
+    {
+        // first check if we're walking into a door
+        MWWorld::Ptr door = getNearbyDoor(actor);
+        if (door != MWWorld::Ptr()) // NOTE: checks interior cells only
+        {
+            if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
+                MWBase::Environment::get().getWorld()->activateDoor(door, 1);
+            }
+        }
+        else // probably walking into another NPC
+        {
+            mObstacleCheck.takeEvasiveAction(movement);
+        }
+    }
+    else { //Not stuck, so reset things
+        movement.mPosition[1] = 1; //Just run forward
+    }
 }
 
 bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
