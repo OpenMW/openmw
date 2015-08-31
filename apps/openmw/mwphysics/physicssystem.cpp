@@ -460,7 +460,7 @@ namespace MWPhysics
     class HeightField
     {
     public:
-        HeightField(float* heights, int x, int y, float triSize, float sqrtVerts)
+        HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts)
         {
             // find the minimum and maximum heights (needed for bullet)
             float minh = heights[0];
@@ -927,7 +927,7 @@ namespace MWPhysics
             return MovementSolver::traceDown(ptr, found->second, mCollisionWorld, maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts)
+    void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts)
     {
         HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts);
         mHeightFields[std::make_pair(x,y)] = heightfield;
