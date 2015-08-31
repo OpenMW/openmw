@@ -116,9 +116,13 @@ struct Land
     /// @note We only check data types that *can* be loaded (present in mDataTypes)
     bool isDataLoaded(int flags) const;
 
+        Land (const Land& land);
+
+        Land& operator= (Land land);
+
+        void swap (Land& land);
+
     private:
-        Land(const Land& land);
-        Land& operator=(const Land& land);
 
         /// Loads data and marks it as loaded
         /// \return true if data is actually loaded from file, false otherwise

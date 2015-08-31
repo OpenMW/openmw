@@ -1,5 +1,7 @@
 #include "loadland.hpp"
 
+#include <utility>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
@@ -215,4 +217,29 @@ bool Land::isDataLoaded(int flags) const
     return (mDataLoaded & flags) == (flags & mDataTypes);
 }
 
+    Land::Land (const Land& land)
+    : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
+      mEsm (land.mEsm), mContext (land.mContext), mDataTypes (land.mDataTypes),
+      mDataLoaded (land.mDataLoaded),
+      mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
+    {}
+
+    Land& Land::operator= (Land land)
+    {
+        swap (land);
+        return *this;
+    }
+
+    void Land::swap (Land& land)
+    {
+        std::swap (mFlags, land.mFlags);
+        std::swap (mX, land.mX);
+        std::swap (mY, land.mY);
+        std::swap (mPlugin, land.mPlugin);
+        std::swap (mEsm, land.mEsm);
+        std::swap (mContext, land.mContext);
+        std::swap (mDataTypes, land.mDataTypes);
+        std::swap (mDataLoaded, land.mDataLoaded);
+        std::swap (mLandData, land.mLandData);
+    }
 }
