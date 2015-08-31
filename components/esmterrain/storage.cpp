@@ -18,6 +18,14 @@ namespace ESMTerrain
     {
     }
 
+    const ESM::Land::LandData *Storage::getLandData (int cellX, int cellY, int flags)
+    {
+        if (const ESM::Land *land = getLand (cellX, cellY))
+            return land->getLandData (flags);
+
+        return 0;
+    }
+
     bool Storage::getMinMaxHeights(float size, const osg::Vec2f &center, float &min, float &max)
     {
         assert (size <= 1 && "Storage::getMinMaxHeights, chunk size should be <= 1 cell");
@@ -32,24 +40,25 @@ namespace ESMTerrain
         int cellX = static_cast<int>(origin.x());
         int cellY = static_cast<int>(origin.y());
 
-        const ESM::Land* land = getLand(cellX, cellY);
-        if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
-            return false;
-
-        min = std::numeric_limits<float>::max();
-        max = -std::numeric_limits<float>::max();
-        for (int row=0; row<ESM::Land::LAND_SIZE; ++row)
+        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VHGT))
         {
-            for (int col=0; col<ESM::Land::LAND_SIZE; ++col)
+            min = std::numeric_limits<float>::max();
+            max = -std::numeric_limits<float>::max();
+            for (int row=0; row<ESM::Land::LAND_SIZE; ++row)
             {
-                float h = land->mLandData->mHeights[col*ESM::Land::LAND_SIZE+row];
-                if (h > max)
-                    max = h;
-                if (h < min)
-                    min = h;
+                for (int col=0; col<ESM::Land::LAND_SIZE; ++col)
+                {
+                    float h = data->mHeights[col*ESM::Land::LAND_SIZE+row];
+                    if (h > max)
+                        max = h;
+                    if (h < min)
+                        min = h;
+                }
             }
+            return true;
         }
-        return true;
+
+        return false;
     }
 
     void Storage::fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row)
@@ -74,12 +83,12 @@ namespace ESMTerrain
             --cellX;
             row += ESM::Land::LAND_SIZE-1;
         }
-        const ESM::Land* land = getLand(cellX, cellY);
-        if (land && land->mDataTypes&ESM::Land::DATA_VNML)
+
+        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VNML))
         {
-            normal.x() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
-            normal.y() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
-            normal.z() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
+            normal.x() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
+            normal.y() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
+            normal.z() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
             normal.normalize();
         }
         else
@@ -109,12 +118,12 @@ namespace ESMTerrain
             ++cellX;
             row = 0;
         }
-        const ESM::Land* land = getLand(cellX, cellY);
-        if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
+
+        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VCLR))
         {
-            color.r() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
-            color.g() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
-            color.b() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
+            color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
+            color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
+            color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
         }
         else
         {
@@ -158,9 +167,9 @@ namespace ESMTerrain
             float vertX_ = 0; // of current cell corner
             for (int cellX = startX; cellX < startX + std::ceil(size); ++cellX)
             {
-                const ESM::Land* land = getLand(cellX, cellY);
-                if (land && !(land->mDataTypes&ESM::Land::DATA_VHGT))
-                    land = NULL;
+                const ESM::Land::LandData *heightData = getLandData (cellX, cellY, ESM::Land::DATA_VHGT);
+                const ESM::Land::LandData *normalData = getLandData (cellX, cellY, ESM::Land::DATA_VNML);
+                const ESM::Land::LandData *colourData = getLandData (cellX, cellY, ESM::Land::DATA_VCLR);
 
                 int rowStart = 0;
                 int colStart = 0;
@@ -177,20 +186,22 @@ namespace ESMTerrain
                     vertX = vertX_;
                     for (int row=rowStart; row<ESM::Land::LAND_SIZE; row += increment)
                     {
+                        int arrayIndex = col*ESM::Land::LAND_SIZE*3+row*3;
+
                         float height = -2048;
-                        if (land)
-                            height = land->mLandData->mHeights[col*ESM::Land::LAND_SIZE + row];
+                        if (heightData)
+                            height = heightData->mHeights[col*ESM::Land::LAND_SIZE + row];
 
                         (*positions)[static_cast<unsigned int>(vertX*numVerts + vertY)]
                             = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * 8192,
                                          (vertY / float(numVerts - 1) - 0.5f) * size * 8192,
                                          height);
 
-                        if (land && land->mDataTypes&ESM::Land::DATA_VNML)
+                        if (normalData)
                         {
-                            normal.x() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
-                            normal.y() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
-                            normal.z() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
+                            for (int i=0; i<3; ++i)
+                                normal[i] = normalData->mNormals[arrayIndex+i];
+
                             normal.normalize();
                         }
                         else
@@ -208,11 +219,10 @@ namespace ESMTerrain
 
                         (*normals)[static_cast<unsigned int>(vertX*numVerts + vertY)] = normal;
 
-                        if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
+                        if (colourData)
                         {
-                            color.r() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
-                            color.g() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
-                            color.b() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
+                            for (int i=0; i<3; ++i)
+                                color[i] = colourData->mColours[arrayIndex+i] / 255.f;
                         }
                         else
                         {
@@ -262,13 +272,12 @@ namespace ESMTerrain
         assert(x<ESM::Land::LAND_TEXTURE_SIZE);
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
-        const ESM::Land* land = getLand(cellX, cellY);
-        if (land && (land->mDataTypes&ESM::Land::DATA_VTEX))
+        if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VTEX))
         {
-            int tex = land->mLandData->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            int tex = data->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0,0); // vtex 0 is always the base texture, regardless of plugin
-            return std::make_pair(tex, land->mPlugin);
+            return std::make_pair(tex, getLand (cellX, cellY)->mPlugin);
         }
         else
             return std::make_pair(0,0);
@@ -447,7 +456,7 @@ namespace ESMTerrain
     {
         assert(x < ESM::Land::LAND_SIZE);
         assert(y < ESM::Land::LAND_SIZE);
-        return land->mLandData->mHeights[y * ESM::Land::LAND_SIZE + x];
+        return land->getLandData()->mHeights[y * ESM::Land::LAND_SIZE + x];
     }
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)

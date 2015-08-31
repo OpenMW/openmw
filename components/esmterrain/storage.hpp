@@ -21,11 +21,16 @@ namespace ESMTerrain
     private:
 
         // Not implemented in this class, because we need different Store implementations for game and editor
-        virtual const ESM::Land* getLand (int cellX, int cellY) = 0;
+        virtual const ESM::Land* getLand (int cellX, int cellY)= 0;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
 
     public:
         Storage(const VFS::Manager* vfs);
+
+        /// Data is loaded first, if necessary. Will return a 0-pointer if there is no data for
+        /// any of the data types specified via \a flags. Will also return a 0-pointer if there
+        /// is no land record for the coordinates \a cellX / \a cellY.
+        const ESM::Land::LandData *getLandData (int cellX, int cellY, int flags);
 
         // Not implemented in this class, because we need different Store implementations for game and editor
         /// Get bounds of the whole terrain in cell units

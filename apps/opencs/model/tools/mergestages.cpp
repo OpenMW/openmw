@@ -130,7 +130,7 @@ void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages&
         land.loadData (ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
             ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
 
-        if (land.mLandData && land.mDataLoaded & ESM::Land::DATA_VTEX)
+        if (const ESM::Land::LandData *data = land.getLandData (ESM::Land::DATA_VTEX))
         {
             // list texture indices
             std::pair<uint16_t, int> key;
@@ -138,7 +138,7 @@ void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages&
 
             for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
             {
-                key.first = land.mLandData->mTextures[i];
+                key.first = data->mTextures[i];
 
                 mState.mTextureIndices[key] = -1;
             }

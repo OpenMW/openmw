@@ -10,7 +10,7 @@ namespace ESM
 {
     unsigned int Land::sRecordId = REC_LAND;
 
-void Land::LandData::save(ESMWriter &esm)
+void Land::LandData::save(ESMWriter &esm) const
 {
     if (mDataTypes & Land::DATA_VNML) {
         esm.writeHNT("VNML", mNormals, sizeof(mNormals));
@@ -55,7 +55,7 @@ void Land::LandData::save(ESMWriter &esm)
     }
 }
 
-void Land::LandData::transposeTextureData(uint16_t *in, uint16_t *out)
+void Land::LandData::transposeTextureData(const uint16_t *in, uint16_t *out)
 {
     int readPos = 0; //bit ugly, but it works
     for ( int y1 = 0; y1 < 4; y1++ )
@@ -139,7 +139,7 @@ void Land::save(ESMWriter &esm) const
     esm.writeHNT("DATA", mFlags);
 }
 
-void Land::loadData(int flags)
+void Land::loadData(int flags) const
 {
     // Try to load only available data
     flags = flags & mDataTypes;
@@ -201,7 +201,7 @@ void Land::unloadData()
     }
 }
 
-bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size)
+bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size) const
 {
     if ((mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
         mEsm->getHExact(ptr, size);
@@ -241,5 +241,19 @@ bool Land::isDataLoaded(int flags) const
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mDataLoaded, land.mDataLoaded);
         std::swap (mLandData, land.mLandData);
+    }
+
+    const Land::LandData *Land::getLandData (int flags) const
+    {
+        if (!(flags & mDataTypes))
+            return 0;
+
+        loadData (flags);
+        return mLandData;
+    }
+
+    const Land::LandData *Land::getLandData() const
+    {
+        return mLandData;
     }
 }
