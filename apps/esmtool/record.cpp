@@ -841,19 +841,13 @@ void Record<ESM::Land>::print()
     std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
-    // Seems like this should done with reference counting in the
-    // loader to me.  But I'm not really knowledgable about this
-    // record type yet. --Cory
-    bool wasLoaded = (mData.mDataLoaded != 0);
-    if (mData.mDataTypes) mData.loadData(mData.mDataTypes);
-    if (mData.mDataLoaded)
+    if (const ESM::Land::LandData *data = mData.getLandData (mData.mDataTypes))
     {
-        std::cout << "  Height Offset: " << mData.mLandData->mHeightOffset << std::endl;
+        std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
         // Lots of missing members.
-        std::cout << "  Unknown1: " << mData.mLandData->mUnk1 << std::endl;
-        std::cout << "  Unknown2: " << mData.mLandData->mUnk2 << std::endl;
+        std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
+        std::cout << "  Unknown2: " << data->mUnk2 << std::endl;
     }
-    if (!wasLoaded) mData.unloadData();
 }
 
 template<>

@@ -420,8 +420,9 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
         mState.getWriter().startRecord (record.mLand->sRecordId);
 
         record.mLand->save (mState.getWriter());
-        if(record.mLand->mLandData)
-            record.mLand->mLandData->save (mState.getWriter());
+
+        if (const ESM::Land::LandData *data = record.mLand->getLandData (record.mLand->mDataTypes))
+            data->save (mState.getWriter());
 
         mState.getWriter().endRecord (record.mLand->sRecordId);
     }
