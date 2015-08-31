@@ -773,6 +773,11 @@ const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
     return mLand;
 }
 
+CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand()
+{
+    return mLand;
+}
+
 const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures() const
 {
     return mLandTextures;
@@ -951,7 +956,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             int index = mLand.load(*mReader, mBase);
 
             if (index!=-1 && !mBase)
-                mLand.getRecord (index).mModified.mLand->loadData (
+                mLand.getRecord (index).mModified.loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
                     ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
 

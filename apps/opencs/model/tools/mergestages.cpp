@@ -124,7 +124,7 @@ void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages&
 
     if (!record.isDeleted())
     {
-        ESM::Land& land = *record.get().mLand;
+        const ESM::Land& land = record.get();
 
         // make sure record is loaded
         land.loadData (ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |

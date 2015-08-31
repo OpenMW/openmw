@@ -232,6 +232,8 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
+            IdCollection<CSMWorld::Land>& getLand();
+
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
 
             IdCollection<CSMWorld::LandTexture>& getLandTextures();
