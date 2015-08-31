@@ -16,7 +16,7 @@ namespace ESMTerrain
     private:
 
         // Not implemented in this class, because we need different Store implementations for game and editor
-        virtual ESM::Land* getLand (int cellX, int cellY) = 0;
+        virtual const ESM::Land* getLand (int cellX, int cellY) = 0;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
 
     public:

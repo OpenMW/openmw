@@ -8,7 +8,7 @@ namespace CSVRender
     {
     }
 
-    ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
+    const ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
     {
         std::ostringstream stream;
         stream << "#" << cellX << " " << cellY;
