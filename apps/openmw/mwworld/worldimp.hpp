@@ -274,7 +274,7 @@ namespace MWWorld
 
             virtual void disable (const Ptr& ptr);
 
-            virtual void advanceTime (double hours);
+            virtual void advanceTime (double hours, bool incremental = false);
             ///< Advance in-game time.
 
             virtual void setHour (double hour);

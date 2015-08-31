@@ -193,7 +193,7 @@ namespace MWWorld
 
         mGlobalVariables.fill (mStore);
 
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
+        mWeatherManager = new MWWorld::WeatherManager(*mRendering, mFallback, mStore);
 
         mWorldScene = new Scene(*mRendering, mPhysics);
     }
@@ -211,6 +211,11 @@ namespace MWWorld
         mRendering->resetCamera();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
+
+        // we don't want old weather to persist on a new game
+        // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
+        delete mWeatherManager;
+        mWeatherManager = new MWWorld::WeatherManager(*mRendering, mFallback, mStore);
 
         if (!bypass)
         {
@@ -263,11 +268,6 @@ namespace MWWorld
         // enable collision
         if (!mPhysics->toggleCollisionMode())
             mPhysics->toggleCollisionMode();
-
-        // we don't want old weather to persist on a new game
-        delete mWeatherManager;
-        mWeatherManager = 0;
-        mWeatherManager = new MWWorld::WeatherManager(mRendering,&mFallback,&mStore);
 
         if (!mStartupScript.empty())
             MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
@@ -786,11 +786,11 @@ namespace MWWorld
         }
     }
 
-    void World::advanceTime (double hours)
+    void World::advanceTime (double hours, bool incremental)
     {
         MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
 
-        mWeatherManager->advanceTime (hours);
+        mWeatherManager->advanceTime (hours, incremental);
 
         hours += mGlobalVariables["gamehour"].getFloat();
 
@@ -813,8 +813,6 @@ namespace MWWorld
         hour = std::fmod (hour, 24);
 
         mGlobalVariables["gamehour"].setFloat(static_cast<float>(hour));
-
-        mWeatherManager->setHour(static_cast<float>(hour));
 
         if (days>0)
             setDay (days + mGlobalVariables["day"].getInteger());
@@ -2874,15 +2872,15 @@ namespace MWWorld
         MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
-    
+
     void World::updateWeather(float duration, bool paused)
     {
         if (mPlayer->wasTeleported())
         {
             mPlayer->setTeleported(false);
-            mWeatherManager->switchToNextWeather(true);
+            mWeatherManager->playerTeleported();
         }
-        
+
         mWeatherManager->update(duration, paused);
     }
 

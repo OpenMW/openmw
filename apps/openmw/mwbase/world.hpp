@@ -185,7 +185,7 @@ namespace MWBase
 
             virtual void disable (const MWWorld::Ptr& ptr) = 0;
 
-            virtual void advanceTime (double hours) = 0;
+            virtual void advanceTime (double hours, bool incremental = false) = 0;
             ///< Advance in-game time.
 
             virtual void setHour (double hour) = 0;

@@ -5,7 +5,9 @@
 
 #include <components/misc/rng.hpp>
 
+#include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
+#include <components/esm/savedgame.hpp>
 #include <components/esm/weatherstate.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -28,6 +30,8 @@ using namespace MWWorld;
 
 namespace
 {
+    static const int invalidWeatherID = -1;
+
     float lerp (float x, float y, float factor)
     {
         return x * (1-factor) + y * factor;
@@ -87,18 +91,106 @@ Max Raindrops=650 ?
 */
 }
 
-float Weather::transitionSeconds() const
+float Weather::transitionDelta() const
 {
-   // This formula is reversed from Morrowind by observing different Transition Delta values with Clouds
-   // Maximum Percent set to 1.0, and watching for when the light from the sun was no longer visible.
-   static const float deltasPerHour = 0.00835;
-   return (deltasPerHour / mTransitionDelta) * 60.0f * 60.0f;
+    // Transition Delta describes how quickly transitioning to the weather in question will take, in Hz. Note that the
+    // measurement is in real time, not in-game time.
+    return mTransitionDelta;
 }
 
 float Weather::cloudBlendFactor(float transitionRatio) const
 {
     // Clouds Maximum Percent affects how quickly the sky transitions from one sky texture to the next.
     return transitionRatio / mCloudsMaximumPercent;
+}
+
+RegionWeather::RegionWeather(const ESM::Region& region)
+    : mWeather(invalidWeatherID)
+    , mChances()
+{
+    mChances.reserve(10);
+    mChances.push_back(region.mData.mClear);
+    mChances.push_back(region.mData.mCloudy);
+    mChances.push_back(region.mData.mFoggy);
+    mChances.push_back(region.mData.mOvercast);
+    mChances.push_back(region.mData.mRain);
+    mChances.push_back(region.mData.mThunder);
+    mChances.push_back(region.mData.mAsh);
+    mChances.push_back(region.mData.mBlight);
+    mChances.push_back(region.mData.mA);
+    mChances.push_back(region.mData.mB);
+}
+
+RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
+    : mWeather(state.mWeather)
+    , mChances(state.mChances)
+{
+}
+
+RegionWeather::operator ESM::RegionWeatherState() const
+{
+    ESM::RegionWeatherState state =
+        {
+            mWeather,
+            mChances
+        };
+
+    return state;
+}
+
+void RegionWeather::setChances(const std::vector<char>& chances)
+{
+    if(mChances.size() < chances.size())
+    {
+        mChances.reserve(chances.size());
+    }
+
+    std::vector<char>::const_iterator it = chances.begin();
+    for(size_t i = 0; it != chances.end(); ++it, ++i)
+    {
+        mChances[i] = *it;
+    }
+
+    // Regional weather no longer supports the current type, select a new weather pattern.
+    if((static_cast<size_t>(mWeather) >= mChances.size()) || (mChances[mWeather] == 0))
+    {
+        chooseNewWeather();
+    }
+}
+
+void RegionWeather::setWeather(int weatherID)
+{
+    mWeather = weatherID;
+}
+
+int RegionWeather::getWeather()
+{
+    // If the region weather was already set (by ChangeWeather, or by a previous call) then just return that value.
+    // Note that the region weather will be expired periodically when the weather update timer expires.
+    if(mWeather == invalidWeatherID)
+    {
+        chooseNewWeather();
+    }
+
+    return mWeather;
+}
+
+void RegionWeather::chooseNewWeather()
+{
+    // All probabilities must add to 100 (responsibility of the user).
+    // If chances A and B has values 30 and 70 then by generating 100 numbers 1..100, 30% will be lesser or equal 30
+    // and 70% will be greater than 30 (in theory).
+    int chance = Misc::Rng::rollDice(100) + 1; // 1..100
+    int sum = 0;
+    int i = 0;
+    for(; static_cast<size_t>(i) < mChances.size(); ++i)
+    {
+        sum += mChances[i];
+        if(chance <= sum)
+            break;
+    }
+
+    mWeather = i;
 }
 
 MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
@@ -118,22 +210,22 @@ MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
     mSpeed = std::min(mSpeed, 180.0f / 23.0f);
 }
 
-MWRender::MoonState MoonModel::calculateState(unsigned int daysPassed, float gameHour) const
+MWRender::MoonState MoonModel::calculateState(const TimeStamp& gameTime) const
 {
-    float rotationFromHorizon = angle(daysPassed, gameHour);
+    float rotationFromHorizon = angle(gameTime);
     MWRender::MoonState state =
-    {
-        rotationFromHorizon,
-        mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
-        static_cast<MWRender::MoonState::Phase>(phase(daysPassed, gameHour)),
-        shadowBlend(rotationFromHorizon),
-        earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameHour)
-    };
+        {
+            rotationFromHorizon,
+            mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
+            static_cast<MWRender::MoonState::Phase>(phase(gameTime)),
+            shadowBlend(rotationFromHorizon),
+            earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameTime.getHour())
+        };
 
     return state;
 }
 
-inline float MoonModel::angle(unsigned int daysPassed, float gameHour) const
+inline float MoonModel::angle(const TimeStamp& gameTime) const
 {
     // Morrowind's moons start travel on one side of the horizon (let's call it H-rise) and travel 180 degrees to the
     // opposite horizon (let's call it H-set). Upon reaching H-set, they reset to H-rise until the next moon rise.
@@ -142,25 +234,25 @@ inline float MoonModel::angle(unsigned int daysPassed, float gameHour) const
     // 1. Moon rises and then sets in one day.
     // 2. Moon sets and doesn't rise in one day (occurs when the moon rise hour is >= 24).
     // 3. Moon sets and then rises in one day.
-    float moonRiseHourToday = moonRiseHour(daysPassed);
+    float moonRiseHourToday = moonRiseHour(gameTime.getDay());
     float moonRiseAngleToday = 0;
 
-    if(gameHour < moonRiseHourToday)
+    if(gameTime.getHour() < moonRiseHourToday)
     {
-        float moonRiseHourYesterday = moonRiseHour(daysPassed - 1);
+        float moonRiseHourYesterday = moonRiseHour(gameTime.getDay() - 1);
         if(moonRiseHourYesterday < 24)
         {
             float moonRiseAngleYesterday = rotation(24 - moonRiseHourYesterday);
             if(moonRiseAngleYesterday < 180)
             {
                 // The moon rose but did not set yesterday, so accumulate yesterday's angle with how much we've travelled today.
-                moonRiseAngleToday = rotation(gameHour) + moonRiseAngleYesterday;
+                moonRiseAngleToday = rotation(gameTime.getHour()) + moonRiseAngleYesterday;
             }
         }
     }
     else
     {
-        moonRiseAngleToday = rotation(gameHour - moonRiseHourToday);
+        moonRiseAngleToday = rotation(gameTime.getHour() - moonRiseHourToday);
     }
 
     if(moonRiseAngleToday >= 180)
@@ -194,17 +286,17 @@ inline float MoonModel::rotation(float hours) const
     return 15.0f * mSpeed * hours;
 }
 
-inline unsigned int MoonModel::phase(unsigned int daysPassed, float gameHour) const
+inline unsigned int MoonModel::phase(const TimeStamp& gameTime) const
 {
     // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
     // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
     // forward declare it (C++11 strongly typed enums solve this).
 
     // If the moon didn't rise yet today, use yesterday's moon phase.
-    if(gameHour < moonRiseHour(daysPassed))
-        return (daysPassed / 3) % 8;
+    if(gameTime.getHour() < moonRiseHour(gameTime.getDay()))
+        return (gameTime.getDay() / 3) % 8;
     else
-        return ((daysPassed + 1) / 3) % 8;
+        return ((gameTime.getDay() + 1) / 3) % 8;
 }
 
 inline float MoonModel::shadowBlend(float angle) const
@@ -270,51 +362,68 @@ inline float MoonModel::earlyMoonShadowAlpha(float angle) const
         return 0.0f;
 }
 
-WeatherManager::WeatherManager(MWRender::RenderingManager* rendering, MWWorld::Fallback* fallback, MWWorld::ESMStore* store) :
-     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mStore(store),
-     mRendering(rendering), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
-     mRemainingTransitionTime(0), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
-     mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0),
-     mMasser("Masser", *fallback), mSecunda("Secunda", *fallback)
+WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWorld::Fallback& fallback, MWWorld::ESMStore& store)
+    : mStore(store)
+    , mRendering(rendering)
+    , mSunriseTime(fallback.getFallbackFloat("Weather_Sunrise_Time"))
+    , mSunsetTime(fallback.getFallbackFloat("Weather_Sunset_Time"))
+    , mSunriseDuration(fallback.getFallbackFloat("Weather_Sunrise_Duration"))
+    , mSunsetDuration(fallback.getFallbackFloat("Weather_Sunset_Duration"))
+    , mNightStart(mSunsetTime + mSunsetDuration)
+    , mNightEnd(mSunriseTime - 0.5f)
+    , mDayStart(mSunriseTime + mSunriseDuration)
+    , mDayEnd(mSunsetTime)
+    , mHoursBetweenWeatherChanges(fallback.getFallbackFloat("Weather_Hours_Between_Weather_Changes"))
+    , mRainSpeed(fallback.getFallbackFloat("Weather_Precip_Gravity"))
+    , mWeatherSettings()
+    , mMasser("Masser", fallback)
+    , mSecunda("Secunda", fallback)
+    , mThunderFrequency(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency"))
+    , mThunderThreshold(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold"))
+    , mThunderSoundID0(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0"))
+    , mThunderSoundID1(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1"))
+    , mThunderSoundID2(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2"))
+    , mThunderSoundID3(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3"))
+    , mWindSpeed(0.f)
+    , mIsStorm(false)
+    , mStormDirection(0,1,0)
+    , mThunderSoundDelay(0.25)
+    , mThunderFlash(0)
+    , mThunderChance(0)
+    , mThunderChanceNeeded(50)
+    , mCurrentRegion()
+    , mTimePassed(0)
+    , mFastForward(false)
+    , mWeatherUpdateTime(mHoursBetweenWeatherChanges)
+    , mTransitionFactor(0)
+    , mCurrentWeather(0)
+    , mNextWeather(0)
+    , mQueuedWeather(0)
+    , mRegions()
+    , mResult()
+    , mAmbientSound()
+    , mPlayingSoundID()
 {
-    //Globals
-    mThunderSoundID0 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");
-    mThunderSoundID1 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1");
-    mThunderSoundID2 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2");
-    mThunderSoundID3 = fallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3");
-    mSunriseTime = fallback->getFallbackFloat("Weather_Sunrise_Time");
-    mSunsetTime = fallback->getFallbackFloat("Weather_Sunset_Time");
-    mSunriseDuration = fallback->getFallbackFloat("Weather_Sunrise_Duration");
-    mSunsetDuration = fallback->getFallbackFloat("Weather_Sunset_Duration");
-    mHoursBetweenWeatherChanges = fallback->getFallbackFloat("Weather_Hours_Between_Weather_Changes");
-    mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-    mThunderFrequency = fallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency");
-    mThunderThreshold = fallback->getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold");
-    mThunderSoundDelay = 0.25;
+    mWeatherSettings.reserve(10);
+    addWeather("Clear", fallback);
+    addWeather("Cloudy", fallback);
+    addWeather("Foggy", fallback);
+    addWeather("Overcast", fallback);
+    addWeather("Rain", fallback, "rain");
+    addWeather("Thunderstorm", fallback, "rain heavy");
+    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif");
+    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif");
+    addWeather("Snow", fallback, "", "meshes\\snow.nif");
+    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif");
 
-    mRainSpeed = fallback->getFallbackFloat("Weather_Precip_Gravity");
+    Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
+    for(; it != store.get<ESM::Region>().end(); ++it)
+    {
+        std::string regionID = Misc::StringUtils::lowerCase(it->mId);
+        mRegions.insert(std::make_pair(regionID, RegionWeather(*it)));
+    }
 
-    //Some useful values
-    /* TODO: Use pre-sunrise_time, pre-sunset_time,
-     * post-sunrise_time, and post-sunset_time to better
-     * describe sunrise/sunset time.
-     * These values are fallbacks attached to weather.
-     */
-    mNightStart = mSunsetTime + mSunsetDuration;
-    mNightEnd = mSunriseTime - 0.5f;
-    mDayStart = mSunriseTime + mSunriseDuration;
-    mDayEnd = mSunsetTime;
-
-    addWeather("Clear", *fallback);
-    addWeather("Cloudy", *fallback);
-    addWeather("Foggy", *fallback);
-    addWeather("Overcast", *fallback);
-    addWeather("Rain", *fallback, "rain");
-    addWeather("Thunderstorm", *fallback, "rain heavy");
-    addWeather("Ashstorm", *fallback, "ashstorm", "meshes\\ashcloud.nif");
-    addWeather("Blight", *fallback, "blight", "meshes\\blightcloud.nif");
-    addWeather("Snow", *fallback, "", "meshes\\snow.nif");
-    addWeather("Blizzard", *fallback, "BM Blizzard", "meshes\\blizzard.nif");
+    forceWeather(0);
 }
 
 WeatherManager::~WeatherManager()
@@ -322,250 +431,127 @@ WeatherManager::~WeatherManager()
     stopSounds();
 }
 
-void WeatherManager::setWeather(const std::string& weather, bool instant)
+void WeatherManager::changeWeather(const std::string& regionID, const unsigned int weatherID)
 {
-    if (weather == mCurrentWeather && mNextWeather == "")
-    {
-        mFirstUpdate = false;
-        return;
-    }
+    // In Morrowind, this seems to have the following behavior, when applied to the current region:
+    // - When there is no transition in progress, start transitioning to the new weather.
+    // - If there is a transition in progress, queue up the transition and process it when the current one completes.
+    // - If there is a transition in progress, and a queued transition, overwrite the queued transition.
+    // - If multiple calls to ChangeWeather are made while paused (console up), only the last call will be used,
+    //   meaning that if there was no transition in progress, only the last ChangeWeather will be processed.
+    // If the region isn't current, Morrowind will store the new weather for the region in question.
 
-    if (instant || mFirstUpdate)
+    if(weatherID < mWeatherSettings.size())
     {
-        mNextWeather = "";
-        mCurrentWeather = weather;
-    }
-    else
-    {
-        if (mNextWeather != "")
+        std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
+        std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+        if(it != mRegions.end())
         {
-            // transition more than 50% finished?
-            if (mRemainingTransitionTime / (findWeather(mCurrentWeather).transitionSeconds()) <= 0.5)
-                mCurrentWeather = mNextWeather;
-        }
-
-        mNextWeather = weather;
-        mRemainingTransitionTime = findWeather(mCurrentWeather).transitionSeconds();
-    }
-    mFirstUpdate = false;
-}
-
-void WeatherManager::setResult(const std::string& weatherType)
-{
-    const Weather& current = findWeather(weatherType);
-
-    mResult.mCloudTexture = current.mCloudTexture;
-    mResult.mCloudBlendFactor = 0;
-    mResult.mWindSpeed = current.mWindSpeed;
-    mResult.mCloudSpeed = current.mCloudSpeed;
-    mResult.mGlareView = current.mGlareView;
-    mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
-    mResult.mAmbientSoundVolume = 1.f;
-    mResult.mEffectFade = 1.f;
-    mResult.mSunColor = current.mSunDiscSunsetColor;
-
-    mResult.mIsStorm = current.mIsStorm;
-
-    mResult.mRainSpeed = current.mRainSpeed;
-    mResult.mRainFrequency = current.mRainFrequency;
-
-    mResult.mParticleEffect = current.mParticleEffect;
-    mResult.mRainEffect = current.mRainEffect;
-
-    mResult.mNight = (mHour < mSunriseTime || mHour > mNightStart - 1);
-
-    mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
-
-    // night
-    if (mHour <= mNightEnd || mHour >= mNightStart + 1)
-    {
-        mResult.mFogColor = current.mFogNightColor;
-        mResult.mAmbientColor = current.mAmbientNightColor;
-        mResult.mSunColor = current.mSunNightColor;
-        mResult.mSkyColor = current.mSkyNightColor;
-        mResult.mNightFade = 1.f;
-    }
-
-    // sunrise
-    else if (mHour >= mNightEnd && mHour <= mDayStart + 1)
-    {
-        if (mHour <= mSunriseTime)
-        {
-            // fade in
-            float advance = mSunriseTime - mHour;
-            float factor = advance / 0.5f;
-            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
-            mResult.mNightFade = factor;
-        }
-        else //if (mHour >= 6)
-        {
-            // fade out
-            float advance = mHour - mSunriseTime;
-            float factor = advance / 3.f;
-            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
-        }
-    }
-
-    // day
-    else if (mHour >= mDayStart + 1 && mHour <= mDayEnd - 1)
-    {
-        mResult.mFogColor = current.mFogDayColor;
-        mResult.mAmbientColor = current.mAmbientDayColor;
-        mResult.mSunColor = current.mSunDayColor;
-        mResult.mSkyColor = current.mSkyDayColor;
-    }
-
-    // sunset
-    else if (mHour >= mDayEnd - 1 && mHour <= mNightStart + 1)
-    {
-        if (mHour <= mDayEnd + 1)
-        {
-            // fade in
-            float advance = (mDayEnd + 1) - mHour;
-            float factor = (advance / 2);
-            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
-        }
-        else //if (mHour >= 19)
-        {
-            // fade out
-            float advance = mHour - (mDayEnd + 1);
-            float factor = advance / 2.f;
-            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
-            mResult.mNightFade = factor;
+            it->second.setWeather(weatherID);
+            regionalWeatherChanged(it->first, it->second);
         }
     }
 }
 
-void WeatherManager::transition(float factor)
+void WeatherManager::modRegion(const std::string& regionID, const std::vector<char>& chances)
 {
-    setResult(mCurrentWeather);
-    const MWRender::WeatherResult current = mResult;
-    setResult(mNextWeather);
-    const MWRender::WeatherResult other = mResult;
+    // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
+    // In Morrowind, this seems to have the following behavior when applied to the current region:
+    // - If the region supports the current weather, no change in current weather occurs.
+    // - If the region no longer supports the current weather, and there is no transition in progress, begin to
+    //   transition to a new supported weather type.
+    // - If the region no longer supports the current weather, and there is a transition in progress, queue a
+    //   transition to a new supported weather type.
 
-    const Weather& nextWeather = findWeather(mNextWeather);
-
-    mResult.mCloudTexture = current.mCloudTexture;
-    mResult.mNextCloudTexture = other.mCloudTexture;
-    mResult.mCloudBlendFactor = nextWeather.cloudBlendFactor(factor);
-
-    mResult.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
-    mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
-    mResult.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
-
-    mResult.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
-    mResult.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
-    mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
-    mResult.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
-    mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
-    mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
-    mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
-
-    mResult.mNight = current.mNight;
-
-    if (factor < 0.5)
+    std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
+    std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+    if(it != mRegions.end())
     {
-        mResult.mIsStorm = current.mIsStorm;
-        mResult.mParticleEffect = current.mParticleEffect;
-        mResult.mRainEffect = current.mRainEffect;
-        mResult.mParticleEffect = current.mParticleEffect;
-        mResult.mRainSpeed = current.mRainSpeed;
-        mResult.mRainFrequency = current.mRainFrequency;
-        mResult.mAmbientSoundVolume = 1-(factor*2);
-        mResult.mEffectFade = mResult.mAmbientSoundVolume;
-        mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        it->second.setChances(chances);
+        regionalWeatherChanged(it->first, it->second);
     }
-    else
+}
+
+void WeatherManager::playerTeleported()
+{
+    // If the player teleports to an outdoors cell in a new region (for instance, by travelling), the weather needs to
+    // be changed immediately, and any transitions for the previous region discarded.
+    MWBase::World* world = MWBase::Environment::get().getWorld();
+    if(world->isCellExterior() || world->isCellQuasiExterior())
     {
-        mResult.mIsStorm = other.mIsStorm;
-        mResult.mParticleEffect = other.mParticleEffect;
-        mResult.mRainEffect = other.mRainEffect;
-        mResult.mParticleEffect = other.mParticleEffect;
-        mResult.mRainSpeed = other.mRainSpeed;
-        mResult.mRainFrequency = other.mRainFrequency;
-        mResult.mAmbientSoundVolume = 2*(factor-0.5f);
-        mResult.mEffectFade = mResult.mAmbientSoundVolume;
-        mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+        std::string playerRegion = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
+        std::map<std::string, RegionWeather>::iterator it = mRegions.find(playerRegion);
+        if(it != mRegions.end() && playerRegion != mCurrentRegion)
+        {
+            mCurrentRegion = playerRegion;
+            forceWeather(it->second.getWeather());
+        }
     }
 }
 
 void WeatherManager::update(float duration, bool paused)
 {
-    float timePassed = static_cast<float>(mTimePassed);
-    mTimePassed = 0;
+    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWBase::World& world = *MWBase::Environment::get().getWorld();
+    TimeStamp time = world.getTimeStamp();
 
-    mWeatherUpdateTime -= timePassed;
-
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-    const bool exterior = (world->isCellExterior() || world->isCellQuasiExterior());
-    if (!exterior)
+    if(!paused)
     {
-        mRendering->setSkyEnabled(false);
+        // Add new transitions when either the player's current external region changes.
+        std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
+        if(updateWeatherTime() || updateWeatherRegion(playerRegion))
+        {
+            std::map<std::string, RegionWeather>::iterator it = mRegions.find(mCurrentRegion);
+            if(it != mRegions.end())
+            {
+                addWeatherTransition(it->second.getWeather());
+            }
+        }
+
+        updateWeatherTransitions(duration);
+    }
+
+    const bool exterior = (world.isCellExterior() || world.isCellQuasiExterior());
+    if(!exterior)
+    {
+        mRendering.setSkyEnabled(false);
         //mRendering->getSkyManager()->setLightningStrength(0.f);
         stopSounds();
         return;
     }
 
-    switchToNextWeather(false);
-
-    if (mNextWeather != "")
-    {
-        mRemainingTransitionTime -= timePassed;
-        if (mRemainingTransitionTime < 0)
-        {
-            mCurrentWeather = mNextWeather;
-            mNextWeather = "";
-        }
-    }
-
-    if (mNextWeather != "")
-        transition(1 - (mRemainingTransitionTime / (findWeather(mCurrentWeather).transitionSeconds())));
-    else
-        setResult(mCurrentWeather);
+    calculateWeatherResult(time.getHour());
 
     mWindSpeed = mResult.mWindSpeed;
     mIsStorm = mResult.mIsStorm;
 
     if (mIsStorm)
     {
-        MWWorld::Ptr player = world->getPlayerPtr();
         osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
         osg::Vec3f redMountainPos (19950, 72032, 27831);
 
         mStormDirection = (playerPos - redMountainPos);
         mStormDirection.z() = 0;
         mStormDirection.normalize();
-        mRendering->getSkyManager()->setStormDirection(mStormDirection);
+        mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }
 
-    mRendering->configureFog(mResult.mFogDepth, mResult.mFogColor);
+    mRendering.configureFog(mResult.mFogDepth, mResult.mFogColor);
 
     // disable sun during night
-    if (mHour >= mNightStart || mHour <= mSunriseTime)
-        mRendering->getSkyManager()->sunDisable();
+    if (time.getHour() >= mNightStart || time.getHour() <= mSunriseTime)
+        mRendering.getSkyManager()->sunDisable();
     else
-        mRendering->getSkyManager()->sunEnable();
+        mRendering.getSkyManager()->sunEnable();
 
     // Update the sun direction.  Run it east to west at a fixed angle from overhead.
     // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
     // mark when the sun is level with the horizon.
     {
         // Shift times into a 24-hour window beginning at mSunriseTime...
-        float adjustedHour = mHour;
+        float adjustedHour = time.getHour();
         float adjustedNightStart = mNightStart;
-        if ( mHour < mSunriseTime )
+        if ( time.getHour() < mSunriseTime )
             adjustedHour += 24.f;
         if ( mNightStart < mSunriseTime )
             adjustedNightStart += 24.f;
@@ -585,16 +571,15 @@ void WeatherManager::update(float duration, bool paused)
             static_cast<float>(cos(theta)),
             -0.268f, // approx tan( -15 degrees )
             static_cast<float>(sin(theta)));
-        mRendering->setSunDirection( final * -1 );
+        mRendering.setSunDirection( final * -1 );
     }
 
-    TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
-    mRendering->getSkyManager()->setMasserState(mMasser.calculateState(time.getDay(), time.getHour()));
-    mRendering->getSkyManager()->setSecundaState(mSecunda.calculateState(time.getDay(), time.getHour()));
+    mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
+    mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
     if (!paused)
     {
-        if (mCurrentWeather == "thunderstorm" && mNextWeather == "")
+        if(mCurrentWeather == 5 && !inTransition())
         {
             if (mThunderFlash > 0)
             {
@@ -641,12 +626,11 @@ void WeatherManager::update(float duration, bool paused)
         //else
             //mRendering->getSkyManager()->setLightningStrength(0.f);
     }
-    
 
-    mRendering->setAmbientColour(mResult.mAmbientColor);
-    mRendering->setSunColour(mResult.mSunColor);
+    mRendering.setAmbientColour(mResult.mAmbientColor);
+    mRendering.setSunColour(mResult.mSunColor);
 
-    mRendering->getSkyManager()->setWeather(mResult);
+    mRendering.getSkyManager()->setWeather(mResult);
 
     // Play sounds
     if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
@@ -671,248 +655,9 @@ void WeatherManager::stopSounds()
     }
 }
 
-std::string WeatherManager::nextWeather(const ESM::Region* region) const
-{
-    std::vector<char> probability;
-
-    RegionModMap::const_iterator iter = mRegionMods.find(Misc::StringUtils::lowerCase(region->mId));
-    if(iter != mRegionMods.end())
-        probability = iter->second;
-    else
-    {
-        probability.reserve(10);
-        probability.push_back(region->mData.mClear);
-        probability.push_back(region->mData.mCloudy);
-        probability.push_back(region->mData.mFoggy);
-        probability.push_back(region->mData.mOvercast);
-        probability.push_back(region->mData.mRain);
-        probability.push_back(region->mData.mThunder);
-        probability.push_back(region->mData.mAsh);
-        probability.push_back(region->mData.mBlight);
-        probability.push_back(region->mData.mA);
-        probability.push_back(region->mData.mB);
-    }
-
-    /*
-     * All probabilities must add to 100 (responsibility of the user).
-     * If chances A and B has values 30 and 70 then by generating
-     * 100 numbers 1..100, 30% will be lesser or equal 30 and
-     * 70% will be greater than 30 (in theory).
-     */
-
-    int chance = Misc::Rng::rollDice(100) + 1; // 1..100
-    int sum = 0;
-    unsigned int i = 0;
-    for (; i < probability.size(); ++i)
-    {
-        sum += probability[i];
-        if (chance < sum)
-            break;
-    }
-
-    switch (i)
-    {
-        case 1:
-            return "cloudy";
-        case 2:
-            return "foggy";
-        case 3:
-            return "overcast";
-        case 4:
-            return "rain";
-        case 5:
-            return "thunderstorm";
-        case 6:
-            return "ashstorm";
-        case 7:
-            return "blight";
-        case 8:
-            return "snow";
-        case 9:
-            return "blizzard";
-        default: // case 0
-            return "clear";
-    }
-}
-
-void WeatherManager::setHour(const float hour)
-{
-    mHour = hour;
-}
-
-unsigned int WeatherManager::getWeatherID() const
-{
-    // Source: http://www.uesp.net/wiki/Tes3Mod:GetCurrentWeather
-
-    if (mCurrentWeather == "clear")
-        return 0;
-    else if (mCurrentWeather == "cloudy")
-        return 1;
-    else if (mCurrentWeather == "foggy")
-        return 2;
-    else if (mCurrentWeather == "overcast")
-        return 3;
-    else if (mCurrentWeather == "rain")
-        return 4;
-    else if (mCurrentWeather == "thunderstorm")
-        return 5;
-    else if (mCurrentWeather == "ashstorm")
-        return 6;
-    else if (mCurrentWeather == "blight")
-        return 7;
-    else if (mCurrentWeather == "snow")
-        return 8;
-    else if (mCurrentWeather == "blizzard")
-        return 9;
-
-    else
-        return 0;
-}
-
-void WeatherManager::changeWeather(const std::string& region, const unsigned int id)
-{
-    // make sure this region exists
-    MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().find(region);
-
-    std::string weather;
-    if (id==0)
-        weather = "clear";
-    else if (id==1)
-        weather = "cloudy";
-    else if (id==2)
-        weather = "foggy";
-    else if (id==3)
-        weather = "overcast";
-    else if (id==4)
-        weather = "rain";
-    else if (id==5)
-        weather = "thunderstorm";
-    else if (id==6)
-        weather = "ashstorm";
-    else if (id==7)
-        weather = "blight";
-    else if (id==8)
-        weather = "snow";
-    else if (id==9)
-        weather = "blizzard";
-    else
-        weather = "clear";
-
-    mRegionOverrides[Misc::StringUtils::lowerCase(region)] = weather;
-
-    MWWorld::Ptr player = MWMechanics::getPlayer();
-    if (player.isInCell())
-    {
-        std::string playerRegion = player.getCell()->getCell()->mRegion;
-        if (Misc::StringUtils::ciEqual(region, playerRegion))
-            setWeather(weather);
-    }
-}
-
-void WeatherManager::modRegion(const std::string &regionid, const std::vector<char> &chances)
-{
-    mRegionMods[Misc::StringUtils::lowerCase(regionid)] = chances;
-    // Start transitioning right away if the region no longer supports the current weather type
-    unsigned int current = getWeatherID();
-    if(current >= chances.size() || chances[current] == 0)
-        mWeatherUpdateTime = 0.0f;
-}
-
 float WeatherManager::getWindSpeed() const
 {
     return mWindSpeed;
-}
-
-bool WeatherManager::isDark() const
-{
-    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
-                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
-    return exterior && (mHour < mSunriseTime || mHour > mNightStart - 1);
-}
-
-void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
-{
-    ESM::WeatherState state;
-    state.mHour = mHour;
-    state.mWindSpeed = mWindSpeed;
-    state.mCurrentWeather = mCurrentWeather;
-    state.mNextWeather = mNextWeather;
-    state.mCurrentRegion = mCurrentRegion;
-    state.mFirstUpdate = mFirstUpdate;
-    state.mRemainingTransitionTime = mRemainingTransitionTime;
-    state.mTimePassed = mTimePassed;
-
-    writer.startRecord(ESM::REC_WTHR);
-    state.save(writer);
-    writer.endRecord(ESM::REC_WTHR);
-}
-
-bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
-{
-    if(ESM::REC_WTHR == type)
-    {
-        // load first so that if it fails, we haven't accidentally reset the state below
-        ESM::WeatherState state;
-        state.load(reader);
-
-        // swap in the loaded values now that we can't fail
-        mHour = state.mHour;
-        mWindSpeed = state.mWindSpeed;
-        mCurrentWeather.swap(state.mCurrentWeather);
-        mNextWeather.swap(state.mNextWeather);
-        mCurrentRegion.swap(state.mCurrentRegion);
-        mFirstUpdate = state.mFirstUpdate;
-        mRemainingTransitionTime = state.mRemainingTransitionTime;
-        mTimePassed = state.mTimePassed;
-
-        return true;
-    }
-
-    return false;
-}
-
-void WeatherManager::clear()
-{
-    stopSounds();
-    mRegionOverrides.clear();
-    mRegionMods.clear();
-    mThunderFlash = 0.0;
-    mThunderChance = 0.0;
-    mThunderChanceNeeded = 50.0;
-}
-
-void WeatherManager::switchToNextWeather(bool instantly)
-{
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-    if (world->isCellExterior() || world->isCellQuasiExterior())
-    {
-        std::string regionstr = Misc::StringUtils::lowerCase(world->getPlayerPtr().getCell()->getCell()->mRegion);
-
-        if (mWeatherUpdateTime <= 0 || regionstr != mCurrentRegion)
-        {
-            mCurrentRegion = regionstr;
-            mWeatherUpdateTime = mHoursBetweenWeatherChanges * 3600;
-
-            std::string weatherType = "clear";
-
-            if (mRegionOverrides.find(regionstr) != mRegionOverrides.end())
-            {
-                weatherType = mRegionOverrides[regionstr];
-            }
-            else
-            {
-                // get weather probabilities for the current region
-                const ESM::Region *region = world->getStore().get<ESM::Region>().search (regionstr);
-
-                if (region != 0)
-                {
-                    weatherType = nextWeather(region);
-                }
-            }
-
-            setWeather(weatherType, instantly);
-        }
-    }
 }
 
 bool WeatherManager::isInStorm() const
@@ -925,9 +670,111 @@ osg::Vec3f WeatherManager::getStormDirection() const
     return mStormDirection;
 }
 
-void WeatherManager::advanceTime(double hours)
+void WeatherManager::advanceTime(double hours, bool incremental)
 {
-    mTimePassed += hours*3600;
+    // In Morrowind, when the player sleeps/waits, serves jail time, travels, or trains, all weather transitions are
+    // immediately applied, regardless of whatever transition time might have been remaining.
+    mTimePassed += hours;
+    mFastForward = !incremental ? true : mFastForward;
+}
+
+unsigned int WeatherManager::getWeatherID() const
+{
+    return mCurrentWeather;
+}
+
+bool WeatherManager::isDark() const
+{
+    TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
+    bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
+                     || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
+    return exterior && (time.getHour() < mSunriseTime || time.getHour() > mNightStart - 1);
+}
+
+void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
+{
+    ESM::WeatherState state;
+    state.mCurrentRegion = mCurrentRegion;
+    state.mTimePassed = mTimePassed;
+    state.mFastForward = mFastForward;
+    state.mWeatherUpdateTime = mWeatherUpdateTime;
+    state.mTransitionFactor = mTransitionFactor;
+    state.mCurrentWeather = mCurrentWeather;
+    state.mNextWeather = mNextWeather;
+    state.mQueuedWeather = mQueuedWeather;
+
+    std::map<std::string, RegionWeather>::iterator it = mRegions.begin();
+    for(; it != mRegions.end(); ++it)
+    {
+        state.mRegions.insert(std::make_pair(it->first, it->second));
+    }
+
+    writer.startRecord(ESM::REC_WTHR);
+    state.save(writer);
+    writer.endRecord(ESM::REC_WTHR);
+}
+
+bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+{
+    if(ESM::REC_WTHR == type)
+    {
+        static const int oldestCompatibleSaveFormat = 2;
+        if(reader.getFormat() < oldestCompatibleSaveFormat)
+        {
+            // Weather state isn't really all that important, so to preserve older save games, we'll just discard the
+            // older weather records, rather than fail to handle the record.
+            reader.skipRecord();
+        }
+        else
+        {
+            ESM::WeatherState state;
+            state.load(reader);
+
+            mCurrentRegion.swap(state.mCurrentRegion);
+            mTimePassed = state.mTimePassed;
+            mFastForward = state.mFastForward;
+            mWeatherUpdateTime = state.mWeatherUpdateTime;
+            mTransitionFactor = state.mTransitionFactor;
+            mCurrentWeather = state.mCurrentWeather;
+            mNextWeather = state.mNextWeather;
+            mQueuedWeather = state.mQueuedWeather;
+
+            mRegions.clear();
+            std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
+            if(it == state.mRegions.end())
+            {
+                // When loading an imported save, the region modifiers aren't currently being set, so just reset them.
+                importRegions();
+            }
+            else
+            {
+                for(; it != state.mRegions.end(); ++it)
+                {
+                    mRegions.insert(std::make_pair(it->first, RegionWeather(it->second)));
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+void WeatherManager::clear()
+{
+    stopSounds();
+
+    mThunderFlash = 0.0;
+    mThunderChance = 0.0;
+    mThunderChanceNeeded = 50.0;
+
+    mCurrentRegion = "";
+    mTimePassed = 0.0f;
+    mWeatherUpdateTime = 0.0f;
+    forceWeather(0);
+    mRegions.clear();
+    importRegions();
 }
 
 inline void WeatherManager::addWeather(const std::string& name,
@@ -935,17 +782,303 @@ inline void WeatherManager::addWeather(const std::string& name,
                                        const std::string& ambientLoopSoundID,
                                        const std::string& particleEffect)
 {
-    static const float fStromWindSpeed = mStore->get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
+    static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
 
     Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, ambientLoopSoundID, particleEffect);
 
-    std::string lower = name;
-    lower[0] = tolower(lower[0]);
-    mWeatherSettings.insert(std::make_pair(lower, weather));
+    mWeatherSettings.push_back(weather);
 }
 
-inline Weather& WeatherManager::findWeather(const std::string& name)
+inline void WeatherManager::importRegions()
 {
-    return mWeatherSettings.at(name);
+    Store<ESM::Region>::iterator it = mStore.get<ESM::Region>().begin();
+    for(; it != mStore.get<ESM::Region>().end(); ++it)
+    {
+        std::string regionID = Misc::StringUtils::lowerCase(it->mId);
+        mRegions.insert(std::make_pair(regionID, RegionWeather(*it)));
+    }
+}
+
+inline void WeatherManager::regionalWeatherChanged(const std::string& regionID, RegionWeather& region)
+{
+    // If the region is current, then add a weather transition for it.
+    MWWorld::Ptr player = MWMechanics::getPlayer();
+    if(player.isInCell())
+    {
+        std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
+        if(!playerRegion.empty() && (playerRegion == regionID))
+        {
+            addWeatherTransition(region.getWeather());
+        }
+    }
+}
+
+inline bool WeatherManager::updateWeatherTime()
+{
+    mWeatherUpdateTime -= mTimePassed;
+    mTimePassed = 0.0f;
+    if(mWeatherUpdateTime <= 0.0f)
+    {
+        // Expire all regional weather, so that any call to getWeather() will return a new weather ID.
+        std::map<std::string, RegionWeather>::iterator it = mRegions.begin();
+        for(; it != mRegions.end(); ++it)
+        {
+            it->second.setWeather(invalidWeatherID);
+        }
+
+        mWeatherUpdateTime += mHoursBetweenWeatherChanges;
+
+        return true;
+    }
+
+    return false;
+}
+
+inline bool WeatherManager::updateWeatherRegion(const std::string& playerRegion)
+{
+    if(!playerRegion.empty() && playerRegion != mCurrentRegion)
+    {
+        mCurrentRegion = playerRegion;
+
+        return true;
+    }
+
+    return false;
+}
+
+inline void WeatherManager::updateWeatherTransitions(const float elapsedRealSeconds)
+{
+    // When a player chooses to train, wait, or serves jail time, any transitions will be fast forwarded to the last
+    // weather type set, regardless of the remaining transition time.
+    if(!mFastForward && inTransition())
+    {
+        const float delta = mWeatherSettings[mNextWeather].transitionDelta();
+        mTransitionFactor -= elapsedRealSeconds * delta;
+        if(mTransitionFactor <= 0.0f)
+        {
+            mCurrentWeather = mNextWeather;
+            mNextWeather = mQueuedWeather;
+            mQueuedWeather = invalidWeatherID;
+
+            // We may have begun processing the queued transition, so we need to apply the remaining time towards it.
+            if(inTransition())
+            {
+                const float newDelta = mWeatherSettings[mNextWeather].transitionDelta();
+                const float remainingSeconds = -(mTransitionFactor / delta);
+                mTransitionFactor = 1.0f - (remainingSeconds * newDelta);
+            }
+            else
+            {
+                mTransitionFactor = 0.0f;
+            }
+        }
+    }
+    else
+    {
+        if(mQueuedWeather != invalidWeatherID)
+        {
+            mCurrentWeather = mQueuedWeather;
+        }
+        else if(mNextWeather != invalidWeatherID)
+        {
+            mCurrentWeather = mNextWeather;
+        }
+
+        mNextWeather = invalidWeatherID;
+        mQueuedWeather = invalidWeatherID;
+        mFastForward = false;
+    }
+}
+
+inline void WeatherManager::forceWeather(const int weatherID)
+{
+    mTransitionFactor = 0.0f;
+    mCurrentWeather = weatherID;
+    mNextWeather = invalidWeatherID;
+    mQueuedWeather = invalidWeatherID;
+}
+
+inline bool WeatherManager::inTransition()
+{
+    return mNextWeather != invalidWeatherID;
+}
+
+inline void WeatherManager::addWeatherTransition(const int weatherID)
+{
+    // In order to work like ChangeWeather expects, this method begins transitioning to the new weather immediately if
+    // no transition is in progress, otherwise it queues it to be transitioned.
+
+    assert(weatherID >= 0 && static_cast<size_t>(weatherID) < mWeatherSettings.size());
+
+    if(!inTransition() && (weatherID != mCurrentWeather))
+    {
+        mNextWeather = weatherID;
+        mTransitionFactor = 1.0f;
+    }
+    else if(inTransition() && (weatherID != mNextWeather))
+    {
+        mQueuedWeather = weatherID;
+    }
+}
+
+inline void WeatherManager::calculateWeatherResult(const float gameHour)
+{
+    if(!inTransition())
+    {
+        calculateResult(mCurrentWeather, gameHour);
+    }
+    else
+    {
+        calculateTransitionResult(1 - mTransitionFactor, gameHour);
+    }
+}
+
+inline void WeatherManager::calculateResult(const int weatherID, const float gameHour)
+{
+    const Weather& current = mWeatherSettings[weatherID];
+
+    mResult.mCloudTexture = current.mCloudTexture;
+    mResult.mCloudBlendFactor = 0;
+    mResult.mWindSpeed = current.mWindSpeed;
+    mResult.mCloudSpeed = current.mCloudSpeed;
+    mResult.mGlareView = current.mGlareView;
+    mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    mResult.mAmbientSoundVolume = 1.f;
+    mResult.mEffectFade = 1.f;
+    mResult.mSunColor = current.mSunDiscSunsetColor;
+
+    mResult.mIsStorm = current.mIsStorm;
+
+    mResult.mRainSpeed = current.mRainSpeed;
+    mResult.mRainFrequency = current.mRainFrequency;
+
+    mResult.mParticleEffect = current.mParticleEffect;
+    mResult.mRainEffect = current.mRainEffect;
+
+    mResult.mNight = (gameHour < mSunriseTime || gameHour > mNightStart - 1);
+
+    mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
+
+    // night
+    if (gameHour <= mNightEnd || gameHour >= mNightStart + 1)
+    {
+        mResult.mFogColor = current.mFogNightColor;
+        mResult.mAmbientColor = current.mAmbientNightColor;
+        mResult.mSunColor = current.mSunNightColor;
+        mResult.mSkyColor = current.mSkyNightColor;
+        mResult.mNightFade = 1.f;
+    }
+
+    // sunrise
+    else if (gameHour >= mNightEnd && gameHour <= mDayStart + 1)
+    {
+        if (gameHour <= mSunriseTime)
+        {
+            // fade in
+            float advance = mSunriseTime - gameHour;
+            float factor = advance / 0.5f;
+            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
+            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
+            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
+            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
+            mResult.mNightFade = factor;
+        }
+        else //if (gameHour >= 6)
+        {
+            // fade out
+            float advance = gameHour - mSunriseTime;
+            float factor = advance / 3.f;
+            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
+            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
+            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
+            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
+        }
+    }
+
+    // day
+    else if (gameHour >= mDayStart + 1 && gameHour <= mDayEnd - 1)
+    {
+        mResult.mFogColor = current.mFogDayColor;
+        mResult.mAmbientColor = current.mAmbientDayColor;
+        mResult.mSunColor = current.mSunDayColor;
+        mResult.mSkyColor = current.mSkyDayColor;
+    }
+
+    // sunset
+    else if (gameHour >= mDayEnd - 1 && gameHour <= mNightStart + 1)
+    {
+        if (gameHour <= mDayEnd + 1)
+        {
+            // fade in
+            float advance = (mDayEnd + 1) - gameHour;
+            float factor = (advance / 2);
+            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
+            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
+            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
+            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
+        }
+        else //if (gameHour >= 19)
+        {
+            // fade out
+            float advance = gameHour - (mDayEnd + 1);
+            float factor = advance / 2.f;
+            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
+            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
+            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
+            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
+            mResult.mNightFade = factor;
+        }
+    }
+}
+
+inline void WeatherManager::calculateTransitionResult(const float factor, const float gameHour)
+{
+    calculateResult(mCurrentWeather, gameHour);
+    const MWRender::WeatherResult current = mResult;
+    calculateResult(mNextWeather, gameHour);
+    const MWRender::WeatherResult other = mResult;
+
+    mResult.mCloudTexture = current.mCloudTexture;
+    mResult.mNextCloudTexture = other.mCloudTexture;
+    mResult.mCloudBlendFactor = mWeatherSettings[mNextWeather].cloudBlendFactor(factor);
+
+    mResult.mFogColor = lerp(current.mFogColor, other.mFogColor, factor);
+    mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
+    mResult.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
+
+    mResult.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
+    mResult.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
+    mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
+    mResult.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+    mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
+    mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
+    mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
+
+    mResult.mNight = current.mNight;
+
+    if(factor < 0.5)
+    {
+        mResult.mIsStorm = current.mIsStorm;
+        mResult.mParticleEffect = current.mParticleEffect;
+        mResult.mRainEffect = current.mRainEffect;
+        mResult.mParticleEffect = current.mParticleEffect;
+        mResult.mRainSpeed = current.mRainSpeed;
+        mResult.mRainFrequency = current.mRainFrequency;
+        mResult.mAmbientSoundVolume = 1-(factor*2);
+        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+    }
+    else
+    {
+        mResult.mIsStorm = other.mIsStorm;
+        mResult.mParticleEffect = other.mParticleEffect;
+        mResult.mRainEffect = other.mRainEffect;
+        mResult.mParticleEffect = other.mParticleEffect;
+        mResult.mRainSpeed = other.mRainSpeed;
+        mResult.mRainFrequency = other.mRainFrequency;
+        mResult.mAmbientSoundVolume = 2*(factor-0.5f);
+        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+    }
 }
 
