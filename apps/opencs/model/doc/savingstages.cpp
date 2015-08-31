@@ -415,16 +415,16 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
     if (land.mState==CSMWorld::RecordBase::State_Modified ||
         land.mState==CSMWorld::RecordBase::State_ModifiedOnly)
     {
-        CSMWorld::Land record = land.get();
+        const CSMWorld::Land& record = land.get();
 
-        mState.getWriter().startRecord (record.mLand->sRecordId);
+        mState.getWriter().startRecord (record.sRecordId);
 
-        record.mLand->save (mState.getWriter());
+        record.save (mState.getWriter());
 
-        if (const ESM::Land::LandData *data = record.mLand->getLandData (record.mLand->mDataTypes))
+        if (const ESM::Land::LandData *data = record.getLandData (record.mDataTypes))
             data->save (mState.getWriter());
 
-        mState.getWriter().endRecord (record.mLand->sRecordId);
+        mState.getWriter().endRecord (record.sRecordId);
     }
     else if (land.mState==CSMWorld::RecordBase::State_Deleted)
     {
