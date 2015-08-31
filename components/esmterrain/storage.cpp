@@ -74,7 +74,7 @@ namespace ESMTerrain
             --cellX;
             row += ESM::Land::LAND_SIZE-1;
         }
-        ESM::Land* land = getLand(cellX, cellY);
+        const ESM::Land* land = getLand(cellX, cellY);
         if (land && land->mDataTypes&ESM::Land::DATA_VNML)
         {
             normal.x() = land->mLandData->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
@@ -109,7 +109,7 @@ namespace ESMTerrain
             ++cellX;
             row = 0;
         }
-        ESM::Land* land = getLand(cellX, cellY);
+        const ESM::Land* land = getLand(cellX, cellY);
         if (land && land->mDataTypes&ESM::Land::DATA_VCLR)
         {
             color.r() = land->mLandData->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
@@ -158,7 +158,7 @@ namespace ESMTerrain
             float vertX_ = 0; // of current cell corner
             for (int cellX = startX; cellX < startX + std::ceil(size); ++cellX)
             {
-                ESM::Land* land = getLand(cellX, cellY);
+                const ESM::Land* land = getLand(cellX, cellY);
                 if (land && !(land->mDataTypes&ESM::Land::DATA_VHGT))
                     land = NULL;
 
@@ -262,7 +262,7 @@ namespace ESMTerrain
         assert(x<ESM::Land::LAND_TEXTURE_SIZE);
         assert(y<ESM::Land::LAND_TEXTURE_SIZE);
 
-        ESM::Land* land = getLand(cellX, cellY);
+        const ESM::Land* land = getLand(cellX, cellY);
         if (land && (land->mDataTypes&ESM::Land::DATA_VTEX))
         {
             int tex = land->mLandData->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
@@ -368,7 +368,7 @@ namespace ESMTerrain
         int cellX = static_cast<int>(std::floor(worldPos.x() / 8192.f));
         int cellY = static_cast<int>(std::floor(worldPos.y() / 8192.f));
 
-        ESM::Land* land = getLand(cellX, cellY);
+        const ESM::Land* land = getLand(cellX, cellY);
         if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
             return -2048;
 
