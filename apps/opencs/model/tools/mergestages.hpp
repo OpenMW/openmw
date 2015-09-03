@@ -146,6 +146,21 @@ namespace CSMTools
             virtual void perform (int stage, CSMDoc::Messages& messages);
             ///< Messages resulting from this stage will be appended to \a messages.
     };
+
+    class MergeLandStage : public CSMDoc::Stage
+    {
+            MergeState& mState;
+
+        public:
+
+            MergeLandStage (MergeState& state);
+
+            virtual int setup();
+            ///< \return number of steps
+
+            virtual void perform (int stage, CSMDoc::Messages& messages);
+            ///< Messages resulting from this stage will be appended to \a messages.
+    };
 }
 
 #endif

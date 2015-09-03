@@ -40,10 +40,9 @@ CSMTools::MergeOperation::MergeOperation (CSMDoc::Document& document, ToUTF8::Fr
     appendStage (new MergeReferencesStage (mState));
     appendStage (new ListLandTexturesMergeStage (mState));
     appendStage (new MergeLandTexturesStage (mState));
+    appendStage (new MergeLandStage (mState));
 
     appendStage (new FinishMergedDocumentStage (mState, encoding));
-
-    /// \todo Land
 }
 
 void CSMTools::MergeOperation::setTarget (std::auto_ptr<CSMDoc::Document> document)

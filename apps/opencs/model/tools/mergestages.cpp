@@ -153,12 +153,20 @@ CSMTools::MergeLandTexturesStage::MergeLandTexturesStage (MergeState& state)
 
 int CSMTools::MergeLandTexturesStage::setup()
 {
-    mNext = mState.mTextureIndices.begin();
-    return mState.mTextureIndices.size();
+    // Should use the size of mState.mTextureIndices instead, but that is not available at this
+    // point. Unless there are any errors in the land and land texture records this will not
+    // make a difference.
+    return mState.mSource.getData().getLandTextures().getSize();
 }
 
 void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& messages)
 {
+    if (stage==0)
+        mNext = mState.mTextureIndices.begin();
+
+    if (mNext==mState.mTextureIndices.end())
+        return;
+
     mNext->second = stage;
 
     std::ostringstream stream;
@@ -182,4 +190,56 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
     /// \todo deal with missing textures (either abort merge or report and make sure OpenMW can deal with missing textures)
 
     ++mNext;
+}
+
+
+CSMTools::MergeLandStage::MergeLandStage (MergeState& state) : mState (state) {}
+
+int CSMTools::MergeLandStage::setup()
+{
+    return mState.mSource.getData().getLand().getSize();
+}
+
+void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
+{
+    const CSMWorld::Record<CSMWorld::Land>& record =
+        mState.mSource.getData().getLand().getRecord (stage);
+
+    if (!record.isDeleted())
+    {
+        const CSMWorld::Land& land = record.get();
+
+        land.loadData (ESM::Land::DATA_VCLR | ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
+            ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
+
+        CSMWorld::Land newLand (land);
+
+        newLand.mEsm = 0; // avoid potential dangling pointer (ESMReader isn't needed anyway,
+                          // because record is already fully loaded)
+        newLand.mPlugin = 0;
+
+        // adjust land texture references
+        if (ESM::Land::LandData *data = newLand.getLandData())
+        {
+            std::pair<uint16_t, int> key;
+            key.second = land.mPlugin;
+
+            for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
+            {
+                key.first = data->mTextures[i];
+                std::map<std::pair<uint16_t, int>, int>::const_iterator iter =
+                    mState.mTextureIndices.find (key);
+
+                if (iter!=mState.mTextureIndices.end())
+                    data->mTextures[i] = iter->second;
+                else
+                    data->mTextures[i] = 0;
+            }
+        }
+
+        CSMWorld::Record<CSMWorld::Land> newRecord (
+            CSMWorld::RecordBase::State_ModifiedOnly, 0, &newLand);
+
+        mState.mTarget->getData().getLand().appendRecord (newRecord);
+    }
 }

@@ -256,4 +256,30 @@ bool Land::isDataLoaded(int flags) const
     {
         return mLandData;
     }
+
+    Land::LandData *Land::getLandData()
+    {
+        return mLandData;
+    }
+
+    void Land::add (int flags)
+    {
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mDataTypes |= flags;
+        mDataLoaded |= flags;
+    }
+
+    void Land::remove (int flags)
+    {
+        mDataTypes &= ~flags;
+        mDataLoaded &= ~flags;
+
+        if (!mDataLoaded)
+        {
+            delete mLandData;
+            mLandData = 0;
+        }
+    }
 }

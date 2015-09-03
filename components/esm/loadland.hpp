@@ -127,6 +127,17 @@ struct Land
         /// Return land data without loading first anything. Can return a 0-pointer.
         const LandData *getLandData() const;
 
+        /// Return land data without loading first anything. Can return a 0-pointer.
+        LandData *getLandData();
+
+        /// \attention Must not be called on objects that aren't fully loaded.
+        ///
+        /// \note Added data fields will be uninitialised
+        void add (int flags);
+
+        /// \attention Must not be called on objects that aren't fully loaded.
+        void remove (int flags);
+
     private:
 
         /// Loads data and marks it as loaded
