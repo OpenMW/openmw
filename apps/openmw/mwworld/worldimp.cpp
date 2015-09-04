@@ -3156,7 +3156,7 @@ namespace MWWorld
 
             // Spawn the explosion orb effect
             const ESM::Static* areaStatic;
-            if (!effect->mCasting.empty())
+            if (!effect->mArea.empty())
                 areaStatic = getStore().get<ESM::Static>().find (effect->mArea);
             else
                 areaStatic = getStore().get<ESM::Static>().find ("VFX_DefaultArea");
