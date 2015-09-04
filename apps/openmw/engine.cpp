@@ -92,10 +92,11 @@ void OMW::Engine::frame(float frametime)
         // update input
         mEnvironment.getInputManager()->update(frametime, false);
 
-        // When the window is minimized, pause everything. Currently this *has* to be here to work around a MyGUI bug.
-        // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures.
-        //if (!mOgre->getWindow()->isActive() || !mOgre->getWindow()->isVisible())
-        //    return true;
+        // When the window is minimized, pause the game. Currently this *has* to be here to work around a MyGUI bug.
+        // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
+        // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
+        if (!mEnvironment.getInputManager()->isWindowVisible())
+            return;
 
         // sound
         if (mUseSound)
@@ -689,9 +690,16 @@ void OMW::Engine::go()
 
         frame(dt);
 
-        mViewer->eventTraversal();
-        mViewer->updateTraversal();
-        mViewer->renderingTraversals();
+        if (!mEnvironment.getInputManager()->isWindowVisible())
+        {
+            OpenThreads::Thread::microSleep(5000);
+        }
+        else
+        {
+            mViewer->eventTraversal();
+            mViewer->updateTraversal();
+            mViewer->renderingTraversals();
+        }
     }
 
     // Save user settings

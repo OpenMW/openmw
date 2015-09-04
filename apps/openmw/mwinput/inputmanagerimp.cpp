@@ -41,6 +41,7 @@ namespace MWInput
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
+        , mWindowVisible(true)
         , mViewer(viewer)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
@@ -154,6 +155,11 @@ namespace MWInput
         delete mInputManager;
 
         delete mVideoWrapper;
+    }
+
+    bool InputManager::isWindowVisible()
+    {
+        return mWindowVisible;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -850,7 +856,7 @@ namespace MWInput
 
     void InputManager::windowVisibilityChange(bool visible)
     {
-        //TODO: Pause game?
+        mWindowVisible = visible;
     }
 
     void InputManager::windowResized(int x, int y)

@@ -25,6 +25,8 @@ namespace MWBase
 
             virtual ~InputManager() {}
 
+            virtual bool isWindowVisible() = 0;
+
             virtual void update(float dt, bool disableControls, bool disableEvents=false) = 0;
 
             virtual void changeInputMode(bool guiMode) = 0;
