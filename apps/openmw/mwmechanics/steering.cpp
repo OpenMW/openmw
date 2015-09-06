@@ -14,14 +14,16 @@ bool smoothTurn(const MWWorld::Ptr& actor, float targetAngleRadians, int axis, f
 {
     float currentAngle (actor.getRefData().getPosition().rot[axis]);
     float diff (targetAngleRadians - currentAngle);
-    if (diff >= osg::DegreesToRadians(180.f))
+    if (std::abs(diff) >= osg::DegreesToRadians(180.f))
     {
-        // Turning the other way would be a better idea
-        diff = diff-osg::DegreesToRadians(360.f);
-    }
-    else if (diff <= osg::DegreesToRadians(-180.f))
-    {
-        diff = osg::DegreesToRadians(360.f)-diff;
+        if (diff >= 0)
+        {
+            diff = diff - osg::DegreesToRadians(360.f);
+        }
+        else
+        {
+            diff = osg::DegreesToRadians(360.f) + diff;
+        }
     }
     float absDiff = std::abs(diff);
 
