@@ -819,9 +819,10 @@ namespace MWMechanics
             }
         }
 
-        if (mCaster == getPlayer() && spellIncreasesSkill(spell))
+        if (mCaster == getPlayer() && spellIncreasesSkill(spell)) {
             mCaster.getClass().skillUsageSucceeded(mCaster,
-                spellSchoolToSkill(school), 0);
+                spellSchoolToSkill(school), 0 , (float)spell->mData.mCost );
+	}
 
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
