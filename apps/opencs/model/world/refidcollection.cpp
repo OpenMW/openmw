@@ -156,7 +156,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
             new RefIdColumn (Columns::ColumnId_SpellType, CSMWorld::ColumnBase::Display_SpellType, false/*editable*/, false/*user editable*/));
     // creatures do not have below columns
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_SpellSrc, CSMWorld::ColumnBase::Display_YesNo, false, false)); // from race
+            new RefIdColumn (Columns::ColumnId_SpellSrc, CSMWorld::ColumnBase::Display_Boolean, false, false)); // from race
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_SpellCost, CSMWorld::ColumnBase::Display_Integer, false, false));
     mColumns.back().addColumn(
