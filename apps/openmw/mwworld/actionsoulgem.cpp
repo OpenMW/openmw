@@ -16,6 +16,9 @@ namespace MWWorld
 
     void ActionSoulgem::executeImp(const Ptr &actor)
     {
+        if (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) { //Ensure we're not in combat
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage5}");
             return;

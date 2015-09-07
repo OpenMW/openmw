@@ -18,6 +18,9 @@ namespace MWWorld
 
     void ActionRead::executeImp (const MWWorld::Ptr& actor) {
 
+        if (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
         //Ensure we're not in combat
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()
                 // Reading in combat is still allowed if the scroll/book is not in the player inventory yet

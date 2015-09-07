@@ -10,6 +10,9 @@ namespace MWWorld
 {
     void ActionAlchemy::executeImp (const Ptr& actor)
     {
+        if (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) { //Ensure we're not in combat
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage3}");
             return;

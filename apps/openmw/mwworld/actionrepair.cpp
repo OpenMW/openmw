@@ -14,6 +14,9 @@ namespace MWWorld
 
     void ActionRepair::executeImp (const Ptr& actor)
     {
+        if (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            return;
+
         if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage2}");
             return;
