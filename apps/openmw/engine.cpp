@@ -676,6 +676,7 @@ void OMW::Engine::go()
     // Start the main rendering loop
     osg::Timer frameTimer;
     double simulationTime = 0.0;
+    float framerateLimit = Settings::Manager::getFloat("framerate limit", "Video");
     while (!mViewer->done() && !mEnvironment.getStateManager()->hasQuitRequest())
     {
         double dt = frameTimer.time_s();
@@ -693,12 +694,23 @@ void OMW::Engine::go()
         if (!mEnvironment.getInputManager()->isWindowVisible())
         {
             OpenThreads::Thread::microSleep(5000);
+            continue;
         }
         else
         {
             mViewer->eventTraversal();
             mViewer->updateTraversal();
             mViewer->renderingTraversals();
+        }
+
+        if (framerateLimit > 0.f)
+        {
+            double thisFrameTime = frameTimer.time_s();
+            double minFrameTime = 1.0 / framerateLimit;
+            if (thisFrameTime < minFrameTime)
+            {
+                OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-thisFrameTime));
+            }
         }
     }
 
