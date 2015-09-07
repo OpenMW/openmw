@@ -118,7 +118,6 @@ namespace CSMWorld
             Display_EffectId,
             Display_PartRefType,
             Display_AiPackageType,
-            Display_YesNo,
             Display_InfoCondFunc,
             Display_InfoCondVar,
             Display_InfoCondComp,
@@ -191,6 +190,12 @@ namespace CSMWorld
         NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
                 ColumnBase::Display_NestedHeader, flags)
         {}
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            // There is nothing to do here.
+            // This prevents exceptions from parent's implementation
+        }
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

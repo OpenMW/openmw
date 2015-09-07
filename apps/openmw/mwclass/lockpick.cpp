@@ -1,4 +1,3 @@
-
 #include "lockpick.hpp"
 
 #include <components/esm/loadlock.hpp>

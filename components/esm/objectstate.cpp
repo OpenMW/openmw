@@ -1,4 +1,3 @@
-
 #include "objectstate.hpp"
 
 #include "esmreader.hpp"

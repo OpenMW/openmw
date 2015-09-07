@@ -1,4 +1,3 @@
-
 #include "scripterrortable.hpp"
 
 #include <QHeaderView>

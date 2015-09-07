@@ -1,4 +1,3 @@
-
 #include "generator.hpp"
 
 #include <cassert>

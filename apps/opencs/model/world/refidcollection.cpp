@@ -94,9 +94,9 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     EnchantableColumns enchantableColumns (inventoryColumns);
 
@@ -156,7 +156,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
             new RefIdColumn (Columns::ColumnId_SpellType, CSMWorld::ColumnBase::Display_SpellType, false/*editable*/, false/*user editable*/));
     // creatures do not have below columns
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_SpellSrc, CSMWorld::ColumnBase::Display_YesNo, false, false)); // from race
+            new RefIdColumn (Columns::ColumnId_SpellSrc, CSMWorld::ColumnBase::Display_Boolean, false, false)); // from race
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_SpellCost, CSMWorld::ColumnBase::Display_Integer, false, false));
     mColumns.back().addColumn(
@@ -208,7 +208,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiWanderIdle, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_YesNo));
+            new RefIdColumn (Columns::ColumnId_AiWanderRepeat, CSMWorld::ColumnBase::Display_Boolean));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_AiActivateName, CSMWorld::ColumnBase::Display_String));
     mColumns.back().addColumn(
@@ -331,7 +331,6 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     {
         { Columns::ColumnId_Biped, ESM::Creature::Bipedal },
         { Columns::ColumnId_HasWeapon, ESM::Creature::Weapon },
-        { Columns::ColumnId_NoMovement, ESM::Creature::None },
         { Columns::ColumnId_Swims, ESM::Creature::Swims },
         { Columns::ColumnId_Flies, ESM::Creature::Flies },
         { Columns::ColumnId_Walks, ESM::Creature::Walks },
@@ -391,7 +390,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
         { Columns::ColumnId_Portable, ESM::Light::Carry },
         { Columns::ColumnId_NegativeLight, ESM::Light::Negative },
         { Columns::ColumnId_Flickering, ESM::Light::Flicker },
-        { Columns::ColumnId_SlowFlickering, ESM::Light::Flicker },
+        { Columns::ColumnId_SlowFlickering, ESM::Light::FlickerSlow },
         { Columns::ColumnId_Pulsing, ESM::Light::Pulse },
         { Columns::ColumnId_SlowPulsing, ESM::Light::PulseSlow },
         { Columns::ColumnId_Fire, ESM::Light::Fire },

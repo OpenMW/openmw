@@ -1,4 +1,3 @@
-
 #include "filterbox.hpp"
 
 #include <QHBoxLayout>

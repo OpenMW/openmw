@@ -1,4 +1,3 @@
-
 #include "containerstate.hpp"
 
 void ESM::ContainerState::load (ESMReader &esm)

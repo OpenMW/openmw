@@ -1,4 +1,3 @@
-
 #include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>

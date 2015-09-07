@@ -1,4 +1,3 @@
-
 #include "multidircollection.hpp"
 
 #include <cctype>

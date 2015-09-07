@@ -1,4 +1,3 @@
-
 #include "tablesubview.hpp"
 
 #include <QHBoxLayout>

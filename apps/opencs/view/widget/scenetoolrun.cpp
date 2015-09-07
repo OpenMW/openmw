@@ -1,4 +1,3 @@
-
 #include "scenetoolrun.hpp"
 
 #include <iterator>

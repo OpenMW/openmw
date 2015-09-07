@@ -1,4 +1,3 @@
-
 #include "recordfilterbox.hpp"
 
 #include <QHBoxLayout>

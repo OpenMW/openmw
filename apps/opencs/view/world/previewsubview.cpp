@@ -1,4 +1,3 @@
-
 #include "previewsubview.hpp"
 
 #include <QHBoxLayout>

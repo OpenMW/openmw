@@ -1,4 +1,3 @@
-
 #include "inventorystate.hpp"
 
 #include "esmreader.hpp"

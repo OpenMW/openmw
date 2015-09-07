@@ -1,4 +1,3 @@
-
 #include "scanner.hpp"
 
 #include <cassert>

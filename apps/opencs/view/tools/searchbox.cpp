@@ -1,4 +1,3 @@
-
 #include "searchbox.hpp"
 
 #include <stdexcept>

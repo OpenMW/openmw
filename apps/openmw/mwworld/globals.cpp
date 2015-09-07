@@ -1,4 +1,3 @@
-
 #include "globals.hpp"
 
 #include <stdexcept>

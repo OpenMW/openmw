@@ -1,9 +1,20 @@
-
 #include "idtableproxymodel.hpp"
 
 #include <vector>
 
 #include "idtablebase.hpp"
+
+namespace
+{
+    std::string getEnumValue(const std::vector<std::string> &values, int index)
+    {
+        if (index < 0 || index >= static_cast<int>(values.size()))
+        {
+            return "";
+        }
+        return values[index];
+    }
+}
 
 void CSMWorld::IdTableProxyModel::updateColumnMap()
 {
@@ -93,7 +104,9 @@ bool CSMWorld::IdTableProxyModel::lessThan(const QModelIndex &left, const QModel
 
     if (valuesIt != mEnumColumnCache.end())
     {
-        return valuesIt->second[left.data().toInt()] < valuesIt->second[right.data().toInt()];
+        std::string first = getEnumValue(valuesIt->second, left.data().toInt());
+        std::string second = getEnumValue(valuesIt->second, right.data().toInt());
+        return first < second;
     }
     return QSortFilterProxyModel::lessThan(left, right);
 }

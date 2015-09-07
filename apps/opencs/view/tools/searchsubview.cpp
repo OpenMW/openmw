@@ -1,4 +1,3 @@
-
 #include "searchsubview.hpp"
 
 #include <QVBoxLayout>

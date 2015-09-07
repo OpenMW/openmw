@@ -1,4 +1,3 @@
-
 #include "savingstages.hpp"
 
 #include <fstream>
@@ -454,6 +453,8 @@ void CSMDoc::WriteLandTextureCollectionStage::perform (int stage, Messages& mess
         CSMWorld::LandTexture record = landTexture.get();
 
         mState.getWriter().startRecord (record.sRecordId);
+
+        mState.getWriter().writeHNString("NAME", record.mId);
 
         record.save (mState.getWriter());
 

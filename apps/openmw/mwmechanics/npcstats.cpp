@@ -1,4 +1,3 @@
-
 #include "npcstats.hpp"
 
 #include <cmath>

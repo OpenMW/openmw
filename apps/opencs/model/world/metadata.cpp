@@ -1,4 +1,3 @@
-
 #include "metadata.hpp"
 
 #include <components/esm/loadtes3.hpp>

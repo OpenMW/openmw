@@ -1,4 +1,3 @@
-
 #include "messages.hpp"
 
 CSMDoc::Message::Message() {}

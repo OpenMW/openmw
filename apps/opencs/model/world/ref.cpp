@@ -1,4 +1,3 @@
-
 #include "ref.hpp"
 
 #include <cmath>

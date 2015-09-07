@@ -1,4 +1,3 @@
-
 #include "static.hpp"
 
 #include <components/esm/loadstat.hpp>

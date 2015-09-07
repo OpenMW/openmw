@@ -1,4 +1,3 @@
-
 #include "columns.hpp"
 
 #include <components/misc/stringops.hpp>
@@ -35,6 +34,8 @@ namespace CSMWorld
             { ColumnId_Volume, "Volume" },
             { ColumnId_MinRange, "Min Range" },
             { ColumnId_MaxRange, "Max Range" },
+            { ColumnId_MinMagnitude, "Min Magnitude" },
+            { ColumnId_MaxMagnitude, "Max Magnitude" },
             { ColumnId_SoundFile, "Sound File" },
             { ColumnId_MapColour, "Map Colour" },
             { ColumnId_SleepEncounter, "Sleep Encounter" },
@@ -107,7 +108,6 @@ namespace CSMWorld
             { ColumnId_OriginalCreature, "Original Creature" },
             { ColumnId_Biped, "Biped" },
             { ColumnId_HasWeapon, "Has Weapon" },
-            { ColumnId_NoMovement, "No Movement" },
             { ColumnId_Swims, "Swims" },
             { ColumnId_Flies, "Flies" },
             { ColumnId_Walks, "Walks" },
@@ -540,11 +540,6 @@ namespace
         "AI Wander", "AI Travel", "AI Follow", "AI Escort", "AI Activate", 0
     };
 
-    static const char *sAiWanderRepeat[] =
-    {
-        "No", "Yes", 0
-    };
-
     static const char *sInfoCondFunc[] =
     {
         " ", "Function", "Global", "Local", "Journal",
@@ -584,7 +579,6 @@ namespace
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
             case CSMWorld::Columns::ColumnId_AiPackageType: return sAiPackageType;
-            case CSMWorld::Columns::ColumnId_AiWanderRepeat: return sAiWanderRepeat;
             case CSMWorld::Columns::ColumnId_InfoCondFunc: return sInfoCondFunc;
             // FIXME: don't have dynamic value enum delegate, use Display_String for now
             //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;

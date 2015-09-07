@@ -1,4 +1,3 @@
-
 #include "door.hpp"
 
 #include <components/esm/loaddoor.hpp>

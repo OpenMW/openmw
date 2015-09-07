@@ -200,6 +200,9 @@ namespace CSMWorld
 
             int mNestedRow;
 
+            // The command to redo/undo the Modified status of a record
+            ModifyCommand *mModifyParentCommand;
+
         public:
 
             DeleteNestedCommand (IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
@@ -218,6 +221,9 @@ namespace CSMWorld
             int mNewRow;
 
             int mParentColumn;
+
+            // The command to redo/undo the Modified status of a record
+            ModifyCommand *mModifyParentCommand;
 
         public:
 

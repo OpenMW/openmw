@@ -1,4 +1,3 @@
-
 #include "birthsigncheck.hpp"
 
 #include <sstream>

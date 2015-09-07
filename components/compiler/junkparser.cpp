@@ -1,4 +1,3 @@
-
 #include "junkparser.hpp"
 
 #include "scanner.hpp"

@@ -1,4 +1,3 @@
-
 #include "enumdelegate.hpp"
 
 #include <cassert>
