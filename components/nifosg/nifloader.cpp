@@ -825,30 +825,33 @@ namespace NifOsg
 
             partsys->setFreezeOnCull(true);
 
-            osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
-            emitter->setParticleSystem(partsys);
-            emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
-
-            // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
-            // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
-            // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
-
-            FindRecIndexVisitor find (partctrl->emitter->recIndex);
-            rootNode->accept(find);
-            if (!find.mFound)
+            if (!partctrl->emitter.empty())
             {
-                std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
-                return;
+                osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
+                emitter->setParticleSystem(partsys);
+                emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
+
+                // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
+                // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
+                // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
+
+                FindRecIndexVisitor find (partctrl->emitter->recIndex);
+                rootNode->accept(find);
+                if (!find.mFound)
+                {
+                    std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
+                    return;
+                }
+                osg::Group* emitterNode = find.mFound;
+
+                // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
+                // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
+                emitterNode->addChild(emitter);
+
+                osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
+                setupController(partctrl, callback, animflags);
+                emitter->setUpdateCallback(callback);
             }
-            osg::Group* emitterNode = find.mFound;
-
-            // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
-            // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
-            emitterNode->addChild(emitter);
-
-            osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
-            setupController(partctrl, callback, animflags);
-            emitter->setUpdateCallback(callback);
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
