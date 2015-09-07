@@ -1327,6 +1327,12 @@ namespace MWGui
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
 
+    void WindowManager::useItem(const MWWorld::Ptr &item)
+    {
+        if (mInventoryWindow)
+            mInventoryWindow->useItem(item);
+    }
+
     bool WindowManager::isAllowed (GuiWindow wnd) const
     {
         return (mAllowed & wnd) != 0;

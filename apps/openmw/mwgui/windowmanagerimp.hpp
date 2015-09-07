@@ -173,6 +173,9 @@ namespace MWGui
     virtual MWGui::ConfirmationDialog* getConfirmationDialog();
     virtual MWGui::TradeWindow* getTradeWindow();
 
+    /// Make the player use an item, while updating GUI state accordingly
+    virtual void useItem(const MWWorld::Ptr& item);
+
     virtual void updateSpellWindow();
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);

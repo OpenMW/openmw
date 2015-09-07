@@ -21,8 +21,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-#include "../mwgui/inventorywindow.hpp"
-
 #include "itemselection.hpp"
 #include "spellview.hpp"
 #include "itemwidget.hpp"
@@ -311,7 +309,7 @@ namespace MWGui
         else if (type == Type_Item)
         {
             MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+            MWBase::Environment::get().getWindowManager()->useItem(item);
             MWWorld::ContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             // change draw state only if the item is in player's right hand
             if (rightHand != store.end() && item == *rightHand)
@@ -337,7 +335,7 @@ namespace MWGui
             // equip, if it can be equipped
             if (!item.getClass().getEquipmentSlots(item).first.empty())
             {
-                MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+                MWBase::Environment::get().getWindowManager()->useItem(item);
 
                 // make sure that item was successfully equipped
                 if (!store.isEquipped(item))

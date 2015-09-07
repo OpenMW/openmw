@@ -18,7 +18,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "spellicons.hpp"
-#include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 #include "spellview.hpp"
 
@@ -104,7 +103,7 @@ namespace MWGui
         if (!alreadyEquipped
             && !item.getClass().getEquipmentSlots(item).first.empty())
         {
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+            MWBase::Environment::get().getWindowManager()->useItem(item);
             // make sure that item was successfully equipped
             if (!store.isEquipped(item))
                 return;

@@ -191,11 +191,13 @@ namespace MWScript
                     if (it == invStore.end())
                         throw std::runtime_error("Item to equip not found");
 
-                    MWWorld::ActionEquip action (*it);
-                    action.execute(ptr);
-
-                    if (ptr == MWMechanics::getPlayer() && !ptr.getClass().getScript(ptr).empty())
-                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        MWBase::Environment::get().getWindowManager()->useItem(*it);
+                    else
+                    {
+                        boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+                        action->execute(ptr);
+                    }
                 }
         };
 
