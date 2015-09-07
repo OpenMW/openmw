@@ -23,7 +23,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
