@@ -158,11 +158,15 @@ namespace MWGui
                     // figure out if player will be woken while sleeping
                     int x = Misc::Rng::rollDice(hoursToWait);
                     float fSleepRandMod = world->getStore().get<ESM::GameSetting>().find("fSleepRandMod")->getFloat();
-                    if (x < static_cast<int>(fSleepRandMod * hoursToWait))
+                    if (x < fSleepRandMod * hoursToWait)
                     {
                         float fSleepRestMod = world->getStore().get<ESM::GameSetting>().find("fSleepRestMod")->getFloat();
-                        mInterruptAt = hoursToWait - int(fSleepRestMod * hoursToWait);
-                        mInterruptCreatureList = region->mSleepList;
+                        int interruptAtHoursRemaining = int(fSleepRestMod * hoursToWait);
+                        if (interruptAtHoursRemaining != 0)
+                        {
+                            mInterruptAt = hoursToWait - interruptAtHoursRemaining;
+                            mInterruptCreatureList = region->mSleepList;
+                        }
                     }
                 }
             }
