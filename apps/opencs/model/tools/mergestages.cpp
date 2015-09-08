@@ -164,35 +164,42 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
     if (stage==0)
         mNext = mState.mTextureIndices.begin();
 
-    if (mNext==mState.mTextureIndices.end())
-        return;
+    bool found = false;
 
-    mNext->second = stage;
-
-    std::ostringstream stream;
-    stream << mNext->first.first << "_" << mNext->first.second;
-
-    int index = mState.mSource.getData().getLandTextures().searchId (stream.str());
-
-    if (index!=-1)
+    do
     {
-        CSMWorld::LandTexture texture =
-            mState.mSource.getData().getLandTextures().getRecord (index).get();
+        if (mNext==mState.mTextureIndices.end())
+            return;
+
+        mNext->second = stage;
 
         std::ostringstream stream;
-        stream << mNext->second << "_0";
+        stream << mNext->first.first << "_" << mNext->first.second;
 
-        texture.mIndex = mNext->second;
-        texture.mId = stream.str();
+        int index = mState.mSource.getData().getLandTextures().searchId (stream.str());
 
-        CSMWorld::Record<CSMWorld::LandTexture> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture);
+        if (index!=-1)
+        {
+            CSMWorld::LandTexture texture =
+                mState.mSource.getData().getLandTextures().getRecord (index).get();
 
-        mState.mTarget->getData().getLandTextures().appendRecord (newRecord);
+            std::ostringstream stream;
+            stream << mNext->second << "_0";
+
+            texture.mIndex = mNext->second;
+            texture.mId = stream.str();
+
+            CSMWorld::Record<CSMWorld::LandTexture> newRecord (
+                CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture);
+
+            mState.mTarget->getData().getLandTextures().appendRecord (newRecord);
+
+            found = true;
+        }
+
+        ++mNext;
     }
-    /// \todo deal with missing textures (either abort merge or report and make sure OpenMW can deal with missing textures)
-
-    ++mNext;
+    while (!found);
 }
 
 
