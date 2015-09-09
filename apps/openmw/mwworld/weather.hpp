@@ -113,11 +113,27 @@ namespace MWWorld
         // is broken in the vanilla game and was disabled.
 
         float transitionDelta() const;
-        float cloudBlendFactor(float transitionRatio) const;
+        float cloudBlendFactor(const float transitionRatio) const;
+
+        float calculateThunder(const float transitionRatio, const float elapsedSeconds, const bool isPaused);
 
     private:
         float mTransitionDelta;
         float mCloudsMaximumPercent;
+
+        // Note: In MW, only thunderstorms support these attributes, but in the interest of making weather more
+        // flexible, these settings are imported for all weather types. Only thunderstorms will normally have any
+        // non-zero values.
+        float mThunderFrequency;
+        float mThunderThreshold;
+        std::string mThunderSoundID[4];
+        float mFlashDecrement;
+
+        float mFlashBrightness;
+
+        void flashDecrement(const float elapsedSeconds);
+        float thunderChance(const float transitionRatio, const float elapsedSeconds) const;
+        void lightningAndThunder(void);
     };
 
     /// A class for storing a region's weather.
@@ -242,21 +258,9 @@ namespace MWWorld
         MoonModel mMasser;
         MoonModel mSecunda;
 
-        float mThunderFrequency;
-        float mThunderThreshold;
-        std::string mThunderSoundID0;
-        std::string mThunderSoundID1;
-        std::string mThunderSoundID2;
-        std::string mThunderSoundID3;
-
         float mWindSpeed;
         bool mIsStorm;
         osg::Vec3f mStormDirection;
-
-        float mThunderSoundDelay;
-        float mThunderFlash;
-        float mThunderChance;
-        float mThunderChanceNeeded;
 
         std::string mCurrentRegion;
         float mTimePassed;
@@ -288,7 +292,7 @@ namespace MWWorld
         bool inTransition();
         void addWeatherTransition(const int weatherID);
 
-        void calculateWeatherResult(const float gameHour);
+        void calculateWeatherResult(const float gameHour, const float elapsedSeconds, const bool isPaused);
         void calculateResult(const int weatherID, const float gameHour);
         void calculateTransitionResult(const float factor, const float gameHour);
     };

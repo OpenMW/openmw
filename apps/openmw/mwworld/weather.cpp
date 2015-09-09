@@ -80,15 +80,24 @@ Weather::Weather(const std::string& name,
     , mRainEffect(fallback.getFallbackBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
     , mTransitionDelta(fallback.getFallbackFloat("Weather_" + name + "_Transition_Delta"))
     , mCloudsMaximumPercent(fallback.getFallbackFloat("Weather_" + name + "_Clouds_Maximum_Percent"))
+    , mThunderFrequency(fallback.getFallbackFloat("Weather_" + name + "_Thunder_Frequency"))
+    , mThunderThreshold(fallback.getFallbackFloat("Weather_" + name + "_Thunder_Threshold"))
+    , mThunderSoundID()
+    , mFlashDecrement(fallback.getFallbackFloat("Weather_" + name + "_Flash_Decrement"))
+    , mFlashBrightness(0.0f)
 {
-/*
-Unhandled:
-Rain Diameter=600 ?
-Rain Height Min=200 ?
-Rain Height Max=700 ?
-Rain Threshold=0.6 ?
-Max Raindrops=650 ?
-*/
+    mThunderSoundID[0] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_0");
+    mThunderSoundID[1] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_1");
+    mThunderSoundID[2] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_2");
+    mThunderSoundID[3] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_3");
+    /*
+    Unhandled:
+    Rain Diameter=600 ?
+    Rain Height Min=200 ?
+    Rain Height Max=700 ?
+    Rain Threshold=0.6 ?
+    Max Raindrops=650 ?
+    */
 }
 
 float Weather::transitionDelta() const
@@ -98,10 +107,64 @@ float Weather::transitionDelta() const
     return mTransitionDelta;
 }
 
-float Weather::cloudBlendFactor(float transitionRatio) const
+float Weather::cloudBlendFactor(const float transitionRatio) const
 {
     // Clouds Maximum Percent affects how quickly the sky transitions from one sky texture to the next.
     return transitionRatio / mCloudsMaximumPercent;
+}
+
+float Weather::calculateThunder(const float transitionRatio, const float elapsedSeconds, const bool isPaused)
+{
+    // When paused, the flash brightness remains the same and no new strikes can occur.
+    if(!isPaused)
+    {
+        // Morrowind doesn't appear to do any calculations unless the transition ratio is higher than the Thunder Threshold.
+        if(transitionRatio >= mThunderThreshold && mThunderFrequency > 0.0f)
+        {
+            flashDecrement(elapsedSeconds);
+
+            if(Misc::Rng::rollProbability() <= thunderChance(transitionRatio, elapsedSeconds))
+            {
+                lightningAndThunder();
+            }
+        }
+        else
+        {
+            mFlashBrightness = 0.0f;
+        }
+    }
+
+    return mFlashBrightness;
+}
+
+inline void Weather::flashDecrement(const float elapsedSeconds)
+{
+   // The Flash Decrement is measured in whole units per second. This means that if the flash brightness was
+   // currently 1.0, then it should take approximately 0.25 seconds to decay to 0.0 (the minimum).
+   float decrement = mFlashDecrement * elapsedSeconds;
+   mFlashBrightness = decrement > mFlashBrightness ? 0.0f : mFlashBrightness - decrement;
+}
+
+inline float Weather::thunderChance(const float transitionRatio, const float elapsedSeconds) const
+{
+   // This formula is reversed from the observation that with Thunder Frequency set to 1, there are roughly 10 strikes
+   // per minute. It doesn't appear to be tied to in game time as Timescale doesn't affect it. Various values of
+   // Thunder Frequency seem to change the average number of strikes in a linear fashion.. During a transition, it appears to
+   // scaled based on how far past it is past the Thunder Threshold.
+   float scaleFactor = (transitionRatio - mThunderThreshold) / (1.0f - mThunderThreshold);
+   return ((mThunderFrequency * 10.0f) / 60.0f) * elapsedSeconds * scaleFactor;
+}
+
+inline void Weather::lightningAndThunder(void)
+{
+    // Morrowind seems to vary the intensity of the brightness based on which of the four sound IDs it selects.
+    // They appear to go from 0 (brightest, closest) to 3 (faintest, farthest). The value of 0.25 per distance
+    // was derived by setting the Flash Decrement to 0.1 and measuring how long each value took to decay to 0.
+    // TODO: Determine the distribution of each distance to see if it's evenly weighted.
+    unsigned int distance = Misc::Rng::rollDice(4);
+    // Flash brightness appears additive, since if multiple strikes occur, it takes longer for it to decay to 0.
+    mFlashBrightness += 1 - (distance * 0.25f);
+    MWBase::Environment::get().getSoundManager()->playSound(mThunderSoundID[distance], 1.0, 1.0);
 }
 
 RegionWeather::RegionWeather(const ESM::Region& region)
@@ -378,19 +441,9 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mWeatherSettings()
     , mMasser("Masser", fallback)
     , mSecunda("Secunda", fallback)
-    , mThunderFrequency(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Frequency"))
-    , mThunderThreshold(fallback.getFallbackFloat("Weather_Thunderstorm_Thunder_Threshold"))
-    , mThunderSoundID0(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0"))
-    , mThunderSoundID1(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_1"))
-    , mThunderSoundID2(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_2"))
-    , mThunderSoundID3(fallback.getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_3"))
     , mWindSpeed(0.f)
     , mIsStorm(false)
     , mStormDirection(0,1,0)
-    , mThunderSoundDelay(0.25)
-    , mThunderFlash(0)
-    , mThunderChance(0)
-    , mThunderChanceNeeded(50)
     , mCurrentRegion()
     , mTimePassed(0)
     , mFastForward(false)
@@ -515,12 +568,11 @@ void WeatherManager::update(float duration, bool paused)
     if(!exterior)
     {
         mRendering.setSkyEnabled(false);
-        //mRendering->getSkyManager()->setLightningStrength(0.f);
         stopSounds();
         return;
     }
 
-    calculateWeatherResult(time.getHour());
+    calculateWeatherResult(time.getHour(), duration, paused);
 
     mWindSpeed = mResult.mWindSpeed;
     mIsStorm = mResult.mIsStorm;
@@ -535,8 +587,6 @@ void WeatherManager::update(float duration, bool paused)
         mStormDirection.normalize();
         mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }
-
-    mRendering.configureFog(mResult.mFogDepth, mResult.mFogColor);
 
     // disable sun during night
     if (time.getHour() >= mNightStart || time.getHour() <= mSunriseTime)
@@ -577,56 +627,7 @@ void WeatherManager::update(float duration, bool paused)
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
-    if (!paused)
-    {
-        if(mCurrentWeather == 5 && !inTransition())
-        {
-            if (mThunderFlash > 0)
-            {
-                // play the sound after a delay
-                mThunderSoundDelay -= duration;
-                if (mThunderSoundDelay <= 0)
-                {
-                    // pick a random sound
-                    int sound = Misc::Rng::rollDice(4);
-                    std::string* soundName = NULL;
-                    if (sound == 0) soundName = &mThunderSoundID0;
-                    else if (sound == 1) soundName = &mThunderSoundID1;
-                    else if (sound == 2) soundName = &mThunderSoundID2;
-                    else if (sound == 3) soundName = &mThunderSoundID3;
-                    if (soundName)
-                        MWBase::Environment::get().getSoundManager()->playSound(*soundName, 1.0, 1.0);
-                    mThunderSoundDelay = 1000;
-                }
-
-                mThunderFlash -= duration;
-                //if (mThunderFlash > 0)
-                    //mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-                //else
-                {
-                    mThunderChanceNeeded = static_cast<float>(Misc::Rng::rollDice(100));
-                    mThunderChance = 0;
-                    //mRendering->getSkyManager()->setLightningStrength( 0.f );
-                }
-            }
-            else
-            {
-                // no thunder active
-                mThunderChance += duration*4; // chance increases by 4 percent every second
-                if (mThunderChance >= mThunderChanceNeeded)
-                {
-                    mThunderFlash = mThunderThreshold;
-
-                    //mRendering->getSkyManager()->setLightningStrength( mThunderFlash / mThunderThreshold );
-
-                    mThunderSoundDelay = 0.25;
-                }
-            }
-        }
-        //else
-            //mRendering->getSkyManager()->setLightningStrength(0.f);
-    }
-
+    mRendering.configureFog(mResult.mFogDepth, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
     mRendering.setSunColour(mResult.mSunColor);
 
@@ -764,10 +765,6 @@ bool WeatherManager::readRecord(ESM::ESMReader& reader, uint32_t type)
 void WeatherManager::clear()
 {
     stopSounds();
-
-    mThunderFlash = 0.0;
-    mThunderChance = 0.0;
-    mThunderChanceNeeded = 50.0;
 
     mCurrentRegion = "";
     mTimePassed = 0.0f;
@@ -921,16 +918,32 @@ inline void WeatherManager::addWeatherTransition(const int weatherID)
     }
 }
 
-inline void WeatherManager::calculateWeatherResult(const float gameHour)
+inline void WeatherManager::calculateWeatherResult(const float gameHour,
+                                                   const float elapsedSeconds,
+                                                   const bool isPaused)
 {
+    float flash = 0.0f;
     if(!inTransition())
     {
         calculateResult(mCurrentWeather, gameHour);
+        flash = mWeatherSettings[mCurrentWeather].calculateThunder(1.0f, elapsedSeconds, isPaused);
     }
     else
     {
         calculateTransitionResult(1 - mTransitionFactor, gameHour);
+        float currentFlash = mWeatherSettings[mCurrentWeather].calculateThunder(mTransitionFactor,
+                                                                                elapsedSeconds,
+                                                                                isPaused);
+        float nextFlash = mWeatherSettings[mNextWeather].calculateThunder(1 - mTransitionFactor,
+                                                                          elapsedSeconds,
+                                                                          isPaused);
+        flash = currentFlash + nextFlash;
     }
+    osg::Vec4f flashColor(flash, flash, flash, 0.0f);
+
+    mResult.mFogColor += flashColor;
+    mResult.mAmbientColor += flashColor;
+    mResult.mSunColor += flashColor;
 }
 
 inline void WeatherManager::calculateResult(const int weatherID, const float gameHour)
