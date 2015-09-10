@@ -7,6 +7,8 @@
 
 #include "../mwworld/containerstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 namespace MWWorld
 {
     ActionApply::ActionApply (const Ptr& object, const std::string& id)
@@ -32,7 +34,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
 
-        if (actor.getClass().apply (actor, mId, actor) && mUsageType!=-1 && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (actor.getClass().apply (actor, mId, actor) && mUsageType!=-1 && actor == MWMechanics::getPlayer())
             actor.getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
 
         actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);

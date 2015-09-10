@@ -9,6 +9,7 @@ namespace MWWorld
 namespace MWMechanics
 {
     MWWorld::Ptr getPlayer();
+    bool isPlayerInCombat();
 }
 
 #endif

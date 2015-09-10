@@ -7,6 +7,8 @@
 
 #include "../mwworld/containerstore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "class.hpp"
 
 namespace MWWorld
@@ -19,7 +21,7 @@ namespace MWWorld
         // apply to actor
         std::string id = getTarget().getClass().getId (getTarget());
 
-        if (actor.getClass().apply (actor, id, actor) && actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (actor.getClass().apply (actor, id, actor) && actor == MWMechanics::getPlayer())
             actor.getClass().skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
     }
 
