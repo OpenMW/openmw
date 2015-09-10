@@ -124,7 +124,7 @@ void CSMTools::ListLandTexturesMergeStage::perform (int stage, CSMDoc::Messages&
 
     if (!record.isDeleted())
     {
-        const ESM::Land& land = record.get();
+        const CSMWorld::Land& land = record.get();
 
         // make sure record is loaded
         land.loadData (ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML |
@@ -228,22 +228,25 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
                           // because record is already fully loaded)
         newLand.mPlugin = 0;
 
-        // adjust land texture references
-        if (ESM::Land::LandData *data = newLand.getLandData())
+        if (land.mDataTypes & ESM::Land::DATA_VTEX)
         {
-            std::pair<uint16_t, int> key;
-            key.second = land.mPlugin;
-
-            for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
+            // adjust land texture references
+            if (ESM::Land::LandData *data = newLand.getLandData())
             {
-                key.first = data->mTextures[i];
-                std::map<std::pair<uint16_t, int>, int>::const_iterator iter =
-                    mState.mTextureIndices.find (key);
+                std::pair<uint16_t, int> key;
+                key.second = land.mPlugin;
 
-                if (iter!=mState.mTextureIndices.end())
-                    data->mTextures[i] = iter->second;
-                else
-                    data->mTextures[i] = 0;
+                for (int i=0; i<ESM::Land::LAND_NUM_TEXTURES; ++i)
+                {
+                    key.first = data->mTextures[i];
+                    std::map<std::pair<uint16_t, int>, int>::const_iterator iter =
+                        mState.mTextureIndices.find (key);
+
+                    if (iter!=mState.mTextureIndices.end())
+                        data->mTextures[i] = iter->second;
+                    else
+                        data->mTextures[i] = 0;
+                }
             }
         }
 
