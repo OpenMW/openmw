@@ -88,6 +88,7 @@ namespace MWMechanics
 
         private:
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos);
+            bool isActorNearInactiveCell(const ESM::Position& actorPos);
 
     };
 }
