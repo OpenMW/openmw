@@ -104,7 +104,6 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
         { CSMWorld::ColumnBase::Display_InfoCondFunc, CSMWorld::Columns::ColumnId_InfoCondFunc, false },
         { CSMWorld::ColumnBase::Display_InfoCondComp, CSMWorld::Columns::ColumnId_InfoCondComp, false },
-        { CSMWorld::ColumnBase::Display_RaceSkill, CSMWorld::Columns::ColumnId_RaceSkill, true },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

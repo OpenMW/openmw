@@ -449,7 +449,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     attrMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcAttributesRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), attrMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcAttributes, CSMWorld::ColumnBase::Display_String, false, false));
+            new RefIdColumn (Columns::ColumnId_Attribute, CSMWorld::ColumnBase::Display_Attribute, false, false));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_UChar, CSMWorld::ColumnBase::Display_Integer));
 
@@ -461,7 +461,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     skillsMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcSkillsRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), skillsMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcSkills, CSMWorld::ColumnBase::Display_String, false, false));
+            new RefIdColumn (Columns::ColumnId_SkillImpact, CSMWorld::ColumnBase::Display_SkillImpact, false, false));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_UChar, CSMWorld::ColumnBase::Display_Integer));
 
@@ -473,16 +473,16 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     miscMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcMiscRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), miscMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcLevel, CSMWorld::ColumnBase::Display_Integer,
+            new RefIdColumn (Columns::ColumnId_Level, CSMWorld::ColumnBase::Display_Integer,
             ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcFactionID, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcHealth, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_Health, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcMana, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_Mana, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcFatigue, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_Fatigue, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcDisposition, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
@@ -490,7 +490,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcRank, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcGold, CSMWorld::ColumnBase::Display_Integer));
+            new RefIdColumn (Columns::ColumnId_Gold, CSMWorld::ColumnBase::Display_Integer));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_NpcPersistence, CSMWorld::ColumnBase::Display_Boolean));
 

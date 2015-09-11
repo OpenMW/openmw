@@ -744,18 +744,7 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
     const ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
 
     if (subColIndex == 0)
-        switch (subRowIndex)
-        {
-            case 0: return QString("Strength");
-            case 1: return QString("Intelligence");
-            case 2: return QString("Willpower");
-            case 3: return QString("Agility");
-            case 4: return QString("Speed");
-            case 5: return QString("Endurance");
-            case 6: return QString("Personality");
-            case 7: return QString("Luck");
-            default: return QVariant(); // throw an exception here?
-        }
+        return subRowIndex;
     else if (subColIndex == 1)
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
@@ -886,7 +875,7 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
         throw std::runtime_error ("index out of range");
 
     if (subColIndex == 0)
-        return QString(ESM::Skill::sSkillNames[subRowIndex].c_str());
+        return subRowIndex;
     else if (subColIndex == 1)
     {
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)

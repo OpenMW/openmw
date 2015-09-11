@@ -199,8 +199,6 @@ namespace CSMWorld
             { ColumnId_RotY, "Rotation Y"},
             { ColumnId_RotZ, "Rotation Z"},
 
-            { ColumnId_Skill, "Skill" },
-
             { ColumnId_OwnerGlobal, "Owner Global" },
             { ColumnId_DefaultProfile, "Default Profile" },
             { ColumnId_BypassNewGame, "Bypass New Game" },
@@ -271,7 +269,7 @@ namespace CSMWorld
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
-            { ColumnId_SkillImpact, "Skills" },
+            { ColumnId_SkillImpact, "Skill" },
 
             { ColumnId_InfoList, "Info List" },
             { ColumnId_InfoCondition, "Info Conditions" },
@@ -285,22 +283,20 @@ namespace CSMWorld
             { ColumnId_NpcSkills, "NPC Skill" },
             { ColumnId_UChar, "Value [0..255]" },
             { ColumnId_NpcMisc, "NPC Misc" },
-            { ColumnId_NpcLevel, "Level" },
+            { ColumnId_Level, "Level" },
             { ColumnId_NpcFactionID, "Faction ID" },
-            { ColumnId_NpcHealth, "NPC Health" },
-            { ColumnId_NpcMana, "Mana" },
-            { ColumnId_NpcFatigue, "Fatigue" },
+            { ColumnId_Mana, "Mana" },
+            { ColumnId_Fatigue, "Fatigue" },
             { ColumnId_NpcDisposition, "NPC Disposition" },
             { ColumnId_NpcReputation, "Reputation" },
             { ColumnId_NpcRank, "NPC Rank" },
-            { ColumnId_NpcGold, "Gold" },
+            { ColumnId_Gold, "Gold" },
             { ColumnId_NpcPersistence, "Persistent" },
 
             { ColumnId_RaceAttributes, "Race Attributes" },
             { ColumnId_RaceMaleValue, "Male Attrib" },
             { ColumnId_RaceFemaleValue, "Female Attrib" },
             { ColumnId_RaceSkillBonus, "Skill Bonus" },
-            { ColumnId_RaceSkill, "Race Skill" },
             { ColumnId_RaceBonus, "Bonus" },
 
             { ColumnId_Interior, "Interior" },
@@ -583,7 +579,6 @@ namespace
             // FIXME: don't have dynamic value enum delegate, use Display_String for now
             //case CSMWorld::Columns::ColumnId_InfoCond: return sInfoCond;
             case CSMWorld::Columns::ColumnId_InfoCondComp: return sInfoCondComp;
-            case CSMWorld::Columns::ColumnId_RaceSkill: return sSkills;
 
             default: return 0;
         }
