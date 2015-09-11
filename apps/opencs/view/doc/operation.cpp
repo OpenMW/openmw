@@ -19,6 +19,7 @@ void CSVDoc::Operation::updateLabel (int threads)
             case CSMDoc::State_Saving: name = "saving"; break;
             case CSMDoc::State_Verifying: name = "verifying"; break;
             case CSMDoc::State_Searching: name = "searching"; break;
+            case CSMDoc::State_Merging: name = "merging"; break;
         }
 
         std::ostringstream stream;
@@ -122,7 +123,7 @@ void CSVDoc::Operation::setBarColor (int type)
         bottomColor = "#9ECB2D";  //green gloss
         break;
 
-    case CSMDoc::State_Compiling:
+    case CSMDoc::State_Merging:
 
         topColor = "#F3E2C7";
         midTopColor = "#C19E67";

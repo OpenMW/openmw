@@ -68,6 +68,7 @@ namespace CSMDoc
             boost::filesystem::path mResDir;
             Blacklist mBlacklist;
             Runner mRunner;
+            bool mDirty;
 
             CSMWorld::IdCompletionManager mIdCompletionManager;
 
@@ -129,7 +130,9 @@ namespace CSMDoc
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
-            
+
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;
@@ -150,11 +153,17 @@ namespace CSMDoc
 
             CSMWorld::IdCompletionManager &getIdCompletionManager();
 
+            void flagAsDirty();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
+
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
 
         private slots:
 
@@ -173,4 +182,3 @@ namespace CSMDoc
 }
 
 #endif
-

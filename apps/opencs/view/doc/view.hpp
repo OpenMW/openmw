@@ -43,6 +43,7 @@ namespace CSVDoc
             QAction *mVerify;
             QAction *mShowStatusBar;
             QAction *mStopDebug;
+            QAction *mMerge;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
@@ -128,6 +129,8 @@ namespace CSVDoc
             void exitApplicationRequest (CSVDoc::View *view);
 
             void editSettingsRequest();
+
+            void mergeDocument (CSMDoc::Document *document);
 
         public slots:
 
@@ -237,6 +240,8 @@ namespace CSVDoc
             void closeRequest (SubView *subView);
 
             void moveScrollBarToEnd(int min, int max);
+
+            void merge();
     };
 }
 

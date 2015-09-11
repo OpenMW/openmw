@@ -71,7 +71,7 @@ namespace MWPhysics
             void updatePosition (const MWWorld::Ptr& ptr);
 
 
-            void addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts);
+            void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts);
 
             void removeHeightField (int x, int y);
 

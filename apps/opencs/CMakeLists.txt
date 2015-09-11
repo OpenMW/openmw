@@ -35,13 +35,18 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel
+    tools reportmodel mergeoperation 
     )
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
+    mergestages
+    )
+
+opencs_hdrs_noqt (model/tools
+    mergestate
     )
 
 
@@ -94,7 +99,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable searchsubview searchbox
+    reportsubview reporttable searchsubview searchbox merge
     )
 
 opencs_units_noqt (view/tools

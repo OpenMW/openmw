@@ -138,6 +138,7 @@ namespace CSMWorld
             void save (int index, ESM::ESMWriter& writer) const;
 
             const RefIdData& getDataSet() const; //I can't figure out a better name for this one :(
+            void copyTo (int index, RefIdCollection& target) const;
     };
 }
 
