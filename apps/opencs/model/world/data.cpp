@@ -1055,8 +1055,10 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         {
             int index = mLand.load(*mReader, mBase);
 
-            if (index!=-1 && !mBase)
-                mLand.getRecord (index).mModified.loadData (
+            // Load all land data for now. A future optimisation may only load non-base data
+            // if a suitable mechanism for avoiding race conditions can be established.
+            if (index!=-1/* && !mBase*/)
+                mLand.getRecord (index).get().loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
                     ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
 
