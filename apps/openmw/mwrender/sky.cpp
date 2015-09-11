@@ -1181,20 +1181,6 @@ void SkyManager::setSecundaState(const MoonState& state)
     mSecunda->setState(state);
 }
 
-void SkyManager::setLightningStrength(const float factor)
-{
-    if (!mCreated) return;
-    /*
-    if (factor > 0.f)
-    {
-        mLightning->setDiffuseColour (ColourValue(2*factor, 2*factor, 2*factor));
-        mLightning->setVisible(true);
-    }
-    else
-        mLightning->setVisible(false);
-        */
-}
-
 void SkyManager::setDate(int day, int month)
 {
     mDay = day;
