@@ -171,10 +171,10 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
         if (mNext==mState.mTextureIndices.end())
             return;
 
-        mNext->second = stage;
+        mNext->second = stage+1;
 
         std::ostringstream stream;
-        stream << mNext->first.first << "_" << mNext->first.second;
+        stream << mNext->first.first-1 << "_" << mNext->first.second;
 
         int index = mState.mSource.getData().getLandTextures().searchId (stream.str());
 
@@ -184,9 +184,9 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
                 mState.mSource.getData().getLandTextures().getRecord (index).get();
 
             std::ostringstream stream;
-            stream << mNext->second << "_0";
+            stream << mNext->second-1 << "_0";
 
-            texture.mIndex = mNext->second;
+            texture.mIndex = mNext->second-1;
             texture.mId = stream.str();
 
             CSMWorld::Record<CSMWorld::LandTexture> newRecord (
