@@ -189,7 +189,7 @@ namespace CSMWorld
             ColumnId_RotX = 174,
             ColumnId_RotY = 175,
             ColumnId_RotZ = 176,
-            ColumnId_Skill = 177,
+            // unused
             ColumnId_OwnerGlobal = 178,
             ColumnId_DefaultProfile = 179,
             ColumnId_BypassNewGame = 180,
@@ -276,22 +276,22 @@ namespace CSMWorld
             ColumnId_NpcSkills = 249,
             ColumnId_UChar = 250,
             ColumnId_NpcMisc = 251,
-            ColumnId_NpcLevel = 252,
+            ColumnId_Level = 252,
             ColumnId_NpcFactionID = 253,
-            ColumnId_NpcHealth = 254,
-            ColumnId_NpcMana = 255,
-            ColumnId_NpcFatigue = 256,
+            // unused
+            ColumnId_Mana = 255,
+            ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,
             ColumnId_NpcReputation = 258,
             ColumnId_NpcRank = 259,
-            ColumnId_NpcGold = 260,
+            ColumnId_Gold = 260,
             ColumnId_NpcPersistence = 261,
 
             ColumnId_RaceAttributes = 262,
             ColumnId_RaceMaleValue = 263,
             ColumnId_RaceFemaleValue = 264,
             ColumnId_RaceSkillBonus = 265,
-            ColumnId_RaceSkill = 266,
+            // unused
             ColumnId_RaceBonus = 267,
 
             ColumnId_Interior = 268,

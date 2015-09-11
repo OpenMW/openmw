@@ -140,7 +140,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceAttributeAdapter()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceAttributes, ColumnBase::Display_String,
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute,
             ColumnBase::Flag_Dialogue, false));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_RaceMaleValue, ColumnBase::Display_Integer));
@@ -151,7 +151,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceSkillsBonusAdapter()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceSkill, ColumnBase::Display_RaceSkill));
+        new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_RaceBonus, ColumnBase::Display_Integer));
 
