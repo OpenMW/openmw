@@ -927,7 +927,7 @@ namespace MWMechanics
             return true;
         }
 
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
+        if(MWMechanics::isPlayerInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
         }

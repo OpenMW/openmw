@@ -16,6 +16,7 @@
 
 #include "steering.hpp"
 #include "actorutil.hpp"
+#include "coordinateconverter.hpp"
 
 MWMechanics::AiPackage::~AiPackage() {}
 
@@ -32,36 +33,14 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
-    const ESM::Cell *cell = actor.getCell()->getCell();
+    //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
+    //... units from player, and exterior cells are 8192 units long and wide.
+    //... But AI processing distance may increase in the future.
+    if (isNearInactiveCell(pos))
     {
-        MWWorld::Ptr player = getPlayer();
-        Movement &movement = actor.getClass().getMovementSettings(actor);
-
-        //Ensure pursuer doesn't leave loaded cells
-        if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
-        {
-            int sideX = PathFinder::sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
-        if(cell->mData.mY != player.getCell()->getCell()->mData.mY)
-        {
-            int sideY = PathFinder::sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        return false;
     }
-
-    //Start position
-    ESM::Pathgrid::Point start = pos.pos;
 
     //***********************
     /// Checks if you can't get to the end position at all, adds end position to end of path
@@ -69,8 +48,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //***********************
     if(mTimer > 0.25)
     {
+        const ESM::Cell *cell = actor.getCell()->getCell();
         if (doesPathNeedRecalc(dest, cell)) { //Only rebuild path if it's moved
-            mPathFinder.buildSyncedPath(start, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
+            mPathFinder.buildSyncedPath(pos.pos, dest, actor.getCell(), true); //Rebuild path, in case the target has moved
             mPrevDest = dest;
         }
 
@@ -132,4 +112,28 @@ bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
     const MagicEffects& magicEffects(target.getClass().getCreatureStats(target).getMagicEffects());
     return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
         || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+}
+
+bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
+{
+    const ESM::Cell* playerCell(getPlayer().getCell()->getCell());
+    if (playerCell->isExterior())
+    {
+        // get actor's distance from origin of center cell
+        osg::Vec3f actorOffset(actorPos.asVec3());
+        CoordinateConverter(playerCell).toLocal(actorOffset);
+
+        // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
+        // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
+        // While AI Process distance is 7168, AI shuts down actors before they reach edges of 3 x 3 grid.
+        const float distanceFromEdge = 200.0;
+        float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
+        float maxThreshold = (2.0f * ESM::Land::REAL_SIZE) - distanceFromEdge;
+        return (actorOffset[0] < minThreshold) || (maxThreshold < actorOffset[0])
+            || (actorOffset[1] < minThreshold) || (maxThreshold < actorOffset[1]);
+    }
+    else
+    {
+        return false;
+    }
 }

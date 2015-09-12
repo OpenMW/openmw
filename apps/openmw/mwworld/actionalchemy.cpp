@@ -5,15 +5,16 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWWorld
 {
     void ActionAlchemy::executeImp (const Ptr& actor)
     {
-        if (actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (actor != MWMechanics::getPlayer())
             return;
 
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) { //Ensure we're not in combat
+        if(MWMechanics::isPlayerInCombat()) { //Ensure we're not in combat
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage3}");
             return;
         }

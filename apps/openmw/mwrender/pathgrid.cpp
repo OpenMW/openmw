@@ -208,7 +208,7 @@ void Pathgrid::enableCellPathgrid(const MWWorld::CellStore *store)
     if (!pathgrid) return;
 
     osg::Vec3f cellPathGridPos(0, 0, 0);
-    MWMechanics::CoordinateConverter(store->getCell()).ToWorld(cellPathGridPos);
+    MWMechanics::CoordinateConverter(store->getCell()).toWorld(cellPathGridPos);
 
     osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
     cellPathGrid->setPosition(cellPathGridPos);
