@@ -311,6 +311,13 @@ namespace CSMWorld
             { ColumnId_FileDescription, "File Description" },
             { ColumnId_Author, "Author" },
 
+            { ColumnId_CreatureAttributes, "Creature Attributes" },
+            { ColumnId_AttributeValue, "Attrib Value" },
+            { ColumnId_CreatureAttack, "Creature Attack" },
+            { ColumnId_MinAttack, "Min Attack" },
+            { ColumnId_MaxAttack, "Max Attack" },
+            { ColumnId_CreatureMisc, "Creature Misc" },
+
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
             { ColumnId_UseValue3, "Use value 3" },

@@ -297,21 +297,10 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CreatureType, ColumnBase::Display_CreatureType));
     creatureColumns.mType = &mColumns.back();
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_SoulPoints, ColumnBase::Display_Integer));
-    creatureColumns.mSoul = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Scale, ColumnBase::Display_Float));
     creatureColumns.mScale = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_OriginalCreature, ColumnBase::Display_Creature));
     creatureColumns.mOriginal = &mColumns.back();
-    mColumns.push_back (
-        RefIdColumn (Columns::ColumnId_CombatState, ColumnBase::Display_Integer));
-    creatureColumns.mCombat = &mColumns.back();
-    mColumns.push_back (
-        RefIdColumn (Columns::ColumnId_MagicState, ColumnBase::Display_Integer));
-    creatureColumns.mMagic = &mColumns.back();
-    mColumns.push_back (
-        RefIdColumn (Columns::ColumnId_StealthState, ColumnBase::Display_Integer));
-    creatureColumns.mStealth = &mColumns.back();
 
     static const struct
     {
@@ -349,6 +338,59 @@ CSMWorld::RefIdCollection::RefIdCollection()
     }
 
     creatureColumns.mFlags.insert (std::make_pair (respawn, ESM::Creature::Respawn));
+
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_CreatureAttributes,
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    creatureColumns.mAttributes = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> creaAttrMap;
+    creaAttrMap.insert(std::make_pair(UniversalId::Type_Creature, new CreatureAttributesRefIdAdapter()));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), creaAttrMap));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Attribute, CSMWorld::ColumnBase::Display_Attribute, false, false));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_AttributeValue, CSMWorld::ColumnBase::Display_Integer));
+
+    // Nested table
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_CreatureAttack,
+            ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    creatureColumns.mAttacks = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> attackMap;
+    attackMap.insert(std::make_pair(UniversalId::Type_Creature, new CreatureAttackRefIdAdapter()));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), attackMap));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_CreatureAttack, CSMWorld::ColumnBase::Display_Integer, false, false));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_MinAttack, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_MaxAttack, CSMWorld::ColumnBase::Display_Integer));
+
+    // Nested list
+    mColumns.push_back(RefIdColumn (Columns::ColumnId_CreatureMisc,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
+    creatureColumns.mMisc = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> creaMiscMap;
+    creaMiscMap.insert(std::make_pair(UniversalId::Type_Creature, new CreatureMiscRefIdAdapter()));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), creaMiscMap));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Level, CSMWorld::ColumnBase::Display_Integer,
+            ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Health, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Mana, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Fatigue, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_SoulPoints, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_CombatState, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_MagicState, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_StealthState, CSMWorld::ColumnBase::Display_Integer));
+    mColumns.back().addColumn(
+            new RefIdColumn (Columns::ColumnId_Gold, CSMWorld::ColumnBase::Display_Integer));
 
     mColumns.push_back (RefIdColumn (Columns::ColumnId_OpenSound, ColumnBase::Display_Sound));
     const RefIdColumn *openSound = &mColumns.back();
