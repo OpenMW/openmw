@@ -1447,9 +1447,6 @@ QVariant ActorRefIdAdapter<ESM::NPC>::getData (const RefIdColumn *column, const 
     const Record<ESM::NPC>& record = static_cast<const Record<ESM::NPC>&> (
         data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::NPC>::getType())));
 
-    if (column==mActors.mHasAi)
-        return record.get().mHasAI!=0;
-
     if (column==mActors.mHello)
         return record.get().mAiData.mHello;
 
@@ -1630,9 +1627,6 @@ QVariant ActorRefIdAdapter<ESM::Creature>::getData (const RefIdColumn *column, c
 {
     const Record<ESM::Creature>& record = static_cast<const Record<ESM::Creature>&> (
         data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::Creature>::getType())));
-
-    if (column==mActors.mHasAi)
-        return record.get().mHasAI!=0;
 
     if (column==mActors.mHello)
         return record.get().mAiData.mHello;

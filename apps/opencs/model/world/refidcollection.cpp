@@ -114,8 +114,6 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
 
     ActorColumns actorsColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_Ai, ColumnBase::Display_Boolean));
-    actorsColumns.mHasAi = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_Integer));
     actorsColumns.mHello = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFlee, ColumnBase::Display_Integer));
