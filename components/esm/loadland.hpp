@@ -76,17 +76,29 @@ struct Land
 
     struct LandData
     {
+        // Initial reference height for the first vertex, only needed for filling mHeights
         float mHeightOffset;
+        // Height in world space for each vertex
         float mHeights[LAND_NUM_VERTS];
+
+        // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
         VNML mNormals[LAND_NUM_VERTS * 3];
+
+        // 2D array of texture indices. An index can be used to look up an ESM::LandTexture,
+        // but to do so you must subtract 1 from the index first!
+        // An index of 0 indicates the default texture.
         uint16_t mTextures[LAND_NUM_TEXTURES];
 
+        // 24-bit RGB color for each vertex
         unsigned char mColours[3 * LAND_NUM_VERTS];
+
+        // DataTypes available in this LandData, accessing data that is not available is an undefined operation
         int mDataTypes;
 
         // low-LOD heightmap (used for rendering the global map)
         signed char mWnam[81];
 
+        // ???
         short mUnk1;
         uint8_t mUnk2;
 
