@@ -120,7 +120,7 @@ namespace ESM {
         for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
         mData.mGold = 0;
         mFlags = 0;
-        mScale = 0;
+        mScale = 1.f;
         mModel.clear();
         mName.clear();
         mScript.clear();
