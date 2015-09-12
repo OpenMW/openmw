@@ -693,7 +693,7 @@ namespace CSMWorld
         const RefIdColumn *mScale;
         const RefIdColumn *mOriginal;
         const RefIdColumn *mAttributes;
-        const RefIdColumn *mAttack;
+        const RefIdColumn *mAttacks;
         const RefIdColumn *mMisc;
 
         CreatureColumns (const ActorColumns& actorColumns);
