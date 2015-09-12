@@ -102,7 +102,7 @@ namespace CSMWorld
             ColumnId_OriginalCreature = 87,
             ColumnId_Biped = 88,
             ColumnId_HasWeapon = 89,
-            // unused
+            // used for SpellSrc
             ColumnId_Swims = 91,
             ColumnId_Flies = 92,
             ColumnId_Walks = 93,
@@ -189,7 +189,7 @@ namespace CSMWorld
             ColumnId_RotX = 174,
             ColumnId_RotY = 175,
             ColumnId_RotZ = 176,
-            // unused
+            // used for SpellCost
             ColumnId_OwnerGlobal = 178,
             ColumnId_DefaultProfile = 179,
             ColumnId_BypassNewGame = 180,
@@ -278,7 +278,7 @@ namespace CSMWorld
             ColumnId_NpcMisc = 251,
             ColumnId_Level = 252,
             ColumnId_NpcFactionID = 253,
-            // unused
+            // used for SpellChance
             ColumnId_Mana = 255,
             ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,
@@ -309,9 +309,16 @@ namespace CSMWorld
             ColumnId_MinMagnitude = 278,
             ColumnId_MaxMagnitude = 279,
 
-            ColumnId_SpellSrc = 280,
-            ColumnId_SpellCost = 281,
-            ColumnId_SpellChance = 282,
+            ColumnId_CreatureAttributes = 280,
+            ColumnId_AttributeValue = 281,
+            ColumnId_CreatureAttack = 282,
+            ColumnId_MinAttack = 283,
+            ColumnId_MaxAttack = 284,
+            ColumnId_CreatureMisc = 285,
+
+            ColumnId_SpellSrc = 90,
+            ColumnId_SpellCost = 177,
+            ColumnId_SpellChance = 254,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

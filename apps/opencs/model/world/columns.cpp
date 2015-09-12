@@ -285,6 +285,7 @@ namespace CSMWorld
             { ColumnId_NpcMisc, "NPC Misc" },
             { ColumnId_Level, "Level" },
             { ColumnId_NpcFactionID, "Faction ID" },
+
             { ColumnId_Mana, "Mana" },
             { ColumnId_Fatigue, "Fatigue" },
             { ColumnId_NpcDisposition, "NPC Disposition" },
@@ -310,6 +311,13 @@ namespace CSMWorld
             { ColumnId_FileFormat, "File Format" },
             { ColumnId_FileDescription, "File Description" },
             { ColumnId_Author, "Author" },
+
+            { ColumnId_CreatureAttributes, "Creature Attributes" },
+            { ColumnId_AttributeValue, "Attrib Value" },
+            { ColumnId_CreatureAttack, "Creature Attack" },
+            { ColumnId_MinAttack, "Min Attack" },
+            { ColumnId_MaxAttack, "Max Attack" },
+            { ColumnId_CreatureMisc, "Creature Misc" },
 
             { ColumnId_SpellSrc, "From Race" },
             { ColumnId_SpellCost, "Cast Cost" },
