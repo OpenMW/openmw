@@ -65,7 +65,7 @@ namespace CSMWorld
             ColumnId_Weight = 50,
             ColumnId_EnchantmentPoints = 51,
             ColumnId_Quality = 52,
-            ColumnId_Ai = 53,
+            // unused
             ColumnId_AiHello = 54,
             ColumnId_AiFlee = 55,
             ColumnId_AiFight = 56,

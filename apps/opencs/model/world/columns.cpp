@@ -71,7 +71,6 @@ namespace CSMWorld
             { ColumnId_Weight, "Weight" },
             { ColumnId_EnchantmentPoints, "Enchantment Points" },
             { ColumnId_Quality, "Quality" },
-            { ColumnId_Ai, "AI" },
             { ColumnId_AiHello, "AI Hello" },
             { ColumnId_AiFlee, "AI Flee" },
             { ColumnId_AiFight, "AI Fight" },

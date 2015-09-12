@@ -479,7 +479,6 @@ namespace CSMWorld
 
     struct ActorColumns : public NameColumns
     {
-        const RefIdColumn *mHasAi;
         const RefIdColumn *mHello;
         const RefIdColumn *mFlee;
         const RefIdColumn *mFight;
@@ -524,9 +523,6 @@ namespace CSMWorld
         const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
-        if (column==mActors.mHasAi)
-            return record.get().mHasAI!=0;
-
         if (column==mActors.mHello)
             return record.get().mAiData.mHello;
 
@@ -568,9 +564,7 @@ namespace CSMWorld
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mActors.mHasAi)
-            record2.mHasAI = value.toInt();
-        else if (column==mActors.mHello)
+        if (column==mActors.mHello)
             record2.mAiData.mHello = value.toInt();
         else if (column==mActors.mFlee)
             record2.mAiData.mFlee = value.toInt();
