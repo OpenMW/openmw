@@ -36,7 +36,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
     //... units from player, and exterior cells are 8192 units long and wide.
     //... But AI processing distance may increase in the future.
-    if (isActorNearInactiveCell(pos))
+    if (isNearInactiveCell(pos))
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         return false;
@@ -114,14 +114,14 @@ bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
         || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
 }
 
-bool MWMechanics::AiPackage::isActorNearInactiveCell(const ESM::Position& actorPos)
+bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
 {
     const ESM::Cell* playerCell(getPlayer().getCell()->getCell());
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
         osg::Vec3f actorOffset(actorPos.asVec3());
-        CoordinateConverter(playerCell).ToLocal(actorOffset);
+        CoordinateConverter(playerCell).toLocal(actorOffset);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells

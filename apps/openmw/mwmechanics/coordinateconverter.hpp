@@ -18,15 +18,15 @@ namespace MWMechanics
             CoordinateConverter(const ESM::Cell* cell);
 
             /// in-place conversion from local to world
-            void ToWorld(ESM::Pathgrid::Point& point);
+            void toWorld(ESM::Pathgrid::Point& point);
 
             /// in-place conversion from local to world
-            void ToWorld(osg::Vec3f& point);
+            void toWorld(osg::Vec3f& point);
 
             /// in-place conversion from world to local
-            void ToLocal(osg::Vec3f& point);
+            void toLocal(osg::Vec3f& point);
 
-            osg::Vec3f ToLocalVec3(const ESM::Pathgrid::Point& point);
+            osg::Vec3f toLocalVec3(const ESM::Pathgrid::Point& point);
 
         private:
             int mCellX;

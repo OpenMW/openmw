@@ -207,10 +207,10 @@ namespace MWMechanics
         //       outside an area enclosed by walls, but there is a pathgrid
         //       point right behind the wall that is closer than any pathgrid
         //       point outside the wall
-        osg::Vec3f startPointInLocalCoords(converter.ToLocalVec3(startPoint));
+        osg::Vec3f startPointInLocalCoords(converter.toLocalVec3(startPoint));
         int startNode = getClosestPoint(mPathgrid, startPointInLocalCoords);
 
-        osg::Vec3f endPointInLocalCoords(converter.ToLocalVec3(endPoint));
+        osg::Vec3f endPointInLocalCoords(converter.toLocalVec3(endPoint));
         std::pair<int, bool> endNode = getClosestReachablePoint(mPathgrid, cell,
             endPointInLocalCoords,
                 startNode);
@@ -223,7 +223,7 @@ namespace MWMechanics
         if(startNode == endNode.first)
         {
             ESM::Pathgrid::Point temp(mPathgrid->mPoints[startNode]);
-            converter.ToWorld(temp);
+            converter.toWorld(temp);
             mPath.push_back(temp);
         }
         else
@@ -233,7 +233,7 @@ namespace MWMechanics
             // convert supplied path to world co-ordinates
             for (std::list<ESM::Pathgrid::Point>::iterator iter(mPath.begin()); iter != mPath.end(); ++iter)
             {
-                converter.ToWorld(*iter);
+                converter.toWorld(*iter);
             }
         }
 

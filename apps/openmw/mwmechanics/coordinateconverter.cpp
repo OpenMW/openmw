@@ -15,25 +15,25 @@ namespace MWMechanics
         }
     }
 
-    void CoordinateConverter::ToWorld(ESM::Pathgrid::Point& point)
+    void CoordinateConverter::toWorld(ESM::Pathgrid::Point& point)
     {
         point.mX += mCellX;
         point.mY += mCellY;
     }
 
-    void CoordinateConverter::ToWorld(osg::Vec3f& point)
+    void CoordinateConverter::toWorld(osg::Vec3f& point)
     {
         point.x() += static_cast<float>(mCellX);
         point.y() += static_cast<float>(mCellY);
     }
 
-    void CoordinateConverter::ToLocal(osg::Vec3f& point)
+    void CoordinateConverter::toLocal(osg::Vec3f& point)
     {
         point.x() -= static_cast<float>(mCellX);
         point.y() -= static_cast<float>(mCellY);
     }
 
-    osg::Vec3f CoordinateConverter::ToLocalVec3(const ESM::Pathgrid::Point& point)
+    osg::Vec3f CoordinateConverter::toLocalVec3(const ESM::Pathgrid::Point& point)
     {
         return osg::Vec3f(
             static_cast<float>(point.mX - mCellX),
