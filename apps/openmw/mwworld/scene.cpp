@@ -43,22 +43,34 @@ namespace
     }
 
     void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                                    MWRender::RenderingManager& rendering)
+                                    MWRender::RenderingManager& rendering,
+				    int prio = 0)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
         {
             osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
-            if (!ptr.getClass().isActor())
-                worldRotQuat = worldRotQuat * osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
-                    osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0));
+            if (!ptr.getClass().isActor()) {
+		if (prio)
+		    /* There are 2 ways to handle rotations, the setangle way
+		     * (prio = 1), or the usual way */
+		    worldRotQuat = osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
+			osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0)) * worldRotQuat;
+		else
+		    worldRotQuat = worldRotQuat * osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
+			osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0));
+	    }
 
             float x = ptr.getRefData().getLocalRotation().rot[0];
             float y = ptr.getRefData().getLocalRotation().rot[1];
             float z = ptr.getRefData().getLocalRotation().rot[2];
 
             osg::Quat rot(z, osg::Vec3(0,0,-1));
-            if (!ptr.getClass().isActor())
-                rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
+            if (!ptr.getClass().isActor()) {
+		if (prio)
+		    rot = osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0)) * rot;
+		else
+		    rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
+	    }
 
             rendering.rotateObject(ptr, rot * worldRotQuat);
             physics.updateRotation(ptr);
@@ -135,9 +147,9 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::updateObjectLocalRotation (const Ptr& ptr)
+    void Scene::updateObjectLocalRotation (const Ptr& ptr, int prio)
     {
-        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
+        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering,prio);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
