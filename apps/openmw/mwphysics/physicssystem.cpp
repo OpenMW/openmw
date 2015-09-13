@@ -396,8 +396,8 @@ namespace MWPhysics
             }
 
             bool isOnGround = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
-            {
+            if (!(inertia.z() > 0.f))
+            { // I don't want any limit for the walk on water effect !
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
@@ -1152,9 +1152,7 @@ namespace MWPhysics
 
                 bool waterCollision = false;
                 if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->getCell()->hasWater()
-                        && !world->isUnderwater(iter->first.getCell(),
-                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                        && cell->getCell()->hasWater())
                     waterCollision = true;
 
                 ActorMap::iterator foundActor = mActors.find(iter->first);
