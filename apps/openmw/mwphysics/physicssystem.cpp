@@ -1152,9 +1152,9 @@ namespace MWPhysics
 
                 bool waterCollision = false;
                 if (effects.get(ESM::MagicEffect::WaterWalking).getMagnitude()
-                        && cell->getCell()->hasWater()
-                        && !world->isUnderwater(iter->first.getCell(),
-                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                        && cell->getCell()->hasWater())
+//                        && !world->isUnderwater(iter->first.getCell(),
+//                                               osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
                     waterCollision = true;
 
                 ActorMap::iterator foundActor = mActors.find(iter->first);
