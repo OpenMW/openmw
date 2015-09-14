@@ -78,6 +78,8 @@ namespace MWMechanics
 
             virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
+            void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
@@ -87,7 +89,6 @@ namespace MWMechanics
             ESM::Pathgrid::Point mPrevDest;
 
         private:
-            void evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos);
             bool isNearInactiveCell(const ESM::Position& actorPos);
 
     };
