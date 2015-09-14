@@ -1,12 +1,12 @@
 Description
 ===========
 
-Your pull request description should include:
+Your pull request description should include (if applicable):
 
+* A link back to the bug report or forum discussion that prompted the change
 * Summary of the changes made
 * Reasoning / motivation behind the change
 * What testing you have carried out to verify the change
-* If applicable, a link back to the bug report or forum discussion that prompted the change
 
 Other notes
 ===========
