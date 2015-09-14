@@ -1076,6 +1076,12 @@ namespace MWMechanics
 
             killDeadActors();
 
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+		/* This is a workaround so that killDeadActors can be stopped
+		 * based on mSkipAnim. Maybe this killDeadActors should be
+		 * called differently ideally, but it will do for now */
+		iter->second->getCharacterController()->resetSkipAnim();
+
             // check if we still have any player enemies to switch music
             static int currentMusic = 0;
 
@@ -1161,10 +1167,8 @@ namespace MWMechanics
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
-	    if (cls.isNpc() && iter->first.get<ESM::NPC>()->mBase->mFlags & 8) {
-		// persistent (mannequins) !
+	    if (iter->second->getCharacterController()->getskipAnim())
 		continue;
-	    }
             if(!stats.isDead())
             {
                 if(iter->second->getCharacterController()->isDead())

@@ -143,7 +143,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
-    
+
     typedef std::deque<std::pair<std::string,size_t> > AnimationQueue;
     AnimationQueue mAnimQueue;
 
@@ -233,12 +233,15 @@ public:
     /// @return false if the character has already been killed before
     bool kill();
 
+    bool getskipAnim() { return mSkipAnim; }
+    void resetSkipAnim() { mSkipAnim = false; }
+
     void resurrect();
     bool isDead() const
     { return mDeathState != CharState_None; }
 
     void forceStateUpdate();
-    
+
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
 
