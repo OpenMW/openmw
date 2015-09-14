@@ -1161,7 +1161,7 @@ namespace MWMechanics
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
-	    if (iter->first.get<ESM::NPC>()->mBase->mFlags & 8) {
+	    if (cls.isNpc() && iter->first.get<ESM::NPC>()->mBase->mFlags & 8) {
 		// persistent (mannequins) !
 		continue;
 	    }
