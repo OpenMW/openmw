@@ -150,6 +150,16 @@ void Actor::setCanWaterWalk(bool waterWalk)
     {
         mCanWaterWalk = waterWalk;
         updateCollisionMask();
+	if (waterWalk) {
+	    ESM::Position pos = mPtr.getRefData().getPosition();
+	    if (pos.pos[2] < -100) {
+		/* I didn't look for the exact limit but watercolision will
+		 * push the player out of water only if there is not too much
+		 * water, for -100 and beyond position must be adjusted ! */
+		pos.pos[2] = -50;
+		mPtr.getRefData().setPosition(pos);
+	    }
+	}
     }
 }
 
