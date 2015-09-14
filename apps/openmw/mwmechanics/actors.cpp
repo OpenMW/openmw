@@ -1161,6 +1161,10 @@ namespace MWMechanics
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
+	    if (iter->first.get<ESM::NPC>()->mBase->mFlags & 8) {
+		// persistent (mannequins) !
+		continue;
+	    }
             if(!stats.isDead())
             {
                 if(iter->second->getCharacterController()->isDead())
@@ -1176,7 +1180,7 @@ namespace MWMechanics
 
             if (iter->second->getCharacterController()->kill())
             {
-                // TODO: It's not known whether the soundgen tags scream, roar, and moan are reliable 
+                // TODO: It's not known whether the soundgen tags scream, roar, and moan are reliable
                 // for NPCs since some of the npc death animation files are missing them.
 
                 // Play dying words
