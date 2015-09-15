@@ -1248,7 +1248,7 @@ namespace MWWorld
         ptr.getRefData().setPosition(pos);
 
         if(ptr.getRefData().getBaseNode() != 0)
-            mWorldScene->updateObjectLocalRotation(ptr);
+            mWorldScene->updateObjectLocalRotation(ptr,1);
     }
 
     void World::localRotateObject (const Ptr& ptr, float x, float y, float z)

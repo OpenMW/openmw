@@ -107,7 +107,7 @@ namespace MWWorld
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
 
-            void updateObjectLocalRotation (const Ptr& ptr);
+            void updateObjectLocalRotation (const Ptr& ptr,int prio = 0);
             void updateObjectScale(const Ptr& ptr);
 
             bool isCellActive(const CellStore &cell);

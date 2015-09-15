@@ -201,13 +201,23 @@ void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, 
     float skillGain = 1;
     if (usageType>=4)
         throw std::runtime_error ("skill usage type out of range");
-    if (usageType>=0)
-    {
-        skillGain = skill->mData.mUseValue[usageType];
-        if (skillGain<0)
-            throw std::runtime_error ("invalid skill gain factor");
+    if (skill->mData.mSpecialization == 1 &&
+	    skill->mIndex != ESM::Skill::Enchant &&
+	    skill->mIndex != ESM::Skill::Alchemy) { // magic skill !
+	// in this case we receive spell cost in extraFactor
+	int skill_level = getSkill (skillIndex).getBase();
+	float bonus_mp = 100.0/pow((((skill_level+1)*2.0)/5),2);
+	float max = getSkillProgressRequirement(skillIndex, class_);
+	skillGain = bonus_mp*extraFactor*max/100;
+    } else {
+	if (usageType>=0)
+	{
+	    skillGain = skill->mData.mUseValue[usageType];
+	    if (skillGain<0)
+		throw std::runtime_error ("invalid skill gain factor");
+	}
+	skillGain *= extraFactor;
     }
-    skillGain *= extraFactor;
 
     MWMechanics::SkillValue& value = getSkill (skillIndex);
 

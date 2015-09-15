@@ -697,7 +697,12 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
-        if(!cls.getCreatureStats(mPtr).isDead())
+        if(!cls.getCreatureStats(mPtr).isDead() ||
+		(cls.isNpc() &&
+		 mPtr.get<ESM::NPC>()->mBase->mFlags & 8)) // persistent !
+	    /* From http://wiki.theassimilationlab.com/mmw/Morrowind_Script_Library#Mannequins
+	     * mannequins are npc with the persist bit, they don't play the
+	     * death animation and just stay here */
             mIdleState = CharState_Idle;
         else
         {
@@ -1870,8 +1875,6 @@ void CharacterController::update(float duration)
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
-
-    mSkipAnim = false;
 
     mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
