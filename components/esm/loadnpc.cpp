@@ -121,7 +121,12 @@ namespace ESM
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mHasAI) {
+        if (mAiData.mHello != 0
+            || mAiData.mFight != 0
+            || mAiData.mFlee != 0
+            || mAiData.mAlarm != 0
+            || mAiData.mServices != 0)
+        {
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
 
