@@ -697,18 +697,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
-        if(!cls.getCreatureStats(mPtr).isDead() ||
-		(cls.isNpc() &&
-		 mPtr.get<ESM::NPC>()->mBase->mFlags & 8)) // persistent !
-	    /* From http://wiki.theassimilationlab.com/mmw/Morrowind_Script_Library#Mannequins
-	     * mannequins are npc with the persist bit, they don't play the
-	     * death animation and just stay here */
-            mIdleState = CharState_Idle;
-        else
-        {
-            int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
-            playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
-        }
+	// Don't test if the character is dead here to give a chance to an
+	// eventual attached script to stop the death animation for mannequins
+	mIdleState = CharState_Idle;
     }
     else
     {
