@@ -63,7 +63,6 @@ namespace Compiler
         if (mState==BeginState && keyword==Scanner::K_begin)
         {
             mState = NameState;
-            scanner.allowNameStartingwithDigit();
             return true;
         }
 
@@ -110,7 +109,6 @@ namespace Compiler
                 scanner.scan (mScriptParser);
 
                 mState = EndNameState;
-                scanner.allowNameStartingwithDigit();
                 return true;
             }
 
