@@ -200,7 +200,7 @@ namespace MWMechanics
 
         //Update every frame
         storage.updateCombatMove(duration);
-        updateActorsMovement(actor, storage.mMovement);
+        updateActorsMovement(actor, duration, storage.mMovement);
         storage.updateAttack(characterController);
         storage.mActionCooldown -= duration;
         
@@ -494,7 +494,7 @@ namespace MWMechanics
         return false;
     }
 
-    void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, MWMechanics::Movement& desiredMovement)
+    void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, float duration, MWMechanics::Movement& desiredMovement)
     {
         MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
         if (mPathFinder.isPathConstructed())
@@ -506,8 +506,7 @@ namespace MWMechanics
             }
             else
             {
-                zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
-                actorMovementSettings.mPosition[1] = 1;
+                evadeObstacles(actor, duration, pos);
             }
         }
         else

@@ -77,7 +77,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Po
     return false;
 }
 
-void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float duration, ESM::Position& pos)
+void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos)
 {
     zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
 
