@@ -53,8 +53,8 @@ namespace
 		if (prio)
 		    /* There are 2 ways to handle rotations, the setangle way
 		     * (prio = 1), or the usual way */
-		    worldRotQuat = osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
-			osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0)) * worldRotQuat;
+		    worldRotQuat = osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0)) *
+			osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) * worldRotQuat;
 		else
 		    worldRotQuat = worldRotQuat * osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
 			osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0));
