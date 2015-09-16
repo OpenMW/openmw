@@ -6,6 +6,7 @@
 #include <MyGUI_ImageBox.h>
 
 #include <components/esm/loadmgef.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -134,23 +135,24 @@ namespace MWGui
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "") );
                     }
                 }
-		if (effectIt->mRemainingTime > -1) {
-		    sourcesDescription += " #{sDuration}: ";
-		    float duration = effectIt->mRemainingTime;
-		    if (duration > 3600) {
-			int hour = duration / 3600;
-			duration -= hour*3600;
-			sourcesDescription += MWGui::ToolTips::toString(hour) + "h";
-		    }
-		    if (duration > 60) {
-			int minute = duration / 60;
-			duration -= minute*60;
-			sourcesDescription += MWGui::ToolTips::toString(minute) + "m";
-		    }
-		    if (duration > 0.1) {
-			sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
-		    }
-		}
+                if (effectIt->mRemainingTime > -1 &&
+                        Settings::Manager::getBool("show effect duration","Game")) {
+                    sourcesDescription += " #{sDuration}: ";
+                    float duration = effectIt->mRemainingTime;
+                    if (duration > 3600) {
+                        int hour = duration / 3600;
+                        duration -= hour*3600;
+                        sourcesDescription += MWGui::ToolTips::toString(hour) + "h";
+                    }
+                    if (duration > 60) {
+                        int minute = duration / 60;
+                        duration -= minute*60;
+                        sourcesDescription += MWGui::ToolTips::toString(minute) + "m";
+                    }
+                    if (duration > 0.1) {
+                        sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
+                    }
+                }
             }
 
             if (remainingDuration > 0.f)
