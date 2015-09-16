@@ -253,6 +253,8 @@ protected:
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
 
+    float mAlpha;
+
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
@@ -419,7 +421,8 @@ public:
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group) {}
     virtual void setVampire(bool vampire) {}
-    virtual void setAlpha(float alpha) {}
+    /// A value < 1 makes the animation translucent, 1.f = fully opaque
+    void setAlpha(float alpha);
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
     virtual void releaseArrow(float attackStrength) {}
