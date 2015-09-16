@@ -483,7 +483,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             idlePriority = Priority_SwimIdle;
         }
         else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
+        {
             idle = "idlesneak";
+            idlePriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
+        }
         else if(mIdleState != CharState_None)
         {
             idle = "idle";

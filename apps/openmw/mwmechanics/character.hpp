@@ -29,6 +29,7 @@ class CreatureStats;
 enum Priority {
     Priority_Default,
     Priority_WeaponLowerBody,
+    Priority_SneakIdleLowerBody,
     Priority_SwimIdle,
     Priority_Jump,
     Priority_Movement,

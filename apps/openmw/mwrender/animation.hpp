@@ -105,12 +105,12 @@ public:
             return true;
         }
 
-        int& operator[] (int n)
+        int& operator[] (BoneGroup n)
         {
             return mPriority[n];
         }
 
-        const int& operator[] (int n) const
+        const int& operator[] (BoneGroup n) const
         {
             return mPriority[n];
         }
