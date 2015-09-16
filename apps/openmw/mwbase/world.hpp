@@ -541,6 +541,10 @@ namespace MWBase
             virtual void resetActors() = 0;
 
             virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
+
+            /// Return a vector aiming the actor's weapon towards a target.
+            /// @note The length of the vector is the distance between actor and target.
+            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
     };
 }
 

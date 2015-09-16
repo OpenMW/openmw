@@ -107,6 +107,7 @@ namespace MWPhysics
 
             bool isOnGround (const MWWorld::Ptr& actor);
 
+            /// Get physical half extents (scaled) of the given actor.
             osg::Vec3f getHalfExtents(const MWWorld::Ptr& actor);
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
