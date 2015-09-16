@@ -680,7 +680,7 @@ namespace MWRender
                 if(!(state->second.mBlendMask&(1<<blendMask)))
                     continue;
 
-                if(active == mStates.end() || active->second.mPriority.mPriority[blendMask] < state->second.mPriority.mPriority[blendMask])
+                if(active == mStates.end() || active->second.mPriority[blendMask] < state->second.mPriority[blendMask])
                     active = state;
             }
 

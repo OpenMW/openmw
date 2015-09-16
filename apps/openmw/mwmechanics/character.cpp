@@ -278,7 +278,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mHitState = CharState_Block;
                 mCurrentHit = "shield";
                 MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
-                priorityBlock.mPriority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+                priorityBlock[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
                 mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
             }
 
@@ -1063,7 +1063,7 @@ bool CharacterController::updateWeaponState()
     }
 
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    priorityWeapon.mPriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+    priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut

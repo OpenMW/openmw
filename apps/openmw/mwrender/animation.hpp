@@ -105,6 +105,16 @@ public:
             return true;
         }
 
+        int& operator[] (int n)
+        {
+            return mPriority[n];
+        }
+
+        const int& operator[] (int n) const
+        {
+            return mPriority[n];
+        }
+
         bool contains(int priority) const
         {
             for (unsigned int i=0; i<sNumBlendMasks; ++i)
