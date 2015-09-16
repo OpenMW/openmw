@@ -102,9 +102,9 @@ namespace MWInput
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
 
-        		/* Joystick Init */
+        /* Joystick Init */
 
-		//Load controller mappings
+        // Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
         if(controllerBindingsFile!="")
         {
@@ -112,10 +112,10 @@ namespace MWInput
         }
 #endif
 
-		//Open all presently connected sticks
-		int numSticks = SDL_NumJoysticks();
-		for(int i = 0; i < numSticks; i++)
-		{
+        // Open all presently connected sticks
+        int numSticks = SDL_NumJoysticks();
+        for(int i = 0; i < numSticks; i++)
+        {
             if(SDL_IsGameController(i))
             {
                 SDL_ControllerDeviceEvent evt;
@@ -126,7 +126,7 @@ namespace MWInput
             {
                 //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
             }
-		}
+        }
 
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)

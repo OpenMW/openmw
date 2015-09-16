@@ -16,7 +16,7 @@ namespace
 CSMWorld::InfoTableProxyModel::InfoTableProxyModel(CSMWorld::UniversalId::Type type, QObject *parent)
     : IdTableProxyModel(parent),
       mType(type),
-	  mInfoColumnId(type == UniversalId::Type_TopicInfos ? Columns::ColumnId_Topic : 
+      mInfoColumnId(type == UniversalId::Type_TopicInfos ? Columns::ColumnId_Topic :
                                                            Columns::ColumnId_Journal),
       mInfoColumnIndex(-1),
       mLastAddedSourceRow(-1)

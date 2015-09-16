@@ -287,7 +287,7 @@ namespace MWWorld
 
         if (mPlayer)
         {
-	    mPlayer->clear();
+            mPlayer->clear();
             mPlayer->setCell(0);
             mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
