@@ -1094,7 +1094,7 @@ namespace MWMechanics
             static float sneakTimer = 0.f; // times update of sneak icon
 
             // if player is in sneak state see if anyone detects him
-            if (player.getClass().getCreatureStats(player).getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak))
+            if (playerCharacter && playerCharacter->isSneaking())
             {
                 static float sneakSkillTimer = 0.f; // times sneak skill progress from "avoid notice"
 

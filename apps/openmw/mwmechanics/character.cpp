@@ -1768,7 +1768,7 @@ void CharacterController::update(float duration)
 
         if(mAnimQueue.empty() || inwater || sneak)
         {
-            idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
+            idlestate = (inwater ? CharState_IdleSwim : (sneak && !inJump ? CharState_IdleSneak : CharState_Idle));
         }
         else if(mAnimQueue.size() > 1)
         {
@@ -2046,6 +2046,15 @@ bool CharacterController::isReadyToBlock() const
 bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut;
+}
+
+bool CharacterController::isSneaking() const
+{
+    return mIdleState == CharState_IdleSneak ||
+            mMovementState == CharState_SneakForward ||
+            mMovementState == CharState_SneakBack ||
+            mMovementState == CharState_SneakLeft ||
+            mMovementState == CharState_SneakRight;
 }
 
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)

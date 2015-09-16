@@ -241,6 +241,7 @@ public:
     
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+    bool isSneaking() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
 
