@@ -169,7 +169,7 @@ namespace MWClass
 
         std::string text;
 
-	text += "\nDuration: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
+	text += "\n#{sDuration}: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
         if (ref->mBase->mData.mWeight != 0)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);
