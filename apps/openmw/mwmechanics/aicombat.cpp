@@ -65,7 +65,7 @@ namespace
             Ogre::Vector3 dir = to - from;
             dir.z = 0;
             dir.normalise();
-			float verticalOffset = 200; // instead of '200' here we want the height of the actor
+            float verticalOffset = 200; // instead of '200' here we want the height of the actor
             Ogre::Vector3 _from = from + dir*offsetXY + Ogre::Vector3::UNIT_Z * verticalOffset;
 
             // cast up-down ray and find height in world space of hit
