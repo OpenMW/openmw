@@ -1018,14 +1018,11 @@ namespace MWWorld
         return facedObject;
     }
 
-    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
+    osg::Vec3f getActorHeadPosition(const MWWorld::Ptr& actor, MWRender::RenderingManager* rendering)
     {
-        const ESM::Position &posdata = ptr.getRefData().getPosition();
+        osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
 
-        osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
-        osg::Vec3f pos (posdata.asVec3());
-
-        MWRender::Animation* anim = mRendering->getAnimation(ptr);
+        MWRender::Animation* anim = rendering->getAnimation(actor);
         if (anim != NULL)
         {
             const osg::Node* node = anim->getNode("Head");
@@ -1035,9 +1032,18 @@ namespace MWWorld
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())
-                    pos = mats[0].getTrans();
+                    origin = mats[0].getTrans();
             }
         }
+        return origin;
+    }
+
+    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
+    {
+        const ESM::Position &posdata = ptr.getRefData().getPosition();
+
+        osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
+        osg::Vec3f pos = getActorHeadPosition(ptr, mRendering);
 
         std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance);
         if(result.first.isEmpty())
@@ -2608,21 +2614,7 @@ namespace MWWorld
         MWWorld::Ptr target;
         float distance = 192.f; // ??
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
-
-        MWRender::Animation* anim = mRendering->getAnimation(actor);
-        if (anim != NULL)
-        {
-            const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
-                node = anim->getNode("Bip01 Head");
-            if (node != NULL)
-            {
-                osg::MatrixList mats = node->getWorldMatrices();
-                if (mats.size())
-                    origin = mats[0].getTrans();
-            }
-        }
+        osg::Vec3f origin = getActorHeadPosition(actor, mRendering);
 
         osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
                 * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
@@ -3261,5 +3253,13 @@ namespace MWWorld
         if (physicActor && physicActor->isWalkingOnWater())
             return true;
         return false;
+    }
+
+    osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
+    {
+        osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
+        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
+        targetPos.z() += mPhysics->getHalfExtents(target).z();
+        return (targetPos - weaponPos);
     }
 }
