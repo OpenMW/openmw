@@ -113,6 +113,7 @@ Programmers
     viadanna
     Vincent Heuken
     vocollapse
+    zelurker
 
 Manual
 ------
