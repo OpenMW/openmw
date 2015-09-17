@@ -56,7 +56,7 @@ namespace
             osg::Vec3f dir = to - from;
             dir.z() = 0;
             dir.normalize();
-			float verticalOffset = 200; // instead of '200' here we want the height of the actor
+            float verticalOffset = 200; // instead of '200' here we want the height of the actor
             osg::Vec3f _from = from + dir*offsetXY + osg::Vec3f(0,0,1) * verticalOffset;
 
             // cast up-down ray and find height in world space of hit

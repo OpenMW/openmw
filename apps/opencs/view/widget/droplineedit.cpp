@@ -35,7 +35,7 @@ void CSVWidget::DropLineEdit::dropEvent(QDropEvent *event)
     if (CSVWorld::DragDropUtils::canAcceptData(*event, mDropType))
     {
         CSMWorld::UniversalId id = CSVWorld::DragDropUtils::getAcceptedData(*event, mDropType);
-		setText(QString::fromUtf8(id.getId().c_str()));
+        setText(QString::fromUtf8(id.getId().c_str()));
         emit tableMimeDataDropped(id, CSVWorld::DragDropUtils::getTableMimeData(*event)->getDocumentPtr());
     }
 }

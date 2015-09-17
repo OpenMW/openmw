@@ -44,7 +44,7 @@ namespace Compiler
 
     namespace Gui
     {
-        void registerExtensions (Extensions& extensions);	
+        void registerExtensions (Extensions& extensions);
     }
 
     namespace Misc

@@ -493,14 +493,14 @@ void Record<ESM::Book>::print()
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
     if (mPrintPlain)
     {
-    	std::cout << "  Text:" << std::endl;
-    	std::cout << "START--------------------------------------" << std::endl;
-    	std::cout << mData.mText << std::endl;
-    	std::cout << "END----------------------------------------" << std::endl;
+        std::cout << "  Text:" << std::endl;
+        std::cout << "START--------------------------------------" << std::endl;
+        std::cout << mData.mText << std::endl;
+        std::cout << "END----------------------------------------" << std::endl;
     }
     else
     {
-    	std::cout << "  Text: [skipped]" << std::endl;
+        std::cout << "  Text: [skipped]" << std::endl;
     }
 }
 
@@ -799,14 +799,14 @@ void Record<ESM::DialInfo>::print()
     {
         if (mPrintPlain)
         {
-        	std::cout << "  Result Script:" << std::endl;
-        	std::cout << "START--------------------------------------" << std::endl;
-        	std::cout << mData.mResultScript << std::endl;
-        	std::cout << "END----------------------------------------" << std::endl;
+            std::cout << "  Result Script:" << std::endl;
+            std::cout << "START--------------------------------------" << std::endl;
+            std::cout << mData.mResultScript << std::endl;
+            std::cout << "END----------------------------------------" << std::endl;
         }
         else
         {
-        	std::cout << "  Result Script: [skipped]" << std::endl;
+            std::cout << "  Result Script: [skipped]" << std::endl;
         }
     }
 }
@@ -1201,14 +1201,14 @@ void Record<ESM::Script>::print()
 
     if (mPrintPlain)
     {
-    	std::cout << "  Script:" << std::endl;
-    	std::cout << "START--------------------------------------" << std::endl;
-    	std::cout << mData.mScriptText << std::endl;
-    	std::cout << "END----------------------------------------" << std::endl;
+        std::cout << "  Script:" << std::endl;
+        std::cout << "START--------------------------------------" << std::endl;
+        std::cout << mData.mScriptText << std::endl;
+        std::cout << "END----------------------------------------" << std::endl;
     }
     else
     {
-    	std::cout << "  Script: [skipped]" << std::endl;
+        std::cout << "  Script: [skipped]" << std::endl;
     }
 }
 
