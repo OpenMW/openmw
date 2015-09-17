@@ -700,13 +700,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
         }
 
-        if(!cls.getCreatureStats(mPtr).isDead())
-            mIdleState = CharState_Idle;
-        else
-        {
-            int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
-            playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
-        }
+	// Don't test if the character is dead here to give a chance to an
+	// eventual attached script to stop the death animation for mannequins
+	mIdleState = CharState_Idle;
     }
     else
     {
@@ -1873,8 +1869,6 @@ void CharacterController::update(float duration)
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
-
-    mSkipAnim = false;
 
     mAnimation->enableHeadAnimation(cls.isActor() && !cls.getCreatureStats(mPtr).isDead());
 }
