@@ -83,14 +83,6 @@ namespace CSVWorld
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
-
-        public slots:
-
-            void updateUserSetting (const QString &, const QStringList &);
-
-        signals:
-
-            void updateSceneUserSetting (const QString &, const QStringList &);
     };
 }
 
