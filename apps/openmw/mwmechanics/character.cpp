@@ -278,7 +278,7 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 mHitState = CharState_Block;
                 mCurrentHit = "shield";
                 MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
-                priorityBlock.mPriority[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+                priorityBlock[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
                 mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
             }
 
@@ -483,7 +483,10 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             idlePriority = Priority_SwimIdle;
         }
         else if(mIdleState == CharState_IdleSneak && mAnimation->hasAnimation("idlesneak"))
+        {
             idle = "idlesneak";
+            idlePriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_SneakIdleLowerBody;
+        }
         else if(mIdleState != CharState_None)
         {
             idle = "idle";
@@ -1063,7 +1066,7 @@ bool CharacterController::updateWeaponState()
     }
 
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    priorityWeapon.mPriority[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
+    priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
     if(weaptype != mWeaponType && mHitState != CharState_KnockDown && mHitState != CharState_KnockOut
@@ -1768,7 +1771,7 @@ void CharacterController::update(float duration)
 
         if(mAnimQueue.empty() || inwater || sneak)
         {
-            idlestate = (inwater ? CharState_IdleSwim : (sneak ? CharState_IdleSneak : CharState_Idle));
+            idlestate = (inwater ? CharState_IdleSwim : (sneak && !inJump ? CharState_IdleSneak : CharState_Idle));
         }
         else if(mAnimQueue.size() > 1)
         {
@@ -2046,6 +2049,15 @@ bool CharacterController::isReadyToBlock() const
 bool CharacterController::isKnockedOut() const
 {
     return mHitState == CharState_KnockOut;
+}
+
+bool CharacterController::isSneaking() const
+{
+    return mIdleState == CharState_IdleSneak ||
+            mMovementState == CharState_SneakForward ||
+            mMovementState == CharState_SneakBack ||
+            mMovementState == CharState_SneakLeft ||
+            mMovementState == CharState_SneakRight;
 }
 
 void CharacterController::setAttackingOrSpell(bool attackingOrSpell)

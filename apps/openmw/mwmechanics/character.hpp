@@ -29,6 +29,7 @@ class CreatureStats;
 enum Priority {
     Priority_Default,
     Priority_WeaponLowerBody,
+    Priority_SneakIdleLowerBody,
     Priority_SwimIdle,
     Priority_Jump,
     Priority_Movement,
@@ -241,6 +242,7 @@ public:
     
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+    bool isSneaking() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
 

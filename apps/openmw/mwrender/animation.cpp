@@ -9,6 +9,8 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
+#include <osg/BlendFunc>
+#include <osg/Material>
 
 #include <osgParticle/ParticleSystem>
 
@@ -292,6 +294,7 @@ namespace MWRender
         , mTextKeyListener(NULL)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
+        , mAlpha(1.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
@@ -680,7 +683,7 @@ namespace MWRender
                 if(!(state->second.mBlendMask&(1<<blendMask)))
                     continue;
 
-                if(active == mStates.end() || active->second.mPriority.mPriority[blendMask] < state->second.mPriority.mPriority[blendMask])
+                if(active == mStates.end() || active->second.mPriority[(BoneGroup)blendMask] < state->second.mPriority[(BoneGroup)blendMask])
                     active = state;
             }
 
@@ -1245,6 +1248,37 @@ namespace MWRender
             return NULL;
         else
             return found->second;
+    }
+
+    void Animation::setAlpha(float alpha)
+    {
+        if (alpha == mAlpha)
+            return;
+        mAlpha = alpha;
+
+        if (alpha != 1.f)
+        {
+            osg::StateSet* stateset (new osg::StateSet);
+
+            osg::BlendFunc* blendfunc (new osg::BlendFunc);
+            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            // FIXME: overriding diffuse/ambient/emissive colors
+            osg::Material* material (new osg::Material);
+            material->setColorMode(osg::Material::OFF);
+            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+            stateset->setNestRenderBins(false);
+            mObjectRoot->setStateSet(stateset);
+        }
+        else
+        {
+            mObjectRoot->setStateSet(NULL);
+        }
     }
 
     void Animation::setLightEffect(float effect)
