@@ -704,8 +704,9 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             mIdleState = CharState_Idle;
         else
         {
-            int deathindex = mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation();
-            playDeath(1.0f, CharacterState(CharState_Death1 + deathindex));
+            // Set the death state, but don't play it yet
+            // We will play it in the first frame, but only if no script set the skipAnim flag
+            mDeathState = static_cast<CharacterState>(CharState_Death1 + mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation());
         }
     }
     else
@@ -1838,6 +1839,13 @@ void CharacterController::update(float duration)
     }
     else if(cls.getCreatureStats(mPtr).isDead())
     {
+        // initial start of death animation for actors that started the game as dead
+        // not done in constructor since we need to give scripts a chance to set the mSkipAnim flag
+        if (!mSkipAnim && mDeathState != CharState_None && mCurrentDeath.empty())
+        {
+            playDeath(1.f, mDeathState);
+        }
+
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
