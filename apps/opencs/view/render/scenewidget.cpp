@@ -143,6 +143,10 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
     setLighting(&mLightingDay);
+
+    /// \todo make shortcut configurable
+    QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+    connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
 }
 
 SceneWidget::~SceneWidget()

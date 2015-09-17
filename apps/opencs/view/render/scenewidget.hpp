@@ -88,6 +88,10 @@ namespace CSVRender
     private slots:
 
         void selectLightingMode (const std::string& mode);
+
+        signals:
+
+             void focusToolbarRequest();
     };
 
 
