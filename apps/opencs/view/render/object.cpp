@@ -10,6 +10,8 @@
 #include <osg/Shape>
 #include <osg/Geode>
 
+#include <osgFX/Scribe>
+
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
@@ -116,9 +118,14 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBaseNode(0), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero)
+: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero)
 {
     mBaseNode = new osg::PositionAttitudeTransform;
+    mOutline = new osgFX::Scribe;
+    mOutline->addChild(mBaseNode);
+
+    mBaseNode->setUserData(new ObjectHolder(this));
+
     parentNode->addChild(mBaseNode);
 
     // 0x1 reserved for separating cull and update visitors
@@ -143,6 +150,23 @@ CSVRender::Object::~Object()
     clear();
 
     mParentNode->removeChild(mBaseNode);
+}
+
+void CSVRender::Object::setSelected(bool selected)
+{
+    mSelected = selected;
+
+    mParentNode->removeChild(mOutline);
+    mParentNode->removeChild(mBaseNode);
+    if (selected)
+        mParentNode->addChild(mOutline);
+    else
+        mParentNode->addChild(mBaseNode);
+}
+
+bool CSVRender::Object::getSelected() const
+{
+    return mSelected;
 }
 
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
