@@ -56,6 +56,9 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     layout->addWidget(window->getGLWidget());
     setLayout(layout);
 
+    // Pass events through this widget first
+    window->getGLWidget()->installEventFilter(this);
+
     mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
@@ -92,6 +95,24 @@ void RenderWidget::setVisibilityMask(int mask)
 {
     // 0x1 reserved for separating cull and update visitors
     mView->getCamera()->setCullMask(mask<<1);
+}
+
+bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    // handle event in this widget, is there a better way to do this?
+    if (event->type() == QEvent::MouseButtonPress)
+        mousePressEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::MouseButtonRelease)
+        mouseReleaseEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::MouseMove)
+        mouseMoveEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::KeyPress)
+        keyPressEvent(static_cast<QKeyEvent*>(event));
+    if (event->type() == QEvent::KeyRelease)
+        keyReleaseEvent(static_cast<QKeyEvent*>(event));
+
+    // Always pass the event on to GLWidget, i.e. to OSG event queue
+    return QObject::eventFilter(obj, event);
 }
 
 // --------------------------------------------------

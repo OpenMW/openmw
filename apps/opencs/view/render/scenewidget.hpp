@@ -45,6 +45,8 @@ namespace CSVRender
 
         void setVisibilityMask(int mask);
 
+        bool eventFilter(QObject *, QEvent *);
+
     protected:
 
         osg::ref_ptr<osgViewer::View> mView;
