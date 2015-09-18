@@ -52,6 +52,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
     QLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(window->getGLWidget());
     setLayout(layout);
 
