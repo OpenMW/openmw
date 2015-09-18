@@ -935,8 +935,10 @@ namespace MWRender
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
+        osg::ref_ptr<osg::StateSet> previousStateset;
         if (mObjectRoot)
         {
+            previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
         mObjectRoot = NULL;
@@ -960,6 +962,9 @@ namespace MWRender
             mInsert->addChild(newObjectRoot);
             mObjectRoot = newObjectRoot;
         }
+
+        if (previousStateset)
+            mObjectRoot->setStateSet(previousStateset);
 
         if (baseonly)
         {
