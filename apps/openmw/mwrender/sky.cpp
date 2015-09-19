@@ -364,6 +364,7 @@ public:
     Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
         , mUpdater(new Updater)
+        , mInitialFlashScale(2.6f)
     {
         mTransform->addUpdateCallback(mUpdater);
 
@@ -384,6 +385,8 @@ public:
 
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryTransform, true);
         mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryTransform, false);
+
+        createSunFlash(textureManager);
     }
 
     ~Sun()
@@ -447,6 +450,34 @@ private:
         return oqn;
     }
 
+    void createSunFlash(Resource::TextureManager& textureManager)
+    {
+        osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_flash_grey_05.dds",
+                                                                        osg::Texture::CLAMP,
+                                                                        osg::Texture::CLAMP);
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
+        transform->setScale(osg::Vec3f(mInitialFlashScale, mInitialFlashScale, mInitialFlashScale));
+
+        mTransform->addChild(transform);
+
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        transform->addChild(geode);
+
+        geode->addDrawable(createTexturedQuad());
+
+        osg::StateSet* stateset = geode->getOrCreateStateSet();
+
+        stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(createUnlitMaterial(),
+                                       osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+        stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
+        stateset->setNestRenderBins(false);
+
+        // TODO: change size depending on occlusion
+    }
+
     struct Updater : public SceneUtil::StateSetUpdater
     {
         osg::Vec4f mColor;
@@ -472,6 +503,7 @@ private:
     osg::ref_ptr<Updater> mUpdater;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
+    float mInitialFlashScale;
 };
 
 class Moon : public CelestialBody
