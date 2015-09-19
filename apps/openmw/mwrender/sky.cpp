@@ -359,14 +359,20 @@ class Sun : public CelestialBody
 public:
     Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
-        , mUpdater(new Updater(textureManager))
+        , mUpdater(new Updater)
     {
-        mGeode->addUpdateCallback(mUpdater);
+        mTransform->addUpdateCallback(mUpdater);
+
+        osg::ref_ptr<osg::Texture2D> sunTex = textureManager.getTexture2D("textures/tx_sun_05.dds",
+                                                                        osg::Texture::CLAMP,
+                                                                        osg::Texture::CLAMP);
+
+        mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
     }
 
     ~Sun()
     {
-        mGeode->removeUpdateCallback(mUpdater);
+        mTransform->removeUpdateCallback(mUpdater);
     }
 
     virtual void adjustTransparency(const float ratio)
@@ -387,22 +393,15 @@ public:
 private:
     struct Updater : public SceneUtil::StateSetUpdater
     {
-        Resource::TextureManager& mTextureManager;
         osg::Vec4f mColor;
 
-        Updater(Resource::TextureManager& textureManager)
-            : mTextureManager(textureManager)
-            , mColor(0.0f, 0.0f, 0.0f, 1.0f)
+        Updater()
+            : mColor(1.f, 1.f, 1.f, 1.0f)
         {
         }
 
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            osg::ref_ptr<osg::Texture2D> tex = mTextureManager.getTexture2D("textures/tx_sun_05.dds",
-                                                                            osg::Texture::CLAMP,
-                                                                            osg::Texture::CLAMP);
-
-            stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
             stateset->setAttributeAndModes(createUnlitMaterial(),
                                            osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
