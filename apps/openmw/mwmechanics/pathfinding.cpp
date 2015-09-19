@@ -215,6 +215,17 @@ namespace MWMechanics
             endPointInLocalCoords,
                 startNode);
 
+        // if it's shorter for actor to travel from start to end, than to travel from either
+        // start or end to nearest pathgrid point, just travel from start to end.
+        float startToEndLength2 = (endPointInLocalCoords - startPointInLocalCoords).length2();
+        float endTolastNodeLength2 = distanceSquared(mPathgrid->mPoints[endNode.first], endPointInLocalCoords);
+        float startTo1stNodeLength2 = distanceSquared(mPathgrid->mPoints[startNode], startPointInLocalCoords);
+        if ((startToEndLength2 < startTo1stNodeLength2) || (startToEndLength2 < endTolastNodeLength2))
+        {
+            mPath.push_back(endPoint);
+            return;
+        }
+
         // AiWander has logic that depends on whether a path was created,
         // deleting allowed nodes if not.  Hence a path needs to be created
         // even if the start and the end points are the same.
