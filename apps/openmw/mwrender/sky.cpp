@@ -41,6 +41,7 @@
 #include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
+#include "renderbin.hpp"
 
 namespace
 {
@@ -376,7 +377,7 @@ public:
         osg::ref_ptr<osg::PositionAttitudeTransform> queryTransform (new osg::PositionAttitudeTransform);
         queryTransform->setScale(osg::Vec3f(0.5f, 0.5f, 0.5f));
         // Need to render after the world geometry so we can correctly test for occlusions
-        queryTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
+        queryTransform->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
         queryTransform->getOrCreateStateSet()->setNestRenderBins(false);
 
         mTransform->addChild(queryTransform);
@@ -680,7 +681,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode = skyroot;
 
     // By default render before the world is rendered
-    mRootNode->getOrCreateStateSet()->setRenderBinDetails(-1, "RenderBin");
+    mRootNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Sky, "RenderBin");
 }
 
 void SkyManager::create()
