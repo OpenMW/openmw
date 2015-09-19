@@ -15,6 +15,14 @@ namespace MWMechanics
     static const float DURATION_SAME_SPOT = 1.0f;
     static const float DURATION_TO_EVADE = 0.4f;
 
+    const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] =
+    {
+        { 1.0f, 0.0f },     // move to side
+        { 1.0f, -1.0f },    // move to side and backwards
+        { -1.0f, 0.0f },    // move to other side
+        { -1.0f, -1.0f }    // move to side and backwards
+    };
+
     // Proximity check function for interior doors.  Given that most interior cells
     // do not have many doors performance shouldn't be too much of an issue.
     //
@@ -69,7 +77,7 @@ namespace MWMechanics
       , mStuckDuration(0)
       , mEvadeDuration(0)
       , mDistSameSpot(-1) // avoid calculating it each time
-      , mEvadeDirection(1.0f)
+      , mEvadeDirectionIndex(0)
     {
     }
 
@@ -176,8 +184,8 @@ namespace MWMechanics
 
     void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement)
     {
-        actorMovement.mPosition[0] = mEvadeDirection;
-        actorMovement.mPosition[1] = 0;
+        actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
+        actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
     }
 
     void ObstacleCheck::chooseEvasionDirection(bool samePosition)
@@ -185,7 +193,11 @@ namespace MWMechanics
         // change direction if attempt didn't work
         if (samePosition && (0 < mEvadeDuration))
         {
-            mEvadeDirection = mEvadeDirection == 1.0f ? -1.0f : 1.0f;
+            ++mEvadeDirectionIndex;
+            if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
+            {
+                mEvadeDirectionIndex = 0;
+            }
         }
     }
 

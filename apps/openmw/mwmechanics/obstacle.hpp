@@ -13,6 +13,8 @@ namespace MWMechanics
     /// NOTE: determined empirically based on in-game behaviour
     static const float MIN_DIST_TO_DOOR_SQUARED = 128*128;
 
+    static const int NUM_EVADE_DIRECTIONS = 4;
+
     /// tests actor's proximity to a closed door by default
     bool proximityToDoor(const MWWorld::Ptr& actor,
                          float minSqr = MIN_DIST_TO_DOOR_SQUARED,
@@ -47,6 +49,9 @@ namespace MWMechanics
             float mPrevX;
             float mPrevY;
 
+            // directions to try moving in when get stuck
+            static const float evadeDirections[NUM_EVADE_DIRECTIONS][2];
+
             enum WalkState
             {
                 State_Norm,
@@ -58,7 +63,7 @@ namespace MWMechanics
             float mStuckDuration; // accumulate time here while in same spot
             float mEvadeDuration;
             float mDistSameSpot; // take account of actor's speed
-            float mEvadeDirection;
+            int mEvadeDirectionIndex;
 
             void chooseEvasionDirection(bool samePosition);
     };
