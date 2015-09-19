@@ -458,16 +458,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mPlayingSoundID()
 {
     mWeatherSettings.reserve(10);
-    addWeather("Clear", fallback);
-    addWeather("Cloudy", fallback);
-    addWeather("Foggy", fallback);
-    addWeather("Overcast", fallback);
-    addWeather("Rain", fallback, "rain");
-    addWeather("Thunderstorm", fallback, "rain heavy");
-    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif");
-    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif");
-    addWeather("Snow", fallback, "", "meshes\\snow.nif");
-    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif");
+    addWeather("Clear", fallback); // 0
+    addWeather("Cloudy", fallback); // 1
+    addWeather("Foggy", fallback); // 2
+    addWeather("Overcast", fallback); // 3
+    addWeather("Rain", fallback, "rain"); // 4
+    addWeather("Thunderstorm", fallback, "rain heavy"); // 5
+    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", fallback, "", "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
