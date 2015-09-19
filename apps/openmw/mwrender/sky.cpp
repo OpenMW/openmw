@@ -11,6 +11,9 @@
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
 #include <osg/Version>
+#include <osg/OcclusionQueryNode>
+#include <osg/ColorMask>
+#include <osg/MatrixTransform>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
@@ -368,6 +371,18 @@ public:
                                                                         osg::Texture::CLAMP);
 
         mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
+
+        // Slightly downscale the query geometry since the sun quad has a transparent texture that doesn't cover the whole area
+        osg::ref_ptr<osg::PositionAttitudeTransform> queryTransform (new osg::PositionAttitudeTransform);
+        queryTransform->setScale(osg::Vec3f(0.5f, 0.5f, 0.5f));
+        // Need to render after the world geometry so we can correctly test for occlusions
+        queryTransform->getOrCreateStateSet()->setRenderBinDetails(10, "RenderBin");
+        queryTransform->getOrCreateStateSet()->setNestRenderBins(false);
+
+        mTransform->addChild(queryTransform);
+
+        mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryTransform, true);
+        mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryTransform, false);
     }
 
     ~Sun()
@@ -391,6 +406,46 @@ public:
     }
 
 private:
+    /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
+    osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
+    {
+        osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;
+        oqn->setQueriesEnabled(true);
+
+        // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
+        // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
+        // is only called once.
+        // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
+        oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
+
+        osg::ref_ptr<osg::Geode> queryGeode = osg::clone(mGeode.get(), osg::CopyOp::DEEP_COPY_ALL);
+        // Disable writing to the color buffer. We are using this geode for visibility tests only.
+        osg::ref_ptr<osg::ColorMask> colormask (new osg::ColorMask(0, 0, 0, 0));
+        queryGeode->getOrCreateStateSet()->setAttributeAndModes(colormask, osg::StateAttribute::ON);
+
+        oqn->addChild(queryGeode);
+
+        if (queryVisible)
+        {
+            osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+            depth->setFunction(osg::Depth::LESS);
+            // This is a trick to make fragments written by the query always use the maximum depth value,
+            // without having to retrieve the current far clipping distance.
+            // We want the sun glare to be "infinitely" far away.
+            depth->setZNear(1.0);
+            depth->setZFar(1.0);
+            oqn->getQueryStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+        }
+        else
+        {
+            oqn->getQueryStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+        }
+
+        parent->addChild(oqn);
+
+        return oqn;
+    }
+
     struct Updater : public SceneUtil::StateSetUpdater
     {
         osg::Vec4f mColor;
@@ -414,6 +469,8 @@ private:
     };
 
     osg::ref_ptr<Updater> mUpdater;
+    osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
+    osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
 };
 
 class Moon : public CelestialBody
