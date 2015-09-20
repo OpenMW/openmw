@@ -458,28 +458,10 @@ namespace MWMechanics
 
                 followTarget = false;
 
-                buildNewPath(actor, target); //may fail to build a path, check before use
+                buildNewPath(actor, target);
 
-                // if current actor pos is closer to target then last point of path (excluding target itself) then go straight on target
-                // This works on the borders between the path grid and areas with no waypoints.
-                if(inLOS && mPathFinder.getPath().size() > 1)
-                {
-                    // get point just before target
-                    std::list<ESM::Pathgrid::Point>::const_iterator pntIter = --mPathFinder.getPath().end();
-                    --pntIter;
-                    osg::Vec3f vBeforeTarget(PathFinder::MakeOsgVec3(*pntIter));
-
-                    if(distToTarget <= (vTargetPos - vBeforeTarget).length())
-                    {
-                        mPathFinder.clearPath();
-                    }
-                }
-
-                // if there is no new path, then go straight on target
-                if (!mPathFinder.isPathConstructed())
-                {
-                    movement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos));
-                }
+                // should always return a path (even if it's just go straight on target.)
+                assert(mPathFinder.isPathConstructed());
             }
 
             if (readyToAttack)
