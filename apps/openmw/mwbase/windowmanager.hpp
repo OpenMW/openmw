@@ -272,7 +272,7 @@ namespace MWBase
 
             virtual void enableRest() = 0;
             virtual bool getRestEnabled() = 0;
-            virtual bool getJournalAllowed() = 0; 
+            virtual bool getJournalAllowed() = 0;
 
             virtual bool getPlayerSleeping() = 0;
             virtual void wakeUpPlayer() = 0;
@@ -359,6 +359,9 @@ namespace MWBase
             virtual void requestMap(std::set<MWWorld::CellStore*> cells) = 0;
             virtual void removeCell(MWWorld::CellStore* cell) = 0;
             virtual void writeFog(MWWorld::CellStore* cell) = 0;
+            virtual void setScale(float scalingFactor) = 0;
+            virtual float getBookScale() = 0;
+            virtual float getScrollScale() = 0;
     };
 }
 

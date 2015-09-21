@@ -1095,20 +1095,20 @@ namespace MWGui
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
-        
+
         std::string MyGuiPrefix = "setting=";
         size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
-        
+
         if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
         {
             tag = tag.substr(MyGuiPrefixLength, tag.length());
             std::string settingSection = tag.substr(0, tag.find(","));
             std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
-            
-            _result = Settings::Manager::getString(settingTag, settingSection);            
+
+            _result = Settings::Manager::getString(settingTag, settingSection);
         }
         else if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
@@ -2061,6 +2061,31 @@ namespace MWGui
     void WindowManager::writeFog(MWWorld::CellStore *cell)
     {
         mLocalMapRender->saveFogOfWar(cell);
+    }
+
+    void WindowManager::setScale(float scalingFactor)
+    {
+        mGuiPlatform->getRenderManagerPtr()->setScale(scalingFactor);
+        MWBase::Environment::get().getInputManager()->setScale(scalingFactor);
+    }
+
+    static float get_ratio(osg::ref_ptr<osg::Viewport> vp,int w,int h)
+    {
+        float ratiox = vp->width()*.95/w;
+        float ratioy = vp->height() * .85/h;
+        if (ratiox < ratioy)
+            return ratiox;
+        return ratioy;
+    }
+
+    float WindowManager::getBookScale()
+    {
+        return get_ratio(mViewer->getCamera()->getViewport(),584,398);
+    }
+
+    float WindowManager::getScrollScale()
+    {
+        return get_ratio(mViewer->getCamera()->getViewport(),512,512);
     }
 
 }

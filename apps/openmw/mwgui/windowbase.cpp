@@ -10,11 +10,15 @@
 
 #include "draganddrop.hpp"
 
-using namespace MWGui;
+    using namespace MWGui;
 
-WindowBase::WindowBase(const std::string& parLayout)
+    WindowBase::WindowBase(const std::string& parLayout)
   : Layout(parLayout)
 {
+    isBook = parLayout == "openmw_book.layout";
+    isScroll = parLayout == "openmw_scroll.layout";
+    uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+    if (uiScale < 0.001) uiScale = 1.0;
 }
 
 void WindowBase::setVisible(bool visible)
@@ -48,13 +52,39 @@ bool WindowBase::isVisible()
 void WindowBase::center()
 {
     // Centre dialog
+    MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+    float scale;
+    if (isBook)
+        scale = wm->getBookScale()/uiScale;
+    else if (isScroll)
+        scale = wm->getScrollScale()/uiScale;
+    else
+        scale = 1;
 
     MyGUI::IntSize gameWindowSize = MyGUI::RenderManager::getInstance().getViewSize();
 
     MyGUI::IntCoord coord = mMainWidget->getCoord();
-    coord.left = (gameWindowSize.width - coord.width)/2;
-    coord.top = (gameWindowSize.height - coord.height)/2;
+    coord.left = (gameWindowSize.width/scale - coord.width)/2;
+    coord.top = (gameWindowSize.height/scale - coord.height)/2;
     mMainWidget->setCoord(coord);
+}
+
+void WindowBase::open()
+{
+    if (isBook || isScroll) {
+        MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+        if (isBook)
+            wm->setScale(wm->getBookScale());
+        else
+            wm->setScale(wm->getScrollScale());
+    }
+}
+
+void WindowBase::close()
+{
+    if (isBook || isScroll) {
+        MWBase::Environment::get().getWindowManager()->setScale(uiScale);
+    }
 }
 
 WindowModal::WindowModal(const std::string& parLayout)

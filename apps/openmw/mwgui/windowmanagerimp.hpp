@@ -489,7 +489,7 @@ namespace MWGui
     float mFPS;
 
     std::map<std::string, std::string> mFallbackMap;
-    
+
     int mShowOwned;
 
     std::string mVersionDescription;
@@ -521,6 +521,9 @@ namespace MWGui
     void createTextures();
     void createCursors();
     void setMenuTransparency(float value);
+    void setScale(float scalingFactor);
+    float getBookScale();
+    float getScrollScale();
   };
 }
 

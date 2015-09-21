@@ -54,6 +54,7 @@ public:
     RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor);
     virtual ~RenderManager();
 
+    void setScale(float scalingFactor);
     void initialise();
     void shutdown();
 

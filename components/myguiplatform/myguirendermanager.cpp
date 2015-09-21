@@ -527,4 +527,12 @@ bool RenderManager::checkTexture(MyGUI::ITexture* _texture)
     return true;
 }
 
+void RenderManager::setScale(float scalingFactor)
+{
+    if (scalingFactor != 0.f)
+        mInvScalingFactor = 1.f / scalingFactor;
+    osg::ref_ptr<osg::Viewport> vp = mViewer->getCamera()->getViewport();
+    setViewSize(vp->width(), vp->height());
+}
+
 }

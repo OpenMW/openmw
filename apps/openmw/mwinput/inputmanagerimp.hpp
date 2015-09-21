@@ -152,6 +152,7 @@ namespace MWInput
 
         void clearAllKeyBindings (ICS::Control* control);
         void clearAllControllerBindings (ICS::Control* control);
+        void setScale(float uiscale);
 
     private:
         SDL_Window* mWindow;
