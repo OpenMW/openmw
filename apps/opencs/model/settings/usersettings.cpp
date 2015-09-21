@@ -371,6 +371,41 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "list go to the first/last item");
     }
 
+    declareSection ("scene-input", "3D Scene Input");
+    {
+        QString left ("Left Mouse-Button");
+        QString cLeft ("Ctrl-Left Mouse-Button");
+        QString right ("Right Mouse-Button");
+        QString cRight ("Ctrl-Right Mouse-Button");
+        QString middle ("Middle Mouse-Button");
+        QString cMiddle ("Ctrl-Middle Mouse-Button");
+
+        QStringList values;
+        values << left << cLeft << right << cRight << middle << cMiddle;
+
+        Setting *primaryNavigation = createSetting (Type_ComboBox, "p-navi", "Primary Camera Navigation Button");
+        primaryNavigation->setDeclaredValues (values);
+        primaryNavigation->setDefaultValue (left);
+
+        Setting *secondaryNavigation = createSetting (Type_ComboBox, "s-navi", "Secondary Camera Navigation Button");
+        secondaryNavigation->setDeclaredValues (values);
+        secondaryNavigation->setDefaultValue (cLeft);
+
+        Setting *primaryEditing = createSetting (Type_ComboBox, "p-edit", "Primary Editing Button");
+        primaryEditing->setDeclaredValues (values);
+        primaryEditing->setDefaultValue (right);
+
+        Setting *secondaryEditing = createSetting (Type_ComboBox, "s-edit", "Secondary Editing Button");
+        secondaryEditing->setDeclaredValues (values);
+        secondaryEditing->setDefaultValue (cRight);
+
+        values << "Context Sensitive";
+
+        Setting *selection = createSetting (Type_ComboBox, "select", "Selection Button");
+        selection->setDeclaredValues (values);
+        selection->setDefaultValue (middle);
+    }
+
     {
         /******************************************************************
         * There are three types of values:
