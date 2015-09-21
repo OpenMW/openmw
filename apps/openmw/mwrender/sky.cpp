@@ -385,6 +385,7 @@ public:
         alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
         queryNode->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
         queryNode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
+        queryNode->getOrCreateStateSet()->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
 
         mTransform->addChild(queryNode);
 
@@ -407,6 +408,8 @@ public:
         mUpdater->mColor.a() = ratio;
         if (mSunGlareCallback)
             mSunGlareCallback->setGlareView(ratio);
+        if (mSunFlashCallback)
+            mSunFlashCallback->setGlareView(ratio);
     }
 
     void setDirection(const osg::Vec3f& direction)
@@ -505,8 +508,6 @@ private:
         osg::StateSet* stateset = geode->getOrCreateStateSet();
 
         stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
-        stateset->setAttributeAndModes(createUnlitMaterial(),
-                                       osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
@@ -639,6 +640,7 @@ private:
     public:
         SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
             : OcclusionCallback(oqnVisible, oqnTotal)
+            , mGlareView(1.f)
         {
         }
 
@@ -648,8 +650,20 @@ private:
 
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
+            osg::ref_ptr<osg::StateSet> stateset;
+
             if (visibleRatio > 0.f)
             {
+                const float fadeThreshold = 0.1;
+                if (visibleRatio < fadeThreshold)
+                {
+                    float fade = 1.f - (fadeThreshold - visibleRatio) / fadeThreshold;
+                    osg::ref_ptr<osg::Material> mat (createUnlitMaterial());
+                    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade*mGlareView));
+                    stateset = new osg::StateSet;
+                    stateset->setAttributeAndModes(mat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                }
+
                 const float threshold = 0.6;
                 visibleRatio = visibleRatio * (1.f - threshold) + threshold;
             }
@@ -667,13 +681,27 @@ private:
 
                 modelView.preMultScale(osg::Vec3f(visibleRatio, visibleRatio, visibleRatio));
 
+                if (stateset)
+                    cv->pushStateSet(stateset);
+
                 cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
 
                 traverse(node, nv);
 
                 cv->popModelViewMatrix();
+
+                if (stateset)
+                    cv->popStateSet();
             }
         }
+
+        void setGlareView(float value)
+        {
+            mGlareView = value;
+        }
+
+    private:
+        float mGlareView;
     };
 
 
@@ -728,10 +756,8 @@ private:
                 for (int i=0; i<3; ++i)
                     sunGlareFaderColor[i] = std::min(1.f, sunGlareFaderColor[i]);
 
-                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
                 mat->setEmission(osg::Material::FRONT_AND_BACK, sunGlareFaderColor);
-                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,0));
 
                 stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
