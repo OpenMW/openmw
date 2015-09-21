@@ -209,9 +209,6 @@ namespace MWRender
 
         float mRemainingTransitionTime;
 
-        float mGlare; // target
-        float mGlareFade; // actual
-
         bool mRainEnabled;
         std::string mRainEffect;
         float mRainSpeed;

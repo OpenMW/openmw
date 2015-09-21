@@ -972,8 +972,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mCloudSpeed(0.0f)
     , mStarsOpacity(0.0f)
     , mRemainingTransitionTime(0.0f)
-    , mGlare(0.0f)
-    , mGlareFade(0.0f)
     , mRainEnabled(false)
     , mRainSpeed(0)
     , mRainFrequency(1)
@@ -1290,32 +1288,6 @@ void SkyManager::update(float duration)
     mCloudUpdater->setAnimationTimer(mCloudAnimationTimer);
     mCloudUpdater2->setAnimationTimer(mCloudAnimationTimer);
 
-    if (mSunEnabled)
-    {
-        // take 1/10 sec for fading the glare effect from invisible to full
-        if (mGlareFade > mGlare)
-        {
-            mGlareFade -= duration*10;
-            if (mGlareFade < mGlare) mGlareFade = mGlare;
-        }
-        else if (mGlareFade < mGlare)
-        {
-            mGlareFade += duration*10;
-            if (mGlareFade > mGlare) mGlareFade = mGlare;
-        }
-
-        // increase the strength of the sun glare effect depending
-        // on how directly the player is looking at the sun
-        /*
-        Vector3 sun = mSunGlare->getPosition();
-        Vector3 cam = mCamera->getRealDirection();
-        const Degree angle = sun.angleBetween( cam );
-        float val = 1- (angle.valueDegrees() / 180.f);
-        val = (val*val*val*val)*6;
-        mSunGlare->setSize(val * mGlareFade);
-        */
-    }
-
     // rotate the stars by 360 degrees every 4 days
     mAtmosphereNightRoll += MWBase::Environment::get().getWorld()->getTimeScaleFactor()*duration*osg::DegreesToRadians(360.f) / (3600*96.f);
     if (mAtmosphereNightNode->getNodeMask() != 0)
@@ -1466,6 +1438,15 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     mMasser->adjustTransparency(weather.mGlareView);
     mSecunda->adjustTransparency(weather.mGlareView);
+
+    /*
+    float timeofday_angle = std::abs(mSun->getPosition().z/mSunGlare->getPosition().length());
+    float strength;
+    if (timeofday_angle <= 0.44)
+        strength = timeofday_angle/0.44f;
+    else
+        strength = 1.f;
+    */
     mSun->adjustTransparency(weather.mGlareView);
 
     float nextStarsOpacity = weather.mNightFade * weather.mGlareView;
@@ -1477,20 +1458,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
     }
 
     mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);
-
-
-    /*
-    float strength;
-    float timeofday_angle = std::abs(mSunGlare->getPosition().z/mSunGlare->getPosition().length());
-    if (timeofday_angle <= 0.44)
-        strength = timeofday_angle/0.44f;
-    else
-        strength = 1.f;
-
-    mSunGlare->setVisibility(weather.mGlareView * mGlareFade * strength);
-
-    mSun->setVisibility(weather.mGlareView * strength);
-    */
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
@@ -1522,8 +1489,6 @@ void SkyManager::setSunDirection(const osg::Vec3f& direction)
     if (!mCreated) return;
 
     mSun->setDirection(direction);
-
-    //mSunGlare->setPosition(direction);
 }
 
 void SkyManager::setMasserState(const MoonState& state)
