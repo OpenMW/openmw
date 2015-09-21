@@ -366,7 +366,6 @@ public:
     Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
         , mUpdater(new Updater)
-        , mInitialFlashScale(2.6f)
     {
         mTransform->addUpdateCallback(mUpdater);
 
@@ -496,7 +495,8 @@ private:
                                                                         osg::Texture::CLAMP);
 
         osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
-        transform->setScale(osg::Vec3f(mInitialFlashScale, mInitialFlashScale, mInitialFlashScale));
+        const float scale = 2.6f;
+        transform->setScale(osg::Vec3f(scale,scale,scale));
 
         mTransform->addChild(transform);
 
@@ -804,7 +804,6 @@ private:
     osg::ref_ptr<osg::Node> mSunGlareNode;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
-    float mInitialFlashScale;
 };
 
 class Moon : public CelestialBody
