@@ -14,6 +14,7 @@
 #include <osg/OcclusionQueryNode>
 #include <osg/ColorMask>
 #include <osg/MatrixTransform>
+#include <osg/BlendFunc>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
@@ -376,7 +377,7 @@ public:
 
         // Slightly downscale the query geometry since the sun quad has a transparent texture that doesn't cover the whole area
         osg::ref_ptr<osg::PositionAttitudeTransform> queryTransform (new osg::PositionAttitudeTransform);
-        queryTransform->setScale(osg::Vec3f(0.5f, 0.5f, 0.5f));
+        queryTransform->setScale(osg::Vec3f(0.4f, 0.4f, 0.4f));
         // Need to render after the world geometry so we can correctly test for occlusions
         queryTransform->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
         queryTransform->getOrCreateStateSet()->setNestRenderBins(false);
@@ -386,17 +387,26 @@ public:
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryTransform, true);
         mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryTransform, false);
 
-        createSunFlash(textureManager);
+        osg::PositionAttitudeTransform* sunFlashNode = createSunFlash(textureManager);
+
+        mSunFlashCallback = new SunFlashCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels, sunFlashNode, mTransform);
+        mTransform->addCullCallback(mSunFlashCallback);
+
+        createSunGlare();
     }
 
     ~Sun()
     {
         mTransform->removeUpdateCallback(mUpdater);
+        destroySunFlash();
+        destroySunGlare();
     }
 
     virtual void adjustTransparency(const float ratio)
     {
         mUpdater->mColor.a() = ratio;
+        if (mSunGlareCallback)
+            mSunGlareCallback->setGlareView(ratio);
     }
 
     void setDirection(const osg::Vec3f& direction)
@@ -407,6 +417,12 @@ public:
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0.0f, 0.0f, 1.0f), normalizedDirection);
         mTransform->setAttitude(quat);
+    }
+
+    void setGlareTimeOfDayFade(float val)
+    {
+        if (mSunGlareCallback)
+            mSunGlareCallback->setTimeOfDayFade(val);
     }
 
 private:
@@ -450,7 +466,7 @@ private:
         return oqn;
     }
 
-    void createSunFlash(Resource::TextureManager& textureManager)
+    osg::PositionAttitudeTransform* createSunFlash(Resource::TextureManager& textureManager)
     {
         osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_flash_grey_05.dds",
                                                                         osg::Texture::CLAMP,
@@ -474,12 +490,58 @@ private:
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
-
-        // TODO: change size depending on occlusion
+        return transform;
+    }
+    void destroySunFlash()
+    {
+        mTransform->removeCullCallback(mSunFlashCallback);
+        mSunFlashCallback = NULL;
     }
 
-    struct Updater : public SceneUtil::StateSetUpdater
+    void createSunGlare()
     {
+        osg::ref_ptr<osg::Camera> camera (new osg::Camera);
+        camera->setProjectionMatrix(osg::Matrix::identity());
+        camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF); // add to skyRoot instead?
+        camera->setViewMatrix(osg::Matrix::identity());
+        camera->setClearMask(0);
+        camera->setRenderOrder(osg::Camera::NESTED_RENDER);
+        camera->setAllowEventFocus(false);
+
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1,-1,0), osg::Vec3f(2,0,0), osg::Vec3f(0,2,0));
+        geode->addDrawable(geom);
+
+        camera->addChild(geode);
+
+        osg::StateSet* stateset = geom->getOrCreateStateSet();
+
+        stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
+        stateset->setNestRenderBins(false);
+        stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+        // set up additive blending
+        osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc);
+        blendFunc->setSource(osg::BlendFunc::SRC_ALPHA);
+        blendFunc->setDestination(osg::BlendFunc::ONE);
+        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
+
+        mSunGlareCallback = new SunGlareCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels, mTransform);
+        mSunGlareNode = camera;
+
+        mSunGlareNode->addCullCallback(mSunGlareCallback);
+
+        mTransform->addChild(camera);
+    }
+    void destroySunGlare()
+    {
+        mSunGlareNode->removeCullCallback(mSunGlareCallback);
+        mSunGlareCallback = NULL;
+    }
+
+    class Updater : public SceneUtil::StateSetUpdater
+    {
+    public:
         osg::Vec4f mColor;
 
         Updater()
@@ -489,8 +551,7 @@ private:
 
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            stateset->setAttributeAndModes(createUnlitMaterial(),
-                                           osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
         }
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
@@ -500,7 +561,181 @@ private:
         }
     };
 
+    class OcclusionCallback : public osg::NodeCallback
+    {
+    public:
+        OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
+            : mOcclusionQueryVisiblePixels(oqnVisible)
+            , mOcclusionQueryTotalPixels(oqnTotal)
+        {
+        }
+
+    protected:
+        float getVisibleRatio (osg::Camera* camera)
+        {
+            int visible = mOcclusionQueryVisiblePixels->getQueryGeometry()->getNumPixels(camera);
+            int total = mOcclusionQueryTotalPixels->getQueryGeometry()->getNumPixels(camera);
+
+            float visibleRatio = 0.f;
+            if (total > 0)
+                visibleRatio = static_cast<float>(visible) / static_cast<float>(total);
+
+            float dt = MWBase::Environment::get().getFrameDuration();
+
+            float lastRatio = mLastRatio[osg::observer_ptr<osg::Camera>(camera)];
+
+            float change = dt*10;
+
+            if (visibleRatio > lastRatio)
+                visibleRatio = std::min(visibleRatio, lastRatio + change);
+            else
+                visibleRatio = std::max(visibleRatio, lastRatio - change);
+
+            mLastRatio[osg::observer_ptr<osg::Camera>(camera)] = visibleRatio;
+
+            return visibleRatio;
+        }
+
+    private:
+        osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
+        osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
+
+        std::map<osg::observer_ptr<osg::Camera>, float> mLastRatio;
+    };
+
+    /// SunFlashCallback handles fading/scaling of the sun flash depending on occlusion query result. Must be attached as a cull callback.
+    class SunFlashCallback : public OcclusionCallback
+    {
+    public:
+        SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
+                         osg::ref_ptr<osg::PositionAttitudeTransform> flashNode,
+                         osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
+            : OcclusionCallback(oqnVisible, oqnTotal)
+            , mFlashNode(flashNode)
+        {
+            mInitialScale = mFlashNode->getScale().x();
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+            float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
+
+            handleOcclusionResult (visibleRatio, cv);
+
+            traverse(node, nv);
+        }
+
+        void handleOcclusionResult(float visibleRatio, osgUtil::CullVisitor* cv)
+        {
+            // TODO
+        }
+
+    private:
+        float mInitialScale;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mFlashNode;
+    };
+
+
+    /// SunGlareCallback controls a full-screen glare effect depending on occlusion query result and the angle between sun and camera.
+    /// Must be attached as a cull callback to the node above the glare node.
+    class SunGlareCallback : public OcclusionCallback
+    {
+    public:
+        SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
+                         osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
+            : OcclusionCallback(oqnVisible, oqnTotal)
+            , mSunTransform(sunTransform)
+            , mTimeOfDayFade(1.f)
+            , mGlareView(1.f)
+        {
+
+        }
+
+        virtual void operator ()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+            float angleRadians = getAngleToSunInRadians(cv->getCurrentCamera());
+            float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
+
+            const float angleMaxRadians = osg::DegreesToRadians(30.f); // Sun Glare Fader Angle Max
+
+            float value = 1.f - std::min(1.f, angleRadians / angleMaxRadians);
+
+            const float sunGlareFaderMax = 0.5f;
+            float fade = value * sunGlareFaderMax;
+
+            fade *= mTimeOfDayFade * mGlareView * visibleRatio;
+
+            if (fade == 0.f)
+            {
+                // no traverse
+                return;
+            }
+            else
+            {
+                osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
+
+                osg::ref_ptr<osg::Material> mat (createUnlitMaterial());
+
+                osg::Vec4f sunGlareFaderColor (222/255.f, 95/255.f, 39/255.f, 1);
+
+                // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
+                // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
+                // so the resulting color looks more orange than red.
+                sunGlareFaderColor *= 2;
+                for (int i=0; i<3; ++i)
+                    sunGlareFaderColor[i] = std::min(1.f, sunGlareFaderColor[i]);
+
+                mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
+                mat->setEmission(osg::Material::FRONT_AND_BACK, sunGlareFaderColor);
+                mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,0));
+
+                stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+
+                cv->pushStateSet(stateset);
+                traverse(node, nv);
+                cv->popStateSet();
+            }
+        }
+
+        void setTimeOfDayFade(float val)
+        {
+            mTimeOfDayFade = val;
+        }
+
+        void setGlareView(float glareView)
+        {
+            mGlareView = glareView;
+        }
+
+    private:
+        float getAngleToSunInRadians(osg::Camera* camera) const
+        {
+            osg::Vec3d eye, center, up;
+            camera->getViewMatrixAsLookAt(eye, center, up);
+
+            osg::Vec3d forward = center - eye;
+            osg::Vec3d sun = mSunTransform->getPosition();
+
+            forward.normalize();
+            sun.normalize();
+            float angleRadians = std::acos(forward * sun);
+            return angleRadians;
+        }
+
+        osg::ref_ptr<osg::PositionAttitudeTransform> mSunTransform;
+        float mTimeOfDayFade;
+        float mGlareView;
+    };
+
     osg::ref_ptr<Updater> mUpdater;
+    osg::ref_ptr<SunFlashCallback> mSunFlashCallback;
+    osg::ref_ptr<SunGlareCallback> mSunGlareCallback;
+    osg::ref_ptr<osg::Node> mSunGlareNode;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
     float mInitialFlashScale;
@@ -1223,11 +1458,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
         mParticleFader->setAlpha(weather.mEffectFade);
 }
 
-void SkyManager::setGlare(const float glare)
-{
-    mGlare = glare;
-}
-
 void SkyManager::sunEnable()
 {
     if (!mCreated) return;
@@ -1276,11 +1506,9 @@ void SkyManager::setDate(int day, int month)
     mMonth = month;
 }
 
-void SkyManager::setGlareEnabled (bool enabled)
+void SkyManager::setGlareTimeOfDayFade(float val)
 {
-    if (!mCreated || !mEnabled)
-        return;
-    //mSunGlare->setVisible (mSunEnabled && enabled);
+    mSun->setGlareTimeOfDayFade(val);
 }
 
 }

@@ -624,6 +624,14 @@ void WeatherManager::update(float duration, bool paused)
         mRendering.setSunDirection( final * -1 );
     }
 
+    float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
+    if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(0);
+    else if (time.getHour() < peakHour)
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (peakHour - time.getHour()) / (peakHour - mSunriseTime));
+    else
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (time.getHour() - peakHour) / (mSunsetTime - peakHour));
+
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 

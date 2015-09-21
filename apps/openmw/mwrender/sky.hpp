@@ -140,8 +140,7 @@ namespace MWRender
         void setMasserState(const MoonState& state);
         void setSecundaState(const MoonState& state);
 
-        void setGlare(const float glare);
-        void setGlareEnabled(bool enabled);
+        void setGlareTimeOfDayFade(float val);
 
     private:
         void create();
