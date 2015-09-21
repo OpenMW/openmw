@@ -75,7 +75,7 @@ namespace MWWorld
         float mLandFogDayDepth;
         float mLandFogNightDepth;
 
-        // Color modulation for the sun itself during sunset (not completely sure)
+        // Color modulation for the sun itself during sunset
         osg::Vec4f mSunDiscSunsetColor;
 
         // Used by scripts to animate signs, etc based on the wind (GetWindSpeed)
@@ -242,12 +242,7 @@ namespace MWWorld
         float mSunsetTime;
         float mSunriseDuration;
         float mSunsetDuration;
-        // Some useful values
-        /* TODO: Use pre-sunrise_time, pre-sunset_time,
-         * post-sunrise_time, and post-sunset_time to better
-         * describe sunrise/sunset time.
-         * These values are fallbacks attached to weather.
-         */
+        float mSunPreSunsetTime;
         float mNightStart;
         float mNightEnd;
         float mDayStart;

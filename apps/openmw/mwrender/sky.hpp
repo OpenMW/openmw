@@ -48,8 +48,10 @@ namespace MWRender
 
         osg::Vec4f mSkyColor;
 
+        // sun light color
         osg::Vec4f mSunColor;
 
+        // alpha is the sun transparency
         osg::Vec4f mSunDiscColor;
 
         float mFogDepth;

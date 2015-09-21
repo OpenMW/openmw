@@ -402,6 +402,13 @@ public:
         destroySunGlare();
     }
 
+    void setColor(const osg::Vec4f& color)
+    {
+        mUpdater->mColor.r() = color.r();
+        mUpdater->mColor.g() = color.g();
+        mUpdater->mColor.b() = color.b();
+    }
+
     virtual void adjustTransparency(const float ratio)
     {
         mUpdater->mColor.a() = ratio;
@@ -576,7 +583,7 @@ private:
         osg::Vec4f mColor;
 
         Updater()
-            : mColor(1.f, 1.f, 1.f, 1.0f)
+            : mColor(1.f, 1.f, 1.f, 1.f)
         {
         }
 
@@ -588,7 +595,8 @@ private:
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
         {
             osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, mColor);
+            mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mColor.a()));
+            mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(mColor.r(), mColor.g(), mColor.b(), 1));
         }
     };
 
@@ -1464,15 +1472,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
     mMasser->adjustTransparency(weather.mGlareView);
     mSecunda->adjustTransparency(weather.mGlareView);
 
-    /*
-    float timeofday_angle = std::abs(mSun->getPosition().z/mSunGlare->getPosition().length());
-    float strength;
-    if (timeofday_angle <= 0.44)
-        strength = timeofday_angle/0.44f;
-    else
-        strength = 1.f;
-    */
-    mSun->adjustTransparency(weather.mGlareView);
+    mSun->setColor(weather.mSunDiscColor);
+    mSun->adjustTransparency(weather.mGlareView * weather.mSunDiscColor.a());
 
     float nextStarsOpacity = weather.mNightFade * weather.mGlareView;
     if(weather.mNight && mStarsOpacity != nextStarsOpacity)
