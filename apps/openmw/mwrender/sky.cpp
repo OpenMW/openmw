@@ -387,11 +387,7 @@ public:
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryTransform, true);
         mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryTransform, false);
 
-        osg::PositionAttitudeTransform* sunFlashNode = createSunFlash(textureManager);
-
-        mSunFlashCallback = new SunFlashCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels, sunFlashNode, mTransform);
-        mTransform->addCullCallback(mSunFlashCallback);
-
+        createSunFlash(textureManager);
         createSunGlare();
     }
 
@@ -466,7 +462,7 @@ private:
         return oqn;
     }
 
-    osg::PositionAttitudeTransform* createSunFlash(Resource::TextureManager& textureManager)
+    void createSunFlash(Resource::TextureManager& textureManager)
     {
         osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_flash_grey_05.dds",
                                                                         osg::Texture::CLAMP,
@@ -490,12 +486,19 @@ private:
         stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
         stateset->setRenderBinDetails(RenderBin_SunGlare, "RenderBin");
         stateset->setNestRenderBins(false);
-        return transform;
+
+        mSunFlashNode = transform;
+
+        mSunFlashCallback = new SunFlashCallback(mOcclusionQueryVisiblePixels, mOcclusionQueryTotalPixels);
+        mSunFlashNode->addCullCallback(mSunFlashCallback);
     }
     void destroySunFlash()
     {
-        mTransform->removeCullCallback(mSunFlashCallback);
-        mSunFlashCallback = NULL;
+        if (mSunFlashNode)
+        {
+            mSunFlashNode->removeCullCallback(mSunFlashCallback);
+            mSunFlashCallback = NULL;
+        }
     }
 
     void createSunGlare()
@@ -535,8 +538,11 @@ private:
     }
     void destroySunGlare()
     {
-        mSunGlareNode->removeCullCallback(mSunGlareCallback);
-        mSunGlareCallback = NULL;
+        if (mSunGlareNode)
+        {
+            mSunGlareNode->removeCullCallback(mSunGlareCallback);
+            mSunGlareCallback = NULL;
+        }
     }
 
     class Updater : public SceneUtil::StateSetUpdater
@@ -603,17 +609,13 @@ private:
         std::map<osg::observer_ptr<osg::Camera>, float> mLastRatio;
     };
 
-    /// SunFlashCallback handles fading/scaling of the sun flash depending on occlusion query result. Must be attached as a cull callback.
+    /// SunFlashCallback handles fading/scaling of a node depending on occlusion query result. Must be attached as a cull callback.
     class SunFlashCallback : public OcclusionCallback
     {
     public:
-        SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
-                         osg::ref_ptr<osg::PositionAttitudeTransform> flashNode,
-                         osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
+        SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
             : OcclusionCallback(oqnVisible, oqnTotal)
-            , mFlashNode(flashNode)
         {
-            mInitialScale = mFlashNode->getScale().x();
         }
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -622,19 +624,33 @@ private:
 
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
-            handleOcclusionResult (visibleRatio, cv);
+            if (visibleRatio > 0.f)
+            {
+                // rescale into [0.35, 1.0] range
+                const float threshold = 0.35;
+                visibleRatio = visibleRatio * (1.f - threshold) + threshold;
+            }
 
-            traverse(node, nv);
+            float scale = visibleRatio;
+
+            if (scale == 0.f)
+            {
+                // no traverse
+                return;
+            }
+            else
+            {
+                osg::Matrix modelView = *cv->getModelViewMatrix();
+
+                modelView.preMultScale(osg::Vec3f(visibleRatio, visibleRatio, visibleRatio));
+
+                cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
+
+                traverse(node, nv);
+
+                cv->popModelViewMatrix();
+            }
         }
-
-        void handleOcclusionResult(float visibleRatio, osgUtil::CullVisitor* cv)
-        {
-            // TODO
-        }
-
-    private:
-        float mInitialScale;
-        osg::ref_ptr<osg::PositionAttitudeTransform> mFlashNode;
     };
 
 
@@ -734,6 +750,7 @@ private:
 
     osg::ref_ptr<Updater> mUpdater;
     osg::ref_ptr<SunFlashCallback> mSunFlashCallback;
+    osg::ref_ptr<osg::Node> mSunFlashNode;
     osg::ref_ptr<SunGlareCallback> mSunGlareCallback;
     osg::ref_ptr<osg::Node> mSunGlareNode;
     osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
