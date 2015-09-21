@@ -15,6 +15,7 @@
 #include <osg/ColorMask>
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
+#include <osg/AlphaFunc>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
@@ -375,17 +376,20 @@ public:
 
         mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
 
-        // Slightly downscale the query geometry since the sun quad has a transparent texture that doesn't cover the whole area
-        osg::ref_ptr<osg::PositionAttitudeTransform> queryTransform (new osg::PositionAttitudeTransform);
-        queryTransform->setScale(osg::Vec3f(0.4f, 0.4f, 0.4f));
+        osg::ref_ptr<osg::Group> queryNode (new osg::Group);
         // Need to render after the world geometry so we can correctly test for occlusions
-        queryTransform->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
-        queryTransform->getOrCreateStateSet()->setNestRenderBins(false);
+        queryNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
+        queryNode->getOrCreateStateSet()->setNestRenderBins(false);
+        // Set up alpha testing on the occlusion testing subgraph, that way we can get the occlusion tested fragments to match the circular shape of the sun
+        osg::ref_ptr<osg::AlphaFunc> alphaFunc (new osg::AlphaFunc);
+        alphaFunc->setFunction(osg::AlphaFunc::GREATER, 0.8);
+        queryNode->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
+        queryNode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
 
-        mTransform->addChild(queryTransform);
+        mTransform->addChild(queryNode);
 
-        mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryTransform, true);
-        mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryTransform, false);
+        mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
+        mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryNode, false);
 
         createSunFlash(textureManager);
         createSunGlare();
@@ -440,6 +444,26 @@ private:
         queryGeode->getOrCreateStateSet()->setAttributeAndModes(colormask, osg::StateAttribute::ON);
 
         oqn->addChild(queryGeode);
+
+        // Remove the default OFF|PROTECTED setting for texturing. We *want* to enable texturing for alpha testing purposes
+        oqn->getQueryStateSet()->removeTextureMode(0, GL_TEXTURE_2D);
+
+        // Need to add texture coordinates so that texturing works. A bit ugly, relies on the vertex ordering
+        // used within OcclusionQueryNode.
+        osg::ref_ptr<osg::Vec2Array> texCoordArray (new osg::Vec2Array);
+        for (int i=0; i<8; ++i)
+        {
+            texCoordArray->push_back(osg::Vec2(0,0));
+            texCoordArray->push_back(osg::Vec2(1,0));
+            texCoordArray->push_back(osg::Vec2(0,0));
+            texCoordArray->push_back(osg::Vec2(1,0));
+            texCoordArray->push_back(osg::Vec2(1,1));
+            texCoordArray->push_back(osg::Vec2(0,1));
+            texCoordArray->push_back(osg::Vec2(0,1));
+            texCoordArray->push_back(osg::Vec2(1,1));
+        }
+
+        oqn->getQueryGeometry()->setTexCoordArray(0, texCoordArray, osg::Array::BIND_PER_VERTEX);
 
         if (queryVisible)
         {
@@ -626,8 +650,7 @@ private:
 
             if (visibleRatio > 0.f)
             {
-                // rescale into [0.35, 1.0] range
-                const float threshold = 0.35;
+                const float threshold = 0.6;
                 visibleRatio = visibleRatio * (1.f - threshold) + threshold;
             }
 
