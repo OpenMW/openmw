@@ -44,6 +44,11 @@ namespace CSVWorld
 
             void clear();
 
+            /// Clear local variable cache for \a script.
+            ///
+            /// \return Were there any locals that needed clearing?
+            bool clearLocals (const std::string& script);
+
         private slots:
 
             void cellClicked (int row, int column);

@@ -131,6 +131,11 @@ void CSVWorld::ScriptErrorTable::clear()
     setRowCount (0);
 }
 
+bool CSVWorld::ScriptErrorTable::clearLocals (const std::string& script)
+{
+    return mContext.clearLocals (script);
+}
+
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)
 {
     if (item (row, 1))
