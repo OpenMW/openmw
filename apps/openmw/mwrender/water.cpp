@@ -21,6 +21,7 @@
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
+#include "renderbin.hpp"
 
 namespace
 {
@@ -86,7 +87,7 @@ namespace
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
-        stateset->setRenderBinDetails(9, "RenderBin");
+        stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
 
         std::vector<osg::ref_ptr<osg::Texture2D> > textures;
         for (int i=0; i<32; ++i)

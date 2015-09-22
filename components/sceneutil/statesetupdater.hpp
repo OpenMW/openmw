@@ -6,7 +6,7 @@
 namespace SceneUtil
 {
 
-    /// @brief Implements efficient pre-frame updating of StateSets.
+    /// @brief Implements efficient per-frame updating of StateSets.
     /// @par With a naive update there would be race conditions when the OSG draw thread of the last frame
     ///     queues up a StateSet that we want to modify for the next frame. To solve this we could set the StateSet to
     ///     DYNAMIC data variance but that would undo all the benefits of the threading model - having the cull and draw
