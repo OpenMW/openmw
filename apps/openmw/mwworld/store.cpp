@@ -1029,7 +1029,8 @@ namespace MWWorld
     // Script
     //=========================================================================
 
-    inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
+    template <>
+    void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
         ESM::Script scpt;
         scpt.load(esm);
         Misc::StringUtils::toLower(scpt.mId);
@@ -1045,7 +1046,8 @@ namespace MWWorld
     // StartScript
     //=========================================================================
 
-    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
+    template <>
+    void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
     {
         ESM::StartScript s;
         s.load(esm);
