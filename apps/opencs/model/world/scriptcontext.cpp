@@ -39,8 +39,6 @@ char CSMWorld::ScriptContext::getGlobalType (const std::string& name) const
 std::pair<char, bool> CSMWorld::ScriptContext::getMemberType (const std::string& name,
     const std::string& id) const
 {
-    /// \todo invalidate locals cache on change to scripts
-
     std::string id2 = Misc::StringUtils::lowerCase (id);
 
     int index = mData.getScripts().searchId (id2);
@@ -119,4 +117,19 @@ void CSMWorld::ScriptContext::clear()
     mIds.clear();
     mIdsUpdated = false;
     mLocals.clear();
+}
+
+bool CSMWorld::ScriptContext::clearLocals (const std::string& script)
+{
+    std::map<std::string, Compiler::Locals>::iterator iter =
+        mLocals.find (Misc::StringUtils::lowerCase (script));
+
+    if (iter!=mLocals.end())
+    {
+        mLocals.erase (iter);
+        mIdsUpdated = false;
+        return true;
+    }
+
+    return false;
 }

@@ -38,6 +38,7 @@ namespace CSVWorld
             CSMDoc::Document& mDocument;
             CSMWorld::IdTable *mModel;
             int mColumn;
+            int mIdColumn;
             int mStateColumn;
             TableBottomBox *mBottom;
             RecordButtonBar *mButtons;

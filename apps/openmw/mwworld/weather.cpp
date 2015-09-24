@@ -432,6 +432,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mSunsetTime(fallback.getFallbackFloat("Weather_Sunset_Time"))
     , mSunriseDuration(fallback.getFallbackFloat("Weather_Sunrise_Duration"))
     , mSunsetDuration(fallback.getFallbackFloat("Weather_Sunset_Duration"))
+    , mSunPreSunsetTime(fallback.getFallbackFloat("Weather_Sun_Pre-Sunset_Time"))
     , mNightStart(mSunsetTime + mSunsetDuration)
     , mNightEnd(mSunriseTime - 0.5f)
     , mDayStart(mSunriseTime + mSunriseDuration)
@@ -458,16 +459,16 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mPlayingSoundID()
 {
     mWeatherSettings.reserve(10);
-    addWeather("Clear", fallback);
-    addWeather("Cloudy", fallback);
-    addWeather("Foggy", fallback);
-    addWeather("Overcast", fallback);
-    addWeather("Rain", fallback, "rain");
-    addWeather("Thunderstorm", fallback, "rain heavy");
-    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif");
-    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif");
-    addWeather("Snow", fallback, "", "meshes\\snow.nif");
-    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif");
+    addWeather("Clear", fallback); // 0
+    addWeather("Cloudy", fallback); // 1
+    addWeather("Foggy", fallback); // 2
+    addWeather("Overcast", fallback); // 3
+    addWeather("Rain", fallback, "rain"); // 4
+    addWeather("Thunderstorm", fallback, "rain heavy"); // 5
+    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", fallback, "", "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
@@ -623,6 +624,14 @@ void WeatherManager::update(float duration, bool paused)
             static_cast<float>(sin(theta)));
         mRendering.setSunDirection( final * -1 );
     }
+
+    float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
+    if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(0);
+    else if (time.getHour() < peakHour)
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (peakHour - time.getHour()) / (peakHour - mSunriseTime));
+    else
+        mRendering.getSkyManager()->setGlareTimeOfDayFade(1 - (time.getHour() - peakHour) / (mSunsetTime - peakHour));
 
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
@@ -958,7 +967,6 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     mResult.mAmbientSoundVolume = 1.f;
     mResult.mEffectFade = 1.f;
-    mResult.mSunColor = current.mSunDiscSunsetColor;
 
     mResult.mIsStorm = current.mIsStorm;
 
@@ -972,6 +980,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
 
     mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
 
+    // TODO: use pre/post sunset/sunrise time values in [Weather] section
     // night
     if (gameHour <= mNightEnd || gameHour >= mNightStart + 1)
     {
@@ -1042,6 +1051,36 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
             mResult.mNightFade = factor;
         }
     }
+
+    if (gameHour >= mSunsetTime - mSunPreSunsetTime)
+    {
+        float factor = (gameHour - (mSunsetTime - mSunPreSunsetTime)) / mSunPreSunsetTime;
+        factor = std::min(1.f, factor);
+        mResult.mSunDiscColor = lerp(osg::Vec4f(1,1,1,1), current.mSunDiscSunsetColor, factor);
+        // The SunDiscSunsetColor in the INI isn't exactly the resulting color on screen, most likely because
+        // MW applied the color to the ambient term as well. After the ambient and emissive terms are added together, the fixed pipeline
+        // would then clamp the total lighting to (1,1,1). A noticable change in color tone can be observed when only one of the color components gets clamped.
+        // Unfortunately that means we can't use the INI color as is, have to replicate the above nonsense.
+        mResult.mSunDiscColor = mResult.mSunDiscColor + osg::componentMultiply(mResult.mSunDiscColor, mResult.mAmbientColor);
+        for (int i=0; i<3; ++i)
+            mResult.mSunDiscColor[i] = std::min(1.f, mResult.mSunDiscColor[i]);
+    }
+    else
+        mResult.mSunDiscColor = osg::Vec4f(1,1,1,1);
+
+    if (gameHour >= mSunsetTime)
+    {
+        float fade = std::min(1.f, (gameHour - mSunsetTime) / 2.f);
+        fade = fade*fade;
+        mResult.mSunDiscColor.a() = 1.f - fade;
+    }
+    else if (gameHour >= mSunriseTime && gameHour <= mSunriseTime + 1)
+    {
+        mResult.mSunDiscColor.a() = gameHour - mSunriseTime;
+    }
+    else
+        mResult.mSunDiscColor.a() = 1;
+
 }
 
 inline void WeatherManager::calculateTransitionResult(const float factor, const float gameHour)

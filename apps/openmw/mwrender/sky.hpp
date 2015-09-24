@@ -48,8 +48,10 @@ namespace MWRender
 
         osg::Vec4f mSkyColor;
 
+        // sun light color
         osg::Vec4f mSunColor;
 
+        // alpha is the sun transparency
         osg::Vec4f mSunDiscColor;
 
         float mFogDepth;
@@ -140,8 +142,7 @@ namespace MWRender
         void setMasserState(const MoonState& state);
         void setSecundaState(const MoonState& state);
 
-        void setGlare(const float glare);
-        void setGlareEnabled(bool enabled);
+        void setGlareTimeOfDayFade(float val);
 
     private:
         void create();
@@ -209,9 +210,6 @@ namespace MWRender
         std::string mCurrentParticleEffect;
 
         float mRemainingTransitionTime;
-
-        float mGlare; // target
-        float mGlareFade; // actual
 
         bool mRainEnabled;
         std::string mRainEffect;

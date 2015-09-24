@@ -89,6 +89,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
 
     mColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_ScriptText);
+    mIdColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
     mStateColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
 
     QString source = mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString();
@@ -241,6 +242,15 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 
     ScriptEdit::ChangeLock lock (*mEditor);
 
+    bool updateRequired = false;
+
+    for (int i=topLeft.row(); i<=bottomRight.row(); ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
@@ -256,13 +266,28 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
             mEditor->setPlainText (source);
             mEditor->setTextCursor (cursor);
 
-            recompile();
+            updateRequired = true;
         }
     }
+
+    if (updateRequired)
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
+    bool updateRequired = false;
+
+    for (int i=start; i<=end; ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
+    if (updateRequired)
+        recompile();
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (!parent.isValid() && index.row()>=start && index.row()<=end)
