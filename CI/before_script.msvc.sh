@@ -16,6 +16,9 @@ while [ $# -gt 0 ]; do
 
 		-k )
 			KEEP=true ;;
+		
+		-u )
+			UNITY_BUILD=true ;;
 
 		* )
 			echo "Unknown arg $ARG."
@@ -161,6 +164,10 @@ case $PLATFORM in
 		exit 1
 		;;
 esac
+
+if ! [ -z $UNITY_BUILD ]; then
+	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
+fi
 
 case $CONFIGURATION in
 	debug|Debug|DEBUG )
