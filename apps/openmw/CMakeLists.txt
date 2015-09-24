@@ -23,6 +23,7 @@ add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
+    renderbin
     )
 
 add_openmw_dir (mwinput
@@ -64,7 +65,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
+    store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
     )
 
@@ -74,15 +75,15 @@ add_openmw_dir (mwphysics
 
 add_openmw_dir (mwclass
     classes activator creature npc weapon armor potion apparatus book clothing container door
-    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static
+    ingredient creaturelevlist itemlevlist light lockpick misc probe repair static actor
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat creaturestats magiceffects movement
+    mechanicsmanagerimp stat creaturestats magiceffects movement actorutil
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
     disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
-    character actors objects aistate
+    character actors objects aistate coordinateconverter
     )
 
 add_openmw_dir (mwstate
@@ -178,4 +179,5 @@ if (MSVC)
     if (CMAKE_CL_64)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
+    add_definitions("-D_USE_MATH_DEFINES")
 endif (MSVC)

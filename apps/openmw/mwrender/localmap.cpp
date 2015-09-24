@@ -12,6 +12,7 @@
 #include <osgViewer/Viewer>
 
 #include <components/esm/fogstate.hpp>
+#include <components/esm/loadcell.hpp>
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/files/memorystream.hpp>
@@ -26,10 +27,10 @@
 namespace
 {
 
-    class CameraUpdateCallback : public osg::NodeCallback
+    class CameraLocalUpdateCallback : public osg::NodeCallback
     {
     public:
-        CameraUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
+        CameraLocalUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
             : mRendered(false)
             , mCamera(cam)
             , mParent(parent)
@@ -204,7 +205,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setStateSet(stateset);
     camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
-    camera->setUpdateCallback(new CameraUpdateCallback(camera, this));
+    camera->setUpdateCallback(new CameraLocalUpdateCallback(camera, this));
 
     return camera;
 }
@@ -644,7 +645,7 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
     osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
     if (!result.success())
     {
-        std::cerr << "Failed to read fog: " << result.message() << std::endl;
+        std::cerr << "Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
 
@@ -676,7 +677,7 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
     if (!result.success())
     {
-        std::cerr << "Unable to write fog: " << result.message() << std::endl;
+        std::cerr << "Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
         return;
     }
     mFogOfWarImage->flipVertical();

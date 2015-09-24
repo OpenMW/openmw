@@ -1,7 +1,5 @@
 #include "alchemywindow.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include <MyGUI_Gui.h>
 
 #include "../mwbase/environment.hpp"
@@ -11,6 +9,7 @@
 
 #include "../mwmechanics/magiceffects.hpp"
 #include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -66,9 +65,6 @@ namespace MWGui
 
     void AlchemyWindow::onCreateButtonClicked(MyGUI::Widget* _sender)
     {
-        std::string name = mNameEdit->getCaption();
-        boost::algorithm::trim(name);
-
         MWMechanics::Alchemy::Result result = mAlchemy->create (mNameEdit->getCaption ());
 
         if (result == MWMechanics::Alchemy::Result_NoName)
@@ -117,16 +113,16 @@ namespace MWGui
                 MWWorld::Ptr ingred = *mIngredients[i]->getUserData<MWWorld::Ptr>();
                 if (ingred.getRefData().getCount() == 0)
                     removeIngredient(mIngredients[i]);
-        }
+            }
 
         update();
     }
 
     void AlchemyWindow::open()
     {
-        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        InventoryItemModel* model = new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        InventoryItemModel* model = new InventoryItemModel(MWMechanics::getPlayer());
         mSortModel = new SortFilterItemModel(model);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
@@ -135,9 +131,6 @@ namespace MWGui
         mNameEdit->setCaption("");
 
         int index = 0;
-
-        mAlchemy->setAlchemist (MWBase::Environment::get().getWorld()->getPlayerPtr());
-
         for (MWMechanics::Alchemy::TToolsIterator iter (mAlchemy->beginTools());
             iter!=mAlchemy->endTools() && index<static_cast<int> (mApparatus.size()); ++iter, ++index)
         {

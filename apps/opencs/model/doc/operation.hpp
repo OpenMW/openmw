@@ -83,7 +83,9 @@ namespace CSMDoc
 
             void executeStage();
 
-            void operationDone();
+        protected slots:
+
+            virtual void operationDone();
     };
 }
 

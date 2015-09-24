@@ -1,4 +1,3 @@
-
 #include "booleannode.hpp"
 
 CSMFilter::BooleanNode::BooleanNode (bool true_) : mTrue (true_) {}

@@ -296,12 +296,11 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns),
   mType(NULL),
-  mSoul(NULL),
   mScale(NULL),
   mOriginal(NULL),
-  mCombat(NULL),
-  mMagic(NULL),
-  mStealth(NULL)
+  mAttributes(NULL),
+  mAttacks(NULL),
+  mMisc(NULL)
 {}
 
 CSMWorld::CreatureRefIdAdapter::CreatureRefIdAdapter (const CreatureColumns& columns)
@@ -317,23 +316,20 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
     if (column==mColumns.mType)
         return record.get().mData.mType;
 
-    if (column==mColumns.mSoul)
-        return record.get().mData.mSoul;
-
     if (column==mColumns.mScale)
         return record.get().mScale;
 
     if (column==mColumns.mOriginal)
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
-    if (column==mColumns.mCombat)
-        return static_cast<int> (record.get().mData.mCombat);
+    if (column==mColumns.mAttributes)
+        return true; // Required to show nested tables in dialogue subview
 
-    if (column==mColumns.mMagic)
-        return static_cast<int> (record.get().mData.mMagic);
+    if (column==mColumns.mAttacks)
+        return true; // Required to show nested tables in dialogue subview
 
-    if (column==mColumns.mStealth)
-        return static_cast<int> (record.get().mData.mStealth);
+    if (column==mColumns.mMisc)
+        return true; // Required to show nested items in dialogue subview
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -354,18 +350,10 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
 
     if (column==mColumns.mType)
         creature.mData.mType = value.toInt();
-    else if (column==mColumns.mSoul)
-        creature.mData.mSoul = value.toInt();
     else if (column==mColumns.mScale)
         creature.mScale = value.toFloat();
     else if (column==mColumns.mOriginal)
         creature.mOriginal = value.toString().toUtf8().constData();
-    else if (column==mColumns.mCombat)
-        creature.mData.mCombat = value.toInt();
-    else if (column==mColumns.mMagic)
-        creature.mData.mMagic = value.toInt();
-    else if (column==mColumns.mStealth)
-        creature.mData.mStealth = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -694,18 +682,7 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
     const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
 
     if (subColIndex == 0)
-        switch (subRowIndex)
-        {
-            case 0: return QString("Strength");
-            case 1: return QString("Intelligence");
-            case 2: return QString("Willpower");
-            case 3: return QString("Agility");
-            case 4: return QString("Speed");
-            case 5: return QString("Endurance");
-            case 6: return QString("Personality");
-            case 7: return QString("Luck");
-            default: return QVariant(); // throw an exception here?
-        }
+        return subRowIndex;
     else if (subColIndex == 1)
         switch (subRowIndex)
         {
@@ -815,7 +792,7 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
         throw std::runtime_error ("index out of range");
 
     if (subColIndex == 0)
-        return QString(ESM::Skill::sSkillNames[subRowIndex].c_str());
+        return subRowIndex;
     else if (subColIndex == 1)
         return static_cast<int>(npcStruct.mSkills[subRowIndex]);
     else
@@ -971,6 +948,289 @@ int CSMWorld::NpcMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *colu
 }
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    return 1; // fixed at size 1
+}
+
+CSMWorld::CreatureAttributesRefIdAdapter::CreatureAttributesRefIdAdapter()
+{}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    // store the whole struct
+    creature.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (creature);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttributesRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    // return the whole struct
+    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    if (subColIndex == 0)
+        return subRowIndex;
+    else if (subColIndex == 1)
+        switch (subRowIndex)
+        {
+            case 0: return creature.mData.mStrength;
+            case 1: return creature.mData.mIntelligence;
+            case 2: return creature.mData.mWillpower;
+            case 3: return creature.mData.mAgility;
+            case 4: return creature.mData.mSpeed;
+            case 5: return creature.mData.mEndurance;
+            case 6: return creature.mData.mPersonality;
+            case 7: return creature.mData.mLuck;
+            default: return QVariant(); // throw an exception here?
+        }
+    else
+        return QVariant(); // throw an exception here?
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    if (subColIndex == 1)
+        switch(subRowIndex)
+        {
+            case 0: creature.mData.mStrength = value.toInt(); break;
+            case 1: creature.mData.mIntelligence = value.toInt(); break;
+            case 2: creature.mData.mWillpower = value.toInt(); break;
+            case 3: creature.mData.mAgility = value.toInt(); break;
+            case 4: creature.mData.mSpeed = value.toInt(); break;
+            case 5: creature.mData.mEndurance = value.toInt(); break;
+            case 6: creature.mData.mPersonality = value.toInt(); break;
+            case 7: creature.mData.mLuck = value.toInt(); break;
+            default: return; // throw an exception here?
+        }
+    else
+        return; // throw an exception here?
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureAttributesRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 2;
+}
+
+int CSMWorld::CreatureAttributesRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    // There are 8 attributes
+    return 8;
+}
+
+CSMWorld::CreatureAttackRefIdAdapter::CreatureAttackRefIdAdapter()
+{}
+
+void CSMWorld::CreatureAttackRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    // store the whole struct
+    creature.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (creature);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttackRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    // return the whole struct
+    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
+        throw std::runtime_error ("index out of range");
+
+    if (subColIndex == 0)
+        return subRowIndex + 1;
+    else if (subColIndex < 3) // 1 or 2
+        return creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)];
+    else
+        return QVariant(); // throw an exception here?
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    if (subRowIndex < 0 || subRowIndex > 2)
+        throw std::runtime_error ("index out of range");
+
+    if (subColIndex == 1 || subColIndex == 2)
+        creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)] = value.toInt();
+    else
+        return; // throw an exception here?
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureAttackRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 3;
+}
+
+int CSMWorld::CreatureAttackRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    // There are 3 attacks
+    return 3;
+}
+
+CSMWorld::CreatureMiscRefIdAdapter::CreatureMiscRefIdAdapter()
+{}
+
+CSMWorld::CreatureMiscRefIdAdapter::~CreatureMiscRefIdAdapter()
+{}
+
+void CSMWorld::CreatureMiscRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    throw std::logic_error ("cannot add a row to a fixed table");
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    throw std::logic_error ("cannot remove a row to a fixed table");
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    throw std::logic_error ("table operation not supported");
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureMiscRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    throw std::logic_error ("table operation not supported");
+}
+
+QVariant CSMWorld::CreatureMiscRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    switch (subColIndex)
+    {
+        case 0: return creature.mData.mLevel;
+        case 1: return creature.mData.mHealth;
+        case 2: return creature.mData.mMana;
+        case 3: return creature.mData.mFatigue;
+        case 4: return creature.mData.mSoul;
+        case 5: return creature.mData.mCombat;
+        case 6: return creature.mData.mMagic;
+        case 7: return creature.mData.mStealth;
+        case 8: return creature.mData.mGold;
+        default: return QVariant(); // throw an exception here?
+    }
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    switch(subColIndex)
+    {
+        case 0: creature.mData.mLevel   = value.toInt(); break;
+        case 1: creature.mData.mHealth  = value.toInt(); break;
+        case 2: creature.mData.mMana    = value.toInt(); break;
+        case 3: creature.mData.mFatigue = value.toInt(); break;
+        case 4: creature.mData.mSoul    = value.toInt(); break;
+        case 5: creature.mData.mCombat  = value.toInt(); break;
+        case 6: creature.mData.mMagic   = value.toInt(); break;
+        case 7: creature.mData.mStealth = value.toInt(); break;
+        case 8: creature.mData.mGold    = value.toInt(); break;
+        default: return; // throw an exception here?
+    }
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 9; // Level, Health, Mana, Fatigue, Soul, Combat, Magic, Steath, Gold
+}
+
+int CSMWorld::CreatureMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
     return 1; // fixed at size 1
 }

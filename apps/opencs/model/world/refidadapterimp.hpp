@@ -2,7 +2,6 @@
 #define CSM_WOLRD_REFIDADAPTERIMP_H
 
 #include <map>
-#include <iostream>
 
 #include <QVariant>
 
@@ -480,7 +479,6 @@ namespace CSMWorld
 
     struct ActorColumns : public NameColumns
     {
-        const RefIdColumn *mHasAi;
         const RefIdColumn *mHello;
         const RefIdColumn *mFlee;
         const RefIdColumn *mFight;
@@ -525,9 +523,6 @@ namespace CSMWorld
         const Record<RecordT>& record = static_cast<const Record<RecordT>&> (
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
-        if (column==mActors.mHasAi)
-            return record.get().mHasAI!=0;
-
         if (column==mActors.mHello)
             return record.get().mAiData.mHello;
 
@@ -569,9 +564,7 @@ namespace CSMWorld
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mActors.mHasAi)
-            record2.mHasAI = value.toInt();
-        else if (column==mActors.mHello)
+        if (column==mActors.mHello)
             record2.mAiData.mHello = value.toInt();
         else if (column==mActors.mFlee)
             record2.mAiData.mFlee = value.toInt();
@@ -697,12 +690,11 @@ namespace CSMWorld
     {
         std::map<const RefIdColumn *, unsigned int> mFlags;
         const RefIdColumn *mType;
-        const RefIdColumn *mSoul;
         const RefIdColumn *mScale;
         const RefIdColumn *mOriginal;
-        const RefIdColumn *mCombat;
-        const RefIdColumn *mMagic;
-        const RefIdColumn *mStealth;
+        const RefIdColumn *mAttributes;
+        const RefIdColumn *mAttacks;
+        const RefIdColumn *mMisc;
 
         CreatureColumns (const ActorColumns& actorColumns);
     };
@@ -915,6 +907,97 @@ namespace CSMWorld
 
         NpcMiscRefIdAdapter ();
         virtual ~NpcMiscRefIdAdapter();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureAttributesRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        CreatureAttributesRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureAttackRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        CreatureAttackRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureMiscRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        CreatureMiscRefIdAdapter (const CreatureMiscRefIdAdapter&);
+        CreatureMiscRefIdAdapter& operator= (const CreatureMiscRefIdAdapter&);
+
+    public:
+
+        CreatureMiscRefIdAdapter ();
+        virtual ~CreatureMiscRefIdAdapter();
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -1567,7 +1650,7 @@ namespace CSMWorld
                         return QVariant();
                 case 5: // wander repeat
                     if (content.mType == ESM::AI_Wander)
-                        return content.mWander.mShouldRepeat;
+                        return content.mWander.mShouldRepeat != 0;
                     else
                         return QVariant();
                 case 6: // activate name

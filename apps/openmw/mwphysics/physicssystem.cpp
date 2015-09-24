@@ -30,6 +30,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -460,7 +461,7 @@ namespace MWPhysics
     class HeightField
     {
     public:
-        HeightField(float* heights, int x, int y, float triSize, float sqrtVerts)
+        HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts)
         {
             // find the minimum and maximum heights (needed for bullet)
             float minh = heights[0];
@@ -746,7 +747,7 @@ namespace MWPhysics
         {
         }
 
-        virtual	btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
+        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult,bool normalInWorldSpace)
         {
             if (rayResult.m_collisionObject == mMe)
                 return 1.f;
@@ -927,7 +928,7 @@ namespace MWPhysics
             return MovementSolver::traceDown(ptr, found->second, mCollisionWorld, maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (float* heights, int x, int y, float triSize, float sqrtVerts)
+    void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts)
     {
         HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts);
         mHeightFields[std::make_pair(x,y)] = heightfield;
@@ -1091,7 +1092,7 @@ namespace MWPhysics
 
     bool PhysicsSystem::toggleCollisionMode()
     {
-        ActorMap::iterator found = mActors.find(MWBase::Environment::get().getWorld()->getPlayerPtr());
+        ActorMap::iterator found = mActors.find(MWMechanics::getPlayer());
         if (found != mActors.end())
         {
             bool cmode = found->second->getCollisionMode();

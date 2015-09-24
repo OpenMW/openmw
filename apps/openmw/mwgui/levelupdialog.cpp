@@ -16,6 +16,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWGui
 {
@@ -203,7 +204,7 @@ namespace MWGui
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats (player);
 
         if (mSpentAttributes.size() < mCoinCount)

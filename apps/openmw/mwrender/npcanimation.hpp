@@ -65,7 +65,6 @@ private:
     boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
-    float mAlpha;
     bool mSoundsDisabled;
 
     void updateNpcBase();
@@ -133,9 +132,6 @@ public:
 
     /// Get the inventory slot that the given node path leads into, or -1 if not found.
     int getSlot(const osg::NodePath& path) const;
-
-    /// Make the NPC only partially visible
-    virtual void setAlpha(float alpha);
 
     virtual void setVampire(bool vampire);
 

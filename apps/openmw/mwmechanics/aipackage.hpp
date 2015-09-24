@@ -69,6 +69,8 @@ namespace MWMechanics
             /// Simulates the passing of time
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
 
+            bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
+
         protected:
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
@@ -76,15 +78,19 @@ namespace MWMechanics
 
             virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
+            void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
+
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
             float mTimer;
-            float mStuckTimer;
 
-            ESM::Position mStuckPos;
             ESM::Pathgrid::Point mPrevDest;
+
+        private:
+            bool isNearInactiveCell(const ESM::Position& actorPos);
+
     };
 }
 

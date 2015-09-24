@@ -1,4 +1,3 @@
-
 #include "pagedworldspacewidget.hpp"
 
 #include <sstream>
@@ -171,7 +170,10 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
 
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
-    osg::Vec3d position = mView->getCamera()->getViewMatrix().getTrans();
+    osg::Vec3d eye, center, up;
+    mView->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+    osg::Vec3d position = eye;
+
     std::ostringstream stream;
 
     stream

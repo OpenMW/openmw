@@ -1,4 +1,3 @@
-
 #include "refdata.hpp"
 
 #include <components/esm/objectstate.hpp>
@@ -15,7 +14,6 @@ namespace MWWorld
     {
         mBaseNode = refData.mBaseNode;
         mLocals = refData.mLocals;
-        mHasLocals = refData.mHasLocals;
         mEnabled = refData.mEnabled;
         mCount = refData.mCount;
         mPosition = refData.mPosition;
@@ -35,7 +33,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(0), mDeleted(false), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
+    : mBaseNode(0), mDeleted(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -46,7 +44,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mDeleted(false),  mHasLocals (false), mEnabled (true),
+    : mBaseNode(0), mDeleted(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
       mChanged(false) // Loading from ESM/ESP files -> assume unchanged
@@ -57,13 +55,13 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode(0), mDeleted(false), mHasLocals (false),
+    : mBaseNode(0), mDeleted(false),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
       mCustomData (0),
       mChanged(true) // Loading from a savegame -> assume changed
-    {   
+    {
         for (int i=0; i<3; ++i)
             mLocalRotation.rot[i] = objectState.mLocalRotation[i];
     }
@@ -84,10 +82,7 @@ namespace MWWorld
 
     void RefData::write (ESM::ObjectState& objectState, const std::string& scriptId) const
     {
-        objectState.mHasLocals = mHasLocals;
-
-        if (mHasLocals)
-            mLocals.write (objectState.mLocals, scriptId);
+        objectState.mHasLocals = mLocals.write (objectState.mLocals, scriptId);
 
         objectState.mEnabled = mEnabled;
         objectState.mCount = mCount;
@@ -140,13 +135,8 @@ namespace MWWorld
 
     void RefData::setLocals (const ESM::Script& script)
     {
-        if (!mHasLocals)
-        {
-            mLocals.configure (script);
-            mHasLocals = true;
-            if (!mLocals.isEmpty())
-                mChanged = true;
-        }
+        if (mLocals.configure (script) && !mLocals.isEmpty())
+            mChanged = true;
     }
 
     void RefData::setCount (int count)

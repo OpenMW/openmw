@@ -1,4 +1,3 @@
-
 #include "tablesubview.hpp"
 
 #include <QVBoxLayout>
@@ -22,8 +21,6 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 : SubView (id)
 {
     QVBoxLayout *layout = new QVBoxLayout;
-
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
 
     layout->addWidget (mBottom =
         new TableBottomBox (creatorFactory, document, id, this), 0);
@@ -71,6 +68,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+
+        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
@@ -166,4 +168,3 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     }
     return false;
 }
-

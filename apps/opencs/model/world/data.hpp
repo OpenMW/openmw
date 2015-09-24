@@ -113,7 +113,7 @@ namespace CSMWorld
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
 
-            Resource::ResourceSystem mResourceSystem;
+            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
@@ -138,9 +138,9 @@ namespace CSMWorld
 
             const VFS::Manager* getVFS() const;
 
-            Resource::ResourceSystem* getResourceSystem();
+            boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
 
-            const Resource::ResourceSystem* getResourceSystem() const;
+            boost::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 
@@ -232,7 +232,11 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
+            IdCollection<CSMWorld::Land>& getLand();
+
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            IdCollection<CSMWorld::LandTexture>& getLandTextures();
 
             const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
@@ -254,6 +258,8 @@ namespace CSMWorld
             const Resources& getResources (const UniversalId& id) const;
 
             const MetaData& getMetaData() const;
+
+            void setMetaData (const MetaData& metaData);
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.

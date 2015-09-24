@@ -30,8 +30,12 @@ ItemView::~ItemView()
 
 void ItemView::setModel(ItemModel *model)
 {
+    if (mModel == model)
+        return;
+
     delete mModel;
     mModel = model;
+
     update();
 }
 

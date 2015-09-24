@@ -136,12 +136,6 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
-            virtual void setActorHealth(const Ptr& ptr, float health, const Ptr& attacker=Ptr()) const;
-            ///< Sets a new current health value for the actor, optionally specifying the object causing
-            /// the change. Use this instead of using CreatureStats directly as this will make sure the
-            /// correct dialog and actor states are properly handled when being hurt or healed.
-            /// (default implementation: throw an exception)
-
             virtual boost::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
@@ -166,6 +160,8 @@ namespace MWWorld
 
             virtual void unlock (const Ptr& ptr) const;
             ///< Unlock object (default implementation: throw an exception)
+
+            virtual bool canLock (const Ptr& ptr) const;
 
             virtual void setRemainingUsageTime (const Ptr& ptr, float duration) const;
             ///< Sets the remaining duration of the object, such as an equippable light
@@ -284,6 +280,8 @@ namespace MWWorld
 
             virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
 
+            virtual bool isGold(const MWWorld::Ptr& ptr) const { return false; };
+            
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
 

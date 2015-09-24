@@ -1,4 +1,3 @@
-
 #include "npc.hpp"
 
 #include <memory>
@@ -25,6 +24,7 @@
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
 #include "../mwmechanics/character.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
@@ -402,22 +402,9 @@ namespace MWClass
         return ref->mBase->mId;
     }
 
-    void Npc::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
-    {
-        MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
-    }
-
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         renderingInterface.getObjects().insertNPC(ptr);
-    }
-
-    void Npc::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
-    {
-        physics.addActor(ptr, model);
-        MWBase::Environment::get().getMechanicsManager()->add(ptr);
-        if (getCreatureStats(ptr).isDead())
-            MWBase::Environment::get().getWorld()->enableActorCollision(ptr, false);
     }
 
     bool Npc::isPersistent(const MWWorld::Ptr &actor) const
@@ -504,7 +491,7 @@ namespace MWClass
         if(otherstats.isDead()) // Can't hit dead actors
             return;
 
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(ptr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
         int weapskill = ESM::Skill::HandToHand;
@@ -543,7 +530,7 @@ namespace MWClass
         {
             MWMechanics::getHandToHandDamage(ptr, victim, damage, healthdmg, attackStrength);
         }
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(ptr == MWMechanics::getPlayer())
         {
             skillUsageSucceeded(ptr, weapskill, 0);
 
@@ -609,7 +596,7 @@ namespace MWClass
         if(!object.isEmpty())
             getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
 
-        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
             const std::string &script = ptr.getClass().getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
@@ -701,7 +688,7 @@ namespace MWClass
                     if (armorhealth == 0)
                         armor = *inv.unequipItem(armor, ptr);
 
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    if (ptr == MWMechanics::getPlayer())
                         skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
 
                     switch(armor.getClass().getEquipmentSkill(armor))
@@ -717,7 +704,7 @@ namespace MWClass
                             break;
                     }
                 }
-                else if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                else if(ptr == MWMechanics::getPlayer())
                     skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
             }
         }
@@ -730,11 +717,12 @@ namespace MWClass
             if(damage > 0.0f)
             {
                 sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
-                if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                if (ptr == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
             }
-            float health = getCreatureStats(ptr).getHealth().getCurrent() - damage;
-            setActorHealth(ptr, health, attacker);
+            MWMechanics::DynamicStat<float> health(getCreatureStats(ptr).getHealth());
+            health.setCurrent(health.getCurrent() - damage);
+            getCreatureStats(ptr).setHealth(health);
         }
         else
         {
@@ -751,64 +739,15 @@ namespace MWClass
                 attacker.getClass().getNpcStats(attacker).addWerewolfKill();
             }
 
-            // Simple check for who attacked first: if the player attacked first, a crimeId should be set
-            // Doesn't handle possible edge case where no one reported the assault, but in such a case,
-            // for bystanders it is not possible to tell who attacked first, anyway.
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (attacker == player && ptr.getClass().getNpcStats(ptr).getCrimeId() != -1 && ptr != player)
-                MWBase::Environment::get().getMechanicsManager()->commitCrime(player, ptr, MWBase::MechanicsManager::OT_Murder);
+            MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, attacker);
         }
     }
-
-    void Npc::block(const MWWorld::Ptr &ptr) const
-    {
-        MWWorld::InventoryStore& inv = getInventoryStore(ptr);
-        MWWorld::ContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-        if (shield == inv.end())
-            return;
-
-        MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        switch(shield->getClass().getEquipmentSkill(*shield))
-        {
-            case ESM::Skill::LightArmor:
-                sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::MediumArmor:
-                sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
-                break;
-            case ESM::Skill::HeavyArmor:
-                sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
-                break;
-            default:
-                return;
-        }
-    }
-
-    void Npc::setActorHealth(const MWWorld::Ptr& ptr, float health, const MWWorld::Ptr& attacker) const
-    {
-        MWMechanics::CreatureStats &crstats = getCreatureStats(ptr);
-        bool wasDead = crstats.isDead();
-
-        MWMechanics::DynamicStat<float> stat(crstats.getHealth());
-        stat.setCurrent(health);
-        crstats.setHealth(stat);
-
-        if(!wasDead && crstats.isDead())
-        {
-            // actor was just killed
-        }
-        else if(wasDead && !crstats.isDead())
-        {
-            // actor was just resurrected
-        }
-    }
-
 
     boost::shared_ptr<MWWorld::Action> Npc::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const
     {
         // player got activated by another NPC
-        if(ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if(ptr == MWMechanics::getPlayer())
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(actor));
 
         // Werewolfs can't activate NPCs
@@ -961,16 +900,6 @@ namespace MWClass
         return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
-    osg::Vec3f Npc::getRotationVector (const MWWorld::Ptr& ptr) const
-    {
-        MWMechanics::Movement &movement = getMovementSettings(ptr);
-        osg::Vec3f vec(movement.mRotation[0], movement.mRotation[1], movement.mRotation[2]);
-        movement.mRotation[0] = 0.0f;
-        movement.mRotation[1] = 0.0f;
-        movement.mRotation[2] = 0.0f;
-        return vec;
-    }
-
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
@@ -983,11 +912,6 @@ namespace MWClass
     {
         boost::shared_ptr<Class> instance (new Npc);
         registerClass (typeid (ESM::NPC).name(), instance);
-    }
-
-    bool Npc::hasToolTip (const MWWorld::Ptr& ptr) const
-    {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -1020,21 +944,9 @@ namespace MWClass
 
     float Npc::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        const MWMechanics::NpcStats &stats = getNpcStats(ptr);
-
         // According to UESP, inventory weight is ignored in werewolf form. Does that include
         // feather and burden effects?
-        float weight = 0.0f;
-        if(!stats.isWerewolf())
-        {
-            weight  = getContainerStore(ptr).getWeight();
-            weight -= stats.getMagicEffects().get(ESM::MagicEffect::Feather).getMagnitude();
-            weight += stats.getMagicEffects().get(ESM::MagicEffect::Burden).getMagnitude();
-            if(weight < 0.0f)
-                weight = 0.0f;
-        }
-
-        return weight;
+        return getNpcStats(ptr).isWerewolf() ? 0.0f : Actor::getEncumbrance(ptr);
     }
 
     bool Npc::apply (const MWWorld::Ptr& ptr, const std::string& id,

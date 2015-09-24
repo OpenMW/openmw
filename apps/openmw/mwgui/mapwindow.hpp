@@ -42,14 +42,20 @@ namespace MWGui
 
         size_t size() const;
 
-        std::vector<ESM::CustomMarker>::const_iterator begin() const;
-        std::vector<ESM::CustomMarker>::const_iterator end() const;
+        typedef std::multimap<ESM::CellId, ESM::CustomMarker> ContainerType;
+
+        typedef std::pair<ContainerType::const_iterator, ContainerType::const_iterator> RangeType;
+
+        ContainerType::const_iterator begin() const;
+        ContainerType::const_iterator end() const;
+
+        RangeType getMarkers(const ESM::CellId& cellId) const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
-        std::vector<ESM::CustomMarker> mMarkers;
+        ContainerType mMarkers;
     };
 
     class LocalMapBase
@@ -120,7 +126,7 @@ namespace MWGui
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
 
-        void updateCustomMarkers();
+        virtual void updateCustomMarkers();
 
         void applyFogOfWar();
 
@@ -184,7 +190,8 @@ namespace MWGui
 
         void renderGlobalMap(Loading::Listener* loadingListener);
 
-        // adds the marker to the global map
+        /// adds the marker to the global map
+        /// @param name The ESM::Cell::mName
         void addVisitedLocation(const std::string& name, int x, int y);
 
         // reveals this cell's map on the global map
@@ -196,6 +203,8 @@ namespace MWGui
         virtual void open();
 
         void onFrame(float dt);
+
+        virtual void updateCustomMarkers();
 
         /// Clear all savegame-specific data
         void clear();
@@ -215,6 +224,7 @@ namespace MWGui
         void onNoteDoubleClicked(MyGUI::Widget* sender);
         void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
+        void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
 
         MyGUI::ScrollView* mGlobalMap;
         std::auto_ptr<MyGUI::ITexture> mGlobalMapTexture;
@@ -242,7 +252,7 @@ namespace MWGui
 
         MWRender::GlobalMap* mGlobalMapRender;
 
-        std::vector<MyGUI::Widget*> mGlobalMapMarkers;
+        std::map<std::pair<int, int>, MyGUI::Widget*> mGlobalMapMarkers;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;

@@ -233,6 +233,7 @@ namespace MWGui
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
                 mResolutionList->addItem(str);
         }
+        highlightCurrentResolution();
 
         std::string tf = Settings::Manager::getString("texture filtering", "General");
         mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
@@ -300,7 +301,27 @@ namespace MWGui
 
     void SettingsWindow::onResolutionCancel()
     {
+        highlightCurrentResolution();
+    }
+
+    void SettingsWindow::highlightCurrentResolution()
+    {
         mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
+
+        int currentX = Settings::Manager::getInt("resolution x", "Video");
+        int currentY = Settings::Manager::getInt("resolution y", "Video");
+
+        for (size_t i=0; i<mResolutionList->getItemCount(); ++i)
+        {
+            int resX, resY;
+            parseResolution (resX, resY, mResolutionList->getItemNameAt(i));
+
+            if (resX == currentX && resY == currentY)
+            {
+                mResolutionList->setIndexSelected(i);
+                break;
+            }
+        }
     }
 
     void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)

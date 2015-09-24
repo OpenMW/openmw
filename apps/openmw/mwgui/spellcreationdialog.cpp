@@ -19,6 +19,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"
@@ -376,7 +377,7 @@ namespace MWGui
             return;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
@@ -474,7 +475,7 @@ namespace MWGui
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
-        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayerPtr());
+        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWMechanics::getPlayer());
         mSuccessChance->setCaption(MyGUI::utility::toString(int(chance)));
     }
 
@@ -507,7 +508,7 @@ namespace MWGui
     {
         // get the list of magic effects that are known to the player
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 

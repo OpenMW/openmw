@@ -1,4 +1,3 @@
-
 #include "actiontalk.hpp"
 
 #include "../mwbase/environment.hpp"

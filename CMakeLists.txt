@@ -20,7 +20,7 @@ message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
 set(OPENMW_VERSION_MINOR 36)
-set(OPENMW_VERSION_RELEASE 0)
+set(OPENMW_VERSION_RELEASE 1)
 
 set(OPENMW_VERSION_COMMITHASH "")
 set(OPENMW_VERSION_TAGHASH "")
@@ -56,6 +56,8 @@ configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
+option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
+option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
@@ -70,6 +72,7 @@ option(BUILD_OPENCS "build OpenMW Construction Set" ON)
 option(BUILD_WIZARD "build Installation Wizard" ON)
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
+option(BUILD_NIFTEST "build nif file tester" OFF)
 option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
 
 # OS X deployment
@@ -199,8 +202,66 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
+find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+if(OSG_STATIC)
+   macro(use_static_osg_plugin_library PLUGIN_NAME)
+      set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
+
+      # For now, users wishing to do a static build will need to pass the path to where the plugins reside
+      # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
+      find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      make_library_set(${PLUGIN_NAME}_LIBRARY)
+
+      if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
+         message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
+      endif()
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
+   endmacro()
+
+   macro(use_static_osg_plugin_dep DEPENDENCY)
+      find_package(${DEPENDENCY} REQUIRED)
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
+   endmacro()
+
+   add_definitions(-DOSG_LIBRARY_STATIC)
+
+   set(PLUGIN_LIST
+       osgdb_png # depends on libpng, zlib
+       osgdb_tga
+       osgdb_dds
+       osgdb_jpeg # depends on libjpeg
+       )
+
+   foreach(PLUGIN ${PLUGIN_LIST})
+      use_static_osg_plugin_library(${PLUGIN})
+   endforeach()
+
+   # OSG static plugins need to linked against their respective dependencies
+   set(PLUGIN_DEPS_LIST
+       PNG # needed by osgdb_png
+       ZLIB # needed by osgdb_png
+       JPEG # needed by osgdb_jpeg
+       )
+
+   foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
+      use_static_osg_plugin_dep(${DEPENDENCY})
+   endforeach()
+endif()
+
+if(QT_STATIC)
+   if(WIN32)
+      if(DESIRED_QT_VERSION MATCHES 4)
+         # QtCore needs WSAAsyncSelect from Ws2_32.lib
+         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
+         message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
+      endif()
+   endif()
+endif()
 
 find_package(MyGUI REQUIRED)
 if (${MYGUI_VERSION} VERSION_LESS "3.2.1")
@@ -228,7 +289,7 @@ if(MYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)
-    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw-Info.plist.in
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
@@ -245,6 +306,11 @@ add_subdirectory(files/)
 if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
+
+    if (OPENMW_OSX_DEPLOYMENT)
+        SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+        SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+    endif()
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -273,6 +339,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+        "${OpenMW_BINARY_DIR}/openmw.appdata.xml")
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.desktop
         "${OpenMW_BINARY_DIR}/openmw-cs.desktop")
 endif()
@@ -336,6 +404,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_ESMTOOL)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_NIFTEST)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_NIFTEST)
     IF(BUILD_MWINIIMPORTER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-iniimporter" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_MWINIIMPORTER)
@@ -358,6 +429,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${DATAROOTDIR}/appdata" COMPONENT "openmw")
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "opencs")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
@@ -366,6 +438,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
@@ -519,6 +592,10 @@ if (BUILD_WIZARD)
    add_subdirectory(apps/wizard)
 endif()
 
+if (BUILD_NIFTEST)
+    add_subdirectory(apps/niftest)
+endif(BUILD_NIFTEST)
+
 # UnitTests
 if (BUILD_UNITTESTS)
   add_subdirectory( apps/openmw_test_suite )
@@ -666,13 +743,65 @@ if (APPLE)
 
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
-        include(BundleUtilities)
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+        include(BundleUtilitiesWithRPath)
     " COMPONENT Runtime)
 
-    #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
-    set(DIRS "")
+    set(ABSOLUTE_PLUGINS "")
+    set(USED_OSG_PLUGINS
+                        osgdb_tga
+                        osgdb_dds
+                        osgdb_imageio
+                      )
 
-        include(CPack)
+    foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
+      set(PLUGIN_ABS "${OSG_PLUGIN_LIB_SEARCH_PATH}/${PLUGIN_NAME}.so")
+      set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+    endforeach ()
+
+    get_filename_component(PLUGIN_PREFIX_DIR "${OSG_PLUGIN_LIB_SEARCH_PATH}" NAME)
+
+    # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
+    # and returns list of install paths for all installed plugins
+    function (install_plugins_for_bundle bundle_path plugins_var)
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/PlugIns/${PLUGIN_PREFIX_DIR}")
+
+        set(PLUGINS "")
+        set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
+
+        foreach (PLUGIN ${ABSOLUTE_PLUGINS})
+            get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
+            get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
+
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
+            set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
+
+            install(CODE "
+                copy_resolved_item_into_bundle(\"${PLUGIN}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+            " COMPONENT Runtime)
+        endforeach ()
+
+        set(${plugins_var} ${PLUGINS} PARENT_SCOPE)
+    endfunction (install_plugins_for_bundle)
+
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
+    install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
+
+    set(DIRS "${CMAKE_PREFIX_PATH}/lib")
+
+    install(CODE "
+        function(gp_item_default_embedded_path_override item  default_embedded_path_var)
+            if (\${item} MATCHES ${PLUGIN_PREFIX_DIR})
+              set(path \"@executable_path/../PlugIns/${PLUGIN_PREFIX_DIR}\")
+              set(\${default_embedded_path_var} \"\${path}\" PARENT_SCOPE)
+            endif()
+        endfunction()
+
+        cmake_policy(SET CMP0009 OLD)
+        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
+        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
+        " COMPONENT Runtime)
+    include(CPack)
 endif (APPLE)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'

@@ -18,8 +18,8 @@ addons:
       name: "OpenMW/openmw"
       description: "<Your project description here>"
     notification_email: scrawl@baseoftrash.de
-    build_command_prepend: "cmake ."
-    build_command:   "make -j3"
+    build_command_prepend: "cmake . -DBUILD_UNITTESTS=FALSE -DBUILD_OPENCS=FALSE"
+    build_command:   "make"
     branch_pattern: coverity_scan
 matrix:
   include:
@@ -40,8 +40,8 @@ script:
  - cd ./build
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ]; then ${ANALYZE}make -j2; fi
  - if [ "$COVERITY_SCAN_BRANCH" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
-after_script:
  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
+ - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
 notifications:
   recipients:
     - corrmage+travis-ci@gmail.com

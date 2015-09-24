@@ -539,6 +539,9 @@ namespace MWGui
             , mRepeatStepTime(0.1f)
             , mIsIncreasing(true)
         {
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,2)
+            ScrollBar::setRepeatEnabled(false);
+#endif
         }
 
         MWScrollBar::~MWScrollBar()
@@ -602,7 +605,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -618,7 +621,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

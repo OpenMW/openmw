@@ -45,6 +45,7 @@
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "../mwrender/vismask.hpp"
 
@@ -55,10 +56,9 @@
 
 #include "../mwmechanics/stat.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwrender/localmap.hpp"
-
-#include "../mwsound/soundmanagerimp.hpp"
 
 #include "console.hpp"
 #include "journalwindow.hpp"
@@ -113,7 +113,7 @@ namespace MWGui
     WindowManager::WindowManager(
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
-            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
+            Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
       : mResourceSystem(resourceSystem)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
@@ -187,6 +187,8 @@ namespace MWGui
       , mRestAllowed(true)
       , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
+      , mShowOwned(0)
+      , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
@@ -235,8 +237,9 @@ namespace MWGui
 
         MyGUI::InputManager::getInstance().eventChangeKeyFocus += MyGUI::newDelegate(this, &WindowManager::onKeyFocusChanged);
 
+        // Create all cursors in advance
+        createCursors();
         onCursorChange(MyGUI::PointerManager::getInstance().getDefaultPointer());
-
         mCursorManager->setEnabled(true);
 
         // hide mygui's pointer
@@ -260,6 +263,8 @@ namespace MWGui
 
         MyGUI::ClipboardManager::getInstance().eventClipboardChanged += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
+
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void WindowManager::initUI()
@@ -271,7 +276,7 @@ namespace MWGui
         mDragAndDrop = new DragAndDrop();
 
         mRecharge = new Recharge();
-        mMenu = new MainMenu(w, h, mResourceSystem->getVFS());
+        mMenu = new MainMenu(w, h, mResourceSystem->getVFS(), mVersionDescription);
         mLocalMapRender = new MWRender::LocalMap(mViewer);
         mMap = new MapWindow(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         trackWindow(mMap, "map");
@@ -896,7 +901,10 @@ namespace MWGui
 
     void WindowManager::updateMap()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        if (!mLocalMapRender)
+            return;
+
+        MWWorld::Ptr player = MWMechanics::getPlayer();
 
         osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();
         osg::Quat playerOrientation (-player.getRefData().getPosition().rot[2], osg::Vec3(0,0,1));
@@ -986,7 +994,7 @@ namespace MWGui
         if (cell->getCell()->isExterior())
         {
             if (!cell->getCell()->mName.empty())
-                mMap->addVisitedLocation ("#{sCell=" + name + "}", cell->getCell()->getGridX (), cell->getCell()->getGridY ());
+                mMap->addVisitedLocation (name, cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
             mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
         }
@@ -1034,6 +1042,12 @@ namespace MWGui
     void WindowManager::setFocusObject(const MWWorld::Ptr& focus)
     {
         mToolTips->setFocusObject(focus);
+
+        if(mHud && (mShowOwned == 2 || mShowOwned == 3))
+        {
+            bool owned = mToolTips->checkOwned();
+            mHud->setCrosshairOwned(owned);
+        }
     }
 
     void WindowManager::setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y)
@@ -1081,11 +1095,22 @@ namespace MWGui
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
         std::string tag(_tag);
+        
+        std::string MyGuiPrefix = "setting=";
+        size_t MyGuiPrefixLength = MyGuiPrefix.length();
 
         std::string tokenToFind = "sCell=";
         size_t tokenLength = tokenToFind.length();
-
-        if (tag.compare(0, tokenLength, tokenToFind) == 0)
+        
+        if(tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
+        {
+            tag = tag.substr(MyGuiPrefixLength, tag.length());
+            std::string settingSection = tag.substr(0, tag.find(","));
+            std::string settingTag = tag.substr(tag.find(",")+1, tag.length());
+            
+            _result = Settings::Manager::getString(settingTag, settingSection);            
+        }
+        else if (tag.compare(0, tokenLength, tokenToFind) == 0)
         {
             _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
         }
@@ -1178,31 +1203,7 @@ namespace MWGui
 
     void WindowManager::onCursorChange(const std::string &name)
     {
-        if(!mCursorManager->cursorChanged(name))
-            return; //the cursor manager doesn't want any more info about this cursor
-        //See if we can get the information we need out of the cursor resource
-        ResourceImageSetPointerFix* imgSetPtr = dynamic_cast<ResourceImageSetPointerFix*>(MyGUI::PointerManager::getInstance().getByName(name));
-        if(imgSetPtr != NULL)
-        {
-            MyGUI::ResourceImageSet* imgSet = imgSetPtr->getImageSet();
-
-            std::string tex_name = imgSet->getIndexInfo(0,0).texture;
-
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
-            tex->setUnRefImageDataAfterApply(false); // FIXME?
-
-            //everything looks good, send it to the cursor manager
-            if(tex.valid())
-            {
-                Uint8 size_x = imgSetPtr->getSize().width;
-                Uint8 size_y = imgSetPtr->getSize().height;
-                Uint8 hotspot_x = imgSetPtr->getHotSpot().left;
-                Uint8 hotspot_y = imgSetPtr->getHotSpot().top;
-                int rotation = imgSetPtr->getRotation();
-
-                mCursorManager->receiveCursorInfo(name, rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
-            }
-        }
+        mCursorManager->cursorChanged(name);
     }
 
     void WindowManager::popGuiMode()
@@ -1325,6 +1326,12 @@ namespace MWGui
     MWGui::CountDialog* WindowManager::getCountDialog() { return mCountDialog; }
     MWGui::ConfirmationDialog* WindowManager::getConfirmationDialog() { return mConfirmationDialog; }
     MWGui::TradeWindow* WindowManager::getTradeWindow() { return mTradeWindow; }
+
+    void WindowManager::useItem(const MWWorld::Ptr &item)
+    {
+        if (mInventoryWindow)
+            mInventoryWindow->useItem(item);
+    }
 
     bool WindowManager::isAllowed (GuiWindow wnd) const
     {
@@ -1547,7 +1554,7 @@ namespace MWGui
     {
         mInventoryWindow->updatePlayer();
 
-        const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             setWerewolfOverlay(true);
@@ -1669,10 +1676,10 @@ namespace MWGui
             writer.endRecord(ESM::REC_ASPL);
         }
 
-        for (std::vector<ESM::CustomMarker>::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
+        for (CustomMarkerCollection::ContainerType::const_iterator it = mCustomMarkers.begin(); it != mCustomMarkers.end(); ++it)
         {
             writer.startRecord(ESM::REC_MARK);
-            (*it).save(writer);
+            it->second.save(writer);
             writer.endRecord(ESM::REC_MARK);
         }
     }
@@ -1686,7 +1693,9 @@ namespace MWGui
         else if (type == ESM::REC_ASPL)
         {
             reader.getSubNameIs("ID__");
-            mSelectedSpell = reader.getHString();
+            std::string spell = reader.getHString();
+            if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell))
+                mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)
         {
@@ -1958,6 +1967,33 @@ namespace MWGui
     std::string WindowManager::correctTexturePath(const std::string& path)
     {
         return Misc::ResourceHelpers::correctTexturePath(path, mResourceSystem->getVFS());
+    }
+
+    void WindowManager::createCursors()
+    {
+        MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
+        while (enumerator.next())
+        {
+            MyGUI::IResource* resource = enumerator.current().second;
+            ResourceImageSetPointerFix* imgSetPointer = dynamic_cast<ResourceImageSetPointerFix*>(resource);
+            if (!imgSetPointer)
+                continue;
+            std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
+
+            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(tex_name, osg::Texture::CLAMP, osg::Texture::CLAMP);
+
+            if(tex.valid())
+            {
+                //everything looks good, send it to the cursor manager
+                Uint8 size_x = imgSetPointer->getSize().width;
+                Uint8 size_y = imgSetPointer->getSize().height;
+                Uint8 hotspot_x = imgSetPointer->getHotSpot().left;
+                Uint8 hotspot_y = imgSetPointer->getHotSpot().top;
+                int rotation = imgSetPointer->getRotation();
+
+                mCursorManager->createCursor(imgSetPointer->getResourceName(), rotation, tex->getImage(), size_x, size_y, hotspot_x, hotspot_y);
+            }
+        }
     }
 
     void WindowManager::createTextures()

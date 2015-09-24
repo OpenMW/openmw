@@ -1,8 +1,8 @@
-
 #include "light.hpp"
 
 #include <components/esm/loadligh.hpp>
 #include <components/esm/objectstate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -170,6 +170,8 @@ namespace MWClass
 
         std::string text;
 
+        if (Settings::Manager::getBool("show effect duration","Game"))
+            text += "\n#{sDuration}: " + MWGui::ToolTips::toString(ptr.getClass().getRemainingUsageTime(ptr));
         if (ref->mBase->mData.mWeight != 0)
         {
             text += "\n#{sWeight}: " + MWGui::ToolTips::toString(ref->mBase->mData.mWeight);

@@ -17,6 +17,7 @@ namespace MWMechanics
 {
     struct EffectKey;
     class MagicEffects;
+    class CreatureStats;
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
@@ -60,6 +61,8 @@ namespace MWMechanics
 
     int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
 
+    void effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
+
     class CastSpell
     {
     private:
@@ -94,7 +97,8 @@ namespace MWMechanics
                       const ESM::EffectList& effects, ESM::RangeType range, bool reflected=false, bool exploded=false);
 
         /// @note \a caster can be any type of object, or even an empty object.
-        void applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
+        /// @return was the target suitable for the effect?
+        bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
     };
 
 }

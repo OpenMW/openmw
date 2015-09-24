@@ -1,4 +1,3 @@
-
 #include "operation.hpp"
 
 #include <string>

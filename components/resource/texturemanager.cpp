@@ -1,10 +1,20 @@
 #include "texturemanager.hpp"
 
 #include <osgDB/Registry>
+#include <osg/GLExtensions>
+#include <osg/Version>
 
 #include <stdexcept>
 
 #include <components/vfs/manager.hpp>
+
+#ifdef OSG_LIBRARY_STATIC
+// This list of plugins should match with the list in the top-level CMakelists.txt.
+USE_OSGPLUGIN(png)
+USE_OSGPLUGIN(tga)
+USE_OSGPLUGIN(dds)
+USE_OSGPLUGIN(jpeg)
+#endif
 
 namespace
 {
@@ -64,7 +74,30 @@ namespace Resource
         for (std::map<MapKey, osg::ref_ptr<osg::Texture2D> >::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
         {
             osg::ref_ptr<osg::Texture2D> tex = it->second;
-            tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+
+            // Keep mip-mapping disabled if the texture creator explicitely requested no mipmapping.
+            osg::Texture::FilterMode oldMin = tex->getFilter(osg::Texture::MIN_FILTER);
+            if (oldMin == osg::Texture::LINEAR || oldMin == osg::Texture::NEAREST)
+            {
+                osg::Texture::FilterMode newMin = osg::Texture::LINEAR;
+                switch (mMinFilter)
+                {
+                case osg::Texture::LINEAR:
+                case osg::Texture::LINEAR_MIPMAP_LINEAR:
+                case osg::Texture::LINEAR_MIPMAP_NEAREST:
+                    newMin = osg::Texture::LINEAR;
+                    break;
+                case osg::Texture::NEAREST:
+                case osg::Texture::NEAREST_MIPMAP_LINEAR:
+                case osg::Texture::NEAREST_MIPMAP_NEAREST:
+                    newMin = osg::Texture::NEAREST;
+                    break;
+                }
+                tex->setFilter(osg::Texture::MIN_FILTER, newMin);
+            }
+            else
+                tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+
             tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
             tex->setMaxAnisotropy(static_cast<float>(mMaxAnisotropy));
         }
@@ -76,6 +109,39 @@ namespace Resource
 
     }
     */
+
+    bool checkSupported(osg::Image* image, const std::string& filename)
+    {
+        switch(image->getPixelFormat())
+        {
+            case(GL_COMPRESSED_RGB_S3TC_DXT1_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT1_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
+            case(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
+            {
+#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+                osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
+                if (exts && !exts->isTextureCompressionS3TCSupported
+                        // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
+                        && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+#else
+                osg::Texture::Extensions* exts = osg::Texture::getExtensions(0, false);
+                if (exts && !exts->isTextureCompressionS3TCSupported()
+                        // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
+                        && !osg::isGLExtensionSupported(0, "GL_S3_s3tc"))
+#endif
+                {
+                    std::cerr << "Error loading " << filename << ": no S3TC texture compression support installed" << std::endl;
+                    return false;
+                }
+                break;
+            }
+            // not bothering with checks for other compression formats right now, we are unlikely to ever use those anyway
+            default:
+                return true;
+        }
+        return true;
+    }
 
     osg::ref_ptr<osg::Texture2D> TextureManager::getTexture2D(const std::string &filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT)
     {
@@ -116,11 +182,15 @@ namespace Resource
             osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
             if (!result.success())
             {
-                std::cerr << "Error loading " << filename << ": " << result.message() << std::endl;
+                std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
                 return mWarningTexture;
             }
 
             osg::Image* image = result.getImage();
+            if (!checkSupported(image, filename))
+            {
+                return mWarningTexture;
+            }
 
             // We need to flip images, because the Morrowind texture coordinates use the DirectX convention (top-left image origin),
             // but OpenGL uses bottom left as the image origin.

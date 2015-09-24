@@ -1,4 +1,3 @@
-
 #include "literals.hpp"
 
 #include <algorithm>

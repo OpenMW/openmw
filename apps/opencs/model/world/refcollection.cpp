@@ -1,4 +1,3 @@
-
 #include "refcollection.hpp"
 
 #include <sstream>

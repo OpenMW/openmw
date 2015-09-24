@@ -1,12 +1,14 @@
-
 #include "stringparser.hpp"
 
 #include <algorithm>
 #include <iterator>
 
+#include <components/misc/stringops.hpp>
+
 #include "scanner.hpp"
 #include "generator.hpp"
-#include <components/misc/stringops.hpp>
+#include "context.hpp"
+#include "extensions.hpp"
 
 namespace Compiler
 {
@@ -31,6 +33,25 @@ namespace Compiler
         }
 
         return Parser::parseName (name, loc, scanner);
+    }
+
+    bool StringParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
+    {
+        if (const Extensions *extensions = getContext().getExtensions())
+        {
+            std::string argumentType; // ignored
+            bool hasExplicit = false; // ignored
+            if (extensions->isInstruction (keyword, argumentType, hasExplicit))
+            {
+                // pretend this is not a keyword
+                std::string name = loc.mLiteral;
+                if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                    name = name.substr (1, name.size()-2);
+                return parseName (name, loc, scanner);
+            }
+        }
+
+        return Parser::parseKeyword (keyword, loc, scanner);
     }
 
     bool StringParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)

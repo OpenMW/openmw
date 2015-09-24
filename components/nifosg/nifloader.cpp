@@ -825,30 +825,33 @@ namespace NifOsg
 
             partsys->setFreezeOnCull(true);
 
-            osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
-            emitter->setParticleSystem(partsys);
-            emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
-
-            // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
-            // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
-            // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
-
-            FindRecIndexVisitor find (partctrl->emitter->recIndex);
-            rootNode->accept(find);
-            if (!find.mFound)
+            if (!partctrl->emitter.empty())
             {
-                std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
-                return;
+                osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
+                emitter->setParticleSystem(partsys);
+                emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
+
+                // Note: we assume that the Emitter node is placed *before* the Particle node in the scene graph.
+                // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
+                // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
+
+                FindRecIndexVisitor find (partctrl->emitter->recIndex);
+                rootNode->accept(find);
+                if (!find.mFound)
+                {
+                    std::cerr << "can't find emitter node, wrong node order? in " << mFilename << std::endl;
+                    return;
+                }
+                osg::Group* emitterNode = find.mFound;
+
+                // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
+                // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
+                emitterNode->addChild(emitter);
+
+                osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
+                setupController(partctrl, callback, animflags);
+                emitter->setUpdateCallback(callback);
             }
-            osg::Group* emitterNode = find.mFound;
-
-            // Emitter attached to the emitter node. Note one side effect of the emitter using the CullVisitor is that hiding its node
-            // actually causes the emitter to stop firing. Convenient, because MW behaves this way too!
-            emitterNode->addChild(emitter);
-
-            osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
-            setupController(partctrl, callback, animflags);
-            emitter->setUpdateCallback(callback);
 
             // affectors must be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
@@ -903,7 +906,7 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape " << triShape->name << " in " << mFilename << std::endl;
+                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
                     continue;
                 }
 
@@ -1159,11 +1162,11 @@ namespace NifOsg
                 osg::FrontFace* frontFace = new osg::FrontFace;
                 switch (stencilprop->data.drawMode)
                 {
-                case 1:
+                case 2:
                     frontFace->setMode(osg::FrontFace::CLOCKWISE);
                     break;
                 case 0:
-                case 2:
+                case 1:
                 default:
                     frontFace->setMode(osg::FrontFace::COUNTER_CLOCKWISE);
                     break;
@@ -1264,13 +1267,34 @@ namespace NifOsg
                 {
                     if (texprop->textures[i].inUse)
                     {
-                        if (i != Nif::NiTexturingProperty::BaseTexture
-                                && i != Nif::NiTexturingProperty::GlowTexture
-                                && i != Nif::NiTexturingProperty::DarkTexture
-                                && i != Nif::NiTexturingProperty::DetailTexture)
+                        switch(i)
                         {
-                            std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
-                            continue;
+                            //These are handled later on
+                            case Nif::NiTexturingProperty::BaseTexture:
+                            case Nif::NiTexturingProperty::GlowTexture:
+                            case Nif::NiTexturingProperty::DarkTexture:
+                            case Nif::NiTexturingProperty::DetailTexture:
+                                break;
+                            case Nif::NiTexturingProperty::GlossTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::GlossTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            case Nif::NiTexturingProperty::BumpTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::BumpTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            case Nif::NiTexturingProperty::DecalTexture:
+                            {
+                                std::cerr << "NiTexturingProperty::DecalTexture in " << mFilename << " not currently used." << std::endl;
+                                continue;
+                            }
+                            default:
+                            {
+                                std::cerr << "Warning: unhandled texture stage " << i << " in " << mFilename << std::endl;
+                                continue;
+                            }
                         }
 
                         const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];

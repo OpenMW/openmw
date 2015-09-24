@@ -29,6 +29,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     darkf
+    Dieho
     Dmitry Shkurskiy (endorph)
     Douglas Diniz (Dgdiniz)
     Douglas Mencken (dougmencken)
@@ -52,6 +53,7 @@ Programmers
     jeaye
     Jeffrey Haines (Jyby)
     Jengerer
+    Jiří Kuneš (kunesj)
     Joel Graff (graffy)
     John Blomberg (fstp)
     Jordan Ayers
@@ -59,6 +61,7 @@ Programmers
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
+    Koncord
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
@@ -86,6 +89,7 @@ Programmers
     Nolan Poe (nopoe)
     Paul McElroy (Greendogo)
     Pieter van der Kloet (pvdk)
+    pkubik
     Radu-Marius Popovici (rpopovici)
     rdimesio
     riothamus
@@ -109,6 +113,7 @@ Programmers
     viadanna
     Vincent Heuken
     vocollapse
+    zelurker
 
 Manual
 ------

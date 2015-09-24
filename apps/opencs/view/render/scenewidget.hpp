@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QTimer>
 
+#include <boost/shared_ptr.hpp>
+
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
@@ -13,7 +15,7 @@
 
 namespace Resource
 {
-    class SceneManager;
+    class ResourceSystem;
 }
 
 namespace osg
@@ -43,6 +45,8 @@ namespace CSVRender
 
         void setVisibilityMask(int mask);
 
+        bool eventFilter(QObject *, QEvent *);
+
     protected:
 
         osg::ref_ptr<osgViewer::View> mView;
@@ -57,7 +61,7 @@ namespace CSVRender
     {
         Q_OBJECT
     public:
-        SceneWidget(Resource::SceneManager* sceneManager, QWidget* parent = 0, Qt::WindowFlags f = 0);
+        SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0, Qt::WindowFlags f = 0);
         virtual ~SceneWidget();
 
         CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
@@ -73,7 +77,7 @@ namespace CSVRender
 
         void setAmbient(const osg::Vec4f& ambient);
 
-        Resource::SceneManager* mSceneManager;
+        boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
         Lighting* mLighting;
 
@@ -86,6 +90,10 @@ namespace CSVRender
     private slots:
 
         void selectLightingMode (const std::string& mode);
+
+        signals:
+
+             void focusToolbarRequest();
     };
 
 

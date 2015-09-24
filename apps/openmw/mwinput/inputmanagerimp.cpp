@@ -28,6 +28,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 using namespace ICS;
 
@@ -40,6 +41,7 @@ namespace MWInput
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
+        , mWindowVisible(true)
         , mViewer(viewer)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
@@ -100,9 +102,9 @@ namespace MWInput
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
 
-        		/* Joystick Init */
+        /* Joystick Init */
 
-		//Load controller mappings
+        // Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
         if(controllerBindingsFile!="")
         {
@@ -110,10 +112,10 @@ namespace MWInput
         }
 #endif
 
-		//Open all presently connected sticks
-		int numSticks = SDL_NumJoysticks();
-		for(int i = 0; i < numSticks; i++)
-		{
+        // Open all presently connected sticks
+        int numSticks = SDL_NumJoysticks();
+        for(int i = 0; i < numSticks; i++)
+        {
             if(SDL_IsGameController(i))
             {
                 SDL_ControllerDeviceEvent evt;
@@ -124,7 +126,7 @@ namespace MWInput
             {
                 //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
             }
-		}
+        }
 
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
@@ -153,6 +155,11 @@ namespace MWInput
         delete mInputManager;
 
         delete mVideoWrapper;
+    }
+
+    bool InputManager::isWindowVisible()
+    {
+        return mWindowVisible;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -369,6 +376,9 @@ namespace MWInput
                 float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
                 float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
                 const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+
+                xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+                yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
 
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
@@ -846,7 +856,7 @@ namespace MWInput
 
     void InputManager::windowVisibilityChange(bool visible)
     {
-        //TODO: Pause game?
+        mWindowVisible = visible;
     }
 
     void InputManager::windowResized(int x, int y)
@@ -1009,7 +1019,7 @@ namespace MWInput
     {
         if (!mControlSwitch["playercontrols"])
             return;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             // Cannot use items or spells while in werewolf form
@@ -1026,7 +1036,7 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             if (player.getClass().getNpcStats(player).isWerewolf())
             {
                 // Cannot use items or spells while in werewolf form

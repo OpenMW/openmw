@@ -1,5 +1,6 @@
-
 #include "aisequence.hpp"
+
+#include <limits>
 
 #include "aipackage.hpp"
 #include "aistate.hpp"
@@ -11,12 +12,10 @@
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
 #include "aipursue.hpp"
+#include "actorutil.hpp"
 
 #include <components/esm/aisequence.hpp>
 
-#include "../mwworld/class.hpp"
-#include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -152,7 +151,7 @@ bool AiSequence::isPackageDone() const
 
 void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
-    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if(actor != getPlayer())
     {
         if (!mPackages.empty())
         {
@@ -244,7 +243,7 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
-    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
 
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)

@@ -12,12 +12,14 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    float distance(ESM::Pathgrid::Point point, float x, float y, float);
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
     class PathFinder
     {
         public:
             PathFinder();
+
+            static const int PathTolerance = 32;
 
             static float sgn(float val)
             {
@@ -35,10 +37,10 @@ namespace MWMechanics
 
             void clearPath();
 
-            bool checkPathCompleted(float x, float y, float tolerance=32.f);
+            bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
-            /// In degrees
+            /// In radians
             float getZAngleToNext(float x, float y) const;
 
             bool isPathConstructed() const

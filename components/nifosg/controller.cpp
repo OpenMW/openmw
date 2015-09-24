@@ -353,6 +353,13 @@ AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp 
 {
 }
 
+void AlphaController::setDefaults(osg::StateSet *stateset)
+{
+    // need to create a deep copy of StateAttributes we will modify
+    osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+    stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+}
+
 void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
 {
     if (hasInput())
@@ -378,6 +385,13 @@ MaterialColorController::MaterialColorController(const MaterialColorController &
     : StateSetUpdater(copy, copyop), Controller(copy)
     , mData(copy.mData)
 {
+}
+
+void MaterialColorController::setDefaults(osg::StateSet *stateset)
+{
+    // need to create a deep copy of StateAttributes we will modify
+    osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+    stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
 }
 
 void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -407,7 +421,8 @@ FlipController::FlipController(int texSlot, float delta, std::vector<osg::ref_pt
 }
 
 FlipController::FlipController()
-    : mDelta(0.f)
+    : mTexSlot(0)
+    , mDelta(0.f)
 {
 }
 

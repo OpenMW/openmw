@@ -54,6 +54,7 @@ IF (WIN32) #Windows
 
         if ( MYGUI_STATIC )
            set(LIB_SUFFIX "Static")
+           find_package(freetype)
         endif ( MYGUI_STATIC )
 
         find_library ( MYGUI_LIBRARIES_REL NAMES MyGUIEngine${LIB_SUFFIX}.lib HINTS ${MYGUI_LIB_DIR} PATH_SUFFIXES "" release relwithdebinfo minsizerel )
@@ -145,11 +146,12 @@ IF (MYGUI_FOUND)
     IF (NOT MYGUI_FIND_QUIETLY)
         MESSAGE(STATUS "MyGUI version: ${MYGUI_VERSION}")
     ENDIF (NOT MYGUI_FIND_QUIETLY)
-
-ELSE (MYGUI_FOUND)
-    IF (MYGUI_FIND_REQUIRED)
-        MESSAGE(FATAL_ERROR "Could not find MYGUI")
-    ENDIF (MYGUI_FIND_REQUIRED)
 ENDIF (MYGUI_FOUND)
+
+include(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MyGUI DEFAULT_MSG
+    MYGUI_INCLUDE_DIRS
+    FREETYPE_LIBRARIES
+    MYGUI_LIBRARIES)
 
 CMAKE_POLICY(POP)

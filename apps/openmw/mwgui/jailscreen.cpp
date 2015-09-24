@@ -8,6 +8,7 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/store.hpp"
@@ -57,7 +58,7 @@ namespace MWGui
 
         if (mFadeTimeRemaining <= 0)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             MWBase::Environment::get().getWorld()->teleportToClosestMarker(player, "prisonmarker");
 
             setVisible(true);
@@ -76,7 +77,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Jail);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
 
         MWBase::Environment::get().getWorld()->advanceTime(mDays * 24);
         for (int i=0; i<mDays*24; ++i)

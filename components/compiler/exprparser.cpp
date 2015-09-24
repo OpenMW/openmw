@@ -1,4 +1,3 @@
-
 #include "exprparser.hpp"
 
 #include <stdexcept>
@@ -353,7 +352,10 @@ namespace Compiler
             if (extensions->isInstruction (keyword, argumentType, hasExplicit))
             {
                 // pretend this is not a keyword
-                return parseName (loc.mLiteral, loc, scanner);
+                std::string name = loc.mLiteral;
+                if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
+                    name = name.substr (1, name.size()-2);
+                return parseName (name, loc, scanner);
             }
         }
 

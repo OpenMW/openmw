@@ -17,6 +17,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 
@@ -241,13 +243,13 @@ namespace MWRender
         mAnimation->showCarriedLeft(showCarriedLeft);
 
         mCurrentAnimGroup = groupname;
-        mAnimation->play(mCurrentAnimGroup, 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->play(mCurrentAnimGroup, 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
 
         MWWorld::ContainerStoreIterator torch = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
         if(torch != inv.end() && torch->getTypeName() == typeid(ESM::Light).name() && showCarriedLeft)
         {
             if(!mAnimation->getInfo("torch"))
-                mAnimation->play("torch", 2, MWRender::Animation::Group_LeftArm, false,
+                mAnimation->play("torch", 2, Animation::BlendMask_LeftArm, false,
                                  1.0f, "start", "stop", 0.0f, ~0ul, true);
         }
         else if(mAnimation->getInfo("torch"))
@@ -295,7 +297,7 @@ namespace MWRender
     // --------------------------------------------------------------------------------------------------
 
     RaceSelectionPreview::RaceSelectionPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem)
-        : CharacterPreview(viewer, resourceSystem, MWBase::Environment::get().getWorld()->getPlayerPtr(),
+        : CharacterPreview(viewer, resourceSystem, MWMechanics::getPlayer(),
             512, 512, osg::Vec3f(0, 125, 8), osg::Vec3f(0,0,8))
         , mBase (*mCharacter.get<ESM::NPC>()->mBase)
         , mRef(&mBase)
@@ -357,7 +359,7 @@ namespace MWRender
 
     void RaceSelectionPreview::onSetup ()
     {
-        mAnimation->play("idle", 1, Animation::Group_All, false, 1.0f, "start", "stop", 0.0f, 0);
+        mAnimation->play("idle", 1, Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f, 0);
         mAnimation->runAnimation(0.f);
 
         // attach camera to follow the head node

@@ -23,6 +23,7 @@ namespace MWWorld
 {
     class Ptr;
     class CellStore;
+    class CellRef;
 }
 
 namespace Loading
@@ -128,6 +129,11 @@ namespace MWBase
                                       OffenseType type, int arg=0, bool victimAware=false) = 0;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
+
+            /// Notify that actor was killed, add a murder bounty if applicable
+            /// @note No-op for non-player attackers
+            virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
+
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
@@ -154,12 +160,13 @@ namespace MWBase
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
             ///< Forces an object to refresh its animation state.
 
-            virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
+            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
             ///< Run animation for a MW-reference. Calls to this function for references that are currently not
             /// in the scene should be ignored.
             ///
             /// \param mode 0 normal, 1 immediate start, 2 immediate loop
             /// \param count How many times the animation should be run
+            /// \return Success or error
 
             virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
@@ -211,6 +218,8 @@ namespace MWBase
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
+            
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
     };
 }
 

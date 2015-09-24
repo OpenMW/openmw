@@ -1,4 +1,3 @@
-
 #include "regioncheck.hpp"
 
 #include <sstream>

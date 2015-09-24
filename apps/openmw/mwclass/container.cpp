@@ -1,4 +1,3 @@
-
 #include "container.hpp"
 
 #include <components/esm/loadcont.hpp>
@@ -281,9 +280,12 @@ namespace MWClass
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
+    bool Container::canLock(const MWWorld::Ptr &ptr) const
+    {
+        return true;
+    }
 
-    MWWorld::Ptr
-    Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
@@ -291,8 +293,7 @@ namespace MWClass
         return MWWorld::Ptr(&cell.get<ESM::Container>().insert(*ref), &cell);
     }
 
-    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-        const
+    void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
@@ -307,8 +308,7 @@ namespace MWClass
             readState (state2.mInventory);
     }
 
-    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-        const
+    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
     {
         ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
 

@@ -32,6 +32,10 @@ namespace Compiler
             ///< Handle a name token.
             /// \return fetch another token?
 
+            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
+            ///< Handle a keyword token.
+            /// \return fetch another token?
+
             virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
             ///< Handle a special character token.
             /// \return fetch another token?

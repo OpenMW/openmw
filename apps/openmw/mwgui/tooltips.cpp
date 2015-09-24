@@ -17,6 +17,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
@@ -38,6 +39,7 @@ namespace MWGui
         , mLastMouseY(0)
         , mEnabled(true)
         , mFullHelp(false)
+        , mShowOwned(0)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -55,6 +57,8 @@ namespace MWGui
         {
             mMainWidget->getChildAt(i)->setVisible(false);
         }
+        
+        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void ToolTips::setEnabled(bool enabled)
@@ -231,7 +235,7 @@ namespace MWGui
                     }
                     if (MWMechanics::spellIncreasesSkill(spell)) // display school of spells that contribute to skill progress
                     {
-                        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                        MWWorld::Ptr player = MWMechanics::getPlayer();
                         int school = MWMechanics::getSpellSchool(spell, player);
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
@@ -346,10 +350,41 @@ namespace MWGui
 
         return tooltipSize;
     }
+    
+    bool ToolTips::checkOwned()
+    {
+        if(!mFocusObject.isEmpty())
+        {
+            const MWWorld::CellRef& cellref = mFocusObject.getCellRef();
+            MWWorld::Ptr ptr = MWMechanics::getPlayer();
+            MWWorld::Ptr victim;
+            
+            MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
+            bool allowed = mm->isAllowedToUse(ptr, cellref, victim); 
+
+            return !allowed;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
     {
         mDynamicToolTipBox->setVisible(true);
+        
+        if(mShowOwned == 1 || mShowOwned == 3)
+        {
+            if(checkOwned())
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
+            }
+            else
+            {
+                mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp");
+            }
+        }
 
         std::string caption = info.caption;
         std::string image = info.icon;

@@ -4,10 +4,11 @@
 #include <QWidget>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include "extendedcommandconfigurator.hpp"
+
 class QLabel;
 class QStackedLayout;
 class QStatusBar;
-class QUndoStack;
 
 namespace CSMDoc
 {
@@ -23,13 +24,21 @@ namespace CSVWorld
     {
             Q_OBJECT
 
+            enum EditMode { EditMode_None, EditMode_Creation, EditMode_ExtendedConfig };
+
             bool mShowStatusBar;
             QLabel *mStatus;
             QStatusBar *mStatusBar;
             int mStatusCount[4];
+
+            EditMode mEditMode;
             Creator *mCreator;
-            bool mCreating;
+            ExtendedCommandConfigurator *mExtendedConfigurator;
+
             QStackedLayout *mLayout;
+            bool mHasPosition;
+            int mRow;
+            int mColumn;
 
         private:
 
@@ -37,16 +46,23 @@ namespace CSVWorld
             TableBottomBox (const TableBottomBox&);
             TableBottomBox& operator= (const TableBottomBox&);
 
+            void updateSize();
+
             void updateStatus();
+
+            void extendedConfigRequest(ExtendedCommandConfigurator::Mode mode,
+                                       const std::vector<std::string> &selectedIds);
 
         public:
 
-            TableBottomBox (const CreatorFactoryBase& creatorFactory, 
-                            CSMDoc::Document& document, 
-                            const CSMWorld::UniversalId& id, 
+            TableBottomBox (const CreatorFactoryBase& creatorFactory,
+                            CSMDoc::Document& document,
+                            const CSMWorld::UniversalId& id,
                             QWidget *parent = 0);
 
             virtual ~TableBottomBox();
+
+            virtual bool eventFilter(QObject *object, QEvent *event);
 
             void setEditLock (bool locked);
 
@@ -65,8 +81,10 @@ namespace CSVWorld
 
         private slots:
 
-            void createRequestDone();
+            void requestDone();
             ///< \note This slot being called does not imply success.
+
+            void currentWidgetChanged(int index);
 
         public slots:
 
@@ -77,9 +95,16 @@ namespace CSVWorld
             /// \param deleted Number of deleted records
             /// \param modified Number of added and modified records
 
+            void positionChanged (int row, int column);
+
+            void noMorePosition();
+
             void createRequest();
             void cloneRequest(const std::string& id,
                               const CSMWorld::UniversalId::Type type);
+
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
     };
 }
 

@@ -1,4 +1,3 @@
-
 #include "containerstore.hpp"
 
 #include <cassert>
@@ -12,6 +11,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/levelledlist.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "manualref.hpp"
 #include "refdata.hpp"
@@ -210,7 +210,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
     // a bit pointless to set owner for the player
-    if (actorPtr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (actorPtr != MWMechanics::getPlayer())
         return add(ref.getPtr(), count, actorPtr, true);
     else
         return add(ref.getPtr(), count, actorPtr, false);
@@ -225,7 +225,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     // HACK: Set owner on the original item, then reset it after we have copied it
     // If we set the owner on the copied item, it would not stack correctly...
     std::string oldOwner = itemPtr.getCellRef().getOwner();
-    if (!setOwner || actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr()) // No point in setting owner to the player - NPCs will not respect this anyway
+    if (!setOwner || actorPtr == MWMechanics::getPlayer()) // No point in setting owner to the player - NPCs will not respect this anyway
     {
         itemPtr.getCellRef().setOwner("");
     }
@@ -298,11 +298,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for detecting player gold)
-    if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
-        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100"))
+    if(ptr.getClass().isGold(ptr))
     {
         int realCount = count * ptr.getClass().getValue(ptr);
 

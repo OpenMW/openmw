@@ -2,8 +2,6 @@
 
 #include <osg/UserDataContainer>
 #include <osg/MatrixTransform>
-#include <osg/BlendFunc>
-#include <osg/Material>
 
 #include <components/misc/rng.hpp>
 
@@ -21,6 +19,7 @@
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -277,7 +276,6 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
-    mAlpha(1.f),
     mSoundsDisabled(disableSounds)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
@@ -378,7 +376,7 @@ void NpcAnimation::updateNpcBase()
                                       : "meshes\\wolf\\skin.1st.nif");
     smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
 
-    setObjectRoot(smodel, true, true);
+    setObjectRoot(smodel, true, true, false);
 
     if(mViewMode != VM_FirstPerson)
     {
@@ -421,7 +419,6 @@ void NpcAnimation::updateParts()
     if (!mObjectRoot.get())
         return;
 
-    mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
 
     NpcType curType = Type_Normal;
@@ -459,7 +456,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = 0;//(mAmmunition.get() != NULL);
+    bool wasArrowAttached = (mAmmunition.get() != NULL);
 
     MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
     for(size_t i = 0;i < slotlistsize && mViewMode != VM_HeadOnly;i++)
@@ -622,7 +619,7 @@ void NpcAnimation::updateParts()
                 continue;
             }
 
-            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            if ((!mNpc->isMale()) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
             {
                 // Allow opposite gender's parts as fallback if parts for our gender are missing
                 BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
@@ -901,7 +898,6 @@ void NpcAnimation::showWeapons(bool showWeapon)
     {
         removeIndividualPart(ESM::PRT_Weapon);
     }
-    mAlpha = 1.f;
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
@@ -987,37 +983,6 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
     }
 }
 
-void NpcAnimation::setAlpha(float alpha)
-{
-    if (alpha == mAlpha)
-        return;
-    mAlpha = alpha;
-
-    if (alpha != 1.f)
-    {
-        osg::StateSet* stateset (new osg::StateSet);
-
-        osg::BlendFunc* blendfunc (new osg::BlendFunc);
-        stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-        // FIXME: overriding diffuse/ambient/emissive colors
-        osg::Material* material (new osg::Material);
-        material->setColorMode(osg::Material::OFF);
-        material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
-        material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-        stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-        stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
-        stateset->setNestRenderBins(false);
-        mObjectRoot->setStateSet(stateset);
-    }
-    else
-    {
-        mObjectRoot->setStateSet(NULL);
-    }
-}
-
 void NpcAnimation::enableHeadAnimation(bool enable)
 {
     mHeadAnimationTime->setEnabled(enable);
@@ -1039,7 +1004,7 @@ void NpcAnimation::setVampire(bool vampire)
         return;
     if ((mNpcType == Type_Vampire) != vampire)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (mPtr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWorld()->reattachPlayerCamera();
         else
             rebuild();

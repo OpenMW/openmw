@@ -1,7 +1,7 @@
-
 #include "worldspacewidget.hpp"
 
 #include <algorithm>
+#include <iostream>
 
 #include <QEvent>
 #include <QDragEnterEvent>
@@ -13,6 +13,8 @@
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
 
+#include <osgUtil/LineSegmentIntersector>
+
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
 
@@ -20,11 +22,12 @@
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
+#include "object.hpp"
 #include "elements.hpp"
 #include "editmode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (document.getData().getResourceSystem()->getSceneManager(), parent), mSceneElements(0), mRun(0), mDocument(document),
+: SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
   mInteractionMask (0)
 {
     setAcceptDrops(true);
@@ -371,11 +374,49 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
-    if(event->buttons() & Qt::RightButton)
+    if (event->button() != Qt::RightButton)
+        return;
+
+    // (0,0) is considered the lower left corner of an OpenGL window
+    int x = event->x();
+    int y = height() - event->y();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
+
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    visitor.setTraversalMask(getInteractionMask() << 1);
+
+    mView->getCamera()->accept(visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
     {
-        //mMouse->mousePressEvent(event);
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+
+        // reject back-facing polygons
+        osg::Vec3f normal = intersection.getWorldIntersectNormal();
+        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
+        if (normal.z() < 0)
+            continue;
+
+        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        {
+            osg::Node* node = *it;
+            if (CSVRender::ObjectHolder* holder = dynamic_cast<CSVRender::ObjectHolder*>(node->getUserData()))
+            {
+                // hit an Object, toggle its selection state
+                CSVRender::Object* obj = holder->mObject;
+                obj->setSelected(!obj->getSelected());
+                return;
+            }
+        }
+
+        // must be terrain, report coordinates
+        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
+        return;
     }
-    //SceneWidget::mousePressEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)

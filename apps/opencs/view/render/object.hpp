@@ -6,6 +6,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <osg/ref_ptr>
+#include <osg/Referenced>
 
 class QModelIndex;
 
@@ -14,6 +15,11 @@ namespace osg
 {
     class PositionAttitudeTransform;
     class Group;
+}
+
+namespace osgFX
+{
+    class Scribe;
 }
 
 namespace Resource
@@ -29,12 +35,29 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+
+    class Object;
+
+    // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing a ray query
+    class ObjectHolder : public osg::Referenced
+    {
+    public:
+        ObjectHolder(Object* obj)
+            : mObject(obj)
+        {
+        }
+
+        Object* mObject;
+    };
+
     class Object
     {
             const CSMWorld::Data& mData;
             std::string mReferenceId;
             std::string mReferenceableId;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
+            osg::ref_ptr<osgFX::Scribe> mOutline;
+            bool mSelected;
             osg::Group* mParentNode;
             Resource::ResourceSystem* mResourceSystem;
             bool mForceBaseToZero;
@@ -67,6 +90,11 @@ namespace CSVRender
             /// it at 0, 0, 0 instead.
 
             ~Object();
+
+            /// Mark the object as selected, selected objects show an outline effect
+            void setSelected(bool selected);
+
+            bool getSelected() const;
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?

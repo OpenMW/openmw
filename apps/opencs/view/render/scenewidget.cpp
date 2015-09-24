@@ -13,6 +13,7 @@
 #include <osg/LightModel>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../widget/scenetoolmode.hpp"
 #include "../../model/settings/usersettings.hpp"
@@ -51,8 +52,12 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
     QLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(window->getGLWidget());
     setLayout(layout);
+
+    // Pass events through this widget first
+    window->getGLWidget()->installEventFilter(this);
 
     mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
@@ -90,6 +95,24 @@ void RenderWidget::setVisibilityMask(int mask)
 {
     // 0x1 reserved for separating cull and update visitors
     mView->getCamera()->setCullMask(mask<<1);
+}
+
+bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    // handle event in this widget, is there a better way to do this?
+    if (event->type() == QEvent::MouseButtonPress)
+        mousePressEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::MouseButtonRelease)
+        mouseReleaseEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::MouseMove)
+        mouseMoveEvent(static_cast<QMouseEvent*>(event));
+    if (event->type() == QEvent::KeyPress)
+        keyPressEvent(static_cast<QKeyEvent*>(event));
+    if (event->type() == QEvent::KeyRelease)
+        keyReleaseEvent(static_cast<QKeyEvent*>(event));
+
+    // Always pass the event on to GLWidget, i.e. to OSG event queue
+    return QObject::eventFilter(obj, event);
 }
 
 // --------------------------------------------------
@@ -132,9 +155,9 @@ void CompositeViewer::update()
 
 // ---------------------------------------------------
 
-SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, Qt::WindowFlags f)
+SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f)
     : RenderWidget(parent, f)
-    , mSceneManager(sceneManager)
+    , mResourceSystem(resourceSystem)
     , mLighting(NULL)
     , mHasDefaultAmbient(false)
 {
@@ -142,12 +165,16 @@ SceneWidget::SceneWidget(Resource::SceneManager* sceneManager, QWidget *parent, 
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
     setLighting(&mLightingDay);
+
+    /// \todo make shortcut configurable
+    QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
+    connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
 }
 
 SceneWidget::~SceneWidget()
 {
     // Since we're holding on to the scene templates past the existance of this graphics context, we'll need to manually release the created objects
-    mSceneManager->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
+    mResourceSystem->getSceneManager()->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
 
 void SceneWidget::setLighting(Lighting *lighting)

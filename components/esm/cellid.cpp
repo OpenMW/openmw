@@ -1,4 +1,3 @@
-
 #include "cellid.hpp"
 
 #include "esmreader.hpp"
@@ -34,4 +33,27 @@ bool ESM::operator== (const CellId& left, const CellId& right)
 bool ESM::operator!= (const CellId& left, const CellId& right)
 {
     return !(left==right);
+}
+
+bool ESM::operator < (const CellId& left, const CellId& right)
+{
+    if (left.mPaged < right.mPaged)
+        return true;
+    if (left.mPaged > right.mPaged)
+        return false;
+
+    if (left.mPaged)
+    {
+        if (left.mIndex.mX < right.mIndex.mX)
+            return true;
+        if (left.mIndex.mX > right.mIndex.mX)
+            return false;
+
+        if (left.mIndex.mY < right.mIndex.mY)
+            return true;
+        if (left.mIndex.mY > right.mIndex.mY)
+            return false;
+    }
+
+    return left.mWorldspace < right.mWorldspace;
 }

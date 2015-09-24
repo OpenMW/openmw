@@ -1,4 +1,3 @@
-
 #include "actiontake.hpp"
 
 #include "../mwbase/environment.hpp"

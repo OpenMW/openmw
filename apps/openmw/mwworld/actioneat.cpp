@@ -1,7 +1,4 @@
-
 #include "actioneat.hpp"
-
-#include <cstdlib>
 
 #include <components/esm/loadskil.hpp>
 
@@ -9,6 +6,8 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/containerstore.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "class.hpp"
 
@@ -22,7 +21,7 @@ namespace MWWorld
         // apply to actor
         std::string id = getTarget().getClass().getId (getTarget());
 
-        if (actor.getClass().apply (actor, id, actor))
+        if (actor.getClass().apply (actor, id, actor) && actor == MWMechanics::getPlayer())
             actor.getClass().skillUsageSucceeded (actor, ESM::Skill::Alchemy, 1);
     }
 

@@ -14,10 +14,10 @@
 namespace
 {
 
-class UpdateCameraCallback : public osg::NodeCallback
+class UpdateRenderCameraCallback : public osg::NodeCallback
 {
 public:
-    UpdateCameraCallback(MWRender::Camera* cam)
+    UpdateRenderCameraCallback(MWRender::Camera* cam)
         : mCamera(cam)
     {
     }
@@ -67,7 +67,7 @@ namespace MWRender
         mMainCam.yaw = 0.f;
         mMainCam.offset = 400.f;
 
-        mUpdateCallback = new UpdateCameraCallback(this);
+        mUpdateCallback = new UpdateRenderCameraCallback(this);
         mCamera->addUpdateCallback(mUpdateCallback);
     }
 

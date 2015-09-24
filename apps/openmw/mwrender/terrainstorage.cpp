@@ -51,7 +51,7 @@ namespace MWRender
         maxY += 1;
     }
 
-    ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
+    const ESM::Land* TerrainStorage::getLand(int cellX, int cellY)
     {
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();

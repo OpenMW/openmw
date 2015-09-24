@@ -1,7 +1,5 @@
 #include "material.hpp"
 
-#include <iostream>
-
 #include <osg/Depth>
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>

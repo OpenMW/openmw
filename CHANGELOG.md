@@ -1,3 +1,8 @@
+0.36.1
+------
+
+    Bug #2590: Start scripts not added correctly
+
 0.36.0
 ------
 

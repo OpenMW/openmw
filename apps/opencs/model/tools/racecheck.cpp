@@ -1,4 +1,3 @@
-
 #include "racecheck.hpp"
 
 #include <sstream>

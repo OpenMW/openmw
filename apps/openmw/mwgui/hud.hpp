@@ -47,6 +47,7 @@ namespace MWGui
         void unsetSelectedWeapon();
 
         void setCrosshairVisible(bool visible);
+        void setCrosshairOwned(bool owned);
 
         void onFrame(float dt);
 

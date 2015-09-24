@@ -14,7 +14,9 @@
 
 #if defined(_WIN32)
 // For OutputDebugString
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
@@ -197,18 +199,14 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         return false;
     }
 
-    std::cout << "OpenMW version " << OPENMW_VERSION;
-    std::string rev = OPENMW_VERSION_COMMITHASH;
-    std::string tag = OPENMW_VERSION_TAGHASH;
-    if (!rev.empty() && !tag.empty())
-    {
-        rev = rev.substr(0, 10);
-        std::cout << " (revision " << rev << ")";
-    }
-    std::cout << std::endl;
-
     if (variables.count ("version"))
+    {
+        cfgMgr.readConfiguration(variables, desc, true);
+
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+        std::cout << v.describe() << std::endl;
         return false;
+    }
 
     cfgMgr.readConfiguration(variables, desc);
 

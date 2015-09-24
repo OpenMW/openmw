@@ -15,9 +15,9 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "spellicons.hpp"
-#include "inventorywindow.hpp"
 #include "confirmationdialog.hpp"
 #include "spellview.hpp"
 
@@ -79,12 +79,12 @@ namespace MWGui
     {
         mSpellIcons->updateWidgets(mEffectBox, false);
 
-        mSpellView->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer()));
     }
 
     void SpellWindow::onEnchantedItemSelected(MWWorld::Ptr item, bool alreadyEquipped)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         // retrieve ContainerStoreIterator to the item
@@ -103,7 +103,7 @@ namespace MWGui
         if (!alreadyEquipped
             && !item.getClass().getEquipmentSlots(item).first.empty())
         {
-            MWBase::Environment::get().getWindowManager()->getInventoryWindow()->useItem(item);
+            MWBase::Environment::get().getWindowManager()->useItem(item);
             // make sure that item was successfully equipped
             if (!store.isEquipped(item))
                 return;
@@ -159,7 +159,7 @@ namespace MWGui
 
     void SpellWindow::onSpellSelected(const std::string& spellId)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
         store.setSelectedEnchantItem(store.end());
         MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
@@ -169,7 +169,7 @@ namespace MWGui
 
     void SpellWindow::onDeleteSpellAccept()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
@@ -183,7 +183,7 @@ namespace MWGui
 
     void SpellWindow::cycle(bool next)
     {
-        mSpellView->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer()));
 
         SpellModel::ModelIndex selected = 0;
         for (SpellModel::ModelIndex i = 0; i<int(mSpellView->getModel()->getItemCount()); ++i)

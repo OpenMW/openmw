@@ -1,4 +1,3 @@
-
 #include "globalscripts.hpp"
 
 #include <cassert>
@@ -199,13 +198,12 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
-            {
-                GlobalScriptDesc desc;
-                desc.mLocals.configure (*script);
+            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
 
-                iter = mScripts.insert (std::make_pair (name, desc)).first;
-            }
+            GlobalScriptDesc desc;
+            desc.mLocals.configure (*script);
+
+            iter = mScripts.insert (std::make_pair (name2, desc)).first;
         }
 
         return iter->second.mLocals;

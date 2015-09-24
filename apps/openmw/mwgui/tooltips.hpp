@@ -1,4 +1,3 @@
-
 #ifndef MWGUI_TOOLTIPS_H
 #define MWGUI_TOOLTIPS_H
 
@@ -87,7 +86,10 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
-
+        
+        bool checkOwned();
+        /// Returns True if taking mFocusObject would be crime
+ 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
@@ -107,7 +109,7 @@ namespace MWGui
 
         static std::string sSchoolNames[6];
 
-	int mHorizontalScrollIndex;
+        int mHorizontalScrollIndex;
 
 
         float mDelay;
@@ -119,6 +121,8 @@ namespace MWGui
         bool mEnabled;
 
         bool mFullHelp;
+        
+        int mShowOwned;
     };
 }
 #endif

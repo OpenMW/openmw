@@ -23,7 +23,7 @@ opencs_units (model/world
 
 
 opencs_units_noqt (model/world
-    universalid record commands columnbase scriptcontext cell refidcollection
+    universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata
@@ -35,13 +35,18 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel
+    tools reportmodel mergeoperation 
     )
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
+    mergestages
+    )
+
+opencs_hdrs_noqt (model/tools
+    mergestate
     )
 
 
@@ -64,7 +69,7 @@ opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
-    dialoguespinbox recordbuttonbar tableeditidaction
+    dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
     )
 
 opencs_units_noqt (view/world
@@ -94,7 +99,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable searchsubview searchbox
+    reportsubview reporttable searchsubview searchbox merge
     )
 
 opencs_units_noqt (view/tools
@@ -192,6 +197,7 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
         MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs-Info.plist.in"
         )
 
     set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES

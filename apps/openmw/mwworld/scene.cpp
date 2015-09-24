@@ -1,15 +1,12 @@
 #include "scene.hpp"
 
 #include <limits>
+#include <iostream>
 
-#include <components/nif/niffile.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/vfs/manager.hpp>
-
-#include <osg/PositionAttitudeTransform>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -236,7 +233,7 @@ namespace MWWorld
 
         if(result.second)
         {
-            std::cout << "loading cell " << cell->getCell()->getDescription() << std::endl;
+            std::cout << "Loading cell " << cell->getCell()->getDescription() << std::endl;
 
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
@@ -253,9 +250,9 @@ namespace MWWorld
                     // Actually only VHGT is needed here, but we'll need the rest for rendering anyway.
                     // Load everything now to reduce IO overhead.
                     const int flags = ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX;
-                    if (!land->isDataLoaded(flags))
-                        land->loadData(flags);
-                    mPhysics->addHeightField (land->mLandData->mHeights, cell->getCell()->getGridX(), cell->getCell()->getGridY(),
+
+                    const ESM::Land::LandData *data = land->getLandData (flags);
+                    mPhysics->addHeightField (data->mHeights, cell->getCell()->getGridX(), cell->getCell()->getGridY(),
                         worldsize / (verts-1), verts);
                 }
             }
@@ -327,7 +324,7 @@ namespace MWWorld
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
 
-        const int halfGridSize = Settings::Manager::getInt("exterior grid size", "Cells")/2;
+        const int halfGridSize = Settings::Manager::getInt("exterior cell load distance", "Cells");
 
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())

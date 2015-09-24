@@ -143,7 +143,7 @@ namespace ESSImport
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image2, ostream);
         if (!result.success())
         {
-            std::cerr << "can't write global map image: " << result.message() << std::endl;
+            std::cerr << "can't write global map image: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

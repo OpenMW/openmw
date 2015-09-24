@@ -1,4 +1,3 @@
-
 #include "alchemy.hpp"
 
 #include <cassert>

@@ -1,4 +1,3 @@
-
 #include "cell.hpp"
 
 #include <osg/Group>
@@ -32,7 +31,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
     bool modified = false;
 
     const CSMWorld::RefCollection& collection = mData.getReferences();
-    
+
     for (int i=start; i<=end; ++i)
     {
         std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
@@ -68,15 +67,16 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
     int landIndex = land.searchId(mId);
     if (landIndex != -1)
     {
-        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
-        {
-            mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
-            mTerrain->loadCell(esmLand->mX,
-                               esmLand->mY);
+        const ESM::Land& esmLand = land.getRecord(mId).get();
 
-            mX = esmLand->mX;
-            mY = esmLand->mY;
+        if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+        {
+            mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
+            mTerrain->loadCell(esmLand.mX,
+                               esmLand.mY);
+
+            mX = esmLand.mX;
+            mY = esmLand.mY;
         }
     }
 }

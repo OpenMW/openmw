@@ -16,20 +16,20 @@
 
 #include <components/settings/settings.hpp>
 
-#include <components/misc/stringops.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwscript/interpretercontext.hpp"
-#include "../mwbase/scriptmanager.hpp"
 #include "../mwrender/characterpreview.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "itemview.hpp"
 #include "inventoryitemmodel.hpp"
@@ -65,7 +65,7 @@ namespace MWGui
         , mGuiMode(GM_Inventory)
         , mLastXSize(0)
         , mLastYSize(0)
-        , mPreview(new MWRender::InventoryPreview(viewer, resourceSystem, MWBase::Environment::get().getWorld()->getPlayerPtr()))
+        , mPreview(new MWRender::InventoryPreview(viewer, resourceSystem, MWMechanics::getPlayer()))
         , mTrading(false)
     {
         mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
@@ -121,7 +121,12 @@ namespace MWGui
     {
         mPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
         mTradeModel = new TradeItemModel(new InventoryItemModel(mPtr), MWWorld::Ptr());
-        mSortModel = new SortFilterItemModel(mTradeModel);
+
+        if (mSortModel) // reuse existing SortModel when possible to keep previous category/filter settings
+            mSortModel->setSourceModel(mTradeModel);
+        else
+            mSortModel = new SortFilterItemModel(mTradeModel);
+
         mItemView->setModel(mSortModel);
 
         mPreview->updatePtr(mPtr);
@@ -330,7 +335,7 @@ namespace MWGui
 
     void InventoryWindow::open()
     {
-        mPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        mPtr = MWMechanics::getPlayer();
 
         updateEncumbranceBar();
 
@@ -436,6 +441,20 @@ namespace MWGui
     {
         const std::string& script = ptr.getClass().getScript(ptr);
 
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+
+        // early-out for items that need to be equipped, but can't be equipped: we don't want to set OnPcEquip in that case
+        if (!ptr.getClass().getEquipmentSlots(ptr).first.empty())
+        {
+            std::pair<int, std::string> canEquip = ptr.getClass().canBeEquipped(ptr, player);
+            if (canEquip.first == 0)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                updateItemView();
+                return;
+            }
+        }
+
         // If the item has a script, set its OnPcEquip to 1
         if (!script.empty()
                 // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
@@ -455,7 +474,7 @@ namespace MWGui
         {
             boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
-            action->execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
+            action->execute (player);
 
             mSkippedToEquip = MWWorld::Ptr();
         }
@@ -532,7 +551,7 @@ namespace MWGui
 
     void InventoryWindow::updateEncumbranceBar()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
 
         float capacity = player.getClass().getCapacity(player);
         float encumbrance = player.getClass().getEncumbrance(player);
@@ -566,7 +585,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
 
         MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(
-                    MWBase::Environment::get().getWorld()->getPlayerPtr());
+                    MWMechanics::getPlayer());
 
         dirtyPreview();
     }
@@ -597,7 +616,7 @@ namespace MWGui
 
         int count = object.getRefData().getCount();
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWBase::Environment::get().getWorld()->breakInvisibility(player);
 
         MWBase::Environment::get().getMechanicsManager()->itemTaken(player, object, MWWorld::Ptr(), count);
@@ -627,7 +646,7 @@ namespace MWGui
     {
         ItemModel::ModelIndex selected = -1;
         // not using mSortFilterModel as we only need sorting, not filtering
-        SortFilterItemModel model(new InventoryItemModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        SortFilterItemModel model(new InventoryItemModel(MWMechanics::getPlayer()));
         model.setSortByType(false);
         model.update();
         if (model.getItemCount() == 0)

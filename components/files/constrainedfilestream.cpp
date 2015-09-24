@@ -1,7 +1,6 @@
 #include "constrainedfilestream.hpp"
 
 #include <streambuf>
-#include <iostream>
 
 #include "lowlevelfile.hpp"
 

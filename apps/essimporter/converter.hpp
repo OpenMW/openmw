@@ -507,45 +507,24 @@ class ConvertGAME : public Converter
 public:
     ConvertGAME() : mHasGame(false) {}
 
-    std::string toString(int weatherId)
-    {
-        switch (weatherId)
-        {
-        case 0:
-            return "clear";
-        case 1:
-            return "cloudy";
-        case 2:
-            return "foggy";
-        case 3:
-            return "overcast";
-        case 4:
-            return "rain";
-        case 5:
-            return "thunderstorm";
-        case 6:
-            return "ashstorm";
-        case 7:
-            return "blight";
-        case 8:
-            return "snow";
-        case 9:
-            return "blizzard";
-        case -1:
-            return "";
-        default:
-            {
-                std::stringstream error;
-                error << "unknown weather id: " << weatherId;
-                throw std::runtime_error(error.str());
-            }
-        }
-    }
-
     virtual void read(ESM::ESMReader &esm)
     {
         mGame.load(esm);
         mHasGame = true;
+    }
+
+    int validateWeatherID(int weatherID)
+    {
+        if(weatherID >= -1 && weatherID < 10)
+        {
+            return weatherID;
+        }
+        else
+        {
+            std::stringstream error;
+            error << "Invalid weather ID:" << weatherID << std::endl;
+            throw std::runtime_error(error.str());
+        }
     }
 
     virtual void write(ESM::ESMWriter &esm)
@@ -554,13 +533,14 @@ public:
             return;
         esm.startRecord(ESM::REC_WTHR);
         ESM::WeatherState weather;
-        weather.mCurrentWeather = toString(mGame.mGMDT.mCurrentWeather);
-        weather.mNextWeather = toString(mGame.mGMDT.mNextWeather);
-        weather.mRemainingTransitionTime = mGame.mGMDT.mWeatherTransition/100.f*(0.015f*24*3600);
-        weather.mHour = mContext->mHour;
-        weather.mWindSpeed = 0.f;
-        weather.mTimePassed = 0.0;
-        weather.mFirstUpdate = false;
+        weather.mTimePassed = 0.0f;
+        weather.mFastForward = false;
+        weather.mWeatherUpdateTime = mGame.mGMDT.mTimeOfNextTransition - mContext->mHour;
+        weather.mTransitionFactor = 1 - (mGame.mGMDT.mWeatherTransition / 100.0f);
+        weather.mCurrentWeather = validateWeatherID(mGame.mGMDT.mCurrentWeather);
+        weather.mNextWeather = validateWeatherID(mGame.mGMDT.mNextWeather);
+        weather.mQueuedWeather = -1;
+        // TODO: Determine how ModRegion modifiers are saved in Morrowind.
         weather.save(esm);
         esm.endRecord(ESM::REC_WTHR);
     }

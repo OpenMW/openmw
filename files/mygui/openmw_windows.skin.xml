@@ -128,6 +128,14 @@
             <State name="normal" offset="0 0 8 8"/>
         </BasisSkin>
     </Resource>
+    
+    <!-- Defines a owned background -->
+    <Resource type="ResourceSkin" name="DialogBG_Owned" size="8 8" texture="white">
+        <Property key="Colour" value="#{setting=GUI,color background owned}"/> 
+        <BasisSkin type="MainSkin" offset="0 0 8 8">
+            <State name="normal" offset="0 0 8 8"/>
+        </BasisSkin>
+    </Resource>
 
     <!-- These define the dialog borders -->
     <Resource type="ResourceSkin" name="DB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">

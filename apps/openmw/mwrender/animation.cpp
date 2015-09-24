@@ -9,6 +9,8 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
+#include <osg/BlendFunc>
+#include <osg/Material>
 
 #include <osgParticle/ParticleSystem>
 
@@ -208,6 +210,38 @@ namespace
         std::vector<osg::Node*> mToRemove;
     };
 
+    class RemoveTriBipVisitor : public osg::NodeVisitor
+    {
+    public:
+        RemoveTriBipVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Geode &node)
+        {
+            const std::string toFind = "tri bip";
+            if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
+            {
+                // Not safe to remove in apply(), since the visitor is still iterating the child list
+                mToRemove.push_back(&node);
+            }
+        }
+
+        void remove()
+        {
+            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+            {
+                osg::Node* node = *it;
+                if (node->getNumParents())
+                    node->getParent(0)->removeChild(node);
+            }
+        }
+
+    private:
+        std::vector<osg::Node*> mToRemove;
+    };
+
 }
 
 namespace MWRender
@@ -219,7 +253,7 @@ namespace MWRender
 
         typedef std::map<std::string, osg::ref_ptr<NifOsg::KeyframeController> > ControllerMap;
 
-        ControllerMap mControllerMap[Animation::sNumGroups];
+        ControllerMap mControllerMap[Animation::sNumBlendMasks];
 
         const std::multimap<float, std::string>& getTextKeys();
     };
@@ -260,8 +294,9 @@ namespace MWRender
         , mTextKeyListener(NULL)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
+        , mAlpha(1.f)
     {
-        for(size_t i = 0;i < sNumGroups;i++)
+        for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i].reset(new AnimationTime);
     }
 
@@ -299,9 +334,9 @@ namespace MWRender
             mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
-    size_t Animation::detectAnimGroup(osg::Node* node)
+    size_t Animation::detectBlendMask(osg::Node* node)
     {
-        static const char sGroupRoots[sNumGroups][32] = {
+        static const char sBlendMaskRoots[sNumBlendMasks][32] = {
             "", /* Lower body / character root */
             "Bip01 Spine1", /* Torso */
             "Bip01 L Clavicle", /* Left arm */
@@ -311,9 +346,9 @@ namespace MWRender
         while(node != mObjectRoot)
         {
             const std::string &name = node->getName();
-            for(size_t i = 1;i < sNumGroups;i++)
+            for(size_t i = 1;i < sNumBlendMasks;i++)
             {
-                if(name == sGroupRoots[i])
+                if(name == sBlendMaskRoots[i])
                     return i;
             }
 
@@ -361,13 +396,13 @@ namespace MWRender
 
             osg::Node* node = found->second;
 
-            size_t group = detectAnimGroup(node);
+            size_t blendMask = detectBlendMask(node);
 
             // clone the controller, because each Animation needs its own ControllerSource
             osg::ref_ptr<NifOsg::KeyframeController> cloned = osg::clone(it->second.get(), osg::CopyOp::DEEP_COPY_ALL);
-            cloned->setSource(mAnimationTimePtr[group]);
+            cloned->setSource(mAnimationTimePtr[blendMask]);
 
-            animsrc->mControllerMap[group].insert(std::make_pair(bonename, cloned));
+            animsrc->mControllerMap[blendMask].insert(std::make_pair(bonename, cloned));
         }
 
         mAnimSources.push_back(animsrc);
@@ -390,7 +425,7 @@ namespace MWRender
     {
         mStates.clear();
 
-        for(size_t i = 0;i < sNumGroups;i++)
+        for(size_t i = 0;i < sNumBlendMasks;i++)
             mAnimationTimePtr[i]->setTimePtr(boost::shared_ptr<float>());
 
         mAccumCtrl = NULL;
@@ -461,7 +496,7 @@ namespace MWRender
             mTextKeyListener->handleTextKey(groupname, key, map);
     }
 
-    void Animation::play(const std::string &groupname, int priority, int groups, bool autodisable, float speedmult,
+    void Animation::play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
                          const std::string &start, const std::string &stop, float startpoint, size_t loops, bool loopfallback)
     {
         if(!mObjectRoot || mAnimSources.empty())
@@ -472,8 +507,6 @@ namespace MWRender
             resetActiveGroups();
             return;
         }
-
-        priority = std::max(0, priority);
 
         AnimStateMap::iterator stateiter = mStates.begin();
         while(stateiter != mStates.end())
@@ -505,7 +538,7 @@ namespace MWRender
                 state.mLoopCount = loops;
                 state.mPlaying = (state.getTime() < state.mStopTime);
                 state.mPriority = priority;
-                state.mGroups = groups;
+                state.mBlendMask = blendMask;
                 state.mAutoDisable = autodisable;
                 mStates[groupname] = state;
 
@@ -600,23 +633,20 @@ namespace MWRender
         state.setTime(state.mStartTime + ((state.mStopTime - state.mStartTime) * startpoint));
 
         // mLoopStartTime and mLoopStopTime normally get assigned when encountering these keys while playing the animation
-        // (see handleTextKey). But if startpoint is already past these keys, we need to assign them now.
-        if(state.getTime() > state.mStartTime)
+        // (see handleTextKey). But if startpoint is already past these keys, or start time is == stop time, we need to assign them now.
+        const std::string loopstarttag = groupname+": loop start";
+        const std::string loopstoptag = groupname+": loop stop";
+
+        NifOsg::TextKeyMap::const_reverse_iterator key(groupend);
+        for (; key != startkey && key != keys.rend(); ++key)
         {
-            const std::string loopstarttag = groupname+": loop start";
-            const std::string loopstoptag = groupname+": loop stop";
+            if (key->first > state.getTime())
+                continue;
 
-            NifOsg::TextKeyMap::const_reverse_iterator key(groupend);
-            for (; key != startkey && key != keys.rend(); ++key)
-            {
-                if (key->first > state.getTime())
-                    continue;
-
-                if (key->second == loopstarttag)
-                    state.mLoopStartTime = key->first;
-                else if (key->second == loopstoptag)
-                    state.mLoopStopTime = key->first;
-            }
+            if (key->second == loopstarttag)
+                state.mLoopStartTime = key->first;
+            else if (key->second == loopstoptag)
+                state.mLoopStopTime = key->first;
         }
 
         return true;
@@ -643,35 +673,35 @@ namespace MWRender
 
         mAccumCtrl = NULL;
 
-        for(size_t grp = 0;grp < sNumGroups;grp++)
+        for(size_t blendMask = 0;blendMask < sNumBlendMasks;blendMask++)
         {
             AnimStateMap::const_iterator active = mStates.end();
 
             AnimStateMap::const_iterator state = mStates.begin();
             for(;state != mStates.end();++state)
             {
-                if(!(state->second.mGroups&(1<<grp)))
+                if(!(state->second.mBlendMask&(1<<blendMask)))
                     continue;
 
-                if(active == mStates.end() || active->second.mPriority < state->second.mPriority)
+                if(active == mStates.end() || active->second.mPriority[(BoneGroup)blendMask] < state->second.mPriority[(BoneGroup)blendMask])
                     active = state;
             }
 
-            mAnimationTimePtr[grp]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
+            mAnimationTimePtr[blendMask]->setTimePtr(active == mStates.end() ? boost::shared_ptr<float>() : active->second.mTime);
 
-            // add external controllers for the AnimSource active in this group
+            // add external controllers for the AnimSource active in this blend mask
             if (active != mStates.end())
             {
                 boost::shared_ptr<AnimSource> animsrc = active->second.mSource;
 
-                for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[grp].begin(); it != animsrc->mControllerMap[grp].end(); ++it)
+                for (AnimSource::ControllerMap::iterator it = animsrc->mControllerMap[blendMask].begin(); it != animsrc->mControllerMap[blendMask].end(); ++it)
                 {
                     osg::ref_ptr<osg::Node> node = mNodeMap.at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
                     node->addUpdateCallback(it->second);
                     mActiveControllers.insert(std::make_pair(node, it->second));
 
-                    if (grp == 0 && node == mAccumRoot)
+                    if (blendMask == 0 && node == mAccumRoot)
                     {
                         mAccumCtrl = it->second;
 
@@ -688,20 +718,6 @@ namespace MWRender
             }
         }
         addControllers();
-    }
-
-    void Animation::changeGroups(const std::string &groupname, int groups)
-    {
-        AnimStateMap::iterator stateiter = mStates.find(groupname);
-        if(stateiter != mStates.end())
-        {
-            if(stateiter->second.mGroups != groups)
-            {
-                stateiter->second.mGroups = groups;
-                resetActiveGroups();
-            }
-            return;
-        }
     }
 
     void Animation::stopLooping(const std::string& groupname)
@@ -917,10 +933,12 @@ namespace MWRender
         return movement;
     }
 
-    void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly)
+    void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
+        osg::ref_ptr<osg::StateSet> previousStateset;
         if (mObjectRoot)
         {
+            previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
         mObjectRoot = NULL;
@@ -945,11 +963,21 @@ namespace MWRender
             mObjectRoot = newObjectRoot;
         }
 
+        if (previousStateset)
+            mObjectRoot->setStateSet(previousStateset);
+
         if (baseonly)
         {
             RemoveDrawableVisitor removeDrawableVisitor;
             mObjectRoot->accept(removeDrawableVisitor);
             removeDrawableVisitor.remove();
+        }
+
+        if (isCreature)
+        {
+            RemoveTriBipVisitor removeTriBipVisitor;
+            mObjectRoot->accept(removeTriBipVisitor);
+            removeTriBipVisitor.remove();
         }
 
         NodeMapVisitor visitor;
@@ -1208,9 +1236,10 @@ namespace MWRender
     {
         for (AnimStateMap::const_iterator stateiter = mStates.begin(); stateiter != mStates.end(); ++stateiter)
         {
-            if((stateiter->second.mPriority > MWMechanics::Priority_Movement
-                    && stateiter->second.mPriority < MWMechanics::Priority_Torch)
-                    || stateiter->second.mPriority == MWMechanics::Priority_Death)
+            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Hit))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Weapon))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Knockdown))
+                    || stateiter->second.mPriority.contains(int(MWMechanics::Priority_Death)))
                 return false;
         }
         return true;
@@ -1224,6 +1253,37 @@ namespace MWRender
             return NULL;
         else
             return found->second;
+    }
+
+    void Animation::setAlpha(float alpha)
+    {
+        if (alpha == mAlpha)
+            return;
+        mAlpha = alpha;
+
+        if (alpha != 1.f)
+        {
+            osg::StateSet* stateset (new osg::StateSet);
+
+            osg::BlendFunc* blendfunc (new osg::BlendFunc);
+            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            // FIXME: overriding diffuse/ambient/emissive colors
+            osg::Material* material (new osg::Material);
+            material->setColorMode(osg::Material::OFF);
+            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,alpha));
+            material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+            stateset->setNestRenderBins(false);
+            mObjectRoot->setStateSet(stateset);
+        }
+        else
+        {
+            mObjectRoot->setStateSet(NULL);
+        }
     }
 
     void Animation::setLightEffect(float effect)
@@ -1326,7 +1386,7 @@ namespace MWRender
     {
         if (!model.empty())
         {
-            setObjectRoot(model, false, false);
+            setObjectRoot(model, false, false, false);
             if (animated)
                 addAnimSource(model);
 

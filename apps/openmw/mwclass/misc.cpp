@@ -1,4 +1,3 @@
-
 #include "misc.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -25,20 +24,16 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace
-{
-bool isGold (const MWWorld::Ptr& ptr)
-{
-    return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
-                    || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
-}
-}
-
 namespace MWClass
 {
+    bool Miscellaneous::isGold (const MWWorld::Ptr& ptr) const
+    {
+        return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
+                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
+                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_010")
+                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
+                        || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
+    }
     std::string Miscellaneous::getId (const MWWorld::Ptr& ptr) const
     {
         return ptr.get<ESM::Miscellaneous>()->mBase->mId;

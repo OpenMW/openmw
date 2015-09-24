@@ -1,4 +1,3 @@
-
 #include "clothing.hpp"
 
 #include <components/esm/loadclot.hpp>

@@ -1,23 +1,23 @@
 project (Components)
 
 # Version file
-set (VERSION_HPP_IN ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp.cmake)
-set (VERSION_HPP ${CMAKE_CURRENT_SOURCE_DIR}/version/version.hpp)
+set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
+set (VERSION_FILE "${OpenMW_BINARY_DIR}/resources/version")
 if (GIT_CHECKOUT)
-    add_custom_target (git-version
-        COMMAND ${CMAKE_COMMAND}
-	    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+  add_custom_target (git-version
+       COMMAND ${CMAKE_COMMAND}
+            -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
-	    -DVERSION_HPP_IN=${VERSION_HPP_IN}
-	    -DVERSION_HPP=${VERSION_HPP}
-	    -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
-	    -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
-	    -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
-	    -DOPENMW_VERSION=${OPENMW_VERSION}
+            -DVERSION_IN_FILE=${VERSION_IN_FILE}
+            -DVERSION_FILE=${VERSION_FILE}
+            -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
+            -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
+            -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+            -DOPENMW_VERSION=${OPENMW_VERSION}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
-	    VERBATIM)
+            VERBATIM)
 else (GIT_CHECKOUT)
-    configure_file(${VERSION_HPP_IN} ${VERSION_HPP})
+    configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
 find_package(OpenGL REQUIRED)
@@ -41,11 +41,13 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller workqueue
+    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller
+    # not used yet
+    #workqueue
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
+    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream
     )
 
 add_component_dir (nifosg
@@ -180,6 +182,7 @@ target_link_libraries(components
     ${SDL2_LIBRARY}
     # For MyGUI platform
     ${OPENGL_gl_LIBRARY}
+    ${MYGUI_LIBRARIES}
 )
 
 if (WIN32)
@@ -200,7 +203,10 @@ if (GIT_CHECKOUT)
 endif (GIT_CHECKOUT)
 
 if (WIN32)
-target_link_libraries(components shlwapi)
+    target_link_libraries(components shlwapi)
+    if(MINGW)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOGDI")
+    endif(MINGW)
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15

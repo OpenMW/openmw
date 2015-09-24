@@ -274,7 +274,7 @@ namespace MWWorld
 
             virtual void disable (const Ptr& ptr);
 
-            virtual void advanceTime (double hours);
+            virtual void advanceTime (double hours, bool incremental = false);
             ///< Advance in-game time.
 
             virtual void setHour (double hour);
@@ -336,7 +336,9 @@ namespace MWWorld
             /// use the "Head" node as a basis.
             virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::Ptr &ptr, float distance);
 
+            /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const Ptr& ptr);
+
             virtual void undeleteObject (const Ptr& ptr);
 
             virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
@@ -628,6 +630,10 @@ namespace MWWorld
             virtual void resetActors();
 
             virtual bool isWalkingOnWater (const MWWorld::Ptr& actor);
+
+            /// Return a vector aiming the actor's weapon towards a target.
+            /// @note The length of the vector is the distance between actor and target.
+            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
     };
 }
 

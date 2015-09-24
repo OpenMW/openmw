@@ -1,4 +1,3 @@
-
 #include "potion.hpp"
 
 #include <components/esm/loadalch.hpp>

@@ -185,7 +185,7 @@ namespace MWBase
 
             virtual void disable (const MWWorld::Ptr& ptr) = 0;
 
-            virtual void advanceTime (double hours) = 0;
+            virtual void advanceTime (double hours, bool incremental = false) = 0;
             ///< Advance in-game time.
 
             virtual void setHour (double hour) = 0;
@@ -256,6 +256,7 @@ namespace MWBase
             virtual void fixPosition (const MWWorld::Ptr& actor) = 0;
             ///< Attempt to fix position so that the Ptr is no longer inside collision geometry.
 
+            /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
             virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
@@ -540,6 +541,10 @@ namespace MWBase
             virtual void resetActors() = 0;
 
             virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
+
+            /// Return a vector aiming the actor's weapon towards a target.
+            /// @note The length of the vector is the distance between actor and target.
+            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
     };
 }
 

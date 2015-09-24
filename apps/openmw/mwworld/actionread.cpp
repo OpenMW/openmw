@@ -5,6 +5,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "player.hpp"
 #include "class.hpp"
@@ -18,8 +19,11 @@ namespace MWWorld
 
     void ActionRead::executeImp (const MWWorld::Ptr& actor) {
 
+        if (actor != MWMechanics::getPlayer())
+            return;
+
         //Ensure we're not in combat
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()
+        if(MWMechanics::isPlayerInCombat()
                 // Reading in combat is still allowed if the scroll/book is not in the player inventory yet
                 // (since otherwise, there would be no way to pick it up)
                 && getTarget().getContainerStore() == &actor.getClass().getContainerStore(actor)

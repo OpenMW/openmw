@@ -1,4 +1,3 @@
-
 #include "narynode.hpp"
 
 #include <sstream>

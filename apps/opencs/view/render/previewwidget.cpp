@@ -1,4 +1,3 @@
-
 #include "previewwidget.hpp"
 
 #include <osgGA/TrackballManipulator>
@@ -8,7 +7,7 @@
 
 CSVRender::PreviewWidget::PreviewWidget (CSMWorld::Data& data,
     const std::string& id, bool referenceable, QWidget *parent)
-: SceneWidget (data.getResourceSystem()->getSceneManager(), parent), mData (data), mObject(data, mRootNode, id, referenceable)
+: SceneWidget (data.getResourceSystem(), parent), mData (data), mObject(data, mRootNode, id, referenceable)
 {
     mView->setCameraManipulator(new osgGA::TrackballManipulator);
 

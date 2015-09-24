@@ -1,3 +1,6 @@
+#ifndef VFS_BSAARCHIVE_HPP_
+#define VFS_BSAARCHIVE_HPP_
+
 #include "archive.hpp"
 
 #include <components/bsa/bsa_file.hpp>
@@ -30,3 +33,5 @@ namespace VFS
     };
 
 }
+
+#endif

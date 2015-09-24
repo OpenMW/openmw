@@ -28,10 +28,14 @@ class CreatureStats;
 
 enum Priority {
     Priority_Default,
+    Priority_WeaponLowerBody,
+    Priority_SneakIdleLowerBody,
+    Priority_SwimIdle,
     Priority_Jump,
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Block,
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
@@ -149,7 +153,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     CharacterState mMovementState;
     std::string mCurrentMovement;
-    float mMovementSpeed;
+    float mMovementAnimSpeed;
+    bool mAdjustMovementAnimSpeed;
     bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 
@@ -185,7 +190,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
 
     void clearAnimQueue();
 
@@ -222,7 +227,7 @@ public:
 
     void update(float duration);
 
-    void playGroup(const std::string &groupname, int mode, int count);
+    bool playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
@@ -237,6 +242,7 @@ public:
     
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+    bool isSneaking() const;
 
     void setAttackingOrSpell(bool attackingOrSpell);
 

@@ -1,4 +1,3 @@
-
 #include "streamerrorhandler.hpp"
 
 #include "tokenloc.hpp"

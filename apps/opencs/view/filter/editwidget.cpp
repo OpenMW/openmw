@@ -1,4 +1,3 @@
-
 #include "editwidget.hpp"
 
 #include <QAbstractItemModel>

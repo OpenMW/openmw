@@ -61,6 +61,7 @@ namespace
         DisplayStateStack mStates;
         Book mTopicIndexBook;
         bool mQuestMode;
+        bool mOptionsMode;
         bool mAllQuests;
 
         template <typename T>
@@ -182,6 +183,7 @@ namespace
 
             mQuestMode = false;
             mAllQuests = false;
+            mOptionsMode = false;
         }
 
         void adjustButton (char const * name, bool optional = false)
@@ -244,6 +246,7 @@ namespace
 
         void setBookMode ()
         {
+            mOptionsMode = false;
             setVisible (OptionsBTN, true);
             setVisible (OptionsOverlay, false);
 
@@ -253,6 +256,8 @@ namespace
 
         void setOptionsMode ()
         {
+            mOptionsMode = true;
+
             setVisible (OptionsBTN, false);
             setVisible (OptionsOverlay, true);
 
@@ -351,6 +356,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyTopicSelected (const std::string& topic, int id)
@@ -378,6 +385,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -508,6 +517,8 @@ namespace
 
         void notifyNextPage(MyGUI::Widget* _sender)
         {
+            if (mOptionsMode)
+                return;
             if (!mStates.empty ())
             {
                 unsigned int  & page = mStates.top ().mPage;
@@ -523,6 +534,8 @@ namespace
 
         void notifyPrevPage(MyGUI::Widget* _sender)
         {
+            if (mOptionsMode)
+                return;
             if (!mStates.empty ())
             {
                 unsigned int & page = mStates.top ().mPage;

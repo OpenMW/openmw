@@ -1,4 +1,3 @@
-
 #include "operationholder.hpp"
 
 #include "../settings/usersettings.hpp"

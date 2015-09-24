@@ -1,12 +1,12 @@
 #include "aiavoiddoor.hpp"
-#include <iostream>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "actorutil.hpp"
 
 
 #include "steering.hpp"
@@ -64,7 +64,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
     std::vector<MWWorld::Ptr> actors;
     MWBase::Environment::get().getMechanicsManager()->getActorsInRange(pos.asVec3(),100,actors);
     for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it) {
-        if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
+        if(*it != getPlayer()) { //Not the player
             MWMechanics::AiSequence& seq = it->getClass().getCreatureStats(*it).getAiSequence();
             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) { //Only add it once
                 seq.stack(MWMechanics::AiAvoidDoor(mDoorPtr),*it);

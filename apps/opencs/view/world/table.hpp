@@ -93,6 +93,8 @@ namespace CSVWorld
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
 
+            std::vector<std::string> getSelectedIds() const;
+
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
         signals:
@@ -112,6 +114,10 @@ namespace CSVWorld
 
             void closeRequest();
 
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
+
         private slots:
 
             void editCell();
@@ -128,6 +134,10 @@ namespace CSVWorld
 
             void previewRecord();
 
+            void executeExtendedDelete();
+
+            void executeExtendedRevert();
+
         public slots:
 
             void tableSizeUpdate();
@@ -140,7 +150,7 @@ namespace CSVWorld
 
             void updateUserSetting (const QString &name, const QStringList &list);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void rowAdded(const std::string &id);
     };
 }
 

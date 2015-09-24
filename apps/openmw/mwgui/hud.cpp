@@ -10,7 +10,6 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -19,6 +18,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "inventorywindow.hpp"
 #include "spellicons.hpp"
@@ -260,7 +260,7 @@ namespace MWGui
         {
             // drop item into the gameworld
             MWBase::Environment::get().getWorld()->breakInvisibility(
-                        MWBase::Environment::get().getWorld()->getPlayerPtr());
+                        MWMechanics::getPlayer());
 
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
@@ -339,7 +339,7 @@ namespace MWGui
 
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -351,7 +351,7 @@ namespace MWGui
 
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -518,7 +518,19 @@ namespace MWGui
     {
         mCrosshair->setVisible (visible);
     }
-
+    
+    void HUD::setCrosshairOwned(bool owned)
+    {
+        if(owned)
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair_Owned");
+        }
+        else
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair");
+        }
+    }
+    
     void HUD::setHmsVisible(bool visible)
     {
         mHealth->setVisible(visible);

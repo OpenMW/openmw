@@ -1,4 +1,3 @@
-
 #include "genericcreator.hpp"
 
 #include <memory>

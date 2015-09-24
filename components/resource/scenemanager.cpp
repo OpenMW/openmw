@@ -100,11 +100,20 @@ namespace Resource
         Index::iterator it = mIndex.find(normalized);
         if (it == mIndex.end())
         {
-            Files::IStreamPtr file = mVFS->get(normalized);
-
             // TODO: add support for non-NIF formats
+            osg::ref_ptr<osg::Node> loaded;
+            try
+            {
+                Files::IStreamPtr file = mVFS->get(normalized);
 
-            osg::ref_ptr<osg::Node> loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+                loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error.nif instead" << std::endl;
+                Files::IStreamPtr file = mVFS->get("meshes/marker_error.nif");
+                loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+            }
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
             // TODO: run SharedStateManager::prune on unload

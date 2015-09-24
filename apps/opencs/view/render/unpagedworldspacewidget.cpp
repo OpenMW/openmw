@@ -1,4 +1,3 @@
-
 #include "unpagedworldspacewidget.hpp"
 
 #include <sstream>
@@ -167,7 +166,9 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
-    osg::Vec3d position = mView->getCamera()->getViewMatrix().getTrans();
+    osg::Vec3d eye, center, up;
+    mView->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+    osg::Vec3d position = eye;
 
     std::ostringstream stream;
 

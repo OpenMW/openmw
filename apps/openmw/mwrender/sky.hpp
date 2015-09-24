@@ -1,9 +1,12 @@
 #ifndef OPENMW_MWRENDER_SKY_H
 #define OPENMW_MWRENDER_SKY_H
 
-#include <osg/ref_ptr>
+#include <string>
+#include <memory>
 
-#include "../mwworld/weather.hpp"
+#include <osg/ref_ptr>
+#include <osg/Vec4f>
+#include <osg/PositionAttitudeTransform>
 
 namespace osg
 {
@@ -33,6 +36,70 @@ namespace MWRender
     class RainFader;
     class AlphaFader;
 
+    struct WeatherResult
+    {
+        std::string mCloudTexture;
+        std::string mNextCloudTexture;
+        float mCloudBlendFactor;
+
+        osg::Vec4f mFogColor;
+
+        osg::Vec4f mAmbientColor;
+
+        osg::Vec4f mSkyColor;
+
+        // sun light color
+        osg::Vec4f mSunColor;
+
+        // alpha is the sun transparency
+        osg::Vec4f mSunDiscColor;
+
+        float mFogDepth;
+
+        float mWindSpeed;
+
+        float mCloudSpeed;
+
+        float mGlareView;
+
+        bool mNight; // use night skybox
+        float mNightFade; // fading factor for night skybox
+
+        bool mIsStorm;
+
+        std::string mAmbientLoopSoundID;
+        float mAmbientSoundVolume;
+
+        std::string mParticleEffect;
+        std::string mRainEffect;
+        float mEffectFade;
+
+        float mRainSpeed;
+        float mRainFrequency;
+    };
+
+    struct MoonState
+    {
+        enum Phase
+        {
+            Phase_Full = 0,
+            Phase_WaningGibbous,
+            Phase_ThirdQuarter,
+            Phase_WaningCrescent,
+            Phase_New,
+            Phase_WaxingCrescent,
+            Phase_FirstQuarter,
+            Phase_WaxingGibbous,
+            Phase_Unspecified
+        };
+
+        float mRotationFromHorizon;
+        float mRotationFromNorth;
+        Phase mPhase;
+        float mShadowBlend;
+        float mMoonAlpha;
+    };
+
     class SkyManager
     {
     public:
@@ -60,7 +127,7 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
 
-        void setWeather(const MWWorld::WeatherResult& weather);
+        void setWeather(const WeatherResult& weather);
 
         void sunEnable();
 
@@ -72,24 +139,10 @@ namespace MWRender
 
         void setSunDirection(const osg::Vec3f& direction);
 
-        void setMasserDirection(const osg::Vec3f& direction);
+        void setMasserState(const MoonState& state);
+        void setSecundaState(const MoonState& state);
 
-        void setSecundaDirection(const osg::Vec3f& direction);
-
-        void setMasserFade(const float fade);
-
-        void setSecundaFade(const float fade);
-
-        void masserEnable();
-        void masserDisable();
-
-        void secundaEnable();
-        void secundaDisable();
-
-        void setLightningStrength(const float factor);
-
-        void setGlare(const float glare);
-        void setGlareEnabled(bool enabled);
+        void setGlareTimeOfDayFade(float val);
 
     private:
         void create();
@@ -148,7 +201,6 @@ namespace MWRender
         std::string mClouds;
         std::string mNextClouds;
         float mCloudBlendFactor;
-        float mCloudOpacity;
         float mCloudSpeed;
         float mStarsOpacity;
         osg::Vec4f mCloudColour;
@@ -158,9 +210,6 @@ namespace MWRender
         std::string mCurrentParticleEffect;
 
         float mRemainingTransitionTime;
-
-        float mGlare; // target
-        float mGlareFade; // actual
 
         bool mRainEnabled;
         std::string mRainEffect;

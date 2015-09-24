@@ -1,4 +1,3 @@
-
 #include "class.hpp"
 
 #include <stdexcept>
@@ -109,11 +108,6 @@ namespace MWWorld
         throw std::runtime_error("class cannot be hit");
     }
 
-    void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
-    {
-        throw std::runtime_error("class does not have actor health");
-    }
-
     boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
     {
         return boost::shared_ptr<Action> (new NullAction);
@@ -147,6 +141,11 @@ namespace MWWorld
     void Class::unlock (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not support unlocking");
+    }
+
+    bool Class::canLock(const Ptr &ptr) const
+    {
+        return false;
     }
 
     void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const

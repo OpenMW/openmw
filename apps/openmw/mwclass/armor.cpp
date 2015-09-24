@@ -1,4 +1,3 @@
-
 #include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>
@@ -21,6 +20,7 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -245,7 +245,7 @@ namespace MWClass
             typeText = "#{sHeavy}";
 
         text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
-            MWBase::Environment::get().getWorld()->getPlayerPtr()));
+            MWMechanics::getPlayer()));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"

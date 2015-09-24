@@ -59,10 +59,10 @@ namespace
     }
 
 
-    class CameraUpdateCallback : public osg::NodeCallback
+    class CameraUpdateGlobalCallback : public osg::NodeCallback
     {
     public:
-        CameraUpdateCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
+        CameraUpdateGlobalCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
             : mRendered(false)
             , mCamera(cam)
             , mParent(parent)
@@ -156,6 +156,9 @@ namespace MWRender
                         land->loadData(mask);
                 }
 
+                const ESM::Land::LandData *landData =
+                    land ? land->getLandData (ESM::Land::DATA_WNAM) : 0;
+
                 for (int cellY=0; cellY<mCellSize; ++cellY)
                 {
                     for (int cellX=0; cellX<mCellSize; ++cellX)
@@ -163,15 +166,14 @@ namespace MWRender
                         int vertexX = static_cast<int>(float(cellX)/float(mCellSize) * 9);
                         int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
-
                         int texelX = (x-mMinX) * mCellSize + cellX;
                         int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
 
                         unsigned char r,g,b;
 
                         float y = 0;
-                        if (land && land->mDataTypes & ESM::Land::DATA_WNAM)
-                            y = (land->mLandData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                        if (landData)
+                            y = (landData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
                         else
                             y = (SCHAR_MIN << 4) / 2048.f;
                         if (y < 0)
@@ -261,7 +263,7 @@ namespace MWRender
         else
             camera->setClearMask(GL_NONE);
 
-        camera->setUpdateCallback(new CameraUpdateCallback(camera, this));
+        camera->setUpdateCallback(new CameraUpdateGlobalCallback(camera, this));
 
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         camera->attach(osg::Camera::COLOR_BUFFER, mOverlayTexture);
@@ -361,7 +363,7 @@ namespace MWRender
         osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mOverlayImage, ostream);
         if (!result.success())
         {
-            std::cerr << "Can't write map overlay: " << result.message() << std::endl;
+            std::cerr << "Can't write map overlay: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 
@@ -411,7 +413,7 @@ namespace MWRender
         osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(istream);
         if (!result.success())
         {
-            std::cerr << "Can't read map overlay: " << result.message() << std::endl;
+            std::cerr << "Can't read map overlay: " << result.message() << " code " << result.status() << std::endl;
             return;
         }
 

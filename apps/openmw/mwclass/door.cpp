@@ -1,4 +1,3 @@
-
 #include "door.hpp"
 
 #include <components/esm/loaddoor.hpp>
@@ -26,6 +25,8 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 namespace
 {
@@ -127,7 +128,7 @@ namespace MWClass
 
         if (needKey && hasKey)
         {
-            if(actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            if(actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             unlock(ptr); //Call the function here. because that makes sense.
             // using a key disarms the trap
@@ -205,6 +206,11 @@ namespace MWClass
     void Door::unlock (const MWWorld::Ptr& ptr) const
     {
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
+    }
+
+    bool Door::canLock(const MWWorld::Ptr &ptr) const
+    {
+        return true;
     }
 
     std::string Door::getScript (const MWWorld::Ptr& ptr) const

@@ -65,7 +65,7 @@ namespace CSMWorld
             ColumnId_Weight = 50,
             ColumnId_EnchantmentPoints = 51,
             ColumnId_Quality = 52,
-            ColumnId_Ai = 53,
+            // unused
             ColumnId_AiHello = 54,
             ColumnId_AiFlee = 55,
             ColumnId_AiFight = 56,
@@ -102,7 +102,7 @@ namespace CSMWorld
             ColumnId_OriginalCreature = 87,
             ColumnId_Biped = 88,
             ColumnId_HasWeapon = 89,
-            ColumnId_NoMovement = 90,
+            // unused
             ColumnId_Swims = 91,
             ColumnId_Flies = 92,
             ColumnId_Walks = 93,
@@ -189,7 +189,7 @@ namespace CSMWorld
             ColumnId_RotX = 174,
             ColumnId_RotY = 175,
             ColumnId_RotZ = 176,
-            ColumnId_Skill = 177,
+            // unused
             ColumnId_OwnerGlobal = 178,
             ColumnId_DefaultProfile = 179,
             ColumnId_BypassNewGame = 180,
@@ -276,22 +276,22 @@ namespace CSMWorld
             ColumnId_NpcSkills = 249,
             ColumnId_UChar = 250,
             ColumnId_NpcMisc = 251,
-            ColumnId_NpcLevel = 252,
+            ColumnId_Level = 252,
             ColumnId_NpcFactionID = 253,
-            ColumnId_NpcHealth = 254,
-            ColumnId_NpcMana = 255,
-            ColumnId_NpcFatigue = 256,
+            // unused
+            ColumnId_Mana = 255,
+            ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,
             ColumnId_NpcReputation = 258,
             ColumnId_NpcRank = 259,
-            ColumnId_NpcGold = 260,
+            ColumnId_Gold = 260,
             ColumnId_NpcPersistence = 261,
 
             ColumnId_RaceAttributes = 262,
             ColumnId_RaceMaleValue = 263,
             ColumnId_RaceFemaleValue = 264,
             ColumnId_RaceSkillBonus = 265,
-            ColumnId_RaceSkill = 266,
+            // unused
             ColumnId_RaceBonus = 267,
 
             ColumnId_Interior = 268,
@@ -305,6 +305,16 @@ namespace CSMWorld
             ColumnId_FileFormat = 275,
             ColumnId_FileDescription = 276,
             ColumnId_Author = 277,
+
+            ColumnId_MinMagnitude = 278,
+            ColumnId_MaxMagnitude = 279,
+
+            ColumnId_CreatureAttributes = 280,
+            ColumnId_AttributeValue = 281,
+            ColumnId_CreatureAttack = 282,
+            ColumnId_MinAttack = 283,
+            ColumnId_MaxAttack = 284,
+            ColumnId_CreatureMisc = 285,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.

@@ -47,6 +47,8 @@ namespace MWClass
             virtual void unlock (const MWWorld::Ptr& ptr) const;
             ///< Unlock object
 
+            virtual bool canLock(const MWWorld::Ptr &ptr) const;
+
             virtual std::string getScript (const MWWorld::Ptr& ptr) const;
             ///< Return name of the script attached to ptr
 

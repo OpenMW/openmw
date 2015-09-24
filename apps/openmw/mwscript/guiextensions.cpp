@@ -1,4 +1,3 @@
-
 #include "guiextensions.hpp"
 
 #include <components/compiler/extensions.hpp>
@@ -14,6 +13,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -54,7 +55,7 @@ namespace MWScript
             {
                 MWWorld::Ptr bed = R()(runtime, false);
 
-                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWBase::Environment::get().getWorld()->getPlayerPtr(),
+                if (bed.isEmpty() || !MWBase::Environment::get().getMechanicsManager()->sleepInBed(MWMechanics::getPlayer(),
                                                                              bed))
                     MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_RestBed);
             }

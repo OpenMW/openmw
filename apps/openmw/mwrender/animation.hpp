@@ -67,16 +67,63 @@ typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 class Animation
 {
 public:
-    enum Group {
-        Group_LowerBody = 1<<0,
+    enum BoneGroup {
+        BoneGroup_LowerBody = 0,
+        BoneGroup_Torso,
+        BoneGroup_LeftArm,
+        BoneGroup_RightArm
+    };
 
-        Group_Torso = 1<<1,
-        Group_LeftArm = 1<<2,
-        Group_RightArm = 1<<3,
+    enum BlendMask {
+        BlendMask_LowerBody = 1<<0,
+        BlendMask_Torso = 1<<1,
+        BlendMask_LeftArm = 1<<2,
+        BlendMask_RightArm = 1<<3,
 
-        Group_UpperBody = Group_Torso | Group_LeftArm | Group_RightArm,
+        BlendMask_UpperBody = BlendMask_Torso | BlendMask_LeftArm | BlendMask_RightArm,
 
-        Group_All = Group_LowerBody | Group_UpperBody
+        BlendMask_All = BlendMask_LowerBody | BlendMask_UpperBody
+    };
+    /* This is the number of *discrete* blend masks. */
+    static const size_t sNumBlendMasks = 4;
+
+    /// Holds an animation priority value for each BoneGroup.
+    struct AnimPriority
+    {
+        /// Convenience constructor, initialises all priorities to the same value.
+        AnimPriority(int priority)
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                mPriority[i] = priority;
+        }
+
+        bool operator == (const AnimPriority& other) const
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                if (other.mPriority[i] != mPriority[i])
+                    return false;
+            return true;
+        }
+
+        int& operator[] (BoneGroup n)
+        {
+            return mPriority[n];
+        }
+
+        const int& operator[] (BoneGroup n) const
+        {
+            return mPriority[n];
+        }
+
+        bool contains(int priority) const
+        {
+            for (unsigned int i=0; i<sNumBlendMasks; ++i)
+                if (priority == mPriority[i])
+                    return true;
+            return false;
+        }
+
+        int mPriority[sNumBlendMasks];
     };
 
     class TextKeyListener
@@ -89,9 +136,6 @@ public:
     void setTextKeyListener(TextKeyListener* listener);
 
 protected:
-    /* This is the number of *discrete* groups. */
-    static const size_t sNumGroups = 4;
-
     class AnimationTime : public SceneUtil::ControllerSource
     {
     private:
@@ -132,13 +176,13 @@ protected:
         bool mPlaying;
         size_t mLoopCount;
 
-        int mPriority;
-        int mGroups;
+        AnimPriority mPriority;
+        int mBlendMask;
         bool mAutoDisable;
 
         AnimState() : mStartTime(0.0f), mLoopStartTime(0.0f), mLoopStopTime(0.0f), mStopTime(0.0f),
                       mTime(new float), mSpeedMult(1.0f), mPlaying(false), mLoopCount(0),
-                      mPriority(0), mGroups(0), mAutoDisable(true)
+                      mPriority(0), mBlendMask(0), mAutoDisable(true)
         {
         }
         ~AnimState();
@@ -176,7 +220,7 @@ protected:
     typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
     ControllerMap mActiveControllers;
 
-    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumGroups];
+    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
@@ -209,11 +253,13 @@ protected:
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
 
+    float mAlpha;
+
     /* Sets the appropriate animations on the bone groups based on priority.
      */
     void resetActiveGroups();
 
-    size_t detectAnimGroup(osg::Node* node);
+    size_t detectBlendMask(osg::Node* node);
 
     /* Updates the position of the accum root node for the given time, and
      * returns the wanted movement vector from the previous time. */
@@ -239,7 +285,7 @@ protected:
      * @param baseonly If true, then any meshes or particle systems in the model are ignored
      *      (useful for NPCs, where only the skeleton is needed for the root, and the actual NPC parts are then assembled from separate files).
      */
-    void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly);
+    void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature);
 
     /* Adds the keyframe controllers in the specified model as a new animation source. Note that
      * the filename portion of the provided model name will be prepended with 'x', and the .nif
@@ -304,7 +350,7 @@ public:
      * \param priority Priority of the animation. The animation will play on
      *                 bone groups that don't have another animation set of a
      *                 higher priority.
-     * \param groups Bone groups to play the animation on.
+     * \param blendMask Bone groups to play the animation on.
      * \param autodisable Automatically disable the animation when it stops
      *                    playing.
      * \param speedmult Speed multiplier for the animation.
@@ -319,7 +365,7 @@ public:
      * \param loopFallback Allow looping an animation that has no loop keys, i.e. fall back to use
      *                     the "start" and "stop" keys for looping?
      */
-    void play(const std::string &groupname, int priority, int groups, bool autodisable,
+    void play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable,
               float speedmult, const std::string &start, const std::string &stop,
               float startpoint, size_t loops, bool loopfallback=false);
 
@@ -358,7 +404,6 @@ public:
      * \param groupname Animation group to disable.
      */
     void disable(const std::string &groupname);
-    void changeGroups(const std::string &groupname, int group);
 
     /** Retrieves the velocity (in units per second) that the animation will move. */
     float getVelocity(const std::string &groupname) const;
@@ -376,7 +421,8 @@ public:
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group) {}
     virtual void setVampire(bool vampire) {}
-    virtual void setAlpha(float alpha) {}
+    /// A value < 1 makes the animation translucent, 1.f = fully opaque
+    void setAlpha(float alpha);
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
     virtual void releaseArrow(float attackStrength) {}

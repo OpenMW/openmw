@@ -83,6 +83,8 @@ namespace MWInput
 
         virtual ~InputManager();
 
+        virtual bool isWindowVisible();
+
         /// Clear all savegame-specific data
         virtual void clear();
 
@@ -153,6 +155,7 @@ namespace MWInput
 
     private:
         SDL_Window* mWindow;
+        bool mWindowVisible;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
         bool mJoystickLastUsed;

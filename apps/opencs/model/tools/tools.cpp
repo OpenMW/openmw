@@ -1,4 +1,3 @@
-
 #include "tools.hpp"
 
 #include <QThreadPool>
@@ -28,6 +27,8 @@
 #include "searchoperation.hpp"
 #include "pathgridcheck.hpp"
 #include "soundgencheck.hpp"
+#include "magiceffectcheck.hpp"
+#include "mergeoperation.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -35,6 +36,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
     {
         case CSMDoc::State_Verifying: return &mVerifier;
         case CSMDoc::State_Searching: return &mSearch;
+        case CSMDoc::State_Merging: return &mMerge;
     }
 
     return 0;
@@ -53,7 +55,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 
         std::vector<QString> settings;
         settings.push_back ("script-editor/warnings");
-        
+
         mVerifierOperation->configureSettings (settings);
 
         connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
@@ -108,15 +110,21 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                  mData.getSounds(),
                                                                  mData.getReferenceables()));
 
+        mVerifierOperation->appendStage (new MagicEffectCheckStage (mData.getMagicEffects(),
+                                                                    mData.getSounds(),
+                                                                    mData.getReferenceables(),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Icons),
+                                                                    mData.getResources (CSMWorld::UniversalId::Type_Textures)));
+
         mVerifier.setOperation (mVerifierOperation);
     }
 
     return &mVerifier;
 }
 
-CSMTools::Tools::Tools (CSMDoc::Document& document)
+CSMTools::Tools::Tools (CSMDoc::Document& document, ToUTF8::FromType encoding)
 : mDocument (document), mData (document.getData()), mVerifierOperation (0),
-  mSearchOperation (0), mNextReportNumber (0)
+  mSearchOperation (0), mMergeOperation (0), mNextReportNumber (0), mEncoding (encoding)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
@@ -126,6 +134,10 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
     connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
     connect (&mSearch, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
         this, SLOT (verifierMessage (const CSMDoc::Message&, int)));
+
+    connect (&mMerge, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
+    connect (&mMerge, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
+    // don't need to connect report message, since there are no messages for merge
 }
 
 CSMTools::Tools::~Tools()
@@ -142,6 +154,12 @@ CSMTools::Tools::~Tools()
         delete mSearchOperation;
     }
 
+    if (mMergeOperation)
+    {
+        mMerge.abortAndWait();
+        delete mMergeOperation;
+    }
+
     for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
         delete iter->second;
 }
@@ -153,7 +171,7 @@ CSMWorld::UniversalId CSMTools::Tools::runVerifier (const CSMWorld::UniversalId&
 
     if (mReports.find (reportNumber)==mReports.end())
         mReports.insert (std::make_pair (reportNumber, new ReportModel));
-        
+
     mActiveReports[CSMDoc::State_Verifying] = reportNumber;
 
     getVerifier()->start();
@@ -183,6 +201,25 @@ void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Se
     mSearch.start();
 }
 
+void CSMTools::Tools::runMerge (std::auto_ptr<CSMDoc::Document> target)
+{
+    // not setting an active report, because merge does not produce messages
+
+    if (!mMergeOperation)
+    {
+        mMergeOperation = new MergeOperation (mDocument, mEncoding);
+        mMerge.setOperation (mMergeOperation);
+        connect (mMergeOperation, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
+    }
+
+    target->flagAsDirty();
+
+    mMergeOperation->setTarget (target);
+
+    mMerge.start();
+}
+
 void CSMTools::Tools::abortOperation (int type)
 {
     if (CSMDoc::OperationHolder *operation = get (type))
@@ -195,6 +232,7 @@ int CSMTools::Tools::getRunningOperations() const
     {
        CSMDoc::State_Verifying,
        CSMDoc::State_Searching,
+       CSMDoc::State_Merging,
         -1
     };
 
@@ -225,4 +263,3 @@ void CSMTools::Tools::verifierMessage (const CSMDoc::Message& message, int type)
     if (iter!=mActiveReports.end())
         mReports[iter->second]->add (message);
 }
-

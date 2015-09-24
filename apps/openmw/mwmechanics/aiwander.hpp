@@ -63,14 +63,37 @@ namespace MWMechanics
                 Greet_InProgress,
                 Greet_Done
             };
+
+            enum WanderState {
+                Wander_ChooseAction,
+                Wander_IdleNow,
+                Wander_MoveNow,
+                Wander_Walking
+            };
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
             
             void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            void playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
+
+            /// Have the given actor play an idle animation
+            /// @return Success or error
+            bool playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
-            void getRandomIdle(unsigned short& playedIdle);
+            short unsigned getRandomIdle();
+            void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
+            void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage, float duration, ESM::Position& pos);
+            void playIdleDialogueRandomly(const MWWorld::Ptr& actor);
+            void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
+            void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
+            void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+            void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage, ESM::Position& pos);
+            void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
+                const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
+            bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            void returnToStartLocation(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
 
             int mDistance; // how far the actor can wander from the spawn point
             int mDuration;
@@ -88,8 +111,8 @@ namespace MWMechanics
 
            
 
-            // if false triggers calculating allowed nodes based on mDistance
-            bool mStoredAvailableNodes;
+            // do we need to calculate allowed nodes based on mDistance
+            bool mPopulateAvailableNodes;
 
 
             
@@ -118,8 +141,19 @@ namespace MWMechanics
                 GroupIndex_MaxIdle = 9
             };
 
+            /// convert point from local (i.e. cell) to world co-ordinates
+            void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell);
+
+            void SetCurrentNodeToClosestAllowedNode(osg::Vec3f npcPos);
+
+            void AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex);
+
+            void AddPointBetweenPathGridPoints(const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end);
+
             /// lookup table for converting idleSelect value to groupName
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
+
+            static int OffsetToPreventOvercrowding();
     };
     
     

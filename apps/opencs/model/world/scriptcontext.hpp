@@ -46,6 +46,9 @@ namespace CSMWorld
 
             void clear();
             ///< Remove all cached data.
+
+            /// \return Were there any locals that needed clearing?
+            bool clearLocals (const std::string& script);
     };
 }
 

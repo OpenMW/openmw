@@ -170,6 +170,7 @@ namespace MWWorld
         size_t getSize() const;
         int getDynamicSize() const;
 
+        /// @note The record identifiers are listed in the order that the records were defined by the content files.
         void listIdentifier(std::vector<std::string> &list) const;
 
         T *insert(const T &item);
@@ -319,7 +320,7 @@ namespace MWWorld
 
     public:
 
-        Store<ESM::Pathgrid>();
+        Store();
 
         void setCells(Store<ESM::Cell>& cells);
         void load(ESM::ESMReader &esm, const std::string &id);

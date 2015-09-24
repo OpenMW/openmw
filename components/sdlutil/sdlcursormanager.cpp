@@ -10,8 +10,15 @@
 #include <osg/Geometry>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osgViewer/GraphicsWindow>
 
 #include "imagetosurface.hpp"
+
+#ifdef OSG_LIBRARY_STATIC
+// Sets the default windowing system interface according to the OS.
+// Necessary for OpenSceneGraph to do some things, like decompression.
+USE_GRAPHICSWINDOW()
+#endif
 
 namespace
 {
@@ -119,7 +126,17 @@ namespace
 
         glViewport(0, 0, width, height);
 
-        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+        osg::ref_ptr<osg::Geometry> geom;
+
+#if defined(__APPLE__)
+        // Extra flip needed on Intel graphics OS X systems due to a driver bug
+        std::string vendorString = (const char*)glGetString(GL_VENDOR);
+        if (vendorString.find("Intel") != std::string::npos)
+            geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,1,0), osg::Vec3(2,0,0), osg::Vec3(0,-2,0));
+        else
+#endif
+        geom = osg::createTexturedQuadGeometry(osg::Vec3(-1,-1,0), osg::Vec3(2,0,0), osg::Vec3(0,2,0));
+
         geom->drawImplementation(renderInfo);
 
         glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, resultImage->data());
@@ -175,23 +192,16 @@ namespace SDLUtil
         }
     }
 
-    bool SDLCursorManager::cursorChanged(const std::string& name)
+    void SDLCursorManager::cursorChanged(const std::string& name)
     {
         mCurrentCursor = name;
 
         CursorMap::const_iterator curs_iter = mCursorMap.find(name);
 
-        //we have this cursor
         if(curs_iter != mCursorMap.end())
         {
+            //we have this cursor
             _setGUICursor(name);
-
-            return false;
-        }
-        else
-        {
-            //they should get back to us with more info
-            return true;
         }
     }
 
@@ -200,7 +210,7 @@ namespace SDLUtil
         SDL_SetCursor(mCursorMap.find(name)->second);
     }
 
-    void SDLCursorManager::receiveCursorInfo(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
+    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
         _createCursorFromResource(name, rotDegrees, image, size_x, size_y, hotspot_x, hotspot_y);
     }

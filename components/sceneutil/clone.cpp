@@ -52,6 +52,32 @@ namespace SceneUtil
         {
             osg::CopyOp copyop = *this;
             copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS);
+
+            /*
+
+            Deep copy of primitives required to work around the following (bad?) code in osg::Geometry copy constructor:
+
+            if ((copyop.getCopyFlags() & osg::CopyOp::DEEP_COPY_ARRAYS))
+            {
+                if (_useVertexBufferObjects)
+                {
+                    // copying of arrays doesn't set up buffer objects so we'll need to force
+                    // Geometry to assign these, we'll do this by switching off VBO's then renabling them.
+                    setUseVertexBufferObjects(false);
+                    setUseVertexBufferObjects(true);
+                }
+            }
+
+            In case of DEEP_COPY_PRIMITIVES=Off, DEEP_COPY_ARRAYS=On, the above code makes a modification to the original const Geometry& we copied from,
+            causing problems if we relied on the original Geometry to remain static such as when it was added to an osgUtil::IncrementalCompileOperation.
+
+            Possible fix submitted to osg-submissions ( http://forum.openscenegraph.org/viewtopic.php?t=15217 ).
+
+            */
+
+            copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_PRIMITIVES);
+
+
             osg::Drawable* cloned = osg::clone(drawable, copyop);
             if (cloned->getUpdateCallback())
                 cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));

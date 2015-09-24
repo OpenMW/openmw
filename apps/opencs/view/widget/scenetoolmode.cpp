@@ -1,4 +1,3 @@
-
 #include "scenetoolmode.hpp"
 
 #include <QHBoxLayout>
