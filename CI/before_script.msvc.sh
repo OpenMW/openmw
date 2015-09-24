@@ -520,8 +520,8 @@ printf "SDL 2.0.3... "
 
 	SDL_SDK="`real_pwd`/SDL2-2.0.3"
 	add_cmake_opts -DSDL2_INCLUDE_DIR="$SDL_SDK/include" \
-		-DSDL2_LIBRARY_PATH="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib" \
-		-DSDL2_LIBRARY_ONLY="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib"
+		-DSDL2MAIN_LIBRARY="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2main.lib" \
+		-DSDL2_LIBRARY_PATH="$SDL_SDK/lib/x$ARCHSUFFIX/SDL2.lib"
 
 	add_runtime_dlls `pwd`/SDL2-2.0.3/lib/x$ARCHSUFFIX/SDL2.dll
 
