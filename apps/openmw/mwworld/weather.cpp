@@ -1,6 +1,3 @@
-#define _USE_MATH_DEFINES
-#include <cmath>
-
 #include "weather.hpp"
 
 #include <components/misc/rng.hpp>
@@ -25,6 +22,8 @@
 #include "esmstore.hpp"
 #include "fallback.hpp"
 #include "cellstore.hpp"
+
+#include <cmath>
 
 using namespace MWWorld;
 

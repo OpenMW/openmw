@@ -27,10 +27,10 @@
 namespace
 {
 
-    class CameraUpdateCallback : public osg::NodeCallback
+    class CameraLocalUpdateCallback : public osg::NodeCallback
     {
     public:
-        CameraUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
+        CameraLocalUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
             : mRendered(false)
             , mCamera(cam)
             , mParent(parent)
@@ -205,7 +205,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setStateSet(stateset);
     camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
-    camera->setUpdateCallback(new CameraUpdateCallback(camera, this));
+    camera->setUpdateCallback(new CameraLocalUpdateCallback(camera, this));
 
     return camera;
 }

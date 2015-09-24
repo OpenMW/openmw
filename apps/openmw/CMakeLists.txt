@@ -65,7 +65,7 @@ add_openmw_dir (mwworld
     containerstore actiontalk actiontake manualref player cellfunctors failedaction
     cells localscripts customdata inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
-    esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
+    store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
     contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
     )
 
@@ -179,4 +179,5 @@ if (MSVC)
     if (CMAKE_CL_64)
         set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /bigobj")
     endif (CMAKE_CL_64)
+    add_definitions("-D_USE_MATH_DEFINES")
 endif (MSVC)

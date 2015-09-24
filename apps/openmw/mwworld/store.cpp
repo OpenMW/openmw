@@ -994,7 +994,7 @@ namespace MWWorld
 
 
     template<>
-    inline void Store<ESM::Dialogue>::setUp()
+    void Store<ESM::Dialogue>::setUp()
     {
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
         // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
@@ -1013,7 +1013,7 @@ namespace MWWorld
     }
 
     template <>
-    inline void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
+    void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
         std::map<std::string, ESM::Dialogue>::iterator it = mStatic.find(idLower);
@@ -1029,7 +1029,6 @@ namespace MWWorld
     // Script
     //=========================================================================
 
-    template <>
     inline void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
         ESM::Script scpt;
         scpt.load(esm);
@@ -1046,7 +1045,6 @@ namespace MWWorld
     // StartScript
     //=========================================================================
 
-    template <>
     inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
     {
         ESM::StartScript s;

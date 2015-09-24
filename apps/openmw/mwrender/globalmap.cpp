@@ -59,10 +59,10 @@ namespace
     }
 
 
-    class CameraUpdateCallback : public osg::NodeCallback
+    class CameraUpdateGlobalCallback : public osg::NodeCallback
     {
     public:
-        CameraUpdateCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
+        CameraUpdateGlobalCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
             : mRendered(false)
             , mCamera(cam)
             , mParent(parent)
@@ -263,7 +263,7 @@ namespace MWRender
         else
             camera->setClearMask(GL_NONE);
 
-        camera->setUpdateCallback(new CameraUpdateCallback(camera, this));
+        camera->setUpdateCallback(new CameraUpdateGlobalCallback(camera, this));
 
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         camera->attach(osg::Camera::COLOR_BUFFER, mOverlayTexture);

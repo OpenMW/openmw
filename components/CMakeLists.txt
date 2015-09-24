@@ -47,7 +47,7 @@ add_component_dir (sceneutil
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey data node base nifstream
+    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream
     )
 
 add_component_dir (nifosg

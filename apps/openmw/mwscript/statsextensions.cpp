@@ -228,7 +228,7 @@ namespace MWScript
 
                     // workaround broken endgame scripts that kill dagoth ur
                     if (!R::implicit &&
-                        Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
+                        ::Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "dagoth_ur_1"))
                     {
                         runtime.push (peek);
 

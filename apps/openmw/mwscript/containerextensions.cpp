@@ -56,10 +56,10 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    if(Misc::StringUtils::ciEqual(item, "gold_005")
-                            || Misc::StringUtils::ciEqual(item, "gold_010")
-                            || Misc::StringUtils::ciEqual(item, "gold_025")
-                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
@@ -97,10 +97,10 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    if(Misc::StringUtils::ciEqual(item, "gold_005")
-                            || Misc::StringUtils::ciEqual(item, "gold_010")
-                            || Misc::StringUtils::ciEqual(item, "gold_025")
-                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
                     
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
@@ -131,10 +131,10 @@ namespace MWScript
                     if (count == 0)
                         return;
 
-                    if(Misc::StringUtils::ciEqual(item, "gold_005")
-                            || Misc::StringUtils::ciEqual(item, "gold_010")
-                            || Misc::StringUtils::ciEqual(item, "gold_025")
-                            || Misc::StringUtils::ciEqual(item, "gold_100"))
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
                         
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);

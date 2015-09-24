@@ -1,4 +1,5 @@
 #ifndef OPENMW_MECHANICS_STEERING_H
+#define OPENMW_MECHANICS_STEERING_H
 
 #include <osg/Math>
 

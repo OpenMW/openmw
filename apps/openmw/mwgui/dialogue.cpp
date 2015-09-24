@@ -31,7 +31,7 @@
 namespace
 {
 
-    MyGUI::Colour getTextColour (const std::string& type)
+    MyGUI::Colour getDialogueTextColour (const std::string& type)
     {
         return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
     }
@@ -115,7 +115,7 @@ namespace MWGui
 
     void Response::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("header"));
+        BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("header"));
         typesetter->sectionBreak(9);
         if (mTitle != "")
             typesetter->write(title, to_utf8_span(mTitle.c_str()));
@@ -159,14 +159,14 @@ namespace MWGui
 
         if (hyperLinks.size() && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
         {
-            BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
+            BookTypesetter::Style* style = typesetter->createStyle("", getDialogueTextColour("normal"));
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (std::map<Range, intptr_t>::iterator it = hyperLinks.begin(); it != hyperLinks.end(); ++it)
             {
                 intptr_t topicId = it->second;
-                const MyGUI::Colour linkHot    (getTextColour("link_over"));
-                const MyGUI::Colour linkNormal (getTextColour("link"));
-                const MyGUI::Colour linkActive (getTextColour("link_pressed"));
+                const MyGUI::Colour linkHot(getDialogueTextColour("link_over"));
+                const MyGUI::Colour linkNormal(getDialogueTextColour("link"));
+                const MyGUI::Colour linkActive(getDialogueTextColour("link_pressed"));
                 BookTypesetter::Style* hotStyle = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
                 if (formatted < it->first.first)
                     typesetter->write(style, formatted, it->first.first);
@@ -199,11 +199,11 @@ namespace MWGui
 
     void Response::addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const
     {
-        BookTypesetter::Style* style = typesetter->createStyle("", getTextColour("normal"));
+        BookTypesetter::Style* style = typesetter->createStyle("", getDialogueTextColour("normal"));
 
-        const MyGUI::Colour linkHot    (getTextColour("link_over"));
-        const MyGUI::Colour linkNormal (getTextColour("link"));
-        const MyGUI::Colour linkActive (getTextColour("link_pressed"));
+        const MyGUI::Colour linkHot(getDialogueTextColour("link_over"));
+        const MyGUI::Colour linkNormal(getDialogueTextColour("link"));
+        const MyGUI::Colour linkActive(getDialogueTextColour("link_pressed"));
 
         if (topicId)
             style = typesetter->createHotStyle (style, linkNormal, linkHot, linkActive, topicId);
@@ -217,7 +217,7 @@ namespace MWGui
 
     void Message::write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const
     {
-        BookTypesetter::Style* title = typesetter->createStyle("", getTextColour("notify"));
+        BookTypesetter::Style* title = typesetter->createStyle("", getDialogueTextColour("notify"));
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText.c_str()));
     }
@@ -486,9 +486,9 @@ namespace MWGui
 
         typesetter->sectionBreak(9);
         // choices
-        const MyGUI::Colour linkHot    (getTextColour("answer_over"));
-        const MyGUI::Colour linkNormal (getTextColour("answer"));
-        const MyGUI::Colour linkActive (getTextColour("answer_pressed"));
+        const MyGUI::Colour linkHot(getDialogueTextColour("answer_over"));
+        const MyGUI::Colour linkNormal(getDialogueTextColour("answer"));
+        const MyGUI::Colour linkActive(getDialogueTextColour("answer_pressed"));
         for (std::vector<std::pair<std::string, int> >::iterator it = mChoices.begin(); it != mChoices.end(); ++it)
         {
             Choice* link = new Choice(it->second);
