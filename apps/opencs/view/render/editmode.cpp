@@ -16,3 +16,8 @@ void CSVRender::EditMode::activate (CSVWidget::SceneToolbar *toolbar)
 {
     mWorldspaceWidget->setInteractionMask (mMask);
 }
+
+void CSVRender::EditMode::updateUserSetting (const QString& name, const QStringList& value)
+{
+
+}
