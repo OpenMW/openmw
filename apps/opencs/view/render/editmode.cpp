@@ -21,3 +21,8 @@ void CSVRender::EditMode::updateUserSetting (const QString& name, const QStringL
 {
 
 }
+
+void CSVRender::EditMode::setEditLock (bool locked)
+{
+
+}

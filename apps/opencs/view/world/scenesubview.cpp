@@ -28,7 +28,7 @@
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL),
-  mEditMode (0)
+  mEditMode (0), mLocked (false)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -131,7 +131,8 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
 {
-
+    mLocked = locked;
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (locked);
 }
 
 void CSVWorld::SceneSubView::setStatusBar (bool show)
@@ -258,4 +259,12 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
 
     mScene->selectDefaultNavigationMode();
     setFocusProxy (mScene);
+
+    connect (mEditMode, SIGNAL (modeChanged (const std::string&)),
+        this, SLOT (editModeChanged (const std::string&)));
+}
+
+void CSVWorld::SceneSubView::editModeChanged (const std::string& id)
+{
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
 }

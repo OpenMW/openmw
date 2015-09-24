@@ -47,6 +47,7 @@ namespace CSVWorld
             CSVWidget::SceneToolbar* mToolbar;
             std::string mTitle;
             CSVWidget::SceneToolMode *mEditMode;
+            bool mLocked;
 
         public:
 
@@ -85,6 +86,8 @@ namespace CSVWorld
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+
+            void editModeChanged (const std::string& id);
     };
 }
 
