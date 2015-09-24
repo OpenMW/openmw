@@ -15,6 +15,7 @@
 
 #include "../render/pagedworldspacewidget.hpp"
 #include "../render/unpagedworldspacewidget.hpp"
+#include "../render/editmode.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -26,7 +27,8 @@
 #include "creator.hpp"
 
 CSVWorld::SceneSubView::SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL)
+: SubView (id), mScene(NULL), mLayout(new QHBoxLayout), mDocument(document), mToolbar(NULL),
+  mEditMode (0)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -121,8 +123,8 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
     toolbar->addTool (runTool);
 
-    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
-    toolbar->addTool (editModeTool);
+    mEditMode = widget->makeEditModeSelector (toolbar);
+    toolbar->addTool (mEditMode);
 
     return toolbar;
 }
@@ -145,6 +147,13 @@ void CSVWorld::SceneSubView::useHint (const std::string& hint)
 std::string CSVWorld::SceneSubView::getTitle() const
 {
     return mTitle;
+}
+
+void CSVWorld::SceneSubView::updateUserSetting (const QString& name, const QStringList& value)
+{
+    mScene->updateUserSetting (name, value);
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
+    CSVDoc::SubView::updateUserSetting (name, value);
 }
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)

@@ -254,6 +254,11 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
     return mInteractionMask & getVisibilityMask();
 }
 
+void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const QStringList& value)
+{
+
+}
+
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {

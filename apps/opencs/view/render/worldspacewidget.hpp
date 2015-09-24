@@ -93,6 +93,8 @@ namespace CSVRender
             /// marked for interaction.
             unsigned int getInteractionMask() const;
 
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
