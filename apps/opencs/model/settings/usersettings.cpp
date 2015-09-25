@@ -399,11 +399,12 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         secondaryEditing->setDeclaredValues (values);
         secondaryEditing->setDefaultValue (cRight);
 
-        values << "Context Sensitive";
-
         Setting *selection = createSetting (Type_ComboBox, "select", "Selection Button");
         selection->setDeclaredValues (values);
         selection->setDefaultValue (middle);
+
+        Setting *contextSensitive = createSetting (Type_CheckBox, "context-select", "Context Sensitive Selection");
+        contextSensitive->setDefaultValue ("false");
     }
 
     {
