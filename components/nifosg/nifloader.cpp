@@ -113,6 +113,7 @@ namespace
 
     // NodeCallback used to have a transform always oriented towards the camera. Can have translation and scale
     // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
+    // Must be set as a cull callback.
     class BillboardCallback : public osg::NodeCallback
     {
     public:
@@ -160,24 +161,34 @@ namespace
     struct UpdateMorphGeometry : public osg::Drawable::CullCallback
     {
         UpdateMorphGeometry()
+            : mLastFrameNumber(0)
         {
         }
 
         UpdateMorphGeometry(const UpdateMorphGeometry& copy, const osg::CopyOp& copyop)
             : osg::Drawable::CullCallback(copy, copyop)
+            , mLastFrameNumber(0)
         {
         }
 
         META_Object(NifOsg, UpdateMorphGeometry)
 
-        virtual bool cull(osg::NodeVisitor *, osg::Drawable * drw, osg::State *) const
+        virtual bool cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
         {
             osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
             if (!geom)
                 return false;
+
+            if (mLastFrameNumber == nv->getFrameStamp()->getFrameNumber())
+                return false;
+            mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+
             geom->transformSoftwareMethod();
             return false;
         }
+
+    private:
+        mutable unsigned int mLastFrameNumber;
     };
 
     // Callback to return a static bounding box for a MorphGeometry. The idea is to not recalculate the bounding box
