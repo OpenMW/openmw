@@ -18,6 +18,8 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
 
+#include "../../model/settings/usersettings.hpp"
+
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
@@ -25,6 +27,17 @@
 #include "object.hpp"
 #include "elements.hpp"
 #include "editmode.hpp"
+
+namespace
+{
+    static const char * const sMappingSettings[] =
+    {
+        "p-navi", "s-navi",
+        "p-edit", "s-edit",
+        "select",
+        0
+    };
+}
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
@@ -59,6 +72,13 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
+
+    for (int i=0; sMappingSettings[i]; ++i)
+    {
+        QString key ("scene-input/");
+        key += sMappingSettings[i];
+        storeMappingSetting (key, CSMSettings::UserSettings::instance().settingValue (key));
+    }
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
@@ -256,7 +276,8 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
 
 void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const QStringList& value)
 {
-
+    if (!value.isEmpty() && storeMappingSetting (name, value.first()))
+        return;
 }
 
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
@@ -291,6 +312,40 @@ void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     event->accept();
+}
+
+
+bool CSVRender::WorldspaceWidget::storeMappingSetting (const QString& key, const QString& value)
+{
+    const QString prefix = "scene-input/";
+
+    if (key.startsWith (prefix))
+    {
+        QString key2 (key.mid (prefix.length()));
+
+        for (int i=0; sMappingSettings[i]; ++i)
+            if (key2==sMappingSettings[i])
+            {
+          std::cout<<"button :"<<sMappingSettings[i]<<std::endl;
+                Qt::MouseButton button = Qt::NoButton;
+
+                if (value.endsWith ("Left Mouse-Button"))
+                    button = Qt::LeftButton;
+                else if (value.endsWith ("Right Mouse-Button"))
+                    button = Qt::RightButton;
+                else if (value.endsWith ("Middle Mouse-Button"))
+                    button = Qt::MiddleButton;
+                else
+                    return false;
+
+                bool ctrl = value.startsWith ("Ctrl-");
+
+                mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
+                return true;
+            }
+    }
+
+    return false;
 }
 
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
