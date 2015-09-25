@@ -326,7 +326,6 @@ bool CSVRender::WorldspaceWidget::storeMappingSetting (const QString& key, const
         for (int i=0; sMappingSettings[i]; ++i)
             if (key2==sMappingSettings[i])
             {
-          std::cout<<"button :"<<sMappingSettings[i]<<std::endl;
                 Qt::MouseButton button = Qt::NoButton;
 
                 if (value.endsWith ("Left Mouse-Button"))
