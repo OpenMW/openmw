@@ -1,6 +1,8 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <map>
+
 #include <boost/shared_ptr.hpp>
 
 #include "scenewidget.hpp"
@@ -31,6 +33,7 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
             unsigned int mInteractionMask;
+            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
 
         public:
 
@@ -119,6 +122,9 @@ namespace CSVRender
             void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
+
+            /// \return Is \a key a button mapping setting? (ignored otherwise)
+            bool storeMappingSetting (const QString& key, const QString& value);
 
             virtual std::string getStartupInstruction() = 0;
 
