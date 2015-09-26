@@ -175,7 +175,7 @@ namespace Compiler
             {
                 value += c;
             }
-            else if (isStringCharacter (c))
+            else if (c!='-' && isStringCharacter (c))
             {
                 error = true;
                 value += c;
