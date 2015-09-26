@@ -38,6 +38,11 @@ namespace
 }
 
 
+CSVRender::ObjectTag::ObjectTag (Object* object)
+: TagBase (Element_Reference), mObject (object)
+{}
+
+
 void CSVRender::Object::clear()
 {
 }
