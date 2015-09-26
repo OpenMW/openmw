@@ -25,6 +25,8 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class TagBase;
+
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
@@ -125,6 +127,8 @@ namespace CSVRender
 
             /// \return Is \a key a button mapping setting? (ignored otherwise)
             bool storeMappingSetting (const QString& key, const QString& value);
+
+            osg::ref_ptr<TagBase> mousePick (QMouseEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
 

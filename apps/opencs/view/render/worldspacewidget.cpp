@@ -347,6 +347,53 @@ bool CSVRender::WorldspaceWidget::storeMappingSetting (const QString& key, const
     return false;
 }
 
+osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (QMouseEvent *event)
+{
+    // (0,0) is considered the lower left corner of an OpenGL window
+    int x = event->x();
+    int y = height() - event->y();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
+
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    visitor.setTraversalMask(getInteractionMask() << 1);
+
+    mView->getCamera()->accept(visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
+    {
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+
+        // reject back-facing polygons
+        osg::Vec3f normal = intersection.getWorldIntersectNormal();
+        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
+        if (normal.z() < 0)
+            continue;
+
+        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        {
+            osg::Node* node = *it;
+            if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
+            {
+                if (!(tag->getElement() & mInteractionMask))
+                    break; // not interested -> continue looking
+
+                return tag;
+            }
+        }
+
+// ignoring terrain for now
+        // must be terrain, report coordinates
+//        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
+//        return;
+    }
+
+    return osg::ref_ptr<CSVRender::TagBase>();
+}
+
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
@@ -436,54 +483,16 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
     if (event->button() != Qt::RightButton)
         return;
 
-    // (0,0) is considered the lower left corner of an OpenGL window
-    int x = event->x();
-    int y = height() - event->y();
+    osg::ref_ptr<TagBase> tag = mousePick (event);
 
-    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
-
-    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
-    osgUtil::IntersectionVisitor visitor(intersector);
-
-    visitor.setTraversalMask(getInteractionMask() << 1);
-
-    mView->getCamera()->accept(visitor);
-
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
+    if (tag)
     {
-        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
-
-        // reject back-facing polygons
-        osg::Vec3f normal = intersection.getWorldIntersectNormal();
-        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
-        if (normal.z() < 0)
-            continue;
-
-        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
         {
-            osg::Node* node = *it;
-            if (CSVRender::TagBase* tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
-            {
-                if (!(tag->getElement() & mInteractionMask))
-                    break; // not interested -> continue looking
-
-                // hit something marked with a tag
-                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag))
-                {
-                    // hit an Object, toggle its selection state
-                    CSVRender::Object* object = objectTag->mObject;
-                    object->setSelected (!object->getSelected());
-                }
-
-                return;
-            }
+            // hit an Object, toggle its selection state
+            CSVRender::Object* object = objectTag->mObject;
+            object->setSelected (!object->getSelected());
         }
-
-// ignoring terrain for now
-        // must be terrain, report coordinates
-//        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
-//        return;
     }
 }
 
