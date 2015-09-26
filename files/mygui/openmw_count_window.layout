@@ -13,6 +13,8 @@
         </Widget>
         <Widget type="MWScrollBar" skin="MW_HScroll" position="7 61 578 18" align="Left Top HStretch" name="CountSlider">
             <Property key="MoveToClick" value="true"/>
+            <Property key="Page" value="1"/>
+            <Property key="WheelPage" value="1"/>
         </Widget>
         <Widget type="HBox" skin="" position="0 88 585 24" align="Right Bottom">
             <Widget type="Widget" skin="" position="0 12 0 0">
