@@ -465,7 +465,7 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
             osg::Node* node = *it;
             if (CSVRender::TagBase* tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
             {
-                if (!(tag->getElement() && mInteractionMask))
+                if (!(tag->getElement() & mInteractionMask))
                     break; // not interested -> continue looking
 
                 // hit something marked with a tag
