@@ -650,12 +650,14 @@ namespace Compiler
             mOperators.push_back ('m');
             mTokenLoc = loc;
             return true;
-        } else if (code ==Scanner::S_plus && mNextOperand) {
+        }
+
+        if (code ==Scanner::S_plus && mNextOperand)
+        {
             // Also unary, but +, just ignore it
             mTokenLoc = loc;
             return true;
         }
-
 
         if (code==Scanner::S_open)
         {
