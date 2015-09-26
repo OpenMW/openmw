@@ -124,7 +124,7 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     mOutline = new osgFX::Scribe;
     mOutline->addChild(mBaseNode);
 
-    mBaseNode->setUserData(new ObjectHolder(this));
+    mBaseNode->setUserData(new ObjectTag(this));
 
     parentNode->addChild(mBaseNode);
 

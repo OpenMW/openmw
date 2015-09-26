@@ -39,10 +39,10 @@ namespace CSVRender
     class Object;
 
     // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing a ray query
-    class ObjectHolder : public osg::Referenced
+    class ObjectTag : public osg::Referenced
     {
     public:
-        ObjectHolder(Object* obj)
+        ObjectTag (Object* obj)
             : mObject(obj)
         {
         }
