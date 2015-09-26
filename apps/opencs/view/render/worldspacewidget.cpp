@@ -463,18 +463,27 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
         for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
         {
             osg::Node* node = *it;
-            if (CSVRender::ObjectTag* holder = dynamic_cast<CSVRender::ObjectTag *>(node->getUserData()))
+            if (CSVRender::TagBase* tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
             {
-                // hit an Object, toggle its selection state
-                CSVRender::Object* obj = holder->mObject;
-                obj->setSelected(!obj->getSelected());
+                if (!(tag->getElement() && mInteractionMask))
+                    break; // not interested -> continue looking
+
+                // hit something marked with a tag
+                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag))
+                {
+                    // hit an Object, toggle its selection state
+                    CSVRender::Object* object = objectTag->mObject;
+                    object->setSelected (!object->getSelected());
+                }
+
                 return;
             }
         }
 
+// ignoring terrain for now
         // must be terrain, report coordinates
-        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
-        return;
+//        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
+//        return;
     }
 }
 
