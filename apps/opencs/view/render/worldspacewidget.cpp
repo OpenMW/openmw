@@ -9,6 +9,7 @@
 #include <QDropEvent>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QApplication>
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
@@ -394,6 +395,20 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (QMouseE
     return osg::ref_ptr<CSVRender::TagBase>();
 }
 
+std::string CSVRender::WorldspaceWidget::mapButton (QMouseEvent *event)
+{
+    std::pair<Qt::MouseButton, bool> phyiscal (
+        event->button(), QApplication::keyboardModifiers() & Qt::ControlModifier);
+
+    std::map<std::pair<Qt::MouseButton, bool>, std::string>::const_iterator iter =
+        mButtonMapping.find (phyiscal);
+
+    if (iter!=mButtonMapping.end())
+        return iter->second;
+
+    return "";
+}
+
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
@@ -480,18 +495,24 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
-    if (event->button() != Qt::RightButton)
-        return;
+    std::string button = mapButton (event);
 
-    osg::ref_ptr<TagBase> tag = mousePick (event);
-
-    if (tag)
+    if (button=="p-navi" || button=="s-navi")
     {
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+
+    }
+    else if (button=="p-edit" || button=="s-edit" || button=="select")
+    {
+        osg::ref_ptr<TagBase> tag = mousePick (event);
+
+        if (tag)
         {
-            // hit an Object, toggle its selection state
-            CSVRender::Object* object = objectTag->mObject;
-            object->setSelected (!object->getSelected());
+            if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+            {
+                // hit an Object, toggle its selection state
+                CSVRender::Object* object = objectTag->mObject;
+                object->setSelected (!object->getSelected());
+            }
         }
     }
 }
