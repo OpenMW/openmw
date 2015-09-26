@@ -48,9 +48,8 @@ namespace MWGui
 
             void onResChange(int width, int height);
 
-            // Print a message to the console. Messages may contain color
-            // code, eg. "#FFFFFF this is white".
-            void print(const std::string &msg);
+            // Print a message to the console, in specified color.
+            void print(const std::string &msg, const std::string& color = "#FFFFFF");
 
             // These are pre-colored versions that you should use.
 

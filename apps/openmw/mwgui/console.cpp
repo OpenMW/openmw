@@ -170,25 +170,25 @@ namespace MWGui
         mCommandLine->setFontName(fntName);
     }
 
-    void Console::print(const std::string &msg)
+    void Console::print(const std::string &msg, const std::string& color)
     {
-        mHistory->addText(msg);
+        mHistory->addText(color + MyGUI::TextIterator::toTagsString(msg));
     }
 
     void Console::printOK(const std::string &msg)
     {
-        print("#FF00FF" + msg + "\n");
+        print(msg + "\n", "#FF00FF");
     }
 
     void Console::printError(const std::string &msg)
     {
-        print("#FF2222" + msg + "\n");
+        print(msg + "\n", "#FF2222");
     }
 
     void Console::execute (const std::string& command)
     {
         // Log the command
-        print("#FFFFFF> " + command + "\n");
+        print("> " + command + "\n");
 
         Compiler::Locals locals;
         Compiler::Output output (locals);
