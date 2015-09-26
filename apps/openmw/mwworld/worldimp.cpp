@@ -204,6 +204,10 @@ namespace MWWorld
         mLevitationEnabled = true;
         mTeleportEnabled = true;
 
+        mGodMode = false;
+        mScriptsEnabled = true;
+        mSky = true;
+
         // Rebuild player
         setupPlayer();
 
@@ -297,9 +301,6 @@ namespace MWWorld
 
         mDoorStates.clear();
 
-        mGodMode = false;
-        mScriptsEnabled = true;
-        mSky = true;
         mTeleportEnabled = true;
         mLevitationEnabled = true;
 
