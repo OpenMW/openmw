@@ -463,7 +463,7 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
         for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
         {
             osg::Node* node = *it;
-            if (CSVRender::ObjectHolder* holder = dynamic_cast<CSVRender::ObjectHolder*>(node->getUserData()))
+            if (CSVRender::ObjectTag* holder = dynamic_cast<CSVRender::ObjectTag *>(node->getUserData()))
             {
                 // hit an Object, toggle its selection state
                 CSVRender::Object* obj = holder->mObject;
