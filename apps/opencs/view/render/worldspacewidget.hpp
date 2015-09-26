@@ -130,6 +130,8 @@ namespace CSVRender
 
             osg::ref_ptr<TagBase> mousePick (QMouseEvent *event);
 
+            std::string mapButton (QMouseEvent *event);
+
             virtual std::string getStartupInstruction() = 0;
 
         private slots:
