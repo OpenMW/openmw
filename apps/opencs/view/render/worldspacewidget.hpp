@@ -36,6 +36,8 @@ namespace CSVRender
             CSMDoc::Document& mDocument;
             unsigned int mInteractionMask;
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+            CSVWidget::SceneToolMode *mEditMode;
+            bool mLocked;
 
         public:
 
@@ -100,6 +102,8 @@ namespace CSVRender
 
             virtual void updateUserSetting (const QString& name, const QStringList& value);
 
+            virtual void setEditLock (bool locked);
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
@@ -158,6 +162,7 @@ namespace CSVRender
 
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            void editModeChanged (const std::string& id);
 
         protected slots:
 

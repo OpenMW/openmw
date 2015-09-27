@@ -42,7 +42,7 @@ namespace
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
-  mInteractionMask (0)
+  mInteractionMask (0), mEditMode (0), mLocked (false)
 {
     setAcceptDrops(true);
 
@@ -199,11 +199,14 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeEditModeSelector (
     CSVWidget::SceneToolbar *parent)
 {
-    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Edit Mode");
+    mEditMode = new CSVWidget::SceneToolMode (parent, "Edit Mode");
 
-    addEditModeSelectorButtons (tool);
+    addEditModeSelectorButtons (mEditMode);
 
-    return tool;
+    connect (mEditMode, SIGNAL (modeChanged (const std::string&)),
+        this, SLOT (editModeChanged (const std::string&)));
+
+    return mEditMode;
 }
 
 CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
@@ -279,6 +282,13 @@ void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const 
 {
     if (!value.isEmpty() && storeMappingSetting (name, value.first()))
         return;
+
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
+}
+
+void CSVRender::WorldspaceWidget::setEditLock (bool locked)
+{
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (locked);
 }
 
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
@@ -466,6 +476,11 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
         mRun->removeProfile (debugProfiles.data (
             debugProfiles.index (i, idColumn)).toString().toUtf8().constData());
     }
+}
+
+void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
+{
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
 }
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
