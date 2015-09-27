@@ -378,12 +378,7 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (QMouseE
         {
             osg::Node* node = *it;
             if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
-            {
-                if (!(tag->getElement() & mInteractionMask))
-                    break; // not interested -> continue looking
-
                 return tag;
-            }
         }
 
 // ignoring terrain for now
