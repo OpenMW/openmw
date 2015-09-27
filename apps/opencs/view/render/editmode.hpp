@@ -1,11 +1,14 @@
 #ifndef CSV_RENDER_EDITMODE_H
 #define CSV_RENDER_EDITMODE_H
 
+#include <osg/ref_ptr>
+
 #include "../widget/modebutton.hpp"
 
 namespace CSVRender
 {
     class WorldspaceWidget;
+    class TagBase;
 
     class EditMode : public CSVWidget::ModeButton
     {
@@ -28,6 +31,15 @@ namespace CSVRender
 
             /// Default-implementation: Ignored.
             virtual void setEditLock (bool locked);
+
+            /// Default-implementation: Ignored.
+            virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: Ignored.
+            virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: Ignored.
+            virtual void selectPressed (osg::ref_ptr<TagBase> tag);
     };
 }
 

@@ -28,6 +28,7 @@
 #include "object.hpp"
 #include "elements.hpp"
 #include "editmode.hpp"
+#include "instancemode.hpp"
 
 namespace
 {
@@ -302,9 +303,7 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
 {
     /// \todo replace EditMode with suitable subclasses
-    tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Instance editing"),
-        "object");
+    tool->addButton (new InstanceMode (this, tool), "object");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
         "pathgrid");
@@ -515,15 +514,14 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
     {
         osg::ref_ptr<TagBase> tag = mousePick (event);
 
-        if (tag)
-        {
-            if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-            {
-                // hit an Object, toggle its selection state
-                CSVRender::Object* object = objectTag->mObject;
-                object->setSelected (!object->getSelected());
-            }
-        }
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        if (button=="p-edit")
+            editMode.primaryEditPressed (tag);
+        else if (button=="s-edit")
+            editMode.secondaryEditPressed (tag);
+        else if (button=="select")
+            editMode.selectPressed (tag);
     }
 }
 
