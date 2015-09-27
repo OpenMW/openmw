@@ -26,3 +26,9 @@ void CSVRender::EditMode::setEditLock (bool locked)
 {
 
 }
+
+void CSVRender::EditMode::primaryEditPressed (osg::ref_ptr<TagBase> tag) {}
+
+void CSVRender::EditMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag) {}
+
+void CSVRender::EditMode::selectPressed (osg::ref_ptr<TagBase> tag) {}
