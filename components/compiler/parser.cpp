@@ -102,9 +102,12 @@ namespace Compiler
     bool Parser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (!(mOptional && mEmpty))
+        if (!(mOptional && mEmpty)) {
+            if (loc.mLiteral == "fixme")
+                // Ignoring fixme for now
+                return true;
             reportSeriousError ("Unexpected name", loc);
-        else
+        } else
             scanner.putbackName (name, loc);
 
         return false;
