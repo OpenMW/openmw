@@ -67,7 +67,7 @@ namespace
             osg::Quat rot(z, osg::Vec3(0,0,-1));
             if (!ptr.getClass().isActor()) {
 		if (prio)
-		    rot = osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0)) * rot;
+		    rot = osg::Quat(y, osg::Vec3(-1,0,0)) * osg::Quat(x, osg::Vec3(0,-1,0)) * rot;
 		else
 		    rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
 	    }
