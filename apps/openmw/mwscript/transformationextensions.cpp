@@ -160,15 +160,15 @@ namespace MWScript
 
                     if (axis=="x")
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]));
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0] + ptr.getRefData().getLocalRotation().rot[0]));
                     }
                     else if (axis=="y")
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]));
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1] + ptr.getRefData().getLocalRotation().rot[1]));
                     }
                     else if (axis=="z")
                     {
-                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
+                        runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2] + ptr.getRefData().getLocalRotation().rot[2]));
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
