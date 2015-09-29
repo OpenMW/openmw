@@ -5,10 +5,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "scenewidget.hpp"
+#include "../../model/doc/document.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
-#include <apps/opencs/model/doc/document.hpp>
-#include <apps/opencs/model/world/tablemimedata.hpp>
+#include "scenewidget.hpp"
+#include "elements.hpp"
 
 namespace CSMWorld
 {
@@ -103,6 +104,9 @@ namespace CSVRender
             virtual void updateUserSetting (const QString& name, const QStringList& value);
 
             virtual void setEditLock (bool locked);
+
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask) = 0;
 
         protected:
 

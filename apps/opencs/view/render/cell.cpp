@@ -211,3 +211,24 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
     return addObjects (start, end);
 }
+
+void CSVRender::Cell::setSelection (int elementMask, Selection mode)
+{
+    if (elementMask & Element_Reference)
+    {
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+        {
+            bool selected = false;
+
+            switch (mode)
+            {
+                case Selection_Clear: selected = false; break;
+                case Selection_All: selected = true; break;
+                case Selection_Invert: selected = !iter->second->getSelected(); break;
+            }
+
+            iter->second->setSelected (selected);
+        }
+    }
+}
