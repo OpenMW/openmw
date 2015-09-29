@@ -10,6 +10,7 @@
 #include "cellcreator.hpp"
 #include "referenceablecreator.hpp"
 #include "referencecreator.hpp"
+#include "startscriptcreator.hpp"
 #include "scenesubview.hpp"
 #include "dialoguecreator.hpp"
 #include "infocreator.hpp"
@@ -52,6 +53,9 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
     for (int i=0; sTableTypes[i]!=CSMWorld::UniversalId::Type_None; ++i)
         manager.add (sTableTypes[i],
             new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
+
+    manager.add (CSMWorld::UniversalId::Type_StartScripts,
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<StartScriptCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_Cells,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<CellCreator> >);
@@ -125,7 +129,6 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         CSMWorld::UniversalId::Type_BodyPart,
         CSMWorld::UniversalId::Type_SoundGen,
         CSMWorld::UniversalId::Type_Pathgrid,
-        CSMWorld::UniversalId::Type_StartScript,
 
         CSMWorld::UniversalId::Type_None // end marker
     };
@@ -134,6 +137,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         manager.add (sTableTypes2[i],
             new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,
             CreatorFactory<GenericCreator> > (false));
+
+    manager.add (CSMWorld::UniversalId::Type_StartScript,
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,
+        CreatorFactory<StartScriptCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
