@@ -1,16 +1,10 @@
 #include "startscriptcreator.hpp"
 
-StartScriptCreator::StartScriptCreator()
-{
-
-}
-
-
-CSVWORLD::StartScriptCreator::StartScriptCreator(CSMWorld::Data &data, QUndoStack &undoStack, const CSMWorld::UniversalId &id, bool relaxedIdRules):
+CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data &data, QUndoStack &undoStack, const CSMWorld::UniversalId &id, bool relaxedIdRules):
     GenericCreator (data, undoStack, id, true)
 {}
 
-std::string CSVWORLD::StartScriptCreator::getErrors() const
+std::string CSVWorld::StartScriptCreator::getErrors() const
 {
     std::string errors;
 

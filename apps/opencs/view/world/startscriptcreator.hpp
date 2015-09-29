@@ -3,7 +3,7 @@
 
 #include "genericcreator.hpp"
 
-namespace CSVWORLD {
+namespace CSVWorld {
 
     class StartScriptCreator : public GenericCreator
     {
@@ -16,7 +16,7 @@ namespace CSVWORLD {
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
-        };
+     };
 
 }
 
