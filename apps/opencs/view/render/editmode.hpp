@@ -17,6 +17,10 @@ namespace CSVRender
             WorldspaceWidget *mWorldspaceWidget;
             unsigned int mMask;
 
+        protected:
+
+            WorldspaceWidget& getWorldspaceWidget();
+
         public:
 
             EditMode (WorldspaceWidget *worldspaceWidget, const QIcon& icon, unsigned int mask,

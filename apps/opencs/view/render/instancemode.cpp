@@ -3,6 +3,7 @@
 
 #include "elements.hpp"
 #include "object.hpp"
+#include "worldspacewidget.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
@@ -30,6 +31,9 @@ void CSVRender::InstanceMode::selectPressed (osg::ref_ptr<TagBase> tag)
             // hit an Object, toggle its selection state
             CSVRender::Object* object = objectTag->mObject;
             object->setSelected (!object->getSelected());
+            return;
         }
     }
+
+    getWorldspaceWidget().clearSelection (Element_Reference);
 }
