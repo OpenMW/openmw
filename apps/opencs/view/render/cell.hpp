@@ -51,6 +51,15 @@ namespace CSVRender
 
         public:
 
+            enum Selection
+            {
+                Selection_Clear,
+                Selection_All,
+                Selection_Invert
+            };
+
+        public:
+
             Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id);
 
             ~Cell();
@@ -75,6 +84,8 @@ namespace CSVRender
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
+
+            void setSelection (int elementMask, Selection mode);
     };
 }
 

@@ -79,6 +79,9 @@ namespace CSVRender
 
             virtual unsigned int getVisibilityMask() const;
 
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask);
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
