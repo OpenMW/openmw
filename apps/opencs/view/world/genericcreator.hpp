@@ -60,6 +60,8 @@ namespace CSVWorld
 
             virtual std::string getId() const;
 
+            virtual std::string getIdValidatorResult() const;
+
             /// Allow subclasses to add additional data to \a command.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
 

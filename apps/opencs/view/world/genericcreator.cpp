@@ -47,6 +47,16 @@ std::string CSVWorld::GenericCreator::getId() const
     return mId->text().toUtf8().constData();
 }
 
+std::string CSVWorld::GenericCreator::getIdValidatorResult() const
+{
+    std::string errors;
+
+    if (!mId->hasAcceptableInput())
+        errors = mValidator->getError();
+
+    return errors;
+}
+
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
 
 void CSVWorld::GenericCreator::pushCommand (std::auto_ptr<CSMWorld::CreateCommand> command,
