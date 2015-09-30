@@ -200,7 +200,7 @@ namespace MWScript
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
                     else
-                        throw std::runtime_error ("invalid axis: " + axis);
+                        throw std::runtime_error ("invalid axis: " + axis);                    
                 }
         };
 
@@ -212,8 +212,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    bool need_update = (ptr ==
-                            dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).getReference(false));
 
                     if (!ptr.isInCell())
                         return;
@@ -248,8 +246,7 @@ namespace MWScript
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
 
-                    if (need_update)
-                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
                 }
         };
 
@@ -290,8 +287,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    bool need_update = (ptr ==
-                            dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).getReference(false));
 
                     if (ptr.getContainerStore())
                         return;
@@ -319,7 +314,7 @@ namespace MWScript
                     }
                     catch(std::exception&)
                     {
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);                        
                         int cx,cy;
                         MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
@@ -333,8 +328,7 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
                         ptr = MWWorld::Ptr(ptr.getBase(), store);
-                        if (need_update)
-                            dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
+                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
                         float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
                         float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
@@ -358,8 +352,6 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    bool need_update = (ptr ==
-                            dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).getReference(false));
 
                     if (!ptr.isInCell())
                         return;
@@ -392,8 +384,7 @@ namespace MWScript
                     {
                         ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
                     }
-                    if (need_update)
-                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
                     float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
                     float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
@@ -649,8 +640,6 @@ namespace MWScript
 
                     if (!ptr.isInCell())
                         return;
-                    bool need_update = (ptr ==
-                            dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).getReference(false));
 
                     MWWorld::LocalRotation rot;
                     rot.rot[0] = 0;
@@ -660,10 +649,9 @@ namespace MWScript
 
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
 
-                    if (need_update)
-                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
-                                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
-                                    ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                            ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
 
                 }
         };
@@ -779,8 +767,8 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
