@@ -167,7 +167,7 @@ namespace MWScript
             MWWorld::Ptr getReference(bool required=true);
             ///< Reference, that the script is running from (can be empty)
 
-            void updatePtr(const MWWorld::Ptr& updated);
+            void updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
             ///< Update the Ptr stored in mReference, if there is one stored there. Should be called after the reference has been moved to a new cell.
 
             virtual std::string getTargetId() const;

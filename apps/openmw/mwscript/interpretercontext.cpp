@@ -601,9 +601,9 @@ namespace MWScript
         return mTargetId;
     }
 
-    void InterpreterContext::updatePtr(const MWWorld::Ptr& updated)
+    void InterpreterContext::updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)
     {
-        if (!mReference.isEmpty())
+        if (!mReference.isEmpty() && base == mReference)
             mReference = updated;
     }
 }
