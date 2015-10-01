@@ -599,8 +599,14 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
-    //if(!mMouse->wheelEvent(event))
-        RenderWidget::wheelEvent(event);
+    if (mDragging)
+    {
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.dragWheel (event->delta());
+    }
+
+    RenderWidget::wheelEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
