@@ -38,3 +38,24 @@ void CSVRender::EditMode::primaryEditPressed (osg::ref_ptr<TagBase> tag) {}
 void CSVRender::EditMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag) {}
 
 void CSVRender::EditMode::selectPressed (osg::ref_ptr<TagBase> tag) {}
+
+bool CSVRender::EditMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+{
+    return false;
+}
+
+bool CSVRender::EditMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
+{
+    return false;
+}
+
+bool CSVRender::EditMode::selectStartDrag (osg::ref_ptr<TagBase> tag)
+{
+    return false;
+}
+
+void CSVRender::EditMode::drag (int diffX, int diffY) {}
+
+void CSVRender::EditMode::dragCompleted() {}
+
+void CSVRender::EditMode::dragAborted() {}
