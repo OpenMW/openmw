@@ -61,7 +61,7 @@ namespace CSVRender
             virtual bool selectStartDrag (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: ignored
-            virtual void drag (int diffX, int diffY);
+            virtual void drag (int diffX, int diffY, double speedFactor);
 
             /// Default-implementation: ignored
             virtual void dragCompleted();
@@ -73,7 +73,7 @@ namespace CSVRender
             virtual void dragAborted();
 
             /// Default-implementation: ignored
-            virtual void dragWheel (int diff);
+            virtual void dragWheel (int diff, double speedFactor);
     };
 }
 
