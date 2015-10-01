@@ -396,8 +396,8 @@ namespace MWPhysics
             }
 
             bool isOnGround = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
-            {
+            if (!(inertia.z() > 0.f) /* && !(newPosition.z() < swimlevel) */)
+            { // I don't want any limit for the walk on water effect !
                 osg::Vec3f from = newPosition;
                 osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
                              osg::Vec3f(0,0,sStepSizeDown+2.f) : osg::Vec3f(0,0,2.f));
