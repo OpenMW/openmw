@@ -54,10 +54,10 @@ bool CSVRender::EditMode::selectStartDrag (osg::ref_ptr<TagBase> tag)
     return false;
 }
 
-void CSVRender::EditMode::drag (int diffX, int diffY) {}
+void CSVRender::EditMode::drag (int diffX, int diffY, double speedFactor) {}
 
 void CSVRender::EditMode::dragCompleted() {}
 
 void CSVRender::EditMode::dragAborted() {}
 
-void CSVRender::EditMode::dragWheel (int diff) {}
+void CSVRender::EditMode::dragWheel (int diff, double speedFactor) {}

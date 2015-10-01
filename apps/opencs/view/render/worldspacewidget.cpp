@@ -81,6 +81,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         key += sMappingSettings[i];
         storeMappingSetting (key, CSMSettings::UserSettings::instance().settingValue (key));
     }
+
+    mDragFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-factor").toDouble();
+    mDragWheelFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-wheel-factor").toDouble();
+    mDragShiftFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-shift-factor").toDouble();
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
@@ -284,7 +288,14 @@ void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const 
     if (!value.isEmpty() && storeMappingSetting (name, value.first()))
         return;
 
-    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
+    if (name=="scene-input/drag-factor")
+        mDragFactor = value.at (0).toDouble();
+    else if (name=="scene-input/drag-wheel-factor")
+        mDragWheelFactor = value.at (0).toDouble();
+    else if (name=="scene-input/drag-shift-factor")
+        mDragShiftFactor = value.at (0).toDouble();
+    else
+        dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
 }
 
 void CSVRender::WorldspaceWidget::setEditLock (bool locked)
@@ -530,9 +541,14 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
         mDragX = event->x();
         mDragY = height() - event->y();
 
+        double factor = mDragFactor;
+
+        if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
+            factor *= mDragShiftFactor;
+
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
-        editMode.drag (diffX, diffY);
+        editMode.drag (diffX, diffY, factor);
     }
 
     RenderWidget::mouseMoveEvent(event);
@@ -601,9 +617,14 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
     if (mDragging)
     {
+        double factor = mDragWheelFactor;
+
+        if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
+            factor *= mDragShiftFactor;
+
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
-        editMode.dragWheel (event->delta());
+        editMode.dragWheel (event->delta(), factor);
     }
 
     RenderWidget::wheelEvent(event);

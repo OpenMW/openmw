@@ -43,6 +43,9 @@ namespace CSVRender
             bool mDragging;
             int mDragX;
             int mDragY;
+            double mDragFactor;
+            double mDragWheelFactor;
+            double mDragShiftFactor;
 
         public:
 

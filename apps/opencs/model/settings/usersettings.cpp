@@ -405,6 +405,21 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
 
         Setting *contextSensitive = createSetting (Type_CheckBox, "context-select", "Context Sensitive Selection");
         contextSensitive->setDefaultValue ("false");
+
+        Setting *dragMouseSensitivity = createSetting (Type_DoubleSpinBox, "drag-factor",
+            "Mouse sensitivity during drag operations");
+        dragMouseSensitivity->setDefaultValue (1.0);
+        dragMouseSensitivity->setRange (0.001, 100.0);
+
+        Setting *dragWheelSensitivity = createSetting (Type_DoubleSpinBox, "drag-wheel-factor",
+            "Mouse wheel sensitivity during drag operations");
+        dragWheelSensitivity->setDefaultValue (1.0);
+        dragWheelSensitivity->setRange (0.001, 100.0);
+
+        Setting *dragShiftFactor = createSetting (Type_DoubleSpinBox, "drag-shift-factor",
+            "Acceleration factor during drag operations while holding down shift");
+        dragShiftFactor->setDefaultValue (4.0);
+        dragShiftFactor->setRange (0.001, 100.0);
     }
 
     {
