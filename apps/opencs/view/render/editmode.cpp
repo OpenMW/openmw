@@ -59,3 +59,5 @@ void CSVRender::EditMode::drag (int diffX, int diffY) {}
 void CSVRender::EditMode::dragCompleted() {}
 
 void CSVRender::EditMode::dragAborted() {}
+
+void CSVRender::EditMode::dragWheel (int diff) {}

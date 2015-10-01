@@ -71,6 +71,9 @@ namespace CSVRender
             /// \note dragAborted will not be called, if the drag is aborted via changing
             /// editing mode
             virtual void dragAborted();
+
+            /// Default-implementation: ignored
+            virtual void dragWheel (int diff);
     };
 }
 
