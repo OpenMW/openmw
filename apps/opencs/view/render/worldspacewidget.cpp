@@ -43,7 +43,7 @@ namespace
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
-  mInteractionMask (0), mEditMode (0), mLocked (false)
+  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false)
 {
     setAcceptDrops(true);
 
@@ -480,6 +480,7 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
 void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
 {
     dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
+    mDragging = false;
 }
 
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
@@ -495,16 +496,54 @@ void CSVRender::WorldspaceWidget::updateOverlay()
 
 void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
-    if(event->buttons() & Qt::RightButton)
+    if (!mDragging)
     {
-        //mMouse->mouseMoveEvent(event);
+        if (mDragMode=="p-navi" || mDragMode=="s-navi")
+        {
+
+        }
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="select")
+        {
+            osg::ref_ptr<TagBase> tag = mousePick (event);
+
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            if (mDragMode=="p-edit")
+                mDragging = editMode.primaryEditStartDrag (tag);
+            else if (mDragMode=="s-edit")
+                mDragging = editMode.secondaryEditStartDrag (tag);
+            else if (mDragMode=="select")
+                mDragging = editMode.selectStartDrag (tag);
+
+            if (mDragging)
+            {
+                mDragX = event->posF().x();
+                mDragY = height() - event->posF().y();
+            }
+        }
     }
+    else
+    {
+        int diffX = event->x() - mDragX;
+        int diffY = (height() - event->y()) - mDragY;
+
+        mDragX = event->x();
+        mDragY = height() - event->y();
+
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.drag (diffX, diffY);
+    }
+
     RenderWidget::mouseMoveEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
     std::string button = mapButton (event);
+
+    if (!mDragging)
+        mDragMode = button;
 
     if (button=="p-navi" || button=="s-navi")
     {
@@ -527,17 +566,25 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 
 void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
-    if(event->button() == Qt::RightButton)
+    if (mDragging)
     {
-        /*
-        if(!getViewport())
+        std::string button = mapButton (event);
+
+        if (mDragMode=="p-navi" || mDragMode=="s-navi")
         {
-            SceneWidget::mouseReleaseEvent(event);
-            return;
+
         }
-        */
-        //mMouse->mouseReleaseEvent(event);
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="select")
+        {
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            editMode.dragCompleted();
+            mDragging = false;
+        }
     }
+
+    mDragMode.clear();
+
     RenderWidget::mouseReleaseEvent(event);
 }
 
@@ -560,7 +607,13 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        //mMouse->cancelDrag();
+        if (mDragging)
+        {
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            editMode.dragAborted();
+            mDragging = false;
+        }
     }
     else
         RenderWidget::keyPressEvent(event);

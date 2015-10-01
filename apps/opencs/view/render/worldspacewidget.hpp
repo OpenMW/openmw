@@ -39,6 +39,10 @@ namespace CSVRender
             std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
             CSVWidget::SceneToolMode *mEditMode;
             bool mLocked;
+            std::string mDragMode;
+            bool mDragging;
+            int mDragX;
+            int mDragY;
 
         public:
 
