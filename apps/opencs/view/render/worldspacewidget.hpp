@@ -112,6 +112,8 @@ namespace CSVRender
 
             virtual void setEditLock (bool locked);
 
+            CSMDoc::Document& getDocument();
+
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask) = 0;
 
@@ -120,8 +122,6 @@ namespace CSVRender
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
-
-            CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
 
