@@ -85,12 +85,12 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode
+    previewwidget editmode instancemode
     )
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight
-    lightingbright object cell terrainstorage
+    lightingbright object cell terrainstorage tagbase
     )
 
 opencs_hdrs_noqt (view/render

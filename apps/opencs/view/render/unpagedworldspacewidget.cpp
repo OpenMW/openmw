@@ -102,6 +102,12 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
     return true;
 }
 
+void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_Clear);
+    flagAsModified();
+}
+
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

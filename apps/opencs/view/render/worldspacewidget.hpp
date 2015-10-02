@@ -1,12 +1,15 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <map>
+
 #include <boost/shared_ptr.hpp>
 
-#include "scenewidget.hpp"
+#include "../../model/doc/document.hpp"
+#include "../../model/world/tablemimedata.hpp"
 
-#include <apps/opencs/model/doc/document.hpp>
-#include <apps/opencs/model/world/tablemimedata.hpp>
+#include "scenewidget.hpp"
+#include "elements.hpp"
 
 namespace CSMWorld
 {
@@ -23,6 +26,8 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class TagBase;
+
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
@@ -31,6 +36,16 @@ namespace CSVRender
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
             unsigned int mInteractionMask;
+            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+            CSVWidget::SceneToolMode *mEditMode;
+            bool mLocked;
+            std::string mDragMode;
+            bool mDragging;
+            int mDragX;
+            int mDragY;
+            double mDragFactor;
+            double mDragWheelFactor;
+            double mDragShiftFactor;
 
         public:
 
@@ -93,13 +108,20 @@ namespace CSVRender
             /// marked for interaction.
             unsigned int getInteractionMask() const;
 
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
+
+            virtual void setEditLock (bool locked);
+
+            CSMDoc::Document& getDocument();
+
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask) = 0;
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
-
-            CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
 
@@ -117,6 +139,13 @@ namespace CSVRender
             void dropEvent(QDropEvent* event);
 
             void dragMoveEvent(QDragMoveEvent *event);
+
+            /// \return Is \a key a button mapping setting? (ignored otherwise)
+            bool storeMappingSetting (const QString& key, const QString& value);
+
+            osg::ref_ptr<TagBase> mousePick (QMouseEvent *event);
+
+            std::string mapButton (QMouseEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
 
@@ -144,6 +173,7 @@ namespace CSVRender
 
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            void editModeChanged (const std::string& id);
 
         protected slots:
 

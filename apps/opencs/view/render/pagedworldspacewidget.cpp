@@ -314,6 +314,15 @@ unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
     return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
 }
 
+void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_Clear);
+
+    flagAsModified();
+}
+
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {

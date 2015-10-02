@@ -41,6 +41,9 @@ namespace CSVWidget
             /// The ownership of \a button is transferred to *this.
             void addButton (ModeButton *button, const std::string& id);
 
+            /// Will return a 0-pointer only if the mode does not have any buttons yet.
+            ModeButton *getCurrent();
+
         signals:
 
             void modeChanged (const std::string& id);
