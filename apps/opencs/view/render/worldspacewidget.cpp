@@ -528,8 +528,13 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
             if (mDragging)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+                mDragX = event->localPos().x();
+                mDragY = height() - event->localPos().y();
+#else
                 mDragX = event->posF().x();
                 mDragY = height() - event->posF().y();
+#endif
             }
         }
     }
