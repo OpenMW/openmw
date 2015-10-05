@@ -268,7 +268,7 @@ namespace MWBase
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false, bool do_wrap = true) = 0;
 
             virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
 

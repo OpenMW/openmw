@@ -111,7 +111,7 @@ namespace MWWorld
             void updateWeather(float duration, bool paused = false);
             int getDaysPerMonth (int month) const;
 
-            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust);
+            void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust, bool do_wrap);
 
             Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return an updated Ptr in case the Ptr's cell changes
@@ -351,7 +351,7 @@ namespace MWWorld
 
             /// World rotates object, uses degrees
             /// \param adjust indicates rotation should be set or adjusted
-            virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
+            virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false, bool do_wrap = true);
 
             /// Local rotates object, uses degrees
             virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
