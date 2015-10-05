@@ -123,6 +123,9 @@ namespace MWMechanics
             }
         }
 
+        if (spell->mData.mType == ESM::Spell::ST_Power)
+            return stats.getSpells().canUsePower(spell->mId) ? 100 : 0;
+
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
@@ -817,6 +820,10 @@ namespace MWMechanics
                 sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
+
+            // A power can be used once per 24h
+            if (spell->mData.mType == ESM::Spell::ST_Power)
+                stats.getSpells().usePower(spell->mId);
         }
 
         if (mCaster == getPlayer() && spellIncreasesSkill(spell))
