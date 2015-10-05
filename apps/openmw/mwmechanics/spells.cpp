@@ -312,7 +312,7 @@ namespace MWMechanics
 
     bool Spells::canUsePower(const std::string &power) const
     {
-        std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(power);
+        std::map<std::string, MWWorld::TimeStamp>::const_iterator it = mUsedPowers.find(Misc::StringUtils::lowerCase(power));
         if (it == mUsedPowers.end() || it->second + 24 <= MWBase::Environment::get().getWorld()->getTimeStamp())
             return true;
         else
@@ -321,7 +321,7 @@ namespace MWMechanics
 
     void Spells::usePower(const std::string &power)
     {
-        mUsedPowers[power] = MWBase::Environment::get().getWorld()->getTimeStamp();
+        mUsedPowers[Misc::StringUtils::lowerCase(power)] = MWBase::Environment::get().getWorld()->getTimeStamp();
     }
 
     void Spells::readState(const ESM::SpellState &state)
