@@ -12,6 +12,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/manualref.hpp"
 
 namespace MWScript
 {
@@ -42,9 +43,9 @@ namespace MWScript
         }
         else
         {
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPtr (id, false);
+            MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id);
 
-            script = ptr.getClass().getScript (ptr);
+            script = ref.getPtr().getClass().getScript (ref.getPtr());
             reference = true;
         }
 
