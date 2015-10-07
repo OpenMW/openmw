@@ -2660,10 +2660,6 @@ namespace MWWorld
         {
             const ESM::Spell* spell = getStore().get<ESM::Spell>().find(selectedSpell);
 
-            // A power can be used once per 24h
-            if (spell->mData.mType == ESM::Spell::ST_Power)
-                stats.getSpells().usePower(spell->mId);
-
             cast.cast(spell);
         }
         else if (actor.getClass().hasInventoryStore(actor))
