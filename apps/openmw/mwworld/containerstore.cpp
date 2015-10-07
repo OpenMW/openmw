@@ -140,7 +140,11 @@ void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
 {
     if (ptr.getRefData().getCount() <= 1)
         return;
-    addNewStack(ptr, ptr.getRefData().getCount()-1);
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-1);
+    const std::string script = it->getClass().getScript(*it);
+    if (!script.empty())
+        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
+
     remove(ptr, ptr.getRefData().getCount()-1, container);
 }
 
