@@ -198,26 +198,38 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
     if (hint.empty())
         return;
 
-    if (hint[0]=='l')
-    {
-        std::istringstream stream (hint.c_str()+1);
-
-        char ignore;
-        int line;
-        int column;
-
-        if (stream >> ignore >> line >> column)
+    size_t line = 0, column = 0;
+    std::istringstream stream (hint.c_str()+2);
+    switch(hint[0]){
+        case 'R':
+        case 'r':
         {
-            QTextCursor cursor = mEditor->textCursor();
+            QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
+            QString source = mModel->data (index).toString();
+            size_t pos;
+            stream >> pos >> pos;
 
-            cursor.movePosition (QTextCursor::Start);
-            if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
-                cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
-
-            mEditor->setFocus();
-            mEditor->setTextCursor (cursor);
+            for (size_t i = 0; i <= pos; ++i){
+                if (source[(unsigned) i] == '\n'){
+                    ++line;
+                    column = i;
+                }
+            }
+            column = pos - column - (line > 0 ? 1 : 0);
+            break;
         }
+        case 'l':
+            stream >> line >> column;
     }
+
+    QTextCursor cursor = mEditor->textCursor();
+
+    cursor.movePosition (QTextCursor::Start);
+    if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+        cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+
+    mEditor->setFocus();
+    mEditor->setTextCursor (cursor);
 }
 
 void CSVWorld::ScriptSubView::textChanged()
