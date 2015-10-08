@@ -261,7 +261,7 @@ namespace CSMWorld
             ColumnId_LevelledItemChanceNone = 238,
 
             ColumnId_PowerList = 239,
-            ColumnId_SkillImpact = 240, // impact from magic effects
+            ColumnId_Skill = 240,
 
             ColumnId_InfoList = 241,
             ColumnId_InfoCondition = 242,
@@ -288,8 +288,8 @@ namespace CSMWorld
             ColumnId_NpcPersistence = 261,
 
             ColumnId_RaceAttributes = 262,
-            ColumnId_RaceMaleValue = 263,
-            ColumnId_RaceFemaleValue = 264,
+            ColumnId_Male = 263,
+            // unused
             ColumnId_RaceSkillBonus = 265,
             // unused
             ColumnId_RaceBonus = 267,
