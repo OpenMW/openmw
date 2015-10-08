@@ -83,7 +83,8 @@ namespace MWScript
             store.get<ESM::Probe>().search (name) ||
             store.get<ESM::Repair>().search (name) ||
             store.get<ESM::Static>().search (name) ||
-            store.get<ESM::Weapon>().search (name);
+            store.get<ESM::Weapon>().search (name) ||
+            store.get<ESM::Script>().search (name);
     }
 
     bool CompilerContext::isJournalId (const std::string& name) const
