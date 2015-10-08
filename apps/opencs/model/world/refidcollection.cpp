@@ -84,7 +84,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
     mColumns.back().addColumn(
@@ -501,7 +501,7 @@ CSMWorld::RefIdCollection::RefIdCollection(const CSMWorld::Data& data)
     skillsMap.insert(std::make_pair(UniversalId::Type_Npc, new NpcSkillsRefIdAdapter(data)));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), skillsMap));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_SkillImpact, CSMWorld::ColumnBase::Display_SkillImpact, false, false));
+            new RefIdColumn (Columns::ColumnId_Skill, CSMWorld::ColumnBase::Display_SkillId, false, false));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_UChar, CSMWorld::ColumnBase::Display_Integer));
 

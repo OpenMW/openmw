@@ -113,7 +113,7 @@ namespace CSMWorld
             Display_SoundGeneratorType,
             Display_School,
             Display_Id,
-            Display_SkillImpact,
+            Display_SkillId,
             Display_EffectRange,
             Display_EffectId,
             Display_PartRefType,
@@ -121,7 +121,6 @@ namespace CSMWorld
             Display_InfoCondFunc,
             Display_InfoCondVar,
             Display_InfoCondComp,
-            Display_RaceSkill,
             Display_String32,
             Display_LongString256,
 

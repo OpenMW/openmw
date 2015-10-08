@@ -268,7 +268,7 @@ namespace CSMWorld
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
-            { ColumnId_SkillImpact, "Skill" },
+            { ColumnId_Skill, "Skill" },
 
             { ColumnId_InfoList, "Info List" },
             { ColumnId_InfoCondition, "Info Conditions" },
@@ -294,8 +294,7 @@ namespace CSMWorld
             { ColumnId_NpcPersistence, "Persistent" },
 
             { ColumnId_RaceAttributes, "Race Attributes" },
-            { ColumnId_RaceMaleValue, "Male Attrib" },
-            { ColumnId_RaceFemaleValue, "Female Attrib" },
+            { ColumnId_Male, "Male" },
             { ColumnId_RaceSkillBonus, "Skill Bonus" },
             { ColumnId_RaceBonus, "Bonus" },
 
@@ -577,7 +576,7 @@ namespace
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
             case CSMWorld::Columns::ColumnId_School: return sSchools;
-            case CSMWorld::Columns::ColumnId_SkillImpact: return sSkills;
+            case CSMWorld::Columns::ColumnId_Skill: return sSkills;
             case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;
