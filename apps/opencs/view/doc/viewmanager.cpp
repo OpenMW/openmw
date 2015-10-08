@@ -97,7 +97,7 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true },
         { CSMWorld::ColumnBase::Display_SoundGeneratorType, CSMWorld::Columns::ColumnId_SoundGeneratorType, false },
         { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, false },
-        { CSMWorld::ColumnBase::Display_SkillImpact, CSMWorld::Columns::ColumnId_SkillImpact, true },
+        { CSMWorld::ColumnBase::Display_SkillId, CSMWorld::Columns::ColumnId_Skill, true },
         { CSMWorld::ColumnBase::Display_EffectRange, CSMWorld::Columns::ColumnId_EffectRange, false },
         { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
         { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
