@@ -198,28 +198,31 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
     if (hint.empty())
         return;
 
-    size_t line = 0, column = 0;
-    std::istringstream stream (hint.c_str()+2);
+    unsigned line = 0, column = 0;
+    char c;
+    std::istringstream stream (hint.c_str()+1);
     switch(hint[0]){
         case 'R':
         case 'r':
         {
             QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
             QString source = mModel->data (index).toString();
-            size_t pos;
-            stream >> pos >> pos;
+            unsigned pos, dummy;
+            if (!(stream >> c >> dummy >> pos) )
+                return;
 
-            for (size_t i = 0; i <= pos; ++i){
-                if (source[(unsigned) i] == '\n'){
+            for (unsigned i = 0; i <= pos; ++i){
+                if (source[i] == '\n'){
                     ++line;
-                    column = i;
+                    column = i+1;
                 }
             }
-            column = pos - column - (line > 0 ? 1 : 0);
+            column = pos - column;
             break;
         }
         case 'l':
-            stream >> line >> column;
+            if (!(stream >> c >> line >> column))
+                    return;
     }
 
     QTextCursor cursor = mEditor->textCursor();
