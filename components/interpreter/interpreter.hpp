@@ -2,6 +2,7 @@
 #define INTERPRETER_INTERPRETER_H_INCLUDED
 
 #include <map>
+#include <stack>
 
 #include "runtime.hpp"
 #include "types.hpp"
@@ -14,6 +15,8 @@ namespace Interpreter
 
     class Interpreter
     {
+            std::stack<Runtime> mCallstack;
+            bool mRunning;
             Runtime mRuntime;
             std::map<int, Opcode1 *> mSegment0;
             std::map<int, Opcode2 *> mSegment1;
@@ -31,6 +34,10 @@ namespace Interpreter
             void abortUnknownCode (int segment, int opcode);
 
             void abortUnknownSegment (Type_Code code);
+
+            void begin();
+
+            void end();
 
         public:
 
