@@ -249,7 +249,7 @@ namespace CSMWorld
             { ColumnId_AiWanderDist, "Wander Dist" },
             { ColumnId_AiDuration, "Ai Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
-            { ColumnId_AiWanderIdle, "Wander Idle" },
+            //{ ColumnId_AiWanderIdle, "Wander Idle" },
             { ColumnId_AiWanderRepeat, "Wander Repeat" },
             { ColumnId_AiActivateName, "Activate" },
             { ColumnId_AiTargetId, "Target ID" },
@@ -268,7 +268,7 @@ namespace CSMWorld
             { ColumnId_LevelledItemChanceNone, "Chance None" },
 
             { ColumnId_PowerList, "Powers" },
-            { ColumnId_SkillImpact, "Skill" },
+            { ColumnId_Skill, "Skill" },
 
             { ColumnId_InfoList, "Info List" },
             { ColumnId_InfoCondition, "Info Conditions" },
@@ -293,8 +293,7 @@ namespace CSMWorld
             { ColumnId_NpcPersistence, "Persistent" },
 
             { ColumnId_RaceAttributes, "Race Attributes" },
-            { ColumnId_RaceMaleValue, "Male Attrib" },
-            { ColumnId_RaceFemaleValue, "Female Attrib" },
+            { ColumnId_Male, "Male" },
             { ColumnId_RaceSkillBonus, "Skill Bonus" },
             { ColumnId_RaceBonus, "Bonus" },
 
@@ -316,6 +315,15 @@ namespace CSMWorld
             { ColumnId_MinAttack, "Min Attack" },
             { ColumnId_MaxAttack, "Max Attack" },
             { ColumnId_CreatureMisc, "Creature Misc" },
+
+            { ColumnId_Idle1, "Idle 1" },
+            { ColumnId_Idle2, "Idle 2" },
+            { ColumnId_Idle3, "Idle 3" },
+            { ColumnId_Idle4, "Idle 4" },
+            { ColumnId_Idle5, "Idle 5" },
+            { ColumnId_Idle6, "Idle 6" },
+            { ColumnId_Idle7, "Idle 7" },
+            { ColumnId_Idle8, "Idle 8" },
 
             { ColumnId_UseValue1, "Use value 1" },
             { ColumnId_UseValue2, "Use value 2" },
@@ -572,7 +580,7 @@ namespace
             case CSMWorld::Columns::ColumnId_MeshType: return sMeshTypes;
             case CSMWorld::Columns::ColumnId_SoundGeneratorType: return sSoundGeneratorType;
             case CSMWorld::Columns::ColumnId_School: return sSchools;
-            case CSMWorld::Columns::ColumnId_SkillImpact: return sSkills;
+            case CSMWorld::Columns::ColumnId_Skill: return sSkills;
             case CSMWorld::Columns::ColumnId_EffectRange: return sEffectRange;
             case CSMWorld::Columns::ColumnId_EffectId: return sEffectId;
             case CSMWorld::Columns::ColumnId_PartRefType: return sPartRefType;

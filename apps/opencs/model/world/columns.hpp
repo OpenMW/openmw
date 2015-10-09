@@ -241,7 +241,7 @@ namespace CSMWorld
             ColumnId_AiWanderDist = 221,
             ColumnId_AiDuration = 222,
             ColumnId_AiWanderToD = 223,
-            ColumnId_AiWanderIdle = 224,
+            // unused
             ColumnId_AiWanderRepeat = 225,
             ColumnId_AiActivateName = 226,
             // use ColumnId_PosX, etc for AI destinations
@@ -261,7 +261,7 @@ namespace CSMWorld
             ColumnId_LevelledItemChanceNone = 238,
 
             ColumnId_PowerList = 239,
-            ColumnId_SkillImpact = 240, // impact from magic effects
+            ColumnId_Skill = 240,
 
             ColumnId_InfoList = 241,
             ColumnId_InfoCondition = 242,
@@ -288,8 +288,8 @@ namespace CSMWorld
             ColumnId_NpcPersistence = 261,
 
             ColumnId_RaceAttributes = 262,
-            ColumnId_RaceMaleValue = 263,
-            ColumnId_RaceFemaleValue = 264,
+            ColumnId_Male = 263,
+            // unused
             ColumnId_RaceSkillBonus = 265,
             // unused
             ColumnId_RaceBonus = 267,
@@ -315,6 +315,15 @@ namespace CSMWorld
             ColumnId_MinAttack = 283,
             ColumnId_MaxAttack = 284,
             ColumnId_CreatureMisc = 285,
+
+            ColumnId_Idle1 = 286,
+            ColumnId_Idle2 = 287,
+            ColumnId_Idle3 = 288,
+            ColumnId_Idle4 = 289,
+            ColumnId_Idle5 = 290,
+            ColumnId_Idle6 = 291,
+            ColumnId_Idle7 = 292,
+            ColumnId_Idle8 = 293,
 
             // Allocated to a separate value range, so we don't get a collision should we ever need
             // to extend the number of use values.
