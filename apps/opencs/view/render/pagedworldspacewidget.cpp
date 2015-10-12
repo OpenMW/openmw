@@ -21,6 +21,7 @@
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
     bool modified = false;
+    bool wasEmpty = mCells.empty();
 
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
@@ -32,6 +33,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         {
             int index = cells.searchId (iter->first.getId (mWorldspace));
 
+            /// \todo handle cells that don't exist
             if (!mSelection.has (iter->first) || index==-1 ||
                 cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
             {
@@ -60,6 +62,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     {
         int index = cells.searchId (iter->getId (mWorldspace));
 
+        /// \todo handle cells that don't exist
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
@@ -72,6 +75,35 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     }
 
     if (modified)
+    {
+        for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter (mCells.begin());
+            iter!=mCells.end(); ++iter)
+        {
+            int mask = 0;
+
+            for (int i=CellArrow::Direction_North; i<=CellArrow::Direction_East; i *= 2)
+            {
+                CSMWorld::CellCoordinates coordinates (iter->second->getCoordinates());
+
+                switch (i)
+                {
+                    case CellArrow::Direction_North: coordinates = coordinates.move (0, 1); break;
+                    case CellArrow::Direction_West: coordinates = coordinates.move (-1, 0); break;
+                    case CellArrow::Direction_South: coordinates = coordinates.move (0, -1); break;
+                    case CellArrow::Direction_East: coordinates = coordinates.move (1, 0); break;
+                }
+
+                if (!mSelection.has (coordinates))
+                    mask |= i;
+            }
+
+            iter->second->setCellArrows (mask);
+        }
+    }
+
+    /// \todo do not overwrite manipulator object
+    /// \todo move code to useViewHint function
+    if (modified && wasEmpty)
         mView->setCameraManipulator(new osgGA::TrackballManipulator);
 
     return modified;

@@ -14,6 +14,7 @@
 #endif
 
 #include "object.hpp"
+#include "cellarrow.hpp"
 
 class QModelIndex;
 
@@ -25,6 +26,7 @@ namespace osg
 namespace CSMWorld
 {
     class Data;
+    class CellCoordinates;
 }
 
 namespace CSVRender
@@ -38,6 +40,7 @@ namespace CSVRender
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             int mX;
             int mY;
+            std::auto_ptr<CellArrow> mCellArrows[4];
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -86,6 +89,11 @@ namespace CSVRender
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
             void setSelection (int elementMask, Selection mode);
+
+            void setCellArrows (int mask);
+
+            /// Returns 0, 0 in case of an unpaged cell.
+            CSMWorld::CellCoordinates getCoordinates() const;
     };
 }
 

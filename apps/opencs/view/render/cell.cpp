@@ -9,6 +9,7 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/refcollection.hpp"
+#include "../../model/world/cellcoordinates.hpp"
 
 #include "elements.hpp"
 #include "terrainstorage.hpp"
@@ -231,4 +232,27 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
             iter->second->setSelected (selected);
         }
     }
+}
+
+void CSVRender::Cell::setCellArrows (int mask)
+{
+    for (int i=0; i<4; ++i)
+    {
+        CellArrow::Direction direction = static_cast<CellArrow::Direction> (1<<i);
+
+        bool enable = mask & direction;
+
+        if (enable!=(mCellArrows[i].get()!=0))
+        {
+            if (enable)
+                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mX, mY));
+            else
+                mCellArrows[i].reset (0);
+        }
+    }
+}
+
+CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
+{
+    return CSMWorld::CellCoordinates (mX, mY);
 }
