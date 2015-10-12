@@ -38,8 +38,7 @@ namespace CSVRender
             osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            int mX;
-            int mY;
+            CSMWorld::CellCoordinates mCoordinates;
             std::auto_ptr<CellArrow> mCellArrows[4];
 
             /// Ignored if cell does not have an object with the given ID.

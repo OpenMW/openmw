@@ -5,6 +5,8 @@
 
 #include <osg/ref_ptr>
 
+#include "../../model/world/cellcoordinates.hpp"
+
 namespace osg
 {
     class PositionAttitudeTransform;
@@ -48,8 +50,7 @@ namespace CSVRender
             Direction mDirection;
             osg::Group* mParentNode;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
-            int mXIndex;
-            int mYIndex;
+            CSMWorld::CellCoordinates mCoordinates;
 
             void adjustTransform();
 
@@ -57,13 +58,12 @@ namespace CSVRender
 
         public:
 
-            CellArrow (osg::Group *cellNode, Direction direction, int xIndex, int yIndex);
+            CellArrow (osg::Group *cellNode, Direction direction,
+                const CSMWorld::CellCoordinates& coordinates);
 
             ~CellArrow();
 
-            int getXIndex() const;
-
-            int getYIndex() const;
+            CSMWorld::CellCoordinates getCoordinates() const;
     };
 }
 

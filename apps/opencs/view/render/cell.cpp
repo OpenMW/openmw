@@ -52,7 +52,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
 }
 
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mX(0), mY(0)
+: mData (data), mId (Misc::StringUtils::lowerCase (id))
 {
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
@@ -76,8 +76,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
             mTerrain->loadCell(esmLand.mX,
                                esmLand.mY);
 
-            mX = esmLand.mX;
-            mY = esmLand.mY;
+            mCoordinates = CSMWorld::CellCoordinates (esmLand.mX, esmLand.mY);
         }
     }
 }
@@ -245,7 +244,7 @@ void CSVRender::Cell::setCellArrows (int mask)
         if (enable!=(mCellArrows[i].get()!=0))
         {
             if (enable)
-                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mX, mY));
+                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mCoordinates));
             else
                 mCellArrows[i].reset (0);
         }
@@ -254,5 +253,5 @@ void CSVRender::Cell::setCellArrows (int mask)
 
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
 {
-    return CSMWorld::CellCoordinates (mX, mY);
+    return mCoordinates;
 }

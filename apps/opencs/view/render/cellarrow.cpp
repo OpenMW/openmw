@@ -8,7 +8,6 @@
 #include <osg/Shape>
 #include <osg/Geode>
 
-
 #include "elements.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
@@ -27,8 +26,8 @@ void CSVRender::CellArrow::adjustTransform()
     const int cellSize = 8192;
     const int offset = cellSize / 2 + 400;
 
-    int x = mXIndex*cellSize + cellSize/2;
-    int y = mYIndex*cellSize + cellSize/2;
+    int x = mCoordinates.getX()*cellSize + cellSize/2;
+    int y = mCoordinates.getY()*cellSize + cellSize/2;
 
     switch (mDirection)
     {
@@ -61,8 +60,8 @@ void CSVRender::CellArrow::buildShape()
 }
 
 CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,
-    int xIndex, int yIndex)
-: mDirection (direction), mParentNode (cellNode), mXIndex (xIndex), mYIndex (yIndex)
+    const CSMWorld::CellCoordinates& coordinates)
+: mDirection (direction), mParentNode (cellNode), mCoordinates (coordinates)
 {
     mBaseNode = new osg::PositionAttitudeTransform;
 
@@ -82,12 +81,7 @@ CSVRender::CellArrow::~CellArrow()
     mParentNode->removeChild (mBaseNode);
 }
 
-int CSVRender::CellArrow::getXIndex() const
+CSMWorld::CellCoordinates CSVRender::CellArrow::getCoordinates() const
 {
-    return mXIndex;
-}
-
-int CSVRender::CellArrow::getYIndex() const
-{
-    return mYIndex;
+    return mCoordinates;
 }
