@@ -54,6 +54,11 @@ bool CSVRender::Cell::addObjects (int start, int end)
 CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id)
 : mData (data), mId (Misc::StringUtils::lowerCase (id))
 {
+    std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
+
+    if (result.second)
+        mCoordinates = result.first;
+
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
 
@@ -75,8 +80,6 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
             mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
             mTerrain->loadCell(esmLand.mX,
                                esmLand.mY);
-
-            mCoordinates = CSMWorld::CellCoordinates (esmLand.mX, esmLand.mY);
         }
     }
 }

@@ -28,6 +28,12 @@ namespace CSMWorld
 
             std::string getId (const std::string& worldspace) const;
             ///< Return the ID for the cell at these coordinates.
+
+            /// \return first: CellCoordinates (or 0, 0 if cell does not have coordinates),
+            /// second: is cell paged?
+            ///
+            /// \note The worldspace part of \a id is ignored
+            static std::pair<CellCoordinates, bool> fromId (const std::string& id);
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);
