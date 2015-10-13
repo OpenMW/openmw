@@ -71,38 +71,45 @@ void CSVRender::CellArrow::buildShape()
 
     geometry->setVertexArray (vertices);
 
-    osg::DrawElementsUShort *top = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
-    top->push_back (0);
-    top->push_back (1);
-    top->push_back (2);
-    geometry->addPrimitiveSet (top);
+    osg::DrawElementsUShort *primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
 
-    osg::DrawElementsUShort *bottom = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
-    bottom->push_back (5);
-    bottom->push_back (4);
-    bottom->push_back (3);
-    geometry->addPrimitiveSet (bottom);
+    // top
+    primitives->push_back (0);
+    primitives->push_back (1);
+    primitives->push_back (2);
 
-    osg::DrawElementsUShort *back = new osg::DrawElementsUShort (osg::PrimitiveSet::QUADS, 0);
-    back->push_back (3+6);
-    back->push_back (4+6);
-    back->push_back (1+6);
-    back->push_back (0+6);
-    geometry->addPrimitiveSet (back);
+    // bottom
+    primitives->push_back (5);
+    primitives->push_back (4);
+    primitives->push_back (3);
 
-    osg::DrawElementsUShort *side1 = new osg::DrawElementsUShort (osg::PrimitiveSet::QUADS, 0);
-    side1->push_back (0+6);
-    side1->push_back (2+6);
-    side1->push_back (5+6);
-    side1->push_back (3+6);
-    geometry->addPrimitiveSet (side1);
+    // back
+    primitives->push_back (3+6);
+    primitives->push_back (4+6);
+    primitives->push_back (1+6);
 
-    osg::DrawElementsUShort *side2 = new osg::DrawElementsUShort (osg::PrimitiveSet::QUADS, 0);
-    side2->push_back (4+6);
-    side2->push_back (5+6);
-    side2->push_back (2+6);
-    side2->push_back (1+6);
-    geometry->addPrimitiveSet (side2);
+    primitives->push_back (3+6);
+    primitives->push_back (1+6);
+    primitives->push_back (0+6);
+
+    // sides
+    primitives->push_back (0+6);
+    primitives->push_back (2+6);
+    primitives->push_back (5+6);
+
+    primitives->push_back (0+6);
+    primitives->push_back (5+6);
+    primitives->push_back (3+6);
+
+    primitives->push_back (4+6);
+    primitives->push_back (5+6);
+    primitives->push_back (2+6);
+
+    primitives->push_back (4+6);
+    primitives->push_back (2+6);
+    primitives->push_back (1+6);
+
+    geometry->addPrimitiveSet (primitives);
 
     osg::Vec4Array *colours = new osg::Vec4Array;
 
