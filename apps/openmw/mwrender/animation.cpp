@@ -1320,13 +1320,16 @@ namespace MWRender
     {
         mHeadController = NULL;
 
-        NodeMap::iterator found = mNodeMap.find("bip01 head");
-        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+        if (mPtr.getClass().isBipedal(mPtr))
         {
-            osg::Node* node = found->second;
-            mHeadController = new RotateController(mObjectRoot.get());
-            node->addUpdateCallback(mHeadController);
-            mActiveControllers.insert(std::make_pair(node, mHeadController));
+            NodeMap::iterator found = mNodeMap.find("bip01 head");
+            if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+            {
+                osg::Node* node = found->second;
+                mHeadController = new RotateController(mObjectRoot.get());
+                node->addUpdateCallback(mHeadController);
+                mActiveControllers.insert(std::make_pair(node, mHeadController));
+            }
         }
     }
 
