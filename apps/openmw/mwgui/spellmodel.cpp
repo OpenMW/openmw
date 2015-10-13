@@ -1,5 +1,7 @@
 #include "spellmodel.hpp"
 
+#include <iostream>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -79,8 +81,13 @@ namespace MWGui
             const std::string enchantId = item.getClass().getEnchantment(item);
             if (enchantId.empty())
                 continue;
-            const ESM::Enchantment* enchant =
-                esmStore.get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
+            const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
+            if (!enchant)
+            {
+                std::cerr << "Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
+                continue;
+            }
+
             if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
                 continue;
 
