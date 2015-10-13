@@ -645,8 +645,15 @@ void MWWorld::InventoryStore::updateRechargingItems()
     {
         if (it->getClass().getEnchantment(*it) != "")
         {
-            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                        it->getClass().getEnchantment(*it));
+            std::string enchantmentId = it->getClass().getEnchantment(*it);
+            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
+                        enchantmentId);
+            if (!enchantment)
+            {
+                std::cerr << "Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId() << std::endl;
+                continue;
+            }
+
             if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
                     || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
                 mRechargingItems.push_back(std::make_pair(it, static_cast<float>(enchantment->mData.mCharge)));
