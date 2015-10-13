@@ -88,7 +88,8 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
         MWWorld::Ptr door = getNearbyDoor(actor);
         if (door != MWWorld::Ptr()) // NOTE: checks interior cells only
         {
-            if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
+            if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
+                    && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0) {
                 MWBase::Environment::get().getWorld()->activateDoor(door, 1);
             }
         }
