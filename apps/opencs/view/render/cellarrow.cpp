@@ -116,7 +116,7 @@ void CSVRender::CellArrow::buildShape()
     for (int i=0; i<6; ++i)
         colours->push_back (osg::Vec4f (1.0f, 0.0f, 0.0f, 1.0f));
     for (int i=0; i<6; ++i)
-        colours->push_back (osg::Vec4f (1.0f, 0.0f, 0.4f, 1.0f));
+        colours->push_back (osg::Vec4f (0.8f, (i==2 || i==5) ? 0.6f : 0.4f, 0.0f, 1.0f));
 
     geometry->setColorArray (colours);
     geometry->setColorBinding (osg::Geometry::BIND_PER_VERTEX);
