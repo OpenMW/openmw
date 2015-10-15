@@ -1,5 +1,6 @@
 #include "pagedworldspacewidget.hpp"
 
+#include <memory>
 #include <sstream>
 
 #include <QMouseEvent>
@@ -26,17 +27,14 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
     {
-        // remove (or name/region modified)
+        // remove/update
         std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
 
         while (iter!=mCells.end())
         {
-            int index = cells.searchId (iter->first.getId (mWorldspace));
-
-            /// \todo handle cells that don't exist
-            if (!mSelection.has (iter->first) || index==-1 ||
-                cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted)
+            if (!mSelection.has (iter->first))
             {
+                // remove
                 delete iter->second;
                 mCells.erase (iter++);
 
@@ -44,12 +42,33 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             }
             else
             {
-                // check if name or region field has changed
-                // FIXME: config setting
-                //std::string name = cells.getRecord(index).get().mName;
-                //std::string region = cells.getRecord(index).get().mRegion;
+                // update
+                int index = cells.searchId (iter->first.getId (mWorldspace));
 
-                // cell marker update goes here
+                bool deleted = index==-1 ||
+                    cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted;
+
+                if (deleted!=iter->second->isDeleted())
+                {
+                    modified = true;
+
+                    std::auto_ptr<Cell> cell (new Cell (mDocument.getData(), mRootNode,
+                        iter->first.getId (mWorldspace), deleted));
+
+                    delete iter->second;
+                    iter->second = cell.release();
+                }
+                else if (!deleted)
+                {
+                    // delete state has not changed -> just update
+
+                    // TODO check if name or region field has changed (cell marker)
+                    // FIXME: config setting
+                    //std::string name = cells.getRecord(index).get().mName;
+                    //std::string region = cells.getRecord(index).get().mRegion;
+
+                    modified = true;
+                }
 
                 ++iter;
             }
@@ -60,11 +79,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     for (CSMWorld::CellSelection::Iterator iter (mSelection.begin()); iter!=mSelection.end();
         ++iter)
     {
-        int index = cells.searchId (iter->getId (mWorldspace));
-
-        /// \todo handle cells that don't exist
-        if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
-            mCells.find (*iter)==mCells.end())
+        if (mCells.find (*iter)==mCells.end())
         {
             Cell *cell = new Cell (mDocument.getData(), mRootNode,
                     iter->getId (mWorldspace));

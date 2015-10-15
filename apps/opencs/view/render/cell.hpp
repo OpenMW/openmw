@@ -40,6 +40,7 @@ namespace CSVRender
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
             std::auto_ptr<CellArrow> mCellArrows[4];
+            bool mDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -62,7 +63,10 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id);
+            /// \note Deleted covers both cells that are deleted and cells that don't exist in
+            /// the first place.
+            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+                bool deleted = false);
 
             ~Cell();
 
@@ -93,6 +97,8 @@ namespace CSVRender
 
             /// Returns 0, 0 in case of an unpaged cell.
             CSMWorld::CellCoordinates getCoordinates() const;
+
+            bool isDeleted() const;
     };
 }
 

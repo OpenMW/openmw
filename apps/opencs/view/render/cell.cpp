@@ -51,8 +51,9 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id)
-: mData (data), mId (Misc::StringUtils::lowerCase (id))
+CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+    bool deleted)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
@@ -62,24 +63,27 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
 
-    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
-        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
-
-    int rows = references.rowCount();
-
-    addObjects (0, rows-1);
-
-    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-    int landIndex = land.searchId(mId);
-    if (landIndex != -1)
+    if (!mDeleted)
     {
-        const ESM::Land& esmLand = land.getRecord(mId).get();
+        CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+            *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
-        if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+        int rows = references.rowCount();
+
+        addObjects (0, rows-1);
+
+        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+        int landIndex = land.searchId(mId);
+        if (landIndex != -1)
         {
-            mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
-            mTerrain->loadCell(esmLand.mX,
-                               esmLand.mY);
+            const ESM::Land& esmLand = land.getRecord(mId).get();
+
+            if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+            {
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
+                mTerrain->loadCell(esmLand.mX,
+                                   esmLand.mY);
+            }
         }
     }
 }
@@ -125,6 +129,9 @@ bool CSVRender::Cell::referenceableAboutToBeRemoved (const QModelIndex& parent, 
 bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
+    if (mDeleted)
+        return false;
+
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
@@ -192,6 +199,9 @@ bool CSVRender::Cell::referenceAboutToBeRemoved (const QModelIndex& parent, int 
     if (parent.isValid())
         return false;
 
+    if (mDeleted)
+        return false;
+
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
@@ -210,6 +220,9 @@ bool CSVRender::Cell::referenceAboutToBeRemoved (const QModelIndex& parent, int 
 bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int end)
 {
     if (parent.isValid())
+        return false;
+
+    if (mDeleted)
         return false;
 
     return addObjects (start, end);
@@ -257,4 +270,9 @@ void CSVRender::Cell::setCellArrows (int mask)
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
 {
     return mCoordinates;
+}
+
+bool CSVRender::Cell::isDeleted() const
+{
+    return mDeleted;
 }
