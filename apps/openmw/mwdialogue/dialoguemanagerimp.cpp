@@ -420,7 +420,6 @@ namespace MWDialogue
         {
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
-                ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
                 {
                     executeTopic (keyword);
