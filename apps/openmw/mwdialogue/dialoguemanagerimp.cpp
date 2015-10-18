@@ -139,9 +139,6 @@ namespace MWDialogue
 
         win->startDialogue(actor, actor.getClass().getName (actor), resetHistory);
 
-        //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
-        updateTopics();
-
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
@@ -165,12 +162,19 @@ namespace MWDialogue
                         // TODO play sound
                     }
 
+                    // first topics update so that parseText knows the keywords to highlight
+                    updateTopics();
+
                     parseText (info->mResponse);
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
+
+                    // update topics again to accomodate changes resulting from executeScript
+                    updateTopics();
+
                     return;
                 }
             }
