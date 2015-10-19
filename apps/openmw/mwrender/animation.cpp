@@ -1275,15 +1275,26 @@ namespace MWRender
             material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
             stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
-            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
-            stateset->setNestRenderBins(false);
             mObjectRoot->setStateSet(stateset);
         }
         else
         {
             mObjectRoot->setStateSet(NULL);
         }
+
+        setRenderBin();
+    }
+
+    void Animation::setRenderBin()
+    {
+        if (mAlpha != 1.f)
+        {
+            osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        }
+        else if (osg::StateSet* stateset = mObjectRoot->getStateSet())
+            stateset->setRenderBinToInherit();
     }
 
     void Animation::setLightEffect(float effect)
