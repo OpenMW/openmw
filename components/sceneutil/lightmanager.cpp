@@ -126,15 +126,13 @@ namespace SceneUtil
     };
 
     LightManager::LightManager()
-        : mLightsInViewSpace(false)
-        , mStartLight(0)
+        : mStartLight(0)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
     }
 
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)
         : osg::Group(copy, copyop)
-        , mLightsInViewSpace(false)
         , mStartLight(copy.mStartLight)
     {
 
@@ -142,8 +140,8 @@ namespace SceneUtil
 
     void LightManager::update()
     {
-        mLightsInViewSpace = false;
         mLights.clear();
+        mLightsInViewSpace.clear();
 
         // do an occasional cleanup for orphaned lights
         if (mStateSetCache.size() > 5000)
@@ -159,22 +157,6 @@ namespace SceneUtil
                                                         worldMat.getTrans().y(),
                                                         worldMat.getTrans().z(), 1.f));
         mLights.push_back(l);
-    }
-
-    void LightManager::prepareForCamera(osg::Camera *cam)
-    {
-        // later on we need to store this per camera
-        if (!mLightsInViewSpace)
-        {
-            for (std::vector<LightSourceTransform>::iterator it = mLights.begin(); it != mLights.end(); ++it)
-            {
-                LightSourceTransform& l = *it;
-                osg::Matrix worldViewMat = l.mWorldMatrix * cam->getViewMatrix();
-                l.mViewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), l.mLightSource->getRadius());
-                transformBoundingSphere(worldViewMat, l.mViewBound);
-            }
-            mLightsInViewSpace = true;
-        }
     }
 
     osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList &lightList)
@@ -212,6 +194,30 @@ namespace SceneUtil
         return mLights;
     }
 
+    const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera)
+    {
+        osg::observer_ptr<osg::Camera> camPtr (camera);
+        std::map<osg::observer_ptr<osg::Camera>, LightSourceViewBoundCollection>::iterator it = mLightsInViewSpace.find(camPtr);
+
+        if (it == mLightsInViewSpace.end())
+        {
+            it = mLightsInViewSpace.insert(std::make_pair(camPtr, LightSourceViewBoundCollection())).first;
+
+            for (std::vector<LightSourceTransform>::iterator lightIt = mLights.begin(); lightIt != mLights.end(); ++lightIt)
+            {
+                osg::Matrix worldViewMat = lightIt->mWorldMatrix * camera->getViewMatrix();
+                osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), lightIt->mLightSource->getRadius());
+                transformBoundingSphere(worldViewMat, viewBound);
+
+                LightSourceViewBound l;
+                l.mLightSource = lightIt->mLightSource;
+                l.mViewBound = viewBound;
+                it->second.push_back(l);
+            }
+        }
+        return it->second;
+    }
+
     void LightManager::setStartLight(int start)
     {
         mStartLight = start;
@@ -241,7 +247,7 @@ namespace SceneUtil
     }
 
 
-    bool sortLights (const LightManager::LightSourceTransform* left, const LightManager::LightSourceTransform* right)
+    bool sortLights (const LightManager::LightSourceViewBound* left, const LightManager::LightSourceViewBound* right)
     {
         return left->mViewBound.center().length2() - left->mViewBound.radius2()/4.f < right->mViewBound.center().length2() - right->mViewBound.radius2()/4.f;
     }
@@ -273,13 +279,11 @@ namespace SceneUtil
             }
         }
 
-        mLightManager->prepareForCamera(cv->getCurrentCamera());
-
         // Possible optimizations:
         // - cull list of lights by the camera frustum
         // - organize lights in a quad tree
 
-        const std::vector<LightManager::LightSourceTransform>& lights = mLightManager->getLights();
+        const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera());
 
         if (lights.size())
         {
@@ -288,10 +292,10 @@ namespace SceneUtil
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
-            std::vector<const LightManager::LightSourceTransform*> lightList;
+            LightManager::LightList lightList;
             for (unsigned int i=0; i<lights.size(); ++i)
             {
-                const LightManager::LightSourceTransform& l = lights[i];
+                const LightManager::LightSourceViewBound& l = lights[i];
                 if (l.mViewBound.intersects(nodeBound))
                     lightList.push_back(&l);
             }
