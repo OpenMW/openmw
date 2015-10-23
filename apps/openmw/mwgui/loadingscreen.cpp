@@ -235,40 +235,64 @@ namespace MWGui
         draw();
     }
 
+    bool LoadingScreen::needToDrawLoadingScreen()
+    {
+        if ( mTimer.time_m() <= mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
+            return false;
+
+        // the minimal delay before a loading screen shows
+        const float initialDelay = 0.05;
+
+        bool alreadyShown = (mLastRenderTime > mLoadingOnTime);
+        float diff = (mTimer.time_m() - mLoadingOnTime);
+
+        if (!alreadyShown)
+        {
+            // bump the delay by the current progress - i.e. if during the initial delay the loading
+            // has almost finished, no point showing the loading screen now
+            diff -= mProgress / static_cast<float>(mProgressBar->getScrollRange()) * 100.f;
+        }
+
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+        if (!showWallpaper && diff < initialDelay*1000)
+            return false;
+        return true;
+    }
+
     void LoadingScreen::draw()
     {
-        if (mTimer.time_m() > mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
+        if (!needToDrawLoadingScreen())
+            return;
+
+        bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
+                == MWBase::StateManager::State_NoGame);
+        if (showWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
         {
-            bool showWallpaper = (MWBase::Environment::get().getStateManager()->getState()
-                    == MWBase::StateManager::State_NoGame);
-
-            if (showWallpaper && mTimer.time_m() > mLastWallpaperChangeTime + 5000*1)
-            {
-                mLastWallpaperChangeTime = mTimer.time_m();
-                changeWallpaper();
-            }
-
-            // Turn off rendering except the GUI
-            int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
-            int oldCullMask = mViewer->getCamera()->getCullMask();
-            mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
-            mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
-
-            MWBase::Environment::get().getInputManager()->update(0, true, true);
-
-            //osg::Timer timer;
-            mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
-            //std::cout << "frame took " << timer.time_m() << std::endl;
-
-            //if (mViewer->getIncrementalCompileOperation())
-                //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
-
-            // resume 3d rendering
-            mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
-            mViewer->getCamera()->setCullMask(oldCullMask);
-
-            mLastRenderTime = mTimer.time_m();
+            mLastWallpaperChangeTime = mTimer.time_m();
+            changeWallpaper();
         }
+
+        // Turn off rendering except the GUI
+        int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
+        int oldCullMask = mViewer->getCamera()->getCullMask();
+        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
+        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
+
+        MWBase::Environment::get().getInputManager()->update(0, true, true);
+
+        //osg::Timer timer;
+        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+        //std::cout << "frame took " << timer.time_m() << std::endl;
+
+        //if (mViewer->getIncrementalCompileOperation())
+            //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
+
+        // resume 3d rendering
+        mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
+        mViewer->getCamera()->setCullMask(oldCullMask);
+
+        mLastRenderTime = mTimer.time_m();
     }
 
 }
