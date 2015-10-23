@@ -64,6 +64,16 @@ namespace SceneUtil
         std::vector<osg::ref_ptr<osg::Light> > mLights;
     };
 
+    LightManager* findLightManager(const osg::NodePath& path)
+    {
+        for (unsigned int i=0;i<path.size(); ++i)
+        {
+            if (LightManager* lightManager = dynamic_cast<LightManager*>(path[i]))
+                return lightManager;
+        }
+        return NULL;
+    }
+
     // Set on a LightSource. Adds the light source to its light manager for the current frame.
     // This allows us to keep track of the current lights in the scene graph without tying creation & destruction to the manager.
     class CollectLightCallback : public osg::NodeCallback
@@ -82,14 +92,8 @@ namespace SceneUtil
         {
             if (!mLightManager)
             {
-                for (unsigned int i=0;i<nv->getNodePath().size(); ++i)
-                {
-                    if (LightManager* lightManager = dynamic_cast<LightManager*>(nv->getNodePath()[i]))
-                    {
-                        mLightManager = lightManager;
-                        break;
-                    }
-                }
+                mLightManager = findLightManager(nv->getNodePath());
+
                 if (!mLightManager)
                     throw std::runtime_error("can't find parent LightManager");
             }
@@ -264,14 +268,7 @@ namespace SceneUtil
 
         if (!mLightManager)
         {
-            for (unsigned int i=0;i<nv->getNodePath().size(); ++i)
-            {
-                if (LightManager* lightManager = dynamic_cast<LightManager*>(nv->getNodePath()[i]))
-                {
-                    mLightManager = lightManager;
-                    break;
-                }
-            }
+            mLightManager = findLightManager(nv->getNodePath());
             if (!mLightManager)
             {
                 traverse(node, nv);
