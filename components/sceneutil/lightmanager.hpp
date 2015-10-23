@@ -88,7 +88,7 @@ namespace SceneUtil
             osg::BoundingSphere mViewBound;
         };
 
-        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera);
+        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix);
 
         typedef std::vector<const LightSourceViewBound*> LightList;
 
