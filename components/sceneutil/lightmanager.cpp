@@ -198,7 +198,7 @@ namespace SceneUtil
         return mLights;
     }
 
-    const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera)
+    const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera, const osg::RefMatrix* viewMatrix)
     {
         osg::observer_ptr<osg::Camera> camPtr (camera);
         std::map<osg::observer_ptr<osg::Camera>, LightSourceViewBoundCollection>::iterator it = mLightsInViewSpace.find(camPtr);
@@ -209,7 +209,7 @@ namespace SceneUtil
 
             for (std::vector<LightSourceTransform>::iterator lightIt = mLights.begin(); lightIt != mLights.end(); ++lightIt)
             {
-                osg::Matrix worldViewMat = lightIt->mWorldMatrix * camera->getViewMatrix();
+                osg::Matrix worldViewMat = lightIt->mWorldMatrix * (*viewMatrix);
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), lightIt->mLightSource->getRadius());
                 transformBoundingSphere(worldViewMat, viewBound);
 
@@ -280,7 +280,10 @@ namespace SceneUtil
         // - cull list of lights by the camera frustum
         // - organize lights in a quad tree
 
-        const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera());
+        // Don't use Camera::getViewMatrix, that one might be relative to another camera!
+        const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
+
+        const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
 
         if (lights.size())
         {
