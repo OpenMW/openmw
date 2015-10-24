@@ -8,11 +8,6 @@
 namespace MWGui
 {
 
-    namespace Widgets
-    {
-        class MWScrollBar;
-    }
-
     class WaitDialogProgressBar : public WindowBase
     {
     public:
@@ -51,7 +46,7 @@ namespace MWGui
         MyGUI::Button* mUntilHealedButton;
         MyGUI::Button* mWaitButton;
         MyGUI::Button* mCancelButton;
-        MWGui::Widgets::MWScrollBar* mHourSlider;
+        MyGUI::ScrollBar* mHourSlider;
 
         TimeAdvancer mTimeAdvancer;
         bool mSleeping;
