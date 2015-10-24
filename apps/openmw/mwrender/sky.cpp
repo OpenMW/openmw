@@ -741,7 +741,7 @@ private:
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
-            float angleRadians = getAngleToSunInRadians(cv->getCurrentCamera());
+            float angleRadians = getAngleToSunInRadians(*cv->getCurrentRenderStage()->getInitialViewMatrix());
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
             const float angleMaxRadians = osg::DegreesToRadians(mSunGlareFaderAngleMax);
@@ -784,10 +784,10 @@ private:
         }
 
     private:
-        float getAngleToSunInRadians(osg::Camera* camera) const
+        float getAngleToSunInRadians(const osg::Matrix& viewMatrix) const
         {
             osg::Vec3d eye, center, up;
-            camera->getViewMatrixAsLookAt(eye, center, up);
+            viewMatrix.getLookAt(eye, center, up);
 
             osg::Vec3d forward = center - eye;
             osg::Vec3d sun = mSunTransform->getPosition();
