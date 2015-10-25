@@ -64,6 +64,8 @@ namespace CSVRender
             ~CellArrow();
 
             CSMWorld::CellCoordinates getCoordinates() const;
+
+            Direction getDirection() const;
     };
 }
 

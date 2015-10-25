@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include <QMouseEvent>
+#include <QApplication>
 
 #include <osgGA/TrackballManipulator>
 
@@ -81,10 +82,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
     {
         if (mCells.find (*iter)==mCells.end())
         {
-            Cell *cell = new Cell (mDocument.getData(), mRootNode,
-                    iter->getId (mWorldspace));
-            mCells.insert (std::make_pair (*iter, cell));
-
+            addCellToScene (*iter);
             modified = true;
         }
     }
@@ -150,6 +148,76 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
         "terrain-move");
+}
+
+void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button)
+{
+    if (tag && tag->getElement()==Element_CellArrow)
+    {
+        if (button=="p-edit" || button=="s-edit")
+        {
+            if (CellArrowTag *cellArrowTag =
+                dynamic_cast<CSVRender::CellArrowTag *> (tag.get()))
+            {
+                CellArrow *arrow = cellArrowTag->getCellArrow();
+
+                CSMWorld::CellCoordinates coordinates = arrow->getCoordinates();
+
+                CellArrow::Direction direction = arrow->getDirection();
+
+                int x = 0;
+                int y = 0;
+
+                switch (direction)
+                {
+                    case CellArrow::Direction_North: y = 1; break;
+                    case CellArrow::Direction_West: x = -1; break;
+                    case CellArrow::Direction_South: y = -1; break;
+                    case CellArrow::Direction_East: x = 1; break;
+                }
+
+                bool modified = false;
+
+                if (QApplication::keyboardModifiers() & Qt::ShiftModifier)
+                {
+                    if (button=="p-edit")
+                        addCellSelection (x, y);
+                    else
+                        moveCellSelection (x, y);
+
+                    modified = true;
+                }
+                else
+                {
+                    CSMWorld::CellCoordinates newCoordinates = coordinates.move (x, y);
+
+                    if (mCells.find (newCoordinates)==mCells.end())
+                    {
+                        addCellToScene (newCoordinates);
+                        mSelection.add (newCoordinates);
+                        modified = true;
+                    }
+
+                    if (button=="s-edit")
+                    {
+                        if (mCells.find (coordinates)!=mCells.end())
+                        {
+                            removeCellFromScene (coordinates);
+                            mSelection.remove (coordinates);
+                            modified = true;
+                        }
+                    }
+                }
+
+                if (modified)
+                    adjustCells();
+
+                return;
+            }
+        }
+    }
+
+    WorldspaceWidget::handleMouseClick (tag, button);
 }
 
 void CSVRender::PagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -229,6 +297,72 @@ std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
         << ", 0";
 
     return stream.str();
+}
+
+void CSVRender::PagedWorldspaceWidget::addCellToScene (
+    const CSMWorld::CellCoordinates& coordinates)
+{
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
+
+    int index = cells.searchId (coordinates.getId (mWorldspace));
+
+    bool deleted = index==-1 ||
+        cells.getRecord (index).mState==CSMWorld::RecordBase::State_Deleted;
+
+    Cell *cell = new Cell (mDocument.getData(), mRootNode, coordinates.getId (mWorldspace),
+        deleted);
+
+    mCells.insert (std::make_pair (coordinates, cell));
+}
+
+void CSVRender::PagedWorldspaceWidget::removeCellFromScene (
+    const CSMWorld::CellCoordinates& coordinates)
+{
+    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.find (coordinates);
+
+    if (iter!=mCells.end())
+    {
+        delete iter->second;
+        mCells.erase (iter);
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::addCellSelection (int x, int y)
+{
+    CSMWorld::CellSelection newSelection = mSelection;
+    newSelection.move (x, y);
+
+    for (CSMWorld::CellSelection::Iterator iter (newSelection.begin()); iter!=newSelection.end();
+        ++iter)
+    {
+        if (mCells.find (*iter)==mCells.end())
+        {
+            addCellToScene (*iter);
+            mSelection.add (*iter);
+        }
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::moveCellSelection (int x, int y)
+{
+    CSMWorld::CellSelection newSelection = mSelection;
+    newSelection.move (x, y);
+
+    for (CSMWorld::CellSelection::Iterator iter (mSelection.begin()); iter!=mSelection.end();
+        ++iter)
+    {
+        if (!newSelection.has (*iter))
+            removeCellFromScene (*iter);
+    }
+
+    for (CSMWorld::CellSelection::Iterator iter (newSelection.begin()); iter!=newSelection.end();
+        ++iter)
+    {
+        if (!mSelection.has (*iter))
+            addCellToScene (*iter);
+    }
+
+    mSelection = newSelection;
 }
 
 CSVRender::PagedWorldspaceWidget::PagedWorldspaceWidget (QWidget* parent, CSMDoc::Document& document)

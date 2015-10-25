@@ -154,3 +154,8 @@ CSMWorld::CellCoordinates CSVRender::CellArrow::getCoordinates() const
 {
     return mCoordinates;
 }
+
+CSVRender::CellArrow::Direction CSVRender::CellArrow::getDirection() const
+{
+    return mDirection;
+}
