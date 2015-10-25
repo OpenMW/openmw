@@ -493,6 +493,8 @@ namespace MWRender
         texture->setInternalFormat(GL_RGB);
         texture->setTextureSize(w, h);
         texture->setResizeNonPowerOfTwoHint(false);
+        texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         rttCamera->attach(osg::Camera::COLOR_BUFFER, texture);
 
         image->setDataType(GL_UNSIGNED_BYTE);
