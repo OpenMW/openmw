@@ -167,11 +167,12 @@ namespace MWGui
         MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
                             static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
+        mMainWidget->setPosition(pos);
+        mMainWidget->setSize(size);
+
         if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
             updatePreviewSize();
 
-        mMainWidget->setPosition(pos);
-        mMainWidget->setSize(size);
         adjustPanes();
     }
 
