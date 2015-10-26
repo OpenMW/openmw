@@ -14,6 +14,7 @@
 #endif
 
 #include "object.hpp"
+#include "cellarrow.hpp"
 
 class QModelIndex;
 
@@ -25,6 +26,7 @@ namespace osg
 namespace CSMWorld
 {
     class Data;
+    class CellCoordinates;
 }
 
 namespace CSVRender
@@ -36,8 +38,9 @@ namespace CSVRender
             osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            int mX;
-            int mY;
+            CSMWorld::CellCoordinates mCoordinates;
+            std::auto_ptr<CellArrow> mCellArrows[4];
+            bool mDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -60,7 +63,10 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id);
+            /// \note Deleted covers both cells that are deleted and cells that don't exist in
+            /// the first place.
+            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+                bool deleted = false);
 
             ~Cell();
 
@@ -86,6 +92,13 @@ namespace CSVRender
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
             void setSelection (int elementMask, Selection mode);
+
+            void setCellArrows (int mask);
+
+            /// Returns 0, 0 in case of an unpaged cell.
+            CSMWorld::CellCoordinates getCoordinates() const;
+
+            bool isDeleted() const;
     };
 }
 

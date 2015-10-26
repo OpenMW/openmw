@@ -90,7 +90,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight
-    lightingbright object cell terrainstorage tagbase
+    lightingbright object cell terrainstorage tagbase cellarrow
     )
 
 opencs_hdrs_noqt (view/render

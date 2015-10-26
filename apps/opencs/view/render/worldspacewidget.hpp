@@ -27,6 +27,7 @@ namespace CSVWidget
 namespace CSVRender
 {
     class TagBase;
+    class CellArrow;
 
     class WorldspaceWidget : public SceneWidget
     {
@@ -131,6 +132,8 @@ namespace CSVRender
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
+
+            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button);
 
         private:
 

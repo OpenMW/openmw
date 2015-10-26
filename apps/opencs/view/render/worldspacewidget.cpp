@@ -574,14 +574,7 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
     {
         osg::ref_ptr<TagBase> tag = mousePick (event);
 
-        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
-
-        if (button=="p-edit")
-            editMode.primaryEditPressed (tag);
-        else if (button=="s-edit")
-            editMode.secondaryEditPressed (tag);
-        else if (button=="select")
-            editMode.selectPressed (tag);
+        handleMouseClick (tag, button);
     }
 }
 
@@ -649,4 +642,16 @@ void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
     }
     else
         RenderWidget::keyPressEvent(event);
+}
+
+void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button)
+{
+    EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+    if (button=="p-edit")
+        editMode.primaryEditPressed (tag);
+    else if (button=="s-edit")
+        editMode.secondaryEditPressed (tag);
+    else if (button=="select")
+        editMode.selectPressed (tag);
 }

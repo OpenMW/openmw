@@ -32,6 +32,23 @@ std::string CSMWorld::CellCoordinates::getId (const std::string& worldspace) con
     return stream.str();
 }
 
+std::pair<CSMWorld::CellCoordinates, bool> CSMWorld::CellCoordinates::fromId (
+    const std::string& id)
+{
+    // no worldspace for now, needs to be changed for 1.1
+    if (!id.empty() && id[0]=='#')
+    {
+        int x, y;
+        char ignore;
+
+        std::istringstream stream (id);
+        if (stream >> ignore >> x >> y)
+            return std::make_pair (CellCoordinates (x, y), true);
+    }
+
+    return std::make_pair (CellCoordinates(), false);
+}
+
 bool CSMWorld::operator== (const CellCoordinates& left, const CellCoordinates& right)
 {
     return left.getX()==right.getX() && left.getY()==right.getY();
