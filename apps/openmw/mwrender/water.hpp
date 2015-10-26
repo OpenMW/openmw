@@ -9,6 +9,9 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
+    class Texture2D;
+    class Image;
+    class Camera;
 }
 
 namespace osgUtil
@@ -37,6 +40,7 @@ namespace MWRender
         static const int CELL_SIZE = 8192;
 
         osg::ref_ptr<osg::Group> mParent;
+        osg::ref_ptr<osg::Group> mSceneRoot;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
@@ -51,7 +55,9 @@ namespace MWRender
         void updateVisible();
 
     public:
-        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback);
+        Water(osg::Group* parent, osg::Group* sceneRoot,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback,
+              const std::string& resourcePath);
         ~Water();
 
         void setEnabled(bool enabled);

@@ -122,7 +122,8 @@ namespace MWRender
         bool mWireframe;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback)
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+                                       const MWWorld::Fallback* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -145,7 +146,7 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
 
-        mWater.reset(new Water(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback));
+        mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
                                                 new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
@@ -197,6 +198,39 @@ namespace MWRender
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
+
+        /*
+        osg::Texture2D* texture = new osg::Texture2D;
+        texture->setSourceFormat(GL_DEPTH_COMPONENT);
+        texture->setInternalFormat(GL_DEPTH_COMPONENT24_ARB);
+        texture->setSourceType(GL_UNSIGNED_INT);
+
+        mViewer->getCamera()->attach(osg::Camera::DEPTH_BUFFER, texture);
+
+        osg::ref_ptr<osg::Camera> camera (new osg::Camera);
+        camera->setProjectionMatrix(osg::Matrix::identity());
+        camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+        camera->setViewMatrix(osg::Matrix::identity());
+        camera->setClearMask(0);
+        camera->setRenderOrder(osg::Camera::NESTED_RENDER);
+        camera->setAllowEventFocus(false);
+
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1,-1,0), osg::Vec3f(0.5,0,0), osg::Vec3f(0,0.5,0));
+        geode->addDrawable(geom);
+
+        camera->addChild(geode);
+
+        osg::StateSet* stateset = geom->getOrCreateStateSet();
+
+        stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+        stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+        stateset->setRenderBinDetails(20, "RenderBin");
+        stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+        mLightRoot->addChild(camera);
+        */
     }
 
     RenderingManager::~RenderingManager()
@@ -260,6 +294,7 @@ namespace MWRender
     {
         // need to wrap this in a StateUpdater?
         mSunLight->setDiffuse(colour);
+        mSunLight->setSpecular(colour);
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)

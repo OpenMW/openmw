@@ -153,7 +153,8 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-        int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
+        int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
+            const std::string& resourcePath)
     : mResourceSystem(resourceSystem), mFallback(fallbackMap), mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
@@ -163,7 +164,7 @@ namespace MWWorld
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
-        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback);
+        mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
 
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();

@@ -32,6 +32,7 @@
 #include "camera.hpp"
 #include "rotatecontroller.hpp"
 #include "renderbin.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -323,9 +324,9 @@ public:
 
     virtual void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)
     {
-        renderInfo.getState()->applyAttribute(mDepth);
+        //renderInfo.getState()->applyAttribute(mDepth);
 
-        glClear(GL_DEPTH_BUFFER_BIT);
+        //glClear(GL_DEPTH_BUFFER_BIT);
 
         bin->drawImplementation(renderInfo, previous);
     }
@@ -441,6 +442,7 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
+        mObjectRoot->setNodeMask(Mask_FirstPerson);
         if(isWerewolf)
             addAnimSource(smodel);
         else

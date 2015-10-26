@@ -513,7 +513,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(),
         mFileCollections, mContentFiles, mEncoder, mFallbackMap,
-        mActivationDistanceOverride, mCellName, mStartupScript));
+        mActivationDistanceOverride, mCellName, mStartupScript, mResDir.string()));
     mEnvironment.getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 

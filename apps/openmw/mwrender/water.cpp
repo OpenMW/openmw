@@ -2,20 +2,32 @@
 
 #include <iomanip>
 
+#include <osg/io_utils>
+
+#include <osg/Depth>
 #include <osg/Group>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Depth>
+#include <osg/ClipNode>
+#include <osg/MatrixTransform>
+#include <osg/FrontFace>
+#include <osg/Shader>
+
+#include <osgDB/ReadFile> // XXX remove
 
 #include <osgUtil/IncrementalCompileOperation>
+#include <osgUtil/CullVisitor>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
 
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>
+
+#include <components/settings/settings.hpp>
 
 #include <components/esm/loadcell.hpp>
 
@@ -69,7 +81,7 @@ namespace
         return waterGeom;
     }
 
-    void createWaterStateSet(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node)
+    void createSimpleWaterStateSet(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node)
     {
         osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
@@ -111,8 +123,152 @@ namespace MWRender
 
 // --------------------------------------------------------------------------------------------------------------------------------
 
-Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico, const MWWorld::Fallback* fallback)
+/// @brief Allows to cull and clip meshes that are below a plane. Useful for reflection & refraction camera effects.
+/// Also handles flipping of the plane when the eye point goes below it.
+/// To use, simply create the scene as subgraph of this node, then do setPlane(const osg::Plane& plane);
+class ClipCullNode : public osg::Group
+{
+    class PlaneCullCallback : public osg::NodeCallback
+    {
+    public:
+        /// @param cullPlane The culling plane (in world space).
+        PlaneCullCallback(const osg::Plane* cullPlane)
+            : osg::NodeCallback()
+            , mCullPlane(cullPlane)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+            osg::Polytope::PlaneList origPlaneList = cv->getProjectionCullingStack().back().getFrustum().getPlaneList();
+
+            // TODO: offset plane towards the viewer to fix bleeding at the water shore
+
+            osg::Plane plane = *mCullPlane;
+            plane.transform(*cv->getCurrentRenderStage()->getInitialViewMatrix());
+
+            osg::Vec3d eyePoint = cv->getEyePoint();
+            if (mCullPlane->intersect(osg::BoundingSphere(osg::Vec3d(0,0,eyePoint.z()), 0)) > 0)
+                plane.flip();
+
+            cv->getProjectionCullingStack().back().getFrustum().add(plane);
+
+            traverse(node, nv);
+
+            // undo
+            cv->getProjectionCullingStack().back().getFrustum().set(origPlaneList);
+        }
+
+    private:
+        const osg::Plane* mCullPlane;
+    };
+
+    class FlipCallback : public osg::NodeCallback
+    {
+    public:
+        FlipCallback(const osg::Plane* cullPlane)
+            : mCullPlane(cullPlane)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+            osg::Vec3d eyePoint = cv->getEyePoint();
+            // flip the below graph if the eye point is above the plane
+            if (mCullPlane->intersect(osg::BoundingSphere(osg::Vec3d(0,0,eyePoint.z()), 0)) > 0)
+            {
+                osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+                modelViewMatrix->preMultScale(osg::Vec3(1,1,-1));
+
+                cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
+                traverse(node, nv);
+                cv->popModelViewMatrix();
+            }
+            else
+                traverse(node, nv);
+        }
+
+    private:
+        const osg::Plane* mCullPlane;
+    };
+
+public:
+    ClipCullNode()
+    {
+        addCullCallback (new PlaneCullCallback(&mPlane));
+
+        mClipNodeTransform = new osg::PositionAttitudeTransform;
+        mClipNodeTransform->addCullCallback(new FlipCallback(&mPlane));
+        addChild(mClipNodeTransform);
+
+        mClipNode = new osg::ClipNode;
+
+        mClipNodeTransform->addChild(mClipNode);
+    }
+
+    void setPlane (const osg::Plane& plane)
+    {
+        if (plane == mPlane)
+            return;
+        mPlane = plane;
+
+        mClipNode->getClipPlaneList().clear();
+        mClipNode->addClipPlane(new osg::ClipPlane(0, mPlane));
+        mClipNode->setStateSetModes(*getOrCreateStateSet(), osg::StateAttribute::ON);
+    }
+
+private:
+    osg::ref_ptr<osg::PositionAttitudeTransform> mClipNodeTransform;
+    osg::ref_ptr<osg::ClipNode> mClipNode;
+
+    osg::Plane mPlane;
+};
+
+// Node callback to entirely skip the traversal.
+class NoTraverseCallback : public osg::NodeCallback
+{
+public:
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        // no traverse()
+    }
+};
+
+void addDebugOverlay(osg::Texture2D* texture, int pos, osg::Group* parent)
+{
+    osg::ref_ptr<osg::Camera> debugCamera (new osg::Camera);
+    debugCamera->setProjectionMatrix(osg::Matrix::identity());
+    debugCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    debugCamera->setViewMatrix(osg::Matrix::identity());
+    debugCamera->setClearMask(0);
+    debugCamera->setRenderOrder(osg::Camera::NESTED_RENDER);
+    debugCamera->setAllowEventFocus(false);
+
+    const float size = 0.5;
+    osg::ref_ptr<osg::Geode> debugGeode (new osg::Geode);
+    osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1 + size*pos, -1, 0), osg::Vec3f(size,0,0), osg::Vec3f(0,size,0));
+    debugGeode->addDrawable(geom);
+
+    debugCamera->addChild(debugGeode);
+
+    osg::StateSet* debugStateset = geom->getOrCreateStateSet();
+
+    debugStateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+    debugStateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+
+    debugStateset->setRenderBinDetails(20, "RenderBin");
+    debugStateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+    parent->addChild(debugCamera);
+}
+
+Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
+             const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
+    , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
     , mEnabled(true)
     , mToggled(true)
@@ -126,17 +282,164 @@ Water::Water(osg::Group *parent, Resource::ResourceSystem *resourceSystem, osgUt
     geode->addDrawable(waterGeom);
     geode->setNodeMask(Mask_Water);
 
+    // TODO: node mask to use simple water for local map
+
     if (ico)
         ico->add(geode);
 
-    createWaterStateSet(mResourceSystem, geode);
+    //createSimpleWaterStateSet(mResourceSystem, geode);
 
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->addChild(geode);
 
-    mParent->addChild(mWaterNode);
+    mSceneRoot->addChild(mWaterNode);
 
     setHeight(mTop);
+
+    const float waterLevel = -1;
+
+    // refraction
+    unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
+    osg::ref_ptr<osg::Camera> refractionCamera (new osg::Camera);
+    refractionCamera->setRenderOrder(osg::Camera::PRE_RENDER);
+    refractionCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    refractionCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    refractionCamera->setReferenceFrame(osg::Camera::RELATIVE_RF);
+
+    refractionCamera->setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
+    refractionCamera->setNodeMask(Mask_RenderToTexture);
+    refractionCamera->setViewport(0, 0, rttSize, rttSize);
+
+    // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
+    // A double update would mess with the light collection (in addition to being plain redundant)
+    refractionCamera->setUpdateCallback(new NoTraverseCallback);
+
+    // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
+    refractionCamera->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<ClipCullNode> clipNode (new ClipCullNode);
+    clipNode->setPlane(osg::Plane(osg::Vec3d(0,0,-1), osg::Vec3d(0,0, waterLevel)));
+
+    refractionCamera->addChild(clipNode);
+    clipNode->addChild(mSceneRoot);
+
+    // TODO: add ingame setting for texture quality
+
+    osg::ref_ptr<osg::Texture2D> refractionTexture = new osg::Texture2D;
+    refractionTexture->setTextureSize(rttSize, rttSize);
+    refractionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    refractionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+    refractionTexture->setInternalFormat(GL_RGB);
+    refractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    refractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
+    refractionCamera->attach(osg::Camera::COLOR_BUFFER, refractionTexture);
+
+    osg::ref_ptr<osg::Texture2D> refractionDepthTexture = new osg::Texture2D;
+    refractionDepthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
+    refractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24_ARB);
+    refractionDepthTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    refractionDepthTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+    refractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
+    refractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    refractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
+    refractionCamera->attach(osg::Camera::DEPTH_BUFFER, refractionDepthTexture);
+
+    mParent->addChild(refractionCamera);
+
+    // reflection
+    osg::ref_ptr<osg::Camera> reflectionCamera (new osg::Camera);
+    reflectionCamera->setRenderOrder(osg::Camera::PRE_RENDER);
+    reflectionCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    reflectionCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+    reflectionCamera->setReferenceFrame(osg::Camera::RELATIVE_RF);
+
+    reflectionCamera->setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
+    reflectionCamera->setNodeMask(Mask_RenderToTexture);
+
+    reflectionCamera->setViewport(0, 0, rttSize, rttSize);
+
+    // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
+    // A double update would mess with the light collection (in addition to being plain redundant)
+    reflectionCamera->setUpdateCallback(new NoTraverseCallback);
+
+    osg::ref_ptr<osg::Texture2D> reflectionTexture = new osg::Texture2D;
+    reflectionTexture->setInternalFormat(GL_RGB);
+    reflectionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    reflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    reflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    reflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+    reflectionCamera->attach(osg::Camera::COLOR_BUFFER, reflectionTexture);
+
+    reflectionCamera->setViewMatrix(osg::Matrix::translate(0,0,-waterLevel) * osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,waterLevel));
+
+    osg::ref_ptr<osg::MatrixTransform> reflectNode (new osg::MatrixTransform);
+
+    // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
+    osg::ref_ptr<osg::FrontFace> frontFace (new osg::FrontFace);
+    frontFace->setMode(osg::FrontFace::CLOCKWISE);
+    reflectNode->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+
+    osg::ref_ptr<ClipCullNode> clipNode2 (new ClipCullNode);
+    clipNode2->setPlane(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,waterLevel)));
+
+    reflectNode->addChild(clipNode2);
+    clipNode2->addChild(mSceneRoot);
+
+    reflectionCamera->addChild(reflectNode);
+
+    // TODO: add to waterNode so cameras don't get updated when water is hidden?
+
+    mParent->addChild(reflectionCamera);
+
+    // debug overlay
+    addDebugOverlay(refractionTexture, 0, mParent);
+    addDebugOverlay(refractionDepthTexture, 1, mParent);
+    addDebugOverlay(reflectionTexture, 2, mParent);
+
+    // shader
+    // FIXME: windows utf8 path handling?
+
+    osg::ref_ptr<osg::Shader> vertexShader (osg::Shader::readShaderFile(osg::Shader::VERTEX, resourcePath + "/shaders/water_vertex.glsl"));
+
+    osg::ref_ptr<osg::Shader> fragmentShader (osg::Shader::readShaderFile(osg::Shader::FRAGMENT, resourcePath + "/shaders/water_fragment.glsl"));
+
+    osg::ref_ptr<osg::Program> program (new osg::Program);
+    program->addShader(vertexShader);
+    program->addShader(fragmentShader);
+
+    osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(osgDB::readImageFile(resourcePath + "/shaders/water_nm.png")));
+    normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+    normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+    normalMap->setMaxAnisotropy(16);
+    normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
+    normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    normalMap->getImage()->flipVertical();
+
+    osg::ref_ptr<osg::StateSet> shaderStateset = new osg::StateSet;
+    shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+    shaderStateset->addUniform(new osg::Uniform("reflectionMap", 0));
+    shaderStateset->addUniform(new osg::Uniform("refractionMap", 1));
+    shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 2));
+    shaderStateset->addUniform(new osg::Uniform("normalMap", 3));
+
+    shaderStateset->setTextureAttributeAndModes(0, reflectionTexture, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(1, refractionTexture, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(2, refractionDepthTexture, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(3, normalMap, osg::StateAttribute::ON);
+    shaderStateset->setMode(GL_BLEND, osg::StateAttribute::ON); // TODO: set Off when refraction is on
+    shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+    depth->setWriteMask(false);
+    shaderStateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
+    // TODO: render after transparent bin when refraction is on
+    shaderStateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
+
+    geode->setStateSet(shaderStateset);
 }
 
 Water::~Water()

@@ -1,6 +1,9 @@
 #include "sky.hpp"
 
 #include <cmath>
+#include <iostream>
+
+#include <osg/io_utils>
 
 #include <osg/Transform>
 #include <osg/Geode>
@@ -250,6 +253,8 @@ public:
         // That's not a problem though, children of this node can be culled just fine
         // Just make sure you do not place a CameraRelativeTransform deep in the scene graph
         setCullingActive(false);
+
+        addCullCallback(new CullCallback);
     }
 
     CameraRelativeTransform(const CameraRelativeTransform& copy, const osg::CopyOp& copyop)
@@ -259,7 +264,7 @@ public:
 
     META_Node(MWRender, CameraRelativeTransform)
 
-    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor*) const
+    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const
     {
         if (_referenceFrame==RELATIVE_RF)
         {
@@ -277,6 +282,48 @@ public:
     {
         return osg::BoundingSphere(osg::Vec3f(0,0,0), 0);
     }
+
+    class CullCallback : public osg::NodeCallback
+    {
+    public:
+        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+            // XXX have to remove unwanted culling plane of the water reflection camera
+
+            // Remove all planes that aren't from the standard frustum
+            unsigned int numPlanes = 4;
+            if (cv->getCullingMode() & osg::CullSettings::NEAR_PLANE_CULLING)
+                ++numPlanes;
+            if (cv->getCullingMode() & osg::CullSettings::FAR_PLANE_CULLING)
+                ++numPlanes;
+
+            int mask = 0x1;
+            int resultMask = cv->getProjectionCullingStack().back().getFrustum().getResultMask();
+            for (unsigned int i=0; i<cv->getProjectionCullingStack().back().getFrustum().getPlaneList().size(); ++i)
+            {
+                if (i >= numPlanes)
+                {
+                    // turn off this culling plane
+                    resultMask &= (~mask);
+                }
+
+                mask <<= 1;
+            }
+
+            cv->getProjectionCullingStack().back().getFrustum().setResultMask(resultMask);
+            cv->getCurrentCullingSet().getFrustum().setResultMask(resultMask);
+
+            cv->getProjectionCullingStack().back().pushCurrentMask();
+            cv->getCurrentCullingSet().pushCurrentMask();
+
+            traverse(node, nv);
+
+            cv->getProjectionCullingStack().back().popCurrentMask();
+            cv->getCurrentCullingSet().popCurrentMask();
+        }
+    };
 };
 
 class ModVertexAlphaVisitor : public osg::NodeVisitor
@@ -1014,6 +1061,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mSunEnabled(true)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
+
     skyroot->setNodeMask(Mask_Sky);
     parentNode->addChild(skyroot);
 
@@ -1021,6 +1069,9 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
 
     // By default render before the world is rendered
     mRootNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Sky, "RenderBin");
+
+    // Prevent unwanted clipping by water reflection camera's clipping plane
+    mRootNode->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
 }
 
 void SkyManager::create()

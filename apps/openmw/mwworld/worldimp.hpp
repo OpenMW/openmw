@@ -167,7 +167,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript);
+                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath);
 
             virtual ~World();
 
