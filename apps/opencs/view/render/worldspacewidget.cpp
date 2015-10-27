@@ -563,25 +563,14 @@ void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 
     if (!mDragging)
         mDragMode = button;
-
-    if (button=="p-navi" || button=="s-navi")
-    {
-
-    }
-    else if (button=="p-edit" || button=="s-edit" || button=="select")
-    {
-        osg::ref_ptr<TagBase> tag = mousePick (event);
-
-        handleMouseClick (tag, button);
-    }
 }
 
 void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
+    std::string button = mapButton (event);
+
     if (mDragging)
     {
-        std::string button = mapButton (event);
-
         if (mDragMode=="p-navi" || mDragMode=="s-navi")
         {
 
@@ -592,6 +581,19 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 
             editMode.dragCompleted();
             mDragging = false;
+        }
+    }
+    else
+    {
+        if (button=="p-navi" || button=="s-navi")
+        {
+
+        }
+        else if (button=="p-edit" || button=="s-edit" || button=="select")
+        {
+            osg::ref_ptr<TagBase> tag = mousePick (event);
+
+            handleMouseClick (tag, button);
         }
     }
 
