@@ -555,8 +555,6 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 
         editMode.drag (diffX, diffY, factor);
     }
-
-    RenderWidget::mouseMoveEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
@@ -598,8 +596,6 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
     }
 
     mDragMode.clear();
-
-    RenderWidget::mouseReleaseEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
@@ -608,7 +604,6 @@ void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
     {
         //mMouse->mouseDoubleClickEvent(event);
     }
-    //SceneWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
@@ -624,8 +619,6 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 
         editMode.dragWheel (event->delta(), factor);
     }
-
-    RenderWidget::wheelEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
