@@ -102,7 +102,7 @@ namespace CSVRender
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
 
-            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button);
+            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift);
 
         signals:
 

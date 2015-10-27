@@ -133,7 +133,8 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
-            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button);
+            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
+                bool shift);
 
         private:
 
