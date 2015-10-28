@@ -3,6 +3,8 @@
 
 #include <osg/ref_ptr>
 
+#include <components/settings/settings.hpp>
+
 #include "../mwworld/cellstore.hpp"
 
 namespace osg
@@ -67,6 +69,8 @@ namespace MWRender
         /// @param refraction the refraction camera (optional)
         void createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction);
 
+        void updateWaterMaterial();
+
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,
               Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback,
@@ -92,6 +96,7 @@ namespace MWRender
 
         void update(float dt);
 
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 
 }

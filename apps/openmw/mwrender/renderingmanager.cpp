@@ -785,6 +785,8 @@ namespace MWRender
             }
             else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
                 updateTextureFiltering();
+            else if (it->first == "Water")
+                mWater->processChangedSettings(changed);
         }
     }
 
