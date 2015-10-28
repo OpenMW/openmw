@@ -34,6 +34,8 @@ const float SPEC_HARDNESS = 256.0;                 // specular highlights hardne
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
 
+const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
+
 // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -
 
 float fresnel_dielectric(vec3 Incoming, vec3 Normal, float eta)
@@ -160,6 +162,8 @@ void main(void)
     vec3 R = reflect(vVec, normal);
     float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS) * shadow;
 
+    vec3 waterColor = WATER_COLOR;
+    waterColor = waterColor * length(gl_LightModel.ambient.xyz);
 #if REFRACTION
     float refractionDepth = texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x;
     // make linear
@@ -168,14 +172,12 @@ void main(void)
     
     float waterDepth = refractionDepth - depthPassthrough;
 
-    vec3 waterColor = vec3(0.090195, 0.115685, 0.12745);
-    waterColor = waterColor * length(gl_LightModel.ambient.xyz);
     if (cameraPos.z > 0.0)
         refraction = mix(refraction, waterColor, clamp(waterDepth/VISIBILITY, 0.0, 1.0));
 
     gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * gl_LightSource[0].specular.xyz;
 #else
-    gl_FragData[0].xyz = mix(reflection,  vec3(0.090195, 0.115685, 0.12745),  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz;
+    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz;
 #endif
 
     // fog
