@@ -12,15 +12,15 @@
 
 namespace CSMWorld
 {
-    enum TableEditModes
-    {
-        TableEdit_None,      // no editing
-        TableEdit_Full,      // edit cells and add/remove rows
-        TableEdit_FixedRows  // edit cells only
-    };
-
     struct ColumnBase
     {
+        enum TableEditModes
+        {
+            TableEdit_None,      // no editing
+            TableEdit_Full,      // edit cells and add/remove rows
+            TableEdit_FixedRows  // edit cells only
+        };
+
         enum Roles
         {
             Role_Flags = Qt::UserRole,
@@ -211,9 +211,9 @@ namespace CSMWorld
         {
             // by default editable; also see IdTree::hasChildren()
             if (mFixedRows)
-                return QVariant::fromValue(TableEdit_FixedRows);
+                return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
             else
-                return QVariant::fromValue(TableEdit_Full);
+                return QVariant::fromValue(ColumnBase::TableEdit_Full);
         }
 
         virtual bool isEditable() const
@@ -237,6 +237,6 @@ namespace CSMWorld
     };
 }
 
-Q_DECLARE_METATYPE(CSMWorld::TableEditModes)
+Q_DECLARE_METATYPE(CSMWorld::ColumnBase::TableEditModes)
 
 #endif
