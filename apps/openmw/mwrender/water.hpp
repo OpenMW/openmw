@@ -9,9 +9,6 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
-    class Texture2D;
-    class Image;
-    class Camera;
 }
 
 namespace osgUtil

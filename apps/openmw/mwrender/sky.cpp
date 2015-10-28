@@ -1,9 +1,6 @@
 #include "sky.hpp"
 
 #include <cmath>
-#include <iostream>
-
-#include <osg/io_utils>
 
 #include <osg/Transform>
 #include <osg/Geode>
@@ -264,7 +261,7 @@ public:
 
     META_Node(MWRender, CameraRelativeTransform)
 
-    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const
+    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor*) const
     {
         if (_referenceFrame==RELATIVE_RF)
         {
