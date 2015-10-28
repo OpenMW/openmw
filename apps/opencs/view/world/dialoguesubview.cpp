@@ -567,13 +567,13 @@ void CSVWorld::EditWidget::remake(int row)
                 bool editable = true;
                 bool fixedRows = false;
                 QVariant v = mTable->index(row, i).data();
-                if (v.canConvert<CSMWorld::TableEditModes>())
+                if (v.canConvert<CSMWorld::ColumnBase::TableEditModes>())
                 {
-                    assert (QString(v.typeName()) == "CSMWorld::TableEditModes");
+                    assert (QString(v.typeName()) == "CSMWorld::ColumnBase::TableEditModes");
 
-                    if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEditModes::TableEdit_None)
+                    if (v.value<CSMWorld::ColumnBase::TableEditModes>() == CSMWorld::ColumnBase::TableEdit_None)
                         editable = false;
-                    else if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEditModes::TableEdit_FixedRows)
+                    else if (v.value<CSMWorld::ColumnBase::TableEditModes>() == CSMWorld::ColumnBase::TableEdit_FixedRows)
                         fixedRows = true;
                 }
 
