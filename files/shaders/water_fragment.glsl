@@ -60,13 +60,13 @@ varying vec3  screenCoordsPassthrough;
 varying vec4  position;
 varying float  depthPassthrough;
 
+uniform sampler2D normalMap;
+
 uniform sampler2D reflectionMap;
 #if REFRACTION
 uniform sampler2D refractionMap;
 uniform sampler2D refractionDepthMap;
 #endif
-
-uniform sampler2D normalMap;
                 
 uniform float osg_SimulationTime;
 

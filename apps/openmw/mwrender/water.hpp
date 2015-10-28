@@ -9,6 +9,8 @@ namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
+    class Geode;
+    class Node;
 }
 
 namespace osgUtil
@@ -41,6 +43,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mParent;
         osg::ref_ptr<osg::Group> mSceneRoot;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
+        osg::ref_ptr<osg::Geode> mWaterGeode;
         Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
@@ -49,12 +52,20 @@ namespace MWRender
         osg::ref_ptr<Refraction> mRefraction;
         osg::ref_ptr<Reflection> mReflection;
 
+        const std::string mResourcePath;
+
         bool mEnabled;
         bool mToggled;
         float mTop;
 
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
+
+        void createSimpleWaterStateSet(osg::Node* node);
+
+        /// @param reflection the reflection camera (required)
+        /// @param refraction the refraction camera (optional)
+        void createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction);
 
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,

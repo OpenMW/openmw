@@ -82,41 +82,6 @@ namespace
         return waterGeom;
     }
 
-    void createSimpleWaterStateSet(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node)
-    {
-        osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
-
-        osg::ref_ptr<osg::Material> material (new osg::Material);
-        material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-        material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.7f));
-        material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        material->setColorMode(osg::Material::OFF);
-        stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
-
-        stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-
-        osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-        depth->setWriteMask(false);
-        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
-
-        stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-
-        std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-        for (int i=0; i<32; ++i)
-        {
-            std::ostringstream texname;
-            texname << "textures/water/water" << std::setw(2) << std::setfill('0') << i << ".dds";
-            textures.push_back(resourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
-        }
-
-        osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 2/32.f, textures));
-        controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
-        node->addUpdateCallback(controller);
-        node->setStateSet(stateset);
-        stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
-    }
-
 }
 
 namespace MWRender
@@ -419,6 +384,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
+    , mResourcePath(resourcePath)
     , mEnabled(true)
     , mToggled(true)
     , mTop(0)
@@ -427,19 +393,19 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
 
-    osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-    geode->addDrawable(waterGeom);
-    geode->setNodeMask(Mask_Water);
+    mWaterGeode = new osg::Geode;
+    mWaterGeode->addDrawable(waterGeom);
+    mWaterGeode->setNodeMask(Mask_Water);
 
     if (ico)
-        ico->add(geode);
+        ico->add(mWaterGeode);
 
     mWaterNode = new osg::PositionAttitudeTransform;
-    mWaterNode->addChild(geode);
+    mWaterNode->addChild(mWaterGeode);
 
     // simple water fallback for the local map
-    osg::ref_ptr<osg::Geode> geode2 (osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(mResourceSystem, geode2);
+    osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
+    createSimpleWaterStateSet(geode2);
     geode2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geode2);
 
@@ -453,31 +419,65 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mRefraction = new Refraction();
     mRefraction->setWaterLevel(waterLevel);
     mRefraction->setScene(mSceneRoot);
-
-    // TODO: add ingame setting for texture quality
-
     mParent->addChild(mRefraction);
 
     // reflection
     mReflection = new Reflection();
     mReflection->setWaterLevel(waterLevel);
     mReflection->setScene(mSceneRoot);
-
-    // TODO: add to waterNode so cameras don't get updated when water is hidden?
-
     mParent->addChild(mReflection);
 
-    // shader
+    createShaderWaterStateSet(mWaterGeode, mReflection, mRefraction);
 
-    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, resourcePath + "/shaders/water_vertex.glsl"));
+    // TODO: add ingame setting for texture quality
+}
 
-    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, resourcePath + "/shaders/water_fragment.glsl"));
+void Water::createSimpleWaterStateSet(osg::Node* node)
+{
+    osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
+
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.7f));
+    material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+    material->setColorMode(osg::Material::OFF);
+    stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
+
+    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+    depth->setWriteMask(false);
+    stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
+    stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
+
+    std::vector<osg::ref_ptr<osg::Texture2D> > textures;
+    for (int i=0; i<32; ++i)
+    {
+        std::ostringstream texname;
+        texname << "textures/water/water" << std::setw(2) << std::setfill('0') << i << ".dds";
+        textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+    }
+
+    osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 2/32.f, textures));
+    controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+    node->addUpdateCallback(controller);
+    node->setStateSet(stateset);
+    stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
+}
+
+void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction)
+{
+    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, mResourcePath + "/shaders/water_vertex.glsl"));
+
+    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl"));
 
     osg::ref_ptr<osg::Program> program (new osg::Program);
     program->addShader(vertexShader);
     program->addShader(fragmentShader);
 
-    osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(resourcePath + "/shaders/water_nm.png")));
+    osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
     normalMap->setMaxAnisotropy(16);
@@ -487,26 +487,33 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     osg::ref_ptr<osg::StateSet> shaderStateset = new osg::StateSet;
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-    shaderStateset->addUniform(new osg::Uniform("reflectionMap", 0));
-    shaderStateset->addUniform(new osg::Uniform("refractionMap", 1));
-    shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 2));
-    shaderStateset->addUniform(new osg::Uniform("normalMap", 3));
+    shaderStateset->addUniform(new osg::Uniform("normalMap", 0));
+    shaderStateset->addUniform(new osg::Uniform("reflectionMap", 1));
+    shaderStateset->addUniform(new osg::Uniform("refractionMap", 2));
+    shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 3));
 
-    shaderStateset->setTextureAttributeAndModes(0, mReflection->getReflectionTexture(), osg::StateAttribute::ON);
-    shaderStateset->setTextureAttributeAndModes(1, mRefraction->getRefractionTexture(), osg::StateAttribute::ON);
-    shaderStateset->setTextureAttributeAndModes(2, mRefraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
-    shaderStateset->setTextureAttributeAndModes(3, normalMap, osg::StateAttribute::ON);
-    shaderStateset->setMode(GL_BLEND, osg::StateAttribute::ON); // TODO: set Off when refraction is on
+    shaderStateset->setTextureAttributeAndModes(0, normalMap, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(1, reflection->getReflectionTexture(), osg::StateAttribute::ON);
+    if (refraction)
+    {
+        shaderStateset->setTextureAttributeAndModes(2, refraction->getRefractionTexture(), osg::StateAttribute::ON);
+        shaderStateset->setTextureAttributeAndModes(3, refraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
+        shaderStateset->setRenderBinDetails(MWRender::RenderBin_Default, "RenderBin");
+    }
+    else
+    {
+        shaderStateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+
+        shaderStateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
+
+        osg::ref_ptr<osg::Depth> depth (new osg::Depth);
+        depth->setWriteMask(false);
+        shaderStateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+    }
+
     shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
 
-    osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-    depth->setWriteMask(false);
-    shaderStateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
-
-    // TODO: render after transparent bin when refraction is on
-    shaderStateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
-
-    geode->setStateSet(shaderStateset);
+    node->setStateSet(shaderStateset);
 }
 
 Water::~Water()
@@ -551,7 +558,12 @@ void Water::update(float dt)
 
 void Water::updateVisible()
 {
-    mWaterNode->setNodeMask(mEnabled && mToggled ? ~0 : 0);
+    unsigned int mask = mEnabled && mToggled ? ~0 : 0;
+    mWaterNode->setNodeMask(mask);
+    if (mRefraction)
+        mRefraction->setNodeMask(mask);
+    if (mReflection)
+        mReflection->setNodeMask(mask);
 }
 
 bool Water::toggle()
