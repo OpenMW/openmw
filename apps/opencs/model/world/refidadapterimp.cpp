@@ -144,8 +144,34 @@ QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData (const RefIdColumn *c
     switch (subColIndex)
     {
         case 0: return record.get().mData.mEffectID[subRowIndex];
-        case 1: return record.get().mData.mSkills[subRowIndex];
-        case 2: return record.get().mData.mAttributes[subRowIndex];
+        case 1:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainSkill:
+                case ESM::MagicEffect::DamageSkill:
+                case ESM::MagicEffect::RestoreSkill:
+                case ESM::MagicEffect::FortifySkill:
+                case ESM::MagicEffect::AbsorbSkill:
+                    return record.get().mData.mSkills[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
+        case 2:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::AbsorbAttribute:
+                    return record.get().mData.mAttributes[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
         default:
             throw std::runtime_error("Trying to access non-existing column in the nested table!");
     }
