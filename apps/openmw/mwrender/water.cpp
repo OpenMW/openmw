@@ -444,7 +444,6 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
 void Water::updateWaterMaterial()
 {
-    // TODO: add ingame setting for texture quality
     if (mReflection)
     {
         mParent->removeChild(mReflection);
@@ -543,6 +542,7 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
         shaderStateset->setTextureAttributeAndModes(3, refraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
         shaderStateset->addUniform(new osg::Uniform("refractionMap", 2));
         shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 3));
+        // FIXME: zfighting with ripples
         shaderStateset->setRenderBinDetails(MWRender::RenderBin_Default, "RenderBin");
     }
     else

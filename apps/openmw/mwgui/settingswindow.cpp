@@ -177,10 +177,10 @@ namespace MWGui
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
-        getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
+        getWidget(mWaterTextureSize, "WaterTextureSize");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -203,6 +203,8 @@ namespace MWGui
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
         mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
+
+        mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
@@ -239,11 +241,18 @@ namespace MWGui
         mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
         mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
+        int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
+        if (waterTextureSize >= 512)
+            mWaterTextureSize->setIndexSelected(0);
+        if (waterTextureSize >= 1024)
+            mWaterTextureSize->setIndexSelected(1);
+        if (waterTextureSize >= 2048)
+            mWaterTextureSize->setIndexSelected(2);
+
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
 
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
-            mRefractionButton->setEnabled(false);
             mShadowsEnabledButton->setEnabled(false);
         }
 
@@ -324,6 +333,19 @@ namespace MWGui
         }
     }
 
+    void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        int size = 0;
+        if (pos == 0)
+            size = 512;
+        else if (pos == 1)
+            size = 1024;
+        else if (pos == 2)
+            size = 2048;
+        Settings::Manager::setInt("rtt size", "Water", size);
+        apply();
+    }
+
     void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)
     {
         Settings::Manager::setString("texture size", "Shadows", _sender->getItemNameAt(pos));
@@ -350,12 +372,6 @@ namespace MWGui
         {
             if (newState == false)
             {
-                // refraction needs shaders to display underwater fog
-                mRefractionButton->setCaptionWithReplacing("#{sOff}");
-                mRefractionButton->setEnabled(false);
-
-                Settings::Manager::setBool("refraction", "Water", false);
-
                 // shadows not supported
                 mShadowsEnabledButton->setEnabled(false);
                 mShadowsEnabledButton->setCaptionWithReplacing("#{sOff}");
@@ -363,9 +379,6 @@ namespace MWGui
             }
             else
             {
-                // re-enable
-                mRefractionButton->setEnabled(true);
-
                 mShadowsEnabledButton->setEnabled(true);
             }
         }

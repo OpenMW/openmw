@@ -38,7 +38,8 @@ namespace MWGui
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mShadersButton;
-            MyGUI::Button* mRefractionButton;
+
+            MyGUI::ComboBox* mWaterTextureSize;
 
             MyGUI::Button* mShadowsEnabledButton;
             MyGUI::ComboBox* mShadowsTextureSize;
@@ -60,6 +61,8 @@ namespace MWGui
             void onResolutionAccept();
             void onResolutionCancel();
             void highlightCurrentResolution();
+
+            void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 
             void onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
 

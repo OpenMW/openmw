@@ -365,21 +365,32 @@
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 75 16" align="Left Top">
-                                <Property key="Caption" value="Reflection"/>
+                                <Property key="Caption" value="Water shader"/>
                             </Widget>
                         </Widget>
                         <Widget type="Widget" skin="" position="24 32 300 230">
-                        </Widget>
-                        <Widget type="HBox" skin="" position="4 135 350 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="RefractionButton">
-                                <UserString key="SettingCategory" value="Water"/>
-                                <UserString key="SettingName" value="refraction"/>
-                                <UserString key="SettingType" value="CheckButton"/>
+                            <Widget type="HBox" skin="" position="4 0 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="RefractionButton">
+                                    <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="refraction"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
+                                    <Property key="Caption" value="Refraction"/>
+                                </Widget>
                             </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
-                                <Property key="Caption" value="Refraction"/>
+                            <Widget type="HBox" skin="" position="4 28 350 24">
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 85 24" align="Left Top" name="WaterTextureSize">
+                                    <Property key="AddItem" value="Low"/>
+                                    <Property key="AddItem" value="Medium"/>
+                                    <Property key="AddItem" value="High"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Texture quality"/>
+                                </Widget>
                             </Widget>
                         </Widget>
+
                     </Widget>
                     <Widget type="TabItem" skin="" position="0 28 352 268">
                         <Property key="Caption" value="  Shadows  "/>
