@@ -76,7 +76,7 @@ namespace SceneUtil
 
         struct LightSourceTransform
         {
-            LightSource* mLightSource;
+            osg::ref_ptr<LightSource> mLightSource;
             osg::Matrix mWorldMatrix;
         };
 
@@ -84,7 +84,7 @@ namespace SceneUtil
 
         struct LightSourceViewBound
         {
-            LightSource* mLightSource;
+            osg::ref_ptr<LightSource> mLightSource;
             osg::BoundingSphere mViewBound;
         };
 
