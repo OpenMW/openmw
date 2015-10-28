@@ -2,6 +2,7 @@
 
 #include <iomanip>
 
+#include <osg/PolygonOffset>
 #include <osg/Geode>
 #include <osg/Texture2D>
 #include <osg/Material>
@@ -54,6 +55,11 @@ namespace
         osg::ref_ptr<osg::Depth> depth (new osg::Depth);
         depth->setWriteMask(false);
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+
+        osg::ref_ptr<osg::PolygonOffset> polygonOffset (new osg::PolygonOffset);
+        polygonOffset->setUnits(-1);
+        polygonOffset->setFactor(-1);
+        stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
 
         stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 

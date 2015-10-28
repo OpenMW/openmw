@@ -526,7 +526,6 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
         shaderStateset->setTextureAttributeAndModes(3, refraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
         shaderStateset->addUniform(new osg::Uniform("refractionMap", 2));
         shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 3));
-        // FIXME: zfighting with ripples
         shaderStateset->setRenderBinDetails(MWRender::RenderBin_Default, "RenderBin");
     }
     else
