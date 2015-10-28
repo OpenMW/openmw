@@ -27,7 +27,7 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
 
     // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column==mColumns.mEffects)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -68,7 +68,7 @@ QVariant CSMWorld::IngredientRefIdAdapter::getData (const RefIdColumn *column, c
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Ingredient)));
 
     if (column==mColumns.mEffects)
-        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+        return QVariant::fromValue(CSMWorld::TableEdit_FixedRows);
 
     return InventoryRefIdAdapter<ESM::Ingredient>::getData (column, data, index);
 }
@@ -272,7 +272,7 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mArmor;
 
     if (column==mPartRef)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -360,7 +360,7 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mType;
 
     if (column==mPartRef)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }
@@ -408,7 +408,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -477,13 +477,13 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
     if (column==mColumns.mAttributes)
-        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+        return QVariant::fromValue(CSMWorld::TableEdit_FixedRows);
 
     if (column==mColumns.mAttacks)
-        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+        return QVariant::fromValue(CSMWorld::TableEdit_FixedRows);
 
     if (column==mColumns.mMisc)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -723,13 +723,13 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mAttributes || column==mColumns.mSkills)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant::fromValue(TableEditModes::TableEdit_None);
+            return QVariant::fromValue(CSMWorld::TableEdit_None);
         else
-            return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+            return QVariant::fromValue(CSMWorld::TableEdit_FixedRows);
     }
 
     if (column==mColumns.mMisc)
-        return QVariant::fromValue(TableEditModes::TableEdit_Full);
+        return QVariant::fromValue(CSMWorld::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);

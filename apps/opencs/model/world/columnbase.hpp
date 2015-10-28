@@ -211,9 +211,9 @@ namespace CSMWorld
         {
             // by default editable; also see IdTree::hasChildren()
             if (mFixedRows)
-                return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+                return QVariant::fromValue(TableEdit_FixedRows);
             else
-                return QVariant::fromValue(TableEditModes::TableEdit_Full);
+                return QVariant::fromValue(TableEdit_Full);
         }
 
         virtual bool isEditable() const

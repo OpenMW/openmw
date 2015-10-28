@@ -571,9 +571,9 @@ void CSVWorld::EditWidget::remake(int row)
                 {
                     assert (QString(v.typeName()) == "CSMWorld::TableEditModes");
 
-                    if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEditModes::TableEdit_None)
+                    if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEdit_None)
                         editable = false;
-                    else if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEditModes::TableEdit_FixedRows)
+                    else if (v.value<CSMWorld::TableEditModes>() == CSMWorld::TableEdit_FixedRows)
                         fixedRows = true;
                 }
 
