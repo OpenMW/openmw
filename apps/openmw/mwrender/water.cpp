@@ -352,7 +352,66 @@ private:
 
 class Reflection : public osg::Camera
 {
+public:
+    Reflection()
+    {
+        setRenderOrder(osg::Camera::PRE_RENDER);
+        setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+        setReferenceFrame(osg::Camera::RELATIVE_RF);
 
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
+        setNodeMask(Mask_RenderToTexture);
+
+        unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
+        setViewport(0, 0, rttSize, rttSize);
+
+        // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
+        // A double update would mess with the light collection (in addition to being plain redundant)
+        setUpdateCallback(new NoTraverseCallback);
+
+        mReflectionTexture = new osg::Texture2D;
+        mReflectionTexture->setInternalFormat(GL_RGB);
+        mReflectionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+        attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
+
+        // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
+        osg::ref_ptr<osg::FrontFace> frontFace (new osg::FrontFace);
+        frontFace->setMode(osg::FrontFace::CLOCKWISE);
+        getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
+
+        mClipCullNode = new ClipCullNode;
+        addChild(mClipCullNode);
+    }
+
+    void setWaterLevel(float waterLevel)
+    {
+        setViewMatrix(osg::Matrix::translate(0,0,-waterLevel) * osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,waterLevel));
+
+        mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,waterLevel)));
+    }
+
+    void setScene(osg::Node* scene)
+    {
+        if (mScene)
+            mClipCullNode->removeChild(mScene);
+        mScene = scene;
+        mClipCullNode->addChild(scene);
+    }
+
+    osg::Texture2D* getReflectionTexture() const
+    {
+        return mReflectionTexture.get();
+    }
+
+private:
+    osg::ref_ptr<osg::Texture2D> mReflectionTexture;
+    osg::ref_ptr<ClipCullNode> mClipCullNode;
+    osg::ref_ptr<osg::Node> mScene;
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
@@ -400,51 +459,13 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mParent->addChild(mRefraction);
 
     // reflection
-    osg::ref_ptr<osg::Camera> reflectionCamera (new osg::Camera);
-    reflectionCamera->setRenderOrder(osg::Camera::PRE_RENDER);
-    reflectionCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    reflectionCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    reflectionCamera->setReferenceFrame(osg::Camera::RELATIVE_RF);
-
-    reflectionCamera->setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
-    reflectionCamera->setNodeMask(Mask_RenderToTexture);
-
-    unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
-    reflectionCamera->setViewport(0, 0, rttSize, rttSize);
-
-    // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
-    // A double update would mess with the light collection (in addition to being plain redundant)
-    reflectionCamera->setUpdateCallback(new NoTraverseCallback);
-
-    osg::ref_ptr<osg::Texture2D> reflectionTexture = new osg::Texture2D;
-    reflectionTexture->setInternalFormat(GL_RGB);
-    reflectionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    reflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    reflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-    reflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-
-    reflectionCamera->attach(osg::Camera::COLOR_BUFFER, reflectionTexture);
-
-    reflectionCamera->setViewMatrix(osg::Matrix::translate(0,0,-waterLevel) * osg::Matrix::scale(1,1,-1) * osg::Matrix::translate(0,0,waterLevel));
-
-    osg::ref_ptr<osg::MatrixTransform> reflectNode (new osg::MatrixTransform);
-
-    // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
-    osg::ref_ptr<osg::FrontFace> frontFace (new osg::FrontFace);
-    frontFace->setMode(osg::FrontFace::CLOCKWISE);
-    reflectNode->getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
-
-    osg::ref_ptr<ClipCullNode> clipNode2 (new ClipCullNode);
-    clipNode2->setPlane(osg::Plane(osg::Vec3d(0,0,1), osg::Vec3d(0,0,waterLevel)));
-
-    reflectNode->addChild(clipNode2);
-    clipNode2->addChild(mSceneRoot);
-
-    reflectionCamera->addChild(reflectNode);
+    mReflection = new Reflection();
+    mReflection->setWaterLevel(waterLevel);
+    mReflection->setScene(mSceneRoot);
 
     // TODO: add to waterNode so cameras don't get updated when water is hidden?
 
-    mParent->addChild(reflectionCamera);
+    mParent->addChild(mReflection);
 
     // shader
 
@@ -471,7 +492,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     shaderStateset->addUniform(new osg::Uniform("refractionDepthMap", 2));
     shaderStateset->addUniform(new osg::Uniform("normalMap", 3));
 
-    shaderStateset->setTextureAttributeAndModes(0, reflectionTexture, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(0, mReflection->getReflectionTexture(), osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(1, mRefraction->getRefractionTexture(), osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(2, mRefraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(3, normalMap, osg::StateAttribute::ON);
