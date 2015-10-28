@@ -142,8 +142,6 @@ class ClipCullNode : public osg::Group
 
             osg::Polytope::PlaneList origPlaneList = cv->getProjectionCullingStack().back().getFrustum().getPlaneList();
 
-            // TODO: offset plane towards the viewer to fix bleeding at the water shore
-
             osg::Plane plane = *mCullPlane;
             plane.transform(*cv->getCurrentRenderStage()->getInitialViewMatrix());
 
@@ -175,18 +173,21 @@ class ClipCullNode : public osg::Group
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
             osg::Vec3d eyePoint = cv->getEyePoint();
+
+            osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+
             // flip the below graph if the eye point is above the plane
             if (mCullPlane->intersect(osg::BoundingSphere(osg::Vec3d(0,0,eyePoint.z()), 0)) > 0)
             {
-                osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
                 modelViewMatrix->preMultScale(osg::Vec3(1,1,-1));
-
-                cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
-                traverse(node, nv);
-                cv->popModelViewMatrix();
             }
-            else
-                traverse(node, nv);
+            // move the plane back along its normal a little bit to prevent bleeding at the water shore
+            const float clipFudge = 5;
+            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * (-clipFudge));
+
+            cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
+            traverse(node, nv);
+            cv->popModelViewMatrix();
         }
 
     private:

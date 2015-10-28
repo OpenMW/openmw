@@ -21,8 +21,8 @@ const float WAVE_CHOPPYNESS = 0.05;                // wave choppyness
 const float WAVE_SCALE = 75.0;                     // overall wave scale
 
 const float BUMP = 0.5;                            // overall water surface bumpiness
-const float REFL_BUMP = 0.15;                      // reflection distortion amount
-const float REFR_BUMP = 0.06;                      // refraction distortion amount
+const float REFL_BUMP = 0.10;                      // reflection distortion amount
+const float REFR_BUMP = 0.07;                      // refraction distortion amount
 
 const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scattering
 const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
