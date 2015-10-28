@@ -68,6 +68,9 @@ uniform sampler2D normalMap;
                 
 uniform float osg_SimulationTime;
 
+uniform float near;
+uniform float far;
+
 void main(void)
 {
     // FIXME
@@ -160,10 +163,8 @@ void main(void)
 #if REFRACTION
     float refractionDepth = texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x;
     // make linear
-    float zNear = 5; // FIXME
-    float zFar = 6666; // FIXME
     float z_n = 2.0 * refractionDepth - 1.0;
-    refractionDepth = 2.0 * zNear * zFar / (zFar + zNear - z_n * (zFar - zNear));
+    refractionDepth = 2.0 * near * far / (far + near - z_n * (far - near));
     
     float waterDepth = refractionDepth - depthPassthrough;
 

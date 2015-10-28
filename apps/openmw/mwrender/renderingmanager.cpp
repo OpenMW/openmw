@@ -198,6 +198,9 @@ namespace MWRender
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
+
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
     }
 
     RenderingManager::~RenderingManager()
