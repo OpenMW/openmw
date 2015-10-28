@@ -301,7 +301,6 @@ osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
 }
 
 
-
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -319,15 +318,17 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     geode->addDrawable(waterGeom);
     geode->setNodeMask(Mask_Water);
 
-    // TODO: node mask to use simple water for local map
-
     if (ico)
         ico->add(geode);
 
-    //createSimpleWaterStateSet(mResourceSystem, geode);
-
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->addChild(geode);
+
+    // simple water fallback for the local map
+    osg::ref_ptr<osg::Geode> geode2 (osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES));
+    createSimpleWaterStateSet(mResourceSystem, geode2);
+    geode2->setNodeMask(Mask_SimpleWater);
+    mWaterNode->addChild(geode2);
 
     mSceneRoot->addChild(mWaterNode);
 
