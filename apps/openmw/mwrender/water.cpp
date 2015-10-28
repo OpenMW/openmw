@@ -458,6 +458,11 @@ void Water::changeCell(const MWWorld::CellStore* store)
         mWaterNode->setPosition(getSceneNodeCoordinates(store->getCell()->mData.mX, store->getCell()->mData.mY));
     else
         mWaterNode->setPosition(osg::Vec3f(0,0,mTop));
+
+    // create a new StateSet to prevent threading issues
+    osg::ref_ptr<osg::StateSet> nodeStateSet (new osg::StateSet);
+    nodeStateSet->addUniform(new osg::Uniform("nodePosition", osg::Vec3f(mWaterNode->getPosition())));
+    mWaterNode->setStateSet(nodeStateSet);
 }
 
 void Water::setHeight(const float height)

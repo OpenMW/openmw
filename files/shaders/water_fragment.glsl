@@ -70,11 +70,11 @@ uniform float osg_SimulationTime;
 
 uniform float near;
 uniform float far;
+uniform vec3 nodePosition;
 
 void main(void)
 {
-    // FIXME
-    vec3 worldPos = position.xyz; // ((wMat) * ( position)).xyz;
+    vec3 worldPos = position.xyz + nodePosition.xyz;
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
