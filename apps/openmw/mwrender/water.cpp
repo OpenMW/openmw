@@ -423,22 +423,6 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     setHeight(mTop);
 
-    const float waterLevel = -1;
-
-    // refraction
-    mRefraction = new Refraction();
-    mRefraction->setWaterLevel(waterLevel);
-    mRefraction->setScene(mSceneRoot);
-    mParent->addChild(mRefraction);
-
-    // reflection
-    mReflection = new Reflection();
-    mReflection->setWaterLevel(waterLevel);
-    mReflection->setScene(mSceneRoot);
-    mParent->addChild(mReflection);
-
-    createShaderWaterStateSet(mWaterGeode, mReflection, mRefraction);
-
     updateWaterMaterial();
 }
 
@@ -605,6 +589,11 @@ void Water::setHeight(const float height)
     osg::Vec3f pos = mWaterNode->getPosition();
     pos.z() = height;
     mWaterNode->setPosition(pos);
+
+    if (mReflection)
+        mReflection->setWaterLevel(mTop);
+    if (mRefraction)
+        mRefraction->setWaterLevel(mTop);
 }
 
 void Water::update(float dt)
