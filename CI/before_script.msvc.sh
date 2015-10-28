@@ -573,6 +573,9 @@ else
 			add_cmake_opts -DBUILD_OPENCS=no \
 				-DBUILD_OPENMW=no
 			;;
+		* )
+			echo "  Building everything."
+			;;
 	esac
 fi
 

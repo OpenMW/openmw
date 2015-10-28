@@ -10,12 +10,12 @@ platform:
 
 configuration: Debug
 
-environment:
-    matrix:
+#environment:
+#    matrix:
 #        - STEP: misc
 #        - STEP: components # misc builds this too
 # Build takes too long for these, ignore for now
-        - STEP: openmw
+#        - STEP: openmw
 #        - STEP: opencs
 
 matrix:
