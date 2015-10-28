@@ -80,11 +80,11 @@ CSMWorld::RefIdCollection::RefIdCollection()
         new IngredEffectRefIdAdapter ()));
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), ingredientEffectsMap));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_IngredEffectId));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
 
     // nested table
     PotionColumns potionColumns (inventoryColumns);
@@ -98,9 +98,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mColumns.back().addColumn(

@@ -124,6 +124,10 @@ namespace CSMWorld
             Display_String32,
             Display_LongString256,
 
+            Display_EffectSkill,     // must display at least one, unlike Display_Skill
+            Display_EffectAttribute, // must display at least one, unlike Display_Attribute
+            Display_IngredEffectId,  // display none allowed, unlike Display_EffectId
+
             //top level columns that nest other columns
             Display_NestedHeader
         };
