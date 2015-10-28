@@ -221,7 +221,7 @@ namespace CSMWorld
             return true;
         }
 
-    Private:
+    private:
         bool mFixedRows;
     };
 

@@ -577,7 +577,9 @@ void CSVWorld::EditWidget::remake(int row)
                         fixedRows = true;
                 }
 
-                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this, editable, fixedRows);
+                NestedTable* table =
+                    new NestedTable(mDocument, id, mNestedModels.back(), this, editable, fixedRows);
+                table->resizeColumnsToContents();
                 if (!editable)
                 {
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
