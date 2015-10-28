@@ -71,6 +71,21 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
 
+    IngredientColumns ingredientColumns (inventoryColumns);
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    ingredientColumns.mEffects = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> ingredientEffectsMap;
+    ingredientEffectsMap.insert(std::make_pair(UniversalId::Type_Ingredient,
+        new IngredEffectRefIdAdapter ()));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), ingredientEffectsMap));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+
     // nested table
     PotionColumns potionColumns (inventoryColumns);
     mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,
@@ -651,7 +666,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
         new DoorRefIdAdapter (nameColumns, openSound, closeSound)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
-        new InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, inventoryColumns)));
+        new IngredientRefIdAdapter (ingredientColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
         new LevelledListRefIdAdapter<ESM::CreatureLevList> (
         UniversalId::Type_CreatureLevelledList, levListColumns)));
