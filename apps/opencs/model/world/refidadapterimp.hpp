@@ -346,6 +346,66 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
+    struct IngredientColumns : public InventoryColumns
+    {
+        const RefIdColumn *mEffects;
+
+        IngredientColumns (const InventoryColumns& columns);
+    };
+
+    class IngredientRefIdAdapter : public InventoryRefIdAdapter<ESM::Ingredient>
+    {
+            IngredientColumns mColumns;
+
+        public:
+
+            IngredientRefIdAdapter (const IngredientColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    class IngredEffectRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        IngredEffectRefIdAdapter (const IngredEffectRefIdAdapter&);
+        IngredEffectRefIdAdapter& operator= (const IngredEffectRefIdAdapter&);
+
+    public:
+
+        IngredEffectRefIdAdapter();
+
+        virtual ~IngredEffectRefIdAdapter();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
     struct EnchantableColumns : public InventoryColumns
     {
         const RefIdColumn *mEnchantment;
