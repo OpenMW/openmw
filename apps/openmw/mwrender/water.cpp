@@ -14,7 +14,7 @@
 #include <osg/FrontFace>
 #include <osg/Shader>
 
-#include <osgDB/ReadFile> // XXX remove
+#include <osgDB/ReadFile>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -239,34 +239,6 @@ public:
     }
 };
 
-void addDebugOverlay(osg::Texture2D* texture, int pos, osg::Group* parent)
-{
-    osg::ref_ptr<osg::Camera> debugCamera (new osg::Camera);
-    debugCamera->setProjectionMatrix(osg::Matrix::identity());
-    debugCamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
-    debugCamera->setViewMatrix(osg::Matrix::identity());
-    debugCamera->setClearMask(0);
-    debugCamera->setRenderOrder(osg::Camera::NESTED_RENDER);
-    debugCamera->setAllowEventFocus(false);
-
-    const float size = 0.5;
-    osg::ref_ptr<osg::Geode> debugGeode (new osg::Geode);
-    osg::ref_ptr<osg::Geometry> geom = osg::createTexturedQuadGeometry(osg::Vec3f(-1 + size*pos, -1, 0), osg::Vec3f(size,0,0), osg::Vec3f(0,size,0));
-    debugGeode->addDrawable(geom);
-
-    debugCamera->addChild(debugGeode);
-
-    osg::StateSet* debugStateset = geom->getOrCreateStateSet();
-
-    debugStateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-    debugStateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-
-    debugStateset->setRenderBinDetails(20, "RenderBin");
-    debugStateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-
-    parent->addChild(debugCamera);
-}
-
 osg::ref_ptr<osg::Shader> readShader (osg::Shader::Type type, const std::string& file)
 {
     osg::ref_ptr<osg::Shader> shader (new osg::Shader(type));
@@ -431,11 +403,6 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     // TODO: add to waterNode so cameras don't get updated when water is hidden?
 
     mParent->addChild(reflectionCamera);
-
-    // debug overlay
-    addDebugOverlay(refractionTexture, 0, mParent);
-    addDebugOverlay(refractionDepthTexture, 1, mParent);
-    addDebugOverlay(reflectionTexture, 2, mParent);
 
     // shader
 
