@@ -273,6 +273,88 @@ osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
 }
 
 
+class Refraction : public osg::Camera
+{
+public:
+    Refraction()
+    {
+        unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
+        setRenderOrder(osg::Camera::PRE_RENDER);
+        setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+        setReferenceFrame(osg::Camera::RELATIVE_RF);
+
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
+        setNodeMask(Mask_RenderToTexture);
+        setViewport(0, 0, rttSize, rttSize);
+
+        // No need for Update traversal since the scene is already updated as part of the main scene graph
+        // A double update would mess with the light collection (in addition to being plain redundant)
+        setUpdateCallback(new NoTraverseCallback);
+
+        // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
+        getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+
+        mClipCullNode = new ClipCullNode;
+        addChild(mClipCullNode);
+
+        mRefractionTexture = new osg::Texture2D;
+        mRefractionTexture->setTextureSize(rttSize, rttSize);
+        mRefractionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mRefractionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mRefractionTexture->setInternalFormat(GL_RGB);
+        mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
+        attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
+
+        mRefractionDepthTexture = new osg::Texture2D;
+        mRefractionDepthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
+        mRefractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24_ARB);
+        mRefractionDepthTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mRefractionDepthTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
+        mRefractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+        mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
+        attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
+    }
+
+    void setScene(osg::Node* scene)
+    {
+        if (mScene)
+            mClipCullNode->removeChild(mScene);
+        mScene = scene;
+        mClipCullNode->addChild(scene);
+    }
+
+    void setWaterLevel(float waterLevel)
+    {
+        mClipCullNode->setPlane(osg::Plane(osg::Vec3d(0,0,-1), osg::Vec3d(0,0, waterLevel)));
+    }
+
+    osg::Texture2D* getRefractionTexture() const
+    {
+        return mRefractionTexture.get();
+    }
+
+    osg::Texture2D* getRefractionDepthTexture() const
+    {
+        return mRefractionDepthTexture.get();
+    }
+
+private:
+    osg::ref_ptr<ClipCullNode> mClipCullNode;
+    osg::ref_ptr<osg::Texture2D> mRefractionTexture;
+    osg::ref_ptr<osg::Texture2D> mRefractionDepthTexture;
+    osg::ref_ptr<osg::Node> mScene;
+};
+
+class Reflection : public osg::Camera
+{
+
+};
+
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -309,54 +391,13 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     const float waterLevel = -1;
 
     // refraction
-    unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
-    osg::ref_ptr<osg::Camera> refractionCamera (new osg::Camera);
-    refractionCamera->setRenderOrder(osg::Camera::PRE_RENDER);
-    refractionCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    refractionCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-    refractionCamera->setReferenceFrame(osg::Camera::RELATIVE_RF);
-
-    refractionCamera->setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
-    refractionCamera->setNodeMask(Mask_RenderToTexture);
-    refractionCamera->setViewport(0, 0, rttSize, rttSize);
-
-    // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
-    // A double update would mess with the light collection (in addition to being plain redundant)
-    refractionCamera->setUpdateCallback(new NoTraverseCallback);
-
-    // No need for fog here, we are already applying fog on the water surface itself as well as underwater fog
-    refractionCamera->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
-
-    osg::ref_ptr<ClipCullNode> clipNode (new ClipCullNode);
-    clipNode->setPlane(osg::Plane(osg::Vec3d(0,0,-1), osg::Vec3d(0,0, waterLevel)));
-
-    refractionCamera->addChild(clipNode);
-    clipNode->addChild(mSceneRoot);
+    mRefraction = new Refraction();
+    mRefraction->setWaterLevel(waterLevel);
+    mRefraction->setScene(mSceneRoot);
 
     // TODO: add ingame setting for texture quality
 
-    osg::ref_ptr<osg::Texture2D> refractionTexture = new osg::Texture2D;
-    refractionTexture->setTextureSize(rttSize, rttSize);
-    refractionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-    refractionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-    refractionTexture->setInternalFormat(GL_RGB);
-    refractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    refractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-
-    refractionCamera->attach(osg::Camera::COLOR_BUFFER, refractionTexture);
-
-    osg::ref_ptr<osg::Texture2D> refractionDepthTexture = new osg::Texture2D;
-    refractionDepthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
-    refractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24_ARB);
-    refractionDepthTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-    refractionDepthTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-    refractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
-    refractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    refractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-
-    refractionCamera->attach(osg::Camera::DEPTH_BUFFER, refractionDepthTexture);
-
-    mParent->addChild(refractionCamera);
+    mParent->addChild(mRefraction);
 
     // reflection
     osg::ref_ptr<osg::Camera> reflectionCamera (new osg::Camera);
@@ -368,6 +409,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     reflectionCamera->setCullMask(Mask_Effect|Mask_Scene|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Player|(1<<16));
     reflectionCamera->setNodeMask(Mask_RenderToTexture);
 
+    unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
     reflectionCamera->setViewport(0, 0, rttSize, rttSize);
 
     // No need for Update traversal since the mSceneRoot is already updated as part of the main scene graph
@@ -430,8 +472,8 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     shaderStateset->addUniform(new osg::Uniform("normalMap", 3));
 
     shaderStateset->setTextureAttributeAndModes(0, reflectionTexture, osg::StateAttribute::ON);
-    shaderStateset->setTextureAttributeAndModes(1, refractionTexture, osg::StateAttribute::ON);
-    shaderStateset->setTextureAttributeAndModes(2, refractionDepthTexture, osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(1, mRefraction->getRefractionTexture(), osg::StateAttribute::ON);
+    shaderStateset->setTextureAttributeAndModes(2, mRefraction->getRefractionDepthTexture(), osg::StateAttribute::ON);
     shaderStateset->setTextureAttributeAndModes(3, normalMap, osg::StateAttribute::ON);
     shaderStateset->setMode(GL_BLEND, osg::StateAttribute::ON); // TODO: set Off when refraction is on
     shaderStateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);

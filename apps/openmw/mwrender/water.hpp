@@ -29,6 +29,8 @@ namespace MWWorld
 namespace MWRender
 {
 
+    class Refraction;
+    class Reflection;
     class RippleSimulation;
 
     /// Water rendering
@@ -43,6 +45,9 @@ namespace MWRender
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<RippleSimulation> mSimulation;
+
+        osg::ref_ptr<Refraction> mRefraction;
+        osg::ref_ptr<Reflection> mReflection;
 
         bool mEnabled;
         bool mToggled;
