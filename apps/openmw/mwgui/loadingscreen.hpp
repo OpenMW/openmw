@@ -52,6 +52,7 @@ namespace MWGui
 
     private:
         void findSplashScreens();
+        bool needToDrawLoadingScreen();
 
         const VFS::Manager* mVFS;
         osg::ref_ptr<osgViewer::Viewer> mViewer;

@@ -64,7 +64,7 @@ namespace SceneUtil
 
         BoneSphereMap mBoneSphereMap;
 
-        bool mFirstFrame;
+        unsigned int mLastFrameNumber;
         bool mBoundsFirstFrame;
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);

@@ -724,22 +724,30 @@ private:
             , mTimeOfDayFade(1.f)
             , mGlareView(1.f)
         {
+            const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
+            mColor = fallback->getFallbackColour("Weather_Sun_Glare_Fader_Color");
+            mSunGlareFaderMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Max");
+            mSunGlareFaderAngleMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Angle_Max");
 
+            // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
+            // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
+            // so the resulting color looks more orange than red.
+            mColor *= 2;
+            for (int i=0; i<3; ++i)
+                mColor[i] = std::min(1.f, mColor[i]);
         }
 
         virtual void operator ()(osg::Node* node, osg::NodeVisitor* nv)
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
-            float angleRadians = getAngleToSunInRadians(cv->getCurrentCamera());
+            float angleRadians = getAngleToSunInRadians(*cv->getCurrentRenderStage()->getInitialViewMatrix());
             float visibleRatio = getVisibleRatio(cv->getCurrentCamera());
 
-            const float angleMaxRadians = osg::DegreesToRadians(30.f); // Sun Glare Fader Angle Max
+            const float angleMaxRadians = osg::DegreesToRadians(mSunGlareFaderAngleMax);
 
             float value = 1.f - std::min(1.f, angleRadians / angleMaxRadians);
-
-            const float sunGlareFaderMax = 0.5f;
-            float fade = value * sunGlareFaderMax;
+            float fade = value * mSunGlareFaderMax;
 
             fade *= mTimeOfDayFade * mGlareView * visibleRatio;
 
@@ -754,17 +762,8 @@ private:
 
                 osg::ref_ptr<osg::Material> mat (createUnlitMaterial());
 
-                osg::Vec4f sunGlareFaderColor (222/255.f, 95/255.f, 39/255.f, 1);
-
-                // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
-                // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
-                // so the resulting color looks more orange than red.
-                sunGlareFaderColor *= 2;
-                for (int i=0; i<3; ++i)
-                    sunGlareFaderColor[i] = std::min(1.f, sunGlareFaderColor[i]);
-
                 mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,fade));
-                mat->setEmission(osg::Material::FRONT_AND_BACK, sunGlareFaderColor);
+                mat->setEmission(osg::Material::FRONT_AND_BACK, mColor);
 
                 stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
 
@@ -785,10 +784,10 @@ private:
         }
 
     private:
-        float getAngleToSunInRadians(osg::Camera* camera) const
+        float getAngleToSunInRadians(const osg::Matrix& viewMatrix) const
         {
             osg::Vec3d eye, center, up;
-            camera->getViewMatrixAsLookAt(eye, center, up);
+            viewMatrix.getLookAt(eye, center, up);
 
             osg::Vec3d forward = center - eye;
             osg::Vec3d sun = mSunTransform->getPosition();
@@ -802,6 +801,9 @@ private:
         osg::ref_ptr<osg::PositionAttitudeTransform> mSunTransform;
         float mTimeOfDayFade;
         float mGlareView;
+        osg::Vec4f mColor;
+        float mSunGlareFaderMax;
+        float mSunGlareFaderAngleMax;
     };
 
     osg::ref_ptr<Updater> mUpdater;

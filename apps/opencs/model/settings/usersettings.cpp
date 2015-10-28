@@ -371,6 +371,57 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "list go to the first/last item");
     }
 
+    declareSection ("scene-input", "3D Scene Input");
+    {
+        QString left ("Left Mouse-Button");
+        QString cLeft ("Ctrl-Left Mouse-Button");
+        QString right ("Right Mouse-Button");
+        QString cRight ("Ctrl-Right Mouse-Button");
+        QString middle ("Middle Mouse-Button");
+        QString cMiddle ("Ctrl-Middle Mouse-Button");
+
+        QStringList values;
+        values << left << cLeft << right << cRight << middle << cMiddle;
+
+        Setting *primaryNavigation = createSetting (Type_ComboBox, "p-navi", "Primary Camera Navigation Button");
+        primaryNavigation->setDeclaredValues (values);
+        primaryNavigation->setDefaultValue (left);
+
+        Setting *secondaryNavigation = createSetting (Type_ComboBox, "s-navi", "Secondary Camera Navigation Button");
+        secondaryNavigation->setDeclaredValues (values);
+        secondaryNavigation->setDefaultValue (cLeft);
+
+        Setting *primaryEditing = createSetting (Type_ComboBox, "p-edit", "Primary Editing Button");
+        primaryEditing->setDeclaredValues (values);
+        primaryEditing->setDefaultValue (right);
+
+        Setting *secondaryEditing = createSetting (Type_ComboBox, "s-edit", "Secondary Editing Button");
+        secondaryEditing->setDeclaredValues (values);
+        secondaryEditing->setDefaultValue (cRight);
+
+        Setting *selection = createSetting (Type_ComboBox, "select", "Selection Button");
+        selection->setDeclaredValues (values);
+        selection->setDefaultValue (middle);
+
+        Setting *contextSensitive = createSetting (Type_CheckBox, "context-select", "Context Sensitive Selection");
+        contextSensitive->setDefaultValue ("false");
+
+        Setting *dragMouseSensitivity = createSetting (Type_DoubleSpinBox, "drag-factor",
+            "Mouse sensitivity during drag operations");
+        dragMouseSensitivity->setDefaultValue (1.0);
+        dragMouseSensitivity->setRange (0.001, 100.0);
+
+        Setting *dragWheelSensitivity = createSetting (Type_DoubleSpinBox, "drag-wheel-factor",
+            "Mouse wheel sensitivity during drag operations");
+        dragWheelSensitivity->setDefaultValue (1.0);
+        dragWheelSensitivity->setRange (0.001, 100.0);
+
+        Setting *dragShiftFactor = createSetting (Type_DoubleSpinBox, "drag-shift-factor",
+            "Acceleration factor during drag operations while holding down shift");
+        dragShiftFactor->setDefaultValue (4.0);
+        dragShiftFactor->setRange (0.001, 100.0);
+    }
+
     {
         /******************************************************************
         * There are three types of values:

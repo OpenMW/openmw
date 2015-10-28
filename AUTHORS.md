@@ -19,6 +19,7 @@ Programmers
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
     Artem Kotsynyak (greye)
+    artemutin
     Arthur Moore (EmperorArthur)
     athile
     Bret Curtis (psi29a)

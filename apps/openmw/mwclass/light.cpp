@@ -234,6 +234,11 @@ namespace MWClass
 
     std::pair<int, std::string> Light::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
     {
+        MWWorld::LiveCellRef<ESM::Light> *ref =
+            ptr.get<ESM::Light>();
+        if (!(ref->mBase->mData.mFlags & ESM::Light::Carry))
+            return std::make_pair(0,"");
+
         MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
         MWWorld::ContainerStoreIterator weapon = invStore.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
 

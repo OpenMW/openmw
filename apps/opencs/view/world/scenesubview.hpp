@@ -27,6 +27,7 @@ namespace CSVRender
 namespace CSVWidget
 {
     class SceneToolbar;
+    class SceneToolMode;
 }
 
 namespace CSVWorld
@@ -57,6 +58,8 @@ namespace CSVWorld
             virtual void useHint (const std::string& hint);
 
             virtual std::string getTitle() const;
+
+            virtual void updateUserSetting (const QString& name, const QStringList& value);
 
         private:
 

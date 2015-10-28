@@ -179,7 +179,7 @@ namespace Compiler
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
-            extensions.registerInstruction ("choice", "j/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
+            extensions.registerInstruction ("choice", "j/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
             extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
                 opcodeForceGreetingExplicit);
             extensions.registerInstruction("goodbye", "", opcodeGoodbye);

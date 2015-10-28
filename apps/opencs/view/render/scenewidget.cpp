@@ -110,6 +110,8 @@ bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
         keyPressEvent(static_cast<QKeyEvent*>(event));
     if (event->type() == QEvent::KeyRelease)
         keyReleaseEvent(static_cast<QKeyEvent*>(event));
+    if (event->type() == QEvent::Wheel)
+        wheelEvent(static_cast<QWheelEvent *>(event));
 
     // Always pass the event on to GLWidget, i.e. to OSG event queue
     return QObject::eventFilter(obj, event);

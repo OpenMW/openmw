@@ -67,7 +67,7 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview
+    cellcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
     dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
     )
@@ -85,12 +85,12 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode
+    previewwidget editmode instancemode
     )
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight
-    lightingbright object cell terrainstorage
+    lightingbright object cell terrainstorage tagbase cellarrow
     )
 
 opencs_hdrs_noqt (view/render

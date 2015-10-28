@@ -307,6 +307,9 @@ protected:
 
     void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor);
 
+    /// Set the render bin for this animation's object root. May be customized by subclasses.
+    virtual void setRenderBin();
+
 public:
 
     Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);

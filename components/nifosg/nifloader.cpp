@@ -57,8 +57,8 @@ namespace
         }
     }
 
-    // Collect all properties affecting the given node that should be applied to an osg::Material.
-    void collectMaterialProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
+    // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the node hierarchy above it.
+    void collectDrawableProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
     {
         const Nif::PropertyList& props = nifNode->props;
         for (size_t i = 0; i <props.length();++i)
@@ -70,6 +70,7 @@ namespace
                 case Nif::RC_NiMaterialProperty:
                 case Nif::RC_NiVertexColorProperty:
                 case Nif::RC_NiSpecularProperty:
+                case Nif::RC_NiAlphaProperty:
                     out.push_back(props[i].getPtr());
                     break;
                 default:
@@ -78,7 +79,7 @@ namespace
             }
         }
         if (nifNode->parent)
-            collectMaterialProperties(nifNode->parent, out);
+            collectDrawableProperties(nifNode->parent, out);
     }
 
     class FrameSwitch : public osg::Group
@@ -113,6 +114,7 @@ namespace
 
     // NodeCallback used to have a transform always oriented towards the camera. Can have translation and scale
     // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
+    // Must be set as a cull callback.
     class BillboardCallback : public osg::NodeCallback
     {
     public:
@@ -160,24 +162,34 @@ namespace
     struct UpdateMorphGeometry : public osg::Drawable::CullCallback
     {
         UpdateMorphGeometry()
+            : mLastFrameNumber(0)
         {
         }
 
         UpdateMorphGeometry(const UpdateMorphGeometry& copy, const osg::CopyOp& copyop)
             : osg::Drawable::CullCallback(copy, copyop)
+            , mLastFrameNumber(0)
         {
         }
 
         META_Object(NifOsg, UpdateMorphGeometry)
 
-        virtual bool cull(osg::NodeVisitor *, osg::Drawable * drw, osg::State *) const
+        virtual bool cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
         {
             osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
             if (!geom)
                 return false;
+
+            if (mLastFrameNumber == nv->getFrameStamp()->getFrameNumber())
+                return false;
+            mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+
             geom->transformSoftwareMethod();
             return false;
         }
+
+    private:
+        mutable unsigned int mLastFrameNumber;
     };
 
     // Callback to return a static bounding box for a MorphGeometry. The idea is to not recalculate the bounding box
@@ -861,9 +873,9 @@ namespace NifOsg
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(partsys);
 
-            std::vector<const Nif::Property*> materialProps;
-            collectMaterialProperties(nifNode, materialProps);
-            applyMaterialProperties(parentNode, materialProps, composite, true, animflags);
+            std::vector<const Nif::Property*> drawableProps;
+            collectDrawableProperties(nifNode, drawableProps);
+            applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
             // Particles don't have normals, so can't be diffuse lit.
             osg::Material* mat = static_cast<osg::Material*>(parentNode->getStateSet()->getAttribute(osg::StateAttribute::MATERIAL));
@@ -923,9 +935,9 @@ namespace NifOsg
             // - if there are no vertex colors, we need to disable colorMode.
             // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
             //   above the actual renderable would be tedious.
-            std::vector<const Nif::Property*> materialProps;
-            collectMaterialProperties(triShape, materialProps);
-            applyMaterialProperties(parentNode, materialProps, composite, !data->colors->empty(), animflags);
+            std::vector<const Nif::Property*> drawableProps;
+            collectDrawableProperties(triShape, drawableProps);
+            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors->empty(), animflags);
         }
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
@@ -1212,42 +1224,12 @@ namespace NifOsg
             case Nif::RC_NiVertexColorProperty:
             case Nif::RC_NiSpecularProperty:
             {
-                // Handled in handleTriShape so we know whether vertex colors are available
+                // Handled on drawable level so we know whether vertex colors are available
                 break;
             }
             case Nif::RC_NiAlphaProperty:
             {
-                const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
-                osg::BlendFunc* blendfunc = new osg::BlendFunc;
-                osg::StateSet* stateset = node->getOrCreateStateSet();
-                if (alphaprop->flags&1)
-                {
-                    blendfunc->setFunction(getBlendMode((alphaprop->flags>>1)&0xf),
-                                           getBlendMode((alphaprop->flags>>5)&0xf));
-                    stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON);
-
-                    bool noSort = (alphaprop->flags>>13)&1;
-                    if (!noSort)
-                    {
-                        stateset->setNestRenderBins(false);
-                        stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-                    }
-                }
-                else
-                {
-                    stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::OFF);
-                    stateset->setNestRenderBins(false);
-                    stateset->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-                }
-
-                osg::AlphaFunc* alphafunc = new osg::AlphaFunc;
-                if((alphaprop->flags>>9)&1)
-                {
-                    alphafunc->setFunction(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f);
-                    stateset->setAttributeAndModes(alphafunc, osg::StateAttribute::ON);
-                }
-                else
-                    stateset->setAttributeAndModes(alphafunc, osg::StateAttribute::OFF);
+                // Handled on drawable level to prevent RenderBin nesting issues
                 break;
             }
             case Nif::RC_NiTexturingProperty:
@@ -1377,7 +1359,7 @@ namespace NifOsg
             }
         }
 
-        void applyMaterialProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
+        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -1433,6 +1415,43 @@ namespace NifOsg
                         mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
                         break;
                     }
+                    break;
+                }
+                case Nif::RC_NiAlphaProperty:
+                {
+                    const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
+                    osg::BlendFunc* blendfunc = new osg::BlendFunc;
+                    if (alphaprop->flags&1)
+                    {
+                        blendfunc->setFunction(getBlendMode((alphaprop->flags>>1)&0xf),
+                                               getBlendMode((alphaprop->flags>>5)&0xf));
+                        stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON);
+
+                        bool noSort = (alphaprop->flags>>13)&1;
+                        if (!noSort)
+                            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                        else
+                            stateset->setRenderBinToInherit();
+                    }
+                    else
+                    {
+                        stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
+                        stateset->removeMode(GL_BLEND);
+                        stateset->setRenderBinToInherit();
+                    }
+
+                    osg::AlphaFunc* alphafunc = new osg::AlphaFunc;
+                    if((alphaprop->flags>>9)&1)
+                    {
+                        alphafunc->setFunction(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f);
+                        stateset->setAttributeAndModes(alphafunc, osg::StateAttribute::ON);
+                    }
+                    else
+                    {
+                        stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
+                        stateset->removeMode(GL_ALPHA_TEST);
+                    }
+                    break;
                 }
                 }
             }

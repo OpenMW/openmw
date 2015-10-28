@@ -15,6 +15,7 @@
 
 #include "../render/pagedworldspacewidget.hpp"
 #include "../render/unpagedworldspacewidget.hpp"
+#include "../render/editmode.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -121,15 +122,14 @@ CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::Worldsp
     CSVWidget::SceneToolRun *runTool = widget->makeRunTool (toolbar);
     toolbar->addTool (runTool);
 
-    CSVWidget::SceneToolMode *editModeTool = widget->makeEditModeSelector (toolbar);
-    toolbar->addTool (editModeTool);
+    toolbar->addTool (widget->makeEditModeSelector (toolbar));
 
     return toolbar;
 }
 
 void CSVWorld::SceneSubView::setEditLock (bool locked)
 {
-
+    mScene->setEditLock (locked);
 }
 
 void CSVWorld::SceneSubView::setStatusBar (bool show)
@@ -145,6 +145,12 @@ void CSVWorld::SceneSubView::useHint (const std::string& hint)
 std::string CSVWorld::SceneSubView::getTitle() const
 {
     return mTitle;
+}
+
+void CSVWorld::SceneSubView::updateUserSetting (const QString& name, const QStringList& value)
+{
+    mScene->updateUserSetting (name, value);
+    CSVDoc::SubView::updateUserSetting (name, value);
 }
 
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)

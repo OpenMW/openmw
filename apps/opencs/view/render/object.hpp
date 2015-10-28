@@ -8,8 +8,9 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 
-class QModelIndex;
+#include "tagbase.hpp"
 
+class QModelIndex;
 
 namespace osg
 {
@@ -35,20 +36,18 @@ namespace CSMWorld
 
 namespace CSVRender
 {
-
     class Object;
 
     // An object to attach as user data to the osg::Node, allows us to get an Object back from a Node when we are doing a ray query
-    class ObjectHolder : public osg::Referenced
+    class ObjectTag : public TagBase
     {
-    public:
-        ObjectHolder(Object* obj)
-            : mObject(obj)
-        {
-        }
+        public:
 
-        Object* mObject;
+            ObjectTag (Object* object);
+
+            Object* mObject;
     };
+
 
     class Object
     {

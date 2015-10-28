@@ -43,6 +43,9 @@ namespace CSVRender
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
 
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask);
+
         private:
 
             virtual void referenceableDataChanged (const QModelIndex& topLeft,

@@ -74,18 +74,23 @@ namespace SceneUtil
         // Called automatically by the LightSource's UpdateCallback
         void addLight(LightSource* lightSource, osg::Matrix worldMat);
 
-        void prepareForCamera(osg::Camera* cam);
-
         struct LightSourceTransform
         {
             LightSource* mLightSource;
             osg::Matrix mWorldMatrix;
-            osg::BoundingSphere mViewBound;
         };
 
         const std::vector<LightSourceTransform>& getLights() const;
 
-        typedef std::vector<const LightSourceTransform*> LightList;
+        struct LightSourceViewBound
+        {
+            LightSource* mLightSource;
+            osg::BoundingSphere mViewBound;
+        };
+
+        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix);
+
+        typedef std::vector<const LightSourceViewBound*> LightList;
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList);
 
@@ -98,7 +103,8 @@ namespace SceneUtil
         // Lights collected from the scene graph. Only valid during the cull traversal.
         std::vector<LightSourceTransform> mLights;
 
-        bool mLightsInViewSpace;
+        typedef std::vector<LightSourceViewBound> LightSourceViewBoundCollection;
+        std::map<osg::observer_ptr<osg::Camera>, LightSourceViewBoundCollection> mLightsInViewSpace;
 
         // < Light list hash , StateSet >
         typedef std::map<size_t, osg::ref_ptr<osg::StateSet> > LightStateSetMap;
