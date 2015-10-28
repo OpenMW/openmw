@@ -166,7 +166,6 @@ void main(void)
     waterColor = waterColor * length(gl_LightModel.ambient.xyz);
 #if REFRACTION
     float refractionDepth = texture2D(refractionDepthMap, screenCoords-(normal.xy*REFR_BUMP)).x;
-    // make linear
     float z_n = 2.0 * refractionDepth - 1.0;
     refractionDepth = 2.0 * near * far / (far + near - z_n * (far - near));
     

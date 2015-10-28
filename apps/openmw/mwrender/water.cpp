@@ -16,6 +16,9 @@
 
 #include <osgDB/ReadFile> // XXX remove
 
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include <osgUtil/IncrementalCompileOperation>
 #include <osgUtil/CullVisitor>
 
@@ -264,6 +267,41 @@ void addDebugOverlay(osg::Texture2D* texture, int pos, osg::Group* parent)
     parent->addChild(debugCamera);
 }
 
+osg::ref_ptr<osg::Shader> readShader (osg::Shader::Type type, const std::string& file)
+{
+    osg::ref_ptr<osg::Shader> shader (new osg::Shader(type));
+
+    // use boost in favor of osg::Shader::readShaderFile, to handle utf-8 path issues on Windows
+    boost::filesystem::ifstream inStream;
+    inStream.open(boost::filesystem::path(file));
+    std::stringstream strstream;
+    strstream << inStream.rdbuf();
+    shader->setShaderSource(strstream.str());
+    return shader;
+}
+
+osg::ref_ptr<osg::Image> readPngImage (const std::string& file)
+{
+    // use boost in favor of osgDB::readImage, to handle utf-8 path issues on Windows
+    boost::filesystem::ifstream inStream;
+    inStream.open(file, std::ios_base::in | std::ios_base::binary);
+    if (inStream.fail())
+        std::cerr << "Failed to open " << file << std::endl;
+    osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+    if (!reader)
+    {
+        std::cerr << "Failed to read " << file << ", no png readerwriter found" << std::endl;
+        return osg::ref_ptr<osg::Image>();
+    }
+    osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
+    if (!result.success())
+        std::cerr << "Failed to read " << file << ": " << result.message() << " code " << result.status() << std::endl;
+
+    return result.getImage();
+}
+
+
+
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -399,17 +437,16 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     addDebugOverlay(reflectionTexture, 2, mParent);
 
     // shader
-    // FIXME: windows utf8 path handling?
 
-    osg::ref_ptr<osg::Shader> vertexShader (osg::Shader::readShaderFile(osg::Shader::VERTEX, resourcePath + "/shaders/water_vertex.glsl"));
+    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, resourcePath + "/shaders/water_vertex.glsl"));
 
-    osg::ref_ptr<osg::Shader> fragmentShader (osg::Shader::readShaderFile(osg::Shader::FRAGMENT, resourcePath + "/shaders/water_fragment.glsl"));
+    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, resourcePath + "/shaders/water_fragment.glsl"));
 
     osg::ref_ptr<osg::Program> program (new osg::Program);
     program->addShader(vertexShader);
     program->addShader(fragmentShader);
 
-    osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(osgDB::readImageFile(resourcePath + "/shaders/water_nm.png")));
+    osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(resourcePath + "/shaders/water_nm.png")));
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
     normalMap->setMaxAnisotropy(16);
