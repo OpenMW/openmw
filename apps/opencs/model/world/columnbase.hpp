@@ -12,6 +12,13 @@
 
 namespace CSMWorld
 {
+    enum TableEditModes
+    {
+        TableEdit_None,      // no editing
+        TableEdit_Full,      // edit cells and add/remove rows
+        TableEdit_FixedRows  // edit cells only
+    };
+
     struct ColumnBase
     {
         enum Roles
@@ -190,8 +197,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NestedParentColumn : public Column<ESXRecordT>
     {
-        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue) : Column<ESXRecordT> (id,
-                ColumnBase::Display_NestedHeader, flags)
+        NestedParentColumn (int id, int flags = ColumnBase::Flag_Dialogue, bool fixedRows = false)
+            : Column<ESXRecordT> (id, ColumnBase::Display_NestedHeader, flags), mFixedRows(fixedRows)
         {}
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
@@ -202,13 +209,20 @@ namespace CSMWorld
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
-            return true; // required by IdTree::hasChildren()
+            // by default editable; also see IdTree::hasChildren()
+            if (mFixedRows)
+                return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
+            else
+                return QVariant::fromValue(TableEditModes::TableEdit_Full);
         }
 
         virtual bool isEditable() const
         {
             return true;
         }
+
+    Private:
+        bool mFixedRows;
     };
 
     struct NestedChildColumn : public NestableColumn
@@ -222,5 +236,7 @@ namespace CSMWorld
         bool mIsEditable;
     };
 }
+
+Q_DECLARE_METATYPE(CSMWorld::TableEditModes)
 
 #endif

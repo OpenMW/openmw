@@ -30,8 +30,9 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
     if (column==mAutoCalc)
         return record.get().mData.mAutoCalc!=0;
 
+    // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column==mColumns.mEffects)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -72,7 +73,7 @@ QVariant CSMWorld::IngredientRefIdAdapter::getData (const RefIdColumn *column, c
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Ingredient)));
 
     if (column==mColumns.mEffects)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
 
     return InventoryRefIdAdapter<ESM::Ingredient>::getData (column, data, index);
 }
@@ -276,7 +277,7 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mArmor;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -364,7 +365,7 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mType;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }
@@ -412,7 +413,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -481,13 +482,13 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
     if (column==mColumns.mAttributes)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
 
     if (column==mColumns.mAttacks)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
 
     if (column==mColumns.mMisc)
-        return true; // Required to show nested items in dialogue subview
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -727,13 +728,13 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mAttributes || column==mColumns.mSkills)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant(QVariant::UserType);
+            return QVariant::fromValue(TableEditModes::TableEdit_None);
         else
-            return true;
+            return QVariant::fromValue(TableEditModes::TableEdit_FixedRows);
     }
 
     if (column==mColumns.mMisc)
-        return true;
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -1613,21 +1614,21 @@ QVariant ActorRefIdAdapter<ESM::NPC>::getData (const RefIdColumn *column, const 
         return record.get().mAiData.mAlarm;
 
     if (column==mActors.mInventory)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     if (column==mActors.mSpells)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant(QVariant::UserType);
+            return QVariant::fromValue(TableEditModes::TableEdit_None);
         else
-            return true;
+            return QVariant::fromValue(TableEditModes::TableEdit_Full);
     }
 
     if (column==mActors.mDestinations)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     if (column==mActors.mAiPackages)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mActors.mServices.find (column);
@@ -1794,16 +1795,16 @@ QVariant ActorRefIdAdapter<ESM::Creature>::getData (const RefIdColumn *column, c
         return record.get().mAiData.mAlarm;
 
     if (column==mActors.mInventory)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     if (column==mActors.mSpells)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     if (column==mActors.mDestinations)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     if (column==mActors.mAiPackages)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(TableEditModes::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mActors.mServices.find (column);

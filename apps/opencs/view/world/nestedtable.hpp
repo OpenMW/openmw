@@ -39,7 +39,8 @@ namespace CSVWorld
                     CSMWorld::UniversalId id,
                     CSMWorld::NestedTableProxyModel* model,
                     QWidget* parent = NULL,
-                    bool editable = true);
+                    bool editable = true,
+                    bool fixedRows = false);
 
         virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
