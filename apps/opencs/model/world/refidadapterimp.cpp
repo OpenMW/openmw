@@ -7,6 +7,7 @@
 #include <components/esm/loadcont.hpp>
 #include <components/esm/loadmgef.hpp>
 
+#include "columnbase.hpp"
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
@@ -66,9 +67,6 @@ CSMWorld::IngredientRefIdAdapter::IngredientRefIdAdapter (const IngredientColumn
 QVariant CSMWorld::IngredientRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
     int index) const
 {
-    const Record<ESM::Ingredient>& record = static_cast<const Record<ESM::Ingredient>&> (
-        data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Ingredient)));
-
     if (column==mColumns.mEffects)
         return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
 
