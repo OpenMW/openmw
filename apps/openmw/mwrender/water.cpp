@@ -285,7 +285,7 @@ public:
 
         mRefractionDepthTexture = new osg::Texture2D;
         mRefractionDepthTexture->setSourceFormat(GL_DEPTH_COMPONENT);
-        mRefractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24_ARB);
+        mRefractionDepthTexture->setInternalFormat(GL_DEPTH_COMPONENT24);
         mRefractionDepthTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mRefractionDepthTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
