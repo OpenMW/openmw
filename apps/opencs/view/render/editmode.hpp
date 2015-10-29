@@ -43,7 +43,10 @@ namespace CSVRender
             virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: Ignored.
-            virtual void selectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: Ignored.
+            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: ignore and return false
             ///
@@ -58,7 +61,12 @@ namespace CSVRender
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool selectStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primarySelectStartDrag (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: ignore and return false
+            ///
+            /// \return Drag accepted?
+            virtual bool secondarySelectStartDrag (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: ignored
             virtual void drag (int diffX, int diffY, double speedFactor);

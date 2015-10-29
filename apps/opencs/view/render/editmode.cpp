@@ -38,7 +38,9 @@ void CSVRender::EditMode::primaryEditPressed (osg::ref_ptr<TagBase> tag) {}
 
 void CSVRender::EditMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag) {}
 
-void CSVRender::EditMode::selectPressed (osg::ref_ptr<TagBase> tag) {}
+void CSVRender::EditMode::primarySelectPressed (osg::ref_ptr<TagBase> tag) {}
+
+void CSVRender::EditMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag) {}
 
 bool CSVRender::EditMode::primaryEditStartDrag (osg::ref_ptr<TagBase> tag)
 {
@@ -50,7 +52,12 @@ bool CSVRender::EditMode::secondaryEditStartDrag (osg::ref_ptr<TagBase> tag)
     return false;
 }
 
-bool CSVRender::EditMode::selectStartDrag (osg::ref_ptr<TagBase> tag)
+bool CSVRender::EditMode::primarySelectStartDrag (osg::ref_ptr<TagBase> tag)
+{
+    return false;
+}
+
+bool CSVRender::EditMode::secondarySelectStartDrag (osg::ref_ptr<TagBase> tag)
 {
     return false;
 }

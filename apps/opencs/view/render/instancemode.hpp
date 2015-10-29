@@ -23,7 +23,9 @@ namespace CSVRender
 
             virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
 
-            virtual void selectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+
+            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
     };
 }
 

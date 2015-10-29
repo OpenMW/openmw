@@ -30,16 +30,32 @@ void CSVRender::InstanceMode::updateUserSetting (const QString& name, const QStr
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
 {
     if (mContextSelect)
-        selectPressed (tag);
+        primarySelectPressed (tag);
 }
 
 void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
 {
     if (mContextSelect)
-        selectPressed (tag);
+        secondarySelectPressed (tag);
 }
 
-void CSVRender::InstanceMode::selectPressed (osg::ref_ptr<TagBase> tag)
+void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
+{
+    if (tag)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            // hit an Object, toggle its selection state
+            CSVRender::Object* object = objectTag->mObject;
+            object->setSelected (!object->getSelected());
+            return;
+        }
+    }
+
+    getWorldspaceWidget().clearSelection (Element_Reference);
+}
+
+void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
 {
     if (tag)
     {

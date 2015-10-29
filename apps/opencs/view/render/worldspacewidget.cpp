@@ -36,7 +36,7 @@ namespace
     {
         "p-navi", "s-navi",
         "p-edit", "s-edit",
-        "select",
+        "p-select", "s-select",
         0
     };
 }
@@ -513,7 +513,7 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
         {
 
         }
-        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="select")
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="p-select" || mDragMode=="s-select")
         {
             osg::ref_ptr<TagBase> tag = mousePick (event);
 
@@ -523,8 +523,10 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
                 mDragging = editMode.primaryEditStartDrag (tag);
             else if (mDragMode=="s-edit")
                 mDragging = editMode.secondaryEditStartDrag (tag);
-            else if (mDragMode=="select")
-                mDragging = editMode.selectStartDrag (tag);
+            else if (mDragMode=="p-select")
+                mDragging = editMode.primarySelectStartDrag (tag);
+            else if (mDragMode=="s-select")
+                mDragging = editMode.secondarySelectStartDrag (tag);
 
             if (mDragging)
             {
@@ -575,7 +577,8 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         {
 
         }
-        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="select")
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" ||
+            mDragMode=="p-select" || mDragMode=="s-select")
         {
             EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
@@ -589,7 +592,8 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         {
 
         }
-        else if (button=="p-edit" || button=="s-edit" || button=="select")
+        else if (button=="p-edit" || button=="s-edit" ||
+            button=="p-select" || button=="s-select")
         {
             osg::ref_ptr<TagBase> tag = mousePick (event);
 
@@ -647,6 +651,8 @@ void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, c
         editMode.primaryEditPressed (tag);
     else if (button=="s-edit")
         editMode.secondaryEditPressed (tag);
-    else if (button=="select")
-        editMode.selectPressed (tag);
+    else if (button=="p-select")
+        editMode.primarySelectPressed (tag);
+    else if (button=="s-select")
+        editMode.secondarySelectPressed (tag);
 }

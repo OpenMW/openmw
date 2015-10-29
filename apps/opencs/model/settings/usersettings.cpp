@@ -399,9 +399,13 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         secondaryEditing->setDeclaredValues (values);
         secondaryEditing->setDefaultValue (cRight);
 
-        Setting *selection = createSetting (Type_ComboBox, "select", "Selection Button");
-        selection->setDeclaredValues (values);
-        selection->setDefaultValue (middle);
+        Setting *primarySelection = createSetting (Type_ComboBox, "p-select", "Selection Button");
+        primarySelection->setDeclaredValues (values);
+        primarySelection->setDefaultValue (middle);
+
+        Setting *secondarySelection = createSetting (Type_ComboBox, "s-select", "Selection Button");
+        secondarySelection->setDeclaredValues (values);
+        secondarySelection->setDefaultValue (cMiddle);
 
         Setting *contextSensitive = createSetting (Type_CheckBox, "context-select", "Context Sensitive Selection");
         contextSensitive->setDefaultValue ("false");
