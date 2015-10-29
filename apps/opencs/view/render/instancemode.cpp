@@ -41,18 +41,18 @@ void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
 
 void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
 {
+    getWorldspaceWidget().clearSelection (Element_Reference);
+
     if (tag)
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
         {
-            // hit an Object, toggle its selection state
+            // hit an Object, select it
             CSVRender::Object* object = objectTag->mObject;
-            object->setSelected (!object->getSelected());
+            object->setSelected (true);
             return;
         }
     }
-
-    getWorldspaceWidget().clearSelection (Element_Reference);
 }
 
 void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
@@ -67,6 +67,4 @@ void CSVRender::InstanceMode::secondarySelectPressed (osg::ref_ptr<TagBase> tag)
             return;
         }
     }
-
-    getWorldspaceWidget().clearSelection (Element_Reference);
 }
