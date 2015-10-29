@@ -411,6 +411,7 @@ public:
         , mUpdater(new Updater)
     {
         mTransform->addUpdateCallback(mUpdater);
+        mTransform->setNodeMask(Mask_Sun);
 
         osg::ref_ptr<osg::Texture2D> sunTex = textureManager.getTexture2D("textures/tx_sun_05.dds",
                                                                         osg::Texture::CLAMP,
