@@ -564,10 +564,23 @@ void CSVWorld::EditWidget::remake(int row)
                     static_cast<CSMWorld::UniversalId::Type> (mTable->data (mTable->index (row, typeColumn)).toInt()),
                     mTable->data (mTable->index (row, idColumn)).toString().toUtf8().constData());
 
-                NestedTable* table = new NestedTable(mDocument, id, mNestedModels.back(), this);
-                table->resizeColumnsToContents();
+                bool editable = true;
+                bool fixedRows = false;
+                QVariant v = mTable->index(row, i).data();
+                if (v.canConvert<CSMWorld::ColumnBase::TableEditModes>())
+                {
+                    assert (QString(v.typeName()) == "CSMWorld::ColumnBase::TableEditModes");
 
-                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                    if (v.value<CSMWorld::ColumnBase::TableEditModes>() == CSMWorld::ColumnBase::TableEdit_None)
+                        editable = false;
+                    else if (v.value<CSMWorld::ColumnBase::TableEditModes>() == CSMWorld::ColumnBase::TableEdit_FixedRows)
+                        fixedRows = true;
+                }
+
+                NestedTable* table =
+                    new NestedTable(mDocument, id, mNestedModels.back(), this, editable, fixedRows);
+                table->resizeColumnsToContents();
+                if (!editable)
                 {
                     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
                     table->setEnabled(false);
@@ -583,7 +596,7 @@ void CSVWorld::EditWidget::remake(int row)
                     new QLabel (mTable->headerData (i, Qt::Horizontal, Qt::DisplayRole).toString(), mMainWidget);
 
                 label->setSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed);
-                if(mTable->index(row, i).data().type() == QVariant::UserType)
+                if(!editable)
                     label->setEnabled(false);
 
                 tablesLayout->addWidget(label);

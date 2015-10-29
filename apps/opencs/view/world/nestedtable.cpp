@@ -16,8 +16,13 @@
 CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
                                    CSMWorld::UniversalId id,
                                    CSMWorld::NestedTableProxyModel* model,
-                                   QWidget* parent)
+                                   QWidget* parent,
+                                   bool editable,
+                                   bool fixedRows)
     : DragRecordTable(document, parent),
+      mAddNewRowAction(NULL),
+      mRemoveRowAction(NULL),
+      mEditIdAction(NULL),
       mModel(model)
 {
     mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
@@ -49,18 +54,24 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
 
     setModel(model);
 
-    mAddNewRowAction = new QAction (tr ("Add new row"), this);
+    if (editable)
+    {
+        if (!fixedRows)
+        {
+            mAddNewRowAction = new QAction (tr ("Add new row"), this);
 
-    connect(mAddNewRowAction, SIGNAL(triggered()),
-            this, SLOT(addNewRowActionTriggered()));
+            connect(mAddNewRowAction, SIGNAL(triggered()),
+                    this, SLOT(addNewRowActionTriggered()));
 
-    mRemoveRowAction = new QAction (tr ("Remove row"), this);
+            mRemoveRowAction = new QAction (tr ("Remove row"), this);
 
-    connect(mRemoveRowAction, SIGNAL(triggered()),
-            this, SLOT(removeRowActionTriggered()));
+            connect(mRemoveRowAction, SIGNAL(triggered()),
+                    this, SLOT(removeRowActionTriggered()));
+        }
 
-    mEditIdAction = new TableEditIdAction(*this, this);
-    connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editCell()));
+        mEditIdAction = new TableEditIdAction(*this, this);
+        connect(mEditIdAction, SIGNAL(triggered()), this, SLOT(editCell()));
+    }
 }
 
 std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() const
@@ -71,6 +82,9 @@ std::vector<CSMWorld::UniversalId> CSVWorld::NestedTable::getDraggedRecords() co
 
 void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
 {
+    if (!mEditIdAction)
+        return;
+
     QModelIndexList selectedRows = selectionModel()->selectedRows();
 
     QMenu menu(this);
@@ -84,10 +98,13 @@ void CSVWorld::NestedTable::contextMenuEvent (QContextMenuEvent *event)
         menu.addSeparator();
     }
 
-    if (selectionModel()->selectedRows().size() == 1)
-        menu.addAction(mRemoveRowAction);
+    if (mAddNewRowAction && mRemoveRowAction)
+    {
+        if (selectionModel()->selectedRows().size() == 1)
+            menu.addAction(mRemoveRowAction);
 
-    menu.addAction(mAddNewRowAction);
+        menu.addAction(mAddNewRowAction);
+    }
 
     menu.exec (event->globalPos());
 }
