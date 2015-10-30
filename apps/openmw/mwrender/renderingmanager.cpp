@@ -487,12 +487,9 @@ namespace MWRender
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-        rttCamera->setClearColor(mViewer->getCamera()->getClearColor());
-        rttCamera->setClearMask(mViewer->getCamera()->getClearMask());
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
         rttCamera->setViewport(0, 0, w, h);
-        rttCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
         texture->setInternalFormat(GL_RGB);
