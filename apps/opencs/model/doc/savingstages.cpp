@@ -154,14 +154,14 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
         for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second;
              ++iter)
         {
-            CSMWorld::RecordBase::State state = iter->mState;
+            CSMWorld::RecordBase::State infoState = iter->mState;
 
-            if (state==CSMWorld::RecordBase::State_Deleted)
+            if (infoState==CSMWorld::RecordBase::State_Deleted)
             {
                 /// \todo wrote record with delete flag
             }
-            else if (state==CSMWorld::RecordBase::State_Modified ||
-                state==CSMWorld::RecordBase::State_ModifiedOnly)
+            else if (infoState==CSMWorld::RecordBase::State_Modified ||
+                     infoState==CSMWorld::RecordBase::State_ModifiedOnly)
             {
                 ESM::DialInfo info = iter->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
