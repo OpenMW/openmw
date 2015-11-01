@@ -426,8 +426,12 @@ class DepthClampCallback : public osg::Drawable::DrawCallback
 public:
     virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
     {
-        if (!osg::isGLExtensionOrVersionSupported(renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3))
+        static bool supported = osg::isGLExtensionOrVersionSupported(renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3);
+        if (!supported)
+        {
             drawable->drawImplementation(renderInfo);
+            return;
+        }
 
         glEnable(GL_DEPTH_CLAMP);
 
