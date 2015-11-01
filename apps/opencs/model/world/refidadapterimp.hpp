@@ -1983,7 +1983,7 @@ namespace CSMWorld
         int index) const
     {
         if (column==mLevList.mLevList || column == mLevList.mNestedListLevList)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }
