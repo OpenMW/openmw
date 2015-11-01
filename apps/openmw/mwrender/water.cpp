@@ -205,6 +205,36 @@ public:
     }
 };
 
+/// Moves water mesh away from the camera slightly if the camera gets to close on the Z axis.
+/// The offset works around graphics artifacts that occured with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
+/// Must be added as a Cull callback.
+class FudgeCallback : public osg::NodeCallback
+{
+public:
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+        const float fudge = 0.1;
+        if (std::abs(cv->getEyeLocal().z()) < fudge)
+        {
+            float diff = fudge - cv->getEyeLocal().z();
+            osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+
+            if (cv->getEyeLocal().z() > 0)
+                modelViewMatrix->preMultTranslate(osg::Vec3f(0,0,-diff));
+            else
+                modelViewMatrix->preMultTranslate(osg::Vec3f(0,0,diff));
+
+            cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
+            traverse(node, nv);
+            cv->popModelViewMatrix();
+        }
+        else
+            traverse(node, nv);
+    }
+};
+
 osg::ref_ptr<osg::Shader> readShader (osg::Shader::Type type, const std::string& file, const std::map<std::string, std::string>& defineMap = std::map<std::string, std::string>())
 {
     osg::ref_ptr<osg::Shader> shader (new osg::Shader(type));
@@ -432,6 +462,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->addChild(mWaterGeode);
+    mWaterNode->addCullCallback(new FudgeCallback);
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
