@@ -596,16 +596,16 @@ namespace CSMWorld
             return record.get().mAiData.mAlarm;
 
         if (column==mActors.mInventory)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         if (column==mActors.mSpells)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         if (column==mActors.mDestinations)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         if (column==mActors.mAiPackages)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
             mActors.mServices.find (column);
@@ -2080,7 +2080,7 @@ namespace CSMWorld
         int index) const
     {
         if (column==mLevList.mLevList || column == mLevList.mNestedListLevList)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }
