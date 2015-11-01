@@ -7,7 +7,6 @@
 #include <components/esm/loadcont.hpp>
 #include <components/esm/loadmgef.hpp>
 
-#include "columnbase.hpp"
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)

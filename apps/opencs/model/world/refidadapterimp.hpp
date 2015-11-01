@@ -11,6 +11,7 @@
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadcrea.hpp>
 
+#include "columnbase.hpp"
 #include "record.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"
