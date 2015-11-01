@@ -249,6 +249,13 @@ namespace MWWorld
         float mDayEnd;
         float mHoursBetweenWeatherChanges;
         float mRainSpeed;
+
+        // underwater fog not really related to weather, but we handle it here because it's convenient
+        float mUnderwaterSunriseFog;
+        float mUnderwaterDayFog;
+        float mUnderwaterSunsetFog;
+        float mUnderwaterNightFog;
+
         std::vector<Weather> mWeatherSettings;
         MoonModel mMasser;
         MoonModel mSecunda;

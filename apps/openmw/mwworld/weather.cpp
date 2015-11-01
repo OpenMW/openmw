@@ -438,6 +438,10 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mDayEnd(mSunsetTime)
     , mHoursBetweenWeatherChanges(fallback.getFallbackFloat("Weather_Hours_Between_Weather_Changes"))
     , mRainSpeed(fallback.getFallbackFloat("Weather_Precip_Gravity"))
+    , mUnderwaterSunriseFog(fallback.getFallbackFloat("Water_UnderwaterSunriseFog"))
+    , mUnderwaterDayFog(fallback.getFallbackFloat("Water_UnderwaterDayFog"))
+    , mUnderwaterSunsetFog(fallback.getFallbackFloat("Water_UnderwaterSunsetFog"))
+    , mUnderwaterNightFog(fallback.getFallbackFloat("Water_UnderwaterNightFog"))
     , mWeatherSettings()
     , mMasser("Masser", fallback)
     , mSecunda("Secunda", fallback)
@@ -624,6 +628,53 @@ void WeatherManager::update(float duration, bool paused)
         mRendering.setSunDirection( final * -1 );
     }
 
+    // TODO: use pre/post sunset/sunrise time values in [Weather] section
+    // TODO: factor out the time of day interpolation code to reuse for calculateWeatherResult()
+    float gameHour = time.getHour();
+    float underwaterFog;
+    // night
+    if (gameHour <= mNightEnd || gameHour >= mNightStart + 1)
+        underwaterFog = mUnderwaterNightFog;
+    // sunrise
+    else if (gameHour >= mNightEnd && gameHour <= mDayStart + 1)
+    {
+        if (gameHour <= mSunriseTime)
+        {
+            // fade in
+            float advance = mSunriseTime - gameHour;
+            float factor = advance / 0.5f;
+            underwaterFog = lerp(mUnderwaterSunriseFog, mUnderwaterNightFog, factor);
+        }
+        else //if (gameHour >= 6)
+        {
+            // fade out
+            float advance = gameHour - mSunriseTime;
+            float factor = advance / 3.f;
+            underwaterFog = lerp(mUnderwaterSunriseFog, mUnderwaterDayFog, factor);
+        }
+    }
+    // day
+    else if (gameHour >= mDayStart + 1 && gameHour <= mDayEnd - 1)
+        underwaterFog = mUnderwaterDayFog;
+    // sunset
+    else if (gameHour >= mDayEnd - 1 && gameHour <= mNightStart + 1)
+    {
+        if (gameHour <= mDayEnd + 1)
+        {
+            // fade in
+            float advance = (mDayEnd + 1) - gameHour;
+            float factor = (advance / 2);
+            underwaterFog = lerp(mUnderwaterSunsetFog, mUnderwaterDayFog, factor);
+        }
+        else //if (gameHour >= 19)
+        {
+            // fade out
+            float advance = gameHour - (mDayEnd + 1);
+            float factor = advance / 2.f;
+            underwaterFog = lerp(mUnderwaterSunsetFog, mUnderwaterNightFog, factor);
+        }
+    }
+
     float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
     if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
         mRendering.getSkyManager()->setGlareTimeOfDayFade(0);
@@ -635,7 +686,7 @@ void WeatherManager::update(float duration, bool paused)
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
-    mRendering.configureFog(mResult.mFogDepth, mResult.mFogColor);
+    mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
     mRendering.setSunColour(mResult.mSunColor);
 
