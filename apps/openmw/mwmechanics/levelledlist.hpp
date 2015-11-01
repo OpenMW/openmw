@@ -1,9 +1,12 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
-#include <components/misc/rng.hpp>
-
+#include <algorithm>
+#include <string>
+#include <vector>
 #include <iostream>
+
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -16,7 +19,6 @@
 
 namespace MWMechanics
 {
-
     /// @return ID of resulting item, or empty if none
     inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, unsigned char failChance=0)
     {
@@ -80,7 +82,50 @@ namespace MWMechanics
                 return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, failChance);
         }
     }
+}
 
+//Returns list of items in group. You get them by returned value->mId.
+inline const std::vector<ESM::LevelledListBase::LevelItem>& itemsInGroup(const std::string& group)
+{
+    MWWorld::ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), group);
+    const ESM::ItemLevList* levItem = ref.getPtr().get<ESM::ItemLevList>()->mBase;
+    const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
+    return items;
+}
+
+//Returns true if item @name is in levelled group @group, false if not.
+inline bool itemInLevelledGroup(const std::string& name, const std::string& group)
+{
+    //Get all items from the group
+    const std::vector<ESM::LevelledListBase::LevelItem>& elements = itemsInGroup(group);
+    //And see if item we're looking for is there.
+    for(std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = elements.begin(); it != elements.end(); ++it)
+    {
+        if(it->mId == name)
+            return true;
+    }
+    return false;
+}
+
+//Return the name of levelled group to which @item belongs, or "" if there's no such group.
+//Function searches for item in all groups of @origin, obtained from NPC's store.
+inline std::string levelledItemGroup(const std::string& item, const ESM::InventoryList& origin)
+{
+    //For every item NPC could have
+    for(std::vector<ESM::ContItem>::const_iterator it = origin.mList.begin(); it != origin.mList.end(); ++it)
+    {
+        //Look only for restocking(negative count) items
+        if (it->mCount >= 0)
+            continue;
+        // If the item belongs to levelled list, return it
+        if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
+        {
+            std::string group = Misc::StringUtils::lowerCase(it->mItem.toString());
+            if(itemInLevelledGroup(item, group))
+                return group;
+        }
+    }
+    return std::string();
 }
 
 #endif

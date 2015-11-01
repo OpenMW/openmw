@@ -461,27 +461,50 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
 void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
-    // Remove the items already spawned by levelled items that will restock
+    //allowedForReplace - Holds information about how many items from the group were sold;
+    //                    Hence, tells us how many items we need to restock.
+    //allowedForReplace[group] <- How many items we should generate(how many of these were sold)
+    std::map<std::string, int> allowedForReplace;
+
+    //See if any of generated items was sold, take note for further restocking:
     for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
     {
-        if (count(it->first) >= it->second)
+        int itemCount = count(it->first);
+        //If it was sold
+        if (itemCount < it->second)
+        {
+            //Remove it from the shop
             remove(it->first, it->second, ptr);
+            std::string group = levelledItemGroup(it->first, items);
+            //And add information to the allowedForReplace map
+            if(allowedForReplace.find(group) == allowedForReplace.end())
+                allowedForReplace[group] = 0;
+            allowedForReplace[group] += std::abs(it->second - itemCount);
+            //Also, remove the record from mLevelledItemMap, if it was the last item in stock.
+            if(!itemCount)
+                mLevelledItemMap.erase(it->first);
+        }
     }
-    mLevelledItemMap.clear();
 
-    for (std::vector<ESM::ContItem>::const_iterator it = items.mList.begin(); it != items.mList.end(); ++it)
+    //Restock:
+    //For every item that NPC could have
+    for(std::vector<ESM::ContItem>::const_iterator it = items.mList.begin(); it != items.mList.end(); ++it)
     {
+        //If he shouldn't have it restocked, don't restock it.
         if (it->mCount >= 0)
             continue;
 
         std::string item = Misc::StringUtils::lowerCase(it->mItem.toString());
 
+        //If it's levelled item, restock if there's need to do so.
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, it->mCount, true);
+            if(allowedForReplace.find(item) != allowedForReplace.end())
+                addInitialItem(item, owner, - allowedForReplace[item], true);
         }
         else
         {
+            //If it isn't levelled item, just resupply to the max count.
             int currentCount = count(item);
             if (currentCount < std::abs(it->mCount))
                 addInitialItem(item, owner, std::abs(it->mCount) - currentCount, true);
