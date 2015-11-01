@@ -74,6 +74,7 @@ Programmers
     Marco Melletti (mellotanica)
     Marco Schulze
     Mateusz Kołaczek (PL_kolek)
+    Mateusz Malisz (malice/MatthewRock)
     megaton
     Michael Hogan (Xethik)
     Michael Mc Donnell
