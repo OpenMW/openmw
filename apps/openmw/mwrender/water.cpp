@@ -613,6 +613,17 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
 Water::~Water()
 {
     mParent->removeChild(mWaterNode);
+
+    if (mReflection)
+    {
+        mParent->removeChild(mReflection);
+        mReflection = NULL;
+    }
+    if (mRefraction)
+    {
+        mParent->removeChild(mRefraction);
+        mRefraction = NULL;
+    }
 }
 
 void Water::setEnabled(bool enabled)
