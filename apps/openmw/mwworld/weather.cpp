@@ -122,8 +122,10 @@ Weather::Weather(const std::string& name,
                 fallback.getFallbackColour("Weather_" + name + "_Sun_Day_Color"),
                 fallback.getFallbackColour("Weather_" + name + "_Sun_Sunset_Color"),
                 fallback.getFallbackColour("Weather_" + name + "_Sun_Night_Color"))
-    , mLandFogDayDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"))
-    , mLandFogNightDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
+    , mLandFogDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
     , mSunDiscSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
     , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
     , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
@@ -1043,8 +1045,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
 
     mResult.mNight = (gameHour < mSunriseTime || gameHour > mTimeSettings.mNightStart - 1);
 
-    mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
-
+    mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings);
     mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings);
     mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings);
     mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings);

@@ -84,8 +84,7 @@ namespace MWWorld
         TimeOfDayInterpolator<osg::Vec4f> mSunColor;
 
         // Fog depth/density
-        float mLandFogDayDepth;
-        float mLandFogNightDepth;
+        TimeOfDayInterpolator<float> mLandFogDepth;
 
         // Color modulation for the sun itself during sunset
         osg::Vec4f mSunDiscSunsetColor;
