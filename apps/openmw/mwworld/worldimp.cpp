@@ -1969,7 +1969,7 @@ namespace MWWorld
     {
         osg::Vec3f pos (object.getRefData().getPosition().asVec3());
 
-        pos.z() += heightRatio*2*mPhysics->getHalfExtents(object).z();
+        pos.z() += heightRatio*2*mPhysics->getRenderingHalfExtents(object).z();
 
         return isUnderwater(object.getCell(), pos);
     }

@@ -1012,8 +1012,12 @@ namespace MWClass
                 + shield;
     }
 
-    void Npc::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f&scale) const
+    void Npc::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f&scale, bool rendering) const
     {
+        if (!rendering)
+            return; // collision meshes are not scaled based on race height
+                    // having the same collision extents for all races makes the environments easier to test
+
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
 

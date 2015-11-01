@@ -287,7 +287,7 @@ namespace MWRender
     void InventoryPreview::onSetup()
     {
         osg::Vec3f scale (1.f, 1.f, 1.f);
-        mCharacter.getClass().adjustScale(mCharacter, scale);
+        mCharacter.getClass().adjustScale(mCharacter, scale, true);
 
         mNode->setScale(scale);
 

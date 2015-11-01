@@ -66,9 +66,16 @@ namespace MWPhysics
         void updatePosition();
 
         /**
-         * Returns the (scaled) half extents
+         * Returns the half extents of the collision body (scaled according to collision scale)
          */
         osg::Vec3f getHalfExtents() const;
+
+        /**
+         * Returns the half extents of the collision body (scaled according to rendering scale)
+         * @note The reason we need this extra method is because of an inconsistency in MW - NPC race scales aren't applied to the collision shape,
+         * most likely to make environment collision testing easier. However in some cases (swimming level) we want the actual scale.
+         */
+        osg::Vec3f getRenderingHalfExtents() const;
 
         /**
          * Sets the current amount of inertial force (incl. gravity) affecting this physic actor
@@ -118,6 +125,7 @@ namespace MWPhysics
         osg::Quat mRotation;
 
         osg::Vec3f mScale;
+        osg::Vec3f mRenderingScale;
         osg::Vec3f mPosition;
 
         osg::Vec3f mForce;

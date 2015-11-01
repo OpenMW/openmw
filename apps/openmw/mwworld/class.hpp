@@ -258,7 +258,8 @@ namespace MWWorld
             virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
             ///< @return the number of enchantment points available for possible enchanting
 
-            virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale) const;
+            virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale, bool rendering) const;
+            /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices

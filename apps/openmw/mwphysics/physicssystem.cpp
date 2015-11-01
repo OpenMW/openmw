@@ -261,7 +261,7 @@ namespace MWPhysics
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fSwimHeightScale")->getFloat();
-            float swimlevel = waterlevel + halfExtents.z() - (halfExtents.z() * 2 * fSwimHeightScale);
+            float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
             osg::Vec3f inertia = physicActor->getInertialForce();
@@ -874,6 +874,15 @@ namespace MWPhysics
         Actor* physactor = getActor(actor);
         if (physactor)
             return physactor->getHalfExtents();
+        else
+            return osg::Vec3f();
+    }
+
+    osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::Ptr &actor)
+    {
+        Actor* physactor = getActor(actor);
+        if (physactor)
+            return physactor->getRenderingHalfExtents();
         else
             return osg::Vec3f();
     }
