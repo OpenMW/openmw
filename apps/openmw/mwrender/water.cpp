@@ -13,6 +13,7 @@
 #include <osg/MatrixTransform>
 #include <osg/FrontFace>
 #include <osg/Shader>
+#include <osg/GLExtensions>
 
 #include <osgDB/ReadFile>
 
@@ -389,6 +390,24 @@ private:
     osg::ref_ptr<osg::Node> mScene;
 };
 
+/// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.
+class DepthClampCallback : public osg::Drawable::DrawCallback
+{
+public:
+    virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
+    {
+        if (!osg::isGLExtensionOrVersionSupported(renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3))
+            drawable->drawImplementation(renderInfo);
+
+        glEnable(GL_DEPTH_CLAMP);
+
+        drawable->drawImplementation(renderInfo);
+
+        // restore default
+        glDisable(GL_DEPTH_CLAMP);
+    }
+};
+
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -402,6 +421,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
     osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
+    waterGeom->setDrawCallback(new DepthClampCallback);
 
     mWaterGeode = new osg::Geode;
     mWaterGeode->addDrawable(waterGeom);
