@@ -15,6 +15,7 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadrace.hpp>
 
+#include "columnbase.hpp"
 #include "record.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"

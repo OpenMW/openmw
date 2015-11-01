@@ -8,7 +8,6 @@
 #include <components/esm/attr.hpp>
 #include <components/esm/loadmgef.hpp>
 
-#include "columnbase.hpp"
 #include "nestedtablewrapper.hpp"
 #include "usertype.hpp"
 #include "idtree.hpp"
