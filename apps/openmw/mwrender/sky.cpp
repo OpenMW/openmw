@@ -1196,14 +1196,13 @@ public:
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
     }
 
-    // Helper for adding AlphaFader to a subgraph
+    // Helper for adding AlphaFaders to a subgraph
     class SetupVisitor : public osg::NodeVisitor
     {
     public:
         SetupVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
-            mAlphaFader = new AlphaFader;
         }
 
         virtual void apply(osg::Node &node)
@@ -1225,22 +1224,26 @@ public:
                         callback = callback->getNestedCallback();
                     }
 
+                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader);
+
                     if (composite)
-                        composite->addController(mAlphaFader);
+                        composite->addController(alphaFader);
                     else
-                        node.addUpdateCallback(mAlphaFader);
+                        node.addUpdateCallback(alphaFader);
+
+                    mAlphaFaders.push_back(alphaFader);
                 }
             }
             traverse(node);
         }
 
-        osg::ref_ptr<AlphaFader> getAlphaFader()
+        std::vector<osg::ref_ptr<AlphaFader> > getAlphaFaders()
         {
-            return mAlphaFader;
+            return mAlphaFaders;
         }
 
     private:
-        osg::ref_ptr<AlphaFader> mAlphaFader;
+        std::vector<osg::ref_ptr<AlphaFader> > mAlphaFaders;
     };
 
 private:
@@ -1437,7 +1440,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             mParticleNode->removeChild(mParticleEffect);
             mParticleEffect = NULL;
-            mParticleFader = NULL;
+            mParticleFaders.clear();
         }
 
         if (mCurrentParticleEffect.empty())
@@ -1464,7 +1467,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
             AlphaFader::SetupVisitor alphaFaderSetupVisitor;
             mParticleEffect->accept(alphaFaderSetupVisitor);
-            mParticleFader = alphaFaderSetupVisitor.getAlphaFader();
+            mParticleFaders = alphaFaderSetupVisitor.getAlphaFaders();
         }
     }
 
@@ -1545,8 +1548,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?
-    if (mParticleFader)
-        mParticleFader->setAlpha(weather.mEffectFade);
+    for (std::vector<osg::ref_ptr<AlphaFader> >::const_iterator it = mParticleFaders.begin(); it != mParticleFaders.end(); ++it)
+        (*it)->setAlpha(weather.mEffectFade);
 }
 
 void SkyManager::sunEnable()

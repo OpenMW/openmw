@@ -15,6 +15,7 @@ namespace SceneUtil
     ///     the first StateSet is the one we can write to, the second is the one currently in use by the draw traversal of the last frame.
     ///     After a frame is completed the places are swapped.
     /// @par Must be set as UpdateCallback on a Node.
+    /// @note Do not add the same StateSetUpdater to multiple nodes.
     /// @note Do not add multiple StateSetControllers on the same Node as they will conflict - instead use the CompositeStateSetUpdater.
     class StateSetUpdater : public osg::NodeCallback
     {

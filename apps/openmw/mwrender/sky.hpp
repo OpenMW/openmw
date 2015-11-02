@@ -158,7 +158,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
-        osg::ref_ptr<AlphaFader> mParticleFader;
+        std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
 
