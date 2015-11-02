@@ -1453,6 +1453,8 @@ void SkyManager::setWeather(const WeatherResult& weather)
             if (!mParticleNode)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
+                mParticleNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Default, "RenderBin");
+                mParticleNode->getOrCreateStateSet()->setNestRenderBins(false);
                 mRootNode->addChild(mParticleNode);
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
