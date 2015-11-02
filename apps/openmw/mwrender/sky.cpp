@@ -35,6 +35,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -1468,6 +1469,9 @@ void SkyManager::setWeather(const WeatherResult& weather)
             AlphaFader::SetupVisitor alphaFaderSetupVisitor;
             mParticleEffect->accept(alphaFaderSetupVisitor);
             mParticleFaders = alphaFaderSetupVisitor.getAlphaFaders();
+
+            SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
+            mParticleEffect->accept(disableFreezeOnCullVisitor);
         }
     }
 
