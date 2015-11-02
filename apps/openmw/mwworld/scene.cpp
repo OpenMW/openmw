@@ -72,7 +72,7 @@ namespace
         {
             float scale = ptr.getCellRef().getScale();
             osg::Vec3f scaleVec (scale, scale, scale);
-            ptr.getClass().adjustScale(ptr, scaleVec);
+            ptr.getClass().adjustScale(ptr, scaleVec, true);
             rendering.scaleObject(ptr, scaleVec);
         }
     }

@@ -34,6 +34,33 @@ namespace MWWorld
     class Fallback;
     class TimeStamp;
 
+
+    struct TimeOfDaySettings
+    {
+        float mNightStart;
+        float mNightEnd;
+        float mDayStart;
+        float mDayEnd;
+        float mSunriseTime;
+    };
+
+    /// Interpolates between 4 data points (sunrise, day, sunset, night) based on the time of day.
+    /// The template value could be a floating point number, or a color.
+    template <typename T>
+    class TimeOfDayInterpolator
+    {
+    public:
+        TimeOfDayInterpolator(const T& sunrise, const T& day, const T& sunset, const T& night)
+            : mSunriseValue(sunrise), mDayValue(day), mSunsetValue(sunset), mNightValue(night)
+        {
+        }
+
+        T getValue (const float gameHour, const TimeOfDaySettings& timeSettings) const;
+
+    private:
+        T mSunriseValue, mDayValue, mSunsetValue, mNightValue;
+    };
+
     /// Defines a single weather setting (according to INI)
     class Weather
     {
@@ -47,33 +74,17 @@ namespace MWWorld
 
         std::string mCloudTexture;
 
-        // Sky (atmosphere) colors
-        osg::Vec4f mSkySunriseColor;
-        osg::Vec4f mSkyDayColor;
-        osg::Vec4f mSkySunsetColor;
-        osg::Vec4f mSkyNightColor;
-
-        // Fog colors
-        osg::Vec4f mFogSunriseColor;
-        osg::Vec4f mFogDayColor;
-        osg::Vec4f mFogSunsetColor;
-        osg::Vec4f mFogNightColor;
-
-        // Ambient lighting colors
-        osg::Vec4f mAmbientSunriseColor;
-        osg::Vec4f mAmbientDayColor;
-        osg::Vec4f mAmbientSunsetColor;
-        osg::Vec4f mAmbientNightColor;
-
-        // Sun (directional) lighting colors
-        osg::Vec4f mSunSunriseColor;
-        osg::Vec4f mSunDayColor;
-        osg::Vec4f mSunSunsetColor;
-        osg::Vec4f mSunNightColor;
+        // Sky (atmosphere) color
+        TimeOfDayInterpolator<osg::Vec4f> mSkyColor;
+        // Fog color
+        TimeOfDayInterpolator<osg::Vec4f> mFogColor;
+        // Ambient lighting color
+        TimeOfDayInterpolator<osg::Vec4f> mAmbientColor;
+        // Sun (directional) lighting color
+        TimeOfDayInterpolator<osg::Vec4f> mSunColor;
 
         // Fog depth/density
-        float mLandFogDayDepth;
-        float mLandFogNightDepth;
+        TimeOfDayInterpolator<float> mLandFogDepth;
 
         // Color modulation for the sun itself during sunset
         osg::Vec4f mSunDiscSunsetColor;
@@ -243,12 +254,18 @@ namespace MWWorld
         float mSunriseDuration;
         float mSunsetDuration;
         float mSunPreSunsetTime;
-        float mNightStart;
-        float mNightEnd;
-        float mDayStart;
-        float mDayEnd;
+
+        TimeOfDaySettings mTimeSettings;
+
+        // fading of night skydome
+        TimeOfDayInterpolator<float> mNightFade;
+
         float mHoursBetweenWeatherChanges;
         float mRainSpeed;
+
+        // underwater fog not really related to weather, but we handle it here because it's convenient
+        TimeOfDayInterpolator<float> mUnderwaterFog;
+
         std::vector<Weather> mWeatherSettings;
         MoonModel mMasser;
         MoonModel mSecunda;

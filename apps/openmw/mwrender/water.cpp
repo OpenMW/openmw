@@ -13,6 +13,7 @@
 #include <osg/MatrixTransform>
 #include <osg/FrontFace>
 #include <osg/Shader>
+#include <osg/GLExtensions>
 
 #include <osgDB/ReadFile>
 
@@ -144,14 +145,18 @@ class ClipCullNode : public osg::Group
 
             osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
 
+            // move the plane back along its normal a little bit to prevent bleeding at the water shore
+            const float clipFudge = -5;
+            // now apply the height of the plane
+            // we can't apply this height in the addClipPlane() since the "flip the below graph" function would otherwise flip the height as well
+            float translate = clipFudge + ((*mCullPlane)[3] * -1);
+            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * translate);
+
             // flip the below graph if the eye point is above the plane
             if (mCullPlane->intersect(osg::BoundingSphere(osg::Vec3d(0,0,eyePoint.z()), 0)) > 0)
             {
                 modelViewMatrix->preMultScale(osg::Vec3(1,1,-1));
             }
-            // move the plane back along its normal a little bit to prevent bleeding at the water shore
-            const float clipFudge = 5;
-            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * (-clipFudge));
 
             cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
             traverse(node, nv);
@@ -167,7 +172,7 @@ public:
     {
         addCullCallback (new PlaneCullCallback(&mPlane));
 
-        mClipNodeTransform = new osg::PositionAttitudeTransform;
+        mClipNodeTransform = new osg::Group;
         mClipNodeTransform->addCullCallback(new FlipCallback(&mPlane));
         addChild(mClipNodeTransform);
 
@@ -183,12 +188,12 @@ public:
         mPlane = plane;
 
         mClipNode->getClipPlaneList().clear();
-        mClipNode->addClipPlane(new osg::ClipPlane(0, mPlane));
+        mClipNode->addClipPlane(new osg::ClipPlane(0, osg::Plane(mPlane.getNormal(), 0))); // mPlane.d() applied in FlipCallback
         mClipNode->setStateSetModes(*getOrCreateStateSet(), osg::StateAttribute::ON);
     }
 
 private:
-    osg::ref_ptr<osg::PositionAttitudeTransform> mClipNodeTransform;
+    osg::ref_ptr<osg::Group> mClipNodeTransform;
     osg::ref_ptr<osg::ClipNode> mClipNode;
 
     osg::Plane mPlane;
@@ -201,6 +206,36 @@ public:
     virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         // no traverse()
+    }
+};
+
+/// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
+/// The offset works around graphics artifacts that occured with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
+/// Must be added as a Cull callback.
+class FudgeCallback : public osg::NodeCallback
+{
+public:
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+
+        const float fudge = 0.2;
+        if (std::abs(cv->getEyeLocal().z()) < fudge)
+        {
+            float diff = fudge - cv->getEyeLocal().z();
+            osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+
+            if (cv->getEyeLocal().z() > 0)
+                modelViewMatrix->preMultTranslate(osg::Vec3f(0,0,-diff));
+            else
+                modelViewMatrix->preMultTranslate(osg::Vec3f(0,0,diff));
+
+            cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
+            traverse(node, nv);
+            cv->popModelViewMatrix();
+        }
+        else
+            traverse(node, nv);
     }
 };
 
@@ -389,6 +424,28 @@ private:
     osg::ref_ptr<osg::Node> mScene;
 };
 
+/// DepthClampCallback enables GL_DEPTH_CLAMP for the current draw, if supported.
+class DepthClampCallback : public osg::Drawable::DrawCallback
+{
+public:
+    virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
+    {
+        static bool supported = osg::isGLExtensionOrVersionSupported(renderInfo.getState()->getContextID(), "GL_ARB_depth_clamp", 3.3);
+        if (!supported)
+        {
+            drawable->drawImplementation(renderInfo);
+            return;
+        }
+
+        glEnable(GL_DEPTH_CLAMP);
+
+        drawable->drawImplementation(renderInfo);
+
+        // restore default
+        glDisable(GL_DEPTH_CLAMP);
+    }
+};
+
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
              const MWWorld::Fallback* fallback, const std::string& resourcePath)
     : mParent(parent)
@@ -402,6 +459,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
 
     osg::ref_ptr<osg::Geometry> waterGeom = createWaterGeometry(CELL_SIZE*150, 40, 900);
+    waterGeom->setDrawCallback(new DepthClampCallback);
 
     mWaterGeode = new osg::Geode;
     mWaterGeode->addDrawable(waterGeom);
@@ -412,6 +470,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->addChild(mWaterGeode);
+    mWaterNode->addCullCallback(new FudgeCallback);
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
@@ -558,6 +617,17 @@ void Water::processChangedSettings(const Settings::CategorySettingVector& settin
 Water::~Water()
 {
     mParent->removeChild(mWaterNode);
+
+    if (mReflection)
+    {
+        mParent->removeChild(mReflection);
+        mReflection = NULL;
+    }
+    if (mRefraction)
+    {
+        mParent->removeChild(mRefraction);
+        mRefraction = NULL;
+    }
 }
 
 void Water::setEnabled(bool enabled)

@@ -110,6 +110,9 @@ namespace MWPhysics
             /// Get physical half extents (scaled) of the given actor.
             osg::Vec3f getHalfExtents(const MWWorld::Ptr& actor);
 
+            /// @see MWPhysics::Actor::getRenderingHalfExtents
+            osg::Vec3f getRenderingHalfExtents(const MWWorld::Ptr& actor);
+
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);

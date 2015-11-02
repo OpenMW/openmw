@@ -110,11 +110,13 @@ void Actor::updateScale()
     float scale = mPtr.getCellRef().getScale();
     osg::Vec3f scaleVec(scale,scale,scale);
 
-    if (!mPtr.getClass().isNpc())
-        mPtr.getClass().adjustScale(mPtr, scaleVec);
-
+    mPtr.getClass().adjustScale(mPtr, scaleVec, false);
     mScale = scaleVec;
     mShape->setLocalScaling(toBullet(mScale));
+
+    scaleVec = osg::Vec3f(scale,scale,scale);
+    mPtr.getClass().adjustScale(mPtr, scaleVec, true);
+    mRenderingScale = scaleVec;
 
     updatePosition();
 }
@@ -122,6 +124,11 @@ void Actor::updateScale()
 osg::Vec3f Actor::getHalfExtents() const
 {
     return osg::componentMultiply(mHalfExtents, mScale);
+}
+
+osg::Vec3f Actor::getRenderingHalfExtents() const
+{
+    return osg::componentMultiply(mHalfExtents, mRenderingScale);
 }
 
 void Actor::setInertialForce(const osg::Vec3f &force)

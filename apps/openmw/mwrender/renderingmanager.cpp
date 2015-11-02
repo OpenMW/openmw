@@ -31,6 +31,8 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include "../mwworld/fallback.hpp"
+
 #include "sky.hpp"
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
@@ -199,6 +201,10 @@ namespace MWRender
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
+        mUnderwaterColor = fallback->getFallbackColour("Water_UnderwaterColor");
+        mUnderwaterWeight = fallback->getFallbackFloat("Water_UnderwaterColorWeight");
+        mUnderwaterIndoorFog = fallback->getFallbackFloat("Water_UnderwaterIndoorFog");
+
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
     }
@@ -349,13 +355,14 @@ namespace MWRender
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 
-        configureFog (cell->mAmbi.mFogDensity, color);
+        configureFog (cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, color);
     }
 
-    void RenderingManager::configureFog(float fogDepth, const osg::Vec4f &color)
+    void RenderingManager::configureFog(float fogDepth, float underwaterFog, const osg::Vec4f &color)
     {
         mFogDepth = fogDepth;
         mFogColor = color;
+        mUnderwaterFog = underwaterFog;
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -378,9 +385,9 @@ namespace MWRender
         mCamera->getPosition(focal, cameraPos);
         if (mWater->isUnderwater(cameraPos))
         {
-            setFogColor(osg::Vec4f(0.090195f, 0.115685f, 0.12745f, 1.f));
-            mStateUpdater->setFogStart(0.f);
-            mStateUpdater->setFogEnd(1000);
+            setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
+            mStateUpdater->setFogStart(mViewDistance * (1 - mUnderwaterFog));
+            mStateUpdater->setFogEnd(mViewDistance);
         }
         else
         {
