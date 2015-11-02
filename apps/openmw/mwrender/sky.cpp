@@ -1432,6 +1432,14 @@ void SkyManager::setWeather(const WeatherResult& weather)
     {
         mCurrentParticleEffect = weather.mParticleEffect;
 
+        // cleanup old particles
+        if (mParticleEffect)
+        {
+            mParticleNode->removeChild(mParticleEffect);
+            mParticleEffect = NULL;
+            mParticleFader = NULL;
+        }
+
         if (mCurrentParticleEffect.empty())
         {
             if (mParticleNode)
@@ -1439,8 +1447,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 mRootNode->removeChild(mParticleNode);
                 mParticleNode = NULL;
             }
-            mParticleEffect = NULL;
-            mParticleFader = NULL;
         }
         else
         {
