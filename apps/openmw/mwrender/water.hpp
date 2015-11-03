@@ -1,11 +1,12 @@
 #ifndef OPENMW_MWRENDER_WATER_H
 #define OPENMW_MWRENDER_WATER_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
+#include <osg/Vec3f>
 
 #include <components/settings/settings.hpp>
-
-#include "../mwworld/cellstore.hpp"
 
 namespace osg
 {
@@ -28,6 +29,8 @@ namespace Resource
 namespace MWWorld
 {
     class Fallback;
+    class CellStore;
+    class Ptr;
 }
 
 namespace MWRender

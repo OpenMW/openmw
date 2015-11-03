@@ -32,6 +32,7 @@
 #include <components/esm/loadcell.hpp>
 
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"

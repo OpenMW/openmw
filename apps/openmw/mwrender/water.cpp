@@ -33,6 +33,8 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include "../mwworld/cellstore.hpp"
+
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
