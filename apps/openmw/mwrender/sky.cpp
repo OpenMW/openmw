@@ -1374,6 +1374,7 @@ void SkyManager::createRain()
     mRainFader = new RainFader;
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
+    mRainNode->setNodeMask(Mask_WeatherParticles);
 
     mRootNode->addChild(mRainNode);
 }
@@ -1515,6 +1516,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
                 mParticleNode->addCullCallback(mUnderwaterSwitch);
+                mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
