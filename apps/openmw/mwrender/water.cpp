@@ -152,18 +152,19 @@ class ClipCullNode : public osg::Group
 
             osg::RefMatrix* modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
 
-            // move the plane back along its normal a little bit to prevent bleeding at the water shore
-            const float clipFudge = -5;
-            // now apply the height of the plane
+            // apply the height of the plane
             // we can't apply this height in the addClipPlane() since the "flip the below graph" function would otherwise flip the height as well
-            float translate = clipFudge + ((*mCullPlane)[3] * -1);
-            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * translate);
+            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * ((*mCullPlane)[3] * -1));
 
             // flip the below graph if the eye point is above the plane
             if (mCullPlane->intersect(osg::BoundingSphere(osg::Vec3d(0,0,eyePoint.z()), 0)) > 0)
             {
                 modelViewMatrix->preMultScale(osg::Vec3(1,1,-1));
             }
+
+            // move the plane back along its normal a little bit to prevent bleeding at the water shore
+            const float clipFudge = -5;
+            modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
 
             cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
             traverse(node, nv);
