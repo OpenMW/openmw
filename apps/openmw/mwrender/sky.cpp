@@ -1066,18 +1066,19 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
 
     mRootNode = skyroot;
 
-    // By default render before the world is rendered
-    mRootNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Sky, "RenderBin");
-
+    mEarlyRenderBinRoot = new osg::Group;
+    // render before the world is rendered
+    mEarlyRenderBinRoot->getOrCreateStateSet()->setRenderBinDetails(RenderBin_Sky, "RenderBin");
     // Prevent unwanted clipping by water reflection camera's clipping plane
-    mRootNode->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
+    mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
+    mRootNode->addChild(mEarlyRenderBinRoot);
 }
 
 void SkyManager::create()
 {
     assert(!mCreated);
 
-    mAtmosphereDay = mSceneManager->createInstance("meshes/sky_atmosphere.nif", mRootNode);
+    mAtmosphereDay = mSceneManager->createInstance("meshes/sky_atmosphere.nif", mEarlyRenderBinRoot);
     ModVertexAlphaVisitor modAtmosphere(0);
     mAtmosphereDay->accept(modAtmosphere);
 
@@ -1086,7 +1087,7 @@ void SkyManager::create()
 
     mAtmosphereNightNode = new osg::PositionAttitudeTransform;
     mAtmosphereNightNode->setNodeMask(0);
-    mRootNode->addChild(mAtmosphereNightNode);
+    mEarlyRenderBinRoot->addChild(mAtmosphereNightNode);
 
     osg::ref_ptr<osg::Node> atmosphereNight;
     if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
@@ -1099,14 +1100,14 @@ void SkyManager::create()
     mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getTextureManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun.reset(new Sun(mRootNode, *mSceneManager->getTextureManager()));
+    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getTextureManager()));
 
     const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mRootNode, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
-    mRootNode->addChild(mCloudNode);
+    mEarlyRenderBinRoot->addChild(mCloudNode);
     mCloudMesh = mSceneManager->createInstance("meshes/sky_clouds_01.nif", mCloudNode);
     ModVertexAlphaVisitor modClouds(1);
     mCloudMesh->accept(modClouds);
@@ -1123,9 +1124,9 @@ void SkyManager::create()
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
-    mRootNode->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-    mRootNode->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
-    mRootNode->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
+    mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+    mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
+    mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
     mMoonScriptColor = fallback->getFallbackColour("Moons_Script_Color");
 
@@ -1282,6 +1283,7 @@ void SkyManager::createRain()
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 
     osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
     particleTemplate.setSizeRange(osgParticle::rangef(5.f, 15.f));
@@ -1457,10 +1459,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
             if (!mParticleNode)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
-                osg::StateSet* particleStateSet = mParticleNode->getOrCreateStateSet();
-                particleStateSet->setRenderBinDetails(RenderBin_Default, "RenderBin");
-                particleStateSet->setNestRenderBins(false);
-                particleStateSet->setMode(GL_FOG, osg::StateAttribute::ON);
                 mRootNode->addChild(mParticleNode);
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);

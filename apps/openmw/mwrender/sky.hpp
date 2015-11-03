@@ -155,6 +155,7 @@ namespace MWRender
         Resource::SceneManager* mSceneManager;
 
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
