@@ -95,6 +95,11 @@ void Actor::updatePosition()
     mCollisionObject->setWorldTransform(tr);
 }
 
+osg::Vec3f Actor::getPosition() const
+{
+    return toOsg(mCollisionObject->getWorldTransform().getOrigin());
+}
+
 void Actor::updateRotation ()
 {
     btTransform tr = mCollisionObject->getWorldTransform();

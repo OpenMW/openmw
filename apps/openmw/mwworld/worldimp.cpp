@@ -3259,8 +3259,7 @@ namespace MWWorld
     osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
     {
         osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
-        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
-        targetPos.z() += mPhysics->getHalfExtents(target).z();
+        osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
 }

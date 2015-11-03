@@ -869,20 +869,29 @@ namespace MWPhysics
         }
     }
 
-    osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::Ptr &actor)
+    osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::Ptr &actor) const
     {
-        Actor* physactor = getActor(actor);
+        const Actor* physactor = getActor(actor);
         if (physactor)
             return physactor->getHalfExtents();
         else
             return osg::Vec3f();
     }
 
-    osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::Ptr &actor)
+    osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::Ptr &actor) const
     {
-        Actor* physactor = getActor(actor);
+        const Actor* physactor = getActor(actor);
         if (physactor)
             return physactor->getRenderingHalfExtents();
+        else
+            return osg::Vec3f();
+    }
+
+    osg::Vec3f PhysicsSystem::getPosition(const MWWorld::Ptr &actor) const
+    {
+        const Actor* physactor = getActor(actor);
+        if (physactor)
+            return physactor->getPosition();
         else
             return osg::Vec3f();
     }
@@ -1031,6 +1040,14 @@ namespace MWPhysics
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
     {
         ActorMap::iterator found = mActors.find(ptr);
+        if (found != mActors.end())
+            return found->second;
+        return NULL;
+    }
+
+    const Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr) const
+    {
+        ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())
             return found->second;
         return NULL;
