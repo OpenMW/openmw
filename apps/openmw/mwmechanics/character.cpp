@@ -504,8 +504,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
                              1.0f, "start", "stop", 0.0f, ~0ul, true);
     }
-
-    updateIdleStormState();
 }
 
 
@@ -867,7 +865,7 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
     mPtr = ptr;
 }
 
-void CharacterController::updateIdleStormState()
+void CharacterController::updateIdleStormState(bool inwater)
 {
     bool inStormDirection = false;
     if (MWBase::Environment::get().getWorld()->isInStorm())
@@ -877,7 +875,7 @@ void CharacterController::updateIdleStormState()
         inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
                 > osg::DegreesToRadians(120.f);
     }
-    if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
+    if (inStormDirection && !inwater && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
         float complete = 0;
         mAnimation->getInfo("idlestorm", &complete);
@@ -1796,6 +1794,7 @@ void CharacterController::update(float duration)
                 forcestateupdate = updateCreatureState() || forcestateupdate;
 
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
+            updateIdleStormState(inwater);
         }
 
         if (inJump)
