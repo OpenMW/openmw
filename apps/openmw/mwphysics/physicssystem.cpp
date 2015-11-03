@@ -240,6 +240,8 @@ namespace MWPhysics
             const ESM::Position& refpos = ptr.getRefData().getPosition();
             osg::Vec3f position(refpos.asVec3());
 
+            float collisionShapeOffset = physicActor->getPosition().z() - position.z();
+
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
             if (!ptr.getClass().isMobile(ptr))
@@ -256,12 +258,11 @@ namespace MWPhysics
             }
 
             btCollisionObject *colobj = physicActor->getCollisionObject();
-            osg::Vec3f halfExtents = physicActor->getHalfExtents();
-            position.z() += halfExtents.z();
+            position.z() += collisionShapeOffset;
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fSwimHeightScale")->getFloat();
-            float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
+            float swimlevel = waterlevel + collisionShapeOffset - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
             osg::Vec3f inertia = physicActor->getInertialForce();
@@ -369,7 +370,7 @@ namespace MWPhysics
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if (ptr.getClass().isPureWaterCreature(ptr)
-                            && newPosition.z() + halfExtents.z() > waterlevel)
+                            && newPosition.z() + physicActor->getHalfExtents().z() > waterlevel)
                         newPosition = oldPosition;
                 }
                 else
@@ -450,7 +451,7 @@ namespace MWPhysics
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z() -= halfExtents.z(); // remove what was added at the beginning
+            newPosition.z() -= collisionShapeOffset; // remove what was added at the beginning
             return newPosition;
         }
     };
@@ -820,12 +821,8 @@ namespace MWPhysics
         if (!physactor1 || !physactor2)
             return false;
 
-        osg::Vec3f halfExt1 = physactor1->getHalfExtents();
-        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
-        pos1.z() += halfExt1.z()*2*0.9f; // eye level
-        osg::Vec3f halfExt2 = physactor2->getHalfExtents();
-        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
-        pos2.z() += halfExt2.z()*2*0.9f;
+        osg::Vec3f pos1 (physactor1->getPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.8)); // eye level
+        osg::Vec3f pos2 (physactor2->getPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.8));
 
         RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap);
 
