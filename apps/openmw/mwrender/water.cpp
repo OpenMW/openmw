@@ -34,6 +34,7 @@
 #include <components/esm/loadcell.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
@@ -457,6 +458,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
+    , mFallback(fallback)
     , mResourcePath(resourcePath)
     , mEnabled(true)
     , mToggled(true)
@@ -480,7 +482,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(geode2); // Water_Map_Alpha
+    createSimpleWaterStateSet(geode2, mFallback->getFallbackFloat("Water_Map_Alpha"));
     geode2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geode2);
 
@@ -522,18 +524,18 @@ void Water::updateWaterMaterial()
         createShaderWaterStateSet(mWaterGeode, mReflection, mRefraction);
     }
     else
-        createSimpleWaterStateSet(mWaterGeode);
+        createSimpleWaterStateSet(mWaterGeode, mFallback->getFallbackFloat("Water_World_Alpha"));
 
     updateVisible();
 }
 
-void Water::createSimpleWaterStateSet(osg::Node* node)
+void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 {
     osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 0.7f)); // Water_World_Alpha
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, alpha));
     material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
     material->setColorMode(osg::Material::OFF);
     stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
@@ -548,14 +550,18 @@ void Water::createSimpleWaterStateSet(osg::Node* node)
     stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
 
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-    for (int i=0; i<32; ++i)
+    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
+    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;
-        texname << "textures/water/water" << std::setw(2) << std::setfill('0') << i << ".dds";
+        texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
         textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
     }
 
-    osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 2/32.f, textures));
+    float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
+
+    osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 1.f/fps, textures));
     controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
     node->setUpdateCallback(controller);
     node->setStateSet(stateset);
