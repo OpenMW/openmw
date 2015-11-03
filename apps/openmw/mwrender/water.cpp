@@ -79,6 +79,10 @@ namespace
         waterGeom->setVertexArray(verts);
         waterGeom->setTexCoordArray(0, texcoords);
 
+        osg::ref_ptr<osg::Vec3Array> normal (new osg::Vec3Array);
+        normal->push_back(osg::Vec3f(0,0,1));
+        waterGeom->setNormalArray(normal, osg::Array::BIND_OVERALL);
+
         waterGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS,0,verts->size()));
         return waterGeom;
     }
@@ -526,9 +530,9 @@ void Water::createSimpleWaterStateSet(osg::Node* node)
     osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
     osg::ref_ptr<osg::Material> material (new osg::Material);
-    material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.7f)); // Water_World_Alpha
-    material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+    material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 0.7f)); // Water_World_Alpha
+    material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
     material->setColorMode(osg::Material::OFF);
     stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
 
