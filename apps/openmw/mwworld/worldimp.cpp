@@ -781,6 +781,9 @@ namespace MWWorld
 
         if (reference.getRefData().isEnabled())
         {
+            if (reference == getPlayerPtr())
+                throw std::runtime_error("can not disable player object");
+
             reference.getRefData().disable();
 
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
