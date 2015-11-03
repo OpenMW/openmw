@@ -262,8 +262,18 @@ public:
 
     META_Node(MWRender, CameraRelativeTransform)
 
-    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor*) const
+    const osg::Vec3f& getLastEyePoint() const
     {
+        return mEyePoint;
+    }
+
+    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const
+    {
+        if (nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        {
+            mEyePoint = static_cast<osgUtil::CullVisitor*>(nv)->getEyePoint();
+        }
+
         if (_referenceFrame==RELATIVE_RF)
         {
             matrix.setTrans(osg::Vec3f(0.f,0.f,0.f));
@@ -322,6 +332,9 @@ public:
             cv->getCurrentCullingSet().popCurrentMask();
         }
     };
+private:
+    // eyePoint for the current frame
+    mutable osg::Vec3f mEyePoint;
 };
 
 class ModVertexAlphaVisitor : public osg::NodeVisitor
@@ -369,6 +382,45 @@ public:
 
 private:
     int mMeshType;
+};
+
+/// @brief Hides the node subgraph if the eye point is below water.
+/// @note Must be added as cull callback.
+/// @note Meant to be used on a node that is child of a CameraRelativeTransform.
+/// The current eye point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
+class UnderwaterSwitchCallback : public osg::NodeCallback
+{
+public:
+    UnderwaterSwitchCallback(CameraRelativeTransform* cameraRelativeTransform)
+        : mCameraRelativeTransform(cameraRelativeTransform)
+        , mEnabled(true)
+        , mWaterLevel(0.f)
+    {
+    }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osg::Vec3f eyePoint = mCameraRelativeTransform->getLastEyePoint();
+
+        if (mEnabled && eyePoint.z() < mWaterLevel)
+            return;
+
+        traverse(node, nv);
+    }
+
+    void setEnabled(bool enabled)
+    {
+        mEnabled = enabled;
+    }
+    void setWaterLevel(float waterLevel)
+    {
+        mWaterLevel = waterLevel;
+    }
+
+private:
+    osg::ref_ptr<CameraRelativeTransform> mCameraRelativeTransform;
+    bool mEnabled;
+    float mWaterLevel;
 };
 
 /// A base class for the sun and moons.
@@ -1072,6 +1124,8 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     // Prevent unwanted clipping by water reflection camera's clipping plane
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
     mRootNode->addChild(mEarlyRenderBinRoot);
+
+    mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
 }
 
 void SkyManager::create()
@@ -1319,6 +1373,7 @@ void SkyManager::createRain()
 
     mRainFader = new RainFader;
     mRainNode->addUpdateCallback(mRainFader);
+    mRainNode->addCullCallback(mUnderwaterSwitch);
 
     mRootNode->addChild(mRainNode);
 }
@@ -1459,6 +1514,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
             if (!mParticleNode)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
+                mParticleNode->addCullCallback(mUnderwaterSwitch);
                 mRootNode->addChild(mParticleNode);
             }
             mParticleEffect = mSceneManager->createInstance(mCurrentParticleEffect, mParticleNode);
@@ -1605,6 +1661,16 @@ void SkyManager::setDate(int day, int month)
 void SkyManager::setGlareTimeOfDayFade(float val)
 {
     mSun->setGlareTimeOfDayFade(val);
+}
+
+void SkyManager::setWaterHeight(float height)
+{
+    mUnderwaterSwitch->setWaterLevel(height);
+}
+
+void SkyManager::setWaterEnabled(bool enabled)
+{
+    mUnderwaterSwitch->setEnabled(enabled);
 }
 
 }

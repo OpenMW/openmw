@@ -35,6 +35,7 @@ namespace MWRender
     class RainShooter;
     class RainFader;
     class AlphaFader;
+    class UnderwaterSwitchCallback;
 
     struct WeatherResult
     {
@@ -100,6 +101,8 @@ namespace MWRender
         float mMoonAlpha;
     };
 
+    ///@brief The SkyManager handles rendering of the sky domes, celestial bodies as well as other objects that need to be rendered
+    /// relative to the camera (e.g. weather particle effects)
     class SkyManager
     {
     public:
@@ -144,6 +147,12 @@ namespace MWRender
 
         void setGlareTimeOfDayFade(float val);
 
+        /// Enable or disable the water plane (used to remove underwater weather particles)
+        void setWaterEnabled(bool enabled);
+
+        /// Set height of water plane (used to remove underwater weather particles)
+        void setWaterHeight(float height);
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -160,6 +169,7 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
         std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
+        osg::ref_ptr<UnderwaterSwitchCallback> mUnderwaterSwitch;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
 

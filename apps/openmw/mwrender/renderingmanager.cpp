@@ -450,11 +450,13 @@ namespace MWRender
     void RenderingManager::setWaterEnabled(bool enabled)
     {
         mWater->setEnabled(enabled);
+        mSky->setWaterEnabled(enabled);
     }
 
     void RenderingManager::setWaterHeight(float height)
     {
         mWater->setHeight(height);
+        mSky->setWaterHeight(height);
     }
 
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
