@@ -2121,7 +2121,7 @@ void CharacterController::updateHeadTracking(float duration)
         osg::Matrixf mat = mats[0];
         osg::Vec3f headPos = mat.getTrans();
 
-        osg::Vec3f targetPos (mHeadTrackTarget.getRefData().getPosition().asVec3());
+        osg::Vec3f direction;
         if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
             const osg::Node* node = anim->getNode("Head");
@@ -2131,11 +2131,12 @@ void CharacterController::updateHeadTracking(float duration)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())
-                    targetPos = mats[0].getTrans();
+                    direction = mats[0].getTrans() - headPos;
             }
+            else
+                // no head node to look at, fall back to look at center of collision box
+                direction = MWBase::Environment::get().getWorld()->aimToTarget(mPtr, mHeadTrackTarget);
         }
-
-        osg::Vec3f direction = targetPos - headPos;
         direction.normalize();
 
         if (!mPtr.getRefData().getBaseNode())
