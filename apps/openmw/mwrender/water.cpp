@@ -474,7 +474,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geode> geode2 (osg::clone(mWaterGeode.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(geode2);
+    createSimpleWaterStateSet(geode2); // Water_Map_Alpha
     geode2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geode2);
 
@@ -527,7 +527,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node)
 
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.7f));
+    material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.7f)); // Water_World_Alpha
     material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
     material->setColorMode(osg::Material::OFF);
     stateset->setAttributeAndModes(material, osg::StateAttribute::ON);
