@@ -122,7 +122,9 @@ namespace SceneUtil
             , mLastFrameNumber(0)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), mLightManager(copy.mLightManager)
+            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
+            , mLightManager(copy.mLightManager)
+            , mLastFrameNumber(0)
         {}
 
         META_Object(NifOsg, LightListCallback)

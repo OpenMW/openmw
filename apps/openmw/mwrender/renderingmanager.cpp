@@ -131,6 +131,10 @@ namespace MWRender
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mFogDepth(0.f)
+        , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
+        , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
+        , mUnderwaterFog(0.f)
+        , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
     {
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
@@ -201,10 +205,6 @@ namespace MWRender
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
-
-        mUnderwaterColor = fallback->getFallbackColour("Water_UnderwaterColor");
-        mUnderwaterWeight = fallback->getFallbackFloat("Water_UnderwaterColorWeight");
-        mUnderwaterIndoorFog = fallback->getFallbackFloat("Water_UnderwaterIndoorFog");
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
