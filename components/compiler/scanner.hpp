@@ -37,7 +37,6 @@ namespace Compiler
             float mPutbackFloat;
             std::string mPutbackName;
             TokenLoc mPutbackLoc;
-            bool mNameStartingWithDigit;
 
         public:
 
