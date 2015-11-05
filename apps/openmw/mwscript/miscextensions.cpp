@@ -37,7 +37,7 @@ namespace
 
     void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end(); ++it)
         {
             if (it->mLevel == level && itemId == it->mId)
                 return;
