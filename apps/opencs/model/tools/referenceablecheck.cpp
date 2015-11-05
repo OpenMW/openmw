@@ -468,6 +468,9 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     if (creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
         messages.push_back (std::make_pair (id, creature.mId + " has negative gold "));
 
+    if (creature.mScale == 0)
+        messages.push_back (std::make_pair (id, creature.mId + " has zero scale value"));
+
     // Check that mentioned scripts exist
     scriptCheck<ESM::Creature>(creature, messages, id.toString());
 }

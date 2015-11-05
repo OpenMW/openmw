@@ -89,6 +89,7 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
 
     mColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_ScriptText);
+    mIdColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
     mStateColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
 
     QString source = mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString();
@@ -197,26 +198,41 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
     if (hint.empty())
         return;
 
-    if (hint[0]=='l')
-    {
-        std::istringstream stream (hint.c_str()+1);
-
-        char ignore;
-        int line;
-        int column;
-
-        if (stream >> ignore >> line >> column)
+    unsigned line = 0, column = 0;
+    char c;
+    std::istringstream stream (hint.c_str()+1);
+    switch(hint[0]){
+        case 'R':
+        case 'r':
         {
-            QTextCursor cursor = mEditor->textCursor();
+            QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
+            QString source = mModel->data (index).toString();
+            unsigned pos, dummy;
+            if (!(stream >> c >> dummy >> pos) )
+                return;
 
-            cursor.movePosition (QTextCursor::Start);
-            if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
-                cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
-
-            mEditor->setFocus();
-            mEditor->setTextCursor (cursor);
+            for (unsigned i = 0; i <= pos; ++i){
+                if (source[i] == '\n'){
+                    ++line;
+                    column = i+1;
+                }
+            }
+            column = pos - column;
+            break;
         }
+        case 'l':
+            if (!(stream >> c >> line >> column))
+                    return;
     }
+
+    QTextCursor cursor = mEditor->textCursor();
+
+    cursor.movePosition (QTextCursor::Start);
+    if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+        cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+
+    mEditor->setFocus();
+    mEditor->setTextCursor (cursor);
 }
 
 void CSVWorld::ScriptSubView::textChanged()
@@ -241,6 +257,15 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 
     ScriptEdit::ChangeLock lock (*mEditor);
 
+    bool updateRequired = false;
+
+    for (int i=topLeft.row(); i<=bottomRight.row(); ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
@@ -256,13 +281,28 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
             mEditor->setPlainText (source);
             mEditor->setTextCursor (cursor);
 
-            recompile();
+            updateRequired = true;
         }
     }
+
+    if (updateRequired)
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
+    bool updateRequired = false;
+
+    for (int i=start; i<=end; ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
+    if (updateRequired)
+        recompile();
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (!parent.isValid() && index.row()>=start && index.row()<=end)

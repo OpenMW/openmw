@@ -134,23 +134,34 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
         state==CSMWorld::RecordBase::State_ModifiedOnly ||
         infoModified)
     {
-        mState.getWriter().startRecord (topic.mModified.sRecordId);
-        mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
-        topic.mModified.save (mState.getWriter());
-        mState.getWriter().endRecord (topic.mModified.sRecordId);
+        if (infoModified && state != CSMWorld::RecordBase::State_Modified
+                         && state != CSMWorld::RecordBase::State_ModifiedOnly)
+        {
+            mState.getWriter().startRecord (topic.mBase.sRecordId);
+            mState.getWriter().writeHNCString ("NAME", topic.mBase.mId);
+            topic.mBase.save (mState.getWriter());
+            mState.getWriter().endRecord (topic.mBase.sRecordId);
+        }
+        else
+        {
+            mState.getWriter().startRecord (topic.mModified.sRecordId);
+            mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
+            topic.mModified.save (mState.getWriter());
+            mState.getWriter().endRecord (topic.mModified.sRecordId);
+        }
 
         // write modified selected info records
         for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second;
              ++iter)
         {
-            CSMWorld::RecordBase::State state = iter->mState;
+            CSMWorld::RecordBase::State infoState = iter->mState;
 
-            if (state==CSMWorld::RecordBase::State_Deleted)
+            if (infoState==CSMWorld::RecordBase::State_Deleted)
             {
                 /// \todo wrote record with delete flag
             }
-            else if (state==CSMWorld::RecordBase::State_Modified ||
-                state==CSMWorld::RecordBase::State_ModifiedOnly)
+            else if (infoState==CSMWorld::RecordBase::State_Modified ||
+                     infoState==CSMWorld::RecordBase::State_ModifiedOnly)
             {
                 ESM::DialInfo info = iter->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
@@ -415,15 +426,16 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
     if (land.mState==CSMWorld::RecordBase::State_Modified ||
         land.mState==CSMWorld::RecordBase::State_ModifiedOnly)
     {
-        CSMWorld::Land record = land.get();
+        const CSMWorld::Land& record = land.get();
 
-        mState.getWriter().startRecord (record.mLand->sRecordId);
+        mState.getWriter().startRecord (record.sRecordId);
 
-        record.mLand->save (mState.getWriter());
-        if(record.mLand->mLandData)
-            record.mLand->mLandData->save (mState.getWriter());
+        record.save (mState.getWriter());
 
-        mState.getWriter().endRecord (record.mLand->sRecordId);
+        if (const ESM::Land::LandData *data = record.getLandData (record.mDataTypes))
+            data->save (mState.getWriter());
+
+        mState.getWriter().endRecord (record.sRecordId);
     }
     else if (land.mState==CSMWorld::RecordBase::State_Deleted)
     {

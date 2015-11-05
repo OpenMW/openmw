@@ -63,7 +63,7 @@ namespace CSVWorld
             void moveSceneNodes(const std::string sceneNodeName, const Ogre::Vector3 &position);
 
             void addHeightField(Ogre::SceneManager *sceneManager,
-                    float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts);
+                    const float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts);
 
             void removeHeightField(Ogre::SceneManager *sceneManager, int x, int y);
 

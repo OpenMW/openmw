@@ -132,11 +132,6 @@ void CSVWorld::SceneSubView::setEditLock (bool locked)
 
 }
 
-void CSVWorld::SceneSubView::updateEditorSetting(const QString &settingName, const QString &settingValue)
-{
-
-}
-
 void CSVWorld::SceneSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
@@ -247,8 +242,6 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
     mToolbar = toolbar;
 
     connect (mScene, SIGNAL (focusToolbarRequest()), mToolbar, SLOT (setFocus()));
-    connect (this, SIGNAL (updateSceneUserSetting(const QString &, const QStringList &)),
-            mScene, SLOT (updateUserSetting(const QString &, const QStringList &)));
     connect (mToolbar, SIGNAL (focusSceneRequest()), mScene, SLOT (setFocus()));
 
     mLayout->addWidget (mToolbar, 0);
@@ -256,9 +249,4 @@ void CSVWorld::SceneSubView::replaceToolbarAndWorldspace (CSVRender::WorldspaceW
 
     mScene->selectDefaultNavigationMode();
     setFocusProxy (mScene);
-}
-
-void CSVWorld::SceneSubView::updateUserSetting (const QString &key, const QStringList &list)
-{
-    emit updateSceneUserSetting(key, list);
 }

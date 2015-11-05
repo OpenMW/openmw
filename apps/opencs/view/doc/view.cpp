@@ -83,6 +83,10 @@ void CSVDoc::View::setupFileMenu()
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     file->addAction (mVerify);
 
+    mMerge = new QAction (tr ("Merge"), this);
+    connect (mMerge, SIGNAL (triggered()), this, SLOT (merge()));
+    file->addAction (mMerge);
+
     QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     file->addAction (loadErrors);
@@ -418,6 +422,9 @@ void CSVDoc::View::updateActions()
 
     mGlobalDebugProfileMenu->updateActions (running);
     mStopDebug->setEnabled (running);
+
+    mMerge->setEnabled (mDocument->getContentFiles().size()>1 &&
+        !(mDocument->getState() & CSMDoc::State_Merging));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
@@ -467,6 +474,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
 
+    setContextMenuPolicy(Qt::NoContextMenu);
+
     updateTitle();
 
     setupUi();
@@ -510,6 +519,7 @@ void CSVDoc::View::updateDocumentState()
     static const int operations[] =
     {
         CSMDoc::State_Saving, CSMDoc::State_Verifying, CSMDoc::State_Searching,
+        CSMDoc::State_Merging,
         -1 // end marker
     };
 
@@ -1052,4 +1062,9 @@ void CSVDoc::View::updateScrollbar()
         mSubViewWindow.setMinimumWidth(newWidth);
     else
         mSubViewWindow.setMinimumWidth(0);
+}
+
+void CSVDoc::View::merge()
+{
+    emit mergeDocument (mDocument);
 }

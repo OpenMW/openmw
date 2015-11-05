@@ -317,8 +317,34 @@ namespace CSMWorld
                     else
                         throw std::runtime_error("Magic effects ID unexpected value");
                 }
-                case 1: return effect.mSkill;
-                case 2: return effect.mAttribute;
+                case 1:
+                {
+                    switch (effect.mEffectID)
+                    {
+                        case ESM::MagicEffect::DrainSkill:
+                        case ESM::MagicEffect::DamageSkill:
+                        case ESM::MagicEffect::RestoreSkill:
+                        case ESM::MagicEffect::FortifySkill:
+                        case ESM::MagicEffect::AbsorbSkill:
+                             return effect.mSkill;
+                        default:
+                            return QVariant();
+                    }
+                }
+                case 2:
+                {
+                    switch (effect.mEffectID)
+                    {
+                        case ESM::MagicEffect::DrainAttribute:
+                        case ESM::MagicEffect::DamageAttribute:
+                        case ESM::MagicEffect::RestoreAttribute:
+                        case ESM::MagicEffect::FortifyAttribute:
+                        case ESM::MagicEffect::AbsorbAttribute:
+                             return effect.mAttribute;
+                        default:
+                            return QVariant();
+                    }
+                }
                 case 3:
                 {
                     if (effect.mRange >=0 && effect.mRange <=2)

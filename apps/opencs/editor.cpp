@@ -26,7 +26,8 @@
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
-  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mLock(), mMerge (mDocumentManager),
+  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
@@ -48,9 +49,12 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
+    mMerge.setLocalData (mLocal);
 
     connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
         this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (documentAboutToBeRemoved (CSMDoc::Document *)),
+        this, SLOT (documentAboutToBeRemoved (CSMDoc::Document *)));
     connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
         this, SLOT (lastDocumentDeleted()));
 
@@ -58,6 +62,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
     connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+    connect (&mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
@@ -490,6 +495,12 @@ void CS::Editor::documentAdded (CSMDoc::Document *document)
     showSplashMessage();
 }
 
+void CS::Editor::documentAboutToBeRemoved (CSMDoc::Document *document)
+{
+    if (mMerge.getDocument()==document)
+        mMerge.cancel();
+}
+
 void CS::Editor::lastDocumentDeleted()
 {
     QApplication::quit();
@@ -534,4 +545,12 @@ void CS::Editor::showSplashMessage()
         QTimer::singleShot(4000, splash, SLOT(close())); // 4 seconds should be enough
         splash->raise(); // for X windows
     }
+}
+
+void CS::Editor::mergeDocument (CSMDoc::Document *document)
+{
+    mMerge.configure (document);
+    mMerge.show();
+    mMerge.raise();
+    mMerge.activateWindow();
 }

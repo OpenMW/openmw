@@ -18,9 +18,9 @@ namespace
         float accumulated_time=0,parent_time = pit->Is_Root() ? CProfileManager::Get_Time_Since_Reset() : pit->Get_Current_Parent_Total_Time();
         int i,j;
         int frames_since_reset = CProfileManager::Get_Frame_Count_Since_Reset();
-        for (i=0;i<spacing;i++)	os << ".";
+        for (i=0;i<spacing;i++) os << ".";
         os << "----------------------------------\n";
-        for (i=0;i<spacing;i++)	os << ".";
+        for (i=0;i<spacing;i++) os << ".";
         std::string s = "Profiling: "+
                 std::string(pit->Get_Current_Parent_Name())+" (total running time: "+MyGUI::utility::toString(parent_time,3)+" ms) ---\n";
         os << s;
@@ -35,7 +35,7 @@ namespace
             accumulated_time += current_total_time;
             float fraction = parent_time > SIMD_EPSILON ? (current_total_time / parent_time) * 100 : 0.f;
 
-            for (j=0;j<spacing;j++)	os << ".";
+            for (j=0;j<spacing;j++) os << ".";
             double ms = (current_total_time / (double)frames_since_reset);
             s = MyGUI::utility::toString(i)+" -- "+pit->Get_Current_Name()+" ("+MyGUI::utility::toString(fraction,2)+" %) :: "+MyGUI::utility::toString(ms,3)+" ms / frame ("+MyGUI::utility::toString(pit->Get_Current_Total_Calls())+" calls)\n";
             os << s;
@@ -47,7 +47,7 @@ namespace
         {
             os << "what's wrong\n";
         }
-        for (i=0;i<spacing;i++)	os << ".";
+        for (i=0;i<spacing;i++) os << ".";
         double unaccounted=  parent_time > SIMD_EPSILON ? ((parent_time - accumulated_time) / parent_time) * 100 : 0.f;
         s = "Unaccounted: ("+MyGUI::utility::toString(unaccounted,3)+" %) :: "+MyGUI::utility::toString(parent_time - accumulated_time,3)+" ms\n";
         os << s;

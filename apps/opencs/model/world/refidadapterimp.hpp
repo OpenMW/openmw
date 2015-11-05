@@ -15,6 +15,7 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadrace.hpp>
 
+#include "columnbase.hpp"
 #include "record.hpp"
 #include "refiddata.hpp"
 #include "universalid.hpp"
@@ -346,6 +347,66 @@ namespace CSMWorld
             ///< If the data type does not match an exception is thrown.
     };
 
+    struct IngredientColumns : public InventoryColumns
+    {
+        const RefIdColumn *mEffects;
+
+        IngredientColumns (const InventoryColumns& columns);
+    };
+
+    class IngredientRefIdAdapter : public InventoryRefIdAdapter<ESM::Ingredient>
+    {
+            IngredientColumns mColumns;
+
+        public:
+
+            IngredientRefIdAdapter (const IngredientColumns& columns);
+
+            virtual QVariant getData (const RefIdColumn *column, const RefIdData& data, int index)
+                const;
+
+            virtual void setData (const RefIdColumn *column, RefIdData& data, int index,
+                const QVariant& value) const;
+            ///< If the data type does not match an exception is thrown.
+    };
+
+    class IngredEffectRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        UniversalId::Type mType;
+
+        // not implemented
+        IngredEffectRefIdAdapter (const IngredEffectRefIdAdapter&);
+        IngredEffectRefIdAdapter& operator= (const IngredEffectRefIdAdapter&);
+
+    public:
+
+        IngredEffectRefIdAdapter();
+
+        virtual ~IngredEffectRefIdAdapter();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
     struct EnchantableColumns : public InventoryColumns
     {
         const RefIdColumn *mEnchantment;
@@ -485,7 +546,6 @@ namespace CSMWorld
 
     struct ActorColumns : public NameColumns
     {
-        const RefIdColumn *mHasAi;
         const RefIdColumn *mHello;
         const RefIdColumn *mFlee;
         const RefIdColumn *mFight;
@@ -531,9 +591,7 @@ namespace CSMWorld
             data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<RecordT>::getType())));
 
         RecordT record2 = record.get();
-        if (column==mActors.mHasAi)
-            record2.mHasAI = value.toInt();
-        else if (column==mActors.mHello)
+        if (column==mActors.mHello)
             record2.mAiData.mHello = value.toInt();
         else if (column==mActors.mFlee)
             record2.mAiData.mFlee = value.toInt();
@@ -659,12 +717,11 @@ namespace CSMWorld
     {
         std::map<const RefIdColumn *, unsigned int> mFlags;
         const RefIdColumn *mType;
-        const RefIdColumn *mSoul;
         const RefIdColumn *mScale;
         const RefIdColumn *mOriginal;
-        const RefIdColumn *mCombat;
-        const RefIdColumn *mMagic;
-        const RefIdColumn *mStealth;
+        const RefIdColumn *mAttributes;
+        const RefIdColumn *mAttacks;
+        const RefIdColumn *mMisc;
 
         CreatureColumns (const ActorColumns& actorColumns);
     };
@@ -884,6 +941,97 @@ namespace CSMWorld
 
         NpcMiscRefIdAdapter (const Data& data);
         virtual ~NpcMiscRefIdAdapter();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureAttributesRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        CreatureAttributesRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureAttackRefIdAdapter : public NestedRefIdAdapterBase
+    {
+    public:
+
+        CreatureAttackRefIdAdapter ();
+
+        virtual void addNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int position) const;
+
+        virtual void removeNestedRow (const RefIdColumn *column,
+                RefIdData& data, int index, int rowToRemove) const;
+
+        virtual void setNestedTable (const RefIdColumn* column,
+                RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const;
+
+        virtual NestedTableWrapperBase* nestedTable (const RefIdColumn* column,
+                const RefIdData& data, int index) const;
+
+        virtual QVariant getNestedData (const RefIdColumn *column,
+                const RefIdData& data, int index, int subRowIndex, int subColIndex) const;
+
+        virtual void setNestedData (const RefIdColumn *column,
+                RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const;
+
+        virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const;
+
+        virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const;
+    };
+
+    class CreatureMiscRefIdAdapter : public NestedRefIdAdapterBase
+    {
+        CreatureMiscRefIdAdapter (const CreatureMiscRefIdAdapter&);
+        CreatureMiscRefIdAdapter& operator= (const CreatureMiscRefIdAdapter&);
+
+    public:
+
+        CreatureMiscRefIdAdapter ();
+        virtual ~CreatureMiscRefIdAdapter();
 
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const;
@@ -1348,6 +1496,8 @@ namespace CSMWorld
 
         virtual ~ActorAiRefIdAdapter() {}
 
+        // FIXME: should check if the AI package type is already in the list and use a default
+        //        that wasn't used already (in extreme case do not add anything at all?
         virtual void addNestedRow (const RefIdColumn *column,
                 RefIdData& data, int index, int position) const
         {
@@ -1431,6 +1581,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
+                    // FIXME: should more than one AI package type be allowed?  Check vanilla
                     switch (content.mType)
                     {
                         case ESM::AI_Wander: return 0;
@@ -1458,47 +1609,52 @@ namespace CSMWorld
                     else
                         return QVariant();
                 case 4: // wander idle
+                case 5:
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                case 11:
                     if (content.mType == ESM::AI_Wander)
-                    {
-                        return static_cast<int>(content.mWander.mIdle[0]); // FIXME:
-                    }
+                        return static_cast<int>(content.mWander.mIdle[subColIndex-4]);
                     else
                         return QVariant();
-                case 5: // wander repeat
+                case 12: // wander repeat
                     if (content.mType == ESM::AI_Wander)
                         return content.mWander.mShouldRepeat != 0;
                     else
                         return QVariant();
-                case 6: // activate name
+                case 13: // activate name
                     if (content.mType == ESM::AI_Activate)
                         return QString(content.mActivate.mName.toString().c_str());
                     else
                         return QVariant();
-                case 7: // target id
+                case 14: // target id
                     if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
                         return QString(content.mTarget.mId.toString().c_str());
                     else
                         return QVariant();
-                case 8: // target cell
+                case 15: // target cell
                     if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
                         return QString::fromUtf8(content.mCellName.c_str());
                     else
                         return QVariant();
-                case 9:
+                case 16:
                     if (content.mType == ESM::AI_Travel)
                         return content.mTravel.mX;
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
                         return content.mTarget.mX;
                     else
                         return QVariant();
-                case 10:
+                case 17:
                     if (content.mType == ESM::AI_Travel)
                         return content.mTravel.mY;
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
                         return content.mTarget.mY;
                     else
                         return QVariant();
-                case 11:
+                case 18:
                     if (content.mType == ESM::AI_Travel)
                         return content.mTravel.mZ;
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
@@ -1528,11 +1684,12 @@ namespace CSMWorld
                 case 0: // ai package type
                     switch (value.toInt())
                     {
-                        case 0: content.mType = ESM::AI_Wander;
-                        case 1: content.mType = ESM::AI_Travel;
-                        case 2: content.mType = ESM::AI_Follow;
-                        case 3: content.mType = ESM::AI_Escort;
-                        case 4: content.mType = ESM::AI_Activate;
+                        case 0: content.mType = ESM::AI_Wander; break;
+                        case 1: content.mType = ESM::AI_Travel; break;
+                        case 2: content.mType = ESM::AI_Follow; break;
+                        case 3: content.mType = ESM::AI_Escort; break;
+                        case 4: content.mType = ESM::AI_Activate; break;
+                        default: return; // return without saving
                     }
                     break; // always save
 
@@ -1541,6 +1698,8 @@ namespace CSMWorld
                         content.mWander.mDistance = static_cast<short>(value.toInt());
                     else
                         return; // return without saving
+
+                    break; // always save
                 case 2:
                     if (content.mType == ESM::AI_Wander ||
                             content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
@@ -1552,62 +1711,77 @@ namespace CSMWorld
                         content.mWander.mTimeOfDay = static_cast<unsigned char>(value.toInt());
                     else
                         return; // return without saving
+
+                    break; // always save
                 case 4:
-                    if (content.mType == ESM::AI_Wander)
-                        break; // FIXME: idle
-                    else
-                        return; // return without saving
                 case 5:
-                    if (content.mType == ESM::AI_Wander)
-                    {
-                        content.mWander.mShouldRepeat = static_cast<unsigned char>(value.toInt());
-                        break;
-                    }
-                case 6: // NAME32
-                    if (content.mType == ESM::AI_Activate)
-                    {
-                        content.mActivate.mName.assign(value.toString().toUtf8().constData());
-                        break;
-                    }
-                    else
-                        return; // return without saving
-                case 7: // NAME32
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                    {
-                        content.mTarget.mId.assign(value.toString().toUtf8().constData());
-                        break;
-                    }
-                    else
-                        return; // return without saving
+                case 6:
+                case 7:
                 case 8:
-                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                    {
-                        content.mCellName = std::string(value.toString().toUtf8().constData());
-                        break;
-                    }
-                    else
-                        return; // return without saving
                 case 9:
-                    if (content.mType == ESM::AI_Travel)
-                        content.mTravel.mZ = value.toFloat();
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mTarget.mZ = value.toFloat();
-                    else
-                        return; // return without saving
                 case 10:
-                    if (content.mType == ESM::AI_Travel)
-                        content.mTravel.mZ = value.toFloat();
-                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mTarget.mZ = value.toFloat();
-                    else
-                        return; // return without saving
                 case 11:
+                    if (content.mType == ESM::AI_Wander)
+                        content.mWander.mIdle[subColIndex-4] = static_cast<unsigned char>(value.toInt());
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 12:
+                    if (content.mType == ESM::AI_Wander)
+                        content.mWander.mShouldRepeat = static_cast<unsigned char>(value.toInt());
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 13: // NAME32
+                    if (content.mType == ESM::AI_Activate)
+                        content.mActivate.mName.assign(value.toString().toUtf8().constData());
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 14: // NAME32
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mId.assign(value.toString().toUtf8().constData());
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 15:
+                    if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mCellName = std::string(value.toString().toUtf8().constData());
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 16:
                     if (content.mType == ESM::AI_Travel)
                         content.mTravel.mZ = value.toFloat();
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
                         content.mTarget.mZ = value.toFloat();
                     else
                         return; // return without saving
+
+                    break; // always save
+                case 17:
+                    if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mZ = value.toFloat();
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mZ = value.toFloat();
+                    else
+                        return; // return without saving
+
+                    break; // always save
+                case 18:
+                    if (content.mType == ESM::AI_Travel)
+                        content.mTravel.mZ = value.toFloat();
+                    else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
+                        content.mTarget.mZ = value.toFloat();
+                    else
+                        return; // return without saving
+
+                    break; // always save
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
             }
@@ -1617,7 +1791,7 @@ namespace CSMWorld
 
         virtual int getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
         {
-            return 12;
+            return 19;
         }
 
         virtual int getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
@@ -1810,7 +1984,7 @@ namespace CSMWorld
         int index) const
     {
         if (column==mLevList.mLevList || column == mLevList.mNestedListLevList)
-            return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
         return BaseRefIdAdapter<RecordT>::getData (column, data, index);
     }

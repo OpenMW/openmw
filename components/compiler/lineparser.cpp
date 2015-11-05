@@ -555,7 +555,7 @@ namespace Compiler
         }
 
         if (mAllowExpression && mState==BeginState &&
-            (code==Scanner::S_open || code==Scanner::S_minus))
+            (code==Scanner::S_open || code==Scanner::S_minus || code==Scanner::S_plus))
         {
             scanner.putbackSpecial (code, loc);
             parseExpression (scanner, loc);

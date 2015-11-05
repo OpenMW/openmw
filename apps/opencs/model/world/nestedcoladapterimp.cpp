@@ -923,7 +923,7 @@ namespace CSMWorld
 
         switch (subColIndex)
         {
-            case 0: return QString(ESM::Attribute::sAttributeNames[subRowIndex].c_str());
+            case 0: return subRowIndex;
             case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
             case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
             default: throw std::runtime_error("Race Attribute subcolumn index out of range");

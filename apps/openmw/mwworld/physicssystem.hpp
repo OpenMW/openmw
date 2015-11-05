@@ -42,7 +42,7 @@ namespace MWWorld
 
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
-            void addHeightField (float* heights,
+            void addHeightField (const float* heights,
                 int x, int y, float yoffset,
                 float triSize, float sqrtVerts);
 

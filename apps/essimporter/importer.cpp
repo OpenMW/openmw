@@ -296,7 +296,7 @@ namespace ESSImport
 
         ESM::ESMWriter writer;
 
-        writer.setFormat (ESM::Header::CurrentFormat);
+        writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
         std::ofstream stream(mOutFile.c_str(), std::ios::binary);
         // all unused

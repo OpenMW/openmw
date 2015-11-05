@@ -25,6 +25,9 @@ namespace CSVFilter
 
             CSMFilter::Parser mParser;
             QPalette mPalette;
+            bool mIsEmpty;
+            int mStateColumnIndex;
+            int mDescColumnIndex;
 
         public:
 

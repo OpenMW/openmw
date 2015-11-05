@@ -33,7 +33,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
     bool modified = false;
 
     const CSMWorld::RefCollection& collection = mData.getReferences();
-    
+
     for (int i=start; i<=end; ++i)
     {
         std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
@@ -70,20 +70,22 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
     int landIndex = land.searchId(mId);
     if (landIndex != -1)
     {
-        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
+        const ESM::Land& esmLand = land.getRecord(mId).get();
+
+        if (esmLand.getLandData (ESM::Land::DATA_VHGT))
         {
             mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
                                                     Terrain::Align_XY));
-            mTerrain->loadCell(esmLand->mX,
-                               esmLand->mY);
+            mTerrain->loadCell(esmLand.mX,
+                               esmLand.mY);
 
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
-            mX = esmLand->mX;
-            mY = esmLand->mY;
+            mX = esmLand.mX;
+            mY = esmLand.mY;
+
             mPhysics->addHeightField(sceneManager,
-                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
+                esmLand.getLandData(ESM::Land::DATA_VHGT)->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
         }
     }
 }

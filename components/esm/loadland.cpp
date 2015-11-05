@@ -1,5 +1,7 @@
 #include "loadland.hpp"
 
+#include <utility>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
@@ -8,7 +10,7 @@ namespace ESM
 {
     unsigned int Land::sRecordId = REC_LAND;
 
-void Land::LandData::save(ESMWriter &esm)
+void Land::LandData::save(ESMWriter &esm) const
 {
     if (mDataTypes & Land::DATA_VNML) {
         esm.writeHNT("VNML", mNormals, sizeof(mNormals));
@@ -53,7 +55,7 @@ void Land::LandData::save(ESMWriter &esm)
     }
 }
 
-void Land::LandData::transposeTextureData(uint16_t *in, uint16_t *out)
+void Land::LandData::transposeTextureData(const uint16_t *in, uint16_t *out)
 {
     int readPos = 0; //bit ugly, but it works
     for ( int y1 = 0; y1 < 4; y1++ )
@@ -137,7 +139,7 @@ void Land::save(ESMWriter &esm) const
     esm.writeHNT("DATA", mFlags);
 }
 
-void Land::loadData(int flags)
+void Land::loadData(int flags) const
 {
     // Try to load only available data
     flags = flags & mDataTypes;
@@ -199,7 +201,7 @@ void Land::unloadData()
     }
 }
 
-bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size)
+bool Land::condLoad(int flags, int dataFlag, void *ptr, unsigned int size) const
 {
     if ((mDataLoaded & dataFlag) == 0 && (flags & dataFlag) != 0) {
         mEsm->getHExact(ptr, size);
@@ -215,4 +217,69 @@ bool Land::isDataLoaded(int flags) const
     return (mDataLoaded & flags) == (flags & mDataTypes);
 }
 
+    Land::Land (const Land& land)
+    : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
+      mEsm (land.mEsm), mContext (land.mContext), mDataTypes (land.mDataTypes),
+      mDataLoaded (land.mDataLoaded),
+      mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
+    {}
+
+    Land& Land::operator= (Land land)
+    {
+        swap (land);
+        return *this;
+    }
+
+    void Land::swap (Land& land)
+    {
+        std::swap (mFlags, land.mFlags);
+        std::swap (mX, land.mX);
+        std::swap (mY, land.mY);
+        std::swap (mPlugin, land.mPlugin);
+        std::swap (mEsm, land.mEsm);
+        std::swap (mContext, land.mContext);
+        std::swap (mDataTypes, land.mDataTypes);
+        std::swap (mDataLoaded, land.mDataLoaded);
+        std::swap (mLandData, land.mLandData);
+    }
+
+    const Land::LandData *Land::getLandData (int flags) const
+    {
+        if (!(flags & mDataTypes))
+            return 0;
+
+        loadData (flags);
+        return mLandData;
+    }
+
+    const Land::LandData *Land::getLandData() const
+    {
+        return mLandData;
+    }
+
+    Land::LandData *Land::getLandData()
+    {
+        return mLandData;
+    }
+
+    void Land::add (int flags)
+    {
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mDataTypes |= flags;
+        mDataLoaded |= flags;
+    }
+
+    void Land::remove (int flags)
+    {
+        mDataTypes &= ~flags;
+        mDataLoaded &= ~flags;
+
+        if (!mDataLoaded)
+        {
+            delete mLandData;
+            mLandData = 0;
+        }
+    }
 }

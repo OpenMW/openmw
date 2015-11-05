@@ -2251,14 +2251,14 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
 : mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
-  mTools (*this),
+  mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()),
-  mIdCompletionManager(mData)
+  mDirty (false), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2296,6 +2296,8 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
+    connect (&mTools, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
@@ -2320,7 +2322,7 @@ int CSMDoc::Document::getState() const
 {
     int state = 0;
 
-    if (!mUndoStack.isClean())
+    if (!mUndoStack.isClean() || mDirty)
         state |= State_Modified;
 
     if (mSaving.isRunning())
@@ -2385,6 +2387,12 @@ void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const C
     emit stateChanged (getState(), this);
 }
 
+void CSMDoc::Document::runMerge (std::auto_ptr<CSMDoc::Document> target)
+{
+    mTools.runMerge (target);
+    emit stateChanged (getState(), this);
+}
+
 void CSMDoc::Document::abortOperation (int type)
 {
     if (type==State_Saving)
@@ -2406,6 +2414,9 @@ void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 
 void CSMDoc::Document::operationDone (int type, bool failed)
 {
+    if (type==CSMDoc::State_Saving && !failed)
+        mDirty = false;
+
     emit stateChanged (getState(), this);
 }
 
@@ -2489,4 +2500,9 @@ boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
 CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
     return mIdCompletionManager;
+}
+
+void CSMDoc::Document::flagAsDirty()
+{
+    mDirty = true;
 }

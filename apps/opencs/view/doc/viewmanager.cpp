@@ -97,14 +97,16 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true },
         { CSMWorld::ColumnBase::Display_SoundGeneratorType, CSMWorld::Columns::ColumnId_SoundGeneratorType, false },
         { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, false },
-        { CSMWorld::ColumnBase::Display_SkillImpact, CSMWorld::Columns::ColumnId_SkillImpact, true },
+        { CSMWorld::ColumnBase::Display_SkillId, CSMWorld::Columns::ColumnId_Skill, true },
         { CSMWorld::ColumnBase::Display_EffectRange, CSMWorld::Columns::ColumnId_EffectRange, false },
         { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
         { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
         { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
         { CSMWorld::ColumnBase::Display_InfoCondFunc, CSMWorld::Columns::ColumnId_InfoCondFunc, false },
         { CSMWorld::ColumnBase::Display_InfoCondComp, CSMWorld::Columns::ColumnId_InfoCondComp, false },
-        { CSMWorld::ColumnBase::Display_RaceSkill, CSMWorld::Columns::ColumnId_RaceSkill, true },
+        { CSMWorld::ColumnBase::Display_IngredEffectId, CSMWorld::Columns::ColumnId_EffectId, true },
+        { CSMWorld::ColumnBase::Display_EffectSkill, CSMWorld::Columns::ColumnId_Skill, false },
+        { CSMWorld::ColumnBase::Display_EffectAttribute, CSMWorld::Columns::ColumnId_Attribute, false },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
@@ -173,6 +175,7 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
+    connect (view, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SIGNAL (mergeDocument (CSMDoc::Document *)));
 
     connect (&CSMSettings::UserSettings::instance(),
              SIGNAL (userSettingUpdated(const QString &, const QStringList &)),

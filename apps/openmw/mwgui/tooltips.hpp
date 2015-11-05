@@ -106,7 +106,7 @@ namespace MWGui
 
         static std::string sSchoolNames[6];
 
-	int mHorizontalScrollIndex;
+        int mHorizontalScrollIndex;
 
 
         float mDelay;

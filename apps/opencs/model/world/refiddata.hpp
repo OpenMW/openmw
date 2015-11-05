@@ -210,7 +210,8 @@ namespace CSMWorld
 
             void erase (int index, int count);
 
-            void insertRecord(CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type, const std::string& id);
+            void insertRecord (CSMWorld::RecordBase& record, CSMWorld::UniversalId::Type type,
+                const std::string& id);
 
             const RecordBase& getRecord (const LocalIndex& index) const;
 
@@ -252,11 +253,9 @@ namespace CSMWorld
             const RefIdDataContainer<ESM::Probe >& getProbes() const;
             const RefIdDataContainer<ESM::Repair>& getRepairs() const;
             const RefIdDataContainer<ESM::Static>& getStatics() const;
+
+            void copyTo (int index, RefIdData& target) const;
     };
 }
 
 #endif
-
-
-
-
