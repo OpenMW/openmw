@@ -781,6 +781,9 @@ namespace MWWorld
 
         if (reference.getRefData().isEnabled())
         {
+            if (reference == getPlayerPtr())
+                throw std::runtime_error("can not disable player object");
+
             reference.getRefData().disable();
 
             if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
@@ -3256,8 +3259,7 @@ namespace MWWorld
     osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
     {
         osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
-        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
-        targetPos.z() += mPhysics->getHalfExtents(target).z();
+        osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
 }

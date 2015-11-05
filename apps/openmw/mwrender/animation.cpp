@@ -1111,25 +1111,6 @@ namespace MWRender
         attachTo->addChild(lightSource);
     }
 
-    class DisableFreezeOnCullVisitor : public osg::NodeVisitor
-    {
-    public:
-        DisableFreezeOnCullVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-
-        virtual void apply(osg::Geode &geode)
-        {
-            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            {
-                osg::Drawable* drw = geode.getDrawable(i);
-                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(drw))
-                    partsys->setFreezeOnCull(false);
-            }
-        }
-    };
-
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
     {
         if (!mObjectRoot.get())
@@ -1163,7 +1144,7 @@ namespace MWRender
         node->accept(findMaxLengthVisitor);
 
         // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
-        DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
+        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         node->accept(disableFreezeOnCullVisitor);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();

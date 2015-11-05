@@ -504,8 +504,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
             mAnimation->play(mCurrentIdle, idlePriority, MWRender::Animation::BlendMask_All, false,
                              1.0f, "start", "stop", 0.0f, ~0ul, true);
     }
-
-    updateIdleStormState();
 }
 
 
@@ -656,6 +654,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAnimation(anim)
     , mIdleState(CharState_None)
     , mMovementState(CharState_None)
+    , mAdjustMovementAnimSpeed(false)
     , mHasMovedInXY(false)
     , mMovementAnimationControlled(true)
     , mDeathState(CharState_None)
@@ -867,7 +866,7 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
     mPtr = ptr;
 }
 
-void CharacterController::updateIdleStormState()
+void CharacterController::updateIdleStormState(bool inwater)
 {
     bool inStormDirection = false;
     if (MWBase::Environment::get().getWorld()->isInStorm())
@@ -877,7 +876,7 @@ void CharacterController::updateIdleStormState()
         inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
                 > osg::DegreesToRadians(120.f);
     }
-    if (inStormDirection && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
+    if (inStormDirection && !inwater && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
     {
         float complete = 0;
         mAnimation->getInfo("idlestorm", &complete);
@@ -1796,6 +1795,7 @@ void CharacterController::update(float duration)
                 forcestateupdate = updateCreatureState() || forcestateupdate;
 
             refreshCurrentAnims(idlestate, movestate, jumpstate, forcestateupdate);
+            updateIdleStormState(inwater);
         }
 
         if (inJump)
@@ -2122,7 +2122,7 @@ void CharacterController::updateHeadTracking(float duration)
         osg::Matrixf mat = mats[0];
         osg::Vec3f headPos = mat.getTrans();
 
-        osg::Vec3f targetPos (mHeadTrackTarget.getRefData().getPosition().asVec3());
+        osg::Vec3f direction;
         if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
             const osg::Node* node = anim->getNode("Head");
@@ -2132,11 +2132,12 @@ void CharacterController::updateHeadTracking(float duration)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
                 if (mats.size())
-                    targetPos = mats[0].getTrans();
+                    direction = mats[0].getTrans() - headPos;
             }
+            else
+                // no head node to look at, fall back to look at center of collision box
+                direction = MWBase::Environment::get().getWorld()->aimToTarget(mPtr, mHeadTrackTarget);
         }
-
-        osg::Vec3f direction = targetPos - headPos;
         direction.normalize();
 
         if (!mPtr.getRefData().getBaseNode())

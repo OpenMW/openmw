@@ -113,14 +113,18 @@ namespace SceneUtil
         int mStartLight;
     };
 
+    /// @note Not thread safe for CullThreadPerCamera threading mode.
     class LightListCallback : public osg::NodeCallback
     {
     public:
         LightListCallback()
             : mLightManager(NULL)
+            , mLastFrameNumber(0)
         {}
         LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
-            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop), mLightManager(copy.mLightManager)
+            : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
+            , mLightManager(copy.mLightManager)
+            , mLastFrameNumber(0)
         {}
 
         META_Object(NifOsg, LightListCallback)
@@ -129,6 +133,8 @@ namespace SceneUtil
 
     private:
         LightManager* mLightManager;
+        unsigned int mLastFrameNumber;
+        LightManager::LightList mLightList;
     };
 
     /// @brief Configures a light's attenuation according to vanilla Morrowind attenuation settings.

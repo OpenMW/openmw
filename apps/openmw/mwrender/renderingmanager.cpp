@@ -32,6 +32,7 @@
 #include <components/esm/loadcell.hpp>
 
 #include "../mwworld/fallback.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -130,6 +131,10 @@ namespace MWRender
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mFogDepth(0.f)
+        , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
+        , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
+        , mUnderwaterFog(0.f)
+        , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
     {
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
@@ -200,10 +205,6 @@ namespace MWRender
         mFieldOfView = Settings::Manager::getFloat("field of view", "General");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
-
-        mUnderwaterColor = fallback->getFallbackColour("Water_UnderwaterColor");
-        mUnderwaterWeight = fallback->getFallbackFloat("Water_UnderwaterColorWeight");
-        mUnderwaterIndoorFog = fallback->getFallbackFloat("Water_UnderwaterIndoorFog");
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
@@ -449,11 +450,13 @@ namespace MWRender
     void RenderingManager::setWaterEnabled(bool enabled)
     {
         mWater->setEnabled(enabled);
+        mSky->setWaterEnabled(enabled);
     }
 
     void RenderingManager::setWaterHeight(float height)
     {
         mWater->setHeight(height);
+        mSky->setWaterHeight(height);
     }
 
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback

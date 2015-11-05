@@ -280,37 +280,40 @@ namespace SceneUtil
         // - cull list of lights by the camera frustum
         // - organize lights in a quad tree
 
-        // Don't use Camera::getViewMatrix, that one might be relative to another camera!
-        const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
 
-        const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
-
-        if (lights.size())
+        // update light list if necessary
+        // makes sure we don't update it more than once per frame when rendering with multiple cameras
+        if (mLastFrameNumber != nv->getFrameStamp()->getFrameNumber())
         {
+            mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+
+            // Don't use Camera::getViewMatrix, that one might be relative to another camera!
+            const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
+            const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
+
             // we do the intersections in view space
             osg::BoundingSphere nodeBound = node->getBound();
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
-            LightManager::LightList lightList;
+            mLightList.clear();
             for (unsigned int i=0; i<lights.size(); ++i)
             {
                 const LightManager::LightSourceViewBound& l = lights[i];
                 if (l.mViewBound.intersects(nodeBound))
-                    lightList.push_back(&l);
+                    mLightList.push_back(&l);
             }
-
-            if (lightList.empty())
-            {
-                traverse(node, nv);
-                return;
-            }
-
+        }
+        if (mLightList.size())
+        {
             unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
 
-            if (lightList.size() > maxLights)
+            osg::StateSet* stateset = NULL;
+
+            if (mLightList.size() > maxLights)
             {
                 // remove lights culled by this camera
+                LightManager::LightList lightList = mLightList;
                 for (LightManager::LightList::iterator it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights; )
                 {
                     osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
@@ -334,9 +337,11 @@ namespace SceneUtil
                     while (lightList.size() > maxLights)
                         lightList.pop_back();
                 }
+                stateset = mLightManager->getLightListStateSet(lightList);
             }
+            else
+                stateset = mLightManager->getLightListStateSet(mLightList);
 
-            osg::StateSet* stateset = mLightManager->getLightListStateSet(lightList);
 
             cv->pushStateSet(stateset);
 

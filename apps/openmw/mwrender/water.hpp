@@ -1,11 +1,12 @@
 #ifndef OPENMW_MWRENDER_WATER_H
 #define OPENMW_MWRENDER_WATER_H
 
+#include <memory>
+
 #include <osg/ref_ptr>
+#include <osg/Vec3f>
 
 #include <components/settings/settings.hpp>
-
-#include "../mwworld/cellstore.hpp"
 
 namespace osg
 {
@@ -28,6 +29,8 @@ namespace Resource
 namespace MWWorld
 {
     class Fallback;
+    class CellStore;
+    class Ptr;
 }
 
 namespace MWRender
@@ -47,6 +50,7 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
         osg::ref_ptr<osg::Geode> mWaterGeode;
         Resource::ResourceSystem* mResourceSystem;
+        const MWWorld::Fallback* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<RippleSimulation> mSimulation;
@@ -63,7 +67,7 @@ namespace MWRender
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
 
-        void createSimpleWaterStateSet(osg::Node* node);
+        void createSimpleWaterStateSet(osg::Node* node, float alpha);
 
         /// @param reflection the reflection camera (required)
         /// @param refraction the refraction camera (optional)
