@@ -262,6 +262,8 @@
                             </Widget>
                         </Widget>
                         <Widget type="HBox" skin="" position="182 124 300 24">
+                            <Property key="Visible" value="false"/>
+                            <UserString key="Hidden" value="true"/>
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadersButton">
                                 <UserString key="SettingCategory" value="Objects"/>
                                 <UserString key="SettingName" value="shaders"/>
