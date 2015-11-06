@@ -392,7 +392,11 @@
                         </Widget>
 
                     </Widget>
+                    <!--
                     <Widget type="TabItem" skin="" position="0 28 352 268">
+                    -->
+                    <Widget type="Widget" skin="" position="0 28 352 268">
+                        <Property key="Visible" value="false"/>
                         <Property key="Caption" value="  Shadows  "/>
                         <Widget type="HBox" skin="" position="4 4 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadowsEnabledButton">
