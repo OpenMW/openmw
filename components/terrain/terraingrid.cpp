@@ -7,6 +7,8 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 
+#include <components/esm/loadland.hpp>
+
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>
 #include <osg/Geode>
@@ -150,7 +152,7 @@ void TerrainGrid::loadCell(int x, int y)
     for (unsigned int i=0; i<2; ++i)
         geometry->setTexCoordArray(i, mCache.getUVBuffer());
 
-    osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(layerTextures, blendmapTextures));
+    osg::ref_ptr<osgFX::Effect> effect (new Terrain::Effect(layerTextures, blendmapTextures, ESM::Land::LAND_TEXTURE_SIZE, ESM::Land::LAND_TEXTURE_SIZE));
 
     effect->addCullCallback(new SceneUtil::LightListCallback);
 

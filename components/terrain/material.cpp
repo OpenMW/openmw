@@ -11,7 +11,7 @@ namespace Terrain
 {
 
     FixedFunctionTechnique::FixedFunctionTechnique(const std::vector<osg::ref_ptr<osg::Texture2D> >& layers,
-                                                   const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps)
+                                                   const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapSize, float layerTileSize)
     {
         bool firstLayer = true;
         int i=0;
@@ -36,7 +36,7 @@ namespace Terrain
 
                 // This is to map corner vertices directly to the center of a blendmap texel.
                 osg::Matrixf texMat;
-                float scale = (16/(16.f+1.f));
+                float scale = (blendmapSize/(static_cast<float>(blendmapSize)+1.f));
                 texMat.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
                 texMat.preMultScale(osg::Vec3f(scale, scale, 1.f));
                 texMat.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
@@ -57,8 +57,7 @@ namespace Terrain
             stateset->setTextureAttributeAndModes(texunit, tex.get());
 
             osg::ref_ptr<osg::TexMat> texMat (new osg::TexMat);
-            float scale = 16.f;
-            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(scale,scale,1.f)));
+            texMat->setMatrix(osg::Matrix::scale(osg::Vec3f(layerTileSize,layerTileSize,1.f)));
             stateset->setTextureAttributeAndModes(texunit, texMat, osg::StateAttribute::ON);
 
             firstLayer = false;
@@ -67,9 +66,12 @@ namespace Terrain
         }
     }
 
-    Effect::Effect(const std::vector<osg::ref_ptr<osg::Texture2D> > &layers, const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps)
+    Effect::Effect(const std::vector<osg::ref_ptr<osg::Texture2D> > &layers, const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps,
+                   int blendmapSize, float layerTileSize)
         : mLayers(layers)
         , mBlendmaps(blendmaps)
+        , mBlendmapSize(blendmapSize)
+        , mLayerTileSize(layerTileSize)
     {
         osg::ref_ptr<osg::Material> material (new osg::Material);
         material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
@@ -80,7 +82,7 @@ namespace Terrain
 
     bool Effect::define_techniques()
     {
-        addTechnique(new FixedFunctionTechnique(mLayers, mBlendmaps));
+        addTechnique(new FixedFunctionTechnique(mLayers, mBlendmaps, mBlendmapSize, mLayerTileSize));
 
         return true;
     }
