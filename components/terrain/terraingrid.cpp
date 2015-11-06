@@ -171,6 +171,12 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         transform->addChild(effect);
         effect->addChild(geode);
 
+        if (mIncrementalCompileOperation)
+        {
+            mIncrementalCompileOperation->add(geode);
+            mIncrementalCompileOperation->add(textureCompileDummy);
+        }
+
         return transform;
     }
 }
@@ -196,16 +202,6 @@ void TerrainGrid::loadCell(int x, int y)
     // Note, the build could be optimized using a custom kdtree builder, since we know that the terrain can be represented by a quadtree
     geode->accept(*mKdTreeBuilder);
     */
-
-
-    /*
-    if (mIncrementalCompileOperation)
-    {
-        mIncrementalCompileOperation->add(geode);
-        mIncrementalCompileOperation->add(textureCompileDummy);
-    }
-    */
-
 
     mGrid[std::make_pair(x,y)] = element.release();
 }
