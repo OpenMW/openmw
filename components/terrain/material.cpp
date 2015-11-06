@@ -11,7 +11,7 @@ namespace Terrain
 {
 
     FixedFunctionTechnique::FixedFunctionTechnique(const std::vector<osg::ref_ptr<osg::Texture2D> >& layers,
-                                                   const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapSize, float layerTileSize)
+                                                   const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize)
     {
         bool firstLayer = true;
         int i=0;
@@ -36,7 +36,7 @@ namespace Terrain
 
                 // This is to map corner vertices directly to the center of a blendmap texel.
                 osg::Matrixf texMat;
-                float scale = (blendmapSize/(static_cast<float>(blendmapSize)+1.f));
+                float scale = (blendmapScale/(static_cast<float>(blendmapScale)+1.f));
                 texMat.preMultTranslate(osg::Vec3f(0.5f, 0.5f, 0.f));
                 texMat.preMultScale(osg::Vec3f(scale, scale, 1.f));
                 texMat.preMultTranslate(osg::Vec3f(-0.5f, -0.5f, 0.f));
@@ -67,10 +67,10 @@ namespace Terrain
     }
 
     Effect::Effect(const std::vector<osg::ref_ptr<osg::Texture2D> > &layers, const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps,
-                   int blendmapSize, float layerTileSize)
+                   int blendmapScale, float layerTileSize)
         : mLayers(layers)
         , mBlendmaps(blendmaps)
-        , mBlendmapSize(blendmapSize)
+        , mBlendmapScale(blendmapScale)
         , mLayerTileSize(layerTileSize)
     {
         osg::ref_ptr<osg::Material> material (new osg::Material);
@@ -82,7 +82,7 @@ namespace Terrain
 
     bool Effect::define_techniques()
     {
-        addTechnique(new FixedFunctionTechnique(mLayers, mBlendmaps, mBlendmapSize, mLayerTileSize));
+        addTechnique(new FixedFunctionTechnique(mLayers, mBlendmaps, mBlendmapScale, mLayerTileSize));
 
         return true;
     }
