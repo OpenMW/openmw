@@ -521,9 +521,17 @@ namespace MWRender
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         rttCamera->setFinalDrawCallback(callback);
 
-        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+        // at the time this function is called we are in the middle of a frame,
+        // so out of order calls are necessary to get a correct frameNumber for the next frame.
+        // refer to the advance() and frame() order in Engine::go()
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
 
         callback->waitTillDone();
+
+        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         rttCamera->setGraphicsContext(NULL);
