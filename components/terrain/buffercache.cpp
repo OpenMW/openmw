@@ -1,7 +1,6 @@
 #include "buffercache.hpp"
 
 #include <cassert>
-#include <iostream>
 
 #include <osg/PrimitiveSet>
 
@@ -208,8 +207,6 @@ namespace Terrain
     osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int flags)
     {
         unsigned int verts = mNumVerts;
-
-        std::cout << "getting index buffer for " << verts << std::endl;
 
         if (mIndexBufferMap.find(flags) != mIndexBufferMap.end())
         {

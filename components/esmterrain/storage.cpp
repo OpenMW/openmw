@@ -1,7 +1,6 @@
 #include "storage.hpp"
 
 #include <set>
-#include <iostream>
 
 #include <osg/Image>
 #include <osg/Plane>
@@ -342,13 +341,6 @@ namespace ESMTerrain
         // To get a consistent look, we need to make sure to use the same base layer in all cells.
         // So we're always adding _land_default.dds as the base layer here, even if it's not referenced in this cell.
         textureIndices.insert(std::make_pair(0,0));
-
-        /*
-        _________
-        | | | | - | | | | -
-        | | | | - | | | | -
-
-        */
 
         for (int y=colStart; y<colEnd; ++y)
             for (int x=rowStart; x<rowEnd; ++x)

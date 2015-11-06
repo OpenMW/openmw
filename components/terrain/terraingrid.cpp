@@ -1,8 +1,6 @@
 #include "terraingrid.hpp"
 
 #include <memory>
-#include <osg/io_utils>
-#include <iostream>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
@@ -77,7 +75,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         osg::ref_ptr<osg::Group> group (new osg::Group);
         if (parent)
             parent->addChild(group);
-        std::cout << "splitting " << chunkSize << " " << std::endl;
+
         float newChunkSize = chunkSize/2.f;
         buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize/2.f, newChunkSize/2.f));
         buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize/2.f, -newChunkSize/2.f));
@@ -90,8 +88,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         float minH, maxH;
         if (!mStorage->getMinMaxHeights(chunkSize, chunkCenter, minH, maxH))
             return NULL; // no terrain defined
-
-        std::cout << "creating " << chunkSize << " " << chunkCenter << std::endl;
 
         osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
         osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
@@ -194,6 +190,7 @@ void TerrainGrid::loadCell(int x, int y)
     element->mNode = terrainNode;
     mTerrainRoot->addChild(element->mNode);
 
+    // kdtree probably not needed with mNumSplits=4
     /*
     // build a kdtree to speed up intersection tests with the terrain
     // Note, the build could be optimized using a custom kdtree builder, since we know that the terrain can be represented by a quadtree
