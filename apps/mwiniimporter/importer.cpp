@@ -20,7 +20,6 @@ MwIniImporter::MwIniImporter()
 {
     const char *map[][2] =
     {
-        { "fps", "General:Show FPS" },
         { "no-sound", "General:Disable Audio" },
         { 0, 0 }
     };

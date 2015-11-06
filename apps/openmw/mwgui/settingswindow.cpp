@@ -166,7 +166,6 @@ namespace MWGui
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
         getWidget(mWindowBorderButton, "WindowBorderButton");
-        getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
@@ -201,7 +200,6 @@ namespace MWGui
         mSettingsTab->eventTabChangeSelect += MyGUI::newDelegate(this, &SettingsWindow::onTabChanged);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
-        mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
@@ -255,8 +253,6 @@ namespace MWGui
         {
             mShadowsEnabledButton->setEnabled(false);
         }
-
-        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(Settings::Manager::getInt("fps", "HUD")));
 
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
@@ -425,14 +421,6 @@ namespace MWGui
             apply();
             return;
         }
-    }
-
-    void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
-    {
-        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 2;
-        Settings::Manager::setInt("fps", "HUD", newLevel);
-        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(newLevel));
-        apply();
     }
 
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)

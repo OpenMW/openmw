@@ -180,8 +180,6 @@ namespace MWGui
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
-    virtual void wmUpdateFps(float fps);
-
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
     virtual void setValue (int parSkill, const MWMechanics::SkillValue& value);
@@ -485,8 +483,6 @@ namespace MWGui
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
     void updateMap();
-
-    float mFPS;
 
     std::map<std::string, std::string> mFallbackMap;
     

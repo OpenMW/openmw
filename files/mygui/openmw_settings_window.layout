@@ -255,14 +255,6 @@
                                 <Property key="Caption" value="Window border"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 94 300 24">
-                            <Property key="Visible" value="false"/>
-                            <UserString key="Hidden" value="true"/>
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FPSButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 32 16" align="Left Top">
-                                <Property key="Caption" value="FPS"/>
-                            </Widget>
-                        </Widget>
                         <Widget type="HBox" skin="" position="182 124 300 24">
                             <Property key="Visible" value="false"/>
                             <UserString key="Hidden" value="true"/>

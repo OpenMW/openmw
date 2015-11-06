@@ -168,9 +168,6 @@ void OMW::Engine::frame(float frametime)
         if (mEnvironment.getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame)
         {
-#if 0
-            mEnvironment.getWindowManager()->wmUpdateFps(fps);
-#endif
             mEnvironment.getWindowManager()->update();
         }
 

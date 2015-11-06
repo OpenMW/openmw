@@ -185,7 +185,6 @@ namespace MWGui
       , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
-      , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
       , mVersionDescription(versionDescription)
@@ -296,7 +295,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop, mLocalMapRender);
+        mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -463,8 +462,6 @@ namespace MWGui
     void WindowManager::update()
     {
         cleanupGarbage();
-
-        mHud->setFPS(mFPS);
 
         mHud->update();
     }
@@ -1138,7 +1135,6 @@ namespace MWGui
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mHud->setFpsVisible(static_cast<bool>(Settings::Manager::getInt("fps", "HUD")));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
@@ -1320,11 +1316,6 @@ namespace MWGui
     void WindowManager::executeInConsole (const std::string& path)
     {
         mConsole->executeFile (path);
-    }
-
-    void WindowManager::wmUpdateFps(float fps)
-    {
-        mFPS = fps;
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
