@@ -489,6 +489,15 @@ namespace MWRender
         mutable bool mDone;
     };
 
+
+    class NoTraverseCallback : public osg::NodeCallback
+    {
+    public:
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+        }
+    };
+
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
@@ -512,6 +521,7 @@ namespace MWRender
         image->setDataType(GL_UNSIGNED_BYTE);
         image->setPixelFormat(texture->getInternalFormat());
 
+        rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mLightRoot);
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
