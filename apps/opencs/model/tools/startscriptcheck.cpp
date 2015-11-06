@@ -1,4 +1,3 @@
-
 #include "startscriptcheck.hpp"
 
 #include <components/misc/stringops.hpp>

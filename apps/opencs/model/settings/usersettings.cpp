@@ -161,6 +161,16 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         grow->setToolTip ("When \"Grow then Scroll\" option is selected, the window size grows to"
             " the width of the virtual desktop. \nIf this option is selected the the window growth"
             "is limited to the current screen.");
+
+        Setting *saveState = createSetting (Type_CheckBox, "save-state", "Save window size and position");
+        saveState->setDefaultValue ("true");
+        saveState->setToolTip ("Remember window size and position between editing sessions.");
+
+        Setting *saveX = createSetting (Type_CheckBox, "x-save-state-workaround", "X windows workaround");
+        saveX->setDefaultValue ("false");
+        saveX->setToolTip ("Some X window managers don't remember the windows state before being"
+            " maximized. In such environments exiting while maximized will correctly start in a maximized"
+            " window, but restoring back to the normal size won't work.  Try this workaround.");
     }
 
     declareSection ("records", "Records");
@@ -179,7 +189,7 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         ritd->setDeclaredValues (values);
     }
 
-    declareSection ("table-input", "Table Input");
+    declareSection ("table-input", "ID Tables");
     {
         QString inPlaceEdit ("Edit in Place");
         QString editRecord ("Edit Record");
@@ -232,6 +242,62 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
             "Jump to the added or cloned record.");
         jumpToAdded->setDefaultValue (defaultValue);
         jumpToAdded->setDeclaredValues (jumpValues);
+
+        Setting *extendedConfig = createSetting (Type_CheckBox, "extended-config",
+            "Manually specify affected record types for an extended delete/revert");
+        extendedConfig->setDefaultValue("false");
+        extendedConfig->setToolTip("Delete and revert commands have an extended form that also affects "
+                                   "associated records.\n\n"
+                                   "If this option is enabled, types of affected records are selected "
+                                   "manually before a command execution.\nOtherwise, all associated "
+                                   "records are deleted/reverted immediately.");
+    }
+
+    declareSection ("dialogues", "ID Dialogues");
+    {
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
+    }
+
+    declareSection ("report-input", "Reports");
+    {
+        QString none ("None");
+        QString edit ("Edit");
+        QString remove ("Remove");
+        QString editAndRemove ("Edit And Remove");
+
+        QStringList values;
+        values << none << edit << remove << editAndRemove;
+
+        QString toolTip = "<ul>"
+            "<li>None</li>"
+            "<li>Edit: Open a table or dialogue suitable for addressing the listed report</li>"
+            "<li>Remove: Remove the report from the report table</li>"
+            "<li>Edit and Remove: Open a table or dialogue suitable for addressing the listed report, then remove the report from the report table</li>"
+            "</ul>";
+
+        Setting *doubleClick = createSetting (Type_ComboBox, "double", "Double Click");
+        doubleClick->setDeclaredValues (values);
+        doubleClick->setDefaultValue (edit);
+        doubleClick->setToolTip ("Action on double click in report table:<p>" + toolTip);
+
+        Setting *shiftDoubleClick = createSetting (Type_ComboBox, "double-s",
+            "Shift Double Click");
+        shiftDoubleClick->setDeclaredValues (values);
+        shiftDoubleClick->setDefaultValue (remove);
+        shiftDoubleClick->setToolTip ("Action on shift double click in report table:<p>" + toolTip);
+
+        Setting *ctrlDoubleClick = createSetting (Type_ComboBox, "double-c",
+            "Control Double Click");
+        ctrlDoubleClick->setDeclaredValues (values);
+        ctrlDoubleClick->setDefaultValue (editAndRemove);
+        ctrlDoubleClick->setToolTip ("Action on control double click in report table:<p>" + toolTip);
+
+        Setting *shiftCtrlDoubleClick = createSetting (Type_ComboBox, "double-sc",
+            "Shift Control Double Click");
+        shiftCtrlDoubleClick->setDeclaredValues (values);
+        shiftCtrlDoubleClick->setDefaultValue (none);
+        shiftCtrlDoubleClick->setToolTip ("Action on shift control double click in report table:<p>" + toolTip);
     }
 
     declareSection ("search", "Search & Replace");
@@ -252,16 +318,97 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         autoDelete->setDefaultValue ("true");
     }
 
-    declareSection ("script-editor", "Script Editor");
+    declareSection ("script-editor", "Scripts");
     {
         Setting *lineNum = createSetting (Type_CheckBox, "show-linenum", "Show Line Numbers");
         lineNum->setDefaultValue ("true");
         lineNum->setToolTip ("Show line numbers to the left of the script editor window."
-                "The current row and column numbers of the text cursor are shown at the bottom.");
+                " The current row and column numbers of the text cursor are shown at the bottom.");
 
         Setting *monoFont = createSetting (Type_CheckBox, "mono-font", "Use monospace font");
         monoFont->setDefaultValue ("true");
         monoFont->setToolTip ("Whether to use monospaced fonts on script edit subview.");
+
+        QString tooltip =
+            "\n#RGB (each of R, G, and B is a single hex digit)"
+            "\n#RRGGBB"
+            "\n#RRRGGGBBB"
+            "\n#RRRRGGGGBBBB"
+            "\nA name from the list of colors defined in the list of SVG color keyword names."
+            "\nX11 color names may also work.";
+
+        QString modeNormal ("Normal");
+
+        QStringList modes;
+        modes << "Ignore" << modeNormal << "Strict";
+
+        Setting *warnings = createSetting (Type_ComboBox, "warnings",
+            "Warning Mode");
+        warnings->setDeclaredValues (modes);
+        warnings->setDefaultValue (modeNormal);
+        warnings->setToolTip ("<ul>How to handle warning messages during compilation:<p>"
+        "<li>Ignore: Do not report warning</li>"
+        "<li>Normal: Report warning as a warning</li>"
+        "<li>Strict: Promote warning to an error</li>"
+        "</ul>");
+
+        Setting *toolbar = createSetting (Type_CheckBox, "toolbar", "Show toolbar");
+        toolbar->setDefaultValue ("true");
+
+        Setting *delay = createSetting (Type_SpinBox, "compile-delay",
+            "Delay between updating of source errors");
+        delay->setDefaultValue (100);
+        delay->setRange (0, 10000);
+        delay->setToolTip ("Delay in milliseconds");
+
+        Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
+        formatInt->setDefaultValues (QStringList() << "Dark magenta");
+        formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatFloat = createSetting (Type_LineEdit, "colour-float", "Highlight Colour: Float");
+        formatFloat->setDefaultValues (QStringList() << "Magenta");
+        formatFloat->setToolTip ("(Default: Magenta) Use one of the following formats:" + tooltip);
+
+        Setting *formatName = createSetting (Type_LineEdit, "colour-name", "Highlight Colour: Name");
+        formatName->setDefaultValues (QStringList() << "Gray");
+        formatName->setToolTip ("(Default: Gray) Use one of the following formats:" + tooltip);
+
+        Setting *formatKeyword = createSetting (Type_LineEdit, "colour-keyword", "Highlight Colour: Keyword");
+        formatKeyword->setDefaultValues (QStringList() << "Red");
+        formatKeyword->setToolTip ("(Default: Red) Use one of the following formats:" + tooltip);
+
+        Setting *formatSpecial = createSetting (Type_LineEdit, "colour-special", "Highlight Colour: Special");
+        formatSpecial->setDefaultValues (QStringList() << "Dark yellow");
+        formatSpecial->setToolTip ("(Default: Dark yellow) Use one of the following formats:" + tooltip);
+
+        Setting *formatComment = createSetting (Type_LineEdit, "colour-comment", "Highlight Colour: Comment");
+        formatComment->setDefaultValues (QStringList() << "Green");
+        formatComment->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
+
+        Setting *formatId = createSetting (Type_LineEdit, "colour-id", "Highlight Colour: Id");
+        formatId->setDefaultValues (QStringList() << "Blue");
+        formatId->setToolTip ("(Default: Blue) Use one of the following formats:" + tooltip);
+    }
+
+    declareSection ("filter", "Global Filter");
+    {
+        Setting *projAdded = createSetting (Type_CheckBox, "project-added", "Project::added initial value");
+        projAdded->setDefaultValue ("false");
+        projAdded->setToolTip ("Show records added by the project when opening a table."
+                " Other records are filterd out.");
+
+        Setting *projModified = createSetting (Type_CheckBox, "project-modified", "Project::modified initial value");
+        projModified->setDefaultValue ("false");
+        projModified->setToolTip ("Show records modified by the project when opening a table."
+                " Other records are filterd out.");
+    }
+
+    declareSection ("general-input", "General Input");
+    {
+        Setting *cycle = createSetting (Type_CheckBox, "cycle", "Cyclic next/previous");
+        cycle->setDefaultValue ("false");
+        cycle->setToolTip ("When using next/previous functions at the last/first item of a "
+            "list go to the first/last item");
     }
 
     {
@@ -482,6 +629,21 @@ QString CSMSettings::UserSettings::setting(const QString &viewKey, const QString
     }
 
     return QString();
+}
+
+QVariant CSMSettings::UserSettings::value(const QString &viewKey, const QVariant &value)
+{
+    if(value != QVariant())
+    {
+        mSettingDefinitions->setValue (viewKey, value);
+        return value;
+    }
+    else if(mSettingDefinitions->contains(viewKey))
+    {
+        return mSettingDefinitions->value (viewKey);
+    }
+
+    return QVariant();
 }
 
 bool CSMSettings::UserSettings::hasSettingDefinitions (const QString &viewKey) const

@@ -82,6 +82,8 @@ namespace CSMSettings {
 
         QString setting(const QString &viewKey, const QString &value = QString());
 
+        QVariant value(const QString &viewKey, const QVariant &value = QVariant());
+
     private:
 
         void buildSettingModelDefaults();

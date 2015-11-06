@@ -1,4 +1,3 @@
-
 #include "activator.hpp"
 
 #include <components/esm/loadacti.hpp>

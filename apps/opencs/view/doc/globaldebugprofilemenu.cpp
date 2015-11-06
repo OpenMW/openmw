@@ -1,4 +1,3 @@
-
 #include "globaldebugprofilemenu.hpp"
 
 #include <vector>

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QThread>
 
+#include "messages.hpp"
+
 namespace CSMWorld
 {
     class UniversalId;
@@ -44,8 +46,7 @@ namespace CSMDoc
 
             void progress (int current, int max, int type);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void done (int type, bool failed);
 

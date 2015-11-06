@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QStringList>
 #include <QString>
+#include <QFile>
 #include <QMap>
 
 #include <boost/filesystem/path.hpp>
@@ -66,6 +67,7 @@ namespace Config
         bool readUserFile(QTextStream &stream);
 
         bool writeFile(QTextStream &stream);
+        bool writeFileWithComments(QFile &file);
 
         void setContentList(const QStringList& fileNames);
         QStringList getContentList() const;
@@ -81,6 +83,8 @@ namespace Config
         QString mDataLocal;
 
         static const char sContentKey[];
+
+        bool isOrderedLine(const QString& line) const;
     };
 }
 #endif // GAMESETTINGS_HPP

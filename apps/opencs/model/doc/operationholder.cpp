@@ -1,5 +1,6 @@
-
 #include "operationholder.hpp"
+
+#include "../settings/usersettings.hpp"
 
 #include "operation.hpp"
 
@@ -19,8 +20,8 @@ void CSMDoc::OperationHolder::setOperation (Operation *operation)
         this, SIGNAL (progress (int, int, int)));
 
     connect (
-        mOperation, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        mOperation, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SIGNAL (reportMessage (const CSMDoc::Message&, int)));
 
     connect (
         mOperation, SIGNAL (done (int, bool)),
@@ -29,6 +30,9 @@ void CSMDoc::OperationHolder::setOperation (Operation *operation)
     connect (this, SIGNAL (abortSignal()), mOperation, SLOT (abort()));
 
     connect (&mThread, SIGNAL (started()), mOperation, SLOT (run()));
+
+    connect (&CSMSettings::UserSettings::instance(), SIGNAL (userSettingUpdated (const QString&, const QStringList&)),
+        mOperation, SLOT (updateUserSetting (const QString&, const QStringList&)));
 }
 
 bool CSMDoc::OperationHolder::isRunning() const

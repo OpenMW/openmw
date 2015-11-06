@@ -1,4 +1,3 @@
-
 #include "alchemy.hpp"
 
 #include <cassert>
@@ -44,6 +43,8 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
         {
             const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();
 
+            std::set<EffectKey> seenEffects;
+
             for (int i=0; i<4; ++i)
                 if (ingredient->mBase->mData.mEffectID[i]!=-1)
                 {
@@ -51,7 +52,8 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
                         ingredient->mBase->mData.mEffectID[i], ingredient->mBase->mData.mSkills[i]!=-1 ?
                         ingredient->mBase->mData.mSkills[i] : ingredient->mBase->mData.mAttributes[i]);
 
-                    ++effects[key];
+                    if (seenEffects.insert(key).second)
+                        ++effects[key];
                 }
         }
     }
@@ -460,7 +462,10 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_NoName;
 
     if (listEffects().empty())
+    {
+        removeIngredients();
         return Result_NoEffects;
+    }
 
     if (beginEffects() == endEffects())
     {

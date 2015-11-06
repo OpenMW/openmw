@@ -1,4 +1,3 @@
-
 #include "reportmodel.hpp"
 
 #include <stdexcept>
@@ -6,24 +5,18 @@
 
 #include "../world/columns.hpp"
 
-CSMTools::ReportModel::Line::Line (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
-: mId (id), mMessage (message), mHint (hint)
-{}
-
-CSMTools::ReportModel::ReportModel (bool fieldColumn)
+CSMTools::ReportModel::ReportModel (bool fieldColumn, bool severityColumn)
+: mColumnField (-1), mColumnSeverity (-1)
 {
-    if (fieldColumn)
-    {
-        mColumnField = 3;
-        mColumnDescription = 4;
-    }
-    else
-    {
-        mColumnDescription = 3;
+    int index = 3;
 
-        mColumnField = -1;
-    }
+    if (severityColumn)
+        mColumnSeverity = index++;
+
+    if (fieldColumn)
+        mColumnField = index++;
+
+    mColumnDescription = index;
 }
 
 int CSMTools::ReportModel::rowCount (const QModelIndex & parent) const
@@ -52,7 +45,7 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
         case Column_Type:
 
             return static_cast<int> (mRows.at (index.row()).mId.getType());
-        
+
         case Column_Id:
         {
             CSMWorld::UniversalId id = mRows.at (index.row()).mId;
@@ -62,7 +55,7 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
             return QString ("-");
         }
-        
+
         case Column_Hint:
 
             return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
@@ -88,7 +81,13 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
         return QString::fromUtf8 (field.c_str());
     }
-    
+
+    if (index.column()==mColumnSeverity)
+    {
+        return QString::fromUtf8 (
+            CSMDoc::Message::toString (mRows.at (index.row()).mSeverity).c_str());
+    }
+
     return QVariant();
 }
 
@@ -112,6 +111,9 @@ QVariant CSMTools::ReportModel::headerData (int section, Qt::Orientation orienta
     if (section==mColumnField)
         return "Field";
 
+    if (section==mColumnSeverity)
+        return "Severity";
+
     return "-";
 }
 
@@ -132,19 +134,18 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
     return true;
 }
 
-void CSMTools::ReportModel::add (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint)
+void CSMTools::ReportModel::add (const CSMDoc::Message& message)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
-    
-    mRows.push_back (Line (id, message, hint));
+
+    mRows.push_back (message);
 
     endInsertRows();
 }
 
 void CSMTools::ReportModel::flagAsReplaced (int index)
 {
-    Line& line = mRows.at (index);
+    CSMDoc::Message& line = mRows.at (index);
     std::string hint = line.mHint;
 
     if (hint.empty() || hint[0]!='R')
@@ -175,4 +176,17 @@ void CSMTools::ReportModel::clear()
         mRows.clear();
         endRemoveRows();
     }
+}
+
+int CSMTools::ReportModel::countErrors() const
+{
+    int count = 0;
+
+    for (std::vector<CSMDoc::Messages::Message>::const_iterator iter (mRows.begin());
+        iter!=mRows.end(); ++iter)
+        if (iter->mSeverity==CSMDoc::Message::Severity_Error ||
+            iter->mSeverity==CSMDoc::Message::Severity_SeriousError)
+            ++count;
+
+    return count;
 }

@@ -14,9 +14,19 @@ add_executable(openmw-iniimporter
 )
 
 target_link_libraries(openmw-iniimporter
-    ${Boost_LIBRARIES}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
     components
 )
+
+if (WIN32)
+    target_link_libraries(openmw-iniimporter
+    ${Boost_LOCALE_LIBRARY})
+endif()
+
+if (MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
+endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)

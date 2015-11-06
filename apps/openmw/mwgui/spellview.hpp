@@ -51,6 +51,8 @@ namespace MWGui
         virtual void setSize(const MyGUI::IntSize& _value);
         virtual void setCoord(const MyGUI::IntCoord& _value);
 
+        void resetScrollbars();
+
     private:
         MyGUI::ScrollView* mScrollView;
 

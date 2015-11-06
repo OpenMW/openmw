@@ -1,4 +1,3 @@
-
 #include "startup.hpp"
 
 #include <QApplication>

@@ -1,4 +1,3 @@
-
 #include "guiextensions.hpp"
 
 #include <components/compiler/extensions.hpp>

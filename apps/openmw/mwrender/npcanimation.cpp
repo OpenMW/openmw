@@ -196,7 +196,11 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
-    if (!mListenerDisabled)
+    if (!mListenerDisabled
+            // No need to getInventoryStore() to reset, if none exists
+            // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
+            // all from within this destructor. ouch!
+           && mPtr.getRefData().getCustomData())
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 

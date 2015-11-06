@@ -1,4 +1,3 @@
-
 #include "actionapply.hpp"
 
 #include "class.hpp"

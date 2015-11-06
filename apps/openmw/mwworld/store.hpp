@@ -188,7 +188,7 @@ namespace MWWorld
             const T *ptr = search(id);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Object '" << id << "' not found (const)";
+                msg << T::getRecordType() << " '" << id << "' not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
@@ -202,7 +202,7 @@ namespace MWWorld
             if(ptr == 0)
             {
                 std::ostringstream msg;
-                msg << "Object starting with '"<<id<<"' not found (const)";
+                msg << T::getRecordType() << " starting with '"<<id<<"' not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;
@@ -364,6 +364,19 @@ namespace MWWorld
             mShared.push_back(&inserted.first->second);
         else
             inserted.first->second = scpt;
+    }
+
+    template <>
+    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
+    {
+        ESM::StartScript s;
+        s.load(esm);
+        s.mId = Misc::StringUtils::toLower(s.mId);
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = s;
     }
 
     template <>
@@ -976,7 +989,7 @@ namespace MWWorld
             const T *ptr = search(index);
             if (ptr == 0) {
                 std::ostringstream msg;
-                msg << "Object with index " << index << " not found";
+                msg << T::getRecordType() << " with index " << index << " not found";
                 throw std::runtime_error(msg.str());
             }
             return ptr;

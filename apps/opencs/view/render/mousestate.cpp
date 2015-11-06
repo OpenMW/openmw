@@ -4,6 +4,8 @@
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 #include <OgreMeshManager.h>
+#include <OgreCamera.h>
+#include <OgreViewport.h>
 
 #include <QMouseEvent>
 #include <QElapsedTimer>

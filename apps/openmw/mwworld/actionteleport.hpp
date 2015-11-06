@@ -13,6 +13,7 @@ namespace MWWorld
     {
             std::string mCellName;
             ESM::Position mPosition;
+            bool mTeleportFollowers;
 
             /// Teleports this actor and also teleports anyone following that actor.
             virtual void executeImp (const Ptr& actor);
@@ -22,8 +23,9 @@ namespace MWWorld
 
         public:
 
-            ActionTeleport (const std::string& cellName, const ESM::Position& position);
+            ActionTeleport (const std::string& cellName, const ESM::Position& position, bool teleportFollowers);
             ///< If cellName is empty, an exterior cell is assumed.
+            /// @param teleportFollowers Whether to teleport any following actors of the target actor as well.
     };
 }
 

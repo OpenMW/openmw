@@ -53,7 +53,7 @@ namespace EsmTool
         }
 
         void setPrintPlain(bool plain) {
-        	mPrintPlain = plain;
+            mPrintPlain = plain;
         }
 
         virtual void load(ESM::ESMReader &esm) = 0;

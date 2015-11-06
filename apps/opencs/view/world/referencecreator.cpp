@@ -1,13 +1,16 @@
-
 #include "referencecreator.hpp"
 
 #include <QLabel>
-#include <QLineEdit>
+
+#include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
+
+#include "../widget/droplineedit.hpp"
 
 std::string CSVWorld::ReferenceCreator::getId() const
 {
@@ -71,13 +74,14 @@ int CSVWorld::ReferenceCreator::getRefNumCount() const
 }
 
 CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& undoStack,
-    const CSMWorld::UniversalId& id)
+    const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager &completionManager)
 : GenericCreator (data, undoStack, id)
 {
     QLabel *label = new QLabel ("Cell", this);
     insertBeforeButtons (label, false);
 
-    mCell = new QLineEdit (this);
+    mCell = new CSVWidget::DropLineEdit(CSMWorld::ColumnBase::Display_Cell, this);
+    mCell->setCompleter(completionManager.getCompleter(CSMWorld::ColumnBase::Display_Cell).get());
     insertBeforeButtons (mCell, true);
 
     setManualEditing (false);
@@ -141,4 +145,13 @@ void CSVWorld::ReferenceCreator::cloneMode(const std::string& originId,
 
     CSVWorld::GenericCreator::cloneMode(originId, type);
     cellChanged(); //otherwise ok button will remain disabled
+}
+
+CSVWorld::Creator *CSVWorld::ReferenceCreatorFactory::makeCreator (CSMDoc::Document& document, 
+                                                                   const CSMWorld::UniversalId& id) const
+{
+    return new ReferenceCreator(document.getData(), 
+                                document.getUndoStack(), 
+                                id,
+                                document.getIdCompletionManager());
 }

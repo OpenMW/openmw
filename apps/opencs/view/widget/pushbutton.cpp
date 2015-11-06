@@ -1,4 +1,3 @@
-
 #include "pushbutton.hpp"
 
 #include <QMouseEvent>

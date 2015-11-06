@@ -68,6 +68,8 @@ namespace CSVDoc
 
             void updateSubViewIndicies (SubView *view = 0);
 
+            void universalIdChanged (const CSMWorld::UniversalId& universalId);
+
         protected slots:
 
             void closeRequest();

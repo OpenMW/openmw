@@ -1,4 +1,3 @@
-
 #include "npc.hpp"
 
 #include <memory>
@@ -10,6 +9,10 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/npcstate.hpp>
+
+#include <components/autocalc/autocalc.hpp>
+#include <components/autocalc/autocalcspell.hpp>
+#include <components/autocalc/store.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -24,7 +27,6 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/disease.hpp"
 #include "../mwmechanics/combat.hpp"
-#include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
 #include "../mwmechanics/character.hpp"
 
@@ -36,6 +38,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/mwstore.hpp"
 
 #include "../mwrender/actors.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -58,116 +61,44 @@ namespace
         return new NpcCustomData (*this);
     }
 
-    int is_even(double d) {
-        double int_part;
-        modf(d / 2.0, &int_part);
-        return 2.0 * int_part == d;
-    }
-
-    int round_ieee_754(double d) {
-        double i = floor(d);
-        d -= i;
-        if(d < 0.5)
-            return static_cast<int>(i);
-        if(d > 0.5)
-            return static_cast<int>(i) + 1;
-        if(is_even(i))
-            return static_cast<int>(i);
-        return static_cast<int>(i) + 1;
-    }
-
-    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::CreatureStats& creatureStats)
+    class Stats : public AutoCalc::StatsBase
     {
-        // race bonus
+        MWMechanics::NpcStats& mNpcStats;
+
+    public:
+
+        Stats(MWMechanics::NpcStats& npcStats) : mNpcStats(npcStats) {}
+
+        virtual unsigned char getBaseAttribute(int index) const { return mNpcStats.getAttribute(index).getBase(); }
+
+        virtual void setAttribute(int index, unsigned char value) { mNpcStats.setAttribute(index, value); }
+
+        virtual void addSpell(const std::string& id) { mNpcStats.getSpells().add(id); }
+
+        virtual unsigned char getBaseSkill(int index) const { return mNpcStats.getSkill(index).getBase(); }
+
+        virtual void setBaseSkill(int index, unsigned char value) { mNpcStats.getSkill(index).setBase(value); }
+	};
+
+    void autoCalculateAttributes (const ESM::NPC* npc, MWMechanics::NpcStats& npcStats)
+    {
         const ESM::Race *race =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
 
-        bool male = (npc->mFlags & ESM::NPC::Female) == 0;
-
-        int level = creatureStats.getLevel();
-        for (int i=0; i<ESM::Attribute::Length; ++i)
-        {
-            const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
-            creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
-        }
-
-        // class bonus
         const ESM::Class *class_ =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
 
-        for (int i=0; i<2; ++i)
-        {
-            int attribute = class_->mData.mAttribute[i];
-            if (attribute>=0 && attribute<8)
-            {
-                creatureStats.setAttribute(attribute,
-                    creatureStats.getAttribute(attribute).getBase() + 10);
-            }
-        }
+        int level = npcStats.getLevel();
 
-        // skill bonus
-        for (int attribute=0; attribute < ESM::Attribute::Length; ++attribute)
-        {
-            float modifierSum = 0;
+        Stats stats(npcStats);
 
-            for (int j=0; j<ESM::Skill::Length; ++j)
-            {
-                const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(j);
+        MWWorld::MWStore store;
 
-                if (skill->mData.mAttribute != attribute)
-                    continue;
+        AutoCalc::autoCalcAttributesImpl (npc, race, class_, level, stats, &store);
 
-                // is this a minor or major skill?
-                float add=0.2f;
-                for (int k=0; k<5; ++k)
-                {
-                    if (class_->mData.mSkills[k][0] == j)
-                        add=0.5;
-                }
-                for (int k=0; k<5; ++k)
-                {
-                    if (class_->mData.mSkills[k][1] == j)
-                        add=1.0;
-                }
-                modifierSum += add;
-            }
-            creatureStats.setAttribute(attribute, std::min(
-                                           round_ieee_754(creatureStats.getAttribute(attribute).getBase()
-                + (level-1) * modifierSum), 100) );
-        }
-
-        // initial health
-        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
-        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
-
-        int multiplier = 3;
-
-        if (class_->mData.mSpecialization == ESM::Class::Combat)
-            multiplier += 2;
-        else if (class_->mData.mSpecialization == ESM::Class::Stealth)
-            multiplier += 1;
-
-        if (class_->mData.mAttribute[0] == ESM::Attribute::Endurance
-            || class_->mData.mAttribute[1] == ESM::Attribute::Endurance)
-            multiplier += 1;
-
-        creatureStats.setHealth(floor(0.5f * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
+        npcStats.setHealth(AutoCalc::autoCalculateHealth(level, class_, stats));
     }
 
-    /**
-     * @brief autoCalculateSkills
-     *
-     * Skills are calculated with following formulae ( http://www.uesp.net/wiki/Morrowind:NPCs#Skills ):
-     *
-     * Skills: (Level - 1) × (Majority Multiplier + Specialization Multiplier)
-     *
-     *         The Majority Multiplier is 1.0 for a Major or Minor Skill, or 0.1 for a Miscellaneous Skill.
-     *
-     *         The Specialization Multiplier is 0.5 for a Skill in the same Specialization as the class,
-     *         zero for other Skills.
-     *
-     * and by adding class, race, specialization bonus.
-     */
     void autoCalculateSkills(const ESM::NPC* npc, MWMechanics::NpcStats& npcStats, const MWWorld::Ptr& ptr)
     {
         const ESM::Class *class_ =
@@ -177,77 +108,13 @@ namespace
 
         const ESM::Race *race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
 
+        Stats stats(npcStats);
 
-        for (int i = 0; i < 2; ++i)
-        {
-            int bonus = (i==0) ? 10 : 25;
+        MWWorld::MWStore store;
 
-            for (int i2 = 0; i2 < 5; ++i2)
-            {
-                int index = class_->mData.mSkills[i2][i];
-                if (index >= 0 && index < ESM::Skill::Length)
-                {
-                    npcStats.getSkill(index).setBase (npcStats.getSkill(index).getBase() + bonus);
-                }
-            }
-        }
+        AutoCalc::autoCalcSkillsImpl(npc, race, class_, level, stats, &store);
 
-        for (int skillIndex = 0; skillIndex < ESM::Skill::Length; ++skillIndex)
-        {
-            float majorMultiplier = 0.1f;
-            float specMultiplier = 0.0f;
-
-            int raceBonus = 0;
-            int specBonus = 0;
-
-            for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
-            {
-                if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
-                {
-                    raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
-                    break;
-                }
-            }
-
-            for (int k = 0; k < 5; ++k)
-            {
-                // is this a minor or major skill?
-                if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
-                {
-                    majorMultiplier = 1.0f;
-                    break;
-                }
-            }
-
-            // is this skill in the same Specialization as the class?
-            const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillIndex);
-            if (skill->mData.mSpecialization == class_->mData.mSpecialization)
-            {
-                specMultiplier = 0.5f;
-                specBonus = 5;
-            }
-
-            npcStats.getSkill(skillIndex).setBase(
-                  std::min(
-                    round_ieee_754(
-                            npcStats.getSkill(skillIndex).getBase()
-                    + 5
-                    + raceBonus
-                    + specBonus
-                    +(int(level)-1) * (majorMultiplier + specMultiplier)), 100)); // Must gracefully handle level 0
-        }
-
-        int skills[ESM::Skill::Length];
-        for (int i=0; i<ESM::Skill::Length; ++i)
-            skills[i] = npcStats.getSkill(i).getBase();
-
-        int attributes[ESM::Attribute::Length];
-        for (int i=0; i<ESM::Attribute::Length; ++i)
-            attributes[i] = npcStats.getAttribute(i).getBase();
-
-        std::vector<std::string> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
-        for (std::vector<std::string>::iterator it = spells.begin(); it != spells.end(); ++it)
-            npcStats.getSpells().add(*it);
+        AutoCalc::autoCalculateSpells(race, stats, &store);
     }
 }
 
@@ -392,7 +259,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData (data.release());
 
-            getInventoryStore(ptr).autoEquip(ptr); 
+            getInventoryStore(ptr).autoEquip(ptr);
         }
     }
 
@@ -1236,18 +1103,17 @@ namespace MWClass
 
         const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
 
-        ensureCustomData(ptr);
-        // If we do the following instead we get a sizable speedup, but this causes compatibility issues
-        // with 0.30 savegames, where some state in CreatureStats was not saved yet,
-        // and therefore needs to be loaded from ESM records. TODO: re-enable this in a future release.
-        /*
-        if (!ptr.getRefData().getCustomData())
+        if (state.mVersion > 0)
         {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::auto_ptr<NpcCustomData> data (new NpcCustomData);
-            ptr.getRefData().setCustomData (data.release());
+            if (!ptr.getRefData().getCustomData())
+            {
+                // Create a CustomData, but don't fill it from ESM records (not needed)
+                std::auto_ptr<NpcCustomData> data (new NpcCustomData);
+                ptr.getRefData().setCustomData (data.release());
+            }
         }
-        */
+        else
+            ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
 

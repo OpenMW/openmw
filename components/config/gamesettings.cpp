@@ -1,6 +1,7 @@
 #include "gamesettings.hpp"
 #include "launchersettings.hpp"
 
+#include <QTextCodec>
 #include <QTextStream>
 #include <QDir>
 #include <QString>
@@ -169,6 +170,258 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
         stream << i.key() << "=" << i.value() << "\n";
 
     }
+
+    return true;
+}
+
+bool Config::GameSettings::isOrderedLine(const QString& line) const
+{
+    return line.contains(QRegExp("^\\s*fallback-archive\\s*="))
+           || line.contains(QRegExp("^\\s*fallback\\s*="))
+           || line.contains(QRegExp("^\\s*data\\s*="))
+           || line.contains(QRegExp("^\\s*data-local\\s*="))
+           || line.contains(QRegExp("^\\s*resources\\s*="))
+           || line.contains(QRegExp("^\\s*content\\s*="));
+}
+
+// Policy:
+//
+// - Always ignore a line beginning with '#' or empty lines; added above a config
+//   entry.
+//
+// - If a line in file exists with matching key and first part of value (before ',',
+//   '\n', etc) also matches, then replace the line with that of mUserSettings.
+// - else remove line
+//
+// - If there is no corresponding line in file, add at the end
+//
+// - Removed content items are saved as comments if the item had any comments.
+//   Content items prepended with '##' are considered previously removed.
+//
+bool Config::GameSettings::writeFileWithComments(QFile &file)
+{
+    QTextStream stream(&file);
+    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+
+    // slurp
+    std::vector<QString> fileCopy;
+    QString line = stream.readLine();
+    while (!line.isNull())
+    {
+        fileCopy.push_back(line);
+        line = stream.readLine();
+    }
+    stream.seek(0);
+
+    // empty file, no comments to keep
+    if (fileCopy.empty())
+        return writeFile(stream);
+
+    // start
+    //   |
+    //   |    +----------------------------------------------------------+
+    //   |    |                                                          |
+    //   v    v                                                          |
+    // skip non-"ordered" lines (remove "ordered" lines)                 |
+    //   |              ^                                                |
+    //   |              |                                                |
+    //   |      non-"ordered" line, write saved comments                 |
+    //   |              ^                                                |
+    //   v              |                                                |
+    // blank or comment line, save in temp buffer <--------+             |
+    //        |                |                           |             |
+    //        |                +------- comment line ------+             |
+    //        v                    (special processing '##')             |
+    //  "ordered" line                                                   |
+    //        |                                                          |
+    //        v                                                          |
+    // save in a separate map of comments keyed by "ordered" line        |
+    //        |                                                          |
+    //        +----------------------------------------------------------+
+    //
+    //
+    QRegExp settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
+    std::vector<QString> comments;
+    std::vector<QString>::iterator commentStart = fileCopy.end();
+    std::map<QString, std::vector<QString> > commentsMap;
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    {
+        if (isOrderedLine(*iter))
+        {
+            // save in a separate map of comments keyed by "ordered" line
+            if (!comments.empty())
+            {
+                if (settingRegex.indexIn(*iter) != -1)
+                {
+                    commentsMap[settingRegex.cap(1)+"="+settingRegex.cap(2)] = comments;
+                    comments.clear();
+                    commentStart = fileCopy.end();
+                }
+                // else do nothing, malformed line
+            }
+
+            *iter = QString(); // "ordered" lines to be removed later
+        }
+        else if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
+        {
+            // comment line, save in temp buffer
+            if (comments.empty())
+                commentStart = iter;
+
+            // special removed content processing
+            if ((*iter).contains(QRegExp("^##content\\s*=")))
+            {
+                if (!comments.empty())
+                {
+                    commentsMap[*iter] = comments;
+                    comments.clear();
+                    commentStart = fileCopy.end();
+                }
+            }
+            else
+                comments.push_back(*iter);
+
+            *iter = QString(); // assume to be deleted later
+        }
+        else
+        {
+            int index = settingRegex.indexIn(*iter);
+
+            // blank or non-"ordered" line, write saved comments
+            if (!comments.empty() && index != -1 && settingRegex.captureCount() >= 2 &&
+                mUserSettings.find(settingRegex.cap(1)) != mUserSettings.end())
+            {
+                for (std::vector<QString>::const_iterator it = comments.begin();
+                        it != comments.end() && commentStart != fileCopy.end(); ++it)
+                {
+                    *commentStart = *it;
+                    ++commentStart;
+                }
+                comments.clear();
+                commentStart = fileCopy.end();
+            }
+
+            // keep blank lines and non-"ordered" lines other than comments
+
+            // look for a key in the line
+            if (index == -1 || settingRegex.captureCount() < 2)
+            {
+                // no key or first part of value found in line, replace with a null string which
+                // will be remved later
+                *iter = QString();
+                comments.clear();
+                commentStart = fileCopy.end();
+                continue;
+            }
+
+            // look for a matching key in user settings
+            *iter = QString(); // assume no match
+            QString key = settingRegex.cap(1);
+            QString keyVal = settingRegex.cap(1)+"="+settingRegex.cap(2);
+            QMap<QString, QString>::const_iterator i = mUserSettings.find(key);
+            while (i != mUserSettings.end() && i.key() == key)
+            {
+                QString settingLine = i.key() + "=" + i.value();
+                if (settingRegex.indexIn(settingLine) != -1)
+                {
+                    if ((settingRegex.cap(1)+"="+settingRegex.cap(2)) == keyVal)
+                    {
+                        *iter = settingLine;
+                        break;
+                    }
+                }
+                ++i;
+            }
+        }
+    }
+
+    // comments at top of file
+    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    {
+        if ((*iter).isNull())
+            continue;
+
+        // Below is based on readFile() code, if that changes corresponding change may be
+        // required (for example duplicates may be inserted if the rules don't match)
+        if (/*(*iter).isEmpty() ||*/ (*iter).contains(QRegExp("^\\s*#")))
+        {
+            stream << *iter << "\n";
+            continue;
+        }
+    }
+
+    // Iterate in reverse order to preserve insertion order
+    QString settingLine;
+    QMapIterator<QString, QString> it(mUserSettings);
+    it.toBack();
+
+    while (it.hasPrevious())
+    {
+        it.previous();
+
+        // Quote paths with spaces
+        if ((it.key() == QLatin1String("data")
+             || it.key() == QLatin1String("data-local")
+             || it.key() == QLatin1String("resources")) && it.value().contains(QChar(' ')))
+        {
+            QString stripped = it.value();
+            stripped.remove(QChar('\"')); // Remove quotes
+
+            settingLine = it.key() + "=\"" + stripped + "\"";
+        }
+        else
+            settingLine = it.key() + "=" + it.value();
+
+        if (settingRegex.indexIn(settingLine) != -1)
+        {
+            std::map<QString, std::vector<QString> >::iterator i =
+                commentsMap.find(settingRegex.cap(1)+"="+settingRegex.cap(2));
+
+            // check if previous removed content item with comments
+            if (i == commentsMap.end())
+                i = commentsMap.find("##"+settingRegex.cap(1)+"="+settingRegex.cap(2));
+
+            if (i != commentsMap.end())
+            {
+                std::vector<QString> cLines = i->second;
+                for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
+                    stream << *ci << "\n";
+
+                commentsMap.erase(i);
+            }
+        }
+
+        stream << settingLine << "\n";
+    }
+
+    // flush any removed settings
+    if (!commentsMap.empty())
+    {
+        std::map<QString, std::vector<QString> >::const_iterator i = commentsMap.begin();
+        for (; i != commentsMap.end(); ++i)
+        {
+            if (i->first.contains(QRegExp("^\\s*content\\s*=")))
+            {
+                std::vector<QString> cLines = i->second;
+                for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
+                    stream << *ci << "\n";
+
+                // mark the content line entry for future preocessing
+                stream << "##" << i->first << "\n";
+
+                //commentsMap.erase(i);
+            }
+        }
+    }
+
+    // flush any end comments
+    if (!comments.empty())
+    {
+        for (std::vector<QString>::const_iterator ci = comments.begin(); ci != comments.end(); ++ci)
+            stream << *ci << "\n";
+    }
+
+    file.resize(file.pos());
 
     return true;
 }

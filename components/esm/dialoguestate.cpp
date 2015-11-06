@@ -1,4 +1,3 @@
-
 #include "dialoguestate.hpp"
 
 #include "esmreader.hpp"

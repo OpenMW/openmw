@@ -1,10 +1,11 @@
-
 #include "scripthighlighter.hpp"
 
 #include <sstream>
 
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/extensions0.hpp>
+
+#include "../../model/settings/usersettings.hpp"
 
 bool CSVWorld::ScriptHighlighter::parseInt (int value, const Compiler::TokenLoc& loc,
     Compiler::Scanner& scanner)
@@ -78,46 +79,77 @@ CSVWorld::ScriptHighlighter::ScriptHighlighter (const CSMWorld::Data& data, Mode
 : QSyntaxHighlighter (parent), Compiler::Parser (mErrorHandler, mContext), mContext (data),
   mMode (mode)
 {
-    /// \todo replace this with user settings
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+
+    QColor color = QColor();
+
     {
+        color.setNamedColor(userSettings.setting("script-editor/colour-int", "Dark magenta"));
+        if (!color.isValid())
+            color = QColor(Qt::darkMagenta);
+
         QTextCharFormat format;
-        format.setForeground (Qt::darkMagenta);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Int, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-float", "Magenta"));
+        if (!color.isValid())
+            color = QColor(Qt::magenta);
+
         QTextCharFormat format;
-        format.setForeground (Qt::magenta);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Float, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-name", "Gray"));
+        if (!color.isValid())
+            color = QColor(Qt::gray);
+
         QTextCharFormat format;
-        format.setForeground (Qt::gray);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Name, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-keyword", "Red"));
+        if (!color.isValid())
+            color = QColor(Qt::red);
+
         QTextCharFormat format;
-        format.setForeground (Qt::red);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Keyword, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-special", "Dark yellow"));
+        if (!color.isValid())
+            color = QColor(Qt::darkYellow);
+
         QTextCharFormat format;
-        format.setForeground (Qt::darkYellow);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Special, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-comment", "Green"));
+        if (!color.isValid())
+            color = QColor(Qt::green);
+
         QTextCharFormat format;
-        format.setForeground (Qt::green);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Comment, format));
     }
 
     {
+        color.setNamedColor(userSettings.setting ("script-editor/colour-id", "Blue"));
+        if (!color.isValid())
+            color = QColor(Qt::blue);
+
         QTextCharFormat format;
-        format.setForeground (Qt::blue);
+        format.setForeground (color);
         mScheme.insert (std::make_pair (Type_Id, format));
     }
 
@@ -142,4 +174,87 @@ void CSVWorld::ScriptHighlighter::highlightBlock (const QString& text)
 void CSVWorld::ScriptHighlighter::invalidateIds()
 {
     mContext.invalidateIds();
+}
+
+bool CSVWorld::ScriptHighlighter::updateUserSetting (const QString &name, const QStringList &list)
+{
+    if (list.empty())
+        return false;
+
+    QColor color = QColor();
+
+    if (name == "script-editor/colour-int")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Int] = format;
+    }
+    else if (name == "script-editor/colour-float")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Float] = format;
+    }
+    else if (name == "script-editor/colour-name")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Name] = format;
+    }
+    else if (name == "script-editor/colour-keyword")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Keyword] = format;
+    }
+    else if (name == "script-editor/colour-special")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Special] = format;
+    }
+    else if (name == "script-editor/colour-comment")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Comment] = format;
+    }
+    else if (name == "script-editor/colour-id")
+    {
+        color.setNamedColor(list.at(0));
+        if (!color.isValid())
+            return false;
+
+        QTextCharFormat format;
+        format.setForeground (color);
+        mScheme[Type_Id] = format;
+    }
+    else
+        return false;
+
+    return true;
 }

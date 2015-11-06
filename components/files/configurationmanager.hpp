@@ -1,8 +1,12 @@
 #ifndef COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 #define COMPONENTS_FILES_CONFIGURATIONMANAGER_HPP
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
+#if (_MSC_VER >= 1900)
+#include <unordered_map>
+#else
 #include <boost/tr1/tr1/unordered_map>
+#endif
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
 #else
@@ -29,7 +33,7 @@ struct ConfigurationManager
     virtual ~ConfigurationManager();
 
     void readConfiguration(boost::program_options::variables_map& variables,
-        boost::program_options::options_description& description);
+        boost::program_options::options_description& description, bool quiet=false);
 
     void processPaths(Files::PathContainer& dataDirs, bool create = false);
     ///< \param create Try creating the directory, if it does not exist.
@@ -52,11 +56,11 @@ struct ConfigurationManager
         typedef Files::FixedPath<> FixedPathType;
 
         typedef const boost::filesystem::path& (FixedPathType::*path_type_f)() const;
-	#if defined HAVE_UNORDERED_MAP
-            typedef std::unordered_map<std::string, path_type_f> TokensMappingContainer;
-	#else
-            typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
-	#endif
+    #if defined HAVE_UNORDERED_MAP
+        typedef std::unordered_map<std::string, path_type_f> TokensMappingContainer;
+    #else
+        typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
+    #endif
 
         void loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,

@@ -1,4 +1,3 @@
-
 #include "variantimp.hpp"
 
 #include <stdexcept>

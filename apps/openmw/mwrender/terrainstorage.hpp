@@ -10,7 +10,7 @@ namespace MWRender
     class TerrainStorage : public ESMTerrain::Storage
     {
     private:
-        virtual ESM::Land* getLand (int cellX, int cellY);
+        virtual const ESM::Land* getLand (int cellX, int cellY);
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin);
     public:
 

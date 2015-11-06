@@ -44,6 +44,7 @@ namespace ContentSelectorModel
         bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent);
 
         void addFiles(const QString &path);
+        void clearFiles();
 
         QModelIndex indexFromItem(const EsmFile *item) const;
         const EsmFile *item(const QString &name) const;
@@ -81,7 +82,6 @@ namespace ContentSelectorModel
         ContentFileList mFiles;
         QHash<QString, Qt::CheckState> mCheckStates;
         QSet<QString> mPluginsWithLoadOrderError;
-        QTextCodec *mCodec;
         QString mEncoding;
         QIcon mWarningIcon;
 

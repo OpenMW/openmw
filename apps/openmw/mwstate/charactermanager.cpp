@@ -1,4 +1,3 @@
-
 #include "charactermanager.hpp"
 
 #include <sstream>

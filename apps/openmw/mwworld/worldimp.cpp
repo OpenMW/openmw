@@ -1,11 +1,15 @@
 #include "worldimp.hpp"
 
-#ifdef _WIN32
-#include <boost/tr1/tr1/unordered_map>
+#if defined(_WIN32) && !defined(__MINGW32__)
+#  if (_MSC_VER < 1900)
+#    include <boost/tr1/tr1/unordered_map>
+#  else
+#    include <unordered_map>
+#  endif
 #elif defined HAVE_UNORDERED_MAP
-#include <unordered_map>
+#  include <unordered_map>
 #else
-#include <tr1/unordered_map>
+#  include <tr1/unordered_map>
 #endif
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwscript/globalscripts.hpp"
@@ -283,7 +287,7 @@ namespace MWWorld
 
         if (mPlayer)
         {
-	    mPlayer->clear();
+            mPlayer->clear();
             mPlayer->setCell(0);
             mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find ("player"));
@@ -2485,6 +2489,17 @@ namespace MWWorld
         if (npcStats.isWerewolf() == werewolf)
             return;
 
+        if (actor == getPlayerPtr())
+        {
+            if (werewolf)
+            {
+                mPlayer->saveSkillsAttributes();
+                mPlayer->setWerewolfSkillsAttributes();
+            }
+            else
+                mPlayer->restoreSkillsAttributes();
+        }
+
         npcStats.setWerewolf(werewolf);
 
         // This is a bit dangerous. Equipped items other than WerewolfRobe may reference
@@ -2919,7 +2934,7 @@ namespace MWWorld
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
-        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition());
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
     

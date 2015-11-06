@@ -1,4 +1,3 @@
-
 #include "modebutton.hpp"
 
 CSVWidget::ModeButton::ModeButton (const QIcon& icon, const QString& tooltip, QWidget *parent)

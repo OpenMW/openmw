@@ -1,4 +1,3 @@
-
 #include "data.hpp"
 
 #include <stdexcept>
@@ -11,6 +10,10 @@
 #include <components/esm/loadglob.hpp>
 #include <components/esm/cellref.hpp>
 
+#include <components/autocalc/autocalc.hpp>
+#include <components/autocalc/autocalcspell.hpp>
+#include <components/autocalc/store.hpp>
+
 #include "idtable.hpp"
 #include "idtree.hpp"
 #include "columnimp.hpp"
@@ -19,6 +22,71 @@
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
 #include "nestedcoladapterimp.hpp"
+#include "npcstats.hpp"
+
+namespace
+{
+    class CSStore : public AutoCalc::StoreCommon
+    {
+        const CSMWorld::IdCollection<ESM::GameSetting>& mGmstTable;
+        const CSMWorld::IdCollection<ESM::Skill>& mSkillTable;
+        const CSMWorld::IdCollection<ESM::MagicEffect>& mMagicEffectTable;
+        const CSMWorld::NestedIdCollection<ESM::Spell>& mSpells;
+
+    public:
+
+        CSStore(const CSMWorld::IdCollection<ESM::GameSetting>& gmst,
+                const CSMWorld::IdCollection<ESM::Skill>& skills,
+                const CSMWorld::IdCollection<ESM::MagicEffect>& magicEffects,
+                const CSMWorld::NestedIdCollection<ESM::Spell>& spells)
+            : mGmstTable(gmst), mSkillTable(skills), mMagicEffectTable(magicEffects), mSpells(spells)
+        { }
+
+        ~CSStore() {}
+
+        virtual int findGmstInt(const std::string& name) const
+        {
+            return mGmstTable.getRecord(name).get().getInt();
+        }
+
+        virtual float findGmstFloat(const std::string& name) const
+        {
+            return mGmstTable.getRecord(name).get().getFloat();
+        }
+
+        virtual const ESM::Skill *findSkill(int index) const
+        {
+            // if the skill does not exist, throws std::runtime_error ("invalid ID: " + id)
+            return &mSkillTable.getRecord(ESM::Skill::indexToId(index)).get();
+        }
+
+        virtual const ESM::MagicEffect* findMagicEffect(int id) const
+        {
+            // if the magic effect does not exist, throws std::runtime_error ("invalid ID: " + id)
+            return &mMagicEffectTable.getRecord(ESM::MagicEffect::indexToId((short)id)).get();
+        }
+
+        virtual void getSpells(std::vector<ESM::Spell*>& spells)
+        {
+            // prepare data in a format used by OpenMW store
+            for (int index = 0; index < mSpells.getSize(); ++index)
+                spells.push_back(const_cast<ESM::Spell *>(&mSpells.getRecord(index).get()));
+        }
+    };
+
+    unsigned short autoCalculateMana(AutoCalc::StatsBase& stats)
+    {
+        return stats.getBaseAttribute(ESM::Attribute::Intelligence) * 2;
+    }
+
+    unsigned short autoCalculateFatigue(AutoCalc::StatsBase& stats)
+    {
+        return stats.getBaseAttribute(ESM::Attribute::Strength)
+                + stats.getBaseAttribute(ESM::Attribute::Willpower)
+                + stats.getBaseAttribute(ESM::Attribute::Agility)
+                + stats.getBaseAttribute(ESM::Attribute::Endurance);
+    }
+}
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)
 {
@@ -61,7 +129,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
-: mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
+: mEncoder (encoding), mPathgrids (mCells), mReferenceables(self()), mRefs (mCells),
   mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0)
 {
     int index = 0;
@@ -115,7 +183,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
     mFactions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_Faction));
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_FactionReaction, ColumnBase::Display_Integer));
 
@@ -135,24 +203,26 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new SpellListAdapter<ESM::Race> ()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
     // Race attributes
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes));
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceAttributes,
+        ColumnBase::Flag_Dialogue, true)); // fixed rows table
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceAttributeAdapter()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceAttributes, ColumnBase::Display_String,
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute,
             ColumnBase::Flag_Dialogue, false));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceMaleValue, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Male, ColumnBase::Display_Integer));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceFemaleValue, ColumnBase::Display_Integer));
+        new NestedChildColumn (Columns::ColumnId_Female, ColumnBase::Display_Integer));
     // Race skill bonus
-    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceSkillBonus));
+    mRaces.addColumn (new NestedParentColumn<ESM::Race> (Columns::ColumnId_RaceSkillBonus,
+        ColumnBase::Flag_Dialogue, true)); // fixed rows table
     index = mRaces.getColumns()-1;
     mRaces.addAdapter (std::make_pair(&mRaces.getColumn(index), new RaceSkillsBonusAdapter()));
     mRaces.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_RaceSkill, ColumnBase::Display_RaceSkill));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
     mRaces.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_RaceBonus, ColumnBase::Display_Integer));
 
@@ -180,7 +250,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
 
@@ -196,13 +266,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBirthsigns.addAdapter (std::make_pair(&mBirthsigns.getColumn(index),
         new SpellListAdapter<ESM::BirthSign> ()));
     mBirthsigns.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_String));
+        new NestedChildColumn (Columns::ColumnId_SpellId, ColumnBase::Display_Spell));
 
     mSpells.addColumn (new StringIdColumn<ESM::Spell>);
     mSpells.addColumn (new RecordStateColumn<ESM::Spell>);
     mSpells.addColumn (new FixedRecordTypeColumn<ESM::Spell> (UniversalId::Type_Spell));
     mSpells.addColumn (new NameColumn<ESM::Spell>);
-    mSpells.addColumn (new SpellTypeColumn<ESM::Spell>);
+    mSpells.addColumn (new SpellTypeColumn<ESM::Spell>); // ColumnId_SpellType
     mSpells.addColumn (new CostColumn<ESM::Spell>);
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_AutoCalc, 0x1));
     mSpells.addColumn (new FlagColumn<ESM::Spell> (Columns::ColumnId_StarterSpell, 0x2));
@@ -214,9 +284,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mSpells.getNestableColumn(index)->addColumn(
@@ -224,9 +294,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mSpells.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mSpells.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     mTopics.addColumn (new StringIdColumn<ESM::Dialogue>);
     mTopics.addColumn (new RecordStateColumn<ESM::Dialogue>);
@@ -330,9 +400,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_SkillImpact, ColumnBase::Display_SkillImpact));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mEnchantments.getNestableColumn(index)->addColumn(
@@ -340,9 +410,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mEnchantments.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Duration, ColumnBase::Display_Integer)); // reuse from light
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MinRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MinMagnitude, ColumnBase::Display_Integer));
     mEnchantments.getNestableColumn(index)->addColumn(
-        new NestedChildColumn (Columns::ColumnId_MaxRange, ColumnBase::Display_Integer)); // reuse from sound
+        new NestedChildColumn (Columns::ColumnId_MaxMagnitude, ColumnBase::Display_Integer));
 
     mBodyParts.addColumn (new StringIdColumn<ESM::BodyPart>);
     mBodyParts.addColumn (new RecordStateColumn<ESM::BodyPart>);
@@ -352,9 +422,12 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Female, ESM::BodyPart::BPF_Female));
     mBodyParts.addColumn (new FlagColumn<ESM::BodyPart> (Columns::ColumnId_Playable,
         ESM::BodyPart::BPF_NotPlayable, ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue, true));
-    mBodyParts.addColumn (new MeshTypeColumn<ESM::BodyPart>);
+
+    int meshTypeFlags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh;
+    MeshTypeColumn<ESM::BodyPart> *meshTypeColumn = new MeshTypeColumn<ESM::BodyPart>(meshTypeFlags);
+    mBodyParts.addColumn (meshTypeColumn);
     mBodyParts.addColumn (new ModelColumn<ESM::BodyPart>);
-    mBodyParts.addColumn (new RaceColumn<ESM::BodyPart>);
+    mBodyParts.addColumn (new BodyPartRaceColumn(meshTypeColumn));
 
     mSoundGens.addColumn (new StringIdColumn<ESM::SoundGenerator>);
     mSoundGens.addColumn (new RecordStateColumn<ESM::SoundGenerator>);
@@ -475,6 +548,23 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mDebugProfiles.addColumn (new ScriptColumn<ESM::DebugProfile> (
         ScriptColumn<ESM::DebugProfile>::Type_Lines));
 
+    mMetaData.appendBlankRecord ("sys::meta");
+
+    mMetaData.addColumn (new StringIdColumn<MetaData> (true));
+    mMetaData.addColumn (new RecordStateColumn<MetaData>);
+    mMetaData.addColumn (new FixedRecordTypeColumn<MetaData> (UniversalId::Type_MetaData));
+    mMetaData.addColumn (new FormatColumn<MetaData>);
+    mMetaData.addColumn (new AuthorColumn<MetaData>);
+    mMetaData.addColumn (new FileDescriptionColumn<MetaData>);
+
+    mLandTextures.addColumn (new StringIdColumn<LandTexture>);
+    mLandTextures.addColumn (new RecordStateColumn<LandTexture>);
+    mLandTextures.addColumn (new FixedRecordTypeColumn<LandTexture> (UniversalId::Type_LandTexture));
+
+    mLand.addColumn (new StringIdColumn<Land>);
+    mLand.addColumn (new RecordStateColumn<Land>);
+    mLand.addColumn (new FixedRecordTypeColumn<Land> (UniversalId::Type_Land));
+
     addModel (new IdTable (&mGlobals), UniversalId::Type_Global);
     addModel (new IdTable (&mGmsts), UniversalId::Type_Gmst);
     addModel (new IdTable (&mSkills), UniversalId::Type_Skill);
@@ -515,12 +605,44 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
         UniversalId::Type_Texture);
     addModel (new ResourceTable (&mResourcesManager.get (UniversalId::Type_Videos)),
         UniversalId::Type_Video);
+    addModel (new IdTable (&mMetaData), UniversalId::Type_MetaData);
+    addModel (new IdTable (&mLand), UniversalId::Type_Land);
+    addModel (new IdTable (&mLandTextures), UniversalId::Type_LandTexture);
+
+    // for autocalc updates when gmst/race/class/skils tables change
+    CSMWorld::IdTable *gmsts =
+        static_cast<CSMWorld::IdTable*>(getTableModel(UniversalId::Type_Gmst));
+    CSMWorld::IdTable *skills =
+        static_cast<CSMWorld::IdTable*>(getTableModel(UniversalId::Type_Skill));
+    CSMWorld::IdTable *classes =
+        static_cast<CSMWorld::IdTable*>(getTableModel(UniversalId::Type_Class));
+    CSMWorld::IdTree *races =
+        static_cast<CSMWorld::IdTree*>(getTableModel(UniversalId::Type_Race));
+    CSMWorld::IdTree *objects =
+        static_cast<CSMWorld::IdTree*>(getTableModel(UniversalId::Type_Referenceable));
+
+    connect (gmsts, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (gmstDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (skills, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (skillDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (classes, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (classDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (races, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (raceDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (objects, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+            this, SLOT (npcDataChanged (const QModelIndex&, const QModelIndex&)));
+    connect (this, SIGNAL (updateNpcAutocalc (int, const std::string&)),
+            objects, SLOT (updateNpcAutocalc (int, const std::string&)));
+    connect (this, SIGNAL (cacheNpcStats (const std::string&, NpcStats*)),
+            this, SLOT (cacheNpcStatsEvent (const std::string&, NpcStats*)));
 
     mRefLoadCache.clear(); // clear here rather than startLoading() and continueLoading() for multiple content files
 }
 
 CSMWorld::Data::~Data()
 {
+    clearNpcStatsCache();
+
     for (std::vector<QAbstractItemModel *>::iterator iter (mModels.begin()); iter!=mModels.end(); ++iter)
         delete *iter;
 
@@ -753,7 +875,17 @@ const CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand() const
     return mLand;
 }
 
+CSMWorld::IdCollection<CSMWorld::Land>& CSMWorld::Data::getLand()
+{
+    return mLand;
+}
+
 const CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures() const
+{
+    return mLandTextures;
+}
+
+CSMWorld::IdCollection<CSMWorld::LandTexture>& CSMWorld::Data::getLandTextures()
 {
     return mLandTextures;
 }
@@ -803,6 +935,17 @@ const CSMWorld::Resources& CSMWorld::Data::getResources (const UniversalId& id) 
     return mResourcesManager.get (id.getType());
 }
 
+const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
+{
+    return mMetaData.getRecord (0).get();
+}
+
+void CSMWorld::Data::setMetaData (const MetaData& metaData)
+{
+    Record<MetaData> record (RecordBase::State_ModifiedOnly, 0, &metaData);
+    mMetaData.setRecord (0, record);
+}
+
 QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& id)
 {
     std::map<UniversalId::Type, QAbstractItemModel *>::iterator iter = mModelIndex.find (id.getType());
@@ -847,8 +990,14 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mBase = base;
     mProject = project;
 
-    mAuthor = mReader->getAuthor();
-    mDescription = mReader->getDesc();
+    if (!mProject && !mBase)
+    {
+        MetaData metaData;
+        metaData.mId = "sys::meta";
+        metaData.load (*mReader);
+
+        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+    }
 
     return mReader->getRecordCount();
 }
@@ -908,8 +1057,10 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         {
             int index = mLand.load(*mReader, mBase);
 
-            if (index!=-1 && !mBase)
-                mLand.getRecord (index).mModified.mLand->loadData (
+            // Load all land data for now. A future optimisation may only load non-base data
+            // if a suitable mechanism for avoiding race conditions can be established.
+            if (index!=-1/* && !mBase*/)
+                mLand.getRecord (index).get().loadData (
                     ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR |
                     ESM::Land::DATA_VTEX | ESM::Land::DATA_WNAM);
 
@@ -923,7 +1074,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             {
                 // log an error and continue loading the refs to the last loaded cell
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_None);
-                messages.add (id, "Logic error: cell index out of bounds");
+                messages.add (id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize()-1;
             }
             std::string cellId = Misc::StringUtils::lowerCase (mCells.getId (index));
@@ -984,7 +1135,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     messages.add (UniversalId::Type_None,
-                        "Trying to delete dialogue record " + id + " which does not exist");
+                        "Trying to delete dialogue record " + id + " which does not exist",
+                        "", CSMDoc::Message::Severity_Warning);
                 }
             }
             else
@@ -1001,7 +1153,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (!mDialogue)
             {
                 messages.add (UniversalId::Type_None,
-                    "Found info record not following a dialogue record");
+                    "Found info record not following a dialogue record", "", CSMDoc::Message::Severity_Error);
 
                 mReader->skipRecord();
                 break;
@@ -1044,7 +1196,8 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
 
     if (unhandledRecord)
     {
-        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString());
+        messages.add (UniversalId::Type_None, "Unsupported record type: " + n.toString(), "",
+            CSMDoc::Message::Severity_Error);
 
         mReader->skipRecord();
     }
@@ -1101,26 +1254,6 @@ int CSMWorld::Data::count (RecordBase::State state) const
         count (state, mPathgrids);
 }
 
-void CSMWorld::Data::setDescription (const std::string& description)
-{
-    mDescription = description;
-}
-
-std::string CSMWorld::Data::getDescription() const
-{
-    return mDescription;
-}
-
-void CSMWorld::Data::setAuthor (const std::string& author)
-{
-    mAuthor = author;
-}
-
-std::string CSMWorld::Data::getAuthor() const
-{
-    return mAuthor;
-}
-
 std::vector<std::string> CSMWorld::Data::getIds (bool listDeleted) const
 {
     std::vector<std::string> ids;
@@ -1158,4 +1291,277 @@ void CSMWorld::Data::dataChanged (const QModelIndex& topLeft, const QModelIndex&
 void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 {
     emit idListChanged();
+}
+
+const CSMWorld::Data& CSMWorld::Data::self ()
+{
+    return *this;
+}
+
+void CSMWorld::Data::skillDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    // mData.mAttribute (affects attributes skill bonus autocalc)
+    // mData.mSpecialization (affects skills autocalc)
+    CSMWorld::IdTable *skillModel =
+        static_cast<CSMWorld::IdTable*>(getTableModel(CSMWorld::UniversalId::Type_Skill));
+
+    int attributeColumn = skillModel->findColumnIndex(CSMWorld::Columns::ColumnId_Attribute);
+    int specialisationColumn = skillModel->findColumnIndex(CSMWorld::Columns::ColumnId_Specialisation);
+
+    if ((topLeft.column() <= attributeColumn && attributeColumn <= bottomRight.column())
+        || (topLeft.column() <= specialisationColumn && specialisationColumn <= bottomRight.column()))
+    {
+        clearNpcStatsCache();
+
+        std::string empty;
+        emit updateNpcAutocalc(0/*all*/, empty);
+    }
+}
+
+void CSMWorld::Data::classDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    // update autocalculated attributes/skills of every NPC with matching class
+    // - mData.mAttribute[2]
+    // - mData.mSkills[5][2]
+    // - mData.mSpecialization
+    CSMWorld::IdTable *classModel =
+        static_cast<CSMWorld::IdTable*>(getTableModel(CSMWorld::UniversalId::Type_Class));
+
+    int attribute1Column = classModel->findColumnIndex(CSMWorld::Columns::ColumnId_Attribute1);   // +1
+    int majorSkill1Column = classModel->findColumnIndex(CSMWorld::Columns::ColumnId_MajorSkill1); // +4
+    int minorSkill1Column = classModel->findColumnIndex(CSMWorld::Columns::ColumnId_MinorSkill1); // +4
+    int specialisationColumn = classModel->findColumnIndex(CSMWorld::Columns::ColumnId_Specialisation);
+
+    if ((topLeft.column() > attribute1Column+1 || attribute1Column > bottomRight.column())
+        && (topLeft.column() > majorSkill1Column+4 || majorSkill1Column > bottomRight.column())
+        && (topLeft.column() > minorSkill1Column+4 || minorSkill1Column > bottomRight.column())
+        && (topLeft.column() > specialisationColumn || specialisationColumn > bottomRight.column()))
+    {
+        return;
+    }
+
+    // get the affected class
+    int idColumn = classModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+    for (int classRow = topLeft.row(); classRow <= bottomRight.row(); ++classRow)
+    {
+        clearNpcStatsCache();
+
+        std::string classId =
+            classModel->data(classModel->index(classRow, idColumn)).toString().toUtf8().constData();
+        emit updateNpcAutocalc(1/*class*/, classId);
+    }
+}
+
+void CSMWorld::Data::raceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    // affects racial bonus attributes & skills
+    // - mData.mAttributeValues[]
+    // - mData.mBonus[].mBonus
+    // - mPowers.mList[]
+    CSMWorld::IdTree *raceModel =
+        static_cast<CSMWorld::IdTree*>(getTableModel(CSMWorld::UniversalId::Type_Race));
+
+    int attrColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_RaceAttributes);
+    int bonusColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_RaceSkillBonus);
+    int powersColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_PowerList);
+
+    bool match = false;
+    int raceRow = topLeft.row();
+    int raceEnd = bottomRight.row();
+    if (topLeft.parent().isValid() && bottomRight.parent().isValid())
+    {
+        if ((topLeft.parent().column() <= attrColumn && attrColumn <= bottomRight.parent().column())
+            || (topLeft.parent().column() <= bonusColumn && bonusColumn <= bottomRight.parent().column())
+            || (topLeft.parent().column() <= powersColumn && powersColumn <= bottomRight.parent().column()))
+        {
+            match = true; // TODO: check for specific nested column?
+            raceRow = topLeft.parent().row();
+            raceEnd = bottomRight.parent().row();
+        }
+    }
+    else
+    {
+        if ((topLeft.column() <= attrColumn && attrColumn <= bottomRight.column())
+            || (topLeft.column() <= bonusColumn && bonusColumn <= bottomRight.column())
+            || (topLeft.column() <= powersColumn && powersColumn <= bottomRight.column()))
+        {
+            match = true; // maybe the whole table changed
+        }
+    }
+
+    if (!match)
+        return;
+
+    // update autocalculated attributes/skills of every NPC with matching race
+    int idColumn = raceModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+    for (; raceRow <= raceEnd; ++raceRow)
+    {
+        clearNpcStatsCache();
+
+        std::string raceId =
+            raceModel->data(raceModel->index(raceRow, idColumn)).toString().toUtf8().constData();
+        emit updateNpcAutocalc(2/*race*/, raceId);
+    }
+}
+
+void CSMWorld::Data::npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    // TODO: for now always recalculate
+    clearNpcStatsCache();
+}
+
+void CSMWorld::Data::gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+    static const QStringList gmsts(QStringList()<< "fNPCbaseMagickaMult" << "fAutoSpellChance"
+            << "fEffectCostMult" << "iAutoSpellAlterationMax" << "iAutoSpellConjurationMax"
+            << "iAutoSpellDestructionMax" << "iAutoSpellIllusionMax" << "iAutoSpellMysticismMax"
+            << "iAutoSpellRestorationMax" << "iAutoSpellTimesCanCast" << "iAutoSpellAttSkillMin");
+
+    bool match = false;
+    for (int row = topLeft.row(); row <= bottomRight.row(); ++row)
+    {
+        if (gmsts.contains(mGmsts.getRecord(row).get().mId.c_str()))
+        {
+            match = true;
+            break;
+        }
+    }
+
+    if (!match)
+        return;
+
+    clearNpcStatsCache();
+
+    std::string empty;
+    emit updateNpcAutocalc(0/*all*/, empty);
+}
+
+void CSMWorld::Data::clearNpcStatsCache ()
+{
+    for (std::map<std::string, CSMWorld::NpcStats*>::iterator it (mNpcStatCache.begin());
+            it != mNpcStatCache.end(); ++it)
+        delete it->second;
+
+    mNpcStatCache.clear();
+}
+
+CSMWorld::NpcStats* CSMWorld::Data::npcAutoCalculate(const ESM::NPC& npc) const
+{
+    CSMWorld::NpcStats * cachedStats = getCachedNpcData (npc.mId);
+    if (cachedStats)
+        return cachedStats;
+
+    int raceIndex = mRaces.searchId(npc.mRace);
+    int classIndex = mClasses.searchId(npc.mClass);
+    // this can happen when creating a new game from scratch
+    if (raceIndex == -1 || classIndex == -1)
+        return 0;
+
+    const ESM::Race *race = &mRaces.getRecord(raceIndex).get();
+    const ESM::Class *class_ = &mClasses.getRecord(classIndex).get();
+
+    bool autoCalc = npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
+    short level = npc.mNpdt52.mLevel;
+    if (autoCalc)
+        level = npc.mNpdt12.mLevel;
+
+    std::auto_ptr<CSMWorld::NpcStats> stats (new CSMWorld::NpcStats());
+
+    CSStore store(mGmsts, mSkills, mMagicEffects, mSpells);
+
+    if (autoCalc)
+    {
+        AutoCalc::autoCalcAttributesImpl (&npc, race, class_, level, *stats, &store);
+
+        stats->setHealth(autoCalculateHealth(level, class_, *stats));
+        stats->setMana(autoCalculateMana(*stats));
+        stats->setFatigue(autoCalculateFatigue(*stats));
+
+        AutoCalc::autoCalcSkillsImpl(&npc, race, class_, level, *stats, &store);
+
+        AutoCalc::autoCalculateSpells(race, *stats, &store);
+    }
+    else
+    {
+        for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin();
+                it != npc.mSpells.mList.end(); ++it)
+        {
+            stats->addSpell(*it);
+        }
+    }
+
+    // update spell info
+    const std::vector<std::string> &racePowers = race->mPowers.mList;
+    for (unsigned int i = 0; i < racePowers.size(); ++i)
+    {
+        int type = -1;
+        int spellIndex = mSpells.searchId(racePowers[i]);
+        if (spellIndex != -1)
+            type = mSpells.getRecord(spellIndex).get().mData.mType;
+        stats->addPowers(racePowers[i], type);
+    }
+    // cost/chance
+    int skills[ESM::Skill::Length];
+    if (autoCalc)
+        for (int i = 0; i< ESM::Skill::Length; ++i)
+            skills[i] = stats->getBaseSkill(i);
+    else
+        for (int i = 0; i< ESM::Skill::Length; ++i)
+            skills[i] = npc.mNpdt52.mSkills[i];
+
+    int attributes[ESM::Attribute::Length];
+    if (autoCalc)
+        for (int i = 0; i< ESM::Attribute::Length; ++i)
+            attributes[i] = stats->getBaseAttribute(i);
+    else
+    {
+        attributes[ESM::Attribute::Strength]    = npc.mNpdt52.mStrength;
+        attributes[ESM::Attribute::Willpower]   = npc.mNpdt52.mWillpower;
+        attributes[ESM::Attribute::Agility]     = npc.mNpdt52.mAgility;
+        attributes[ESM::Attribute::Speed]       = npc.mNpdt52.mSpeed;
+        attributes[ESM::Attribute::Endurance]   = npc.mNpdt52.mEndurance;
+        attributes[ESM::Attribute::Personality] = npc.mNpdt52.mPersonality;
+        attributes[ESM::Attribute::Luck]        = npc.mNpdt52.mLuck;
+    }
+
+    const std::vector<CSMWorld::SpellInfo>& spells = stats->spells();
+    for (std::vector<SpellInfo>::const_iterator it = spells.begin(); it != spells.end(); ++it)
+    {
+        int cost = -1;
+        int spellIndex = mSpells.searchId((*it).mName);
+        const ESM::Spell* spell = 0;
+        if (spellIndex != -1)
+        {
+            spell = &mSpells.getRecord(spellIndex).get();
+            cost = spell->mData.mCost;
+
+            int school;
+            float skillTerm;
+            AutoCalc::calcWeakestSchool(spell, skills, school, skillTerm, &store);
+            float chance = calcAutoCastChance(spell, skills, attributes, school, &store);
+
+            stats->addCostAndChance((*it).mName, cost, (int)ceil(chance)); // percent
+        }
+    }
+
+    if (stats.get() == 0)
+        return 0;
+
+    CSMWorld::NpcStats *result = stats.release();
+    emit cacheNpcStats (npc.mId, result);
+    return result;
+}
+
+void CSMWorld::Data::cacheNpcStatsEvent (const std::string& id, CSMWorld::NpcStats *stats)
+{
+    mNpcStatCache[id] = stats;
+}
+
+CSMWorld::NpcStats* CSMWorld::Data::getCachedNpcData (const std::string& id) const
+{
+    std::map<std::string, CSMWorld::NpcStats*>::const_iterator it = mNpcStatCache.find(id);
+    if (it != mNpcStatCache.end())
+        return it->second;
+    else
+        return 0;
 }

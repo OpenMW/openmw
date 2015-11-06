@@ -19,6 +19,7 @@ Programmers
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
     Artem Kotsynyak (greye)
+    artemutin
     Arthur Moore (EmperorArthur)
     athile
     Bret Curtis (psi29a)
@@ -59,6 +60,7 @@ Programmers
     Julien Voisin (jvoisin/ap0)
     Karl-Felix Glatzer (k1ll)
     Kevin Poitra (PuppyKevin)
+    Koncord
     Lars Söderberg (Lazaroth)
     lazydev
     Leon Saunders (emoose)
@@ -109,6 +111,7 @@ Programmers
     viadanna
     Vincent Heuken
     vocollapse
+    zelurker
 
 Manual
 ------

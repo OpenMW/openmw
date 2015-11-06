@@ -6,6 +6,7 @@
 #include "idcollection.hpp"
 #include "pathgrid.hpp"
 #include "info.hpp"
+#include "usertype.hpp"
 
 namespace CSMWorld
 {
@@ -922,7 +923,7 @@ namespace CSMWorld
 
         switch (subColIndex)
         {
-            case 0: return QString(ESM::Attribute::sAttributeNames[subRowIndex].c_str());
+            case 0: return subRowIndex;
             case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
             case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
             default: throw std::runtime_error("Race Attribute subcolumn index out of range");
@@ -1069,23 +1070,66 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0: return isInterior;
-            case 1: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
-            case 2: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
-            case 3: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mFog : QVariant(QVariant::UserType);
-            case 4: return (isInterior && !behaveLikeExterior) ?
-                    cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
+            case 1:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    return cell.mAmbi.mAmbient;
+                else
+                {
+                    UserInt i(cell.mAmbi.mAmbient);
+                    return QVariant(QVariant::fromValue(i));
+                }
+            }
+            case 2:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    return cell.mAmbi.mSunlight;
+                else
+                {
+                    UserInt i(cell.mAmbi.mSunlight);
+                    return QVariant(QVariant::fromValue(i));
+                }
+            }
+            case 3:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    return cell.mAmbi.mFog;
+                else
+                {
+                    UserInt i(cell.mAmbi.mFog);
+                    return QVariant(QVariant::fromValue(i));
+                }
+            }
+            case 4:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    return cell.mAmbi.mFogDensity;
+                else
+                {
+                    UserFloat f(cell.mAmbi.mFogDensity);
+                    return QVariant(QVariant::fromValue(f));
+                }
+            }
             case 5:
             {
                 if (isInterior && !behaveLikeExterior && interiorWater)
                     return cell.mWater;
                 else
-                    return QVariant(QVariant::UserType);
+                {
+                    UserFloat f(cell.mWater);
+                    return QVariant(QVariant::fromValue(f));
+                }
             }
-            case 6: return isInterior ?
-                    QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+            case 6:
+            {
+                if (isInterior)
+                {
+                    UserInt i(cell.mMapColor);
+                    return QVariant(QVariant::fromValue(i));
+                }
+                else
+                    return cell.mMapColor; // TODO: how to select?
+            }
             //case 7: return isInterior ?
                     //behaveLikeExterior : QVariant(QVariant::UserType);
             default: throw std::runtime_error("Cell subcolumn index out of range");

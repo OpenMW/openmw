@@ -1,9 +1,14 @@
 #ifndef CSM_TOOLS_TOOLS_H
 #define CSM_TOOLS_TOOLS_H
 
+#include <memory>
+#include <map>
+
+#include <components/to_utf8/to_utf8.hpp>
+
 #include <QObject>
 
-#include <map>
+#include <boost/filesystem/path.hpp>
 
 #include "../doc/operationholder.hpp"
 
@@ -24,6 +29,7 @@ namespace CSMTools
     class ReportModel;
     class Search;
     class SearchOperation;
+    class MergeOperation;
 
     class Tools : public QObject
     {
@@ -35,9 +41,12 @@ namespace CSMTools
             CSMDoc::OperationHolder mVerifier;
             SearchOperation *mSearchOperation;
             CSMDoc::OperationHolder mSearch;
+            MergeOperation *mMergeOperation;
+            CSMDoc::OperationHolder mMerge;
             std::map<int, ReportModel *> mReports;
             int mNextReportNumber;
             std::map<int, int> mActiveReports; // type, report number
+            ToUTF8::FromType mEncoding;
 
             // not implemented
             Tools (const Tools&);
@@ -53,18 +62,23 @@ namespace CSMTools
 
         public:
 
-            Tools (CSMDoc::Document& document);
+            Tools (CSMDoc::Document& document, ToUTF8::FromType encoding);
 
             virtual ~Tools();
 
-            CSMWorld::UniversalId runVerifier();
-            ///< \return ID of the report for this verification run
+            /// \param reportId If a valid VerificationResults ID, run verifier for the
+            /// specified report instead of creating a new one.
+            ///
+            /// \return ID of the report for this verification run
+            CSMWorld::UniversalId runVerifier (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
 
             /// Return ID of the report for this search.
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const Search& search);
-            
+
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+
             void abortOperation (int type);
             ///< \attention The operation is not aborted immediately.
 
@@ -75,14 +89,17 @@ namespace CSMTools
 
         private slots:
 
-            void verifierMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void verifierMessage (const CSMDoc::Message& message, int type);
 
         signals:
 
             void progress (int current, int max, int type);
 
             void done (int type, bool failed);
+
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
     };
 }
 

@@ -1,4 +1,3 @@
-
 #include "previewwidget.hpp"
 
 #include <OgreSceneManager.h>

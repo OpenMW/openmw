@@ -114,8 +114,7 @@ namespace MWMechanics
     }
 
     PathFinder::PathFinder()
-        : mIsPathConstructed(false),
-          mPathgrid(NULL),
+        : mPathgrid(NULL),
           mCell(NULL)
     {
     }
@@ -124,7 +123,6 @@ namespace MWMechanics
     {
         if(!mPath.empty())
             mPath.clear();
-        mIsPathConstructed = false;
     }
 
     /*
@@ -180,7 +178,6 @@ namespace MWMechanics
                 static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ)))
             {
                 mPath.push_back(endPoint);
-                mIsPathConstructed = true;
                 return;
             }
         }
@@ -197,7 +194,6 @@ namespace MWMechanics
         if(!mPathgrid || mPathgrid->mPoints.empty())
         {
             mPath.push_back(endPoint);
-            mIsPathConstructed = true;
             return;
         }
 
@@ -235,7 +231,6 @@ namespace MWMechanics
                 if(startNode == endNode.first)
                 {
                     mPath.push_back(endPoint);
-                    mIsPathConstructed = true;
                     return;
                 }
 
@@ -243,7 +238,6 @@ namespace MWMechanics
 
                 if(!mPath.empty())
                 {
-                    mIsPathConstructed = true;
                     // Add the destination (which may be different to the closest
                     // pathgrid point).  However only add if endNode was the closest
                     // point to endPoint.
@@ -256,14 +250,8 @@ namespace MWMechanics
                     if(endNode.second)
                         mPath.push_back(endPoint);
                 }
-                else
-                    mIsPathConstructed = false;
             }
-            else
-                mIsPathConstructed = false;
         }
-        else
-            mIsPathConstructed = false;
 
         return;
     }
@@ -271,7 +259,7 @@ namespace MWMechanics
     float PathFinder::getZAngleToNext(float x, float y) const
     {
         // This should never happen (programmers should have an if statement checking
-        // mIsPathConstructed that prevents this call if otherwise).
+        // isPathConstructed that prevents this call if otherwise).
         if(mPath.empty())
             return 0.;
 
@@ -293,7 +281,6 @@ namespace MWMechanics
             mPath.pop_front();
             if(mPath.empty())
             {
-                mIsPathConstructed = false;
                 return true;
             }
         }
@@ -301,23 +288,35 @@ namespace MWMechanics
         return false;
     }
 
-    // used by AiCombat, see header for the rationale
-    bool PathFinder::syncStart(const std::list<ESM::Pathgrid::Point> &path)
+    // see header for the rationale
+    void PathFinder::buildSyncedPath(const ESM::Pathgrid::Point &startPoint,
+        const ESM::Pathgrid::Point &endPoint,
+        const MWWorld::CellStore* cell,
+        bool allowShortcuts)
     {
         if (mPath.size() < 2)
-            return false; //nothing to pop
-
-        std::list<ESM::Pathgrid::Point>::const_iterator oldStart = path.begin();
-        std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
-
-        if(    (*iter).mX == oldStart->mX
-            && (*iter).mY == oldStart->mY
-            && (*iter).mZ == oldStart->mZ)
         {
-            mPath.pop_front();
-            return true;
+            // if path has one point, then it's the destination.
+            // don't need to worry about bad path for this case
+            buildPath(startPoint, endPoint, cell, allowShortcuts);
         }
-        return false;
+        else
+        {
+            const ESM::Pathgrid::Point oldStart(*getPath().begin());
+            buildPath(startPoint, endPoint, cell, allowShortcuts);
+            if (mPath.size() >= 2)
+            {
+                // if 2nd waypoint of new path == 1st waypoint of old, 
+                // delete 1st waypoint of new path.
+                std::list<ESM::Pathgrid::Point>::iterator iter = ++mPath.begin();
+                if (iter->mX == oldStart.mX
+                    && iter->mY == oldStart.mY
+                    && iter->mZ == oldStart.mZ)
+                {
+                    mPath.pop_front();
+                }
+            }
+        }
     }
 
 }

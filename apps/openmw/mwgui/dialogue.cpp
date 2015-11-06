@@ -291,7 +291,10 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
         else
+        {
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+            mTopicsList->scrollToTop();
+        }
     }
 
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)

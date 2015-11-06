@@ -309,11 +309,11 @@ bool Launcher::MainDialog::setupGameSettings()
         mGameSettings.readUserFile(stream);
     }
 
-    // Now the rest
+    // Now the rest - priority: user > local > global
     QStringList paths;
-    paths.append(userPath + QString("openmw.cfg"));
-    paths.append(QString("openmw.cfg"));
     paths.append(globalPath + QString("openmw.cfg"));
+    paths.append(QString("openmw.cfg"));
+    paths.append(userPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << qPrintable(path);
@@ -490,7 +490,7 @@ bool Launcher::MainDialog::writeSettings()
     // Game settings
     QFile file(userPath + QString("openmw.cfg"));
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
@@ -503,10 +503,8 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-    mGameSettings.writeFile(stream);
+    mGameSettings.writeFileWithComments(file);
     file.close();
 
     // Graphics settings
@@ -525,6 +523,7 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
+    QTextStream stream(&file);
     stream.setDevice(&file);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 

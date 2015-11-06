@@ -1,4 +1,3 @@
-
 #include "quickfileparser.hpp"
 
 #include "skipparser.hpp"

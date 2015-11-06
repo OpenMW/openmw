@@ -3,7 +3,6 @@
 
 #include "settingwindow.hpp"
 #include "resizeablestackedwidget.hpp"
-#include <QStandardItem>
 
 class QStackedWidget;
 class QListWidget;
@@ -25,10 +24,6 @@ namespace CSVSettings {
     public:
 
         explicit Dialog (QMainWindow *parent = 0);
-
-        ///Enables setting debug mode.  When the dialog opens, a page is created
-        ///which displays the SettingModel's contents in a Tree view.
-        void enableDebugMode (bool state, QStandardItemModel *model = 0);
 
     protected:
 

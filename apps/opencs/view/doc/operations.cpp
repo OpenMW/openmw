@@ -19,6 +19,7 @@ CSVDoc::Operations::Operations()
     setVisible (false);
     setFixedHeight (widgetContainer->height());
     setTitleBarWidget (new QWidget (this));
+    setObjectName (QString("operations")); // needed to suppress warning while saving window state
 }
 
 void CSVDoc::Operations::setProgress (int current, int max, int type, int threads)

@@ -660,7 +660,7 @@ namespace MWWorld
         return MovementSolver::traceDown(ptr, mEngine, maxHeight);
     }
 
-    void PhysicsSystem::addHeightField (float* heights,
+    void PhysicsSystem::addHeightField (const float* heights,
                 int x, int y, float yoffset,
                 float triSize, float sqrtVerts)
     {

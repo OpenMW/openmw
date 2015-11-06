@@ -1,4 +1,3 @@
-
 #include "cellref.hpp"
 
 #include "esmreader.hpp"

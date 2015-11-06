@@ -1,4 +1,3 @@
-
 #include "editwidget.hpp"
 
 #include <QAbstractItemModel>
@@ -6,14 +5,17 @@
 #include <QApplication>
 
 #include "../../model/world/data.hpp"
+#include "../../model/world/idtablebase.hpp"
+#include "../../model/world/columns.hpp"
 
 CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
-: QLineEdit (parent), mParser (data)
+: QLineEdit (parent), mParser (data), mIsEmpty(true)
 {
     mPalette = palette();
     connect (this, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
 
-    QAbstractItemModel *model = data.getTableModel (CSMWorld::UniversalId::Type_Filters);
+    const CSMWorld::IdTableBase *model =
+            static_cast<const CSMWorld::IdTableBase *> (data.getTableModel (CSMWorld::UniversalId::Type_Filters));
 
     connect (model, SIGNAL (dataChanged (const QModelIndex &, const QModelIndex&)),
         this, SLOT (filterDataChanged (const QModelIndex &, const QModelIndex&)),
@@ -24,10 +26,23 @@ CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
     connect (model, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
         this, SLOT (filterRowsInserted (const QModelIndex&, int, int)),
         Qt::QueuedConnection);
+
+    mStateColumnIndex   = model->findColumnIndex(CSMWorld::Columns::ColumnId_Modification);
+    mDescColumnIndex    = model->findColumnIndex(CSMWorld::Columns::ColumnId_Description);
 }
 
 void CSVFilter::EditWidget::textChanged (const QString& text)
 {
+    //no need to parse and apply filter if it was empty and now is empty too.
+    //e.g. - we modifiing content of filter with already opened some other (big) tables.
+    if (text.length() == 0){
+        if (mIsEmpty)
+            return;
+        else
+            mIsEmpty = true;
+    }else
+        mIsEmpty = false;
+
     if (mParser.parse (text.toUtf8().constData()))
     {
         setPalette (mPalette);
@@ -46,7 +61,9 @@ void CSVFilter::EditWidget::textChanged (const QString& text)
 void CSVFilter::EditWidget::filterDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
-    textChanged (text());
+    for (int i = topLeft.column(); i <= bottomRight.column(); ++i)
+        if (i != mStateColumnIndex && i != mDescColumnIndex)
+            textChanged (text());
 }
 
 void CSVFilter::EditWidget::filterRowsRemoved (const QModelIndex& parent, int start, int end)

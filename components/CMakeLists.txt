@@ -119,6 +119,10 @@ add_component_dir (fontloader
     fontloader
     )
 
+add_component_dir (autocalc
+    autocalc autocalcspell
+    )
+
 add_component_dir (version
     version
     )
@@ -126,29 +130,30 @@ add_component_dir (version
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
-find_package(Qt4 COMPONENTS QtCore QtGui)
-
-if(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
-    add_component_qt_dir (contentselector
-        model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
-		model/loadordererror
-        view/combobox view/contentselector
-        )
-    add_component_qt_dir (config
-        gamesettings
-        launchersettings
-        settingsbase
-        )
-
-    add_component_qt_dir (process
-        processinvoker
+add_component_qt_dir (contentselector
+    model/modelitem model/esmfile
+    model/naturalsort model/contentmodel
+    model/loadordererror
+    view/combobox view/contentselector
+    )
+add_component_qt_dir (config
+    gamesettings
+    launchersettings
+    settingsbase
     )
 
-   include(${QT_USE_FILE})
+add_component_qt_dir (process
+    processinvoker
+)
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
     QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
-   QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
-endif(QT_QTGUI_LIBRARY AND QT_QTCORE_LIBRARY)
+    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+else()
+    QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
+    QT5_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
@@ -161,14 +166,39 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components 
-    ${Boost_LIBRARIES} 
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_WAVE_LIBRARY}
     ${OGRE_LIBRARIES}
     ${OENGINE_LIBRARY}    
+    ${BULLET_LIBRARIES}
 )
+
+if (WIN32)
+    target_link_libraries(components
+    ${Boost_LOCALE_LIBRARY})
+endif()
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(components
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTGUI_LIBRARY})
+else()
+    qt5_use_modules(components Widgets Core)
+endif()
 
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
+
+if (WIN32)
+    target_link_libraries(components shlwapi)
+    if(MINGW)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOGDI")
+    endif(MINGW)
+endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)

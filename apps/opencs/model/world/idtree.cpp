@@ -35,28 +35,29 @@ QVariant CSMWorld::IdTree::data  (const QModelIndex & index, int role) const
      if (!index.isValid())
           return QVariant();
 
-    if ((role!=Qt::DisplayRole && role!=Qt::EditRole) || index.row() < 0 || index.column() < 0)
-        return QVariant();
-
     if (index.internalId() != 0)
     {
         std::pair<int, int> parentAddress(unfoldIndexAddress(index.internalId()));
+        const NestableColumn *parentColumn = mNestedCollection->getNestableColumn(parentAddress.second);
 
-        if (role == Qt::EditRole &&
-            !mNestedCollection->getNestableColumn(parentAddress.second)->nestedColumn(index.column()).isEditable())
-        {
+        if (role == ColumnBase::Role_Display)
+            return parentColumn->nestedColumn(index.column()).mDisplayType;
+
+        if (role == ColumnBase::Role_ColumnId)
+            return parentColumn->nestedColumn(index.column()).mColumnId;
+
+        if (role == Qt::EditRole && !parentColumn->nestedColumn(index.column()).isEditable())
             return QVariant();
-        }
+
+        if (role != Qt::DisplayRole && role != Qt::EditRole)
+            return QVariant();
 
         return mNestedCollection->getNestedData(parentAddress.first,
                                             parentAddress.second, index.row(), index.column());
     }
     else
     {
-        if (role==Qt::EditRole && !idCollection()->getColumn (index.column()).isEditable())
-            return QVariant();
-
-        return idCollection()->getData (index.row(), index.column());
+        return IdTable::data(index, role);
     }
 }
 
@@ -79,6 +80,9 @@ QVariant CSMWorld::IdTree::nestedHeaderData(int section, int subSection, Qt::Ori
     if (role==ColumnBase::Role_Display)
         return parentColumn->nestedColumn(subSection).mDisplayType;
 
+    if (role==ColumnBase::Role_ColumnId)
+        return parentColumn->nestedColumn(subSection).mColumnId;
+
     return QVariant();
 }
 
@@ -91,8 +95,15 @@ bool CSMWorld::IdTree::setData (const QModelIndex &index, const QVariant &value,
             const std::pair<int, int>& parentAddress(unfoldIndexAddress(index.internalId()));
 
             mNestedCollection->setNestedData(parentAddress.first, parentAddress.second, value, index.row(), index.column());
+            emit dataChanged(index, index);
 
-            emit dataChanged (index, index);
+            // Modifying a value can also change the Modified status of a record.
+            int stateColumn = searchColumnIndex(Columns::ColumnId_Modification);
+            if (stateColumn != -1)
+            {
+                QModelIndex stateIndex = this->index(index.parent().row(), stateColumn);
+                emit dataChanged(stateIndex, stateIndex);
+            }
 
             return true;
         }
@@ -167,10 +178,10 @@ QModelIndex CSMWorld::IdTree::index (int row, int column, const QModelIndex& par
         encodedId = this->foldIndexAddress(parent);
     }
 
-    if (row<0 || row>=idCollection()->getSize())
+    if (row < 0 || row >= rowCount(parent))
         return QModelIndex();
 
-    if (column<0 || column>=idCollection()->getColumns())
+    if (column < 0 || column >= columnCount(parent))
         return QModelIndex();
 
     return createIndex(row, column, encodedId); // store internal id
@@ -256,4 +267,19 @@ CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelInde
         throw std::logic_error("Tried to retrive nested table, but index has no children");
 
     return mNestedCollection->nestedTable(index.row(), index.column());
+}
+
+void CSMWorld::IdTree::updateNpcAutocalc (int type, const std::string& id)
+{
+    emit refreshNpcDialogue (type, id);
+}
+
+int CSMWorld::IdTree::searchNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->searchNestedColumnIndex(parentColumn, id);
+}
+
+int CSMWorld::IdTree::findNestedColumnIndex(int parentColumn, Columns::ColumnId id)
+{
+    return mNestedCollection->findNestedColumnIndex(parentColumn, id);
 }

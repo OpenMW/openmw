@@ -5,9 +5,11 @@
 #include <OgreTechnique.h>
 
 #include <OgreOverlayManager.h>
+#include <OgreOverlay.h>
 #include <OgreOverlayContainer.h>
 #include <OgreFontManager.h>
 #include <OgreTextAreaOverlayElement.h>
+#include <OgreTextureManager.h>
 #include <OgreEntity.h>
 #include <OgreViewport.h>
 #include <OgreRoot.h>

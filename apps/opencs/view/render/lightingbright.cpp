@@ -1,4 +1,3 @@
-
 #include "lightingbright.hpp"
 
 #include <OgreSceneManager.h>

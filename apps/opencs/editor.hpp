@@ -32,9 +32,16 @@
 #include "view/settings/dialog.hpp"
 #include "view/render/overlaysystem.hpp"
 
+#include "view/tools/merge.hpp"
+
 namespace OgreInit
 {
     class OgreInit;
+}
+
+namespace CSMDoc
+{
+    class Document;
 }
 
 namespace CS
@@ -59,10 +66,13 @@ namespace CS
             boost::interprocess::file_lock mLock;
             boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
+            CSVTools::Merge mMerge;
+
+            void showSplashMessage();
 
             void setupDataFiles (const Files::PathContainer& dataDirs);
 
-            std::pair<Files::PathContainer, std::vector<std::string> > readConfig();
+            std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths
 
             // not implemented
@@ -87,6 +97,8 @@ namespace CS
 
             void createGame();
             void createAddon();
+            void cancelCreateGame();
+            void cancelFileDialog();
 
             void loadDocument();
             void openFiles (const boost::filesystem::path &path);
@@ -99,7 +111,11 @@ namespace CS
 
             void documentAdded (CSMDoc::Document *document);
 
+            void documentAboutToBeRemoved (CSMDoc::Document *document);
+
             void lastDocumentDeleted();
+
+            void mergeDocument (CSMDoc::Document *document);
 
         private:
 

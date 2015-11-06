@@ -1,4 +1,3 @@
-
 #include "valuenode.hpp"
 
 #include <sstream>

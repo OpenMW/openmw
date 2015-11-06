@@ -1,4 +1,3 @@
-
 #include "globalscript.hpp"
 
 #include "esmreader.hpp"

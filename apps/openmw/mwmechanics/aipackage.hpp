@@ -14,6 +14,7 @@ namespace MWWorld
 
 namespace ESM
 {
+    struct Cell;
     namespace AiSequence
     {
         struct AiSequence;
@@ -70,6 +71,8 @@ namespace MWMechanics
             /// Causes the actor to attempt to walk to the specified location
             /** \return If the actor has arrived at his destination **/
             bool pathTo(const MWWorld::Ptr& actor, ESM::Pathgrid::Point dest, float duration);
+
+            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

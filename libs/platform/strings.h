@@ -9,7 +9,9 @@
 #elif defined(MSVC) || defined(_MSC_VER)
 #    pragma warning(disable: 4996)
 #    define strcasecmp stricmp
-#    define snprintf _snprintf
+#    if (_MSC_VER < 1900)
+#        define snprintf _snprintf
+#    endif
 #else
 #    warning "Unable to determine your compiler, you should probably take a look here."
 #    include <strings.h>  // Just take a guess

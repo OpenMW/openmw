@@ -1,4 +1,3 @@
-
 #include "classcheck.hpp"
 
 #include <sstream>

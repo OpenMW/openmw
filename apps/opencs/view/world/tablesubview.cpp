@@ -8,9 +8,11 @@
 #include <QHeaderView>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDropEvent>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
@@ -24,10 +26,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
     layout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
+        new TableBottomBox (creatorFactory, document, id, this), 0);
 
     layout->insertWidget (0, mTable =
         new Table (id, mBottom->canCreateAndDelete(), sorting, document), 2);
@@ -36,6 +36,16 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     QHBoxLayout *hLayout = new QHBoxLayout;
     hLayout->insertWidget(0,mFilterBox);
+
+    QCheckBox *added = new QCheckBox("A");
+    QCheckBox *modified = new QCheckBox("M");
+    added->setToolTip("Apply filter project::added.  Changes to\nthis filter setting is not saved in preferences.");
+    modified->setToolTip("Apply filter project::modified.  Changes to\nthis filter setting is not saved in preferences.");
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    added->setCheckState(
+            userSettings.settingValue ("filter/project-added") == "true" ? Qt::Checked : Qt::Unchecked);
+    modified->setCheckState(
+            userSettings.settingValue ("filter/project-modified") == "true" ? Qt::Checked : Qt::Unchecked);
 
     mOptions = new QWidget;
 
@@ -47,6 +57,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     autoJump->setCheckState(Qt::Unchecked);
     connect(autoJump, SIGNAL (stateChanged(int)), mTable, SLOT (jumpAfterModChanged(int)));
     optHLayout->insertWidget(0, autoJump);
+    optHLayout->insertWidget(1, added);
+    optHLayout->insertWidget(2, modified);
     optHLayout->setContentsMargins (QMargins (0, 3, 0, 0));
     mOptions->setLayout(optHLayout);
     mOptions->resize(mOptions->width(), mFilterBox->height());
@@ -87,6 +99,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     connect (mTable, SIGNAL (tableSizeChanged (int, int, int)),
         mBottom, SLOT (tableSizeChanged (int, int, int)));
 
+    connect(added, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterAddedChanged(int)));
+    connect(modified, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterModifiedChanged(int)));
+
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
     mTable->viewport()->installEventFilter(this);
@@ -102,6 +117,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+
+        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));

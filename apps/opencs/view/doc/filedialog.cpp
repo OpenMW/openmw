@@ -33,6 +33,11 @@ void CSVDoc::FileDialog::addFiles(const QString &path)
     mSelector->addFiles(path);
 }
 
+void CSVDoc::FileDialog::clearFiles()
+{
+    mSelector->clearFiles();
+}
+
 QStringList CSVDoc::FileDialog::selectedFilePaths()
 {
     QStringList filePaths;
@@ -105,7 +110,6 @@ void CSVDoc::FileDialog::buildNewFileView()
 
         connect (mFileWidget, SIGNAL (nameChanged(const QString &, bool)),
                 this, SLOT (slotUpdateAcceptButton(const QString &, bool)));
-
     }
 
     ui.projectGroupBoxLayout->insertWidget (0, mFileWidget);
@@ -139,7 +143,7 @@ void CSVDoc::FileDialog::slotUpdateAcceptButton(int)
 {
     QString name = "";
 
-    if (mAction == ContentAction_New)
+    if (mFileWidget && mAction == ContentAction_New)
         name = mFileWidget->getName();
 
     slotUpdateAcceptButton (name, true);

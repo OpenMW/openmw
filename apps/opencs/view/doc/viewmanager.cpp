@@ -1,29 +1,30 @@
-
 #include "viewmanager.hpp"
 
+#include <vector>
 #include <map>
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMessageBox>
+#include <QPushButton>
 
 #include "../../model/doc/documentmanager.hpp"
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
+#include "../world/idcompletiondelegate.hpp"
+#include "../world/colordelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
 #include "view.hpp"
-
-#include <QMessageBox>
-#include <QPushButton>
-#include <QtGui/QApplication>
 
 void CSVDoc::ViewManager::updateIndices()
 {
@@ -60,6 +61,17 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
 
+    mDelegateFactories->add (CSMWorld::ColumnBase::Display_Colour,
+        new CSVWorld::ColorDelegateFactory());
+
+    std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
+    for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
+         current != idCompletionColumns.end();
+         ++current)
+    {
+        mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
+    }
+
     struct Mapping
     {
         CSMWorld::ColumnBase::Display mDisplay;
@@ -84,16 +96,17 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_MeshType, CSMWorld::Columns::ColumnId_MeshType, false },
         { CSMWorld::ColumnBase::Display_Gender, CSMWorld::Columns::ColumnId_Gender, true },
         { CSMWorld::ColumnBase::Display_SoundGeneratorType, CSMWorld::Columns::ColumnId_SoundGeneratorType, false },
-        { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, true },
-        { CSMWorld::ColumnBase::Display_SkillImpact, CSMWorld::Columns::ColumnId_SkillImpact, true },
+        { CSMWorld::ColumnBase::Display_School, CSMWorld::Columns::ColumnId_School, false },
+        { CSMWorld::ColumnBase::Display_SkillId, CSMWorld::Columns::ColumnId_Skill, true },
         { CSMWorld::ColumnBase::Display_EffectRange, CSMWorld::Columns::ColumnId_EffectRange, false },
         { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
         { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
         { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
-        { CSMWorld::ColumnBase::Display_YesNo, CSMWorld::Columns::ColumnId_AiWanderRepeat, false },
         { CSMWorld::ColumnBase::Display_InfoCondFunc, CSMWorld::Columns::ColumnId_InfoCondFunc, false },
         { CSMWorld::ColumnBase::Display_InfoCondComp, CSMWorld::Columns::ColumnId_InfoCondComp, false },
-        { CSMWorld::ColumnBase::Display_RaceSkill, CSMWorld::Columns::ColumnId_RaceSkill, true },
+        { CSMWorld::ColumnBase::Display_IngredEffectId, CSMWorld::Columns::ColumnId_EffectId, true },
+        { CSMWorld::ColumnBase::Display_EffectSkill, CSMWorld::Columns::ColumnId_Skill, false },
+        { CSMWorld::ColumnBase::Display_EffectAttribute, CSMWorld::Columns::ColumnId_Attribute, false },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)
@@ -162,6 +175,7 @@ CSVDoc::View *CSVDoc::ViewManager::addView (CSMDoc::Document *document)
     connect (view, SIGNAL (newAddonRequest ()), this, SIGNAL (newAddonRequest()));
     connect (view, SIGNAL (loadDocumentRequest ()), this, SIGNAL (loadDocumentRequest()));
     connect (view, SIGNAL (editSettingsRequest()), this, SIGNAL (editSettingsRequest()));
+    connect (view, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SIGNAL (mergeDocument (CSMDoc::Document *)));
 
     connect (&CSMSettings::UserSettings::instance(),
              SIGNAL (userSettingUpdated(const QString &, const QStringList &)),
@@ -406,6 +420,27 @@ bool CSVDoc::ViewManager::removeDocument (CSVDoc::View *view)
             else
                 remainingViews.push_back(*iter);
         }
+
+        // FIXME: seems removeDocument() and closeRequest() are duplicated functionality
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        if (remainingViews.empty() && !mViews.empty() &&
+            userSettings.settingValue ("window/save-state").toStdString() == "true")
+        {
+            if (userSettings.settingValue ("window/x-save-state-workaround").toStdString() == "true"
+                    && mViews.back()->isMaximized())
+            {
+                userSettings.setDefinitions("window/maximized", (QStringList() << "true"));
+                userSettings.saveDefinitions(); // store previously saved geometry & state
+            }
+            else
+            {
+                userSettings.value("window/geometry", mViews.back()->saveGeometry());
+                userSettings.value("window/state", mViews.back()->saveState());
+                userSettings.setDefinitions("window/maximized", (QStringList() << "false"));
+                userSettings.saveDefinitions();
+            }
+        }
+
         mDocumentManager.removeDocument(document);
         mViews = remainingViews;
     }

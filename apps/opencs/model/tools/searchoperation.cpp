@@ -1,4 +1,3 @@
-
 #include "searchoperation.hpp"
 
 #include "../doc/state.hpp"
@@ -21,6 +20,8 @@ CSMTools::SearchOperation::SearchOperation (CSMDoc::Document& document)
         iter!=types.end(); ++iter)
         appendStage (new SearchStage (&dynamic_cast<CSMWorld::IdTableBase&> (
             *document.getData().getTableModel (*iter))));
+
+    setDefaultSeverity (CSMDoc::Message::Severity_Info);
 }
 
 void CSMTools::SearchOperation::configure (const Search& search)
