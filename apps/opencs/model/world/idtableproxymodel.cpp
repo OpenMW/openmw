@@ -121,8 +121,11 @@ QString CSMWorld::IdTableProxyModel::getRecordId(int sourceRow) const
 
 void CSMWorld::IdTableProxyModel::refreshFilter()
 {
-    updateColumnMap();
-    invalidateFilter();
+    if (mFilter)
+    {
+        updateColumnMap();
+        invalidateFilter();
+    }
 }
 
 void CSMWorld::IdTableProxyModel::sourceRowsInserted(const QModelIndex &parent, int /*start*/, int end)

@@ -69,6 +69,7 @@ namespace CSVWorld
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
+            bool mAutoJump;
 
             boost::shared_ptr<CSMFilter::Node> mFilter;
             boost::shared_ptr<CSMFilter::Node> mAdded;
@@ -153,6 +154,12 @@ namespace CSVWorld
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
 
             void updateUserSetting (const QString &name, const QStringList &list);
+
+            void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+            void jumpAfterModChanged(int state);
+
+            void queuedScrollTo(int state);
 
             void globalFilterAddedChanged (int state);
 

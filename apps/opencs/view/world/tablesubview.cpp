@@ -1,6 +1,7 @@
 #include "tablesubview.hpp"
 
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <QCheckBox>
 #include <QVBoxLayout>
 #include <QEvent>
@@ -21,7 +22,7 @@
 
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     const CreatorFactoryBase& creatorFactory, bool sorting)
-: SubView (id)
+: SubView (id), mShowOptions(false), mOptions(0)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -34,6 +35,8 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     mFilterBox = new CSVFilter::FilterBox (document.getData(), this);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
+    hLayout->insertWidget(0,mFilterBox);
+
     QCheckBox *added = new QCheckBox("A");
     QCheckBox *modified = new QCheckBox("M");
     added->setToolTip("Apply filter project::added.  Changes to\nthis filter setting is not saved in preferences.");
@@ -44,9 +47,36 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     modified->setCheckState(
             userSettings.settingValue ("filter/project-modified") == "true" ? Qt::Checked : Qt::Unchecked);
 
-    hLayout->insertWidget(0,mFilterBox);
-    hLayout->insertWidget(1,added);
-    hLayout->insertWidget(2,modified);
+    mOptions = new QWidget;
+
+    QHBoxLayout *optHLayout = new QHBoxLayout;
+    QCheckBox *autoJump = new QCheckBox("Auto Jump");
+    autoJump->setToolTip ("Whether to jump to the modified record."
+                "\nCan be useful in finding the moved or modified"
+                "\nobject instance while 3D editing.");
+    autoJump->setCheckState(
+            userSettings.settingValue ("table-input/jump-to-modified") == "true" ? Qt::Checked : Qt::Unchecked);
+    connect(autoJump, SIGNAL (stateChanged(int)), mTable, SLOT (jumpAfterModChanged(int)));
+    optHLayout->insertWidget(0, autoJump);
+    optHLayout->insertWidget(1, added);
+    optHLayout->insertWidget(2, modified);
+    optHLayout->setContentsMargins (QMargins (0, 3, 0, 0));
+    mOptions->setLayout(optHLayout);
+    mOptions->resize(mOptions->width(), mFilterBox->height());
+    mOptions->hide();
+
+    QPushButton *opt = new QPushButton ();
+    opt->setIcon (QIcon (":startup/configure"));
+    opt->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
+    opt->setToolTip ("Open additional options for this subview.");
+    connect (opt, SIGNAL (clicked()), this, SLOT (toggleOptions()));
+
+    QVBoxLayout *buttonLayout = new QVBoxLayout; // work around margin issues
+    buttonLayout->setContentsMargins (QMargins (0/*left*/, 3/*top*/, 3/*right*/, 0/*bottom*/));
+    buttonLayout->insertWidget(0, opt, 0, Qt::AlignVCenter|Qt::AlignRight);
+    hLayout->insertWidget(1, mOptions);
+    hLayout->insertLayout(2, buttonLayout);
+
     layout->insertLayout (0, hLayout);
 
     CSVDoc::SizeHintWidget *widget = new CSVDoc::SizeHintWidget;
@@ -186,4 +216,18 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
         }
     }
     return false;
+}
+
+void CSVWorld::TableSubView::toggleOptions()
+{
+    if (mShowOptions)
+    {
+        mShowOptions = false;
+        mOptions->hide();
+    }
+    else
+    {
+        mShowOptions = true;
+        mOptions->show();
+    }
 }
