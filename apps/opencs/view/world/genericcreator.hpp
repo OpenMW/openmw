@@ -13,10 +13,12 @@ class QLineEdit;
 class QHBoxLayout;
 class QComboBox;
 class QLabel;
+class QUndoStack;
 
 namespace CSMWorld
 {
     class CreateCommand;
+    class Data;
 }
 
 namespace CSVWorld
@@ -57,6 +59,8 @@ namespace CSVWorld
             void insertBeforeButtons (QWidget *widget, bool stretched);
 
             virtual std::string getId() const;
+
+            virtual std::string getIdValidatorResult() const;
 
             /// Allow subclasses to add additional data to \a command.
             virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
@@ -111,6 +115,8 @@ namespace CSVWorld
             void create();
 
             void scopeChanged (int index);
+
+            void dataIdListChanged();
     };
 }
 

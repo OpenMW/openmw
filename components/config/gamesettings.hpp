@@ -83,6 +83,8 @@ namespace Config
         QString mDataLocal;
 
         static const char sContentKey[];
+
+        bool isOrderedLine(const QString& line) const;
     };
 }
 #endif // GAMESETTINGS_HPP

@@ -1,6 +1,8 @@
 #ifndef CSM_WOLRD_NESTEDCOLLECTION_H
 #define CSM_WOLRD_NESTEDCOLLECTION_H
 
+#include "columns.hpp"
+
 class QVariant;
 
 namespace CSMWorld
@@ -33,6 +35,12 @@ namespace CSMWorld
         virtual int getNestedColumnsCount(int row, int column) const;
 
         virtual NestableColumn *getNestableColumn(int column) = 0;
+
+        virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+        ///< \return the column index or -1 if the requested column wasn't found.
+
+        virtual int findNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+        ///< \return the column index or throws an exception if the requested column wasn't found.
     };
 }
 

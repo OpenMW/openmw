@@ -1,4 +1,3 @@
-
 #ifndef MWGUI_TOOLTIPS_H
 #define MWGUI_TOOLTIPS_H
 
@@ -107,7 +106,7 @@ namespace MWGui
 
         static std::string sSchoolNames[6];
 
-	int mHorizontalScrollIndex;
+        int mHorizontalScrollIndex;
 
 
         float mDelay;

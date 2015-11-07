@@ -1,4 +1,3 @@
-
 #include "table.hpp"
 
 #include <QHeaderView>
@@ -7,12 +6,16 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
+#include <QMetaObject>
 #include <QtCore/qnamespace.h>
+
+#include <components/misc/stringops.hpp>
 
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
+#include "../../model/world/infotableproxymodel.hpp"
 #include "../../model/world/idtableproxymodel.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/idtable.hpp"
@@ -21,67 +24,37 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+#include "../../model/filter/parser.hpp"
+#include "../../model/filter/andnode.hpp"
+#include "../../model/filter/ornode.hpp"
 #include "../../model/settings/usersettings.hpp"
 
 #include "recordstatusdelegate.hpp"
+#include "tableeditidaction.hpp"
 #include "util.hpp"
 
 void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 {
     // configure dispatcher
-    QModelIndexList selectedRows = selectionModel()->selectedRows();
-
-    std::vector<std::string> records;
-
-    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
-
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); iter!=selectedRows.end();
-        ++iter)
-    {
-        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
-
-        records.push_back (mModel->data (
-            mModel->index (row, columnIndex)).toString().toUtf8().constData());
-    }
-
-    mDispatcher->setSelection (records);
+    mDispatcher->setSelection (getSelectedIds());
 
     std::vector<CSMWorld::UniversalId> extendedTypes = mDispatcher->getExtendedTypes();
 
     mDispatcher->setExtendedTypes (extendedTypes);
 
     // create context menu
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
     QMenu menu (this);
 
     ///  \todo add menu items for select all and clear selection
 
+    int currentRow = rowAt(event->y());
+    int currentColumn = columnAt(event->x());
+    if (mEditIdAction->isValidIdCell(currentRow, currentColumn))
     {
-        // Request UniversalId editing from table columns.
-
-        int currRow = rowAt( event->y() ),
-            currCol = columnAt( event->x() );
-
-        currRow = mProxyModel->mapToSource(mProxyModel->index( currRow, 0 )).row();
-
-        CSMWorld::ColumnBase::Display colDisplay =
-            static_cast<CSMWorld::ColumnBase::Display>(
-                mModel->headerData(
-                    currCol,
-                    Qt::Horizontal,
-                    CSMWorld::ColumnBase::Role_Display ).toInt());
-
-        QString cellData = mModel->data(mModel->index( currRow, currCol )).toString();
-        CSMWorld::UniversalId::Type colType = CSMWorld::TableMimeData::convertEnums( colDisplay );
-
-        if (    !cellData.isEmpty()
-                && colType != CSMWorld::UniversalId::Type_None )
-        {
-            mEditCellAction->setText(tr("Edit '").append(cellData).append("'"));
-
-            menu.addAction( mEditCellAction );
-
-            mEditCellId = CSMWorld::UniversalId( colType, cellData.toUtf8().constData() );
-        }
+        mEditIdAction->setCell(currentRow, currentColumn);
+        menu.addAction(mEditIdAction);
+        menu.addSeparator();
     }
 
     if (!mEditLock && !(mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
@@ -127,17 +100,24 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 {
                     int row = mProxyModel->mapToSource (
                         mProxyModel->index (selectedRows.begin()->row(), 0)).row();
+                    QString curData = mModel->data(mModel->index(row, column)).toString();
 
-                    if (row>0 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row-1, column)))
+                    if (row > 0)
                     {
-                        menu.addAction (mMoveUpAction);
+                        QString prevData = mModel->data(mModel->index(row - 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), prevData.toStdString()))
+                        {
+                            menu.addAction(mMoveUpAction);
+                        }
                     }
 
-                    if (row<mModel->rowCount()-1 && mModel->data (mModel->index (row, column))==
-                        mModel->data (mModel->index (row+1, column)))
+                    if (row < mModel->rowCount() - 1)
                     {
-                        menu.addAction (mMoveDownAction);
+                        QString nextData = mModel->data(mModel->index(row + 1, column)).toString();
+                        if (Misc::StringUtils::ciEqual(curData.toStdString(), nextData.toStdString()))
+                        {
+                            menu.addAction(mMoveDownAction);
+                        }
                     }
                 }
             }
@@ -254,7 +234,7 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : DragRecordTable(document), mCreateAction (0),
-  mCloneAction(0),mRecordStatusDisplay (0)
+  mCloneAction(0),mRecordStatusDisplay (0), mAutoJump (false)
 {
     CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
     QString jumpSetting = settings.settingValue ("table-input/jump-to-added");
@@ -276,20 +256,37 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
-    mProxyModel = new CSMWorld::IdTableProxyModel (this);
+    bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos ||
+                       id.getType() == CSMWorld::UniversalId::Type_JournalInfos;
+    if (isInfoTable)
+    {
+        mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+    }
+    else
+    {
+        mProxyModel = new CSMWorld::IdTableProxyModel (this);
+    }
     mProxyModel->setSourceModel (mModel);
 
     mDispatcher = new CSMWorld::CommandDispatcher (document, id, this);
 
     setModel (mProxyModel);
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
+#else
     horizontalHeader()->setResizeMode (QHeaderView::Interactive);
+#endif
     verticalHeader()->hide();
-    setSortingEnabled (sorting);
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-    int columns = mModel->columnCount();
+    setSortingEnabled (sorting);
+    if (sorting)
+    {
+        sortByColumn (mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id), Qt::AscendingOrder);
+    }
 
+    int columns = mModel->columnCount();
     for (int i=0; i<columns; ++i)
     {
         int flags = mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Flags).toInt();
@@ -340,10 +337,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mMoveDownAction, SIGNAL (triggered()), this, SLOT (moveDownRecord()));
     addAction (mMoveDownAction);
 
-    mEditCellAction = new QAction( tr("Edit Cell"), this );
-    connect( mEditCellAction, SIGNAL(triggered()), this, SLOT(editCell()) );
-    addAction( mEditCellAction );
-
     mViewAction = new QAction (tr ("View"), this);
     connect (mViewAction, SIGNAL (triggered()), this, SLOT (viewRecord()));
     addAction (mViewAction);
@@ -352,28 +345,33 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mPreviewAction, SIGNAL (triggered()), this, SLOT (previewRecord()));
     addAction (mPreviewAction);
 
-    /// \todo add a user option, that redirects the extended action to an input panel (in
-    /// the bottom bar) that lets the user select which record collections should be
-    /// modified.
-
     mExtendedDeleteAction = new QAction (tr ("Extended Delete Record"), this);
-    connect (mExtendedDeleteAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedDelete()));
+    connect (mExtendedDeleteAction, SIGNAL (triggered()), this, SLOT (executeExtendedDelete()));
     addAction (mExtendedDeleteAction);
 
     mExtendedRevertAction = new QAction (tr ("Extended Revert Record"), this);
-    connect (mExtendedRevertAction, SIGNAL (triggered()), mDispatcher, SLOT (executeExtendedRevert()));
+    connect (mExtendedRevertAction, SIGNAL (triggered()), this, SLOT (executeExtendedRevert()));
     addAction (mExtendedRevertAction);
+
+    mEditIdAction = new TableEditIdAction (*this, this);
+    connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
+    addAction (mEditIdAction);
 
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
-    connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-        this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    // parent, start and end depend on the model sending the signal, in this case mProxyModel
+    // If, for example, mModel was used instead, then scrolTo() should use the index
+    //   mProxyModel->mapFromSource(mModel->index(end, 0))
+    //connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
+    //    this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
+    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
+        this, SLOT (rowAdded (const std::string &)));
 
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
     /// the records status column (for permanence reasons)
     connect (mProxyModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
-        this, SLOT (tableSizeUpdate()));
+        this, SLOT (dataChangedEvent(const QModelIndex&, const QModelIndex&)));
 
     connect (selectionModel(), SIGNAL (selectionChanged (const QItemSelection&, const QItemSelection&)),
         this, SLOT (selectionSizeUpdate ()));
@@ -384,6 +382,24 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
+
+    CSMFilter::Parser parser(mDocument.getData());
+
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    if(userSettings.settingValue ("filter/project-added") == "true")
+    {
+        parser.parse("!string(\"Modified\", \"Added\")");
+        mAdded = parser.getFilter();
+    }
+
+    if(userSettings.settingValue ("filter/project-modified") == "true")
+    {
+        parser.parse("!string(\"Modified\", \"Modified\")");
+        mModified = parser.getFilter();
+    }
+
+    if(mAdded || mModified)
+        recordFilterChanged(boost::shared_ptr<CSMFilter::Node>());
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -407,6 +423,22 @@ CSMWorld::UniversalId CSVWorld::Table::getUniversalId (int row) const
         mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData());
 }
 
+std::vector<std::string> CSVWorld::Table::getSelectedIds() const
+{
+    std::vector<std::string> ids;
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+
+    for (QModelIndexList::const_iterator iter (selectedRows.begin()); 
+         iter != selectedRows.end();
+         ++iter)
+    {
+        int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
+        ids.push_back (mModel->data (mModel->index (row, columnIndex)).toString().toUtf8().constData());
+    }
+    return ids;
+}
+
 void CSVWorld::Table::editRecord()
 {
     if (!mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
@@ -424,7 +456,7 @@ void CSVWorld::Table::cloneRecord()
     {
         QModelIndexList selectedRows = selectionModel()->selectedRows();
         const CSMWorld::UniversalId& toClone = getUniversalId(selectedRows.begin()->row());
-        if (selectedRows.size()==1 && !mModel->isDeleted (toClone.getId()))
+        if (selectedRows.size() == 1)
         {
             emit cloneRequest (toClone);
         }
@@ -499,7 +531,7 @@ void CSVWorld::Table::moveDownRecord()
 
 void CSVWorld::Table::editCell()
 {
-    emit editRequest( mEditCellId, std::string() );
+    emit editRequest(mEditIdAction->getCurrentId(), "");
 }
 
 void CSVWorld::Table::viewRecord()
@@ -536,6 +568,34 @@ void CSVWorld::Table::previewRecord()
         if (mModel->data (index)!=CSMWorld::RecordBase::State_Deleted)
             emit editRequest (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Preview, id),
                 "");
+    }
+}
+
+void CSVWorld::Table::executeExtendedDelete()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedDeleteConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedDelete", Qt::QueuedConnection);
+    }
+}
+
+void CSVWorld::Table::executeExtendedRevert()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    QString configSetting = settings.settingValue ("table-input/extended-config");
+    if (configSetting == "true")
+    {
+        emit extendedRevertConfigRequest(getSelectedIds());
+    }
+    else
+    {
+        QMetaObject::invokeMethod(mDispatcher, "executeExtendedRevert", Qt::QueuedConnection);
     }
 }
 
@@ -640,7 +700,7 @@ void CSVWorld::Table::tableSizeUpdate()
                     case CSMWorld::RecordBase::State_BaseOnly: ++size; break;
                     case CSMWorld::RecordBase::State_Modified: ++size; ++modified; break;
                     case CSMWorld::RecordBase::State_ModifiedOnly: ++size; ++modified; break;
-                    case CSMWorld::RecordBase:: State_Deleted: ++deleted; ++modified; break;
+                    case CSMWorld::RecordBase::State_Deleted: ++deleted; ++modified; break;
                 }
             }
         }
@@ -649,10 +709,6 @@ void CSVWorld::Table::tableSizeUpdate()
     }
 
     emit tableSizeChanged (size, deleted, modified);
-
-    // not really related to tableSizeUpdate() but placed here for convenience rather than
-    // creating a bunch of extra connections & slot
-    mProxyModel->refreshFilter();
 }
 
 void CSVWorld::Table::selectionSizeUpdate()
@@ -670,7 +726,37 @@ void CSVWorld::Table::requestFocus (const std::string& id)
 
 void CSVWorld::Table::recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter)
 {
-    mProxyModel->setFilter (filter);
+    mFilter = filter;
+
+    boost::shared_ptr<CSMFilter::Node> global;
+    if(mAdded && mModified)
+    {
+        std::vector<boost::shared_ptr<CSMFilter::Node> > nodes;
+        nodes.push_back(mAdded);
+        nodes.push_back(mModified);
+        global = boost::shared_ptr<CSMFilter::Node>(new CSMFilter::OrNode (nodes));
+    }
+    else if(mAdded)
+    {
+        global = mAdded;
+    }
+    else if(mModified)
+    {
+        global = mModified;
+    }
+
+    if(filter && global)
+    {
+        std::vector<boost::shared_ptr<CSMFilter::Node> > nodes;
+        nodes.push_back(filter);
+        nodes.push_back(global);
+        boost::shared_ptr<CSMFilter::Node> combined(new CSMFilter::AndNode (nodes));
+        mProxyModel->setFilter (combined);
+    }
+    else if(global)
+        mProxyModel->setFilter (global);
+    else
+        mProxyModel->setFilter (filter);
     tableSizeUpdate();
     selectionSizeUpdate();
 }
@@ -681,36 +767,6 @@ void CSVWorld::Table::mouseMoveEvent (QMouseEvent* event)
     {
         startDragFromTable(*this);
     }
-}
-
-void CSVWorld::Table::dropEvent(QDropEvent *event)
-{
-    QModelIndex index = indexAt (event->pos());
-
-    if (!index.isValid())
-    {
-        return;
-    }
-
-    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
-    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    if (mime->fromDocument (mDocument))
-    {
-        CSMWorld::ColumnBase::Display display = static_cast<CSMWorld::ColumnBase::Display>
-                                                (mModel->headerData (index.column(), Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt());
-
-        if (mime->holdsType (display))
-        {
-            CSMWorld::UniversalId record (mime->returnMatching (display));
-
-            std::auto_ptr<CSMWorld::ModifyCommand> command (new CSMWorld::ModifyCommand
-                    (*mProxyModel, index, QVariant (QString::fromUtf8 (record.getId().c_str()))));
-
-            mDocument.getUndoStack().push (command.release());
-        }
-    } //TODO handle drops from different document
 }
 
 std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const
@@ -744,14 +800,73 @@ std::vector< CSMWorld::UniversalId > CSVWorld::Table::getDraggedRecords() const
     return idToDrag;
 }
 
-void CSVWorld::Table::rowsInsertedEvent(const QModelIndex& parent, int start, int end)
+void CSVWorld::Table::globalFilterAddedChanged(int state)
+{
+    if(state == Qt::Checked && !mAdded)
+    {
+        CSMFilter::Parser parser(mDocument.getData());
+        parser.parse("!string(\"Modified\", \"Added\")");
+        mAdded = parser.getFilter();
+    }
+    else if(state == Qt::Unchecked)
+        mAdded.reset();
+
+    recordFilterChanged(mFilter);
+}
+
+void CSVWorld::Table::globalFilterModifiedChanged(int state)
+{
+    if(state == Qt::Checked && !mModified)
+    {
+        CSMFilter::Parser parser(mDocument.getData());
+        parser.parse("!string(\"Modified\", \"Modified\")");
+        mModified = parser.getFilter();
+    }
+    else if(state == Qt::Unchecked)
+        mModified.reset();
+
+    recordFilterChanged(mFilter);
+}
+
+void CSVWorld::Table::rowAdded(const std::string &id)
 {
     tableSizeUpdate();
+
     if(mJumpToAddedRecord)
     {
+        int idColumn = mModel->findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+        int end = mProxyModel->getModelIndex(id, idColumn).row();
         selectRow(end);
+
+        // without this delay the scroll works but goes to top for add/clone
+        QMetaObject::invokeMethod(this, "queuedScrollTo", Qt::QueuedConnection, Q_ARG(int, end));
 
         if(mUnselectAfterJump)
             clearSelection();
     }
+}
+
+void CSVWorld::Table::queuedScrollTo(int row)
+{
+    scrollTo(mProxyModel->index(row, 0), QAbstractItemView::PositionAtCenter);
+}
+
+void CSVWorld::Table::dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight)
+{
+    tableSizeUpdate();
+
+    if (mAutoJump)
+    {
+        selectRow(bottomRight.row());
+        //scrollTo(mProxyModel->index(bottomRight.row(), 0), QAbstractItemView::PositionAtCenter);
+        scrollTo(bottomRight, QAbstractItemView::PositionAtCenter); // alternative
+    }
+}
+
+void CSVWorld::Table::jumpAfterModChanged(int state)
+{
+    if(state == Qt::Checked)
+        mAutoJump = true;
+    else
+        mAutoJump = false;
 }

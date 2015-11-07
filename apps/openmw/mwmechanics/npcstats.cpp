@@ -1,4 +1,3 @@
-
 #include "npcstats.hpp"
 
 #include <cmath>
@@ -32,6 +31,7 @@ MWMechanics::NpcStats::NpcStats()
 , mWerewolfKills (0)
 , mLevelProgress(0)
 , mTimeToStartDrowning(20.0)
+    , mIsWerewolf(false)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);
 }
@@ -51,7 +51,7 @@ const MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index) const
     if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
-    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
+    return mSkill[index];
 }
 
 MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index)
@@ -59,7 +59,15 @@ MWMechanics::SkillValue& MWMechanics::NpcStats::getSkill (int index)
     if (index<0 || index>=ESM::Skill::Length)
         throw std::runtime_error ("skill index out of range");
 
-    return (!mIsWerewolf ? mSkill[index] : mWerewolfSkill[index]);
+    return mSkill[index];
+}
+
+void MWMechanics::NpcStats::setSkill(int index, const MWMechanics::SkillValue &value)
+{
+    if (index<0 || index>=ESM::Skill::Length)
+        throw std::runtime_error ("skill index out of range");
+
+    mSkill[index] = value;
 }
 
 const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
@@ -188,10 +196,6 @@ float MWMechanics::NpcStats::getSkillProgressRequirement (int skillIndex, const 
 
 void MWMechanics::NpcStats::useSkill (int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
 {
-    // Don't increase skills as a werewolf
-    if(mIsWerewolf)
-        return;
-
     const ESM::Skill *skill =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find (skillIndex);
     float skillGain = 1;
@@ -403,34 +407,12 @@ bool MWMechanics::NpcStats::isWerewolf() const
 
 void MWMechanics::NpcStats::setWerewolf (bool set)
 {
+    if (mIsWerewolf == set)
+        return;
+
     if(set != false)
     {
-        const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-
         mWerewolfKills = 0;
-
-        for(size_t i = 0;i < ESM::Attribute::Length;i++)
-        {
-            mWerewolfAttributes[i] = getAttribute(i);
-            // Oh, Bethesda. It's "Intelligence".
-            std::string name = "fWerewolf"+((i==ESM::Attribute::Intelligence) ? std::string("Intellegence") :
-                                            ESM::Attribute::sAttributeNames[i]);
-            mWerewolfAttributes[i].setBase(int(gmst.find(name)->getFloat()));
-        }
-
-        for(size_t i = 0;i < ESM::Skill::Length;i++)
-        {
-            mWerewolfSkill[i] = getSkill(i);
-
-            // Acrobatics is set separately for some reason.
-            if(i == ESM::Skill::Acrobatics)
-                continue;
-
-            // "Mercantile"! >_<
-            std::string name = "fWerewolf"+((i==ESM::Skill::Mercantile) ? std::string("Merchantile") :
-                                            ESM::Skill::sSkillNames[i]);
-            mWerewolfSkill[i].setBase(int(gmst.find(name)->getFloat()));
-        }
     }
     mIsWerewolf = set;
 }
@@ -464,14 +446,8 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     state.mDisposition = mDisposition;
 
     for (int i=0; i<ESM::Skill::Length; ++i)
-    {
-        mSkill[i].writeState (state.mSkills[i].mRegular);
-        mWerewolfSkill[i].writeState (state.mSkills[i].mWerewolf);
-    }
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-    {
-        mWerewolfAttributes[i].writeState (state.mWerewolfAttributes[i]);
-    }
+        mSkill[i].writeState (state.mSkills[i]);
+
     state.mIsWerewolf = mIsWerewolf;
 
     state.mCrimeId = mCrimeId;
@@ -519,14 +495,7 @@ void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)
     mDisposition = state.mDisposition;
 
     for (int i=0; i<ESM::Skill::Length; ++i)
-    {
-        mSkill[i].readState (state.mSkills[i].mRegular);
-        mWerewolfSkill[i].readState (state.mSkills[i].mWerewolf);
-    }
-    for (int i=0; i<ESM::Attribute::Length; ++i)
-    {
-        mWerewolfAttributes[i].readState (state.mWerewolfAttributes[i]);
-    }
+        mSkill[i].readState (state.mSkills[i]);
 
     mIsWerewolf = state.mIsWerewolf;
 

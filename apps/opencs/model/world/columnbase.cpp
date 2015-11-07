@@ -77,16 +77,18 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_Video,
 
         Display_Id,
-        Display_SkillImpact,
+        Display_SkillId,
         Display_EffectRange,
         Display_EffectId,
         Display_PartRefType,
         Display_AiPackageType,
-        Display_YesNo,
         Display_InfoCondFunc,
         Display_InfoCondVar,
         Display_InfoCondComp,
-        Display_RaceSkill,
+
+        Display_EffectSkill,
+        Display_EffectAttribute,
+        Display_IngredEffectId,
 
         Display_None
     };
@@ -100,7 +102,8 @@ bool CSMWorld::ColumnBase::isId (Display display)
 
 bool CSMWorld::ColumnBase::isText (Display display)
 {
-    return display==Display_String || display==Display_LongString;
+    return display==Display_String || display==Display_LongString ||
+        display==Display_String32 || display==Display_LongString256;
 }
 
 bool CSMWorld::ColumnBase::isScript (Display display)

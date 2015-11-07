@@ -1,4 +1,3 @@
-
 #include "editor.hpp"
 
 #include <openengine/bullet/BulletShapeLoader.h>
@@ -7,6 +6,9 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
+#include <QSplashScreen>
+#include <QFont>
+#include <QTimer>
 
 #include <OgreRoot.h>
 #include <OgreRenderWindow.h>
@@ -24,7 +26,8 @@
 CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 : mUserSettings (mCfgMgr), mOverlaySystem (0), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
-  mLock(), mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
+  mLock(), mMerge (mDocumentManager),
+  mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
 {
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
@@ -46,9 +49,12 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
 
     mNewGame.setLocalData (mLocal);
     mFileDialog.setLocalData (mLocal);
+    mMerge.setLocalData (mLocal);
 
     connect (&mDocumentManager, SIGNAL (documentAdded (CSMDoc::Document *)),
         this, SLOT (documentAdded (CSMDoc::Document *)));
+    connect (&mDocumentManager, SIGNAL (documentAboutToBeRemoved (CSMDoc::Document *)),
+        this, SLOT (documentAboutToBeRemoved (CSMDoc::Document *)));
     connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
         this, SLOT (lastDocumentDeleted()));
 
@@ -56,6 +62,7 @@ CS::Editor::Editor (OgreInit::OgreInit& ogreInit)
     connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
     connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
     connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+    connect (&mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
@@ -95,7 +102,7 @@ void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
     }
 }
 
-std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig()
+std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
 {
     boost::program_options::variables_map variables;
     boost::program_options::options_description desc("Syntax: openmw-cs <options>\nAllowed options");
@@ -115,7 +122,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     boost::program_options::notify(variables);
 
-    mCfgMgr.readConfiguration(variables, desc);
+    mCfgMgr.readConfiguration(variables, desc, quiet);
 
     mDocumentManager.setEncoding (
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
@@ -156,15 +163,23 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     }
 
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
+    Files::PathContainer canonicalPaths;
 
     //iterate the data directories and add them to the file dialog for loading
     for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
     {
+        boost::filesystem::path p = boost::filesystem::canonical(*iter);
+        Files::PathContainer::iterator it = std::find(canonicalPaths.begin(), canonicalPaths.end(), p);
+        if (it == canonicalPaths.end())
+            canonicalPaths.push_back(p);
+        else
+            continue;
+
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
     }
 
-    return std::make_pair (dataDirs, variables["fallback-archive"].as<std::vector<std::string> >());
+    return std::make_pair (canonicalPaths, variables["fallback-archive"].as<std::vector<std::string> >());
 }
 
 void CS::Editor::createGame()
@@ -195,6 +210,11 @@ void CS::Editor::cancelCreateGame()
 void CS::Editor::createAddon()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
 
@@ -215,6 +235,11 @@ void CS::Editor::cancelFileDialog()
 void CS::Editor::loadDocument()
 {
     mStartup.hide();
+
+    mFileDialog.clearFiles();
+    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
+    setupDataFiles (config.first);
+
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
@@ -243,6 +268,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     mDocumentManager.addDocument (files, savePath, true);
 
     mFileDialog.hide();
+    showSplashMessage();
 }
 
 void CS::Editor::createNewGame (const boost::filesystem::path& file)
@@ -254,6 +280,7 @@ void CS::Editor::createNewGame (const boost::filesystem::path& file)
     mDocumentManager.addDocument (files, file, true);
 
     mNewGame.hide();
+    showSplashMessage();
 }
 
 void CS::Editor::showStartup()
@@ -307,12 +334,12 @@ bool CS::Editor::makeIPCServer()
             mServer->close();
             fullPath.remove(QRegExp("dummy$"));
             fullPath += mIpcServerName;
-            if(boost::filesystem::exists(fullPath.toStdString().c_str()))
+            if(boost::filesystem::exists(fullPath.toUtf8().constData()))
             {
                 // TODO: compare pid of the current process with that in the file
                 std::cout << "Detected unclean shutdown." << std::endl;
                 // delete the stale file
-                if(remove(fullPath.toStdString().c_str()))
+                if(remove(fullPath.toUtf8().constData()))
                     std::cerr << "ERROR removing stale connection file" << std::endl;
             }
         }
@@ -468,9 +495,65 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
     mViewManager.addView (document);
+    showSplashMessage();
+}
+
+void CS::Editor::documentAboutToBeRemoved (CSMDoc::Document *document)
+{
+    if (mMerge.getDocument()==document)
+        mMerge.cancel();
 }
 
 void CS::Editor::lastDocumentDeleted()
 {
     QApplication::quit();
+}
+
+void CS::Editor::showSplashMessage()
+{
+    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
+    if(settings.settingValue ("filter/project-added") == "true" ||
+       settings.settingValue ("filter/project-modified") == "true")
+    {
+        QPixmap img(QPixmap(":./openmw-cs.png"));
+
+        QString msgTop("You have active global filters.");
+        QString msgBottom("Some rows may be hidden!");
+        QFont splashFont(QFont("Arial", 16, QFont::Bold)); // TODO: use system font?
+        //splashFont.setStretch(125);
+
+        QFontMetrics fm(splashFont);
+        int msgWidth = std::max(fm.width(msgTop), fm.width(msgBottom));
+        img.scaledToWidth(msgWidth);
+
+        QSplashScreen *splash = new QSplashScreen(img, Qt::WindowStaysOnTopHint);
+        splash->setFont(splashFont);
+        splash->resize(msgWidth+20, splash->height()+fm.lineSpacing()*2+20); // add some margin
+
+        // try to center the message near the center of the saved window
+        QWidget dummy;
+        bool xWorkaround = settings.settingValue ("window/x-save-state-workaround").toStdString() == "true";
+        if (settings.settingValue ("window/save-state").toStdString() == "true" &&
+            !(xWorkaround && settings.settingValue ("window/maximized").toStdString() == "true"))
+        {
+            dummy.restoreGeometry(settings.value("window/geometry").toByteArray());
+            splash->move(dummy.x()+std::max(0, (dummy.width()-msgWidth)/2),
+                         dummy.y()+std::max(0, (dummy.height()-splash->height())/2));
+        }
+        else
+            splash->move(std::max(0, splash->x()-msgWidth/2), splash->y());
+
+        splash->show();
+        splash->showMessage(msgTop+"\n"+msgBottom, Qt::AlignHCenter|Qt::AlignBottom, Qt::red);
+        QTimer::singleShot(4000, splash, SLOT(close())); // 4 seconds should be enough
+        splash->raise(); // for X windows
+    }
+}
+
+void CS::Editor::mergeDocument (CSMDoc::Document *document)
+{
+    mMerge.configure (document);
+    mMerge.show();
+    mMerge.raise();
+    mMerge.activateWindow();
 }

@@ -76,8 +76,15 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
     if (mIdCollection->getColumn (index.column()).isEditable() && role==Qt::EditRole)
     {
         mIdCollection->setData (index.row(), index.column(), value);
+        emit dataChanged(index, index);
 
-        emit dataChanged (index, index);
+        // Modifying a value can also change the Modified status of a record.
+        int stateColumn = searchColumnIndex(Columns::ColumnId_Modification);
+        if (stateColumn != -1)
+        {
+            QModelIndex stateIndex = this->index(index.row(), stateColumn);
+            emit dataChanged(stateIndex, stateIndex);
+        }
 
         return true;
     }
@@ -146,7 +153,7 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
                                     const std::string& destination,
                                     CSMWorld::UniversalId::Type type)
 {
-    int index = mIdCollection->getAppendIndex (destination);
+    int index = mIdCollection->getAppendIndex (destination, type);
 
     beginInsertRows (QModelIndex(), index, index);
     mIdCollection->cloneRecord(origin, destination, type);

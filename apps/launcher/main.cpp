@@ -54,9 +54,6 @@ int main(int argc, char *argv[])
 
         QDir::setCurrent(dir.absolutePath());
 
-        // Support non-latin characters
-        QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-
         Launcher::MainDialog mainWin;
 
         Launcher::FirstRunDialogResult result = mainWin.showFirstRunDialog();

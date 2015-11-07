@@ -1,4 +1,3 @@
-
 #include "worldspacewidget.hpp"
 
 #include <algorithm>
@@ -7,7 +6,12 @@
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
+#include <QMouseEvent>
+#include <QKeyEvent>
 #include <QPoint>
 
 #include "../../model/world/universalid.hpp"

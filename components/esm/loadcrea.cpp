@@ -96,7 +96,12 @@ namespace ESM {
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mHasAI) {
+        if (mAiData.mHello != 0
+            || mAiData.mFight != 0
+            || mAiData.mFlee != 0
+            || mAiData.mAlarm != 0
+            || mAiData.mServices != 0)
+        {
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
         mTransport.save(esm);
@@ -115,7 +120,7 @@ namespace ESM {
         for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
         mData.mGold = 0;
         mFlags = 0;
-        mScale = 0;
+        mScale = 1.f;
         mModel.clear();
         mName.clear();
         mScript.clear();

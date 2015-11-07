@@ -1,4 +1,3 @@
-
 #include "probe.hpp"
 
 #include <components/esm/loadprob.hpp>

@@ -67,6 +67,8 @@ namespace CSMDoc
             Blacklist mBlacklist;
             Runner mRunner;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+            bool mDirty;
+
             CSMWorld::IdCompletionManager mIdCompletionManager;
 
             // It is important that the undo stack is declared last, because on desctruction it fires a signal, that is connected to a slot, that is
@@ -120,12 +122,14 @@ namespace CSMDoc
 
             void save();
 
-            CSMWorld::UniversalId verify();
+            CSMWorld::UniversalId verify (const CSMWorld::UniversalId& reportId = CSMWorld::UniversalId());
 
             CSMWorld::UniversalId newSearch();
 
             void runSearch (const CSMWorld::UniversalId& searchId, const CSMTools::Search& search);
-            
+
+            void runMerge (std::auto_ptr<CSMDoc::Document> target);
+
             void abortOperation (int type);
 
             const CSMWorld::Data& getData() const;
@@ -148,18 +152,23 @@ namespace CSMDoc
 
             CSMWorld::IdCompletionManager &getIdCompletionManager();
 
+            void flagAsDirty();
+
         signals:
 
             void stateChanged (int state, CSMDoc::Document *document);
 
             void progress (int current, int max, int type, int threads, CSMDoc::Document *document);
 
+            /// \attention When this signal is emitted, *this hands over the ownership of the
+            /// document. This signal must be handled to avoid a leak.
+            void mergeDone (CSMDoc::Document *document);
+
         private slots:
 
             void modificationStateChanged (bool clean);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void operationDone (int type, bool failed);
 
@@ -172,4 +181,3 @@ namespace CSMDoc
 }
 
 #endif
-

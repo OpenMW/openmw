@@ -799,9 +799,9 @@ void CSMDoc::Document::addGmsts()
         "sBookSkillMessage",
         "sBounty",
         "sBreath",
-        "sBribe",
-        "sBribe",
-        "sBribe",
+        "sBribe 10 Gold",
+        "sBribe 100 Gold",
+        "sBribe 1000 Gold",
         "sBribeFail",
         "sBribeSuccess",
         "sBuy",
@@ -2251,14 +2251,14 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
 : mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
-  mTools (*this),
+  mTools (*this, encoding),
   mProjectPath ((configuration.getUserDataPath() / "projects") /
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
   mResDir(resDir),
   mRunner (mProjectPath), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()),
-  mIdCompletionManager(mData)
+  mDirty (false), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
         throw std::runtime_error ("Empty content file sequence");
@@ -2272,7 +2272,7 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
         if (boost::filesystem::exists (customFiltersPath))
         {
-            destination << std::ifstream(customFiltersPath.c_str(), std::ios::binary).rdbuf();
+            destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
         }
         else
         {
@@ -2282,9 +2282,6 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew)
     {
-        mData.setDescription ("");
-        mData.setAuthor ("");
-
         if (mContentFiles.size()==1)
             createBase();
     }
@@ -2299,13 +2296,15 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     connect (&mTools, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mTools, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
+    connect (&mTools, SIGNAL (mergeDone (CSMDoc::Document*)),
+            this, SIGNAL (mergeDone (CSMDoc::Document*)));
 
     connect (&mSaving, SIGNAL (progress (int, int, int)), this, SLOT (progress (int, int, int)));
     connect (&mSaving, SIGNAL (done (int, bool)), this, SLOT (operationDone (int, bool)));
 
     connect (
-        &mSaving, SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
+        &mSaving, SIGNAL (reportMessage (const CSMDoc::Message&, int)),
+        this, SLOT (reportMessage (const CSMDoc::Message&, int)));
 
     connect (&mRunner, SIGNAL (runStateChanged()), this, SLOT (runStateChanged()));
 }
@@ -2323,7 +2322,7 @@ int CSMDoc::Document::getState() const
 {
     int state = 0;
 
-    if (!mUndoStack.isClean())
+    if (!mUndoStack.isClean() || mDirty)
         state |= State_Modified;
 
     if (mSaving.isRunning())
@@ -2369,9 +2368,9 @@ void CSMDoc::Document::save()
     emit stateChanged (getState(), this);
 }
 
-CSMWorld::UniversalId CSMDoc::Document::verify()
+CSMWorld::UniversalId CSMDoc::Document::verify (const CSMWorld::UniversalId& reportId)
 {
-    CSMWorld::UniversalId id = mTools.runVerifier();
+    CSMWorld::UniversalId id = mTools.runVerifier (reportId);
     emit stateChanged (getState(), this);
     return id;
 }
@@ -2388,6 +2387,12 @@ void CSMDoc::Document::runSearch (const CSMWorld::UniversalId& searchId, const C
     emit stateChanged (getState(), this);
 }
 
+void CSMDoc::Document::runMerge (std::auto_ptr<CSMDoc::Document> target)
+{
+    mTools.runMerge (target);
+    emit stateChanged (getState(), this);
+}
+
 void CSMDoc::Document::abortOperation (int type)
 {
     if (type==State_Saving)
@@ -2401,15 +2406,17 @@ void CSMDoc::Document::modificationStateChanged (bool clean)
     emit stateChanged (getState(), this);
 }
 
-void CSMDoc::Document::reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-    const std::string& hint, int type)
+void CSMDoc::Document::reportMessage (const CSMDoc::Message& message, int type)
 {
     /// \todo find a better way to get these messages to the user.
-    std::cout << message << std::endl;
+    std::cout << message.mMessage << std::endl;
 }
 
 void CSMDoc::Document::operationDone (int type, bool failed)
 {
+    if (type==CSMDoc::State_Saving && !failed)
+        mDirty = false;
+
     emit stateChanged (getState(), this);
 }
 
@@ -2493,4 +2500,9 @@ boost::shared_ptr<CSVWorld::PhysicsSystem> CSMDoc::Document::getPhysics ()
 CSMWorld::IdCompletionManager &CSMDoc::Document::getIdCompletionManager()
 {
     return mIdCompletionManager;
+}
+
+void CSMDoc::Document::flagAsDirty()
+{
+    mDirty = true;
 }

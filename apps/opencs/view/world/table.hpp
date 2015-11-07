@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include <QtGui/qevent.h>
+#include <QEvent>
 
 #include "../../model/filter/node.hpp"
 #include "../../model/world/columnbase.hpp"
@@ -30,6 +30,7 @@ namespace CSMWorld
 namespace CSVWorld
 {
     class CommandDelegate;
+    class TableEditIdAction;
 
     ///< Table widget
     class Table : public DragRecordTable
@@ -57,26 +58,28 @@ namespace CSVWorld
             QAction *mMoveUpAction;
             QAction *mMoveDownAction;
             QAction *mViewAction;
-            QAction *mEditCellAction;
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
+            TableEditIdAction *mEditIdAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTableBase *mModel;
             int mRecordStatusDisplay;
             CSMWorld::CommandDispatcher *mDispatcher;
-            CSMWorld::UniversalId mEditCellId;
             std::map<Qt::KeyboardModifiers, DoubleClickAction> mDoubleClickActions;
             bool mJumpToAddedRecord;
             bool mUnselectAfterJump;
+            bool mAutoJump;
+
+            boost::shared_ptr<CSMFilter::Node> mFilter;
+            boost::shared_ptr<CSMFilter::Node> mAdded;
+            boost::shared_ptr<CSMFilter::Node> mModified;
 
         private:
 
             void contextMenuEvent (QContextMenuEvent *event);
 
             void mouseMoveEvent(QMouseEvent *event);
-
-            void dropEvent(QDropEvent *event);
 
         protected:
 
@@ -94,6 +97,8 @@ namespace CSVWorld
             CSMWorld::UniversalId getUniversalId (int row) const;
 
             std::vector<std::string> getColumnsWithDisplay(CSMWorld::ColumnBase::Display display) const;
+
+            std::vector<std::string> getSelectedIds() const;
 
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
@@ -114,6 +119,10 @@ namespace CSVWorld
 
             void closeRequest();
 
+            void extendedDeleteConfigRequest(const std::vector<std::string> &selectedIds);
+
+            void extendedRevertConfigRequest(const std::vector<std::string> &selectedIds);
+
         private slots:
 
             void editCell();
@@ -130,6 +139,10 @@ namespace CSVWorld
 
             void previewRecord();
 
+            void executeExtendedDelete();
+
+            void executeExtendedRevert();
+
         public slots:
 
             void tableSizeUpdate();
@@ -142,7 +155,17 @@ namespace CSVWorld
 
             void updateUserSetting (const QString &name, const QStringList &list);
 
-            void rowsInsertedEvent(const QModelIndex& parent, int start, int end);
+            void dataChangedEvent(const QModelIndex &topLeft, const QModelIndex &bottomRight);
+
+            void jumpAfterModChanged(int state);
+
+            void queuedScrollTo(int state);
+
+            void globalFilterAddedChanged (int state);
+
+            void globalFilterModifiedChanged (int state);
+
+            void rowAdded(const std::string &id);
     };
 }
 

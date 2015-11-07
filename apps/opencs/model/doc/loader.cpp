@@ -1,4 +1,3 @@
-
 #include "loader.hpp"
 
 #include <QTimer>
@@ -52,7 +51,7 @@ void CSMDoc::Loader::load()
     {
         if (iter->second.mRecordsLeft)
         {
-            CSMDoc::Messages messages;
+            Messages messages (Message::Severity_Error);
             for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
                 if (document->getData().continueLoading (messages))
                 {
@@ -68,7 +67,7 @@ void CSMDoc::Loader::load()
             for (CSMDoc::Messages::Iterator iter (messages.begin());
                 iter!=messages.end(); ++iter)
             {
-                document->getReport (log)->add (iter->mId, iter->mMessage);
+                document->getReport (log)->add (*iter);
                 emit loadMessage (document, iter->mMessage);
             }
             }

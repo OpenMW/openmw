@@ -1,4 +1,3 @@
-
 #include "skyextensions.hpp"
 
 #include <components/compiler/extensions.hpp>

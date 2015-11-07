@@ -131,6 +131,12 @@ namespace CSMWorld
                 Type_StartScripts,
                 Type_StartScript,
                 Type_Search,
+                Type_MetaDatas,
+                Type_MetaData,
+                Type_LandTextures,
+                Type_LandTexture,
+                Type_Lands,
+                Type_Land,
                 Type_RunLog
             };
 

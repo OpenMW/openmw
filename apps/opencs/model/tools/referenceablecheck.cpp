@@ -468,6 +468,9 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     if (creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
         messages.push_back (std::make_pair (id, creature.mId + " has negative gold "));
 
+    if (creature.mScale == 0)
+        messages.push_back (std::make_pair (id, creature.mId + " has zero scale value"));
+
     // Check that mentioned scripts exist
     scriptCheck<ESM::Creature>(creature, messages, id.toString());
 }
@@ -648,7 +651,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
 
     if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS) //12 = autocalculated
     {
-        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0008 = autocalculated flag
+        if ((npc.mFlags & ESM::NPC::Autocalc) == 0) //0x0010 = autocalculated flag
         {
             messages.push_back (std::make_pair (id, npc.mId + " mNpdtType or flags mismatch!")); //should not happend?
             return;

@@ -77,10 +77,6 @@ namespace MWMechanics
         std::vector<int> mSummonGraveyard;
 
     protected:
-        // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
-        bool mIsWerewolf;
-        AttributeValue mWerewolfAttributes[8];
-
         int mLevel;
 
     public:

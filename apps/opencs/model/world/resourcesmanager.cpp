@@ -1,4 +1,3 @@
-
 #include "resourcesmanager.hpp"
 
 #include <stdexcept>

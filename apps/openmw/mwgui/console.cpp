@@ -295,9 +295,12 @@ namespace MWGui
         mCurrent = mCommandHistory.end();
         mEditString.clear();
 
-        execute (cm);
-
+        // Reset the command line before the command execution.
+        // It prevents the re-triggering of the acceptCommand() event for the same command 
+        // during the actual command execution
         mCommandLine->setCaption("");
+
+        execute (cm);
     }
 
     std::string Console::complete( std::string input, std::vector<std::string> &matches )

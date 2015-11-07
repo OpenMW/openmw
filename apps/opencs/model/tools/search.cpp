@@ -1,4 +1,3 @@
-
 #include "search.hpp"
 
 #include <stdexcept>
@@ -280,7 +279,7 @@ void CSMTools::Search::replace (CSMDoc::Document& document, CSMWorld::IdTableBas
 bool CSMTools::Search::verify (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
     const CSMWorld::UniversalId& id, const std::string& messageHint) const
 {
-    CSMDoc::Messages messages;
+    CSMDoc::Messages messages (CSMDoc::Message::Severity_Info);
 
     int row = model->getModelIndex (id.getId(),
         model->findColumnIndex (CSMWorld::Columns::ColumnId_Id)).row();

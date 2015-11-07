@@ -5,7 +5,13 @@
 #include <utility>
 
 #include <components/esm/loadcont.hpp>
+#include <components/esm/attr.hpp>
+#include <components/esm/loadmgef.hpp>
+
 #include "nestedtablewrapper.hpp"
+#include "usertype.hpp"
+#include "idtree.hpp"
+#include "npcstats.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
 : InventoryColumns (columns) {}
@@ -25,8 +31,9 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
     if (column==mAutoCalc)
         return record.get().mData.mAutoCalc!=0;
 
+    // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column==mColumns.mEffects)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -37,10 +44,168 @@ void CSMWorld::PotionRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     Record<ESM::Potion>& record = static_cast<Record<ESM::Potion>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Potion)));
 
+    ESM::Potion potion = record.get();
+
     if (column==mAutoCalc)
-        record.get().mData.mAutoCalc = value.toInt();
+        potion.mData.mAutoCalc = value.toInt();
     else
+    {
         InventoryRefIdAdapter<ESM::Potion>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(potion);
+}
+
+
+CSMWorld::IngredientColumns::IngredientColumns (const InventoryColumns& columns)
+: InventoryColumns (columns) {}
+
+CSMWorld::IngredientRefIdAdapter::IngredientRefIdAdapter (const IngredientColumns& columns)
+: InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, columns),
+  mColumns(columns)
+{}
+
+QVariant CSMWorld::IngredientRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    if (column==mColumns.mEffects)
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
+
+    return InventoryRefIdAdapter<ESM::Ingredient>::getData (column, data, index);
+}
+
+void CSMWorld::IngredientRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    InventoryRefIdAdapter<ESM::Ingredient>::setData (column, data, index, value);
+
+    return;
+}
+
+
+CSMWorld::IngredEffectRefIdAdapter::IngredEffectRefIdAdapter()
+: mType(UniversalId::Type_Ingredient)
+{}
+
+CSMWorld::IngredEffectRefIdAdapter::~IngredEffectRefIdAdapter()
+{}
+
+void CSMWorld::IngredEffectRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Ingredient>& record =
+        static_cast<Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+    ESM::Ingredient ingredient = record.get();
+
+    ingredient.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (ingredient);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::IngredEffectRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Ingredient>& record =
+        static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    // return the whole struct
+    std::vector<typename ESM::Ingredient::IRDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Ingredient>& record =
+        static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    if (subRowIndex < 0 || subRowIndex >= 4)
+        throw std::runtime_error ("index out of range");
+
+    switch (subColIndex)
+    {
+        case 0: return record.get().mData.mEffectID[subRowIndex];
+        case 1:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainSkill:
+                case ESM::MagicEffect::DamageSkill:
+                case ESM::MagicEffect::RestoreSkill:
+                case ESM::MagicEffect::FortifySkill:
+                case ESM::MagicEffect::AbsorbSkill:
+                    return record.get().mData.mSkills[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
+        case 2:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::AbsorbAttribute:
+                    return record.get().mData.mAttributes[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
+        default:
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Ingredient>& record =
+        static_cast<Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+    ESM::Ingredient ingredient = record.get();
+
+    if (subRowIndex < 0 || subRowIndex >= 4)
+        throw std::runtime_error ("index out of range");
+
+    switch(subColIndex)
+    {
+        case 0: ingredient.mData.mEffectID[subRowIndex] = value.toInt(); break;
+        case 1: ingredient.mData.mSkills[subRowIndex] = value.toInt(); break;
+        case 2: ingredient.mData.mAttributes[subRowIndex] = value.toInt(); break;
+        default:
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+
+    record.setModified (ingredient);
+}
+
+int CSMWorld::IngredEffectRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 3; // effect, skill, attribute
+}
+
+int CSMWorld::IngredEffectRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    return 4; // up to 4 effects
 }
 
 
@@ -71,12 +236,19 @@ void CSMWorld::ApparatusRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     Record<ESM::Apparatus>& record = static_cast<Record<ESM::Apparatus>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Apparatus)));
 
+    ESM::Apparatus apparatus = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        apparatus.mData.mType = value.toInt();
     else if (column==mQuality)
-        record.get().mData.mQuality = value.toFloat();
+        apparatus.mData.mQuality = value.toFloat();
     else
+    {
         InventoryRefIdAdapter<ESM::Apparatus>::setData (column, data, index, value);
+
+        return;
+    }
+    record.setModified(apparatus);
 }
 
 
@@ -103,7 +275,7 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mArmor;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -114,14 +286,22 @@ void CSMWorld::ArmorRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
     Record<ESM::Armor>& record = static_cast<Record<ESM::Armor>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Armor)));
 
+    ESM::Armor armor = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        armor.mData.mType = value.toInt();
     else if (column==mHealth)
-        record.get().mData.mHealth = value.toInt();
+        armor.mData.mHealth = value.toInt();
     else if (column==mArmor)
-        record.get().mData.mArmor = value.toInt();
+        armor.mData.mArmor = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Armor>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(armor);
 }
 
 CSMWorld::BookRefIdAdapter::BookRefIdAdapter (const EnchantableColumns& columns,
@@ -151,12 +331,20 @@ void CSMWorld::BookRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Book>& record = static_cast<Record<ESM::Book>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Book)));
 
+    ESM::Book book = record.get();
+
     if (column==mScroll)
-        record.get().mData.mIsScroll = value.toInt();
+        book.mData.mIsScroll = value.toInt();
     else if (column==mSkill)
-        record.get().mData.mSkillID = value.toInt();
+        book.mData.mSkillID = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Book>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(book);
 }
 
 CSMWorld::ClothingRefIdAdapter::ClothingRefIdAdapter (const EnchantableColumns& columns,
@@ -175,7 +363,7 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mType;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }
@@ -186,10 +374,18 @@ void CSMWorld::ClothingRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     Record<ESM::Clothing>& record = static_cast<Record<ESM::Clothing>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Clothing)));
 
+    ESM::Clothing clothing = record.get();
+
     if (column==mType)
-        record.get().mData.mType = value.toInt();
+        clothing.mData.mType = value.toInt();
     else
+    {
         EnchantableRefIdAdapter<ESM::Clothing>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(clothing);
 }
 
 CSMWorld::ContainerRefIdAdapter::ContainerRefIdAdapter (const NameColumns& columns,
@@ -215,7 +411,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -226,35 +422,42 @@ void CSMWorld::ContainerRefIdAdapter::setData (const RefIdColumn *column, RefIdD
     Record<ESM::Container>& record = static_cast<Record<ESM::Container>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Container)));
 
+    ESM::Container container = record.get();
+
     if (column==mWeight)
-        record.get().mWeight = value.toFloat();
+        container.mWeight = value.toFloat();
     else if (column==mOrganic)
     {
         if (value.toInt())
-            record.get().mFlags |= ESM::Container::Organic;
+            container.mFlags |= ESM::Container::Organic;
         else
-            record.get().mFlags &= ~ESM::Container::Organic;
+            container.mFlags &= ~ESM::Container::Organic;
     }
     else if (column==mRespawn)
     {
         if (value.toInt())
-            record.get().mFlags |= ESM::Container::Respawn;
+            container.mFlags |= ESM::Container::Respawn;
         else
-            record.get().mFlags &= ~ESM::Container::Respawn;
+            container.mFlags &= ~ESM::Container::Respawn;
     }
     else
+    {
         NameRefIdAdapter<ESM::Container>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(container);
 }
 
 CSMWorld::CreatureColumns::CreatureColumns (const ActorColumns& actorColumns)
 : ActorColumns (actorColumns),
   mType(NULL),
-  mSoul(NULL),
   mScale(NULL),
   mOriginal(NULL),
-  mCombat(NULL),
-  mMagic(NULL),
-  mStealth(NULL)
+  mAttributes(NULL),
+  mAttacks(NULL),
+  mMisc(NULL)
 {}
 
 CSMWorld::CreatureRefIdAdapter::CreatureRefIdAdapter (const CreatureColumns& columns)
@@ -270,23 +473,20 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
     if (column==mColumns.mType)
         return record.get().mData.mType;
 
-    if (column==mColumns.mSoul)
-        return record.get().mData.mSoul;
-
     if (column==mColumns.mScale)
         return record.get().mScale;
 
     if (column==mColumns.mOriginal)
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
-    if (column==mColumns.mCombat)
-        return static_cast<int> (record.get().mData.mCombat);
+    if (column==mColumns.mAttributes)
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
 
-    if (column==mColumns.mMagic)
-        return static_cast<int> (record.get().mData.mMagic);
+    if (column==mColumns.mAttacks)
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
 
-    if (column==mColumns.mStealth)
-        return static_cast<int> (record.get().mData.mStealth);
+    if (column==mColumns.mMisc)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -303,20 +503,14 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     Record<ESM::Creature>& record = static_cast<Record<ESM::Creature>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
+    ESM::Creature creature = record.get();
+
     if (column==mColumns.mType)
-        record.get().mData.mType = value.toInt();
-    else if (column==mColumns.mSoul)
-        record.get().mData.mSoul = value.toInt();
+        creature.mData.mType = value.toInt();
     else if (column==mColumns.mScale)
-        record.get().mScale = value.toFloat();
+        creature.mScale = value.toFloat();
     else if (column==mColumns.mOriginal)
-        record.get().mOriginal = value.toString().toUtf8().constData();
-    else if (column==mColumns.mCombat)
-        record.get().mData.mCombat = value.toInt();
-    else if (column==mColumns.mMagic)
-        record.get().mData.mMagic = value.toInt();
-    else if (column==mColumns.mStealth)
-        record.get().mData.mStealth = value.toInt();
+        creature.mOriginal = value.toString().toUtf8().constData();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -325,13 +519,19 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mFlags |= iter->second;
+                creature.mFlags |= iter->second;
             else
-                record.get().mFlags &= ~iter->second;
+                creature.mFlags &= ~iter->second;
         }
         else
+        {
             ActorRefIdAdapter<ESM::Creature>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified(creature);
 }
 
 CSMWorld::DoorRefIdAdapter::DoorRefIdAdapter (const NameColumns& columns,
@@ -361,12 +561,20 @@ void CSMWorld::DoorRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Door>& record = static_cast<Record<ESM::Door>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Door)));
 
+    ESM::Door door = record.get();
+
     if (column==mOpenSound)
-        record.get().mOpenSound = value.toString().toUtf8().constData();
+        door.mOpenSound = value.toString().toUtf8().constData();
     else if (column==mCloseSound)
-        record.get().mCloseSound = value.toString().toUtf8().constData();
+        door.mCloseSound = value.toString().toUtf8().constData();
     else
+    {
         NameRefIdAdapter<ESM::Door>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(door);
 }
 
 CSMWorld::LightColumns::LightColumns (const InventoryColumns& columns)
@@ -409,14 +617,16 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
     Record<ESM::Light>& record = static_cast<Record<ESM::Light>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Light)));
 
+    ESM::Light light = record.get();
+
     if (column==mColumns.mTime)
-        record.get().mData.mTime = value.toInt();
+        light.mData.mTime = value.toInt();
     else if (column==mColumns.mRadius)
-        record.get().mData.mRadius = value.toInt();
+        light.mData.mRadius = value.toInt();
     else if (column==mColumns.mColor)
-        record.get().mData.mColor = value.toInt();
+        light.mData.mColor = value.toInt();
     else if (column==mColumns.mSound)
-        record.get().mSound = value.toString().toUtf8().constData();
+        light.mSound = value.toString().toUtf8().constData();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -425,13 +635,19 @@ void CSMWorld::LightRefIdAdapter::setData (const RefIdColumn *column, RefIdData&
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mData.mFlags |= iter->second;
+                light.mData.mFlags |= iter->second;
             else
-                record.get().mData.mFlags &= ~iter->second;
+                light.mData.mFlags &= ~iter->second;
         }
         else
+        {
             InventoryRefIdAdapter<ESM::Light>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified (light);
 }
 
 CSMWorld::MiscRefIdAdapter::MiscRefIdAdapter (const InventoryColumns& columns, const RefIdColumn *key)
@@ -456,10 +672,18 @@ void CSMWorld::MiscRefIdAdapter::setData (const RefIdColumn *column, RefIdData& 
     Record<ESM::Miscellaneous>& record = static_cast<Record<ESM::Miscellaneous>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Miscellaneous)));
 
+    ESM::Miscellaneous misc = record.get();
+
     if (column==mKey)
-        record.get().mData.mIsKey = value.toInt();
+        misc.mData.mIsKey = value.toInt();
     else
+    {
         InventoryRefIdAdapter<ESM::Miscellaneous>::setData (column, data, index, value);
+
+        return;
+    }
+
+    record.setModified(misc);
 }
 
 CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
@@ -474,8 +698,8 @@ CSMWorld::NpcColumns::NpcColumns (const ActorColumns& actorColumns)
   mMisc(NULL)
 {}
 
-CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns)
-: ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns)
+CSMWorld::NpcRefIdAdapter::NpcRefIdAdapter (const NpcColumns& columns, const CSMWorld::Data& data)
+: ActorRefIdAdapter<ESM::NPC> (UniversalId::Type_Npc, columns), mColumns (columns), mData(data)
 {}
 
 QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data, int index)
@@ -502,13 +726,13 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mAttributes || column==mColumns.mSkills)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant(QVariant::UserType);
+            return QVariant::fromValue(ColumnBase::TableEdit_None);
         else
-            return true;
+            return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
     }
 
     if (column==mColumns.mMisc)
-        return true;
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -525,16 +749,18 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
     Record<ESM::NPC>& record = static_cast<Record<ESM::NPC>&> (
         data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
+    ESM::NPC npc = record.get();
+
     if (column==mColumns.mRace)
-        record.get().mRace = value.toString().toUtf8().constData();
+        npc.mRace = value.toString().toUtf8().constData();
     else if (column==mColumns.mClass)
-        record.get().mClass = value.toString().toUtf8().constData();
+        npc.mClass = value.toString().toUtf8().constData();
     else if (column==mColumns.mFaction)
-        record.get().mFaction = value.toString().toUtf8().constData();
+        npc.mFaction = value.toString().toUtf8().constData();
     else if (column==mColumns.mHair)
-        record.get().mHair = value.toString().toUtf8().constData();
+        npc.mHair = value.toString().toUtf8().constData();
     else if (column==mColumns.mHead)
-        record.get().mHead = value.toString().toUtf8().constData();
+        npc.mHead = value.toString().toUtf8().constData();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -543,16 +769,70 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
         if (iter!=mColumns.mFlags.end())
         {
             if (value.toInt()!=0)
-                record.get().mFlags |= iter->second;
+                npc.mFlags |= iter->second;
             else
-                record.get().mFlags &= ~iter->second;
+                npc.mFlags &= ~iter->second;
+
+            if (iter->second == ESM::NPC::Autocalc)
+            {
+                if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+                {
+                    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(npc);
+                    if (!stats)
+                    {
+                        record.setModified (npc);
+                        return;
+                    }
+
+                    // update npc
+                    npc.mNpdtType = ESM::NPC::NPC_DEFAULT;
+                    npc.mNpdt52.mLevel        = npc.mNpdt12.mLevel;
+
+                    npc.mNpdt52.mStrength     = stats->getBaseAttribute(ESM::Attribute::Strength);
+                    npc.mNpdt52.mIntelligence = stats->getBaseAttribute(ESM::Attribute::Intelligence);
+                    npc.mNpdt52.mWillpower    = stats->getBaseAttribute(ESM::Attribute::Willpower);
+                    npc.mNpdt52.mAgility      = stats->getBaseAttribute(ESM::Attribute::Agility);
+                    npc.mNpdt52.mSpeed        = stats->getBaseAttribute(ESM::Attribute::Speed);
+                    npc.mNpdt52.mEndurance    = stats->getBaseAttribute(ESM::Attribute::Endurance);
+                    npc.mNpdt52.mPersonality  = stats->getBaseAttribute(ESM::Attribute::Personality);
+                    npc.mNpdt52.mLuck         = stats->getBaseAttribute(ESM::Attribute::Luck);
+
+                    for (int i = 0; i < ESM::Skill::Length; ++i)
+                    {
+                        npc.mNpdt52.mSkills[i] = stats->getBaseSkill(i);
+                    }
+
+                    npc.mNpdt52.mHealth       = stats->getHealth();
+                    npc.mNpdt52.mMana         = stats->getMana();
+                    npc.mNpdt52.mFatigue      = stats->getFatigue();
+                    npc.mNpdt52.mDisposition  = npc.mNpdt12.mDisposition;
+                    npc.mNpdt52.mReputation   = npc.mNpdt12.mReputation;
+                    npc.mNpdt52.mRank         = npc.mNpdt12.mRank;
+                    npc.mNpdt52.mGold         = npc.mNpdt12.mGold;
+
+                    // TODO: add spells from autogenerated list like vanilla (but excluding any
+                    // race powers or abilities)
+                }
+                else
+                {
+                    npc.mNpdtType =  ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
+                    npc.mNpdt12.mLevel = npc.mNpdt52.mLevel; // for NPC's loaded as non-autocalc
+                    mData.npcAutoCalculate(npc);
+                }
+            }
         }
         else
+        {
             ActorRefIdAdapter<ESM::NPC>::setData (column, data, index, value);
+
+            return;
+        }
     }
+
+    record.setModified (npc);
 }
 
-CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter ()
+CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter(const CSMWorld::Data& data) : mData(data)
 {}
 
 void CSMWorld::NpcAttributesRefIdAdapter::addNestedRow (const RefIdColumn *column,
@@ -600,34 +880,44 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
+    const ESM::NPC npc = record.get();
+    const ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
 
     if (subColIndex == 0)
-        switch (subRowIndex)
-        {
-            case 0: return QString("Strength");
-            case 1: return QString("Intelligence");
-            case 2: return QString("Willpower");
-            case 3: return QString("Agility");
-            case 4: return QString("Speed");
-            case 5: return QString("Endurance");
-            case 6: return QString("Personality");
-            case 7: return QString("Luck");
-            default: return QVariant(); // throw an exception here?
-        }
+        return subRowIndex;
     else if (subColIndex == 1)
-        switch (subRowIndex)
+        if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
-            case 0: return static_cast<int>(npcStruct.mStrength);
-            case 1: return static_cast<int>(npcStruct.mIntelligence);
-            case 2: return static_cast<int>(npcStruct.mWillpower);
-            case 3: return static_cast<int>(npcStruct.mAgility);
-            case 4: return static_cast<int>(npcStruct.mSpeed);
-            case 5: return static_cast<int>(npcStruct.mEndurance);
-            case 6: return static_cast<int>(npcStruct.mPersonality);
-            case 7: return static_cast<int>(npcStruct.mLuck);
-            default: return QVariant(); // throw an exception here?
+            CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            if (!stats)
+                return QVariant();
+
+            switch (subRowIndex)
+            {
+                case 0: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Strength));
+                case 1: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Intelligence));
+                case 2: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Willpower));
+                case 3: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Agility));
+                case 4: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Speed));
+                case 5: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Endurance));
+                case 6: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Personality));
+                case 7: return static_cast<int>(stats->getBaseAttribute(ESM::Attribute::Luck));
+                default: return QVariant(); // throw an exception here?
+            }
         }
+        else
+            switch (subRowIndex)
+            {
+                case 0: return static_cast<int>(npcStruct.mStrength);
+                case 1: return static_cast<int>(npcStruct.mIntelligence);
+                case 2: return static_cast<int>(npcStruct.mWillpower);
+                case 3: return static_cast<int>(npcStruct.mAgility);
+                case 4: return static_cast<int>(npcStruct.mSpeed);
+                case 5: return static_cast<int>(npcStruct.mEndurance);
+                case 6: return static_cast<int>(npcStruct.mPersonality);
+                case 7: return static_cast<int>(npcStruct.mLuck);
+                default: return QVariant(); // throw an exception here?
+            }
     else
         return QVariant(); // throw an exception here?
 }
@@ -670,7 +960,8 @@ int CSMWorld::NpcAttributesRefIdAdapter::getNestedRowsCount(const RefIdColumn *c
     return 8;
 }
 
-CSMWorld::NpcSkillsRefIdAdapter::NpcSkillsRefIdAdapter ()
+CSMWorld::NpcSkillsRefIdAdapter::NpcSkillsRefIdAdapter(const CSMWorld::Data& data)
+    : mData(data)
 {}
 
 void CSMWorld::NpcSkillsRefIdAdapter::addNestedRow (const RefIdColumn *column,
@@ -718,15 +1009,29 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    const ESM::NPC::NPDTstruct52& npcStruct = record.get().mNpdt52;
+    const ESM::NPC npc = record.get();
 
     if (subRowIndex < 0 || subRowIndex >= ESM::Skill::Length)
         throw std::runtime_error ("index out of range");
 
     if (subColIndex == 0)
-        return QString(ESM::Skill::sSkillNames[subRowIndex].c_str());
+        return subRowIndex;
     else if (subColIndex == 1)
-        return static_cast<int>(npcStruct.mSkills[subRowIndex]);
+    {
+        if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        {
+            CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            if (!stats)
+                return QVariant();
+
+            return static_cast<int>(stats->getBaseSkill(subRowIndex));
+        }
+        else
+        {
+            const ESM::NPC::NPDTstruct52& npcStruct = npc.mNpdt52;
+            return static_cast<int>(npcStruct.mSkills[subRowIndex]);
+        }
+    }
     else
         return QVariant(); // throw an exception here?
 }
@@ -761,7 +1066,7 @@ int CSMWorld::NpcSkillsRefIdAdapter::getNestedRowsCount(const RefIdColumn *colum
     return ESM::Skill::Length;
 }
 
-CSMWorld::NpcMiscRefIdAdapter::NpcMiscRefIdAdapter ()
+CSMWorld::NpcMiscRefIdAdapter::NpcMiscRefIdAdapter(const CSMWorld::Data& data) : mData(data)
 {}
 
 CSMWorld::NpcMiscRefIdAdapter::~NpcMiscRefIdAdapter()
@@ -797,16 +1102,43 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Npc)));
 
-    bool autoCalc = (record.get().mFlags & ESM::NPC::Autocalc) != 0;
+    const ESM::NPC npc = record.get();
+
+    bool autoCalc = (npc.mFlags & ESM::NPC::Autocalc) != 0;
 
     if (autoCalc)
+    {
+        CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+
         switch (subColIndex)
         {
-            case 0: return static_cast<int>(record.get().mNpdt12.mLevel);
-            case 1: return QVariant(QVariant::UserType);
-            case 2: return QVariant(QVariant::UserType);
-            case 3: return QVariant(QVariant::UserType);
-            case 4: return QVariant(QVariant::UserType);
+            case 0: return static_cast<int>(npc.mNpdt12.mLevel);
+            case 1:
+            {
+                UserInt i(0); // unknown
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 2:
+            {
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getHealth());
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 3:
+            {
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getMana());
+                return QVariant(QVariant::fromValue(i));
+            }
+            case 4:
+            {
+                UserInt i(0);
+                if (stats)
+                    i = UserInt(stats->getFatigue());
+                return QVariant(QVariant::fromValue(i));
+            }
             case 5: return static_cast<int>(record.get().mNpdt12.mDisposition);
             case 6: return static_cast<int>(record.get().mNpdt12.mReputation);
             case 7: return static_cast<int>(record.get().mNpdt12.mRank);
@@ -814,6 +1146,7 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             case 9: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
+    }
     else
         switch (subColIndex)
         {
@@ -843,31 +1176,31 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
     if (autoCalc)
         switch(subColIndex)
         {
-            case 0: npc.mNpdt12.mLevel = static_cast<short>(value.toInt()); break;
+            case 0: npc.mNpdt12.mLevel       = static_cast<short>(value.toInt()); break;
             case 1: return;
             case 2: return;
             case 3: return;
             case 4: return;
             case 5: npc.mNpdt12.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt12.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt12.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt12.mGold = value.toInt(); break;
-            case 9: npc.mPersistent = value.toBool(); break;
+            case 6: npc.mNpdt12.mReputation  = static_cast<signed char>(value.toInt()); break;
+            case 7: npc.mNpdt12.mRank        = static_cast<signed char>(value.toInt()); break;
+            case 8: npc.mNpdt12.mGold        = value.toInt(); break;
+            case 9: npc.mPersistent          = value.toBool(); break;
             default: return; // throw an exception here?
         }
     else
         switch(subColIndex)
         {
-            case 0: npc.mNpdt52.mLevel = static_cast<short>(value.toInt()); break;
-            case 1: npc.mNpdt52.mFactionID = static_cast<char>(value.toInt()); break;
-            case 2: npc.mNpdt52.mHealth = static_cast<unsigned short>(value.toInt()); break;
-            case 3: npc.mNpdt52.mMana = static_cast<unsigned short>(value.toInt()); break;
-            case 4: npc.mNpdt52.mFatigue = static_cast<unsigned short>(value.toInt()); break;
+            case 0: npc.mNpdt52.mLevel       = static_cast<short>(value.toInt()); break;
+            case 1: npc.mNpdt52.mFactionID   = static_cast<char>(value.toInt()); break;
+            case 2: npc.mNpdt52.mHealth      = static_cast<unsigned short>(value.toInt()); break;
+            case 3: npc.mNpdt52.mMana        = static_cast<unsigned short>(value.toInt()); break;
+            case 4: npc.mNpdt52.mFatigue     = static_cast<unsigned short>(value.toInt()); break;
             case 5: npc.mNpdt52.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt52.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt52.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt52.mGold = value.toInt(); break;
-            case 9: npc.mPersistent = value.toBool(); break;
+            case 6: npc.mNpdt52.mReputation  = static_cast<signed char>(value.toInt()); break;
+            case 7: npc.mNpdt52.mRank        = static_cast<signed char>(value.toInt()); break;
+            case 8: npc.mNpdt52.mGold        = value.toInt(); break;
+            case 9: npc.mPersistent          = value.toBool(); break;
             default: return; // throw an exception here?
         }
 
@@ -880,6 +1213,289 @@ int CSMWorld::NpcMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *colu
 }
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    return 1; // fixed at size 1
+}
+
+CSMWorld::CreatureAttributesRefIdAdapter::CreatureAttributesRefIdAdapter()
+{}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    // store the whole struct
+    creature.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (creature);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttributesRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    // return the whole struct
+    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    if (subColIndex == 0)
+        return subRowIndex;
+    else if (subColIndex == 1)
+        switch (subRowIndex)
+        {
+            case 0: return creature.mData.mStrength;
+            case 1: return creature.mData.mIntelligence;
+            case 2: return creature.mData.mWillpower;
+            case 3: return creature.mData.mAgility;
+            case 4: return creature.mData.mSpeed;
+            case 5: return creature.mData.mEndurance;
+            case 6: return creature.mData.mPersonality;
+            case 7: return creature.mData.mLuck;
+            default: return QVariant(); // throw an exception here?
+        }
+    else
+        return QVariant(); // throw an exception here?
+}
+
+void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    if (subColIndex == 1)
+        switch(subRowIndex)
+        {
+            case 0: creature.mData.mStrength = value.toInt(); break;
+            case 1: creature.mData.mIntelligence = value.toInt(); break;
+            case 2: creature.mData.mWillpower = value.toInt(); break;
+            case 3: creature.mData.mAgility = value.toInt(); break;
+            case 4: creature.mData.mSpeed = value.toInt(); break;
+            case 5: creature.mData.mEndurance = value.toInt(); break;
+            case 6: creature.mData.mPersonality = value.toInt(); break;
+            case 7: creature.mData.mLuck = value.toInt(); break;
+            default: return; // throw an exception here?
+        }
+    else
+        return; // throw an exception here?
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureAttributesRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 2;
+}
+
+int CSMWorld::CreatureAttributesRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    // There are 8 attributes
+    return 8;
+}
+
+CSMWorld::CreatureAttackRefIdAdapter::CreatureAttackRefIdAdapter()
+{}
+
+void CSMWorld::CreatureAttackRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    // store the whole struct
+    creature.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> > &>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (creature);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureAttackRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    // return the whole struct
+    std::vector<typename ESM::Creature::NPDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Creature::NPDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
+        throw std::runtime_error ("index out of range");
+
+    if (subColIndex == 0)
+        return subRowIndex + 1;
+    else if (subColIndex < 3) // 1 or 2
+        return creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)];
+    else
+        return QVariant(); // throw an exception here?
+}
+
+void CSMWorld::CreatureAttackRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    if (subRowIndex < 0 || subRowIndex > 2)
+        throw std::runtime_error ("index out of range");
+
+    if (subColIndex == 1 || subColIndex == 2)
+        creature.mData.mAttack[(subRowIndex * 2) + (subColIndex - 1)] = value.toInt();
+    else
+        return; // throw an exception here?
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureAttackRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 3;
+}
+
+int CSMWorld::CreatureAttackRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    // There are 3 attacks
+    return 3;
+}
+
+CSMWorld::CreatureMiscRefIdAdapter::CreatureMiscRefIdAdapter()
+{}
+
+CSMWorld::CreatureMiscRefIdAdapter::~CreatureMiscRefIdAdapter()
+{}
+
+void CSMWorld::CreatureMiscRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    throw std::logic_error ("cannot add a row to a fixed table");
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    throw std::logic_error ("cannot remove a row to a fixed table");
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    throw std::logic_error ("table operation not supported");
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::CreatureMiscRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    throw std::logic_error ("table operation not supported");
+}
+
+QVariant CSMWorld::CreatureMiscRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
+
+    const ESM::Creature creature = record.get();
+
+    switch (subColIndex)
+    {
+        case 0: return creature.mData.mLevel;
+        case 1: return creature.mData.mHealth;
+        case 2: return creature.mData.mMana;
+        case 3: return creature.mData.mFatigue;
+        case 4: return creature.mData.mSoul;
+        case 5: return creature.mData.mCombat;
+        case 6: return creature.mData.mMagic;
+        case 7: return creature.mData.mStealth;
+        case 8: return creature.mData.mGold;
+        default: return QVariant(); // throw an exception here?
+    }
+}
+
+void CSMWorld::CreatureMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, UniversalId::Type_Creature)));
+    ESM::Creature creature = record.get();
+
+    switch(subColIndex)
+    {
+        case 0: creature.mData.mLevel   = value.toInt(); break;
+        case 1: creature.mData.mHealth  = value.toInt(); break;
+        case 2: creature.mData.mMana    = value.toInt(); break;
+        case 3: creature.mData.mFatigue = value.toInt(); break;
+        case 4: creature.mData.mSoul    = value.toInt(); break;
+        case 5: creature.mData.mCombat  = value.toInt(); break;
+        case 6: creature.mData.mMagic   = value.toInt(); break;
+        case 7: creature.mData.mStealth = value.toInt(); break;
+        case 8: creature.mData.mGold    = value.toInt(); break;
+        default: return; // throw an exception here?
+    }
+
+    record.setModified (creature);
+}
+
+int CSMWorld::CreatureMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 9; // Level, Health, Mana, Fatigue, Soul, Combat, Magic, Steath, Gold
+}
+
+int CSMWorld::CreatureMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
 {
     return 1; // fixed at size 1
 }
@@ -971,4 +1587,331 @@ void CSMWorld::WeaponRefIdAdapter::setData (const RefIdColumn *column, RefIdData
         else
             EnchantableRefIdAdapter<ESM::Weapon>::setData (column, data, index, value);
     }
+}
+
+namespace CSMWorld
+{
+
+template<>
+QVariant ActorRefIdAdapter<ESM::NPC>::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::NPC>& record = static_cast<const Record<ESM::NPC>&> (
+        data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::NPC>::getType())));
+
+    if (column==mActors.mHello)
+        return record.get().mAiData.mHello;
+
+    if (column==mActors.mFlee)
+        return record.get().mAiData.mFlee;
+
+    if (column==mActors.mFight)
+        return record.get().mAiData.mFight;
+
+    if (column==mActors.mAlarm)
+        return record.get().mAiData.mAlarm;
+
+    if (column==mActors.mInventory)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    if (column==mActors.mSpells)
+    {
+        if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
+            return QVariant::fromValue(ColumnBase::TableEdit_None);
+        else
+            return QVariant::fromValue(ColumnBase::TableEdit_Full);
+    }
+
+    if (column==mActors.mDestinations)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    if (column==mActors.mAiPackages)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mActors.mServices.find (column);
+
+    if (iter!=mActors.mServices.end())
+        return (record.get().mAiData.mServices & iter->second)!=0;
+
+    return NameRefIdAdapter<ESM::NPC>::getData (column, data, index);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::NPC>::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    Record<ESM::NPC>& record =
+        static_cast<Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    if (record.get().mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        return; // can't edit autocalculated spells
+
+    ESM::NPC caster = record.get();
+
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    std::string newString;
+
+    if (position >= (int)list.size())
+        list.push_back(newString);
+    else
+        list.insert(list.begin()+position, newString);
+
+    record.setModified (caster);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::NPC>::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    Record<ESM::NPC>& record =
+        static_cast<Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    if (record.get().mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        return; // can't edit autocalculated spells
+
+    ESM::NPC caster = record.get();
+
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    // avoid race power rows
+    int size = 0;
+    int raceIndex = mData.getRaces().searchId(caster.mRace);
+    if (raceIndex != -1)
+        size = mData.getRaces().getRecord(raceIndex).get().mPowers.mList.size();
+
+    if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size() + size))
+        throw std::runtime_error ("index out of range");
+
+    if (rowToRemove >= static_cast<int>(list.size()) && rowToRemove < static_cast<int>(list.size() + size))
+        return; // hack, assumes the race powers are added at the end
+
+    list.erase (list.begin () + rowToRemove);
+
+    record.setModified (caster);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::NPC>::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::NPC>& record =
+        static_cast<Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+
+    if (record.get().mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
+        return; // can't edit autocalculated spells
+
+    ESM::NPC caster = record.get();
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    // avoid race power rows
+    int size = 0;
+    int raceIndex = mData.getRaces().searchId(caster.mRace);
+    if (raceIndex != -1)
+        size = mData.getRaces().getRecord(raceIndex).get().mPowers.mList.size();
+
+    if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size() + size))
+        throw std::runtime_error ("index out of range");
+
+    if (subRowIndex >= static_cast<int>(list.size()) && subRowIndex < static_cast<int>(list.size() + size))
+        return; // hack, assumes the race powers are added at the end
+
+    if (subColIndex == 0)
+        list.at(subRowIndex) = std::string(value.toString().toUtf8());
+    else
+        throw std::runtime_error("Trying to access non-existing column in the nested table!");
+
+    record.setModified (caster);
+}
+
+template <>
+QVariant NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::NPC>& record =
+        static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    if (!stats)
+        return QVariant();
+
+    const std::vector<SpellInfo>& spells = stats->spells();
+
+    if (subRowIndex < 0 || subRowIndex >= static_cast<int> (spells.size()))
+        throw std::runtime_error ("index out of range");
+
+    switch (subColIndex)
+    {
+        case 0: return QString::fromUtf8(spells[subRowIndex].mName.c_str());
+        case 1: return spells[subRowIndex].mType;
+        case 2: return spells[subRowIndex].mFromRace;
+        case 3: return spells[subRowIndex].mCost;
+        case 4: return spells[subRowIndex].mChance;
+        default:
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+}
+
+template <>
+int NestedSpellRefIdAdapter<ESM::NPC>::getNestedColumnsCount(const RefIdColumn *column,
+        const RefIdData& data) const
+{
+    return 5;
+}
+
+template <>
+int NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    const Record<ESM::NPC>& record =
+        static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    if (!stats)
+        return 0;
+
+    return static_cast<int>(stats->spells().size());
+}
+
+template<>
+QVariant ActorRefIdAdapter<ESM::Creature>::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    const Record<ESM::Creature>& record = static_cast<const Record<ESM::Creature>&> (
+        data.getRecord (RefIdData::LocalIndex (index, BaseRefIdAdapter<ESM::Creature>::getType())));
+
+    if (column==mActors.mHello)
+        return record.get().mAiData.mHello;
+
+    if (column==mActors.mFlee)
+        return record.get().mAiData.mFlee;
+
+    if (column==mActors.mFight)
+        return record.get().mAiData.mFight;
+
+    if (column==mActors.mAlarm)
+        return record.get().mAiData.mAlarm;
+
+    if (column==mActors.mInventory)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    if (column==mActors.mSpells)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    if (column==mActors.mDestinations)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    if (column==mActors.mAiPackages)
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
+
+    std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
+        mActors.mServices.find (column);
+
+    if (iter!=mActors.mServices.end())
+        return (record.get().mAiData.mServices & iter->second)!=0;
+
+    return NameRefIdAdapter<ESM::Creature>::getData (column, data, index);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::Creature>::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+    ESM::Creature caster = record.get();
+
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    std::string newString;
+
+    if (position >= (int)list.size())
+        list.push_back(newString);
+    else
+        list.insert(list.begin()+position, newString);
+
+    record.setModified (caster);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::Creature>::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+    ESM::Creature caster = record.get();
+
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    if (rowToRemove < 0 || rowToRemove >= static_cast<int> (list.size()))
+        throw std::runtime_error ("index out of range");
+
+    list.erase (list.begin () + rowToRemove);
+
+    record.setModified (caster);
+}
+
+template <>
+void NestedSpellRefIdAdapter<ESM::Creature>::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Creature>& record =
+        static_cast<Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+    ESM::Creature caster = record.get();
+    std::vector<std::string>& list = caster.mSpells.mList;
+
+    if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+        throw std::runtime_error ("index out of range");
+
+    if (subColIndex == 0)
+        list.at(subRowIndex) = std::string(value.toString().toUtf8());
+    else
+        throw std::runtime_error("Trying to access non-existing column in the nested table!");
+
+    record.setModified (caster);
+}
+
+template<>
+QVariant NestedSpellRefIdAdapter<ESM::Creature>::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    const std::vector<std::string>& list = record.get().mSpells.mList;
+
+    if (subRowIndex < 0 || subRowIndex >= static_cast<int> (list.size()))
+        throw std::runtime_error ("index out of range");
+
+    const std::string& content = list.at(subRowIndex);
+
+    int type = -1;
+    int spellIndex = mData.getSpells().searchId(content);
+    if (spellIndex != -1)
+        type = mData.getSpells().getRecord(spellIndex).get().mData.mType;
+
+    if (subColIndex == 0)
+        return QString::fromUtf8(content.c_str());
+    else if (subColIndex == 1)
+        return type;
+    else
+        throw std::runtime_error("Trying to access non-existing column in the nested table!");
+}
+
+template <>
+int NestedSpellRefIdAdapter<ESM::Creature>::getNestedColumnsCount(const RefIdColumn *column,
+        const RefIdData& data) const
+{
+    return 2;
+}
+
+template <>
+int NestedSpellRefIdAdapter<ESM::Creature>::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    const Record<ESM::Creature>& record =
+        static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    return static_cast<int>(record.get().mSpells.mList.size());
+}
+
 }

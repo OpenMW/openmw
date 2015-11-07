@@ -73,11 +73,23 @@ namespace CSMWorld
 
             virtual bool hasChildren (const QModelIndex& index) const;
 
-    signals:
+            virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+            ///< \return the column index or -1 if the requested column wasn't found.
 
-        void resetStart(const QString& id);
+            virtual int findNestedColumnIndex(int parentColumn, Columns::ColumnId id);
+            ///< \return the column index or throws an exception if the requested column wasn't found.
 
-        void resetEnd(const QString& id);
+        signals:
+
+            void resetStart(const QString& id);
+
+            void resetEnd(const QString& id);
+
+            void refreshNpcDialogue (int type, const std::string& id);
+
+        public slots:
+
+            void updateNpcAutocalc (int type, const std::string& id);
     };
 }
 

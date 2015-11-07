@@ -30,6 +30,17 @@
 #include <OgreArchiveFactory.h>
 #include <OgreArchiveManager.h>
 #include <OgreResourceGroupManager.h>
+/*
+ * This test for ogre version is not realy correct, because the change happened since
+ * commit d5e05e9d97f47bce40aa41a2bf31c2b6c3fde5f3 (2014-02-24) on the default branch
+ * rather than during an ogre version change event. However it should be good enough.
+ */
+#if OGRE_VERSION < 0x010a00
+#define OGRE_CONST const
+#else
+#define OGRE_CONST
+#endif
+
 #include "bsa_file.hpp"
 
 #include "../files/constrainedfiledatastream.hpp"
@@ -104,7 +115,7 @@ public:
     void load() {}
     void unload() {}
 
-    DataStreamPtr open(const String& filename, bool readonly = true) const
+    virtual DataStreamPtr open(const String& filename, bool readonly = true) OGRE_CONST
     {
         index::const_iterator i = lookup_filename (filename);
 
@@ -149,8 +160,8 @@ public:
 
     time_t getModifiedTime(const String&) { return 0; }
 
-    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                            bool dirs = false) const
+    virtual FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                            bool dirs = false) OGRE_CONST
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());
@@ -216,7 +227,7 @@ public:
   void load() {}
   void unload() {}
 
-  DataStreamPtr open(const String& filename, bool readonly = true) const
+  virtual DataStreamPtr open(const String& filename, bool readonly = true) OGRE_CONST
   {
     // Get a non-const reference to arc. This is a hack and it's all
     // OGRE's fault. You should NOT expect an open() command not to
@@ -262,8 +273,8 @@ public:
         return ptr;
     }
 
-    FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
-                                bool dirs = false) const
+    virtual FileInfoListPtr findFileInfo(const String& pattern, bool recursive = true,
+                                bool dirs = false) OGRE_CONST
     {
         std::string normalizedPattern = normalize_path(pattern.begin(), pattern.end());
         FileInfoListPtr ptr = FileInfoListPtr(new FileInfoList());

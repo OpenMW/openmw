@@ -1,14 +1,18 @@
-
 #include "tablesubview.hpp"
 
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QCheckBox>
 #include <QVBoxLayout>
 #include <QEvent>
 #include <QHeaderView>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDropEvent>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
@@ -18,21 +22,62 @@
 
 CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
     const CreatorFactoryBase& creatorFactory, bool sorting)
-: SubView (id)
+: SubView (id), mShowOptions(false), mOptions(0)
 {
     QVBoxLayout *layout = new QVBoxLayout;
 
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
-
     layout->addWidget (mBottom =
-        new TableBottomBox (creatorFactory, document.getData(), document.getUndoStack(), id, this), 0);
+        new TableBottomBox (creatorFactory, document, id, this), 0);
 
     layout->insertWidget (0, mTable =
         new Table (id, mBottom->canCreateAndDelete(), sorting, document), 2);
 
     mFilterBox = new CSVFilter::FilterBox (document.getData(), this);
 
-    layout->insertWidget (0, mFilterBox);
+    QHBoxLayout *hLayout = new QHBoxLayout;
+    hLayout->insertWidget(0,mFilterBox);
+
+    QCheckBox *added = new QCheckBox("A");
+    QCheckBox *modified = new QCheckBox("M");
+    added->setToolTip("Apply filter project::added.  Changes to\nthis filter setting is not saved in preferences.");
+    modified->setToolTip("Apply filter project::modified.  Changes to\nthis filter setting is not saved in preferences.");
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    added->setCheckState(
+            userSettings.settingValue ("filter/project-added") == "true" ? Qt::Checked : Qt::Unchecked);
+    modified->setCheckState(
+            userSettings.settingValue ("filter/project-modified") == "true" ? Qt::Checked : Qt::Unchecked);
+
+    mOptions = new QWidget;
+
+    QHBoxLayout *optHLayout = new QHBoxLayout;
+    QCheckBox *autoJump = new QCheckBox("Auto Jump");
+    autoJump->setToolTip ("Whether to jump to the modified record."
+                "\nCan be useful in finding the moved or modified"
+                "\nobject instance while 3D editing.");
+    autoJump->setCheckState(
+            userSettings.settingValue ("table-input/jump-to-modified") == "true" ? Qt::Checked : Qt::Unchecked);
+    connect(autoJump, SIGNAL (stateChanged(int)), mTable, SLOT (jumpAfterModChanged(int)));
+    optHLayout->insertWidget(0, autoJump);
+    optHLayout->insertWidget(1, added);
+    optHLayout->insertWidget(2, modified);
+    optHLayout->setContentsMargins (QMargins (0, 3, 0, 0));
+    mOptions->setLayout(optHLayout);
+    mOptions->resize(mOptions->width(), mFilterBox->height());
+    mOptions->hide();
+
+    QPushButton *opt = new QPushButton ();
+    opt->setIcon (QIcon (":startup/configure"));
+    opt->setSizePolicy (QSizePolicy (QSizePolicy::Fixed, QSizePolicy::Fixed));
+    opt->setToolTip ("Open additional options for this subview.");
+    connect (opt, SIGNAL (clicked()), this, SLOT (toggleOptions()));
+
+    QVBoxLayout *buttonLayout = new QVBoxLayout; // work around margin issues
+    buttonLayout->setContentsMargins (QMargins (0/*left*/, 3/*top*/, 3/*right*/, 0/*bottom*/));
+    buttonLayout->insertWidget(0, opt, 0, Qt::AlignVCenter|Qt::AlignRight);
+    hLayout->insertWidget(1, mOptions);
+    hLayout->insertLayout(2, buttonLayout);
+
+    layout->insertLayout (0, hLayout);
 
     CSVDoc::SizeHintWidget *widget = new CSVDoc::SizeHintWidget;
 
@@ -55,6 +100,9 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
     connect (mTable, SIGNAL (tableSizeChanged (int, int, int)),
         mBottom, SLOT (tableSizeChanged (int, int, int)));
 
+    connect(added, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterAddedChanged(int)));
+    connect(modified, SIGNAL (stateChanged(int)), mTable, SLOT (globalFilterModifiedChanged(int)));
+
     mTable->tableSizeUpdate();
     mTable->selectionSizeUpdate();
     mTable->viewport()->installEventFilter(this);
@@ -70,6 +118,11 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
         connect (this, SIGNAL(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)),
                 mBottom, SLOT(cloneRequest(const std::string&, const CSMWorld::UniversalId::Type)));
+
+        connect (mTable, SIGNAL(extendedDeleteConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedDeleteConfigRequest(const std::vector<std::string> &)));
+        connect (mTable, SIGNAL(extendedRevertConfigRequest(const std::vector<std::string> &)),
+            mBottom, SLOT(extendedRevertConfigRequest(const std::vector<std::string> &)));
     }
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         mTable, SLOT (requestFocus (const std::string&)));
@@ -95,8 +148,7 @@ void CSVWorld::TableSubView::editRequest (const CSMWorld::UniversalId& id, const
     focusId (id, hint);
 }
 
-void CSVWorld::TableSubView::updateUserSetting
-                                (const QString &name, const QStringList &list)
+void CSVWorld::TableSubView::updateUserSetting (const QString &name, const QStringList &list)
 {
     mTable->updateUserSetting(name, list);
 }
@@ -166,3 +218,16 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     return false;
 }
 
+void CSVWorld::TableSubView::toggleOptions()
+{
+    if (mShowOptions)
+    {
+        mShowOptions = false;
+        mOptions->hide();
+    }
+    else
+    {
+        mShowOptions = true;
+        mOptions->show();
+    }
+}

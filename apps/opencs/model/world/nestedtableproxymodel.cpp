@@ -75,10 +75,10 @@ QModelIndex CSMWorld::NestedTableProxyModel::index(int row, int column, const QM
 {
     assert (!parent.isValid());
 
-    int rows = mMainModel->rowCount(parent);
-    int columns = mMainModel->columnCount(parent);
+    int numRows = rowCount(parent);
+    int numColumns = columnCount(parent);
 
-    if (row < 0 || row >= rows || column < 0 || column >= columns)
+    if (row < 0 || row >= numRows || column < 0 || column >= numColumns)
         return QModelIndex();
 
     return createIndex(row, column);
@@ -191,5 +191,9 @@ void CSMWorld::NestedTableProxyModel::forwardDataChanged (const QModelIndex& top
     {
         emit dataChanged(index(0,0),
                 index(mMainModel->rowCount(parent)-1, mMainModel->columnCount(parent)-1));
+    }
+    else if (topLeft.parent() == parent && bottomRight.parent() == parent)
+    {
+        emit dataChanged(index(topLeft.row(), topLeft.column()), index(bottomRight.row(), bottomRight.column()));
     }
 }

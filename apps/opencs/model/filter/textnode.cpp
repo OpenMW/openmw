@@ -1,4 +1,3 @@
-
 #include "textnode.hpp"
 
 #include <sstream>

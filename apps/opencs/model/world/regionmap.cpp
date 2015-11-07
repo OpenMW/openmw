@@ -1,4 +1,3 @@
-
 #include "regionmap.hpp"
 
 #include <cmath>
@@ -334,9 +333,9 @@ QVariant CSMWorld::RegionMap::data (const QModelIndex& index, int role) const
                 mColours.find (Misc::StringUtils::lowerCase (cell->second.mRegion));
 
             if (iter!=mColours.end())
-                return QBrush (
-                    QColor (iter->second>>24, (iter->second>>16) & 255, (iter->second>>8) & 255,
-                    iter->second & 255));
+                return QBrush (QColor (iter->second & 0xff, 
+                                       (iter->second >> 8) & 0xff, 
+                                       (iter->second >> 16) & 0xff));
 
             if (cell->second.mRegion.empty())
                 return QBrush (Qt::Dense6Pattern); // no region

@@ -1,4 +1,3 @@
-
 #include "pagedworldspacewidget.hpp"
 
 #include <sstream>
@@ -12,6 +11,8 @@
 #include <OgreOverlayManager.h>
 #include <OgreRoot.h>
 #include <OgreSceneQuery.h>
+#include <OgreSceneNode.h>
+#include <OgreViewport.h>
 
 #include <components/esm/loadland.hpp>
 #include "textoverlay.hpp"

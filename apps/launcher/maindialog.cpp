@@ -309,11 +309,11 @@ bool Launcher::MainDialog::setupGameSettings()
         mGameSettings.readUserFile(stream);
     }
 
-    // Now the rest
+    // Now the rest - priority: user > local > global
     QStringList paths;
-    paths.append(userPath + QString("openmw.cfg"));
-    paths.append(QString("openmw.cfg"));
     paths.append(globalPath + QString("openmw.cfg"));
+    paths.append(QString("openmw.cfg"));
+    paths.append(userPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
         qDebug() << "Loading config file:" << qPrintable(path);

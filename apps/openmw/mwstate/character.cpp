@@ -1,4 +1,3 @@
-
 #include "character.hpp"
 
 #include <ctime>
@@ -28,9 +27,6 @@ void MWState::Character::addSlot (const boost::filesystem::path& path, const std
 
     ESM::ESMReader reader;
     reader.open (slot.mPath.string());
-
-    if (reader.getFormat()>ESM::Header::CurrentFormat)
-        return; // format is too new -> ignore
 
     if (reader.getRecName()!=ESM::REC_SAVE)
         return; // invalid save file -> ignore

@@ -18,16 +18,16 @@ opencs_hdrs_noqt (model/doc
 
 
 opencs_units (model/world
-    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable
-    nestedtableproxymodel idtree pathgridcommands
+    idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel
+    pathgridcommands
     )
 
 
 opencs_units_noqt (model/world
-    universalid record commands columnbase scriptcontext cell refidcollection
+    universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager
+    idcompletionmanager npcstats metadata
     )
 
 opencs_hdrs_noqt (model/world
@@ -36,13 +36,18 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel
+    tools reportmodel mergeoperation 
     )
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage pathgridcheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
+    mergestages
+    )
+
+opencs_hdrs_noqt (model/tools
+    mergestate
     )
 
 
@@ -63,19 +68,20 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview
+    cellcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
-    dialoguespinbox
+    dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
     )
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
     scripthighlighter idvalidator dialoguecreator physicssystem idcompletiondelegate
+    colordelegate dragdroputils
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2 completerpopup
+    scenetooltoggle2 completerpopup coloreditor colorpickerpopup droplineedit
     )
 
 opencs_units (view/render
@@ -95,7 +101,7 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable searchsubview searchbox
+    reportsubview reporttable searchsubview searchbox merge
     )
 
 opencs_units_noqt (view/tools
@@ -155,19 +161,16 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-
-find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
-include(${QT_USE_FILE})
-
-qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
-qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    qt4_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt4_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt4_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+else()
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+    qt5_wrap_cpp(OPENCS_MOC_SRC ${OPENCS_HDR_QT})
+    qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+endif()
 
 # for compiled .ui files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -208,11 +211,35 @@ target_link_libraries(openmw-cs
     ${OGRE_Overlay_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
-    ${Boost_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_WAVE_LIBRARY}
     ${BULLET_LIBRARIES}
-    ${QT_LIBRARIES}
     components
 )
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(openmw-cs
+    ${QT_QTGUI_LIBRARY}
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTNETWORK_LIBRARY})
+
+    if (WIN32)
+        target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
+    endif()
+
+else()
+    qt5_use_modules(openmw-cs Widgets Core Network)
+    if (WIN32)
+        target_link_libraries(Qt5::WinMain)
+    endif()
+endif()
+
+if (WIN32)
+    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+endif()
+
 
 if(APPLE)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION OpenMW COMPONENT BUNDLE)

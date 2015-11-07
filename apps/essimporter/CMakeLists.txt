@@ -33,7 +33,8 @@ add_executable(openmw-essimporter
 )
 
 target_link_libraries(openmw-essimporter
-    ${Boost_LIBRARIES}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
     components
 )
 

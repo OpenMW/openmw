@@ -227,7 +227,7 @@ namespace Physic
         /**
          * Add a HeightField to the simulation
          */
-        void addHeightField(float* heights,
+        void addHeightField(const float* heights,
                 int x, int y, float yoffset,
                 float triSize, float sqrtVerts);
 

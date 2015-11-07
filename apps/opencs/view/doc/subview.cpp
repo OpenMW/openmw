@@ -26,6 +26,8 @@ CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id)
     /// \todo  add a button to the title bar that clones this sub view
 
     setWindowTitle (QString::fromUtf8 (mUniversalId.toString().c_str()));
+    // set object name to suppress warning while saving window state
+    setObjectName (QString::fromUtf8 (mUniversalId.toString().c_str()));
     setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -45,6 +47,7 @@ void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 {
     mUniversalId = id;
     setWindowTitle (QString::fromUtf8(mUniversalId.toString().c_str()));
+    emit universalIdChanged (mUniversalId);
 }
 
 void CSVDoc::SubView::closeEvent (QCloseEvent *event)

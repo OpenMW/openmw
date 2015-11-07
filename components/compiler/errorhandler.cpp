@@ -1,4 +1,3 @@
-
 #include "errorhandler.hpp"
 
 namespace Compiler

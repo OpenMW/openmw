@@ -66,7 +66,7 @@ add_openmw_dir (mwworld
     cells localscripts customdata weather inventorystore ptr actionopen actionread
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     esmstore store recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist projectilemanager cellref
+    contentloader esmloader actiontrap cellreflist projectilemanager cellref mwstore
     )
 
 add_openmw_dir (mwclass
@@ -78,7 +78,7 @@ add_openmw_dir (mwmechanics
     mechanicsmanagerimp stat character creaturestats magiceffects movement actors objects
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor
     aiescort aiactivate aicombat repair enchanting pathfinding pathgrid security spellsuccess spellcasting
-    disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
+    disease pickpocket levelledlist combat steering obstacle difficultyscaling aicombataction actor summoning
     )
 
 add_openmw_dir (mwstate
@@ -91,17 +91,6 @@ add_openmw_dir (mwbase
     )
 
 # Main executable
-if (ANDROID)
-    set(BOOST_COMPONENTS system filesystem program_options thread wave atomic)
-else ()
-    set(BOOST_COMPONENTS system filesystem program_options thread wave)
-endif ()
-
-if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
-endif(WIN32)
-
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 
 if (NOT ANDROID)
     add_executable(openmw
@@ -126,10 +115,14 @@ target_link_libraries(openmw
     ${OGRE_LIBRARIES}
     ${OGRE_STATIC_PLUGINS}
     ${SHINY_LIBRARIES}
-    ${Boost_LIBRARIES}
     ${OPENAL_LIBRARY}
     ${SOUND_INPUT_LIBRARY}
     ${BULLET_LIBRARIES}
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${Boost_WAVE_LIBRARY}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}

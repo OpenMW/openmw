@@ -1,4 +1,3 @@
-
 #include "searchstage.hpp"
 
 #include "../world/idtablebase.hpp"

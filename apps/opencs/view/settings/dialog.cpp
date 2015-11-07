@@ -8,19 +8,12 @@
 #include <QStackedWidget>
 #include <QtGui>
 #include <QSplitter>
+#include <QDesktopWidget>
 
 #include "../../model/settings/usersettings.hpp"
 
 #include "page.hpp"
 
-#include <QApplication>
-
-#include <QTreeView>
-#include <QListView>
-#include <QTableView>
-
-#include <QStandardItemModel>
-#include <QStandardItem>
 
 CSVSettings::Dialog::Dialog(QMainWindow *parent)
     : SettingWindow (parent), mStackedWidget (0), mDebugMode (false)

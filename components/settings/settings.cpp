@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 
+#include <OgreString.h> // FIXME: workaround compilation error with OgreCommon.h included by OgreStringConverter.h
 #include <OgreStringConverter.h>
 
 #include <boost/filesystem/fstream.hpp>

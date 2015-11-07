@@ -669,6 +669,9 @@ namespace MWMechanics
         MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX), 
             static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
         actor.getClass().adjustPosition(actor, false);
+
+        // may have changed cell
+        mStoredAvailableNodes = false;
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell)
@@ -694,7 +697,8 @@ namespace MWMechanics
         // actor can  wander from the spawn position.  AiWander assumes that
         // pathgrid points are available, and uses them to randomly select wander
         // destinations within the allowed set of pathgrid points (nodes).
-        if(mDistance)
+        // ... pathgrids don't usually include water, so swimmers ignore them
+        if (mDistance && !actor.getClass().isPureWaterCreature(actor))
         {
             float cellXOffset = 0;
             float cellYOffset = 0;

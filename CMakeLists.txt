@@ -98,24 +98,28 @@ endif()
 cmake_minimum_required(VERSION 2.6)
 
 # Sound setup
-set(FFmpeg_FIND_COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE SWRESAMPLE AVRESAMPLE)
 unset(FFMPEG_LIBRARIES CACHE)
-find_package(FFmpeg)
+
+find_package(FFmpeg REQUIRED)
+
+set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY})
+
 if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND )
     message(FATAL_ERROR "FFmpeg component required, but not found!")
 endif()
 set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIRS})
-set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARIES})
 if( SWRESAMPLE_FOUND )
     add_definitions(-DHAVE_LIBSWRESAMPLE)
-    set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES} ${SWRESAMPLE_LIBRARIES})
+    set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWRESAMPLE_LIBRARIES})
 else()
     if( AVRESAMPLE_FOUND )
-        set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES} ${AVRESAMPLE_LIBRARIES})
+        set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${AVRESAMPLE_LIBRARIES})
     else()
         message(FATAL_ERROR "Install either libswresample (FFmpeg) or libavresample (Libav).")
     endif()
 endif()
+
+set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
@@ -151,6 +155,19 @@ endif()
 
 # Dependencies
 
+set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+message(STATUS "Using Qt${DESIRED_QT_VERSION}")
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork)
+else()
+    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5Core REQUIRED)
+    find_package(Qt5Network REQUIRED)
+    # Instruct CMake to run moc automatically when needed.
+    #set(CMAKE_AUTOMOC ON)
+endif()
+
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
     find_package (Threads)
@@ -171,7 +188,7 @@ if (HAVE_UNORDERED_MAP)
 endif ()
 
 
-set(BOOST_COMPONENTS system filesystem program_options)
+set(BOOST_COMPONENTS system filesystem program_options thread wave)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -347,6 +364,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+        "${OpenMW_BINARY_DIR}/openmw.appdata.xml")
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.desktop
         "${OpenMW_BINARY_DIR}/openmw-cs.desktop")
 endif()
@@ -404,6 +423,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_ESMTOOL)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_NIFTEST)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_NIFTEST)
     IF(BUILD_MWINIIMPORTER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-iniimporter" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_MWINIIMPORTER)
@@ -430,6 +452,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${DATAROOTDIR}/appdata" COMPONENT "openmw")
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "opencs")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
@@ -599,6 +622,10 @@ endif()
 if (BUILD_WIZARD)
    add_subdirectory(apps/wizard)
 endif()
+
+if (BUILD_NIFTEST)
+    add_subdirectory(apps/niftest)
+endif(BUILD_NIFTEST)
 
 # UnitTests
 if (BUILD_UNITTESTS)

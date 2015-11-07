@@ -1,4 +1,3 @@
-
 #include "mandatoryid.hpp"
 
 #include "../world/collectionbase.hpp"

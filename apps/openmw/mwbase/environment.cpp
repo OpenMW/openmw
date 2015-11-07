@@ -1,4 +1,3 @@
-
 #include "environment.hpp"
 
 #include <cassert>

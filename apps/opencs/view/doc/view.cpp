@@ -7,7 +7,7 @@
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QDockWidget>
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QDesktopWidget>
 #include <QScrollArea>
 #include <QHBoxLayout>
@@ -37,6 +37,23 @@ void CSVDoc::View::closeEvent (QCloseEvent *event)
         event->ignore();
     else
     {
+        if (mSaveWindowState)
+        {
+            CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+            if (isMaximized() && mXWorkaround)
+            {
+                userSettings.setDefinitions("window/maximized", (QStringList() << "true"));
+                userSettings.saveDefinitions(); // store previously saved geometry & state
+            }
+            else
+            {
+                userSettings.value("window/geometry", saveGeometry());
+                userSettings.value("window/state", saveState());
+                userSettings.setDefinitions("window/maximized", (QStringList() << "false"));
+                userSettings.saveDefinitions();
+            }
+        }
+
         // closeRequest() returns true if last document
         mViewManager.removeDocAndView(mDocument);
     }
@@ -66,9 +83,17 @@ void CSVDoc::View::setupFileMenu()
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     file->addAction (mVerify);
 
+    mMerge = new QAction (tr ("Merge"), this);
+    connect (mMerge, SIGNAL (triggered()), this, SLOT (merge()));
+    file->addAction (mMerge);
+
     QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     file->addAction (loadErrors);
+
+    QAction *meta = new QAction (tr ("Meta Data"), this);
+    connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
+    file->addAction (meta);
 
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
@@ -147,6 +172,10 @@ void CSVDoc::View::setupWorldMenu()
     QAction *grid = new QAction (tr ("Pathgrid"), this);
     connect (grid, SIGNAL (triggered()), this, SLOT (addPathgridSubView()));
     world->addAction (grid);
+
+    QAction *land = new QAction (tr ("Lands"), this);
+    connect (land, SIGNAL (triggered()), this, SLOT (addLandSubView()));
+    world->addAction (land);
 
     world->addSeparator(); // items that don't represent single record lists follow here
 
@@ -266,6 +295,10 @@ void CSVDoc::View::setupAssetsMenu()
     QAction *textures = new QAction (tr ("Textures"), this);
     connect (textures, SIGNAL (triggered()), this, SLOT (addTexturesSubView()));
     assets->addAction (textures);
+
+    QAction *land = new QAction (tr ("Land Textures"), this);
+    connect (land, SIGNAL (triggered()), this, SLOT (addLandTextureSubView()));
+    assets->addAction (land);
 
     QAction *videos = new QAction (tr ("Videos"), this);
     connect (videos, SIGNAL (triggered()), this, SLOT (addVideosSubView()));
@@ -389,22 +422,39 @@ void CSVDoc::View::updateActions()
 
     mGlobalDebugProfileMenu->updateActions (running);
     mStopDebug->setEnabled (running);
+
+    mMerge->setEnabled (mDocument->getContentFiles().size()>1 &&
+        !(mDocument->getState() & CSMDoc::State_Merging));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false),
+      mSaveWindowState(false), mXWorkaround(false)
 {
-    int width = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-width").toInt();
+    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    mXWorkaround = userSettings.settingValue ("window/x-save-state-workaround").toStdString() == "true";
+    mSaveWindowState = userSettings.setting ("window/save-state", "true").toStdString() == "true";
 
-    int height = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-height").toInt();
+    // check if saved state should be used and whether it is the first time
+    if (mSaveWindowState && userSettings.hasSettingDefinitions ("window/maximized"))
+    {
+        restoreGeometry(userSettings.value("window/geometry").toByteArray());
+        restoreState(userSettings.value("window/state").toByteArray());
 
-    width = std::max(width, 300);
-    height = std::max(height, 300);
+        if (mXWorkaround && userSettings.settingValue ("window/maximized").toStdString() == "true")
+            setWindowState(windowState() | Qt::WindowMaximized);
+    }
+    else
+    {
+        int width = userSettings.settingValue ("window/default-width").toInt();
+        int height = userSettings.settingValue ("window/default-height").toInt();
 
-    resize (width, height);
+        width = std::max(width, 300);
+        height = std::max(height, 300);
+
+        resize (width, height);
+    }
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
@@ -423,6 +473,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
 
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
+
+    setContextMenuPolicy(Qt::NoContextMenu);
 
     updateTitle();
 
@@ -467,6 +519,7 @@ void CSVDoc::View::updateDocumentState()
     static const int operations[] =
     {
         CSMDoc::State_Saving, CSMDoc::State_Verifying, CSMDoc::State_Searching,
+        CSMDoc::State_Merging,
         -1 // end marker
     };
 
@@ -514,6 +567,10 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
             }
         }
     }
+
+    if (mScroll)
+        QObject::connect(mScroll->horizontalScrollBar(),
+            SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
 
     // User setting for limiting the number of sub views per top level view.
     // Automatically open a new top level view if this number is exceeded
@@ -586,12 +643,6 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
             mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minWidth);
             move(0, y());
         }
-
-        // Make the new subview visible, setFocus() or raise() don't seem to work
-        // On Ubuntu the scrollbar does not go right to the end, even if using
-        // mScroll->horizontalScrollBar()->setValue(mScroll->horizontalScrollBar()->maximum());
-        if (mSubViewWindow.width() > rect.width())
-            mScroll->horizontalScrollBar()->setValue(mSubViewWindow.width());
     }
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
@@ -612,6 +663,17 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     if (!hint.empty())
         view->useHint (hint);
+}
+
+void CSVDoc::View::moveScrollBarToEnd(int min, int max)
+{
+    if (mScroll)
+    {
+        mScroll->horizontalScrollBar()->setValue(max);
+
+        QObject::disconnect(mScroll->horizontalScrollBar(),
+            SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
+    }
 }
 
 void CSVDoc::View::newView()
@@ -794,6 +856,16 @@ void CSVDoc::View::addPathgridSubView()
     addSubView (CSMWorld::UniversalId::Type_Pathgrids);
 }
 
+void CSVDoc::View::addLandTextureSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_LandTextures);
+}
+
+void CSVDoc::View::addLandSubView()
+{
+    addSubView (CSMWorld::UniversalId::Type_Lands);
+}
+
 void CSVDoc::View::addStartScriptsSubView()
 {
     addSubView (CSMWorld::UniversalId::Type_StartScripts);
@@ -802,6 +874,11 @@ void CSVDoc::View::addStartScriptsSubView()
 void CSVDoc::View::addSearchSubView()
 {
     addSubView (mDocument->newSearch());
+}
+
+void CSVDoc::View::addMetaDataSubView()
+{
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_MetaData, "sys::meta"));
 }
 
 void CSVDoc::View::abortOperation (int type)
@@ -836,6 +913,12 @@ void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &li
 {
     if (name=="window/hide-subview")
         updateSubViewIndicies (0);
+
+    if (name == "window/save-state")
+        mSaveWindowState = list.at(0) == "true";
+
+    if (name == "window/x-save-state-workaround")
+        mXWorkaround = list.at(0) == "true";
 
     foreach (SubView *subView, mSubViews)
     {
@@ -928,6 +1011,36 @@ void CSVDoc::View::closeRequest (SubView *subView)
         mViewManager.removeDocAndView (mDocument);
 }
 
+// for more reliable detetion of isMaximized(), see https://bugreports.qt.io/browse/QTBUG-30085
+void CSVDoc::View::saveWindowState()
+{
+    if (!isMaximized())
+    {
+        // update but don't save to config file yet
+        CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+        userSettings.value("window/geometry", saveGeometry());
+        userSettings.value("window/state", saveState());
+    }
+}
+
+// For X11 where Qt does not remember pre-maximised state
+void CSVDoc::View::moveEvent (QMoveEvent *event)
+{
+    if (mXWorkaround && mSaveWindowState)
+        QMetaObject::invokeMethod(this, "saveWindowState", Qt::QueuedConnection);
+
+    QMainWindow::moveEvent(event);
+}
+
+// For X11 where Qt does not remember pre-maximised state
+void CSVDoc::View::resizeEvent (QResizeEvent *event)
+{
+    if (mXWorkaround && mSaveWindowState)
+        QMetaObject::invokeMethod(this, "saveWindowState", Qt::QueuedConnection);
+
+    QMainWindow::resizeEvent(event);
+}
+
 void CSVDoc::View::updateScrollbar()
 {
     QRect rect;
@@ -949,4 +1062,9 @@ void CSVDoc::View::updateScrollbar()
         mSubViewWindow.setMinimumWidth(newWidth);
     else
         mSubViewWindow.setMinimumWidth(0);
+}
+
+void CSVDoc::View::merge()
+{
+    emit mergeDocument (mDocument);
 }

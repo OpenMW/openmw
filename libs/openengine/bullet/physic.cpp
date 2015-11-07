@@ -363,7 +363,7 @@ namespace Physic
         //delete BulletShapeManager::getSingletonPtr();
     }
 
-    void PhysicEngine::addHeightField(float* heights,
+    void PhysicEngine::addHeightField(const float* heights,
         int x, int y, float yoffset,
         float triSize, float sqrtVerts)
     {

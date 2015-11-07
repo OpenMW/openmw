@@ -44,6 +44,7 @@
 #include "infocollection.hpp"
 #include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
+#include "metadata.hpp"
 #ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
 #endif
@@ -60,6 +61,7 @@ namespace CSMWorld
 {
     class ResourcesManager;
     class Resources;
+    class NpcStats;
 
     class Data : public QObject
     {
@@ -94,11 +96,10 @@ namespace CSMWorld
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
+            Collection<MetaData> mMetaData;
             const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
-            std::string mAuthor;
-            std::string mDescription;
             ESM::ESMReader *mReader;
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
@@ -107,6 +108,8 @@ namespace CSMWorld
             int mReaderIndex;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
+
+            std::map<std::string, NpcStats*> mNpcStatCache;
 
             // not implemented
             Data (const Data&);
@@ -120,6 +123,10 @@ namespace CSMWorld
             ///< Append all IDs from collection to \a ids.
 
             static int count (RecordBase::State state, const CollectionBase& collection);
+
+            const Data& self ();
+
+            void clearNpcStatsCache ();
 
         public:
 
@@ -217,7 +224,11 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
+            IdCollection<CSMWorld::Land>& getLand();
+
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            IdCollection<CSMWorld::LandTexture>& getLandTextures();
 
             const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
@@ -237,6 +248,10 @@ namespace CSMWorld
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
+
+            const MetaData& getMetaData() const;
+
+            void setMetaData (const MetaData& metaData);
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
@@ -267,23 +282,37 @@ namespace CSMWorld
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
 
-            void setDescription (const std::string& description);
+            NpcStats* npcAutoCalculate (const ESM::NPC& npc) const;
 
-            std::string getDescription() const;
-
-            void setAuthor (const std::string& author);
-
-            std::string getAuthor() const;
+            NpcStats* getCachedNpcData (const std::string& id) const;
 
         signals:
 
             void idListChanged();
+
+            // refresh NPC dialogue subviews via object table model
+            void updateNpcAutocalc (int type, const std::string& id);
+
+            void cacheNpcStats (const std::string& id, NpcStats *stats) const;
 
         private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsChanged (const QModelIndex& parent, int start, int end);
+
+            // for autocalc updates when gmst/race/class/skils tables change
+            void gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void raceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void classDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void skillDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
+            void cacheNpcStatsEvent (const std::string& id, NpcStats *stats);
     };
 }
 

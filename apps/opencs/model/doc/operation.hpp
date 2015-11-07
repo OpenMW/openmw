@@ -2,9 +2,13 @@
 #define CSM_DOC_OPERATION_H
 
 #include <vector>
+#include <map>
 
 #include <QObject>
 #include <QTimer>
+#include <QStringList>
+
+#include "messages.hpp"
 
 namespace CSMWorld
 {
@@ -30,6 +34,9 @@ namespace CSMDoc
             bool mError;
             bool mConnected;
             QTimer *mTimer;
+            std::map<QString, QStringList> mSettings;
+            bool mPrepared;
+            Message::Severity mDefaultSeverity;
 
             void prepareStages();
 
@@ -46,14 +53,21 @@ namespace CSMDoc
             ///
             /// \attention Do no call this function while this Operation is running.
 
+            /// Specify settings to be passed on to stages.
+            ///
+            /// \attention Do no call this function while this Operation is running.
+            void configureSettings (const std::vector<QString>& settings);
+
+            /// \attention Do no call this function while this Operation is running.
+            void setDefaultSeverity (Message::Severity severity);
+
             bool hasError() const;
 
         signals:
 
             void progress (int current, int max, int type);
 
-            void reportMessage (const CSMWorld::UniversalId& id, const std::string& message,
-                const std::string& hint, int type);
+            void reportMessage (const CSMDoc::Message& message, int type);
 
             void done (int type, bool failed);
 
@@ -63,11 +77,15 @@ namespace CSMDoc
 
             void run();
 
+            void updateUserSetting (const QString& name, const QStringList& value);
+
         private slots:
 
             void executeStage();
 
-            void operationDone();
+        protected slots:
+
+            virtual void operationDone();
     };
 }
 

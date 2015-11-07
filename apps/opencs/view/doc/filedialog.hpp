@@ -45,6 +45,7 @@ namespace CSVDoc
         void showDialog (ContentAction action);
 
         void addFiles (const QString &path);
+        void clearFiles ();
 
         QString filename() const;
         QStringList selectedFilePaths();

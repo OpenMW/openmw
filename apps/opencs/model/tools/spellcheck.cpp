@@ -1,4 +1,3 @@
-
 #include "spellcheck.hpp"
 
 #include <sstream>

@@ -1,4 +1,3 @@
-
 #include "containerstore.hpp"
 
 #include <cassert>

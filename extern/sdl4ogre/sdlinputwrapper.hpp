@@ -27,8 +27,8 @@ namespace SFO
         void setControllerEventCallback(ControllerListener* listen) { mConListener = listen; }
 
         void capture(bool windowEventsOnly);
-		bool isModifierHeld(SDL_Keymod mod);
-		bool isKeyDown(SDL_Scancode key);
+        bool isModifierHeld(SDL_Keymod mod);
+        bool isKeyDown(SDL_Scancode key);
 
         void setMouseVisible (bool visible);
         void setMouseRelative(bool relative);

@@ -1,4 +1,3 @@
-
 #include "cellselection.hpp"
 
 #include <cmath>

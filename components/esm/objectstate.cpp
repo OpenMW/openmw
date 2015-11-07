@@ -1,4 +1,3 @@
-
 #include "objectstate.hpp"
 
 #include "esmreader.hpp"
@@ -6,6 +5,8 @@
 
 void ESM::ObjectState::load (ESMReader &esm)
 {
+    mVersion = esm.getFormat();
+
     mRef.loadData(esm);
 
     mHasLocals = 0;

@@ -1,4 +1,3 @@
-
 #include "resourcetable.hpp"
 
 #include <stdexcept>

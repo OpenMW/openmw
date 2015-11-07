@@ -493,14 +493,14 @@ void Record<ESM::Book>::print()
     std::cout << "  Enchantment Points: " << mData.mData.mEnchant << std::endl;
     if (mPrintPlain)
     {
-    	std::cout << "  Text:" << std::endl;
-    	std::cout << "START--------------------------------------" << std::endl;
-    	std::cout << mData.mText << std::endl;
-    	std::cout << "END----------------------------------------" << std::endl;
+        std::cout << "  Text:" << std::endl;
+        std::cout << "START--------------------------------------" << std::endl;
+        std::cout << mData.mText << std::endl;
+        std::cout << "END----------------------------------------" << std::endl;
     }
     else
     {
-    	std::cout << "  Text: [skipped]" << std::endl;
+        std::cout << "  Text: [skipped]" << std::endl;
     }
 }
 
@@ -799,14 +799,14 @@ void Record<ESM::DialInfo>::print()
     {
         if (mPrintPlain)
         {
-        	std::cout << "  Result Script:" << std::endl;
-        	std::cout << "START--------------------------------------" << std::endl;
-        	std::cout << mData.mResultScript << std::endl;
-        	std::cout << "END----------------------------------------" << std::endl;
+            std::cout << "  Result Script:" << std::endl;
+            std::cout << "START--------------------------------------" << std::endl;
+            std::cout << mData.mResultScript << std::endl;
+            std::cout << "END----------------------------------------" << std::endl;
         }
         else
         {
-        	std::cout << "  Result Script: [skipped]" << std::endl;
+            std::cout << "  Result Script: [skipped]" << std::endl;
         }
     }
 }
@@ -841,19 +841,13 @@ void Record<ESM::Land>::print()
     std::cout << "  Flags: " << landFlags(mData.mFlags) << std::endl;
     std::cout << "  DataTypes: " << mData.mDataTypes << std::endl;
 
-    // Seems like this should done with reference counting in the
-    // loader to me.  But I'm not really knowledgable about this
-    // record type yet. --Cory
-    bool wasLoaded = (mData.mDataLoaded != 0);
-    if (mData.mDataTypes) mData.loadData(mData.mDataTypes);
-    if (mData.mDataLoaded)
+    if (const ESM::Land::LandData *data = mData.getLandData (mData.mDataTypes))
     {
-        std::cout << "  Height Offset: " << mData.mLandData->mHeightOffset << std::endl;
+        std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
         // Lots of missing members.
-        std::cout << "  Unknown1: " << mData.mLandData->mUnk1 << std::endl;
-        std::cout << "  Unknown2: " << mData.mLandData->mUnk2 << std::endl;
+        std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
+        std::cout << "  Unknown2: " << data->mUnk2 << std::endl;
     }
-    if (!wasLoaded) mData.unloadData();
 }
 
 template<>
@@ -1207,14 +1201,14 @@ void Record<ESM::Script>::print()
 
     if (mPrintPlain)
     {
-    	std::cout << "  Script:" << std::endl;
-    	std::cout << "START--------------------------------------" << std::endl;
-    	std::cout << mData.mScriptText << std::endl;
-    	std::cout << "END----------------------------------------" << std::endl;
+        std::cout << "  Script:" << std::endl;
+        std::cout << "START--------------------------------------" << std::endl;
+        std::cout << mData.mScriptText << std::endl;
+        std::cout << "END----------------------------------------" << std::endl;
     }
     else
     {
-    	std::cout << "  Script: [skipped]" << std::endl;
+        std::cout << "  Script: [skipped]" << std::endl;
     }
 }
 

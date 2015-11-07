@@ -1,4 +1,3 @@
-
 #include "output.hpp"
 
 #include <cassert>

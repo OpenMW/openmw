@@ -56,6 +56,8 @@ typedef std::list<CellRef> CellRefTracker;
 struct Cell
 {
     static unsigned int sRecordId;
+    /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
+    static std::string getRecordType() { return "Cell"; }
 
   enum Flags
     {

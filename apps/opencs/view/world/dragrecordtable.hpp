@@ -2,7 +2,9 @@
 #define CSV_WORLD_DRAGRECORDTABLE_H
 
 #include <QTableView>
-#include <QtGui/qevent.h>
+#include <QEvent>
+
+#include "../../model/world/columnbase.hpp"
 
 class QWidget;
 class QAction;
@@ -38,6 +40,11 @@ namespace CSVWorld
             void dragEnterEvent(QDragEnterEvent *event);
 
             void dragMoveEvent(QDragMoveEvent *event);
+
+            void dropEvent(QDropEvent *event);
+
+        private:
+            CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex &index) const;
     };
 }
 

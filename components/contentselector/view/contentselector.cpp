@@ -150,6 +150,11 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
     mContentModel->uncheckAll();
 }
 
+void ContentSelectorView::ContentSelector::clearFiles()
+{
+    mContentModel->clearFiles();
+}
+
 QString ContentSelectorView::ContentSelector::currentFile() const
 {
     QModelIndex currentIdx = ui.addonView->currentIndex();

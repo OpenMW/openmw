@@ -5,6 +5,8 @@
 #include <OgreRay.h>
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
+#include <OgreViewport.h>
 
 #include <openengine/bullet/physic.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -181,7 +183,7 @@ namespace CSVWorld
     }
 
     void PhysicsSystem::addHeightField(Ogre::SceneManager *sceneManager,
-            float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts)
+            const float* heights, int x, int y, float yoffset, float triSize, float sqrtVerts)
     {
         std::string name = "HeightField_"
             + QString::number(x).toStdString() + "_" + QString::number(y).toStdString();

@@ -1,4 +1,3 @@
-
 #include "queststate.hpp"
 
 #include "esmreader.hpp"

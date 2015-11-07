@@ -1,4 +1,3 @@
-
 #include "scenetoolrun.hpp"
 
 #include <iterator>
@@ -65,8 +64,13 @@ CSVWidget::SceneToolRun::SceneToolRun (SceneToolbar *parent, const QString& tool
     mTable->setShowGrid (false);
     mTable->verticalHeader()->hide();
     mTable->horizontalHeader()->hide();
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    mTable->horizontalHeader()->setSectionResizeMode (0, QHeaderView::Stretch);
+    mTable->horizontalHeader()->setSectionResizeMode (1, QHeaderView::ResizeToContents);
+#else
     mTable->horizontalHeader()->setResizeMode (0, QHeaderView::Stretch);
     mTable->horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
+#endif
     mTable->setSelectionMode (QAbstractItemView::NoSelection);
 
     layout->addWidget (mTable);

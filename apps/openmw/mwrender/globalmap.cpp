@@ -83,6 +83,9 @@ namespace MWRender
                         land->loadData(mask);
                 }
 
+                const ESM::Land::LandData *landData =
+                    land ? land->getLandData (ESM::Land::DATA_WNAM) : 0;
+
                 for (int cellY=0; cellY<mCellSize; ++cellY)
                 {
                     for (int cellX=0; cellX<mCellSize; ++cellX)
@@ -90,15 +93,14 @@ namespace MWRender
                         int vertexX = static_cast<int>(float(cellX)/float(mCellSize) * 9);
                         int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
-
                         int texelX = (x-mMinX) * mCellSize + cellX;
                         int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
 
                         unsigned char r,g,b;
 
                         float y = 0;
-                        if (land && land->mDataTypes & ESM::Land::DATA_WNAM)
-                            y = (land->mLandData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
+                        if (landData)
+                            y = (landData->mWnam[vertexY * 9 + vertexX] << 4) / 2048.f;
                         else
                             y = (SCHAR_MIN << 4) / 2048.f;
                         if (y < 0)

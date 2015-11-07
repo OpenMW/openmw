@@ -9,6 +9,10 @@
 
 #include <QColor>
 
+#include <components/esm/loadbody.hpp>
+#include <components/esm/loadskil.hpp>
+#include <components/esm/loadrace.hpp>
+
 #include "columnbase.hpp"
 #include "columns.hpp"
 #include "info.hpp"
@@ -694,7 +698,7 @@ namespace CSMWorld
 
             QColor colour = data.value<QColor>();
 
-            record2.mMapColor = colour.rgb() & 0xffffff;
+            record2.mMapColor = (colour.blue() << 16) | (colour.green() << 8) | colour.red();
 
             record.setModified (record2);
         }
@@ -1911,8 +1915,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct MeshTypeColumn : public Column<ESXRecordT>
     {
-        MeshTypeColumn()
-        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType)
+        MeshTypeColumn(int flags = ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue)
+        : Column<ESXRecordT> (Columns::ColumnId_MeshType, ColumnBase::Display_MeshType, flags)
         {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
@@ -2307,6 +2311,89 @@ namespace CSMWorld
         {
             return true;
         }
+    };
+
+    template<typename ESXRecordT>
+    struct FormatColumn : public Column<ESXRecordT>
+    {
+        FormatColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_FileFormat, ColumnBase::Display_Integer)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return record.get().mFormat;
+        }
+
+        virtual bool isEditable() const
+        {
+            return false;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct AuthorColumn : public Column<ESXRecordT>
+    {
+        AuthorColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_Author, ColumnBase::Display_String32)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mAuthor.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mAuthor = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+
+    template<typename ESXRecordT>
+    struct FileDescriptionColumn : public Column<ESXRecordT>
+    {
+        FileDescriptionColumn()
+        : Column<ESXRecordT> (Columns::ColumnId_FileDescription, ColumnBase::Display_LongString256)
+        {}
+
+        virtual QVariant get (const Record<ESXRecordT>& record) const
+        {
+            return QString::fromUtf8 (record.get().mDescription.c_str());
+        }
+
+        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        {
+            ESXRecordT record2 = record.get();
+
+            record2.mDescription = data.toString().toUtf8().constData();
+
+            record.setModified (record2);
+        }
+
+        virtual bool isEditable() const
+        {
+            return true;
+        }
+    };
+    
+    struct BodyPartRaceColumn : public RaceColumn<ESM::BodyPart>
+    {
+        const MeshTypeColumn<ESM::BodyPart> *mMeshType;
+
+        BodyPartRaceColumn(const MeshTypeColumn<ESM::BodyPart> *meshType);
+
+        virtual QVariant get(const Record<ESM::BodyPart> &record) const;
+        virtual void set(Record<ESM::BodyPart> &record, const QVariant &data);
+        virtual bool isEditable() const;
     };
 }
 

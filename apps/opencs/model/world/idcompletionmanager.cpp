@@ -24,6 +24,7 @@ namespace
         types[CSMWorld::ColumnBase::Display_Faction             ] = CSMWorld::UniversalId::Type_Faction;
         types[CSMWorld::ColumnBase::Display_GlobalVariable      ] = CSMWorld::UniversalId::Type_Global;
         types[CSMWorld::ColumnBase::Display_Icon                ] = CSMWorld::UniversalId::Type_Icon;
+        types[CSMWorld::ColumnBase::Display_Journal             ] = CSMWorld::UniversalId::Type_Journal;
         types[CSMWorld::ColumnBase::Display_Mesh                ] = CSMWorld::UniversalId::Type_Mesh;
         types[CSMWorld::ColumnBase::Display_Miscellaneous       ] = CSMWorld::UniversalId::Type_Referenceable;
         types[CSMWorld::ColumnBase::Display_Npc                 ] = CSMWorld::UniversalId::Type_Referenceable;
@@ -37,6 +38,7 @@ namespace
         types[CSMWorld::ColumnBase::Display_Spell               ] = CSMWorld::UniversalId::Type_Spell;
         types[CSMWorld::ColumnBase::Display_Static              ] = CSMWorld::UniversalId::Type_Referenceable;
         types[CSMWorld::ColumnBase::Display_Texture             ] = CSMWorld::UniversalId::Type_Texture;
+        types[CSMWorld::ColumnBase::Display_Topic               ] = CSMWorld::UniversalId::Type_Topic;
         types[CSMWorld::ColumnBase::Display_Weapon              ] = CSMWorld::UniversalId::Type_Referenceable;
 
         return types;

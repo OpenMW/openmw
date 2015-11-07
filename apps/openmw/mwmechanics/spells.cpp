@@ -1,4 +1,3 @@
-
 #include "spells.hpp"
 
 #include <cstdlib>
