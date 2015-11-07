@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layer" version="1.0">
-    <Layer name="Render" overlapped="false" pick="false"/>
+    <Layer name="Overlay" overlapped="false" pick="false"/>
     <Layer name="HUD" overlapped="false" pick="true"/>
     <Layer name="Menu" overlapped="false" pick="false"/>
     <Layer name="Windows" overlapped="true" pick="true"/>
@@ -12,6 +12,6 @@
     <Layer name="DragAndDrop" overlapped="false" pick="false"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="MessageBox" overlapped="false" pick="true"/>
-    <Layer name="Overlay" overlapped="false" pick="true"/>
+    <Layer name="InputBlocker" overlapped="false" pick="true"/>
     <Layer name="Pointer" overlapped="false" pick="false"/>
 </MyGUI>

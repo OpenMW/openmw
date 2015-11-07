@@ -334,7 +334,7 @@ namespace MWGui
 
         mDebugWindow = new DebugWindow();
 
-        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
+        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
         mHud->setVisible(mHudEnabled);
 
