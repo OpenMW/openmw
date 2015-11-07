@@ -487,7 +487,7 @@ namespace CSMWorld
 
     void InfoListAdapter::removeRow(Record<Info>& record, int rowToRemove) const
     {
-        throw std::logic_error ("cannot add a row to a fixed table");
+        throw std::logic_error ("cannot remove a row to a fixed table");
     }
 
     void InfoListAdapter::setTable(Record<Info>& record,
@@ -531,6 +531,669 @@ namespace CSMWorld
     }
 
     int InfoListAdapter::getRowsCount(const Record<Info>& record) const
+    {
+        return 1; // fixed at size 1
+    }
+
+    // ESM::DialInfo::SelectStruct.mSelectRule
+    // 012345...
+    // ^^^ ^^
+    // ||| ||
+    // ||| |+------------- condition variable string
+    // ||| +-------------- comparison type, ['0'..'5']; e.g. !=, <, >=, etc
+    // ||+---------------- function index (encoded, where function == '1')
+    // |+----------------- function, ['1'..'C']; e.g. Global, Local, Not ID, etc
+    // +------------------ unknown
+    //
+    InfoConditionAdapter::InfoConditionAdapter () {}
+
+    void InfoConditionAdapter::addRow(Record<Info>& record, int position) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        // blank row
+        ESM::DialInfo::SelectStruct condStruct;
+        condStruct.mSelectRule = "00000";
+        condStruct.mValue = ESM::Variant();
+        condStruct.mValue.setType(ESM::VT_Int); // default to ints
+
+        conditions.insert(conditions.begin()+position, condStruct);
+
+        record.setModified (info);
+    }
+
+    void InfoConditionAdapter::removeRow(Record<Info>& record, int rowToRemove) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (rowToRemove < 0 || rowToRemove >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        conditions.erase(conditions.begin()+rowToRemove);
+
+        record.setModified (info);
+    }
+
+    void InfoConditionAdapter::setTable(Record<Info>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        Info info = record.get();
+
+        info.mSelects =
+            static_cast<const NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >&>(nestedTable).mNestedTable;
+
+        record.setModified (info);
+    }
+
+    NestedTableWrapperBase* InfoConditionAdapter::table(const Record<Info>& record) const
+    {
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::DialInfo::SelectStruct> >(record.get().mSelects);
+    }
+
+    // See the mappings in MWDialogue::SelectWrapper::getArgument
+    // from ESM::Attribute, ESM::Skill and MWMechanics::CreatureStats (for AI)
+    static std::map<const std::string, std::string> populateEncToInfoFunc()
+    {
+        std::map<const std::string, std::string> funcMap;
+        funcMap["00"] = "Rank Low";
+        funcMap["01"] = "Rank High";
+        funcMap["02"] = "Rank Requirement";
+        funcMap["03"] = "Reputation";
+        funcMap["04"] = "Health Percent";
+        funcMap["05"] = "PC Reputation";
+        funcMap["06"] = "PC Level";
+        funcMap["07"] = "PC Health Percent";
+        funcMap["08"] = "PC Magicka";
+        funcMap["09"] = "PC Fatigue";
+        funcMap["10"] = "PC Strength";
+        funcMap["11"] = "PC Block";
+        funcMap["12"] = "PC Armoror";
+        funcMap["13"] = "PC Medium Armor";
+        funcMap["14"] = "PC Heavy Armor";
+        funcMap["15"] = "PC Blunt Weapon";
+        funcMap["16"] = "PC Long Blade";
+        funcMap["17"] = "PC Axe";
+        funcMap["18"] = "PC Spear";
+        funcMap["19"] = "PC Athletics";
+        funcMap["20"] = "PC Enchant";
+        funcMap["21"] = "PC Destruction";
+        funcMap["22"] = "PC Alteration";
+        funcMap["23"] = "PC Illusion";
+        funcMap["24"] = "PC Conjuration";
+        funcMap["25"] = "PC Mysticism";
+        funcMap["26"] = "PC Restoration";
+        funcMap["27"] = "PC Alchemy";
+        funcMap["28"] = "PC Unarmored";
+        funcMap["29"] = "PC Security";
+        funcMap["30"] = "PC Sneak";
+        funcMap["31"] = "PC Acrobatics";
+        funcMap["32"] = "PC Light Armor";
+        funcMap["33"] = "PC Short Blade";
+        funcMap["34"] = "PC Marksman";
+        funcMap["35"] = "PC Merchantile";
+        funcMap["36"] = "PC Speechcraft";
+        funcMap["37"] = "PC Hand To Hand";
+        funcMap["38"] = "PC Sex";
+        funcMap["39"] = "PC Expelled";
+        funcMap["40"] = "PC Common Disease";
+        funcMap["41"] = "PC Blight Disease";
+        funcMap["42"] = "PC Clothing Modifier";
+        funcMap["43"] = "PC Crime Level";
+        funcMap["44"] = "Same Sex";
+        funcMap["45"] = "Same Race";
+        funcMap["46"] = "Same Faction";
+        funcMap["47"] = "Faction Rank Difference";
+        funcMap["48"] = "Detected";
+        funcMap["49"] = "Alarmed";
+        funcMap["50"] = "Choice";
+        funcMap["51"] = "PC Intelligence";
+        funcMap["52"] = "PC Willpower";
+        funcMap["53"] = "PC Agility";
+        funcMap["54"] = "PC Speed";
+        funcMap["55"] = "PC Endurance";
+        funcMap["56"] = "PC Personality";
+        funcMap["57"] = "PC Luck";
+        funcMap["58"] = "PC Corpus";
+        funcMap["59"] = "Weather";
+        funcMap["60"] = "PC Vampire";
+        funcMap["61"] = "Level";
+        funcMap["62"] = "Attacked";
+        funcMap["63"] = "Talked To PC";
+        funcMap["64"] = "PC Health";
+        funcMap["65"] = "Creature Target";
+        funcMap["66"] = "Friend Hit";
+        funcMap["67"] = "Fight";
+        funcMap["68"] = "Hello";
+        funcMap["69"] = "Alarm";
+        funcMap["70"] = "Flee";
+        funcMap["71"] = "Should Attack";
+        funcMap["72"] = "Werewolf";
+        funcMap["73"] = "PC Werewolf Kills";
+        return funcMap;
+    }
+    static const std::map<const std::string, std::string> sEncToInfoFunc = populateEncToInfoFunc();
+
+    QVariant InfoConditionAdapter::getData(const Record<Info>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                char condType = conditions[subRowIndex].mSelectRule[1];
+                switch (condType)
+                {
+                    case '0': return 0;  // blank space
+                    case '1': return 1;  // Function
+                    case '2': return 2;  // Global
+                    case '3': return 3;  // Local
+                    case '4': return 4;  // Journal
+                    case '5': return 5;  // Item
+                    case '6': return 6;  // Dead
+                    case '7': return 7;  // Not ID
+                    case '8': return 8;  // Not Factio
+                    case '9': return 9;  // Not Class
+                    case 'A': return 10; // Not Race
+                    case 'B': return 11; // Not Cell
+                    case 'C': return 12; // Not Local
+                    default: return QVariant(); // TODO: log an error?
+                }
+            }
+            case 1:
+            {
+                if (conditions[subRowIndex].mSelectRule[1] == '1')
+                {
+                    // throws an exception if the encoding is not found
+                    return sEncToInfoFunc.at(conditions[subRowIndex].mSelectRule.substr(2, 2)).c_str();
+                }
+                else
+                    return QString(conditions[subRowIndex].mSelectRule.substr(5).c_str());
+            }
+            case 2:
+            {
+                char compType = conditions[subRowIndex].mSelectRule[4];
+                switch (compType)
+                {
+                    case '0': return 3; // =
+                    case '1': return 0; // !=
+                    case '2': return 4; // >
+                    case '3': return 5; // >=
+                    case '4': return 1; // <
+                    case '5': return 2; // <=
+                    default: return QVariant(); // TODO: log an error?
+                }
+            }
+            case 3:
+            {
+                switch (conditions[subRowIndex].mValue.getType())
+                {
+                    case ESM::VT_String:
+                    {
+                        return QString::fromUtf8 (conditions[subRowIndex].mValue.getString().c_str());
+                    }
+                    case ESM::VT_Int:
+                    case ESM::VT_Short:
+                    case ESM::VT_Long:
+                    {
+                        return conditions[subRowIndex].mValue.getInteger();
+                    }
+                    case ESM::VT_Float:
+                    {
+                        return conditions[subRowIndex].mValue.getFloat();
+                    }
+                    default: return QVariant();
+                }
+            }
+            default: throw std::runtime_error("Info condition subcolumn index out of range");
+        }
+    }
+
+    void InfoConditionAdapter::setData(Record<Info>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        Info info = record.get();
+
+        std::vector<ESM::DialInfo::SelectStruct>& conditions = info.mSelects;
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int> (conditions.size()))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                // See sInfoCondFunc in columns.cpp for the enum values
+                switch (value.toInt())
+                {
+                    // FIXME: when these change the values of the other columns need to change
+                    // correspondingly (and automatically)
+                    case 1:
+                    {
+                        conditions[subRowIndex].mSelectRule[1] = '1';             // Function
+                        // default to "Rank Low"
+                        conditions[subRowIndex].mSelectRule[2] = '0';
+                        conditions[subRowIndex].mSelectRule[3] = '0';
+                        break;
+                    }
+                    case 2:  conditions[subRowIndex].mSelectRule[1] = '2'; break; // Global
+                    case 3:  conditions[subRowIndex].mSelectRule[1] = '3'; break; // Local
+                    case 4:  conditions[subRowIndex].mSelectRule[1] = '4'; break; // Journal
+                    case 5:  conditions[subRowIndex].mSelectRule[1] = '5'; break; // Item
+                    case 6:  conditions[subRowIndex].mSelectRule[1] = '6'; break; // Dead
+                    case 7:  conditions[subRowIndex].mSelectRule[1] = '7'; break; // Not ID
+                    case 8:  conditions[subRowIndex].mSelectRule[1] = '8'; break; // Not Faction
+                    case 9:  conditions[subRowIndex].mSelectRule[1] = '9'; break; // Not Class
+                    case 10: conditions[subRowIndex].mSelectRule[1] = 'A'; break; // Not Race
+                    case 11: conditions[subRowIndex].mSelectRule[1] = 'B'; break; // Not Cell
+                    case 12: conditions[subRowIndex].mSelectRule[1] = 'C'; break; // Not Local
+                    default: return; // return without saving
+                }
+                break;
+            }
+            case 1:
+            {
+                if (conditions[subRowIndex].mSelectRule[1] == '1')
+                {
+                    std::map<const std::string, std::string>::const_iterator it = sEncToInfoFunc.begin();
+                    for (;it != sEncToInfoFunc.end(); ++it)
+                    {
+                        if (it->second == value.toString().toUtf8().constData())
+                        {
+                            std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 2);
+                            rule.append(it->first);
+                            // leave old values for undo (NOTE: may not be vanilla's behaviour)
+                            rule.append(conditions[subRowIndex].mSelectRule.substr(4));
+                            conditions[subRowIndex].mSelectRule = rule;
+                            break;
+                        }
+                    }
+
+                    if (it == sEncToInfoFunc.end())
+                        return; // return without saving; TODO: maybe log an error here
+                }
+                else
+                {
+                    // FIXME: validate the string values before saving, based on the current function
+                    std::string rule = conditions[subRowIndex].mSelectRule.substr(0, 5);
+                    conditions[subRowIndex].mSelectRule = rule.append(value.toString().toUtf8().constData());
+                }
+                break;
+            }
+            case 2:
+            {
+                // See sInfoCondComp in columns.cpp for the enum values
+                switch (value.toInt())
+                {
+                    case 0: conditions[subRowIndex].mSelectRule[4] = '1'; break; // !=
+                    case 1: conditions[subRowIndex].mSelectRule[4] = '4'; break; // <
+                    case 2: conditions[subRowIndex].mSelectRule[4] = '5'; break; // <=
+                    case 3: conditions[subRowIndex].mSelectRule[4] = '0'; break; // =
+                    case 4: conditions[subRowIndex].mSelectRule[4] = '2'; break; // >
+                    case 5: conditions[subRowIndex].mSelectRule[4] = '3'; break; // >=
+                    default: return; // return without saving
+                }
+                break;
+            }
+            case 3:
+            {
+                switch (conditions[subRowIndex].mValue.getType())
+                {
+                    case ESM::VT_String:
+                    {
+                        conditions[subRowIndex].mValue.setString (value.toString().toUtf8().constData());
+                        break;
+                    }
+                    case ESM::VT_Int:
+                    case ESM::VT_Short:
+                    case ESM::VT_Long:
+                    {
+                        conditions[subRowIndex].mValue.setInteger (value.toInt());
+                        break;
+                    }
+                    case ESM::VT_Float:
+                    {
+                        conditions[subRowIndex].mValue.setFloat (value.toFloat());
+                        break;
+                    }
+                    default: break;
+                }
+                break;
+            }
+            default: throw std::runtime_error("Info condition subcolumn index out of range");
+        }
+
+        record.setModified (info);
+    }
+
+    int InfoConditionAdapter::getColumnsCount(const Record<Info>& record) const
+    {
+        return 4;
+    }
+
+    int InfoConditionAdapter::getRowsCount(const Record<Info>& record) const
+    {
+        return static_cast<int>(record.get().mSelects.size());
+    }
+
+    RaceAttributeAdapter::RaceAttributeAdapter () {}
+
+    void RaceAttributeAdapter::addRow(Record<ESM::Race>& record, int position) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceAttributeAdapter::removeRow(Record<ESM::Race>& record, int rowToRemove) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceAttributeAdapter::setTable(Record<ESM::Race>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        ESM::Race race = record.get();
+
+        race.mData =
+            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+        record.setModified (race);
+    }
+
+    NestedTableWrapperBase* RaceAttributeAdapter::table(const Record<ESM::Race>& record) const
+    {
+        std::vector<typename ESM::Race::RADTstruct> wrap;
+        wrap.push_back(record.get().mData);
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+    }
+
+    QVariant RaceAttributeAdapter::getData(const Record<ESM::Race>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return QString(ESM::Attribute::sAttributeNames[subRowIndex].c_str());
+            case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
+            case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
+            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+        }
+    }
+
+    void RaceAttributeAdapter::setData(Record<ESM::Race>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= ESM::Attribute::Length)
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return; // throw an exception here?
+            case 1: race.mData.mAttributeValues[subRowIndex].mMale = value.toInt(); break;
+            case 2: race.mData.mAttributeValues[subRowIndex].mFemale = value.toInt(); break;
+            default: throw std::runtime_error("Race Attribute subcolumn index out of range");
+        }
+
+        record.setModified (race);
+    }
+
+    int RaceAttributeAdapter::getColumnsCount(const Record<ESM::Race>& record) const
+    {
+        return 3; // attrib, male, female
+    }
+
+    int RaceAttributeAdapter::getRowsCount(const Record<ESM::Race>& record) const
+    {
+        return ESM::Attribute::Length; // there are 8 attributes
+    }
+
+    RaceSkillsBonusAdapter::RaceSkillsBonusAdapter () {}
+
+    void RaceSkillsBonusAdapter::addRow(Record<ESM::Race>& record, int position) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceSkillsBonusAdapter::removeRow(Record<ESM::Race>& record, int rowToRemove) const
+    {
+        // Do nothing, this table cannot be changed by the user
+    }
+
+    void RaceSkillsBonusAdapter::setTable(Record<ESM::Race>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        ESM::Race race = record.get();
+
+        race.mData =
+            static_cast<const NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+        record.setModified (race);
+    }
+
+    NestedTableWrapperBase* RaceSkillsBonusAdapter::table(const Record<ESM::Race>& record) const
+    {
+        std::vector<typename ESM::Race::RADTstruct> wrap;
+        wrap.push_back(record.get().mData);
+        // deleted by dtor of NestedTableStoring
+        return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
+    }
+
+    QVariant RaceSkillsBonusAdapter::getData(const Record<ESM::Race>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: return race.mData.mBonus[subRowIndex].mSkill; // can be -1
+            case 1: return race.mData.mBonus[subRowIndex].mBonus;
+            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+        }
+    }
+
+    void RaceSkillsBonusAdapter::setData(Record<ESM::Race>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        ESM::Race race = record.get();
+
+        if (subRowIndex < 0 || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus)/sizeof(race.mData.mBonus[0])))
+            throw std::runtime_error ("index out of range");
+
+        switch (subColIndex)
+        {
+            case 0: race.mData.mBonus[subRowIndex].mSkill = value.toInt(); break; // can be -1
+            case 1: race.mData.mBonus[subRowIndex].mBonus = value.toInt(); break;
+            default: throw std::runtime_error("Race skill bonus subcolumn index out of range");
+        }
+
+        record.setModified (race);
+    }
+
+    int RaceSkillsBonusAdapter::getColumnsCount(const Record<ESM::Race>& record) const
+    {
+        return 2; // skill, bonus
+    }
+
+    int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
+    {
+        // there are 7 skill bonuses
+        return static_cast<int>(sizeof(record.get().mData.mBonus)/sizeof(record.get().mData.mBonus[0]));
+    }
+
+    CellListAdapter::CellListAdapter () {}
+
+    void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const
+    {
+        throw std::logic_error ("cannot add a row to a fixed table");
+    }
+
+    void CellListAdapter::removeRow(Record<CSMWorld::Cell>& record, int rowToRemove) const
+    {
+        throw std::logic_error ("cannot remove a row to a fixed table");
+    }
+
+    void CellListAdapter::setTable(Record<CSMWorld::Cell>& record,
+            const NestedTableWrapperBase& nestedTable) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    NestedTableWrapperBase* CellListAdapter::table(const Record<CSMWorld::Cell>& record) const
+    {
+        throw std::logic_error ("table operation not supported");
+    }
+
+    QVariant CellListAdapter::getData(const Record<CSMWorld::Cell>& record,
+            int subRowIndex, int subColIndex) const
+    {
+        CSMWorld::Cell cell = record.get();
+
+        bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
+        bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+        bool interiorWater = (cell.mData.mFlags & ESM::Cell::HasWater) != 0;
+
+        switch (subColIndex)
+        {
+            case 0: return isInterior;
+            case 1: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
+            case 2: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mSunlight : QVariant(QVariant::UserType);
+            case 3: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mFog : QVariant(QVariant::UserType);
+            case 4: return (isInterior && !behaveLikeExterior) ?
+                    cell.mAmbi.mFogDensity : QVariant(QVariant::UserType);
+            case 5:
+            {
+                if (isInterior && !behaveLikeExterior && interiorWater)
+                    return cell.mWater;
+                else
+                    return QVariant(QVariant::UserType);
+            }
+            case 6: return isInterior ?
+                    QVariant(QVariant::UserType) : cell.mMapColor; // TODO: how to select?
+            //case 7: return isInterior ?
+                    //behaveLikeExterior : QVariant(QVariant::UserType);
+            default: throw std::runtime_error("Cell subcolumn index out of range");
+        }
+    }
+
+    void CellListAdapter::setData(Record<CSMWorld::Cell>& record,
+            const QVariant& value, int subRowIndex, int subColIndex) const
+    {
+        CSMWorld::Cell cell = record.get();
+
+        bool isInterior = (cell.mData.mFlags & ESM::Cell::Interior) != 0;
+        bool behaveLikeExterior = (cell.mData.mFlags & ESM::Cell::QuasiEx) != 0;
+        bool interiorWater = (cell.mData.mFlags & ESM::Cell::HasWater) != 0;
+
+        switch (subColIndex)
+        {
+            case 0:
+            {
+                if (value.toBool())
+                    cell.mData.mFlags |= ESM::Cell::Interior;
+                else
+                    cell.mData.mFlags &= ~ESM::Cell::Interior;
+                break;
+            }
+            case 1:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mAmbient = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 2:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mSunlight = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 3:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mFog = static_cast<int32_t>(value.toInt());
+                else
+                    return; // return without saving
+                break;
+            }
+            case 4:
+            {
+                if (isInterior && !behaveLikeExterior)
+                    cell.mAmbi.mFogDensity = value.toFloat();
+                else
+                    return; // return without saving
+                break;
+            }
+            case 5:
+            {
+                if (isInterior && !behaveLikeExterior && interiorWater)
+                    cell.mWater = value.toFloat();
+                else
+                    return; // return without saving
+                break;
+            }
+            case 6:
+            {
+                if (!isInterior)
+                    cell.mMapColor = value.toInt();
+                else
+                    return; // return without saving
+                break;
+            }
+#if 0
+            // redundant since this flag is shown in the main table as "Interior Sky"
+            // keep here for documenting the logic based on vanilla
+            case 7:
+            {
+                if (isInterior)
+                {
+                    if (value.toBool())
+                        cell.mData.mFlags |= ESM::Cell::QuasiEx;
+                    else
+                        cell.mData.mFlags &= ~ESM::Cell::QuasiEx;
+                }
+                else
+                    return; // return without saving
+                break;
+            }
+#endif
+            default: throw std::runtime_error("Cell subcolumn index out of range");
+        }
+
+        record.setModified (cell);
+    }
+
+    int CellListAdapter::getColumnsCount(const Record<CSMWorld::Cell>& record) const
+    {
+        return 7;
+    }
+
+    int CellListAdapter::getRowsCount(const Record<CSMWorld::Cell>& record) const
     {
         return 1; // fixed at size 1
     }

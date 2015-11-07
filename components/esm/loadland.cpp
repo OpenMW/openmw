@@ -67,11 +67,11 @@ Land::Land()
     : mFlags(0)
     , mX(0)
     , mY(0)
+    , mPlugin(0)
     , mEsm(NULL)
     , mDataTypes(0)
     , mDataLoaded(false)
     , mLandData(NULL)
-    , mPlugin(0)
 {
 }
 

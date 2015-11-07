@@ -66,3 +66,9 @@ void CSVDoc::NewGameDialogue::create()
 {
     emit createRequest (mAdjusterWidget->getPath());
 }
+
+void CSVDoc::NewGameDialogue::reject()
+{
+    emit cancelCreateGame ();
+    QDialog::reject();
+}

@@ -26,14 +26,16 @@ namespace CSVTools
             ReportTable *mTable;
             SearchBox mSearchBox;
             CSMDoc::Document& mDocument;
-            int mPaddingBefore;
-            int mPaddingAfter;
             CSMTools::Search mSearch;
             bool mLocked;
 
         private:
 
             void replace (bool selection);
+
+        protected:
+
+            void showEvent (QShowEvent *event);
             
         public:
 

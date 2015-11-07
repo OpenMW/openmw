@@ -17,7 +17,7 @@ namespace CSVWorld
         public:
 
             VarTypeDelegate (const std::vector<std::pair<int, QString> >& values,
-                CSMDoc::Document& document, QObject *parent);
+                CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent);
     };
 
     class VarTypeDelegateFactory : public CommandDelegateFactory
@@ -30,7 +30,8 @@ namespace CSVWorld
                 ESM::VarType type1 = ESM::VT_Unknown, ESM::VarType type2 = ESM::VT_Unknown,
                 ESM::VarType type3 = ESM::VT_Unknown);
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher,
+                CSMDoc::Document& document, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
             void add (ESM::VarType type);

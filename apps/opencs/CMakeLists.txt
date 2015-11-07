@@ -27,6 +27,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
+    idcompletionmanager
     )
 
 opencs_hdrs_noqt (model/world
@@ -41,13 +42,13 @@ opencs_units (model/tools
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage
+    startscriptcheck search searchoperation searchstage pathgridcheck
     )
 
 
 opencs_units (view/doc
     viewmanager view operations operation subview startup filedialog newgame
-    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview
+    filewidget adjusterwidget loader globaldebugprofilemenu runlogsubview sizehint
     )
 
 
@@ -64,16 +65,17 @@ opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
     cellcreator referenceablecreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
+    dialoguespinbox
     )
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem
+    scripthighlighter idvalidator dialoguecreator physicssystem idcompletiondelegate
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2
+    scenetooltoggle2 completerpopup
     )
 
 opencs_units (view/render

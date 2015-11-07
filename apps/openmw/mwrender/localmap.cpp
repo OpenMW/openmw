@@ -25,9 +25,9 @@ using namespace MWRender;
 using namespace Ogre;
 
 LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
-    : mInterior(false)
+    : mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mAngle(0.f)
-    , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
+    , mInterior(false)
 {
     mRendering = rend;
     mRenderingManager = rendering;

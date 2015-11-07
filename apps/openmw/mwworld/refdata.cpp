@@ -37,7 +37,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mDeleted(false)
+    : mBaseNode(0), mDeleted(false), mHasLocals (false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -48,10 +48,10 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mHasLocals (false), mEnabled (true), mCount (1), mPosition (cellRef.mPos),
+    : mBaseNode(0), mDeleted(false),  mHasLocals (false), mEnabled (true),
+      mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
-      mChanged(false), // Loading from ESM/ESP files -> assume unchanged
-      mDeleted(false)
+      mChanged(false) // Loading from ESM/ESP files -> assume unchanged
     {
         mLocalRotation.rot[0]=0;
         mLocalRotation.rot[1]=0;
@@ -59,10 +59,12 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode (0), mHasLocals (false), mEnabled (objectState.mEnabled != 0),
-      mCount (objectState.mCount), mPosition (objectState.mPosition), mCustomData (0),
-      mChanged(true), // Loading from a savegame -> assume changed
-      mDeleted(false)
+    : mBaseNode (0), mDeleted(false), mHasLocals (false),
+      mEnabled (objectState.mEnabled != 0),
+      mCount (objectState.mCount),
+      mPosition (objectState.mPosition),
+      mCustomData (0),
+      mChanged(true) // Loading from a savegame -> assume changed
     {   
         for (int i=0; i<3; ++i)
             mLocalRotation.rot[i] = objectState.mLocalRotation[i];

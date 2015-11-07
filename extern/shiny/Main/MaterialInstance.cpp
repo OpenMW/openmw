@@ -9,11 +9,11 @@
 namespace sh
 {
 	MaterialInstance::MaterialInstance (const std::string& name, Factory* f)
-		: mName(name)
+		: mFailedToCreate(false)
+		, mListener(NULL)
+		, mName(name)
 		, mShadersEnabled(true)
 		, mFactory(f)
-		, mListener(NULL)
-		, mFailedToCreate(false)
 	{
 	}
 

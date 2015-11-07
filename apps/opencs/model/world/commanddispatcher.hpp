@@ -7,6 +7,9 @@
 
 #include "universalid.hpp"
 
+class QModelIndex;
+class QAbstractItemModel;
+
 namespace CSMDoc
 {
     class Document;
@@ -52,6 +55,12 @@ namespace CSMWorld
             /// dispatcher is used for. However if that record collection does not support
             /// the extended mode, the returned vector will be empty instead.
             std::vector<UniversalId> getExtendedTypes() const;
+
+            /// Add a modify command to the undo stack.
+            ///
+            /// \attention model must either be a model for the table operated on by this
+            /// dispatcher or a proxy of it.
+            void executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_);
 
         public slots:
 

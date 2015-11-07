@@ -1,6 +1,6 @@
 #include "worldimp.hpp"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__MINGW32__)
 #include <boost/tr1/tr1/unordered_map>
 #elif defined HAVE_UNORDERED_MAP
 #include <unordered_map>
@@ -147,14 +147,12 @@ namespace MWWorld
         const boost::filesystem::path& resDir, const boost::filesystem::path& cacheDir,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
         int activationDistanceOverride, const std::string& startCell, const std::string& startupScript)
-    : mPlayer (0), mLocalScripts (mStore),
+    : mFallback(fallbackMap), mPlayer (0), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
-      mActivationDistanceOverride (activationDistanceOverride),
-      mFallback(fallbackMap), mTeleportEnabled(true), mLevitationEnabled(true),
-      mGodMode(false), mContentFiles (contentFiles),
-      mGoToJail(false), mDaysInPrison(0),
-      mStartCell (startCell), mStartupScript(startupScript),
-      mScriptsEnabled(true)
+      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
+      mStartCell (startCell), mTeleportEnabled(true),
+      mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new PhysicsSystem(renderer);
         mPhysEngine = mPhysics->getEngine();
@@ -1108,7 +1106,7 @@ namespace MWWorld
         }
     }
 
-    void World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
+    MWWorld::Ptr World::moveObject(const Ptr &ptr, CellStore* newCell, float x, float y, float z)
     {
         ESM::Position pos = ptr.getRefData().getPosition();
 
@@ -1123,6 +1121,7 @@ namespace MWWorld
         CellStore *currCell = ptr.isInCell() ? ptr.getCell() : NULL; // currCell == NULL should only happen for player, during initial startup
         bool isPlayer = ptr == mPlayer->getPlayer();
         bool haveToMove = isPlayer || (currCell && mWorldScene->isCellActive(*currCell));
+        MWWorld::Ptr newPtr = ptr;
 
         if (currCell != newCell)
         {
@@ -1140,6 +1139,7 @@ namespace MWWorld
                         mWorldScene->changeToExteriorCell(pos, false);
                 }
                 addContainerScripts (getPlayerPtr(), newCell);
+                newPtr = getPlayerPtr();
             }
             else
             {
@@ -1147,7 +1147,7 @@ namespace MWWorld
                 bool newCellActive = mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
-                    MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
                     mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
@@ -1163,23 +1163,21 @@ namespace MWWorld
                     removeContainerScripts (ptr);
                     haveToMove = false;
 
-                    MWWorld::Ptr newPtr = ptr.getClass()
-                            .copyToCell(ptr, *newCell);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
                 else if (!currCellActive && !newCellActive)
-                    ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
                 else // both cells active
                 {
-                    MWWorld::Ptr copy =
-                        ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
 
-                    mRendering->updateObjectCell(ptr, copy);
+                    mRendering->updateObjectCell(ptr, newPtr);
                     ptr.getRefData().setBaseNode(NULL);
-                    MWBase::Environment::get().getSoundManager()->updatePtr (ptr, copy);
+                    MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
-                    mechMgr->updateCell(ptr, copy);
+                    mechMgr->updateCell(ptr, newPtr);
 
                     std::string script =
                         ptr.getClass().getScript(ptr);
@@ -1187,22 +1185,23 @@ namespace MWWorld
                     {
                         mLocalScripts.remove(ptr);
                         removeContainerScripts (ptr);
-                        mLocalScripts.add(script, copy);
-                        addContainerScripts (copy, newCell);
+                        mLocalScripts.add(script, newPtr);
+                        addContainerScripts (newPtr, newCell);
                     }
                 }
                 ptr.getRefData().setCount(0);
             }
         }
-        if (haveToMove && ptr.getRefData().getBaseNode())
+        if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(ptr, vec);
-            mPhysics->moveObject (ptr);
+            mRendering->moveObject(newPtr, vec);
+            mPhysics->moveObject (newPtr);
         }
         if (isPlayer)
         {
             mWorldScene->playerMoved (vec);
         }
+        return newPtr;
     }
 
     MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z)
@@ -1216,11 +1215,7 @@ namespace MWWorld
             cell = getExterior(cellX, cellY);
         }
 
-        moveObject(ptr, cell, x, y, z);
-
-        MWWorld::Ptr updated = ptr;
-        updated.mCell = cell;
-        return updated;
+        return moveObject(ptr, cell, x, y, z);
     }
 
     MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
@@ -2924,7 +2919,7 @@ namespace MWWorld
         if ( !closestMarker.mCell->isExterior() )
             cellName = closestMarker.mCell->getCell()->mName;
 
-        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition());
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
     
@@ -2942,7 +2937,7 @@ namespace MWWorld
     struct AddDetectedReference
     {
         AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
-            : mOut(out), mDetector(detector), mType(type), mSquaredDist(squaredDist)
+            : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }
 
@@ -2956,7 +2951,7 @@ namespace MWWorld
                         Ogre::Vector3(mDetector.getRefData().getPosition().pos)) >= mSquaredDist)
                 return true;
 
-            if (!ptr.getRefData().isEnabled())
+            if (!ptr.getRefData().isEnabled() || ptr.getRefData().isDeleted())
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)

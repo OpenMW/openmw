@@ -531,7 +531,7 @@ namespace Compiler
             extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
             extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
             extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
-            extensions.registerInstruction("placeatme","clfl",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
+            extensions.registerInstruction("placeatme","clflX",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
             extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
             extensions.registerInstruction("rotateworld","cf",opcodeRotateWorld,opcodeRotateWorldExplicit);

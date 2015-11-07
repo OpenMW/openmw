@@ -56,8 +56,8 @@ namespace Compiler
     LineParser::LineParser (ErrorHandler& errorHandler, const Context& context, Locals& locals,
         Literals& literals, std::vector<Interpreter::Type_Code>& code, bool allowExpression)
     : Parser (errorHandler, context), mLocals (locals), mLiterals (literals), mCode (code),
-       mState (BeginState), mExprParser (errorHandler, context, locals, literals),
-       mAllowExpression (allowExpression), mButtons(0), mType(0), mReferenceMember(false)
+       mState (BeginState), mReferenceMember(false), mButtons(0), mType(0),
+       mExprParser (errorHandler, context, locals, literals), mAllowExpression (allowExpression)
     {}
 
     bool LineParser::parseInt (int value, const TokenLoc& loc, Scanner& scanner)

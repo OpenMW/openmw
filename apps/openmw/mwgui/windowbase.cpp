@@ -78,7 +78,7 @@ void WindowModal::close()
 }
 
 NoDrop::NoDrop(DragAndDrop *drag, MyGUI::Widget *widget)
-    : mDrag(drag), mWidget(widget), mTransparent(false)
+    : mWidget(widget), mDrag(drag), mTransparent(false)
 {
     if (!mWidget)
         throw std::runtime_error("NoDrop needs a non-NULL widget!");

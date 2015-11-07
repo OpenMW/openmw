@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <map>
+#include <deque>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -26,7 +27,7 @@ namespace CSMDoc
             ESM::ESMWriter mWriter;
             boost::filesystem::path mProjectPath;
             bool mProjectFile;
-            std::map<std::string, std::vector<int> > mSubRecords; // record ID, list of subrecords
+            std::map<std::string, std::deque<int> > mSubRecords; // record ID, list of subrecords
 
         public:
 
@@ -49,7 +50,7 @@ namespace CSMDoc
             bool isProjectFile() const;
             ///< Currently saving project file? (instead of content file)
 
-            std::map<std::string, std::vector<int> >& getSubRecords();
+            std::map<std::string, std::deque<int> >& getSubRecords();
     };
 
 

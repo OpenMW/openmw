@@ -12,7 +12,7 @@
 
 CSVSettings::BooleanView::BooleanView (CSMSettings::Setting *setting,
                                        Page *parent)
-    : mType(setting->type()), View (setting, parent)
+    : View (setting, parent), mType(setting->type())
 {
     foreach (const QString &value, setting->declaredValues())
     {

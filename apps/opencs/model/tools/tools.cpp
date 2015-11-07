@@ -26,6 +26,7 @@
 #include "referencecheck.hpp"
 #include "startscriptcheck.hpp"
 #include "searchoperation.hpp"
+#include "pathgridcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -81,7 +82,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 
         mVerifierOperation->appendStage (new SpellCheckStage (mData.getSpells()));
 
-        mVerifierOperation->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions()));
+        mVerifierOperation->appendStage (new ReferenceableCheckStage (mData.getReferenceables().getDataSet(), mData.getRaces(), mData.getClasses(), mData.getFactions(), mData.getScripts()));
 
         mVerifierOperation->appendStage (new ReferenceCheckStage(mData.getReferences(), mData.getReferenceables(), mData.getCells(), mData.getFactions()));
 
@@ -96,6 +97,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                     CSMWorld::UniversalId( CSMWorld::UniversalId::Type_Meshes )),
                 mData.getRaces() ));
 
+        mVerifierOperation->appendStage (new PathgridCheckStage (mData.getPathgrids()));
+
         mVerifier.setOperation (mVerifierOperation);
     }
 
@@ -103,8 +106,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
 }
 
 CSMTools::Tools::Tools (CSMDoc::Document& document)
-: mDocument (document), mData (document.getData()), mVerifierOperation (0), mNextReportNumber (0),
-  mSearchOperation (0)
+: mDocument (document), mData (document.getData()), mVerifierOperation (0),
+  mSearchOperation (0), mNextReportNumber (0)
 {
     // index 0: load error log
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel));
@@ -114,7 +117,7 @@ CSMTools::Tools::Tools (CSMDoc::Document& document)
     connect (&mSearch, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
     connect (&mSearch,
         SIGNAL (reportMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)),
-        this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));   
+        this, SLOT (verifierMessage (const CSMWorld::UniversalId&, const std::string&, const std::string&, int)));
 }
 
 CSMTools::Tools::~Tools()
@@ -130,7 +133,7 @@ CSMTools::Tools::~Tools()
         mSearch.abortAndWait();
         delete mSearchOperation;
     }
-    
+
     for (std::map<int, ReportModel *>::iterator iter (mReports.begin()); iter!=mReports.end(); ++iter)
         delete iter->second;
 }
@@ -149,7 +152,7 @@ CSMWorld::UniversalId CSMTools::Tools::newSearch()
 {
     mReports.insert (std::make_pair (mNextReportNumber++, new ReportModel (true)));
 
-    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);    
+    return CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Search, mNextReportNumber-1);
 }
 
 void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Search& search)
@@ -159,11 +162,11 @@ void CSMTools::Tools::runSearch (const CSMWorld::UniversalId& searchId, const Se
     if (!mSearchOperation)
     {
         mSearchOperation = new SearchOperation (mDocument);
-        mSearch.setOperation (mSearchOperation);        
+        mSearch.setOperation (mSearchOperation);
     }
 
     mSearchOperation->configure (search);
-    
+
     mSearch.start();
 }
 
@@ -198,7 +201,7 @@ CSMTools::ReportModel *CSMTools::Tools::getReport (const CSMWorld::UniversalId& 
         id.getType()!=CSMWorld::UniversalId::Type_LoadErrorLog &&
         id.getType()!=CSMWorld::UniversalId::Type_Search)
         throw std::logic_error ("invalid request for report model: " + id.toString());
-        
+
     return mReports.at (id.getIndex());
 }
 

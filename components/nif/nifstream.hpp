@@ -35,7 +35,7 @@ public:
 
     NIFFile * const file;
 
-    NIFStream (NIFFile * file, Ogre::DataStreamPtr inp): file (file), inp (inp) {}
+    NIFStream (NIFFile * file, Ogre::DataStreamPtr inp): inp (inp), file (file) {}
 
     void skip(size_t size) { inp->skip(size); }
 

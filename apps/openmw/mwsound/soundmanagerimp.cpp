@@ -33,13 +33,13 @@ namespace MWSound
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
         , mMusicVolume(1.0f)
-        , mFootstepsVolume(1.0f)
         , mVoiceVolume(1.0f)
-        , mPausedSoundTypes(0)
+        , mFootstepsVolume(1.0f)
+        , mListenerUnderwater(false)
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
-        , mListenerUnderwater(false)
+        , mPausedSoundTypes(0)
     {
         if(!useSound)
             return;

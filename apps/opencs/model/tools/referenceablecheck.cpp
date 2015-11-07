@@ -8,12 +8,14 @@
 CSMTools::ReferenceableCheckStage::ReferenceableCheckStage(
     const CSMWorld::RefIdData& referenceable, const CSMWorld::IdCollection<ESM::Race >& races,
     const CSMWorld::IdCollection<ESM::Class>& classes,
-    const CSMWorld::IdCollection<ESM::Faction>& faction)
+    const CSMWorld::IdCollection<ESM::Faction>& faction,
+    const CSMWorld::IdCollection<ESM::Script>& scripts)
     :
     mReferencables(referenceable),
-    mClasses(classes),
     mRaces(races),
+    mClasses(classes),
     mFactions(faction),
+    mScripts(scripts),
     mPlayerPresent(false)
 {
 }
@@ -245,6 +247,9 @@ void CSMTools::ReferenceableCheckStage::bookCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Book, book.mId);
 
     inventoryItemCheck<ESM::Book>(book, messages, id.toString(), true);
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Book>(book, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::activatorCheck(
@@ -265,6 +270,9 @@ void CSMTools::ReferenceableCheckStage::activatorCheck(
     //Checking for model, IIRC all activators should have a model
     if (activator.mModel.empty())
         messages.push_back (std::make_pair (id, activator.mId + " has no model"));
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Activator>(activator, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::potionCheck(
@@ -284,6 +292,9 @@ void CSMTools::ReferenceableCheckStage::potionCheck(
 
     inventoryItemCheck<ESM::Potion>(potion, messages, id.toString());
     //IIRC potion can have empty effects list just fine.
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Potion>(potion, messages, id.toString());
 }
 
 
@@ -305,6 +316,9 @@ void CSMTools::ReferenceableCheckStage::apparatusCheck(
     inventoryItemCheck<ESM::Apparatus>(apparatus, messages, id.toString());
 
     toolCheck<ESM::Apparatus>(apparatus, messages, id.toString());
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Apparatus>(apparatus, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::armorCheck(
@@ -331,6 +345,9 @@ void CSMTools::ReferenceableCheckStage::armorCheck(
     //checking for health. Only positive numbers are allowed, or 0 is illegal
     if (armor.mData.mHealth <= 0)
         messages.push_back (std::make_pair (id, armor.mId + " has non positive health"));
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Armor>(armor, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::clothingCheck(
@@ -348,6 +365,9 @@ void CSMTools::ReferenceableCheckStage::clothingCheck(
     const ESM::Clothing& clothing = (dynamic_cast<const CSMWorld::Record<ESM::Clothing>& >(baseRecord)).get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Clothing, clothing.mId);
     inventoryItemCheck<ESM::Clothing>(clothing, messages, id.toString(), true);
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Clothing>(clothing, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::containerCheck(
@@ -377,6 +397,9 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     //checking for name
     if (container.mName.empty())
         messages.push_back (std::make_pair (id, container.mId + " has an empty name"));
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Container>(container, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::creatureCheck (
@@ -444,6 +467,9 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     //TODO, find meaning of other values
     if (creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
         messages.push_back (std::make_pair (id, creature.mId + " has negative gold "));
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Creature>(creature, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::doorCheck(
@@ -455,15 +481,18 @@ void CSMTools::ReferenceableCheckStage::doorCheck(
     if (baseRecord.isDeleted())
         return;
 
-    const ESM::Door& Door = (dynamic_cast<const CSMWorld::Record<ESM::Door>&>(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, Door.mId);
+    const ESM::Door& door = (dynamic_cast<const CSMWorld::Record<ESM::Door>&>(baseRecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Door, door.mId);
 
     //usual, name or model
-    if (Door.mName.empty())
-        messages.push_back (std::make_pair (id, Door.mId + " has an empty name"));
+    if (door.mName.empty())
+        messages.push_back (std::make_pair (id, door.mId + " has an empty name"));
 
-    if (Door.mModel.empty())
-        messages.push_back (std::make_pair (id, Door.mId + " has no model"));
+    if (door.mModel.empty())
+        messages.push_back (std::make_pair (id, door.mId + " has no model"));
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Door>(door, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::ingredientCheck(
@@ -478,10 +507,13 @@ void CSMTools::ReferenceableCheckStage::ingredientCheck(
         return;
     }
 
-    const ESM::Ingredient& Ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baseRecord)).get();
-    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, Ingredient.mId);
+    const ESM::Ingredient& ingredient = (dynamic_cast<const CSMWorld::Record<ESM::Ingredient>& >(baseRecord)).get();
+    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Ingredient, ingredient.mId);
 
-    inventoryItemCheck<ESM::Ingredient>(Ingredient, messages, id.toString());
+    inventoryItemCheck<ESM::Ingredient>(ingredient, messages, id.toString());
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Ingredient>(ingredient, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::creaturesLevListCheck(
@@ -542,6 +574,9 @@ void CSMTools::ReferenceableCheckStage::lightCheck(
         if (light.mData.mTime == 0)
             messages.push_back (std::make_pair (id, light.mId + " has zero duration"));
     }
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Light>(light, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::lockpickCheck(
@@ -562,6 +597,9 @@ void CSMTools::ReferenceableCheckStage::lockpickCheck(
     inventoryItemCheck<ESM::Lockpick>(lockpick, messages, id.toString());
 
     toolCheck<ESM::Lockpick>(lockpick, messages, id.toString(), true);
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Lockpick>(lockpick, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::miscCheck(
@@ -580,6 +618,9 @@ void CSMTools::ReferenceableCheckStage::miscCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Miscellaneous, miscellaneous.mId);
 
     inventoryItemCheck<ESM::Miscellaneous>(miscellaneous, messages, id.toString());
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Miscellaneous>(miscellaneous, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::npcCheck (
@@ -697,6 +738,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
         messages.push_back (std::make_pair (id, npc.mId + " has no hair"));
 
     //TODO: reputation, Disposition, rank, everything else
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::NPC>(npc, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::weaponCheck(
@@ -773,6 +817,9 @@ void CSMTools::ReferenceableCheckStage::weaponCheck(
                 messages.push_back (std::make_pair (id, weapon.mId + " has negative reach"));
         }
     }
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Weapon>(weapon, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::probeCheck(
@@ -792,6 +839,9 @@ void CSMTools::ReferenceableCheckStage::probeCheck(
 
     inventoryItemCheck<ESM::Probe>(probe, messages, id.toString());
     toolCheck<ESM::Probe>(probe, messages, id.toString(), true);
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Probe>(probe, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::repairCheck (
@@ -808,6 +858,9 @@ void CSMTools::ReferenceableCheckStage::repairCheck (
 
     inventoryItemCheck<ESM::Repair> (repair, messages, id.toString());
     toolCheck<ESM::Repair> (repair, messages, id.toString(), true);
+
+    // Check that mentioned scripts exist
+    scriptCheck<ESM::Repair>(repair, messages, id.toString());
 }
 
 void CSMTools::ReferenceableCheckStage::staticCheck (
@@ -917,5 +970,15 @@ template<typename List> void CSMTools::ReferenceableCheckStage::listCheck (
         if (someList.mList[i].mLevel < 1)
             messages.push_back (std::make_pair (someID,
                 someList.mId + " contains item with non-positive level"));
+    }
+}
+
+template<typename Tool> void CSMTools::ReferenceableCheckStage::scriptCheck (
+    const Tool& someTool, CSMDoc::Messages& messages, const std::string& someID)
+{
+    if (!someTool.mScript.empty())
+    {
+        if (mScripts.searchId(someTool.mScript) == -1)
+            messages.push_back (std::make_pair (someID, someTool.mId + " refers to an unknown script \""+someTool.mScript+"\""));
     }
 }

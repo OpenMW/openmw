@@ -548,6 +548,7 @@ namespace MWGui
         WindowModal::open();
 
         mMagicList->setModel(new SpellModel(MWBase::Environment::get().getWorld()->getPlayerPtr()));
+        mMagicList->resetScrollbars();
     }
 
     void MagicSelectionDialog::onModelIndexSelected(SpellModel::ModelIndex index)

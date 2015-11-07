@@ -14,6 +14,7 @@ namespace ContentSelectorView
     {
         Q_OBJECT
 
+        QMenu *mContextMenu;
         QStringList mFilePaths;
 
     protected:
@@ -51,7 +52,9 @@ namespace ContentSelectorView
         void buildContentModel();
         void buildGameFileView();
         void buildAddonView();
+        void buildContextMenu();
         void setGameFileSelected(int index, bool selected);
+        void setCheckStateForMultiSelectedItems(bool checked);
 
     signals:
         void signalCurrentGamefileIndexChanged (int);
@@ -62,6 +65,9 @@ namespace ContentSelectorView
 
         void slotCurrentGameFileIndexChanged(int index);
         void slotAddonTableItemActivated(const QModelIndex& index);
+        void slotShowContextMenu(const QPoint& pos);
+        void slotCheckMultiSelectedItems();
+        void slotUncheckMultiSelectedItems();
     };
 }
 

@@ -1,6 +1,7 @@
 
 #include "viewmanager.hpp"
 
+#include <vector>
 #include <map>
 
 #include <QApplication>
@@ -10,12 +11,14 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/columns.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
 
 #include "../world/util.hpp"
 #include "../world/enumdelegate.hpp"
 #include "../world/vartypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
 #include "../world/idtypedelegate.hpp"
+#include "../world/idcompletiondelegate.hpp"
 
 #include "../../model/settings/usersettings.hpp"
 
@@ -60,6 +63,14 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
     mDelegateFactories->add (CSMWorld::ColumnBase::Display_RefRecordType,
         new CSVWorld::IdTypeDelegateFactory());
 
+    std::vector<CSMWorld::ColumnBase::Display> idCompletionColumns = CSMWorld::IdCompletionManager::getDisplayTypes();
+    for (std::vector<CSMWorld::ColumnBase::Display>::const_iterator current = idCompletionColumns.begin();
+         current != idCompletionColumns.end();
+         ++current)
+    {
+        mDelegateFactories->add(*current, new CSVWorld::IdCompletionDelegateFactory());
+    }
+
     struct Mapping
     {
         CSMWorld::ColumnBase::Display mDisplay;
@@ -90,7 +101,10 @@ CSVDoc::ViewManager::ViewManager (CSMDoc::DocumentManager& documentManager)
         { CSMWorld::ColumnBase::Display_EffectId, CSMWorld::Columns::ColumnId_EffectId, false },
         { CSMWorld::ColumnBase::Display_PartRefType, CSMWorld::Columns::ColumnId_PartRefType, false },
         { CSMWorld::ColumnBase::Display_AiPackageType, CSMWorld::Columns::ColumnId_AiPackageType, false },
-        { CSMWorld::ColumnBase::Display_YesNo, CSMWorld::Columns::ColumnId_AiWanderRepeat, false }
+        { CSMWorld::ColumnBase::Display_YesNo, CSMWorld::Columns::ColumnId_AiWanderRepeat, false },
+        { CSMWorld::ColumnBase::Display_InfoCondFunc, CSMWorld::Columns::ColumnId_InfoCondFunc, false },
+        { CSMWorld::ColumnBase::Display_InfoCondComp, CSMWorld::Columns::ColumnId_InfoCondComp, false },
+        { CSMWorld::ColumnBase::Display_RaceSkill, CSMWorld::Columns::ColumnId_RaceSkill, true },
     };
 
     for (std::size_t i=0; i<sizeof (sMapping)/sizeof (Mapping); ++i)

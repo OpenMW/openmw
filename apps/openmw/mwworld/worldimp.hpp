@@ -348,7 +348,9 @@ namespace MWWorld
 
             virtual MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z);
             ///< @return an updated Ptr in case the Ptr's cell changes
-            virtual void moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
+
+            virtual MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z);
+            ///< @return an updated Ptr
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 

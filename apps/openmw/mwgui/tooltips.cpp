@@ -30,15 +30,15 @@ namespace MWGui
 
     ToolTips::ToolTips() :
         Layout("openmw_tooltips.layout")
-        , mFullHelp(false)
-        , mEnabled(true)
         , mFocusToolTipX(0.0)
         , mFocusToolTipY(0.0)
+        , mHorizontalScrollIndex(0)
         , mDelay(0.0)
         , mRemainingDelay(0.0)
         , mLastMouseX(0)
         , mLastMouseY(0)
-        , mHorizontalScrollIndex(0)
+        , mEnabled(true)
+        , mFullHelp(false)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
 
@@ -593,7 +593,10 @@ namespace MWGui
 
         for (std::vector<std::pair<std::string, int> >::const_iterator it = itemOwners.begin(); it != itemOwners.end(); ++it)
         {
-            ret += std::string("\nStolen from ") + it->first;
+            if (it->second == std::numeric_limits<int>::max())
+                ret += std::string("\nStolen from ") + it->first; // for legacy (ESS) savegames
+            else
+                ret += std::string("\nStolen ") + MyGUI::utility::toString(it->second) + " from " + it->first;
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");

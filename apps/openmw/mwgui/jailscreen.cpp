@@ -19,9 +19,9 @@ namespace MWGui
 {
     JailScreen::JailScreen()
         : WindowBase("openmw_jail_screen.layout"),
-          mTimeAdvancer(0.01f),
           mDays(1),
-          mFadeTimeRemaining(0)
+          mFadeTimeRemaining(0),
+          mTimeAdvancer(0.01f)
     {
         getWidget(mProgressBar, "ProgressBar");
 

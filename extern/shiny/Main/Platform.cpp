@@ -7,9 +7,9 @@
 namespace sh
 {
 	Platform::Platform (const std::string& basePath)
-		: mBasePath(basePath)
-		, mCacheFolder("./")
+		: mCacheFolder("./")
 		, mFactory(NULL)
+		, mBasePath(basePath)
 	{
 	}
 

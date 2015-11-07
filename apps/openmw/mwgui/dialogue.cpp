@@ -248,10 +248,10 @@ namespace MWGui
 
     DialogueWindow::DialogueWindow()
         : WindowBase("openmw_dialogue_window.layout")
-        , mPersuasionDialog()
-        , mEnabled(false)
         , mServices(0)
+        , mEnabled(false)
         , mGoodbye(false)
+        , mPersuasionDialog()
     {
         // Centre dialog
         center();
@@ -291,7 +291,10 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         }
         else
+        {
             MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
+            mTopicsList->scrollToTop();
+        }
     }
 
     void DialogueWindow::onWindowResize(MyGUI::Window* _sender)

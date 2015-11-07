@@ -128,6 +128,11 @@ void ItemView::update()
     layoutWidgets();
 }
 
+void ItemView::resetScrollBars()
+{
+    mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));
+}
+
 void ItemView::onSelectedItem(MyGUI::Widget *sender)
 {
     ItemModel::ModelIndex index = (*sender->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >()).first;

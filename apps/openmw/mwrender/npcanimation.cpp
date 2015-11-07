@@ -91,7 +91,7 @@ namespace MWRender
 {
 
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
-    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mValue(0), mEnabled(true)
+    : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mEnabled(true), mValue(0)
 {
     resetBlinkTimer();
 }
@@ -196,24 +196,28 @@ const NpcAnimation::PartBoneMap NpcAnimation::sPartList = createPartListMap();
 
 NpcAnimation::~NpcAnimation()
 {
-    if (!mListenerDisabled)
+    if (!mListenerDisabled
+            // No need to getInventoryStore() to reset, if none exists
+            // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
+            // all from within this destructor. ouch!
+           && mPtr.getRefData().getCustomData())
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
   : Animation(ptr, node),
-    mVisibilityFlags(visibilityFlags),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
+    mNpcType(Type_Normal),
+    mVisibilityFlags(visibilityFlags),
     mFirstPersonOffset(0.f, 0.f, 0.f),
     mAlpha(1.f),
-    mNpcType(Type_Normal),
     mSoundsDisabled(disableSounds),
-    mHeadPitch(0.f),
-    mHeadYaw(0.f)
+    mHeadYaw(0.f),
+    mHeadPitch(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 

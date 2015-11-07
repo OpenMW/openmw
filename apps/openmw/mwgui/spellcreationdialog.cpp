@@ -483,15 +483,15 @@ namespace MWGui
 
 
     EffectEditorBase::EffectEditorBase(Type type)
-        : mAddEffectDialog()
-        , mAvailableEffectsList(NULL)
+        : mAvailableEffectsList(NULL)
         , mUsedEffectsView(NULL)
+        , mAddEffectDialog()
         , mSelectAttributeDialog(NULL)
         , mSelectSkillDialog(NULL)
         , mSelectedEffect(0)
         , mSelectedKnownEffectId(0)
-        , mType(type)
         , mConstantEffect(false)
+        , mType(type)
     {
         mAddEffectDialog.eventEffectAdded += MyGUI::newDelegate(this, &EffectEditorBase::onEffectAdded);
         mAddEffectDialog.eventEffectModified += MyGUI::newDelegate(this, &EffectEditorBase::onEffectModified);
@@ -551,6 +551,7 @@ namespace MWGui
             ++i;
         }
         mAvailableEffectsList->adjustSize ();
+        mAvailableEffectsList->scrollToTop();
 
         for (std::vector<short>::const_iterator it = knownEffects.begin(); it != knownEffects.end(); ++it)
         {

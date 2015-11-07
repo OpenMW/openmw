@@ -24,8 +24,6 @@ namespace CSMWorld
 
             void updateColumnMap();
 
-            bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
-
         public:
 
             IdTableProxyModel (QObject *parent = 0);
@@ -34,9 +32,15 @@ namespace CSMWorld
 
             void setFilter (const boost::shared_ptr<CSMFilter::Node>& filter);
 
+            void refreshFilter();
+
         protected:
 
             bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+
+            virtual bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
+
+            virtual bool filterAcceptsColumn (int sourceColumn, const QModelIndex& sourceParent) const;
     };
 }
 

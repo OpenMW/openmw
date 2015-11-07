@@ -157,6 +157,7 @@ void CSVWorld::TableBottomBox::createRequest()
     mLayout->setCurrentWidget (mCreator);
     setVisible (true);
     mCreating = true;
+    mCreator->focus();
 }
 
 void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, 
@@ -168,4 +169,5 @@ void CSVWorld::TableBottomBox::cloneRequest(const std::string& id,
     mCreator->toggleWidgets(false);
     setVisible (true);
     mCreating = true;
+    mCreator->focus();
 }

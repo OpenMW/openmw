@@ -133,6 +133,7 @@ namespace
 
 QuadTreeNode::QuadTreeNode(DefaultWorld* terrain, ChildDirection dir, float size, const Ogre::Vector2 &center, QuadTreeNode* parent)
     : mMaterialGenerator(NULL)
+    , mLoadState(LS_Unloaded)
     , mIsDummy(false)
     , mSize(size)
     , mLodLevel(Log2(static_cast<int>(mSize)))
@@ -142,9 +143,8 @@ QuadTreeNode::QuadTreeNode(DefaultWorld* terrain, ChildDirection dir, float size
     , mCenter(center)
     , mSceneNode(NULL)
     , mParent(parent)
-    , mTerrain(terrain)
     , mChunk(NULL)
-    , mLoadState(LS_Unloaded)
+    , mTerrain(terrain)
 {
     mBounds.setNull();
     for (int i=0; i<4; ++i)

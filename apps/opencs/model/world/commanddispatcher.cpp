@@ -2,6 +2,7 @@
 #include "commanddispatcher.hpp"
 
 #include <algorithm>
+#include <memory>
 
 #include <components/misc/stringops.hpp>
 
@@ -10,6 +11,7 @@
 #include "idtable.hpp"
 #include "record.hpp"
 #include "commands.hpp"
+#include "idtableproxymodel.hpp"
 
 std::vector<std::string> CSMWorld::CommandDispatcher::getDeletableRecords() const
 {
@@ -81,7 +83,7 @@ std::vector<std::string> CSMWorld::CommandDispatcher::getRevertableRecords() con
 
 CSMWorld::CommandDispatcher::CommandDispatcher (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, QObject *parent)
-: QObject (parent), mDocument (document), mId (id), mLocked (false)
+: QObject (parent), mLocked (false), mDocument (document), mId (id)
 {}
 
 void CSMWorld::CommandDispatcher::setEditLock (bool locked)
@@ -131,6 +133,54 @@ std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes
     return tables;
 }
 
+void CSMWorld::CommandDispatcher::executeModify (QAbstractItemModel *model, const QModelIndex& index, const QVariant& new_)
+{
+    if (mLocked)
+        return;
+
+    std::auto_ptr<CSMWorld::UpdateCellCommand> modifyCell;
+
+    int columnId = model->data (index, ColumnBase::Role_ColumnId).toInt();
+
+    if (columnId==Columns::ColumnId_PositionXPos || columnId==Columns::ColumnId_PositionYPos)
+    {
+        IdTableProxyModel *proxy = dynamic_cast<IdTableProxyModel *> (model);
+
+        int row = proxy ? proxy->mapToSource (index).row() : index.row();
+
+        // This is not guaranteed to be the same as \a model, since a proxy could be used.
+        IdTable& model2 = dynamic_cast<IdTable&> (*mDocument.getData().getTableModel (mId));
+
+        int cellColumn = model2.searchColumnIndex (Columns::ColumnId_Cell);
+
+        if (cellColumn!=-1)
+        {
+            QModelIndex cellIndex = model2.index (row, cellColumn);
+
+            std::string cellId = model2.data (cellIndex).toString().toUtf8().data();
+
+            if (cellId.find ('#')!=std::string::npos)
+            {
+                // Need to recalculate the cell
+                modifyCell.reset (new UpdateCellCommand (model2, row));
+            }
+        }
+    }
+
+    std::auto_ptr<CSMWorld::ModifyCommand> modifyData (
+        new CSMWorld::ModifyCommand (*model, index, new_));
+
+    if (modifyCell.get())
+    {
+        mDocument.getUndoStack().beginMacro (modifyData->text());
+        mDocument.getUndoStack().push (modifyData.release());
+        mDocument.getUndoStack().push (modifyCell.release());
+        mDocument.getUndoStack().endMacro();
+    }
+    else
+        mDocument.getUndoStack().push (modifyData.release());
+}
+
 void CSMWorld::CommandDispatcher::executeDelete()
 {
     if (mLocked)
@@ -153,7 +203,15 @@ void CSMWorld::CommandDispatcher::executeDelete()
         std::string id = model.data (model.getModelIndex (*iter, columnIndex)).
             toString().toUtf8().constData();
 
-        mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
+        if (mId.getType() == UniversalId::Type_Referenceables)
+        {
+            mDocument.getUndoStack().push ( new CSMWorld::DeleteCommand (model, id,
+                static_cast<CSMWorld::UniversalId::Type>(model.data (model.index (
+                    model.getModelIndex (id, columnIndex).row(),
+                    model.findColumnIndex (CSMWorld::Columns::ColumnId_RecordType))).toInt())));
+        }
+        else
+            mDocument.getUndoStack().push (new CSMWorld::DeleteCommand (model, id));
     }
 
     if (rows.size()>1)

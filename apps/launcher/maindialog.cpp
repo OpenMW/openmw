@@ -25,7 +25,7 @@
 using namespace Process;
 
 Launcher::MainDialog::MainDialog(QWidget *parent)
-    : mGameSettings(mCfgMgr), QMainWindow (parent)
+    : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
     setupUi(this);
 
@@ -148,10 +148,10 @@ void Launcher::MainDialog::createPages()
 
 }
 
-bool Launcher::MainDialog::showFirstRunDialog()
+Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 {
     if (!setupLauncherSettings())
-        return false;
+        return FirstRunDialogResultFailure;
 
     if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
     {
@@ -176,14 +176,14 @@ bool Launcher::MainDialog::showFirstRunDialog()
         if (msgBox.clickedButton() == wizardButton)
         {
             if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
-                return false;
+                return FirstRunDialogResultFailure;
             } else {
-                return true;
+                return FirstRunDialogResultWizard;
             }
         }
     }
 
-    return setup();
+    return setup() ? FirstRunDialogResultContinue : FirstRunDialogResultFailure;
 }
 
 bool Launcher::MainDialog::setup()
@@ -490,7 +490,7 @@ bool Launcher::MainDialog::writeSettings()
     // Game settings
     QFile file(userPath + QString("openmw.cfg"));
 
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
@@ -503,10 +503,8 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
-    QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
-    mGameSettings.writeFile(stream);
+    mGameSettings.writeFileWithComments(file);
     file.close();
 
     // Graphics settings
@@ -525,6 +523,7 @@ bool Launcher::MainDialog::writeSettings()
                        return false;
     }
 
+    QTextStream stream(&file);
     stream.setDevice(&file);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 

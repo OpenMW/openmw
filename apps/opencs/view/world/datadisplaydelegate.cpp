@@ -6,11 +6,12 @@
 
 CSVWorld::DataDisplayDelegate::DataDisplayDelegate(const ValueList &values,
                                                    const IconList &icons,
+                                                   CSMWorld::CommandDispatcher *dispatcher,
                                                    CSMDoc::Document& document,
                                                    const QString &pageName,
                                                    const QString &settingName,
                                                    QObject *parent)
-    : EnumDelegate (values, document, parent), mDisplayMode (Mode_TextOnly),
+    : EnumDelegate (values, dispatcher, document, parent), mDisplayMode (Mode_TextOnly),
       mIcons (icons), mIconSize (QSize(16, 16)), mIconLeftOffset(3),
       mTextLeftOffset(8), mSettingKey (pageName + '/' + settingName)
 {
@@ -136,9 +137,9 @@ void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, QString enumName,
 }
 
 CSVWorld::CommandDelegate *CSVWorld::DataDisplayDelegateFactory::makeDelegate (
-    CSMDoc::Document& document, QObject *parent) const
+    CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const
 {
-    return new DataDisplayDelegate (mValues, mIcons, document, "", "", parent);
+    return new DataDisplayDelegate (mValues, mIcons, dispatcher, document, "", "", parent);
 }
 
 

@@ -7,7 +7,7 @@
 
 CSVSettings::ListView::ListView(CSMSettings::Setting *setting,
                                 Page *parent)
-    : mComboBox (0), mAbstractItemView (0), View(setting, parent)
+    : View(setting, parent), mAbstractItemView (0), mComboBox (0)
 {
     QWidget *widget =
                     buildWidget(setting->isMultiLine(), setting->widgetWidth());

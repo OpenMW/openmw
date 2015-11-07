@@ -25,10 +25,11 @@ namespace MWRender
 
     GlobalMap::GlobalMap(const std::string &cacheDir)
         : mCacheDir(cacheDir)
-        , mMinX(0), mMaxX(0)
-        , mMinY(0), mMaxY(0)
         , mWidth(0)
         , mHeight(0)
+        , mMinX(0), mMaxX(0)
+        , mMinY(0), mMaxY(0)
+
     {
         mCellSize = Settings::Manager::getInt("global map cell size", "Map");
     }

@@ -2,6 +2,24 @@
 
 #include "view.hpp"
 
+#include <QShortcut>
+#include <QEvent>
+#include <QKeyEvent>
+
+bool CSVDoc::SubView::event (QEvent *event)
+{
+    if (event->type()==QEvent::ShortcutOverride)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *> (event);
+
+        if (keyEvent->key()==Qt::Key_W && keyEvent->modifiers()==(Qt::ShiftModifier | Qt::ControlModifier))
+            emit closeRequest();
+            return true;
+    }
+    
+    return QDockWidget::event (event);
+}
+
 CSVDoc::SubView::SubView (const CSMWorld::UniversalId& id)
  : mUniversalId (id)
 {

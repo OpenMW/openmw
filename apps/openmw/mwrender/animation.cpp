@@ -65,6 +65,7 @@ void Animation::EffectAnimationTime::setValue(Ogre::Real)
 
 Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     : mPtr(ptr)
+    , mGlowLight(NULL)
     , mInsert(node)
     , mSkelBase(NULL)
     , mAccumRoot(NULL)
@@ -72,7 +73,6 @@ Animation::Animation(const MWWorld::Ptr &ptr, Ogre::SceneNode *node)
     , mNonAccumCtrl(NULL)
     , mAccumulate(0.0f)
     , mNullAnimationTimePtr(OGRE_NEW NullAnimationTime)
-    , mGlowLight(NULL)
 {
     for(size_t i = 0;i < sNumGroups;i++)
         mAnimationTimePtr[i].bind(OGRE_NEW AnimationTime(this));

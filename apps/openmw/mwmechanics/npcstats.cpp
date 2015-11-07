@@ -25,12 +25,12 @@
 #include "../mwbase/soundmanager.hpp"
 
 MWMechanics::NpcStats::NpcStats()
-    : mBounty (0)
-, mLevelProgress(0)
-, mDisposition(0)
+    : mDisposition (0)
 , mReputation(0)
 , mCrimeId(-1)
+, mBounty(0)
 , mWerewolfKills (0)
+, mLevelProgress(0)
 , mTimeToStartDrowning(20.0)
 {
     mSkillIncreases.resize (ESM::Attribute::Length, 0);

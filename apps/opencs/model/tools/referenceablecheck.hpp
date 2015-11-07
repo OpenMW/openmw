@@ -15,7 +15,8 @@ namespace CSMTools
             ReferenceableCheckStage (const CSMWorld::RefIdData& referenceable,
                 const CSMWorld::IdCollection<ESM::Race>& races,
                 const CSMWorld::IdCollection<ESM::Class>& classes,
-                const CSMWorld::IdCollection<ESM::Faction>& factions);
+                const CSMWorld::IdCollection<ESM::Faction>& factions,
+                const CSMWorld::IdCollection<ESM::Script>& scripts);
 
             virtual void perform(int stage, CSMDoc::Messages& messages);
             virtual int setup();
@@ -46,26 +47,30 @@ namespace CSMTools
             //FINAL CHECK
             void finalCheck (CSMDoc::Messages& messages);
 
-	    //TEMPLATE CHECKS
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
+            //TEMPLATE CHECKS
+            template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
                                                             CSMDoc::Messages& messages,
                                                             const std::string& someID,
                                                             bool enchantable); //for all enchantable items.
 
-	    template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
+            template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
                                                             CSMDoc::Messages& messages,
                                                             const std::string& someID); //for non-enchantable items.
 
-	    template<typename TOOL> void toolCheck(const TOOL& someTool,
+            template<typename TOOL> void toolCheck(const TOOL& someTool,
                                                    CSMDoc::Messages& messages,
                                                    const std::string& someID,
                                                    bool canbebroken); //for tools with uses.
 
-	    template<typename TOOL> void toolCheck(const TOOL& someTool,
+            template<typename TOOL> void toolCheck(const TOOL& someTool,
                                                    CSMDoc::Messages& messages,
                                                    const std::string& someID); //for tools without uses.
 
-	    template<typename LIST> void listCheck(const LIST& someList,
+            template<typename LIST> void listCheck(const LIST& someList,
+                                                   CSMDoc::Messages& messages,
+                                                   const std::string& someID);
+
+            template<typename TOOL> void scriptCheck(const TOOL& someTool,
                                                    CSMDoc::Messages& messages,
                                                    const std::string& someID);
 
@@ -73,6 +78,7 @@ namespace CSMTools
             const CSMWorld::IdCollection<ESM::Race>& mRaces;
             const CSMWorld::IdCollection<ESM::Class>& mClasses;
             const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+            const CSMWorld::IdCollection<ESM::Script>& mScripts;
             bool mPlayerPresent;
     };
 }

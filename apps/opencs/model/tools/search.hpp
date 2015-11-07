@@ -88,6 +88,10 @@ namespace CSMTools
             void replace (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
                 const CSMWorld::UniversalId& id, const std::string& messageHint,
                 const std::string& replaceText) const;
+
+            // Check if model still matches search results.
+            bool verify (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
+                const CSMWorld::UniversalId& id, const std::string& messageHint) const;
     };
 }
 

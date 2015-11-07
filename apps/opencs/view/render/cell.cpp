@@ -123,7 +123,6 @@ CSVRender::Cell::Cell (CSMDoc::Document& document, Ogre::SceneManager *sceneMana
 : mDocument (document), mId (Misc::StringUtils::lowerCase (id))
 , mProxyModel(0), mModel(0), mPgIndex(-1), mHandler(new CSMWorld::SignalHandler(this))
 , mPhysics(physics), mSceneMgr(sceneManager), mX(0), mY(0)
-
 {
     mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
     mCellNode->setPosition (origin);

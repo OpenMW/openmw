@@ -3,10 +3,14 @@
 
 #include <QVBoxLayout>
 #include <QEvent>
+#include <QHeaderView>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "../doc/sizehint.hpp"
 #include "../filter/filterbox.hpp"
 #include "table.hpp"
 #include "tablebottombox.hpp"
@@ -30,11 +34,18 @@ CSVWorld::TableSubView::TableSubView (const CSMWorld::UniversalId& id, CSMDoc::D
 
     layout->insertWidget (0, mFilterBox);
 
-    QWidget *widget = new QWidget;
+    CSVDoc::SizeHintWidget *widget = new CSVDoc::SizeHintWidget;
 
     widget->setLayout (layout);
 
     setWidget (widget);
+    // prefer height of the screen and full width of the table
+    const QRect rect = QApplication::desktop()->screenGeometry(this);
+    int frameHeight = 40; // set a reasonable default
+    QWidget *topLevel = QApplication::topLevelAt(pos());
+    if (topLevel)
+        frameHeight = topLevel->frameGeometry().height() - topLevel->height();
+    widget->setSizeHint(QSize(mTable->horizontalHeader()->length(), rect.height()-frameHeight));
 
     connect (mTable, SIGNAL (editRequest (const CSMWorld::UniversalId&, const std::string&)),
         this, SLOT (editRequest (const CSMWorld::UniversalId&, const std::string&)));

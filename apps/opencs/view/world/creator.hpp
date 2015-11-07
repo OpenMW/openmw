@@ -40,6 +40,9 @@ namespace CSVWorld
             /// Default implementation: Throw an exception if scope!=Scope_Content.
             virtual void setScope (unsigned int scope);
 
+            /// Focus main input widget
+            virtual void focus() = 0;
+
         signals:
 
             void done();

@@ -32,10 +32,10 @@ namespace MWWorld
     Player::Player (const ESM::NPC *player, const MWBase::World& world)
       : mCellStore(0),
         mLastKnownExteriorPosition(0,0,0),
+        mMarkedCell(NULL),
         mAutoMove(false),
         mForwardBackward(0),
         mTeleported(false),
-        mMarkedCell(NULL),
         mCurrentCrimeId(-1),
         mPaidCrimeId(-1)
     {

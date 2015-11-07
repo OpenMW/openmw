@@ -57,6 +57,17 @@ void ContentSelectorView::ContentSelector::buildAddonView()
 
     connect(ui.addonView, SIGNAL(activated(const QModelIndex&)), this, SLOT(slotAddonTableItemActivated(const QModelIndex&)));
     connect(mContentModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SIGNAL(signalAddonDataChanged(QModelIndex,QModelIndex)));
+    buildContextMenu();
+}
+
+void ContentSelectorView::ContentSelector::buildContextMenu()
+{
+    ui.addonView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui.addonView, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(slotShowContextMenu(const QPoint&)));
+
+    mContextMenu = new QMenu(ui.addonView);
+    mContextMenu->addAction(tr("&Check Selected"), this, SLOT(slotCheckMultiSelectedItems()));
+    mContextMenu->addAction(tr("&Uncheck Selected"), this, SLOT(slotUncheckMultiSelectedItems()));
 }
 
 void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &fileList)
@@ -195,4 +206,33 @@ void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QMo
         checkState = Qt::Checked;
 
     mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
+}
+
+void ContentSelectorView::ContentSelector::slotShowContextMenu(const QPoint& pos)
+{
+    QPoint globalPos = ui.addonView->viewport()->mapToGlobal(pos);
+    mContextMenu->exec(globalPos);
+}
+
+void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(bool checked)
+{
+    Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
+    foreach(const QModelIndex& index, ui.addonView->selectionModel()->selectedIndexes())
+    {
+        QModelIndex sourceIndex = mAddonProxyModel->mapToSource(index);
+        if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() != checkState)
+        {
+            mContentModel->setData(sourceIndex, checkState, Qt::CheckStateRole);
+        }
+    }
+}
+
+void ContentSelectorView::ContentSelector::slotUncheckMultiSelectedItems()
+{
+    setCheckStateForMultiSelectedItems(false);
+}
+
+void ContentSelectorView::ContentSelector::slotCheckMultiSelectedItems()
+{
+    setCheckStateForMultiSelectedItems(true);
 }

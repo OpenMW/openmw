@@ -183,7 +183,7 @@ namespace MWGui
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
 
         // Teleports any followers, too.
-        MWWorld::ActionTeleport action(interior ? cellname : "", pos);
+        MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
         action.execute(player);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);

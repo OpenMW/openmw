@@ -12,6 +12,7 @@ namespace CSMWorld
 {
     class NestedTableProxyModel;
     class UniversalId;
+    class CommandDispatcher;
 }
 
 namespace CSMDoc
@@ -29,9 +30,11 @@ namespace CSVWorld
         QAction *mRemoveRowAction;
         QUndoStack& mUndoStack;
         CSMWorld::NestedTableProxyModel* mModel;
+        CSMWorld::CommandDispatcher *mDispatcher;
 
     public:
         NestedTable(CSMDoc::Document& document,
+                    CSMWorld::UniversalId id,
                     CSMWorld::NestedTableProxyModel* model,
                     QWidget* parent = NULL);
 

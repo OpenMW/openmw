@@ -129,9 +129,9 @@ void CSVWorld::GenericCreator::addScope (const QString& name, CSMWorld::Scope sc
 
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
-: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false), mCloneMode (false),
+: mData (data), mUndoStack (undoStack), mListId (id), mLocked (false),
   mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
-  mScopeLabel (0)
+  mScopeLabel (0), mCloneMode (false)
 {
     mLayout = new QHBoxLayout;
     mLayout->setContentsMargins (0, 0, 0, 0);
@@ -223,6 +223,11 @@ void CSVWorld::GenericCreator::cloneMode(const std::string& originId,
 
 void CSVWorld::GenericCreator::toggleWidgets(bool active)
 {
+}
+
+void CSVWorld::GenericCreator::focus()
+{
+    mId->setFocus();
 }
 
 void CSVWorld::GenericCreator::setScope (unsigned int scope)

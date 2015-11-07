@@ -3,7 +3,7 @@
 #include <QLineEdit>
 
 CSVSettings::SpinBox::SpinBox(QWidget *parent)
-    : mValueList(QStringList()), QSpinBox(parent)
+    : QSpinBox(parent), mValueList(QStringList())
 {
     setRange (0, 0);
 }

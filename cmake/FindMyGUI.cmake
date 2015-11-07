@@ -19,7 +19,46 @@ include(PreprocessorUtils)
 # ENDIF (MYGUI_LIBRARIES AND MYGUI_INCLUDE_DIRS)
 
 IF (WIN32) #Windows
+
     MESSAGE(STATUS "Looking for MyGUI")
+
+    IF(MINGW)
+
+        FIND_PATH ( MYGUI_INCLUDE_DIRS MyGUI.h PATH_SUFFIXES MYGUI)
+        FIND_PATH ( MYGUI_PLATFORM_INCLUDE_DIRS MyGUI_OgrePlatform.h PATH_SUFFIXES MYGUI)
+        FIND_LIBRARY ( MYGUI_LIBRARIES_REL NAMES
+            libMyGUIEngine${CMAKE_SHARED_LIBRARY_SUFFIX}
+            libMyGUI.OgrePlatform${CMAKE_STATIC_LIBRARY_SUFFIX}
+            HINTS
+            ${MYGUI_LIB_DIR}
+            PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+
+        FIND_LIBRARY ( MYGUI_LIBRARIES_DBG NAMES
+            libMyGUIEngine_d${CMAKE_SHARED_LIBRARY_SUFFIX}
+            libMyGUI.OgrePlatform_d${CMAKE_STATIC_LIBRARY_SUFFIX}
+            HINTS
+            ${MYGUI_LIB_DIR}
+            PATH_SUFFIXES "" debug )
+
+        FIND_LIBRARY ( MYGUI_PLATFORM_LIBRARIES_REL NAMES
+            libMyGUI.OgrePlatform${CMAKE_STATIC_LIBRARY_SUFFIX}
+            HINTS
+            ${MYGUI_LIB_DIR}
+            PATH_SUFFIXES "" release relwithdebinfo minsizerel )
+
+        FIND_LIBRARY ( MYGUI_PLATFORM_LIBRARIES_DBG NAMES
+            MyGUI.OgrePlatform_d${CMAKE_STATIC_LIBRARY_SUFFIX}
+            HINTS
+            ${MYGUI_LIB_DIR}
+            PATH_SUFFIXES "" debug )
+
+        make_library_set ( MYGUI_LIBRARIES )
+        make_library_set ( MYGUI_PLATFORM_LIBRARIES )
+
+        MESSAGE ("${MYGUI_LIBRARIES}")
+        MESSAGE ("${MYGUI_PLATFORM_LIBRARIES}")
+    ENDIF(MINGW)
+
     SET(MYGUISDK $ENV{MYGUI_HOME})
     IF (MYGUISDK)
         findpkg_begin ( "MYGUI" )

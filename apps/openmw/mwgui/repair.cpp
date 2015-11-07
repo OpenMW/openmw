@@ -36,6 +36,8 @@ Repair::Repair()
 void Repair::open()
 {
     center();
+    // Reset scrollbars
+    mRepairView->setViewOffset(MyGUI::IntPoint(0, 0));
 }
 
 void Repair::exit()

@@ -20,12 +20,12 @@ namespace MWGui
 
 
 DragAndDrop::DragAndDrop()
-    : mDraggedWidget(NULL)
-    , mDraggedCount(0)
+    : mIsOnDragAndDrop(false)
+    , mDraggedWidget(NULL)
     , mSourceModel(NULL)
     , mSourceView(NULL)
     , mSourceSortModel(NULL)
-    , mIsOnDragAndDrop(false)
+    , mDraggedCount(0)
 {
 }
 

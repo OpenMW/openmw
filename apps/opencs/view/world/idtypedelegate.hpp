@@ -11,7 +11,7 @@ namespace CSVWorld
     class IdTypeDelegate : public DataDisplayDelegate
     {
         public:
-            IdTypeDelegate (const ValueList &mValues, const IconList &icons, CSMDoc::Document& document, QObject *parent);
+            IdTypeDelegate (const ValueList &mValues, const IconList &icons, CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent);
     };
 
     class IdTypeDelegateFactory : public DataDisplayDelegateFactory
@@ -20,7 +20,7 @@ namespace CSVWorld
 
             IdTypeDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
 }

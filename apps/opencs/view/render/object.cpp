@@ -223,12 +223,10 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
         {
             mReferenceableId =
                 references.getData (index, columnIndex).toString().toUtf8().constData();
-
-            update();
         }
 
+        update();
         adjust();
-
         return true;
     }
 

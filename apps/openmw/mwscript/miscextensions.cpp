@@ -595,7 +595,8 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral(runtime[0].mInteger);
                     runtime.pop();
 
-                    runtime.push(ptr.getClass().getCreatureStats(ptr).getActiveSpells().isSpellActive(id));
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+                    runtime.push(stats.getActiveSpells().isSpellActive(id) || stats.getSpells().isSpellActive(id));
                 }
         };
 

@@ -114,11 +114,10 @@ float WeatherManager::calculateAngleFade (const std::string& moonName, float ang
 }
 
 WeatherManager::WeatherManager(MWRender::RenderingManager* rendering,MWWorld::Fallback* fallback) :
-     mHour(14), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
-     mWeatherUpdateTime(0), mThunderFlash(0), mThunderChance(0),
-     mThunderChanceNeeded(50), mThunderSoundDelay(0), mRemainingTransitionTime(0),
-     mTimePassed(0), mFallback(fallback), mWindSpeed(0.f), mRendering(rendering), mIsStorm(false),
-     mStormDirection(0,1,0)
+     mHour(14), mWindSpeed(0.f), mIsStorm(false), mStormDirection(0,1,0), mFallback(fallback),
+     mRendering(rendering), mCurrentWeather("clear"), mNextWeather(""), mFirstUpdate(true),
+     mRemainingTransitionTime(0), mThunderFlash(0), mThunderChance(0), mThunderChanceNeeded(50),
+     mTimePassed(0), mWeatherUpdateTime(0), mThunderSoundDelay(0)
 {
     //Globals
     mThunderSoundID0 = mFallback->getFallbackString("Weather_Thunderstorm_Thunder_Sound_ID_0");

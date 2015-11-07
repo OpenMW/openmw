@@ -39,6 +39,9 @@ namespace CSVWorld
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
 
+            /// Focus main input widget
+            virtual void focus();
+ 
         private slots:
 
             void cellChanged();

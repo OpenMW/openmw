@@ -10,6 +10,7 @@
 
 class QAction;
 class QDockWidget;
+class QScrollArea;
 
 namespace CSMDoc
 {
@@ -47,6 +48,8 @@ namespace CSVDoc
             SubViewFactoryManager mSubViewFactory;
             QMainWindow mSubViewWindow;
             GlobalDebugProfileMenu *mGlobalDebugProfileMenu;
+            QScrollArea *mScroll;
+            bool mScrollbarOnly;
 
 
             // not implemented
@@ -86,6 +89,8 @@ namespace CSVDoc
 
             /// User preference function
             void resizeViewHeight (int height);
+
+            void updateScrollbar();
 
         public:
 

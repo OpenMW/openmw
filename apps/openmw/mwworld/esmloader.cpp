@@ -9,8 +9,8 @@ namespace MWWorld
 EsmLoader::EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& readers,
   ToUTF8::Utf8Encoder* encoder, Loading::Listener& listener)
   : ContentLoader(listener)
-  , mStore(store)
   , mEsm(readers)
+  , mStore(store)
   , mEncoder(encoder)
 {
 }

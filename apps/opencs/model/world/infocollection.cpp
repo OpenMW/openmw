@@ -173,6 +173,17 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
 
     RecordConstIterator begin = getRecords().begin()+iter->second;
 
+    while (begin != getRecords().begin())
+    {
+        if (!Misc::StringUtils::ciEqual(begin->get().mTopicId, topic2))
+        {
+            // we've gone one too far, go back
+            ++begin;
+            break;
+        }
+        --begin;
+    }
+
     // Find end
     RecordConstIterator end = begin;
 

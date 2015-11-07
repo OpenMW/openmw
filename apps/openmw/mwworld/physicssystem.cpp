@@ -499,7 +499,7 @@ namespace MWWorld
 
 
     PhysicsSystem::PhysicsSystem(OEngine::Render::OgreRenderer &_rend) :
-        mRender(_rend), mEngine(0), mTimeAccum(0.0f), mWaterEnabled(false), mWaterHeight(0)
+        mRender(_rend), mEngine(0), mTimeAccum(0.0f), mWaterHeight(0), mWaterEnabled(false)
     {
         // Create physics. shapeLoader is deleted by the physic engine
         NifBullet::ManualBulletShapeLoader* shapeLoader = new NifBullet::ManualBulletShapeLoader();

@@ -515,14 +515,8 @@ namespace MWScript
 
                     Interpreter::Type_Integer value = 0;
 
-                    for (MWMechanics::Spells::TIterator iter (
-                        ptr.getClass().getCreatureStats (ptr).getSpells().begin());
-                        iter!=ptr.getClass().getCreatureStats (ptr).getSpells().end(); ++iter)
-                        if (iter->first==id)
-                        {
-                            value = 1;
-                            break;
-                        }
+                    if (ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(id))
+                        value = 1;
 
                     runtime.push (value);
                 }

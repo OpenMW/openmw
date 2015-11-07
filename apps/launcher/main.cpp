@@ -59,14 +59,16 @@ int main(int argc, char *argv[])
 
         Launcher::MainDialog mainWin;
 
-        if (!mainWin.showFirstRunDialog())
+        Launcher::FirstRunDialogResult result = mainWin.showFirstRunDialog();
+        if (result == Launcher::FirstRunDialogResultFailure)
             return 0;
 
     //    if (!mainWin.setup()) {
     //        return 0;
     //    }
 
-        mainWin.show();
+        if (result == Launcher::FirstRunDialogResultContinue)
+            mainWin.show();
 
         int returnValue = app.exec();
         SDL_Quit();

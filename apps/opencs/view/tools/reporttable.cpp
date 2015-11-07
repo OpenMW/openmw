@@ -131,8 +131,8 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     setModel (mModel);
     setColumnHidden (2, true);
 
-    mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (
-        document, this);
+    mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (0,
+        mDocument, this);
 
     setItemDelegateForColumn (0, mIdTypeDelegate);
 

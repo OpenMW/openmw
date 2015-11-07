@@ -98,6 +98,9 @@ namespace MWMechanics
             const std::string getSelectedSpell() const;
             ///< May return an empty string.
 
+            bool isSpellActive(const std::string& id) const;
+            ///< Are we under the effects of the given spell ID?
+
             bool hasCommonDisease() const;
 
             bool hasBlightDisease() const;

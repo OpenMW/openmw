@@ -16,6 +16,7 @@ namespace CSMWorld
 {
     class TableMimeData;
     class UniversalId;
+    class CommandDispatcher;
 }
 
 namespace CSVWorld
@@ -51,7 +52,8 @@ namespace CSVWorld
 
             virtual ~CommandDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent)
+            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher,
+                CSMDoc::Document& document, QObject *parent)
                 const = 0;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
@@ -78,7 +80,8 @@ namespace CSVWorld
             ///
             /// This function must not be called more than once per value of \a display.
 
-            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display, CSMDoc::Document& document,
+            CommandDelegate *makeDelegate (CSMWorld::ColumnBase::Display display,
+                CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
                 QObject *parent) const;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
             ///
@@ -111,8 +114,9 @@ namespace CSVWorld
     {
             Q_OBJECT
 
-            CSMDoc::Document& mDocument;
             bool mEditLock;
+            CSMWorld::CommandDispatcher *mCommandDispatcher;
+            CSMDoc::Document& mDocument;
 
         protected:
 
@@ -120,12 +124,16 @@ namespace CSVWorld
 
             CSMDoc::Document& getDocument() const;
 
+            CSMWorld::ColumnBase::Display getDisplayTypeFromIndex(const QModelIndex &index) const;
+
             virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;
 
         public:
 
-            CommandDelegate (CSMDoc::Document& document, QObject *parent);
+            /// \param commandDispatcher If CommandDelegate will be only be used on read-only
+            /// cells, a 0-pointer can be passed here.
+            CommandDelegate (CSMWorld::CommandDispatcher *commandDispatcher, CSMDoc::Document& document, QObject *parent);
 
             virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
                 const QModelIndex& index) const;

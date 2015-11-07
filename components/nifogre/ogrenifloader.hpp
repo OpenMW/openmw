@@ -75,7 +75,7 @@ struct ObjectScene {
 
     std::vector<Ogre::Controller<Ogre::Real> > mControllers;
 
-    ObjectScene(Ogre::SceneManager* sceneMgr) : mSkelBase(0), mMaxControllerLength(0), mSceneMgr(sceneMgr)
+    ObjectScene(Ogre::SceneManager* sceneMgr) : mSkelBase(0), mSceneMgr(sceneMgr), mMaxControllerLength(0)
     { }
 
     ~ObjectScene();

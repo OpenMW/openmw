@@ -32,11 +32,11 @@ namespace MWGui
 {
 
     LoadingScreen::LoadingScreen(Ogre::SceneManager* sceneMgr, Ogre::RenderWindow* rw)
-        : mSceneMgr(sceneMgr)
+        : WindowBase("openmw_loading_screen.layout")
+        , mSceneMgr(sceneMgr)
         , mWindow(rw)
-        , WindowBase("openmw_loading_screen.layout")
-        , mLastRenderTime(0)
         , mLastWallpaperChangeTime(0)
+        , mLastRenderTime(0)
         , mProgress(0)
         , mVSyncWasEnabled(false)
     {

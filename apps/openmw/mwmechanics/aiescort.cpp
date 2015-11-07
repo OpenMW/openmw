@@ -49,12 +49,11 @@ namespace MWMechanics
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort *escort)
-        : mActorId(escort->mTargetId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        : mActorId(escort->mTargetId), mCellId(escort->mCellId), mX(escort->mData.mX), mY(escort->mData.mY), mZ(escort->mData.mZ)
+        , mMaxDist(450)
+        , mRemainingDuration(escort->mRemainingDuration)
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
-        , mCellId(escort->mCellId)
-        , mRemainingDuration(escort->mRemainingDuration)
-        , mMaxDist(450)
     {
     }
 

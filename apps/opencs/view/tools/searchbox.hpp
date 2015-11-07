@@ -49,6 +49,8 @@ namespace CSVTools
 
             void setEditLock (bool locked);
 
+            void focus();
+
         private slots:
 
             void modeSelected (int index);

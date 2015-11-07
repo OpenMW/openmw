@@ -102,6 +102,7 @@ namespace MWGui
             const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap)
       : mConsoleOnlyScripts(consoleOnlyScripts)
+      , mCurrentModals()
       , mGuiManager(NULL)
       , mRendering(ogre)
       , mHud(NULL)
@@ -135,8 +136,8 @@ namespace MWGui
       , mTrainingWindow(NULL)
       , mMerchantRepair(NULL)
       , mSoulgemDialog(NULL)
-      , mRecharge(NULL)
       , mRepair(NULL)
+      , mRecharge(NULL)
       , mCompanionWindow(NULL)
       , mVideoBackground(NULL)
       , mVideoWidget(NULL)
@@ -159,8 +160,8 @@ namespace MWGui
       , mPlayerName()
       , mPlayerRaceId()
       , mPlayerAttributes()
-      , mPlayerMinorSkills()
       , mPlayerMajorSkills()
+      , mPlayerMinorSkills()
       , mPlayerSkillValues()
       , mGui(NULL)
       , mGuiModes()
@@ -173,7 +174,6 @@ namespace MWGui
       , mFPS(0.0f)
       , mTriangleCount(0)
       , mBatchCount(0)
-      , mCurrentModals()
       , mFallbackMap(fallbackMap)
     {
         // Set up the GUI system

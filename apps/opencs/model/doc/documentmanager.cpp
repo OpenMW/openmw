@@ -49,6 +49,11 @@ CSMDoc::DocumentManager::~DocumentManager()
         delete *iter;
 }
 
+bool CSMDoc::DocumentManager::isEmpty()
+{
+    return mDocuments.empty();
+}
+
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {

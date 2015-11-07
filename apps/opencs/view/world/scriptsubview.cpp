@@ -1,7 +1,10 @@
-
 #include "scriptsubview.hpp"
 
 #include <stdexcept>
+
+#include <QStatusBar>
+#include <QStackedLayout>
+#include <QLabel>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
@@ -9,13 +12,31 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/settings/usersettings.hpp"
 
 #include "scriptedit.hpp"
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1)
+: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0)
 {
-    setWidget (mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this));
+    QVBoxLayout *layout = new QVBoxLayout;
+    layout->setContentsMargins (QMargins (0, 0, 0, 0));
+
+    mBottom = new QWidget(this);
+    QStackedLayout *bottmLayout = new QStackedLayout(mBottom);
+    bottmLayout->setContentsMargins (0, 0, 0, 0);
+    QStatusBar *statusBar = new QStatusBar(mBottom);
+    mStatus = new QLabel(mBottom);
+    statusBar->addWidget (mStatus);
+    bottmLayout->addWidget (statusBar);
+    mBottom->setLayout (bottmLayout);
+
+    layout->addWidget (mBottom, 0);
+    layout->insertWidget (0, mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
+
+    QWidget *widget = new QWidget;
+    widget->setLayout (layout);
+    setWidget (widget);
 
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
@@ -40,6 +61,33 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     connect (mModel, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowsAboutToBeRemoved (const QModelIndex&, int, int)));
+
+    updateStatusBar();
+    connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
+}
+
+void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
+{
+    if (name == "script-editor/show-linenum")
+    {
+        std::string showLinenum = value.at(0).toStdString();
+        mEditor->showLineNum(showLinenum == "true");
+        mBottom->setVisible(showLinenum == "true");
+    }
+    else if (name == "script-editor/mono-font")
+    {
+        mEditor->setMonoFont(value.at(0).toStdString() == "true");
+    }
+}
+
+void CSVWorld::ScriptSubView::updateStatusBar ()
+{
+    std::ostringstream stream;
+
+    stream << "(" << mEditor->textCursor().blockNumber() + 1 << ", "
+        << mEditor->textCursor().columnNumber() + 1 << ")";
+
+    mStatus->setText (QString::fromUtf8 (stream.str().c_str()));
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)

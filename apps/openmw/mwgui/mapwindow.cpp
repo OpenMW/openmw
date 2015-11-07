@@ -144,16 +144,16 @@ namespace MWGui
         : mCurX(0)
         , mCurY(0)
         , mInterior(false)
-        , mFogOfWar(true)
         , mLocalMap(NULL)
+        , mCompass(NULL)
         , mPrefix()
         , mChanged(true)
+        , mFogOfWar(true)
+        , mMapWidgetSize(0)
+        , mCustomMarkers(markers)
+        , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
         , mLastDirectionY(0.0f)
-        , mCompass(NULL)
-        , mMarkerUpdateTimer(0.0f)
-        , mCustomMarkers(markers)
-        , mMapWidgetSize(0)
     {
         mCustomMarkers.eventMarkersChanged += MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
@@ -300,17 +300,17 @@ namespace MWGui
             MarkerUserData markerPos;
             MyGUI::IntPoint widgetPos = getMarkerPosition(marker.mWorldX, marker.mWorldY, markerPos);
 
-            MyGUI::IntCoord widgetCoord(widgetPos.left - 4,
-                                        widgetPos.top - 4,
-                                        8, 8);
-            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("MarkerButton",
+            MyGUI::IntCoord widgetCoord(widgetPos.left - 8,
+                                        widgetPos.top - 8,
+                                        16, 16);
+            MarkerWidget* markerWidget = mLocalMap->createWidget<MarkerWidget>("CustomMarkerButton",
                 widgetCoord, MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setUserString("ToolTipType", "Layout");
             markerWidget->setUserString("ToolTipLayout", "TextToolTipOneLine");
             markerWidget->setUserString("Caption_TextOneLine", MyGUI::TextIterator::toTagsString(marker.mNote));
-            markerWidget->setNormalColour(MyGUI::Colour(1.0f, 0.3f, 0.3f));
-            markerWidget->setHoverColour(MyGUI::Colour(1.0f, 0.5f, 0.5f));
+            markerWidget->setNormalColour(MyGUI::Colour(0.6f, 0.6f, 0.6f));
+            markerWidget->setHoverColour(MyGUI::Colour(1.0f, 1.0f, 1.0f));
             markerWidget->setUserData(marker);
             markerWidget->setNeedMouseFocus(true);
             customMarkerCreated(markerWidget);
@@ -468,21 +468,17 @@ namespace MWGui
             return;
 
         std::string markerTexture;
-        MyGUI::Colour markerColour;
         if (type == MWBase::World::Detect_Creature)
         {
-            markerTexture = "textures\\menu_map_dcreature.dds";
-            markerColour = MyGUI::Colour(1,0,0,1);
+            markerTexture = "textures\\detect_animal_icon.dds";
         }
         if (type == MWBase::World::Detect_Key)
         {
-            markerTexture = "textures\\menu_map_dkey.dds";
-            markerColour = MyGUI::Colour(0,1,0,1);
+            markerTexture = "textures\\detect_key_icon.dds";
         }
         if (type == MWBase::World::Detect_Enchantment)
         {
-            markerTexture = "textures\\menu_map_dmagic.dds";
-            markerColour = MyGUI::Colour(0,0,1,1);
+            markerTexture = "textures\\detect_enchantment_icon.dds";
         }
 
         int counter = 0;
@@ -499,7 +495,7 @@ namespace MWGui
                 widgetCoord, MyGUI::Align::Default);
             markerWidget->setDepth(Local_MarkerAboveFogLayer);
             markerWidget->setImageTexture(markerTexture);
-            markerWidget->setColour(markerColour);
+            markerWidget->setImageCoord(MyGUI::IntCoord(0,0,8,8));
             markerWidget->setNeedMouseFocus(false);
             mMagicMarkerWidgets.push_back(markerWidget);
         }
@@ -554,16 +550,16 @@ namespace MWGui
 
     MapWindow::MapWindow(CustomMarkerCollection &customMarkers, DragAndDrop* drag, const std::string& cacheDir)
         : WindowPinnableBase("openmw_map_window.layout")
-        , NoDrop(drag, mMainWidget)
         , LocalMapBase(customMarkers)
-        , mGlobal(false)
+        , NoDrop(drag, mMainWidget)
         , mGlobalMap(0)
-        , mGlobalMapRender(0)
-        , mEditNoteDialog()
-        , mEventBoxGlobal(NULL)
-        , mEventBoxLocal(NULL)
         , mGlobalMapImage(NULL)
         , mGlobalMapOverlay(NULL)
+        , mGlobal(false)
+        , mEventBoxGlobal(NULL)
+        , mEventBoxLocal(NULL)
+        , mGlobalMapRender(0)
+        , mEditNoteDialog()
     {
         static bool registered = false;
         if (!registered)

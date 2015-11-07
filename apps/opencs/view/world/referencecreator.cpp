@@ -118,6 +118,11 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
     return errors;
 }
 
+void CSVWorld::ReferenceCreator::focus()
+{
+    mCell->setFocus();
+}
+
 void CSVWorld::ReferenceCreator::cellChanged()
 {
     update();

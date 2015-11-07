@@ -276,4 +276,21 @@ void CSMTools::Search::replace (CSMDoc::Document& document, CSMWorld::IdTableBas
             new CSMWorld::ModifyCommand (*model, index, QString::fromUtf8 (newText.c_str())));
     }
 }
+
+bool CSMTools::Search::verify (CSMDoc::Document& document, CSMWorld::IdTableBase *model,
+    const CSMWorld::UniversalId& id, const std::string& messageHint) const
+{
+    CSMDoc::Messages messages;
+
+    int row = model->getModelIndex (id.getId(),
+        model->findColumnIndex (CSMWorld::Columns::ColumnId_Id)).row();
+    
+    searchRow (model, row, messages);
+
+    for (CSMDoc::Messages::Iterator iter (messages.begin()); iter!=messages.end(); ++iter)
+        if (iter->mHint==messageHint)
+            return true;
+
+    return false;
+}
                 

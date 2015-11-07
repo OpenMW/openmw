@@ -21,9 +21,9 @@ ESM_Context ESMReader::getContext()
 }
 
 ESMReader::ESMReader()
-    : mBuffer(50*1024)
+    : mIdx(0)
     , mRecordFlags(0)
-    , mIdx(0)
+    , mBuffer(50*1024)
     , mGlobalReaderList(NULL)
     , mEncoder(NULL)
 {

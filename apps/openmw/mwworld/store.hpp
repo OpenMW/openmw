@@ -367,6 +367,19 @@ namespace MWWorld
     }
 
     template <>
+    inline void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
+    {
+        ESM::StartScript s;
+        s.load(esm);
+        s.mId = Misc::StringUtils::toLower(s.mId);
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = s;
+    }
+
+    template <>
     class Store<ESM::LandTexture> : public StoreBase
     {
         // For multiple ESM/ESP files we need one list per file.

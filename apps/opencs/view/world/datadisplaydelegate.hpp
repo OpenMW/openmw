@@ -38,12 +38,9 @@ namespace CSVWorld
         QString mSettingKey;
 
     public:
-        explicit DataDisplayDelegate (const ValueList & values,
-                                      const IconList & icons,
-                                      CSMDoc::Document& document,
-                                      const QString &pageName,
-                                      const QString &settingName,
-                                      QObject *parent);
+        DataDisplayDelegate (const ValueList & values, const IconList & icons,
+            CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
+            const QString &pageName, const QString &settingName, QObject *parent);
 
         ~DataDisplayDelegate();
 
@@ -82,7 +79,7 @@ namespace CSVWorld
 
     public:
 
-        virtual CommandDelegate *makeDelegate (CSMDoc::Document& document, QObject *parent) const;
+        virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
         ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
     protected:
