@@ -36,6 +36,7 @@ namespace CSVRender
             NifOgre::ObjectScenePtr mObject;
             bool mForceBaseToZero;
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
+            std::string mPhysicsObject;
 
             /// Not implemented
             Object (const Object&);

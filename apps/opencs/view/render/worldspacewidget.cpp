@@ -12,6 +12,7 @@
 #include <QDropEvent>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QPoint>
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
@@ -58,6 +59,12 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
         this, SLOT (debugProfileDataChanged (const QModelIndex&, const QModelIndex&)));
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
+
+    QAbstractItemModel *pathgrids =
+        document.getData().getTableModel (CSMWorld::UniversalId::Type_Pathgrid);
+
+    connect (pathgrids, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
+        this, SLOT (pathgridDataChanged (const QModelIndex&, const QModelIndex&)));
 
     mPhysics = document.getPhysics(); // create physics if one doesn't exist
     mPhysics->addSceneManager(getSceneManager(), this);
@@ -415,12 +422,52 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
         SceneWidget::wheelEvent(event);
 }
 
+// FIXME: mouse button events are processed in MouseState but key events are
+// processed here - seems inconsistent
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
         mMouse->cancelDrag();
     }
+    else if(event->key() == Qt::Key_Delete)
+    {
+        QPoint p = this->mapFromGlobal(QCursor::pos());
+        std::pair<std::string, Ogre::Vector3> result =
+                mMouse->underCursor(p.x(), p.y(), CSVRender::Element_Pathgrid);
+
+        if(result.first != "")
+        {
+            pathgridAboutToBeRemoved(result.first);
+        }
+        else
+            SceneWidget::keyPressEvent(event);
+    }
+    else if(event->key() == Qt::Key_Insert)
+    {
+        QPoint p = this->mapFromGlobal(QCursor::pos());
+        std::pair<std::string, Ogre::Vector3> result =
+                mMouse->underCursor(p.x(), p.y(), CSVRender::Element_Reference|CSVRender::Element_Terrain);
+
+        if(result.first != "")
+        {
+            pathgridInserted(result.first, result.second);
+        }
+        else
+            SceneWidget::keyPressEvent(event);
+    }
     else
         SceneWidget::keyPressEvent(event);
+}
+
+void CSVRender::WorldspaceWidget::pathgridAboutToBeRemoved (const std::string &pgName)
+{
+}
+
+void CSVRender::WorldspaceWidget::pathgridMoved (const std::string &pgName, const Ogre::Vector3 &newPos)
+{
+}
+
+void CSVRender::WorldspaceWidget::pathgridInserted (const std::string &name, const Ogre::Vector3 &pos)
+{
 }

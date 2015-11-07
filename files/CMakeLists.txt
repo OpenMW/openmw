@@ -17,6 +17,7 @@ set(MATERIAL_FILES
     objects.shader
     objects.shaderset
     openmw.configuration
+    pathgrid_pt.nif
     quad.mat
     quad.shader
     quad.shaderset

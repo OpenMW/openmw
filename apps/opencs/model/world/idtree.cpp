@@ -259,6 +259,10 @@ void CSMWorld::IdTree::setNestedTable(const QModelIndex& index, const CSMWorld::
     {
         emit resetEnd(this->index(index.row(), 0).data().toString());
     }
+    // FIXME: Removing pathgrid points will also remove pathgrid edges, but we have
+    //        no way of emitting signals to indicate those changes.  In addition, the
+    //        removed edges can be any index (and there can be several edges removed
+    //        but always by a factor of two)
 }
 
 CSMWorld::NestedTableWrapperBase* CSMWorld::IdTree::nestedTable(const QModelIndex& index) const

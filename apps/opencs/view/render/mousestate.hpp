@@ -47,15 +47,15 @@ namespace CSVRender
             boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
             Ogre::SceneManager *mSceneManager; // local copy
 
-            QPoint mOldPos;
+            QPoint mOldCursorPos;
             std::string mCurrentObj;
             std::string mGrabbedSceneNode;
+            std::string mGrabbedRefId;
             QElapsedTimer *mMouseEventTimer;
             Ogre::Plane *mPlane;
             Ogre::Vector3 mOrigObjPos;
             Ogre::Vector3 mOrigMousePos;
-            Ogre::Vector3 mCurrentMousePos;
-            float mOffset;
+            Ogre::Vector3 mOldMousePos;
 
             CSMWorld::IdTable *mIdTableModel;
             int mColIndexPosX;
@@ -73,15 +73,18 @@ namespace CSVRender
             void mouseDoubleClickEvent (QMouseEvent *event);
             bool wheelEvent (QWheelEvent *event);
 
+            std::pair<std::string, Ogre::Vector3> underCursor(const int mouseX,
+                    const int mouseY, Ogre::uint32 elements = 0xFFFFFFFF);
+
             void cancelDrag();
 
         private:
 
-            std::pair<bool, Ogre::Vector3> mousePositionOnPlane(const QPoint &pos, const Ogre::Plane &plane);
-            std::pair<std::string, Ogre::Vector3> terrainUnderCursor(const int mouseX, const int mouseY);
-            std::pair<std::string, Ogre::Vector3> objectUnderCursor(const int mouseX, const int mouseY);
+            std::pair<bool, Ogre::Vector3> mousePosOnPlane(const QPoint &pos, const Ogre::Plane &plane);
             std::pair<Ogre::Vector3, Ogre::Vector3> planeAxis();
             void updateSceneWidgets();
+
+            void placeObject(const std::string sceneNodeName, const Ogre::Vector3 &pos); // FIXME
 
             Ogre::Camera *getCamera();     // friend access
             Ogre::Viewport *getViewport(); // friend access

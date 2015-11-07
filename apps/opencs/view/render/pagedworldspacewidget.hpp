@@ -55,6 +55,8 @@ namespace CSVRender
 
             virtual std::string getStartupInstruction();
 
+            Cell *findCell(const std::string &cellId);
+
         public:
 
             PagedWorldspaceWidget (QWidget *parent, CSMDoc::Document& document);
@@ -95,6 +97,10 @@ namespace CSVRender
 
             virtual void mouseDoubleClickEvent (QMouseEvent *event);
 
+            virtual void pathgridInserted (const std::string &referenceId, const Ogre::Vector3 &pos);
+            virtual void pathgridMoved (const std::string &pgName, const Ogre::Vector3 &pos);
+            virtual void pathgridAboutToBeRemoved (const std::string &pgName);
+
         signals:
 
             void cellSelectionChanged (const CSMWorld::CellSelection& selection);
@@ -107,6 +113,9 @@ namespace CSVRender
 
             virtual void cellAdded (const QModelIndex& index, int start, int end);
 
+            virtual void flagAsModSlot();
+
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
     };
 }
 

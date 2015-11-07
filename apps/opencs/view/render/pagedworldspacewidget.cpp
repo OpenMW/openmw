@@ -20,11 +20,14 @@
 
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/pathgridcommands.hpp"
 
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
+#include "../world/physicssystem.hpp"
 
+#include "pathgridpoint.hpp"
 #include "editmode.hpp"
 #include "elements.hpp"
 
@@ -112,8 +115,9 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
         if (index > 0 && cells.getRecord (index).mState!=CSMWorld::RecordBase::State_Deleted &&
             mCells.find (*iter)==mCells.end())
         {
-            Cell *cell = new Cell (mDocument.getData(), getSceneManager(),
+            Cell *cell = new Cell (mDocument, getSceneManager(),
                     iter->getId (mWorldspace), mDocument.getPhysics());
+            connect (cell->getSignalHandler(), SIGNAL(flagAsModified()), this, SLOT(flagAsModSlot()));
             mCells.insert (std::make_pair (*iter, cell));
 
             float height = cell->getTerrainHeightAt(Ogre::Vector3(
@@ -327,6 +331,106 @@ void CSVRender::PagedWorldspaceWidget::referenceAdded (const QModelIndex& parent
             flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::pathgridDataChanged (const QModelIndex& topLeft,
+    const QModelIndex& bottomRight)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+        iter!=mCells.end(); ++iter)
+        iter->second->pathgridDataChanged (topLeft, bottomRight);
+}
+
+CSVRender::Cell *CSVRender::PagedWorldspaceWidget::findCell(const std::string &cellId)
+{
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
+
+    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
+    for(; iter!= mCells.end(); ++iter)
+    {
+        int index = cells.searchId(cellId);
+
+        if (index != -1 && cellId == iter->first.getId (mWorldspace))
+        {
+            return iter->second;
+        }
+    }
+
+    return NULL;
+}
+
+// NOTE: allow placing pathgrid points above objects and terrain
+void CSVRender::PagedWorldspaceWidget::pathgridInserted (const std::string &referenceId, const Ogre::Vector3 &pos)
+{
+    QString id = QString(referenceId.c_str());
+
+    bool terrain = id.startsWith("HeightField_");
+    bool object = QString(referenceId.c_str()).startsWith("ref#");
+    // don't allow placing another one on top of a pathgrid point
+    if (id.isEmpty() || (!terrain && !object))
+        return;
+
+    std::string cellId;
+    if(terrain)
+    {
+        QRegExp nameRe("^HeightField_([\\d-]+)_([\\d-]+)$");
+        if (nameRe.indexIn(id) == -1)
+            return;
+
+        int cellX = nameRe.cap(1).toInt();
+        int cellY = nameRe.cap(2).toInt();
+
+        std::ostringstream stream;
+        stream << "#" << cellX << " " << cellY;
+        cellId = stream.str();
+    }
+    else
+    {
+        const CSMWorld::RefCollection& references = mDocument.getData().getReferences();
+        int index = references.searchId(referenceId);
+        if(index == -1)
+            return;
+
+        cellId = references.getData(index, references.findColumnIndex(CSMWorld::Columns::ColumnId_Cell))
+            .toString().toUtf8().constData();
+    }
+
+    Cell *cell = findCell(cellId);
+    if(cell)
+    {
+        cell->pathgridPointAdded(pos);
+        flagAsModified();
+
+        return;
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::pathgridMoved (const std::string &pgName, const Ogre::Vector3 &pos)
+{
+    std::pair<std::string, int> result = PathgridPoint::getIdAndIndex(pgName);
+
+    Cell *cell = findCell(result.first);
+    if(cell)
+    {
+        cell->pathgridPointMoved(pgName, pos);
+        flagAsModified();
+
+        return;
+    }
+}
+
+void CSVRender::PagedWorldspaceWidget::pathgridAboutToBeRemoved (const std::string &pgName)
+{
+    std::pair<std::string, int> result = PathgridPoint::getIdAndIndex(pgName);
+
+    Cell *cell = findCell(result.first);
+    if(cell)
+    {
+        cell->pathgridPointRemoved(pgName);
+        flagAsModified();
+
+        return;
+    }
+}
+
 std::string CSVRender::PagedWorldspaceWidget::getStartupInstruction()
 {
     Ogre::Vector3 position = getCamera()->getPosition();
@@ -374,9 +478,9 @@ CSVRender::PagedWorldspaceWidget::~PagedWorldspaceWidget()
 
     if(mOverlayMask)
     {
-        removeRenderTargetListener(mOverlayMask);
-        delete mOverlayMask;
-    }
+    removeRenderTargetListener(mOverlayMask);
+    delete mOverlayMask;
+}
 }
 
 void CSVRender::PagedWorldspaceWidget::useViewHint (const std::string& hint)
@@ -525,4 +629,9 @@ void CSVRender::PagedWorldspaceWidget::cellAdded (const QModelIndex& index, int 
     /// \todo check if no selected cell is affected and do not update, if that is the case
     if (adjustCells())
         flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::flagAsModSlot ()
+{
+    flagAsModified();
 }

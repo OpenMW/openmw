@@ -72,9 +72,6 @@ namespace CSVWorld
 
         if(referenceId != "")
         {
-            mSceneNodeToRefId.erase(sceneNodeName);
-            mSceneNodeToMesh.erase(sceneNodeName);
-
             // find which SceneManager has this object
             Ogre::SceneManager *sceneManager = findSceneManager(sceneNodeName);
             if(!sceneManager)
@@ -99,7 +96,8 @@ namespace CSVWorld
                 mRefIdToSceneNode.begin();
             for(; itRef != mRefIdToSceneNode.end(); ++itRef)
             {
-                if((*itRef).second.find(sceneManager) != (*itRef).second.end())
+                if((*itRef).first == referenceId &&
+                        (*itRef).second.find(sceneManager) != (*itRef).second.end())
                 {
                     (*itRef).second.erase(sceneManager);
                     break;
@@ -107,11 +105,15 @@ namespace CSVWorld
             }
 
             // check whether the physics model should be deleted
-            if(mRefIdToSceneNode.find(referenceId) == mRefIdToSceneNode.end())
+            itRef = mRefIdToSceneNode.find(referenceId);
+            if(itRef == mRefIdToSceneNode.end() || (*itRef).second.empty())
             {
                 mEngine->removeRigidBody(referenceId);
                 mEngine->deleteRigidBody(referenceId);
             }
+
+            mSceneNodeToRefId.erase(sceneNodeName);
+            mSceneNodeToMesh.erase(sceneNodeName);
         }
     }
 
@@ -211,11 +213,6 @@ namespace CSVWorld
         }
     }
 
-    // sceneMgr: to lookup the scene node name from the object's referenceId
-    // camera: primarily used to get the visibility mask for the viewport
-    //
-    // returns the found object's scene node name and its position in the world space
-    //
     // WARNING: far clip distance is a global setting, if it changes in future
     //          this method will need to be updated
     std::pair<std::string, Ogre::Vector3> PhysicsSystem::castRay(float mouseX,
@@ -241,27 +238,86 @@ namespace CSVWorld
         _from = btVector3(from.x, from.y, from.z);
         _to = btVector3(to.x, to.y, to.z);
 
-        uint32_t visibilityMask = camera->getViewport()->getVisibilityMask();
-        bool ignoreHeightMap = !(visibilityMask & (uint32_t)CSVRender::Element_Terrain);
-        bool ignoreObjects = !(visibilityMask & (uint32_t)CSVRender::Element_Reference);
+        Ogre::uint32 visibilityMask = camera->getViewport()->getVisibilityMask();
+        bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
+        bool ignorePathgrid = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
 
-        Ogre::Vector3 norm; // not used
-        std::pair<std::string, float> result =
-                                mEngine->rayTest(_from, _to, !ignoreObjects, ignoreHeightMap, &norm);
+        std::pair<std::string, float> result = std::make_pair("", -1);
+        short mask = OEngine::Physic::CollisionType_Raycasting;
+        std::vector<std::pair<float, std::string> > objects = mEngine->rayTest2(_from, _to, mask);
+
+        for (std::vector<std::pair<float, std::string> >::iterator it = objects.begin();
+                it != objects.end(); ++it)
+        {
+            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
+                continue;
+            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
+                continue;
+            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
+                continue;
+
+            result = std::make_pair((*it).second, (*it).first);
+            break;
+        }
 
         // result.first is the object's referenceId
         if(result.first == "")
-            return std::make_pair("", Ogre::Vector3(0,0,0));
+            return std::make_pair("", Ogre::Vector3());
         else
-        {
-            std::string name = refIdToSceneNode(result.first, sceneMgr);
-            if(name == "")
-                name = result.first;
-            else
-                name = refIdToSceneNode(result.first, sceneMgr);
+            return std::make_pair(result.first, ray.getPoint(farClipDist*result.second));
+    }
 
-            return std::make_pair(name, ray.getPoint(farClipDist*result.second));
+    std::pair<std::string, float> PhysicsSystem::distToGround(const Ogre::Vector3 &position,
+            Ogre::uint32 visibilityMask, const float limit)
+    {
+        btVector3 _from, _to;
+        _from = btVector3(position.x, position.y, position.z);
+        _to = btVector3(position.x, position.y, position.z-limit);
+
+        bool ignoreHeightMap = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Terrain);
+        bool ignoreObjects = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Reference);
+        bool ignorePathgrid = !(visibilityMask & (Ogre::uint32)CSVRender::Element_Pathgrid);
+
+        std::pair<std::string, float> result = std::make_pair("", -1);
+        short mask = OEngine::Physic::CollisionType_Raycasting;
+        std::vector<std::pair<float, std::string> > objects = mEngine->rayTest2(_from, _to, mask);
+
+        for (std::vector<std::pair<float, std::string> >::iterator it = objects.begin();
+                it != objects.end(); ++it)
+        {
+            if(ignorePathgrid && QString((*it).second.c_str()).contains(QRegExp("^Pathgrid")))
+                continue;
+            else if(ignoreObjects && QString((*it).second.c_str()).contains(QRegExp("^ref#")))
+                continue;
+            else if(ignoreHeightMap && QString((*it).second.c_str()).contains(QRegExp("^Height")))
+                continue;
+
+            result = std::make_pair((*it).second, (*it).first);
+            break;
         }
+
+        // result.first is the object's referenceId
+        if(result.first == "")
+            return std::make_pair("", -1);
+        else
+            return std::make_pair(result.first, limit*result.second);
+    }
+
+    // tries to find the distance to the "top" of the closest object (ignores pathgrid points)
+    std::pair<std::string, float> PhysicsSystem::distToClosest(const Ogre::Vector3 &position,
+            Ogre::uint32 visibilityMask, const float limit)
+    {
+        const float thickness = 50; // arbitrary number
+
+        std::pair<std::string, float> resDown =
+            distToGround(Ogre::Vector3(position.x, position.y, position.z+thickness),
+                         visibilityMask&(~CSVRender::Element_Pathgrid), limit+thickness);
+
+        if(resDown.first != "")
+            return std::make_pair(resDown.first, resDown.second-thickness);
+        else
+            return std::make_pair("", -1);
     }
 
     std::string PhysicsSystem::refIdToSceneNode(std::string referenceId, Ogre::SceneManager *sceneMgr)

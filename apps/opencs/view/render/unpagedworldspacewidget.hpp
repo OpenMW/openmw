@@ -70,6 +70,10 @@ namespace CSVRender
 
             void cellRowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            virtual void flagAsModSlot();
+
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+
         signals:
 
             void cellChanged(const CSMWorld::UniversalId& id);

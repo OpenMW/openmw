@@ -425,6 +425,9 @@ std::auto_ptr<sh::Factory> CS::Editor::setupGraphics()
     // for font used in overlays
     Ogre::Root::getSingleton().addResourceLocation ((mResources / "mygui").string(),
             "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+    // for pathgrid point nif
+    Ogre::Root::getSingleton().addResourceLocation ((mResources / "materials").string(),
+            "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 
     if (!boost::filesystem::exists (mCfgMgr.getCachePath()))
         boost::filesystem::create_directories (mCfgMgr.getCachePath());

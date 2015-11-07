@@ -124,6 +124,11 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
+            // FIXME: temporary only until the signals from the document are implemented
+            virtual void pathgridInserted (const std::string &terrain, const Ogre::Vector3 &pos);
+            virtual void pathgridMoved (const std::string &pgName, const Ogre::Vector3 &pos);
+            virtual void pathgridAboutToBeRemoved (const std::string &pgName);
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -158,6 +163,7 @@ namespace CSVRender
 
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) = 0;
 
         protected slots:
 
