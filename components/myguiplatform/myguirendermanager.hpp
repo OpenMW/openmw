@@ -20,6 +20,7 @@ namespace osg
     class Group;
     class Camera;
     class RenderInfo;
+    class StateSet;
 }
 
 namespace osgMyGUI
@@ -47,6 +48,8 @@ class RenderManager : public MyGUI::RenderManager, public MyGUI::IRenderTarget
     osg::ref_ptr<osg::Camera> mGuiRoot;
 
     float mInvScalingFactor;
+
+    osg::StateSet* mInjectState;
 
     void destroyAllResources();
 
@@ -94,6 +97,9 @@ public:
     virtual void end();
     /** @see IRenderTarget::doRender */
     virtual void doRender(MyGUI::IVertexBuffer *buffer, MyGUI::ITexture *texture, size_t count);
+
+    /** specify a StateSet to inject for rendering. The StateSet will be used by future doRender calls until you reset it to NULL again. */
+    void setInjectState(osg::StateSet* stateSet);
 
     /** @see IRenderTarget::getInfo */
     virtual const MyGUI::RenderTargetInfo& getInfo() { return mInfo; }
