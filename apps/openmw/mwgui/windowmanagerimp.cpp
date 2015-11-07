@@ -329,7 +329,7 @@ namespace MWGui
         // TODO: check if non-BM versions actually use player_hit_01.dds
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
             hitFaderTexture = "textures\\player_hit_01.dds";
-        mHitFader = new ScreenFader(hitFaderTexture);
+        mHitFader = new ScreenFader(hitFaderTexture, "openmw_screen_fader_hit.layout");
         mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
