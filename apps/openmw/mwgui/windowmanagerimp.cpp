@@ -33,6 +33,7 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
+#include <components/myguiplatform/myguirendermanager.hpp>
 
 #include <components/vfs/manager.hpp>
 

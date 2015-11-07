@@ -115,7 +115,7 @@ add_component_dir (loadinglistener
     )
 
 add_component_dir (myguiplatform
-    myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener
+    myguirendermanager myguidatamanager myguiplatform myguitexture myguiloglistener additivelayer
     )
 
 add_component_dir (widgets
