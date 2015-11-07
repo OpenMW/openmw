@@ -62,6 +62,7 @@ namespace CSMWorld
     class ResourcesManager;
     class Resources;
     class NpcStats;
+    class NpcAutoCalc;
 
     class Data : public QObject
     {
@@ -109,7 +110,7 @@ namespace CSMWorld
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
-            std::map<std::string, NpcStats*> mNpcStatCache;
+            NpcAutoCalc *mNpcAutoCalc;
 
             // not implemented
             Data (const Data&);
@@ -282,37 +283,17 @@ namespace CSMWorld
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
 
-            NpcStats* npcAutoCalculate (const ESM::NPC& npc) const;
-
-            NpcStats* getCachedNpcData (const std::string& id) const;
+            const NpcAutoCalc& getNpcAutoCalc() const;
 
         signals:
 
             void idListChanged();
-
-            // refresh NPC dialogue subviews via object table model
-            void updateNpcAutocalc (int type, const std::string& id);
-
-            void cacheNpcStats (const std::string& id, NpcStats *stats) const;
 
         private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsChanged (const QModelIndex& parent, int start, int end);
-
-            // for autocalc updates when gmst/race/class/skils tables change
-            void gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void raceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void classDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void skillDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void cacheNpcStatsEvent (const std::string& id, NpcStats *stats);
     };
 }
 

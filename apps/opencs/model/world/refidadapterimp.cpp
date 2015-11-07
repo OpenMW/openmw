@@ -12,6 +12,7 @@
 #include "usertype.hpp"
 #include "idtree.hpp"
 #include "npcstats.hpp"
+#include "npcautocalc.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
 : InventoryColumns (columns) {}
@@ -777,7 +778,7 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
             {
                 if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
                 {
-                    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(npc);
+                    CSMWorld::NpcStats *stats = mData.getNpcAutoCalc().npcAutoCalculate(npc);
                     if (!stats)
                     {
                         record.setModified (npc);
@@ -817,7 +818,7 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
                 {
                     npc.mNpdtType =  ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS;
                     npc.mNpdt12.mLevel = npc.mNpdt52.mLevel; // for NPC's loaded as non-autocalc
-                    mData.npcAutoCalculate(npc);
+                    mData.getNpcAutoCalc().npcAutoCalculate(npc);
                 }
             }
         }
@@ -888,7 +889,7 @@ QVariant CSMWorld::NpcAttributesRefIdAdapter::getNestedData (const RefIdColumn *
     else if (subColIndex == 1)
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
-            CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            CSMWorld::NpcStats *stats =  mData.getNpcAutoCalc().npcAutoCalculate(npc);
             if (!stats)
                 return QVariant();
 
@@ -1020,7 +1021,7 @@ QVariant CSMWorld::NpcSkillsRefIdAdapter::getNestedData (const RefIdColumn *colu
     {
         if (npc.mNpdtType == ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
         {
-            CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+            CSMWorld::NpcStats *stats =  mData.getNpcAutoCalc().npcAutoCalculate(npc);
             if (!stats)
                 return QVariant();
 
@@ -1108,7 +1109,7 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
 
     if (autoCalc)
     {
-        CSMWorld::NpcStats *stats =  mData.npcAutoCalculate(npc);
+        CSMWorld::NpcStats *stats =  mData.getNpcAutoCalc().npcAutoCalculate(npc);
 
         switch (subColIndex)
         {
@@ -1732,7 +1733,7 @@ QVariant NestedSpellRefIdAdapter<ESM::NPC>::getNestedData (const RefIdColumn *co
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    CSMWorld::NpcStats *stats = mData.getNpcAutoCalc().npcAutoCalculate(record.get());
     if (!stats)
         return QVariant();
 
@@ -1766,7 +1767,7 @@ int NestedSpellRefIdAdapter<ESM::NPC>::getNestedRowsCount(const RefIdColumn *col
     const Record<ESM::NPC>& record =
         static_cast<const Record<ESM::NPC>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
 
-    CSMWorld::NpcStats *stats = mData.npcAutoCalculate(record.get());
+    CSMWorld::NpcStats *stats = mData.getNpcAutoCalc().npcAutoCalculate(record.get());
     if (!stats)
         return 0;
 

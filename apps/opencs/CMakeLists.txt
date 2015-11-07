@@ -19,7 +19,7 @@ opencs_hdrs_noqt (model/doc
 
 opencs_units (model/world
     idtable idtableproxymodel regionmap data commanddispatcher idtablebase resourcetable nestedtableproxymodel idtree infotableproxymodel
-    pathgridcommands
+    pathgridcommands npcautocalc
     )
 
 
@@ -36,7 +36,7 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel mergeoperation 
+    tools reportmodel mergeoperation
     )
 
 opencs_units_noqt (model/tools
