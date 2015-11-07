@@ -141,8 +141,13 @@ namespace MWMechanics
     template<typename T>
     void DynamicStat<T>::modify (const T& diff, bool allowCurrentDecreaseBelowZero)
     {
-        mStatic.modify (diff);
-        setCurrent (getCurrent()+diff, allowCurrentDecreaseBelowZero);
+	double ratio;
+	if (mStatic.getModified()>0)
+	    ratio = getCurrent()/mStatic.getModified();
+	else
+	    ratio = 0;
+	mStatic.modify (diff);
+	setCurrent (mStatic.getModified()*ratio, allowCurrentDecreaseBelowZero);
     }
     template<typename T>
     void DynamicStat<T>::setCurrent (const T& value, bool allowDecreaseBelowZero)
