@@ -18,7 +18,6 @@
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
 #include "nestedcoladapterimp.hpp"
-#include "npcstats.hpp"
 #include "npcautocalc.hpp"
 
 void CSMWorld::Data::addModel (QAbstractItemModel *model, UniversalId::Type type, bool update)

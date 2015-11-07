@@ -61,7 +61,6 @@ namespace CSMWorld
 {
     class ResourcesManager;
     class Resources;
-    class NpcStats;
     class NpcAutoCalc;
 
     class Data : public QObject
@@ -126,8 +125,6 @@ namespace CSMWorld
             static int count (RecordBase::State state, const CollectionBase& collection);
 
             const Data& self ();
-
-            void clearNpcStatsCache ();
 
         public:
 
