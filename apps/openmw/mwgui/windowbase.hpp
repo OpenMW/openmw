@@ -15,6 +15,9 @@ namespace MWGui
 
     class WindowBase: public Layout
     {
+        protected:
+            bool isBook,isScroll;
+            float uiScale;
         public:
         WindowBase(const std::string& parLayout);
 
@@ -22,9 +25,9 @@ namespace MWGui
         typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
 
         /// Notify that window has been made visible
-        virtual void open() {}
+        virtual void open();
         /// Notify that window has been hidden
-        virtual void close () {}
+        virtual void close ();
         /// Gracefully exits the window
         virtual void exit() {}
         /// Sets the visibility of the window

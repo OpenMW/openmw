@@ -56,6 +56,7 @@ namespace MWBase
             /// Returns if the last used input device was a joystick or a keyboard
             /// @return true if joystick, false otherwise
             virtual bool joystickLastUsed() = 0;
+            virtual void setScale(float uiscale) = 0;
     };
 }
 

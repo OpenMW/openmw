@@ -15,6 +15,7 @@
 #include <components/misc/stringops.hpp>
 #include <components/widgets/imagebutton.hpp>
 #include <components/widgets/list.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -123,7 +124,7 @@ namespace
 
             {
                 MWGui::BookPage::ClickCallback callback;
-                
+
                 callback = boost::bind (&JournalWindowImpl::notifyTopicClicked, this, _1);
 
                 getPage (LeftBookPage)->adviseLinkClicked (callback);
@@ -135,7 +136,7 @@ namespace
 
             {
                 MWGui::BookPage::ClickCallback callback;
-                
+
                 callback = boost::bind (&JournalWindowImpl::notifyIndexLinkClicked, this, _1);
 
                 getPage (LeftTopicIndex)->adviseLinkClicked (callback);
@@ -199,6 +200,8 @@ namespace
 
         void open()
         {
+            MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
+            wm->setScale(wm->getBookScale());
             if (!MWBase::Environment::get().getWindowManager ()->getJournalAllowed ())
             {
                 MWBase::Environment::get().getWindowManager()->popGuiMode ();
@@ -228,6 +231,7 @@ namespace
 
         void close()
         {
+            MWBase::Environment::get().getWindowManager ()->setScale(Settings::Manager::getFloat("scaling factor", "GUI"));
             mModel->unload ();
 
             getPage (LeftBookPage)->showPage (Book (), 0);

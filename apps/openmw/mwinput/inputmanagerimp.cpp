@@ -1576,6 +1576,12 @@ namespace MWInput
         loadControllerDefaults(true);
     }
 
+    void InputManager::setScale(float uiScale)
+    {
+        if (uiScale != 0.f)
+            mInvUiScalingFactor = 1.f / uiScale;
+    }
+
     MyGUI::MouseButton InputManager::sdlButtonToMyGUI(Uint8 button)
     {
         //The right button is the second button, according to MyGUI
