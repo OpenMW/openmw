@@ -288,6 +288,11 @@ namespace MWPhysics
                     velocity = velocity + physicActor->getInertialForce();
                 }
             }
+
+            // dead actors underwater will float to the surface
+            if (ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
+                velocity = osg::Vec3f(0,0,1) * 25;
+
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
             // Now that we have the effective movement vector, apply wind forces to it
