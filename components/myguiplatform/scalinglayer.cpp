@@ -99,8 +99,9 @@ namespace osgMyGUI
     {
         MyGUI::IntSize globalViewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntSize viewSize = globalViewSize;
-        viewSize.width /= getScaleFactor();
-        viewSize.height /= getScaleFactor();
+        float scale = getScaleFactor();
+        viewSize.width /= scale;
+        viewSize.height /= scale;
 
         float hoffset = (globalViewSize.width - mViewSize.width*getScaleFactor())/2.f / static_cast<float>(globalViewSize.width);
         float voffset = (globalViewSize.height - mViewSize.height*getScaleFactor())/2.f / static_cast<float>(globalViewSize.height);
