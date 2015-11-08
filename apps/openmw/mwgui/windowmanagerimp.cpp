@@ -35,6 +35,7 @@
 #include <components/myguiplatform/myguiplatform.hpp>
 #include <components/myguiplatform/myguirendermanager.hpp>
 #include <components/myguiplatform/additivelayer.hpp>
+#include <components/myguiplatform/scalinglayer.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -218,6 +219,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
