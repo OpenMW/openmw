@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
 
-<Widget type="Window" skin="" layer="Windows" position="0 0 512 372" name="_Main">
+<Widget type="Window" skin="" layer="JournalBooks" position="0 0 512 372" name="_Main">
 
     <Widget type="ImageBox" skin="ImageBox" position_real="0 0 1 1" name="ScrollImage">     
         <Property key="ImageTexture" value="textures\scroll.dds"/>
