@@ -949,12 +949,18 @@ public:
         if (!mBook)
             return;
 
-        left -= mCroppedParent->getAbsoluteLeft ();
-        top  -= mCroppedParent->getAbsoluteTop  ();
+        // work around inconsistency in MyGUI where the mouse press coordinates aren't
+        // transformed by the current Layer (even though mouse *move* events are).
+        MyGUI::IntPoint pos (left, top);
+#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
+        pos = mNode->getLayer()->getPosition(left, top);
+#endif
+        pos.left -= mCroppedParent->getAbsoluteLeft ();
+        pos.top  -= mCroppedParent->getAbsoluteTop  ();
 
         if (mLastDown == MyGUI::MouseButton::None)
         {
-            mFocusItem = mBook->hitTest (left, mViewTop + top);
+            mFocusItem = mBook->hitTest (pos.left, mViewTop + pos.top);
             mItemActive = true;
 
             dirtyFocusItem ();
@@ -968,12 +974,19 @@ public:
         if (!mBook)
             return;
 
-        left -= mCroppedParent->getAbsoluteLeft ();
-        top  -= mCroppedParent->getAbsoluteTop  ();
+        // work around inconsistency in MyGUI where the mouse release coordinates aren't
+        // transformed by the current Layer (even though mouse *move* events are).
+        MyGUI::IntPoint pos (left, top);
+#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,2,3)
+        pos = mNode->getLayer()->getPosition(left, top);
+#endif
+
+        pos.left -= mCroppedParent->getAbsoluteLeft ();
+        pos.top  -= mCroppedParent->getAbsoluteTop  ();
 
         if (mLastDown == id)
         {
-            Style * mItem = mBook->hitTest (left, mViewTop + top);
+            Style * mItem = mBook->hitTest (pos.left, mViewTop + pos.top);
 
             bool clicked = mFocusItem == mItem;
 
