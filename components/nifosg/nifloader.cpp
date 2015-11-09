@@ -536,7 +536,7 @@ namespace NifOsg
                     handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
 
                 if (!nifNode->controller.empty())
-                    handleMeshControllers(nifNode, composite, boundTextures, animflags);
+                    handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
             }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
@@ -570,7 +570,7 @@ namespace NifOsg
             return node;
         }
 
-        void handleMeshControllers(const Nif::Node *nifNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int> &boundTextures, int animflags)
+        void handleMeshControllers(const Nif::Node *nifNode, osg::Node* node, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int> &boundTextures, int animflags)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -587,6 +587,14 @@ namespace NifOsg
                     setupController(uvctrl, ctrl, animflags);
                     composite->addController(ctrl);
                 }
+                else if (ctrl->recType == Nif::RC_NiVisController)
+                {
+                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
+                }
+                else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+                {} // handled in handleTriShape
+                else
+                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
             }
         }
 
@@ -815,6 +823,8 @@ namespace NifOsg
                     continue;
                 if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
                     partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
+                else
+                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
             }
             if (!partctrl)
             {
@@ -962,10 +972,7 @@ namespace NifOsg
                                 static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
                     setupController(ctrl.getPtr(), morphctrl, animflags);
                     geometry->setUpdateCallback(morphctrl);
-                }
-                else if (ctrl->recType == Nif::RC_NiVisController)
-                {
-                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), geode, animflags);
+                    break;
                 }
             }
 
@@ -1050,16 +1057,6 @@ namespace NifOsg
                                           const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-
-            for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
-            {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-                    continue;
-                if (ctrl->recType == Nif::RC_NiVisController)
-                {
-                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), geode, animflags);
-                }
-            }
 
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
