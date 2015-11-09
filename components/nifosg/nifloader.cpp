@@ -609,13 +609,18 @@ namespace NifOsg
                 }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
-                    const Nif::NiVisController* visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
-
-                    osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
-                    setupController(visctrl, callback, animflags);
-                    transformNode->addUpdateCallback(callback);
+                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), transformNode, animflags);
                 }
+                else
+                    std::cerr << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename << std::endl;
             }
+        }
+
+        void handleVisController(const Nif::NiVisController* visctrl, osg::Node* node, int animflags)
+        {
+            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
+            setupController(visctrl, callback, animflags);
+            node->addUpdateCallback(callback);
         }
 
         void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
@@ -942,28 +947,31 @@ namespace NifOsg
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Geometry> geometry;
-            if(!triShape->controller.empty())
-            {
-                Nif::ControllerPtr ctrl = triShape->controller;
-                do {
-                    if(ctrl->recType == Nif::RC_NiGeomMorpherController && ctrl->flags & Nif::NiNode::ControllerFlag_Active)
-                    {
-                        geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()));
+            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
 
-                        osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
-                                    static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
-                        setupController(ctrl.getPtr(), morphctrl, animflags);
-                        geometry->setUpdateCallback(morphctrl);
-                        break;
-                    }
-                } while(!(ctrl=ctrl->next).empty());
+            osg::ref_ptr<osg::Geometry> geometry;
+            for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
+            {
+                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                    continue;
+                if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+                {
+                    geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()));
+
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
+                                static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
+                    setupController(ctrl.getPtr(), morphctrl, animflags);
+                    geometry->setUpdateCallback(morphctrl);
+                }
+                else if (ctrl->recType == Nif::RC_NiVisController)
+                {
+                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), geode, animflags);
+                }
             }
 
             if (!geometry.get())
                 geometry = new osg::Geometry;
 
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
             geode->addDrawable(geometry);
@@ -1042,6 +1050,16 @@ namespace NifOsg
                                           const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+
+            for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
+            {
+                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                    continue;
+                if (ctrl->recType == Nif::RC_NiVisController)
+                {
+                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), geode, animflags);
+                }
+            }
 
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
