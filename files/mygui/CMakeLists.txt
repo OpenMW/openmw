@@ -80,6 +80,7 @@ set(MYGUI_FILES
     openmw_savegame_dialog.layout
     openmw_recharge_dialog.layout
     openmw_screen_fader.layout
+    openmw_screen_fader_hit.layout
     openmw_edit_note.layout
     openmw_debug_window.layout
     openmw_debug_window.skin.xml

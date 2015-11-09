@@ -2,7 +2,7 @@
 
 <MyGUI type="Layout">
 
-  <Widget type="Window" skin="" layer="Windows" align="Left|Top" position="0 0 565 390" name="_Main">
+  <Widget type="Window" skin="" layer="JournalBooks" align="Left|Top" position="0 0 565 390" name="_Main">
     <!-- pages -->
     <Widget type="ImageBox" skin="ImageBox" position="-70 0 705 390" align="Top|Right" name="JImage">
     <Property key="ImageTexture" value="textures\tx_menubook.dds"/>

@@ -19,10 +19,9 @@ namespace MWGui
     class HUD : public Layout, public LocalMapBase
     {
     public:
-        HUD(CustomMarkerCollection& customMarkers, bool fpsVisible, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
+        HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
         void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
-        void setFPS(float fps);
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
@@ -37,8 +36,6 @@ namespace MWGui
 
         void setEffectVisible(bool visible);
         void setMinimapVisible(bool visible);
-
-        void setFpsVisible(const bool visible);
 
         void setSelectedSpell(const std::string& spellId, int successChancePercent);
         void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
@@ -76,9 +73,6 @@ namespace MWGui
         MyGUI::TextBox* mCellNameBox;
         MyGUI::TextBox* mWeaponSpellBox;
         MyGUI::Widget *mDrowningFrame, *mDrowningFlash;
-
-        MyGUI::Widget* mFpsBox;
-        MyGUI::TextBox* mFpsCounter;
 
         // bottom left elements
         int mHealthManaStaminaBaseLeft, mWeapBoxBaseLeft, mSpellBoxBaseLeft, mSneakBoxBaseLeft;

@@ -240,8 +240,6 @@ namespace MWPhysics
             const ESM::Position& refpos = ptr.getRefData().getPosition();
             osg::Vec3f position(refpos.asVec3());
 
-            float collisionShapeOffset = physicActor->getPosition().z() - position.z();
-
             // Early-out for totally static creatures
             // (Not sure if gravity should still apply?)
             if (!ptr.getClass().isMobile(ptr))
@@ -258,11 +256,17 @@ namespace MWPhysics
             }
 
             btCollisionObject *colobj = physicActor->getCollisionObject();
-            position.z() += collisionShapeOffset;
+            osg::Vec3f halfExtents = physicActor->getHalfExtents();
+
+            // NOTE: here we don't account for the collision box translation (i.e. physicActor->getPosition() - refpos.pos).
+            // That means the collision shape used for moving this actor is in a different spot than the collision shape
+            // other actors are using to collide against this actor.
+            // While this is strictly speaking wrong, it's needed for MW compatibility.
+            position.z() += halfExtents.z();
 
             static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                     .find("fSwimHeightScale")->getFloat();
-            float swimlevel = waterlevel + collisionShapeOffset - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
+            float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
 
             ActorTracer tracer;
             osg::Vec3f inertia = physicActor->getInertialForce();
@@ -284,6 +288,11 @@ namespace MWPhysics
                     velocity = velocity + physicActor->getInertialForce();
                 }
             }
+
+            // dead actors underwater will float to the surface
+            if (ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
+                velocity = osg::Vec3f(0,0,1) * 25;
+
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
 
             // Now that we have the effective movement vector, apply wind forces to it
@@ -370,7 +379,7 @@ namespace MWPhysics
                 {
                     // don't let pure water creatures move out of water after stepMove
                     if (ptr.getClass().isPureWaterCreature(ptr)
-                            && newPosition.z() + physicActor->getHalfExtents().z() > waterlevel)
+                            && newPosition.z() + halfExtents.z() > waterlevel)
                         newPosition = oldPosition;
                 }
                 else
@@ -451,7 +460,7 @@ namespace MWPhysics
             }
             physicActor->setOnGround(isOnGround);
 
-            newPosition.z() -= collisionShapeOffset; // remove what was added at the beginning
+            newPosition.z() -= halfExtents.z(); // remove what was added at the beginning
             return newPosition;
         }
     };

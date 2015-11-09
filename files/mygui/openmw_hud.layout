@@ -125,11 +125,5 @@
         <Widget type="ImageBox" skin="HUD_Crosshair" position="0 0 32 32" align="Center Center" name="Crosshair">
         </Widget>
 
-        <!-- Basic FPSCounter box -->
-        <Widget type="Widget" skin="" position="12 12 32 26" align="Left Top" name="FPSBox">
-            <Property key="Visible" value="false"/>
-            <Widget type="TextBox" skin="NumFPS" position="3 3 25 17" align="Center" name="FPSCounter"/>
-        </Widget>
-
     </Widget>
 </MyGUI>

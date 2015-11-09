@@ -1563,17 +1563,15 @@ void SkyManager::setWeather(const WeatherResult& weather)
         mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0 : 0);
     }
 
-    if (mCloudColour != weather.mSunColor)
+    if (mCloudColour != weather.mFogColor)
     {
-        // FIXME: this doesn't look correct
-        osg::Vec4f clr( weather.mSunColor.r()*0.7f + weather.mAmbientColor.r()*0.7f,
-                        weather.mSunColor.g()*0.7f + weather.mAmbientColor.g()*0.7f,
-                        weather.mSunColor.b()*0.7f + weather.mAmbientColor.b()*0.7f, 1.f);
+        osg::Vec4f clr (weather.mFogColor);
+        clr += osg::Vec4f(0.13f, 0.13f, 0.13f, 0.f);
 
         mCloudUpdater->setEmissionColor(clr);
         mCloudUpdater2->setEmissionColor(clr);
 
-        mCloudColour = weather.mSunColor;
+        mCloudColour = weather.mFogColor;
     }
 
     if (mSkyColour != weather.mSkyColor)

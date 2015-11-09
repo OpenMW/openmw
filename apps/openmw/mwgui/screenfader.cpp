@@ -66,8 +66,8 @@ namespace MWGui
         mFader->notifyOperationFinished();
     }
 
-    ScreenFader::ScreenFader(const std::string & texturePath)
-        : WindowBase("openmw_screen_fader.layout")
+    ScreenFader::ScreenFader(const std::string & texturePath, const std::string& layout)
+        : WindowBase(layout)
         , mCurrentAlpha(0.f)
         , mFactor(1.f)
         , mRepeat(false)

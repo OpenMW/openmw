@@ -34,19 +34,22 @@ namespace ESMTerrain
 
         osg::Vec2f origin = center - osg::Vec2f(size/2.f, size/2.f);
 
-        assert(origin.x() == (int) origin.x());
-        assert(origin.y() == (int) origin.y());
+        int cellX = static_cast<int>(std::floor(origin.x()));
+        int cellY = static_cast<int>(std::floor(origin.y()));
 
-        int cellX = static_cast<int>(origin.x());
-        int cellY = static_cast<int>(origin.y());
+        int startRow = (origin.x() - cellX) * ESM::Land::LAND_SIZE;
+        int startColumn = (origin.y() - cellY) * ESM::Land::LAND_SIZE;
+
+        int endRow = startRow + size * (ESM::Land::LAND_SIZE-1) + 1;
+        int endColumn = startColumn + size * (ESM::Land::LAND_SIZE-1) + 1;
 
         if (const ESM::Land::LandData *data = getLandData (cellX, cellY, ESM::Land::DATA_VHGT))
         {
             min = std::numeric_limits<float>::max();
             max = -std::numeric_limits<float>::max();
-            for (int row=0; row<ESM::Land::LAND_SIZE; ++row)
+            for (int row=startRow; row<endRow; ++row)
             {
-                for (int col=0; col<ESM::Land::LAND_SIZE; ++col)
+                for (int col=startColumn; col<endColumn; ++col)
                 {
                     float h = data->mHeights[col*ESM::Land::LAND_SIZE+row];
                     if (h > max)
@@ -143,11 +146,9 @@ namespace ESMTerrain
         size_t increment = 1 << lodLevel;
 
         osg::Vec2f origin = center - osg::Vec2f(size/2.f, size/2.f);
-        assert(origin.x() == (int) origin.x());
-        assert(origin.y() == (int) origin.y());
 
-        int startX = static_cast<int>(origin.x());
-        int startY = static_cast<int>(origin.y());
+        int startCellX = static_cast<int>(std::floor(origin.x()));
+        int startCellY = static_cast<int>(std::floor(origin.y()));
 
         size_t numVerts = static_cast<size_t>(size*(ESM::Land::LAND_SIZE - 1) / increment + 1);
 
@@ -162,10 +163,10 @@ namespace ESMTerrain
         float vertX = 0;
 
         float vertY_ = 0; // of current cell corner
-        for (int cellY = startY; cellY < startY + std::ceil(size); ++cellY)
+        for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
         {
             float vertX_ = 0; // of current cell corner
-            for (int cellX = startX; cellX < startX + std::ceil(size); ++cellX)
+            for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
                 const ESM::Land::LandData *heightData = getLandData (cellX, cellY, ESM::Land::DATA_VHGT);
                 const ESM::Land::LandData *normalData = getLandData (cellX, cellY, ESM::Land::DATA_VNML);
@@ -175,18 +176,31 @@ namespace ESMTerrain
                 int colStart = 0;
                 // Skip the first row / column unless we're at a chunk edge,
                 // since this row / column is already contained in a previous cell
+                // This is only relevant if we're creating a chunk spanning multiple cells
                 if (colStart == 0 && vertY_ != 0)
                     colStart += increment;
                 if (rowStart == 0 && vertX_ != 0)
                     rowStart += increment;
 
+                // Only relevant for chunks smaller than (contained in) one cell
+                rowStart += (origin.x() - startCellX) * ESM::Land::LAND_SIZE;
+                colStart += (origin.y() - startCellY) * ESM::Land::LAND_SIZE;
+                int rowEnd = rowStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1;
+                int colEnd = colStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE-1) + 1;
+
                 vertY = vertY_;
-                for (int col=colStart; col<ESM::Land::LAND_SIZE; col += increment)
+                for (int col=colStart; col<colEnd; col += increment)
                 {
                     vertX = vertX_;
-                    for (int row=rowStart; row<ESM::Land::LAND_SIZE; row += increment)
+                    for (int row=rowStart; row<rowEnd; row += increment)
                     {
-                        int arrayIndex = col*ESM::Land::LAND_SIZE*3+row*3;
+                        int srcArrayIndex = col*ESM::Land::LAND_SIZE*3+row*3;
+
+                        assert(row >= 0 && row < ESM::Land::LAND_SIZE);
+                        assert(col >= 0 && col < ESM::Land::LAND_SIZE);
+
+                        assert (vertX < numVerts);
+                        assert (vertY < numVerts);
 
                         float height = -2048;
                         if (heightData)
@@ -200,7 +214,7 @@ namespace ESMTerrain
                         if (normalData)
                         {
                             for (int i=0; i<3; ++i)
-                                normal[i] = normalData->mNormals[arrayIndex+i];
+                                normal[i] = normalData->mNormals[srcArrayIndex+i];
 
                             normal.normalize();
                         }
@@ -222,7 +236,7 @@ namespace ESMTerrain
                         if (colourData)
                         {
                             for (int i=0; i<3; ++i)
-                                color[i] = colourData->mColours[arrayIndex+i] / 255.f;
+                                color[i] = colourData->mColours[srcArrayIndex+i] / 255.f;
                         }
                         else
                         {
@@ -305,8 +319,19 @@ namespace ESMTerrain
         // and interpolate the rest of the cell by hand? :/
 
         osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize/2.f, chunkSize/2.f);
-        int cellX = static_cast<int>(origin.x());
-        int cellY = static_cast<int>(origin.y());
+        int cellX = static_cast<int>(std::floor(origin.x()));
+        int cellY = static_cast<int>(std::floor(origin.y()));
+
+        int realTextureSize = ESM::Land::LAND_TEXTURE_SIZE+1; // add 1 to wrap around next cell
+
+        int rowStart = (origin.x() - cellX) * realTextureSize;
+        int colStart = (origin.y() - cellY) * realTextureSize;
+        int rowEnd = rowStart + chunkSize * (realTextureSize-1) + 1;
+        int colEnd = colStart + chunkSize * (realTextureSize-1) + 1;
+
+        assert (rowStart >= 0 && colStart >= 0);
+        assert (rowEnd <= realTextureSize);
+        assert (colEnd <= realTextureSize);
 
         // Save the used texture indices so we know the total number of textures
         // and number of required blend maps
@@ -317,8 +342,8 @@ namespace ESMTerrain
         // So we're always adding _land_default.dds as the base layer here, even if it's not referenced in this cell.
         textureIndices.insert(std::make_pair(0,0));
 
-        for (int y=0; y<ESM::Land::LAND_TEXTURE_SIZE+1; ++y)
-            for (int x=0; x<ESM::Land::LAND_TEXTURE_SIZE+1; ++x)
+        for (int y=colStart; y<colEnd; ++y)
+            for (int x=rowStart; x<rowEnd; ++x)
             {
                 UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y);
                 textureIndices.insert(id);
@@ -342,7 +367,7 @@ namespace ESMTerrain
         int channels = pack ? 4 : 1;
 
         // Second iteration - create and fill in the blend maps
-        const int blendmapSize = ESM::Land::LAND_TEXTURE_SIZE+1;
+        const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
 
         for (int i=0; i<numBlendmaps; ++i)
         {
@@ -356,7 +381,8 @@ namespace ESMTerrain
             {
                 for (int x=0; x<blendmapSize; ++x)
                 {
-                    UniqueTextureId id = getVtexIndexAt(cellX, cellY, x, y);
+                    UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart);
+                    assert(textureIndicesMap.find(id) != textureIndicesMap.end());
                     int layerIndex = textureIndicesMap.find(id)->second;
                     int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;

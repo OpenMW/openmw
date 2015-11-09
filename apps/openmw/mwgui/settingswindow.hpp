@@ -30,7 +30,6 @@ namespace MWGui
             MyGUI::Button* mFullscreenButton;
             MyGUI::Button* mVSyncButton;
             MyGUI::Button* mWindowBorderButton;
-            MyGUI::Button* mFPSButton;
             MyGUI::ScrollBar* mFOVSlider;
             MyGUI::ScrollBar* mDifficultySlider;
             MyGUI::ScrollBar* mAnisotropySlider;
@@ -53,7 +52,6 @@ namespace MWGui
 
             void onTabChanged(MyGUI::TabControl* _sender, size_t index);
             void onOkButtonClicked(MyGUI::Widget* _sender);
-            void onFpsToggled(MyGUI::Widget* _sender);
             void onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
             void onButtonToggled(MyGUI::Widget* _sender);

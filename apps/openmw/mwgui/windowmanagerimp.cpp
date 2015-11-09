@@ -33,6 +33,9 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
+#include <components/myguiplatform/myguirendermanager.hpp>
+#include <components/myguiplatform/additivelayer.hpp>
+#include <components/myguiplatform/scalinglayer.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -185,7 +188,6 @@ namespace MWGui
       , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
-      , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
       , mVersionDescription(versionDescription)
@@ -216,6 +218,8 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
@@ -246,7 +250,7 @@ namespace MWGui
         MyGUI::PointerManager::getInstance().setVisible(false);
 
         mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
-            MyGUI::Align::Default, "Overlay");
+            MyGUI::Align::Default, "InputBlocker");
         mVideoBackground->setImageTexture("black");
         mVideoBackground->setVisible(false);
         mVideoBackground->setNeedMouseFocus(true);
@@ -296,7 +300,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop, mLocalMapRender);
+        mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -327,12 +331,12 @@ namespace MWGui
         // TODO: check if non-BM versions actually use player_hit_01.dds
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
             hitFaderTexture = "textures\\player_hit_01.dds";
-        mHitFader = new ScreenFader(hitFaderTexture);
+        mHitFader = new ScreenFader(hitFaderTexture, "openmw_screen_fader_hit.layout");
         mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
 
-        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
+        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
         mHud->setVisible(mHudEnabled);
 
@@ -463,8 +467,6 @@ namespace MWGui
     void WindowManager::update()
     {
         cleanupGarbage();
-
-        mHud->setFPS(mFPS);
 
         mHud->update();
     }
@@ -859,7 +861,13 @@ namespace MWGui
                 mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-                mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+                // at the time this function is called we are in the middle of a frame,
+                // so out of order calls are necessary to get a correct frameNumber for the next frame.
+                // refer to the advance() and frame() order in Engine::go()
+                mViewer->eventTraversal();
+                mViewer->updateTraversal();
+                mViewer->renderingTraversals();
+                mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
             }
         }
     }
@@ -1132,7 +1140,6 @@ namespace MWGui
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mHud->setFpsVisible(static_cast<bool>(Settings::Manager::getInt("fps", "HUD")));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
@@ -1314,11 +1321,6 @@ namespace MWGui
     void WindowManager::executeInConsole (const std::string& path)
     {
         mConsole->executeFile (path);
-    }
-
-    void WindowManager::wmUpdateFps(float fps)
-    {
-        mFPS = fps;
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
@@ -1756,7 +1758,13 @@ namespace MWGui
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-            mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+            // at the time this function is called we are in the middle of a frame,
+            // so out of order calls are necessary to get a correct frameNumber for the next frame.
+            // refer to the advance() and frame() order in Engine::go()
+            mViewer->eventTraversal();
+            mViewer->updateTraversal();
+            mViewer->renderingTraversals();
+            mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
         }
         mVideoWidget->stop();
 
