@@ -153,6 +153,34 @@ struct TypesetBookImpl : TypesetBook
         visitRuns (top, bottom, NULL, visitor);
     }
 
+    /// hit test with a margin for error. only hits on interactive text fragments are reported.
+    StyleImpl * hitTestWithMargin (int left, int top)
+    {
+        StyleImpl * hit = hitTest(left, top);
+        if (hit && hit->mInteractiveId > 0)
+            return hit;
+
+        const int maxMargin = 10;
+        for (int margin=1; margin < maxMargin; ++margin)
+        {
+            for (int i=0; i<4; ++i)
+            {
+                if (i==0)
+                    hit = hitTest(left, top-margin);
+                else if (i==1)
+                    hit = hitTest(left, top+margin);
+                else if (i==2)
+                    hit = hitTest(left-margin, top);
+                else
+                    hit = hitTest(left+margin, top);
+
+                if (hit && hit->mInteractiveId > 0)
+                    return hit;
+            }
+        }
+        return NULL;
+    }
+
     StyleImpl * hitTest (int left, int top) const
     {
         for (Sections::const_iterator i = mSections.begin (); i != mSections.end (); ++i)
@@ -916,15 +944,15 @@ public:
         left -= mCroppedParent->getAbsoluteLeft ();
         top  -= mCroppedParent->getAbsoluteTop  ();
 
-        Style * Hit = mBook->hitTest (left, mViewTop + top);
+        Style * hit = mBook->hitTestWithMargin (left, mViewTop + top);
 
         if (mLastDown == MyGUI::MouseButton::None)
         {
-            if (Hit != mFocusItem)
+            if (hit != mFocusItem)
             {
                 dirtyFocusItem ();
 
-                mFocusItem = Hit;
+                mFocusItem = hit;
                 mItemActive = false;
 
                 dirtyFocusItem ();
@@ -933,7 +961,7 @@ public:
         else
         if (mFocusItem != 0)
         {
-            bool newItemActive = Hit == mFocusItem;
+            bool newItemActive = hit == mFocusItem;
 
             if (newItemActive != mItemActive)
             {
@@ -960,7 +988,7 @@ public:
 
         if (mLastDown == MyGUI::MouseButton::None)
         {
-            mFocusItem = mBook->hitTest (pos.left, mViewTop + pos.top);
+            mFocusItem = mBook->hitTestWithMargin (pos.left, mViewTop + pos.top);
             mItemActive = true;
 
             dirtyFocusItem ();
@@ -986,9 +1014,9 @@ public:
 
         if (mLastDown == id)
         {
-            Style * mItem = mBook->hitTest (pos.left, mViewTop + pos.top);
+            Style * item = mBook->hitTestWithMargin (pos.left, mViewTop + pos.top);
 
-            bool clicked = mFocusItem == mItem;
+            bool clicked = mFocusItem == item;
 
             mItemActive = false;
 
@@ -996,8 +1024,8 @@ public:
 
             mLastDown = MyGUI::MouseButton::None;
 
-            if (clicked && mLinkClicked && mItem && mItem->mInteractiveId != 0)
-                mLinkClicked (mItem->mInteractiveId);
+            if (clicked && mLinkClicked && item && item->mInteractiveId != 0)
+                mLinkClicked (item->mInteractiveId);
         }
     }
 
