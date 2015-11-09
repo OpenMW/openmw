@@ -439,6 +439,9 @@ namespace MWRender
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
     {
         ptr.getRefData().getBaseNode()->setScale(scale);
+
+        if (ptr == mCamera->getTrackingPtr()) // update height of camera
+            mCamera->processViewChange();
     }
 
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)

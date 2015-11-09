@@ -29,6 +29,7 @@ namespace MWRender
 
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
+        float mHeightScale;
 
         osg::ref_ptr<osg::Camera> mCamera;
 
@@ -96,6 +97,8 @@ namespace MWRender
 
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
+
+        void updateScale();
 
         void processViewChange();
 
