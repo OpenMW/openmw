@@ -146,7 +146,7 @@ namespace NifOsg
     {
     public:
         UVController();
-        UVController(const UVController&,const osg::CopyOp& = osg::CopyOp::SHALLOW_COPY);
+        UVController(const UVController&,const osg::CopyOp&);
         UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
 
         META_Object(NifOsg,UVController)

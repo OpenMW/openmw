@@ -121,7 +121,7 @@ namespace SceneUtil
             : mLightManager(NULL)
             , mLastFrameNumber(0)
         {}
-        LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY)
+        LightListCallback(const LightListCallback& copy, const osg::CopyOp& copyop)
             : osg::Object(copy, copyop), osg::NodeCallback(copy, copyop)
             , mLightManager(copy.mLightManager)
             , mLastFrameNumber(0)
