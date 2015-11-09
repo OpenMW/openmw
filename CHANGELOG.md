@@ -148,6 +148,7 @@
     Bug #2879: Editor: entered value of field "Buys *" is not saved for a creature
     Bug #2880: OpenMW & OpenMW-CS: having a scale value of 0.000 makes the game laggy
     Bug #2882: Freeze when entering cell "Guild of Fighters (Ald'ruhn)" after dropping some items inside
+    Bug #2883: game not playable if mod providing a spell is removed but the list of known spells still contains it
     Bug #2884: NPC chats about wrong player race
     Bug #2886: Adding custom races breaks existing numbering of PcRace
     Bug #2888: Editor: value entered in "AI Wander Idle" is not kept
@@ -166,6 +167,7 @@
     Bug #2944: Spell chance for power to show as 0 on hud when used
     Bug #2953: Editor: rightclick in an empty place in the menu bar shows an unnamed checkbox
     Bug #2956: Editor: freezes while editing Filter
+    Bug #2959: space character in field enchantment (of an amulet) prevents rendering of surroundings
     Bug #2962: OpenMW: Assertion `it != invStore.end()' failed
     Bug #2964: Recursive script execution can corrupt script runtime data
     Bug #2973: Editor: placing a chest in the game world and activating it heavily blurrs the character portrait
@@ -211,9 +213,7 @@
     Feature #2751: Character preview optimization
     Feature #2804: Editor: Merge Tool
     Feature #2818: Editor: allow copying a record ID to the clipboard
-    Feature #2883: game not playable if mod providing a spell is removed but the list of known spells still contains it
     Feature #2946: Editor: add script line number in results of search
-    Feature #2959: space character in field enchantment (of an amulet) prevents rendering of surroundings
     Feature #2963: Editor: Mouse button bindings in 3D scene
     Feature #2983: Sun Glare fader
     Feature #2999: Scaling of journal and books
