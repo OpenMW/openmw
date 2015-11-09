@@ -163,13 +163,13 @@ namespace MWMechanics
                     {
                         mStuckDuration = 0;
                         mWalkState = State_Evade;
+                        chooseEvasionDirection();
                     }
                 }
             }
                 /* FALL THROUGH */
             case State_Evade:
             {
-                chooseEvasionDirection(samePosition);
                 mEvadeDuration += duration;
                 if(mEvadeDuration < DURATION_TO_EVADE)
                     return true;
@@ -191,16 +191,13 @@ namespace MWMechanics
         actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
     }
 
-    void ObstacleCheck::chooseEvasionDirection(bool samePosition)
+    void ObstacleCheck::chooseEvasionDirection()
     {
         // change direction if attempt didn't work
-        if (samePosition && (0 < mEvadeDuration))
+        ++mEvadeDirectionIndex;
+        if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
         {
-            ++mEvadeDirectionIndex;
-            if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
-            {
-                mEvadeDirectionIndex = 0;
-            }
+            mEvadeDirectionIndex = 0;
         }
     }
 

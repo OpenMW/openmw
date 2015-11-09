@@ -65,7 +65,7 @@ namespace MWMechanics
             float mDistSameSpot; // take account of actor's speed
             int mEvadeDirectionIndex;
 
-            void chooseEvasionDirection(bool samePosition);
+            void chooseEvasionDirection();
     };
 }
 
