@@ -11,7 +11,7 @@
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
-    static const float DIST_SAME_SPOT = 1.8f;
+    static const float DIST_SAME_SPOT = 0.72f;
     static const float DURATION_SAME_SPOT = 1.0f;
     static const float DURATION_TO_EVADE = 0.4f;
 
@@ -114,19 +114,22 @@ namespace MWMechanics
      * t = how long before considered stuck
      * u = how long to move sideways
      *
-     * DIST_SAME_SPOT is calibrated for movement speed of around 150.
-     * A rat has walking speed of around 30, so we need to adjust for
-     * that.
      */
     bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
 
-        if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * (cls.getSpeed(actor) / 150);
+        // actors can move at most 60 fps (the physics framerate).
+        // the max() can be removed if we implement physics interpolation.
+        float movementDuration = std::max(1/60.f, duration);
 
-        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() < mDistSameSpot * mDistSameSpot;
+        if(mDistSameSpot == -1)
+            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
+
+        float distSameSpot = mDistSameSpot * movementDuration;
+
+        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
 
         // update position
         mPrevX = pos.pos[0];
