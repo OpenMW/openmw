@@ -126,8 +126,8 @@ namespace MWMechanics
         if(mDistSameSpot == -1)
             mDistSameSpot = DIST_SAME_SPOT * (cls.getSpeed(actor) / 150);
 
-        bool samePosition = (std::abs(pos.pos[0] - mPrevX) < mDistSameSpot) &&
-                            (std::abs(pos.pos[1] - mPrevY) < mDistSameSpot);
+        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() < mDistSameSpot * mDistSameSpot;
+
         // update position
         mPrevX = pos.pos[0];
         mPrevY = pos.pos[1];
