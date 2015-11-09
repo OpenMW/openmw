@@ -7,7 +7,7 @@ OpenMW is a recreation of the engine for the popular role-playing game Morrowind
 
 OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
 
-* Version: 0.36.1
+* Version: 0.37.0
 * License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
