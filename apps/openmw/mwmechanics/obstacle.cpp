@@ -11,8 +11,8 @@
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
-    static const float DIST_SAME_SPOT = 0.72f;
-    static const float DURATION_SAME_SPOT = 1.0f;
+    static const float DIST_SAME_SPOT = 0.5f;
+    static const float DURATION_SAME_SPOT = 1.5f;
     static const float DURATION_TO_EVADE = 0.4f;
 
     const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] =
