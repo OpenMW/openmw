@@ -20,7 +20,7 @@ namespace ESM
         // <Index in mItems, equipment slot>
         std::map<int, int> mEquipmentSlots;
 
-        std::map<std::string, int> mLevelledItemMap;
+        std::map<std::string, std::pair<int, std::string> > mLevelledItemMap;
 
         typedef std::map<std::string, std::vector<std::pair<float, float> > > TEffectMagnitudes;
         TEffectMagnitudes mPermanentMagicEffectMagnitudes;

@@ -36,6 +36,10 @@ void ESM::InventoryState::load (ESMReader &esm)
     {
         std::string id = esm.getHString();
         int count;
+        std::string parentList;
+        //TODO: How should I handle old saves?
+        if(esm.isNextSub("LLST"))
+            std::string parentList = esm.getHString();
         esm.getHNT (count, "COUN");
         mLevelledItemMap[id] = count;
     }
@@ -79,10 +83,11 @@ void ESM::InventoryState::save (ESMWriter &esm) const
         iter->save (esm, true);
     }
 
-    for (std::map<std::string, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    for (std::map<std::string, std::pair<int, std::string> >::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
     {
         esm.writeHNString ("LEVM", it->first);
-        esm.writeHNT ("COUN", it->second);
+        esm.writeHNT ("COUN", it->second.first);
+        esm.writeHNString("LLST", it->second.second)
     }
 
     for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)

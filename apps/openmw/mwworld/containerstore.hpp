@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <utility>
 
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
@@ -68,9 +69,9 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::string, int> mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <refId, count>
-            /// This is used to remove the spawned item(s) if the levelled item is restocked.
+            std::map<std::string, std::pair<int, std::string> > mLevelledItemMap;
+            ///< Stores result of levelled item spawns. <refId, pair(count, spawningGroup)>
+            /// This is used to restock levelled items(s) if the old item was sold.
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;

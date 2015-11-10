@@ -442,9 +442,11 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             // For a restocking levelled item, remember what we spawned so we can delete it later when the merchant restocks
             if (!levItem.empty() && count < 0)
             {
-                if (mLevelledItemMap.find(id) == mLevelledItemMap.end())
-                    mLevelledItemMap[id] = 0;
-                mLevelledItemMap[id] += std::abs(count);
+                //If there is no item in map, insert it
+                std::map<std::string, std::pair<int, std::string> >::iterator itemInMap =
+                    mLevelledItemMap.insert(std::make_pair(id, std::make_pair(0, levItem))).first;
+                //Update spawned count
+                itemInMap->second.first += std::abs(count);
             }
             count = std::abs(count);
 
@@ -461,30 +463,56 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
 void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
-    // Remove the items already spawned by levelled items that will restock
-    for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
-    {
-        if (count(it->first) >= it->second)
-            remove(it->first, it->second, ptr);
-    }
-    mLevelledItemMap.clear();
+    //allowedForReplace - Holds information about how many items from the list were sold;
+    //                    Hence, tells us how many items we need to restock.
+    //allowedForReplace[list] <- How many items we should generate(how many of these were sold)
+    std::map<std::string, int> allowedForReplace;
 
+    //Check which lists need restocking:
+    for (std::map<std::string, std::pair<int, std::string> >::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    {
+        int spawnedCount = it->second.first; //How many items should be in shop originally
+        int itemCount = count(it->first); //How many items are there in shop now
+        //If anything was sold
+        if(itemCount < spawnedCount)
+        {
+            //Create entry if it does not exist yet
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
+                std::make_pair(it->second.second, 0)).first;
+            //And signal that we need to restock item from this list
+            listInMap->second += std::abs(spawnedCount - itemCount);
+            //Also, remove the record if item no longer figures in the shop
+            if(!itemCount)
+                mLevelledItemMap.erase(it->first);
+            //If there's still item in the shop, change its spawnedCount to current count.
+            else
+                it->second.first -= itemCount;
+        }
+    }
+
+    //Restock:
+    //For every item that NPC could have
     for (std::vector<ESM::ContItem>::const_iterator it = items.mList.begin(); it != items.mList.end(); ++it)
     {
+        //If he shouldn't have it restocked, don't restock it.
         if (it->mCount >= 0)
             continue;
 
-        std::string item = Misc::StringUtils::lowerCase(it->mItem.toString());
+        std::string itemOrList = Misc::StringUtils::lowerCase(it->mItem.toString());
 
+        //If it's levelled list, restock if there's need to do so.
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, it->mCount, true);
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
+            if(listInMap != allowedForReplace.end())
+                addInitialItem(itemOrList, owner, listInMap->second, true);
         }
         else
         {
-            int currentCount = count(item);
+            //Restocking static item - just restock to the max count
+            int currentCount = count(itemOrList);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(item, owner, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(itemOrList, owner, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();
