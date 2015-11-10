@@ -281,7 +281,9 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
-    mSoundsDisabled(disableSounds)
+    mSoundsDisabled(disableSounds),
+    mAccurateAiming(false),
+    mAimingFactor(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -726,7 +728,14 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
 
     if (mFirstPersonNeckController)
     {
-        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0)));
+        if (mAccurateAiming)
+            mAimingFactor = 1.f;
+        else
+            mAimingFactor = std::max(0.f, mAimingFactor - timepassed * 0.5f);
+
+        float rotateFactor = 0.75f + 0.25f * mAimingFactor;
+
+        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0] * rotateFactor, osg::Vec3f(-1,0,0)));
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
 
@@ -1070,6 +1079,11 @@ void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
 {
     Animation::updatePtr(updated);
     mHeadAnimationTime->updatePtr(updated);
+}
+
+void NpcAnimation::setAccurateAiming(bool enabled)
+{
+    mAccurateAiming = enabled;
 }
 
 }

@@ -1479,6 +1479,8 @@ bool CharacterController::updateWeaponState()
         }
     }
 
+    mAnimation->setAccurateAiming(mUpperBodyState > UpperCharState_WeapEquiped);
+
     return forcestateupdate;
 }
 

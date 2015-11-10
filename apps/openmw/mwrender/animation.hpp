@@ -439,6 +439,7 @@ public:
     virtual void setHeadYaw(float yawRadians);
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
+    virtual void setAccurateAiming(bool enabled) {}
 
 private:
     Animation(const Animation&);

@@ -67,6 +67,9 @@ private:
 
     bool mSoundsDisabled;
 
+    bool mAccurateAiming;
+    float mAimingFactor;
+
     void updateNpcBase();
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
@@ -103,6 +106,10 @@ public:
     virtual ~NpcAnimation();
 
     virtual void enableHeadAnimation(bool enable);
+
+    /// 1: the first person meshes follow the camera's rotation completely
+    /// 0: the first person meshes follow the camera with a reduced factor, so you can look down at your own hands
+    virtual void setAccurateAiming(bool enabled);
 
     virtual void setWeaponGroup(const std::string& group);
 
