@@ -1,6 +1,7 @@
 #include "scalinglayer.hpp"
 
 #include <MyGUI_RenderManager.h>
+#include <algorithm>
 
 namespace osgMyGUI
 {
