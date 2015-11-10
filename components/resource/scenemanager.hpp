@@ -73,11 +73,16 @@ namespace Resource
 
         Resource::TextureManager* getTextureManager();
 
+        /// @param mask The node mask to apply to loaded particle system nodes.
+        void setParticleSystemMask(unsigned int mask);
+
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+
+        unsigned int mParticleSystemMask;
 
         // observer_ptr?
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;

@@ -25,8 +25,10 @@ namespace
     class InitWorldSpaceParticlesVisitor : public osg::NodeVisitor
     {
     public:
-        InitWorldSpaceParticlesVisitor()
+        /// @param mask The node mask to set on ParticleSystem nodes.
+        InitWorldSpaceParticlesVisitor(unsigned int mask)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMask(mask)
         {
         }
 
@@ -47,7 +49,7 @@ namespace
                             if (geode->getNumParents() && geode->getParent(0)->getNumParents())
                                 transformInitialParticles(partsys, geode->getParent(0)->getParent(0));
                         }
-                        geode->setNodeMask((1<<10)); //MWRender::Mask_ParticleSystem
+                        geode->setNodeMask(mMask);
                     }
                 }
             }
@@ -74,8 +76,9 @@ namespace
             box.expandBy(sphere);
             partsys->setInitialBound(box);
         }
+    private:
+        unsigned int mMask;
     };
-
 }
 
 namespace Resource
@@ -84,6 +87,7 @@ namespace Resource
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager)
         : mVFS(vfs)
         , mTextureManager(textureManager)
+        , mParticleSystemMask(~0u)
     {
     }
 
@@ -183,7 +187,7 @@ namespace Resource
 
     void SceneManager::notifyAttached(osg::Node *node) const
     {
-        InitWorldSpaceParticlesVisitor visitor;
+        InitWorldSpaceParticlesVisitor visitor (mParticleSystemMask);
         node->accept(visitor);
     }
 
@@ -195,6 +199,11 @@ namespace Resource
     Resource::TextureManager* SceneManager::getTextureManager()
     {
         return mTextureManager;
+    }
+
+    void SceneManager::setParticleSystemMask(unsigned int mask)
+    {
+        mParticleSystemMask = mask;
     }
 
 }

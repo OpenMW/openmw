@@ -137,6 +137,8 @@ namespace MWRender
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
     {
+        resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
         mLightRoot = lightRoot;
         lightRoot->setStartLight(1);
