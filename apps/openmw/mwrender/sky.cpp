@@ -351,33 +351,36 @@ public:
         for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
         {
             osg::Drawable* drw = geode.getDrawable(i);
+            apply(*drw);
+        }
+    }
+    void apply(osg::Drawable& drw)
+    {
+        osg::Geometry* geom = drw.asGeometry();
+        if (!geom)
+            return;
 
-            osg::Geometry* geom = drw->asGeometry();
-            if (!geom)
-                continue;
-
-            osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(geom->getVertexArray()->getNumElements());
-            for (unsigned int i=0; i<colors->size(); ++i)
+        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(geom->getVertexArray()->getNumElements());
+        for (unsigned int i=0; i<colors->size(); ++i)
+        {
+            float alpha = 1.f;
+            if (mMeshType == 0) alpha = i%2 ? 0.f : 1.f; // this is a cylinder, so every second vertex belongs to the bottom-most row
+            else if (mMeshType == 1)
             {
-                float alpha = 1.f;
-                if (mMeshType == 0) alpha = i%2 ? 0.f : 1.f; // this is a cylinder, so every second vertex belongs to the bottom-most row
-                else if (mMeshType == 1)
-                {
-                    if (i>= 49 && i <= 64) alpha = 0.f; // bottom-most row
-                    else if (i>= 33 && i <= 48) alpha = 0.25098; // second row
-                    else alpha = 1.f;
-                }
-                else if (mMeshType == 2)
-                {
-                    osg::Vec4Array* origColors = static_cast<osg::Vec4Array*>(geom->getColorArray());
-                    alpha = ((*origColors)[i].x() == 1.f) ? 1.f : 0.f;
-                }
-
-                (*colors)[i] = osg::Vec4f(0.f, 0.f, 0.f, alpha);
+                if (i>= 49 && i <= 64) alpha = 0.f; // bottom-most row
+                else if (i>= 33 && i <= 48) alpha = 0.25098; // second row
+                else alpha = 1.f;
+            }
+            else if (mMeshType == 2)
+            {
+                osg::Vec4Array* origColors = static_cast<osg::Vec4Array*>(geom->getColorArray());
+                alpha = ((*origColors)[i].x() == 1.f) ? 1.f : 0.f;
             }
 
-            geom->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
+            (*colors)[i] = osg::Vec4f(0.f, 0.f, 0.f, alpha);
         }
+
+        geom->setColorArray(colors, osg::Array::BIND_PER_VERTEX);
     }
 
 private:

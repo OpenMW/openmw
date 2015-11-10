@@ -6,6 +6,7 @@
 #include <osg/Geode>
 #include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -54,11 +55,19 @@ namespace
             for (std::vector<osgParticle::ParticleSystem*>::iterator it = partsysVector.begin(); it != partsysVector.end(); ++it)
                 geode.removeDrawable(*it);
         }
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+                mToRemove.push_back(partsys);
+        }
+#endif
 
         void remove()
         {
             for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
             {
+                // FIXME: a Drawable might have more than one parent
                 osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);

@@ -5,6 +5,7 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Array>
+#include <osg/Version>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -885,9 +886,6 @@ namespace NifOsg
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
 
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-            geode->addDrawable(partsys);
-
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
@@ -907,13 +905,21 @@ namespace NifOsg
             updater->addParticleSystem(partsys);
             parentNode->addChild(updater);
 
+#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+            geode->addDrawable(partsys);
+            osg::Node* toAttach = geode.get();
+#else
+            osg::Node* toAttach = partsys.get();
+#endif
+
             if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
-                parentNode->addChild(geode);
+                parentNode->addChild(toAttach);
             else
             {
                 osg::MatrixTransform* trans = new osg::MatrixTransform;
                 trans->setUpdateCallback(new InverseWorldMatrix);
-                trans->addChild(geode);
+                trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
         }
@@ -957,8 +963,6 @@ namespace NifOsg
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-
             osg::ref_ptr<osg::Geometry> geometry;
             for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -981,21 +985,36 @@ namespace NifOsg
 
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
+#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(geometry);
+#endif
 
             if (geometry->getDataVariance() == osg::Object::DYNAMIC)
             {
                 // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
                 // This is so we can set the DataVariance as STATIC, giving a huge performance boost
                 geometry->setDataVariance(osg::Object::STATIC);
-                osg::ref_ptr<osg::Geode> geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
                 osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
+
+#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+                osg::ref_ptr<osg::Geode> geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
                 frameswitch->addChild(geode);
                 frameswitch->addChild(geode2);
+#else
+                osg::ref_ptr<osg::Geometry> geom2 = static_cast<osg::Geometry*>(osg::clone(geometry.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
+                frameswitch->addChild(geometry);
+                frameswitch->addChild(geom2);
+#endif
+
                 parentNode->addChild(frameswitch);
             }
             else
+#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
                 parentNode->addChild(geode);
+#else
+                parentNode->addChild(geometry);
+#endif
         }
 
         osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
@@ -1056,8 +1075,6 @@ namespace NifOsg
         void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
-
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
@@ -1090,17 +1107,27 @@ namespace NifOsg
             }
             rig->setInfluenceMap(map);
 
-            geode->addDrawable(rig);
-
             // Add a copy, we will alternate between the two copies every other frame using the FrameSwitch
             // This is so we can set the DataVariance as STATIC, giving a huge performance boost
             rig->setDataVariance(osg::Object::STATIC);
+
+            osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
+
+#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+            osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+            geode->addDrawable(rig);
+
             osg::Geode* geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|
                                                                      osg::CopyOp::DEEP_COPY_DRAWABLES));
 
-            osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
             frameswitch->addChild(geode);
             frameswitch->addChild(geode2);
+#else
+            SceneUtil::RigGeometry* rig2 = static_cast<SceneUtil::RigGeometry*>(osg::clone(rig.get(), osg::CopyOp::DEEP_COPY_NODES|
+                                                                                           osg::CopyOp::DEEP_COPY_DRAWABLES));
+            frameswitch->addChild(rig);
+            frameswitch->addChild(rig2);
+#endif
 
             parentNode->addChild(frameswitch);
         }

@@ -11,6 +11,7 @@
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 
@@ -196,10 +197,18 @@ namespace
             traverse(node);
         }
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            mToRemove.push_back(&drw);
+        }
+#endif
+
         void remove()
         {
             for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
             {
+                // FIXME: a Drawable might have more than one parent
                 osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);
@@ -220,6 +229,18 @@ namespace
 
         virtual void apply(osg::Geode &node)
         {
+            applyImpl(node);
+        }
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            applyImpl(drw);
+        }
+#endif
+
+        void applyImpl(osg::Node& node)
+        {
             const std::string toFind = "tri bip";
             if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
             {
@@ -232,6 +253,7 @@ namespace
         {
             for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
             {
+                // FIXME: a Drawable might have more than one parent
                 osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);
