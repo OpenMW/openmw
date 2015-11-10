@@ -109,7 +109,7 @@ void GraphicsWindowSDL2::init()
 
     mValid = true;
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
@@ -130,7 +130,7 @@ bool GraphicsWindowSDL2::realizeImplementation()
 
     SDL_ShowWindow(mWindow);
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();

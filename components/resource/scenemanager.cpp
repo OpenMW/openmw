@@ -58,7 +58,7 @@ namespace
             }
         }
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         // in OSG 3.3 and up Drawables can be directly in the scene graph without a Geode decorating them.
         void apply(osg::Drawable& drw)
         {

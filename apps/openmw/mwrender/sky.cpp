@@ -1271,7 +1271,7 @@ public:
                 if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
                 {
                     SceneUtil::CompositeStateSetUpdater* composite = NULL;
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
                     osg::Callback* callback = node.getUpdateCallback();
 #else
                     osg::NodeCallback* callback = node.getUpdateCallback();

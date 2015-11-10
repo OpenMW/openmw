@@ -905,7 +905,7 @@ namespace NifOsg
             updater->addParticleSystem(partsys);
             parentNode->addChild(updater);
 
-#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+#if OSG_VERSION_LESS_THAN(3,3,3)
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(partsys);
             osg::Node* toAttach = geode.get();
@@ -985,7 +985,7 @@ namespace NifOsg
 
             triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
 
-#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+#if OSG_VERSION_LESS_THAN(3,3,3)
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(geometry);
 #endif
@@ -997,7 +997,7 @@ namespace NifOsg
                 geometry->setDataVariance(osg::Object::STATIC);
                 osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+#if OSG_VERSION_LESS_THAN(3,3,3)
                 osg::ref_ptr<osg::Geode> geode2 = static_cast<osg::Geode*>(osg::clone(geode.get(), osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES));
                 frameswitch->addChild(geode);
                 frameswitch->addChild(geode2);
@@ -1010,7 +1010,7 @@ namespace NifOsg
                 parentNode->addChild(frameswitch);
             }
             else
-#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+#if OSG_VERSION_LESS_THAN(3,3,3)
                 parentNode->addChild(geode);
 #else
                 parentNode->addChild(geometry);
@@ -1113,7 +1113,7 @@ namespace NifOsg
 
             osg::ref_ptr<FrameSwitch> frameswitch = new FrameSwitch;
 
-#if not(OSG_MIN_VERSION_REQUIRED(3,3,3))
+#if OSG_VERSION_LESS_THAN(3,3,3)
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
             geode->addDrawable(rig);
 

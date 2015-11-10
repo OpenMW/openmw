@@ -119,7 +119,7 @@ namespace Resource
             case(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
             case(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
             {
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
                 osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
                 if (exts && !exts->isTextureCompressionS3TCSupported
                         // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
