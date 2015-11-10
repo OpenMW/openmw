@@ -98,19 +98,19 @@ namespace MWScript
                     {
                         localRot.rot[0] = 0;
                         ptr.getRefData().setLocalRotation(localRot);
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az,false,false);
                     }
                     else if (axis == "y")
                     {
                         localRot.rot[1] = 0;
                         ptr.getRefData().setLocalRotation(localRot);
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az,false,false);
                     }
                     else if (axis == "z")
                     {
                         localRot.rot[2] = 0;
                         ptr.getRefData().setLocalRotation(localRot);
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle,false,false);
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -337,7 +337,7 @@ namespace MWScript
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                         if(ptr != MWMechanics::getPlayer())
                             zRot = zRot/60.0f;
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot,false,false);
 
                         ptr.getClass().adjustPosition(ptr, false);
                     }
@@ -393,7 +393,7 @@ namespace MWScript
                     // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                     if(ptr != MWMechanics::getPlayer())
                         zRot = zRot/60.0f;
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot,false,false);
                     ptr.getClass().adjustPosition(ptr, false);
                 }
         };
@@ -614,15 +614,15 @@ namespace MWScript
 
                     if (axis == "x")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az,false,true);
                     }
                     else if (axis == "y")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az,false,true);
                     }
                     else if (axis == "z")
                     {
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation,false,true);
                     }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
@@ -647,7 +647,7 @@ namespace MWScript
                     rot.rot[2] = 0;
                     ptr.getRefData().setLocalRotation(rot);
 
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true,true);
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
                         MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
