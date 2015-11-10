@@ -30,22 +30,21 @@ namespace
     class CameraLocalUpdateCallback : public osg::NodeCallback
     {
     public:
-        CameraLocalUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
+        CameraLocalUpdateCallback(MWRender::LocalMap* parent)
             : mRendered(false)
-            , mCamera(cam)
             , mParent(parent)
         {
         }
 
-        virtual void operator()(osg::Node*, osg::NodeVisitor*)
+        virtual void operator()(osg::Node* node, osg::NodeVisitor*)
         {
             if (mRendered)
-                mCamera->setNodeMask(0);
+                node->setNodeMask(0);
 
             if (!mRendered)
             {
                 mRendered = true;
-                mParent->markForRemoval(mCamera);
+                mParent->markForRemoval(static_cast<osg::Camera*>(node));
             }
 
             // Note, we intentionally do not traverse children here. The map camera's scene data is the same as the master camera's,
@@ -55,7 +54,6 @@ namespace
 
     private:
         bool mRendered;
-        osg::ref_ptr<osg::Camera> mCamera;
         MWRender::LocalMap* mParent;
     };
 
@@ -205,7 +203,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setStateSet(stateset);
     camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
-    camera->setUpdateCallback(new CameraLocalUpdateCallback(camera, this));
+    camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
 
     return camera;
 }
