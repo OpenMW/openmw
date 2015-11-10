@@ -266,6 +266,9 @@ namespace MWRender
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         camera->attach(osg::Camera::COLOR_BUFFER, mOverlayTexture);
 
+        // no need for a depth buffer
+        camera->setImplicitBufferAttachmentMask(osg::DisplaySettings::IMPLICIT_COLOR_BUFFER_ATTACHMENT);
+
         if (cpuCopy)
         {
             // Attach an image to copy the render back to the CPU when finished
@@ -286,10 +289,12 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
             osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-            depth->setFunction(osg::Depth::ALWAYS);
-            geom->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-            geom->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-            geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            depth->setWriteMask(0);
+            osg::StateSet* stateset = geom->getOrCreateStateSet();
+            stateset->setAttribute(depth);
+            stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+            stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             osg::ref_ptr<osg::Geode> geode = new osg::Geode;
             geode->addDrawable(geom);
             camera->addChild(geode);
