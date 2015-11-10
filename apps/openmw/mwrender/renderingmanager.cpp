@@ -140,6 +140,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
 
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
+        lightRoot->setLightingMask(Mask_Lighting);
         mLightRoot = lightRoot;
         lightRoot->setStartLight(1);
 
@@ -165,7 +166,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(SceneUtil::Mask_Lit);
+        source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));

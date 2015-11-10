@@ -1066,6 +1066,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
         osg::Light* light = new osg::Light;
         lightSource->setLight(light);
+        lightSource->setNodeMask(Mask_Lighting);
 
         const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
 
