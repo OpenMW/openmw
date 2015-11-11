@@ -1247,14 +1247,10 @@ namespace MWWorld
 
             if(objRot[0] < -half_pi)     objRot[0] = -half_pi;
             else if(objRot[0] > half_pi) objRot[0] =  half_pi;
-        }
-        else
-        {
-            wrap(objRot[0]);
-        }
 
-        wrap(objRot[1]);
-        wrap(objRot[2]);
+            wrap(objRot[1]);
+            wrap(objRot[2]);
+        }
 
         ptr.getRefData().setPosition(pos);
 
@@ -1268,10 +1264,6 @@ namespace MWWorld
         rot.rot[0]=osg::DegreesToRadians(x);
         rot.rot[1]=osg::DegreesToRadians(y);
         rot.rot[2]=osg::DegreesToRadians(z);
-
-        wrap(rot.rot[0]);
-        wrap(rot.rot[1]);
-        wrap(rot.rot[2]);
 
         ptr.getRefData().setLocalRotation(rot);
 
