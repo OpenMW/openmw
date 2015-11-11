@@ -139,9 +139,6 @@ namespace NifOsg
 
         META_Object(NifOsg, ParticleColorAffector)
 
-        // TODO: very similar to vec3 version, refactor to a template
-        osg::Vec4f interpolate(const float time, const Nif::Vector4KeyMap::MapType& keys);
-
         virtual void operate(osgParticle::Particle* particle, double dt);
 
     private:
