@@ -131,6 +131,7 @@ namespace SceneUtil
 
     LightManager::LightManager()
         : mStartLight(0)
+        , mLightingMask(~0u)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
     }
@@ -138,8 +139,19 @@ namespace SceneUtil
     LightManager::LightManager(const LightManager &copy, const osg::CopyOp &copyop)
         : osg::Group(copy, copyop)
         , mStartLight(copy.mStartLight)
+        , mLightingMask(copy.mLightingMask)
     {
 
+    }
+
+    void LightManager::setLightingMask(unsigned int mask)
+    {
+        mLightingMask = mask;
+    }
+
+    unsigned int LightManager::getLightingMask() const
+    {
+        return mLightingMask;
     }
 
     void LightManager::update()
@@ -237,7 +249,6 @@ namespace SceneUtil
     LightSource::LightSource()
         : mRadius(0.f)
     {
-        setNodeMask(Mask_Lit);
         setUpdateCallback(new CollectLightCallback);
         mId = sLightId++;
     }
@@ -260,12 +271,6 @@ namespace SceneUtil
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
-        if (!(cv->getCurrentCamera()->getCullMask()&Mask_Lit))
-        {
-            traverse(node, nv);
-            return;
-        }
-
         if (!mLightManager)
         {
             mLightManager = findLightManager(nv->getNodePath());
@@ -274,6 +279,12 @@ namespace SceneUtil
                 traverse(node, nv);
                 return;
             }
+        }
+
+        if (!(cv->getCurrentCamera()->getCullMask() & mLightManager->getLightingMask()))
+        {
+            traverse(node, nv);
+            return;
         }
 
         // Possible optimizations:

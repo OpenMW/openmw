@@ -2,9 +2,9 @@
 
 #include <stdexcept>
 #include <iostream>
-
 #include <cstdlib>
 
+#include <osg/Version>
 #include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
@@ -58,6 +58,14 @@ public:
     }
 };
 
+// We can't compute the bounds without a NodeVisitor, since we need the current geomToSkelMatrix.
+// So we return nothing. Bounds are updated every frame in the UpdateCallback.
+class DummyComputeBoundCallback : public osg::Drawable::ComputeBoundingBoxCallback
+{
+public:
+    virtual osg::BoundingBox computeBound(const osg::Drawable&) const  { return osg::BoundingBox(); }
+};
+
 RigGeometry::RigGeometry()
     : mSkeleton(NULL)
     , mLastFrameNumber(0)
@@ -66,6 +74,7 @@ RigGeometry::RigGeometry()
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
+    setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
 }
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
@@ -278,6 +287,12 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
     }
 
     _boundingBox = box;
+    _boundingBoxComputed = true;
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+    // in OSG 3.3.3 and up Drawable inherits from Node, so has a bounding sphere as well.
+    _boundingSphere = osg::BoundingSphere(_boundingBox);
+    _boundingSphereComputed = true;
+#endif
     for (unsigned int i=0; i<getNumParents(); ++i)
         getParent(i)->dirtyBound();
 }

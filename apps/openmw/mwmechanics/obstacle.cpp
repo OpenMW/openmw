@@ -11,8 +11,8 @@
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
-    static const float DIST_SAME_SPOT = 1.8f;
-    static const float DURATION_SAME_SPOT = 1.0f;
+    static const float DIST_SAME_SPOT = 0.5f;
+    static const float DURATION_SAME_SPOT = 1.5f;
     static const float DURATION_TO_EVADE = 0.4f;
 
     const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] =
@@ -114,20 +114,23 @@ namespace MWMechanics
      * t = how long before considered stuck
      * u = how long to move sideways
      *
-     * DIST_SAME_SPOT is calibrated for movement speed of around 150.
-     * A rat has walking speed of around 30, so we need to adjust for
-     * that.
      */
     bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
 
-        if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * (cls.getSpeed(actor) / 150);
+        // actors can move at most 60 fps (the physics framerate).
+        // the max() can be removed if we implement physics interpolation.
+        float movementDuration = std::max(1/60.f, duration);
 
-        bool samePosition = (std::abs(pos.pos[0] - mPrevX) < mDistSameSpot) &&
-                            (std::abs(pos.pos[1] - mPrevY) < mDistSameSpot);
+        if(mDistSameSpot == -1)
+            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
+
+        float distSameSpot = mDistSameSpot * movementDuration;
+
+        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
+
         // update position
         mPrevX = pos.pos[0];
         mPrevY = pos.pos[1];
@@ -160,13 +163,13 @@ namespace MWMechanics
                     {
                         mStuckDuration = 0;
                         mWalkState = State_Evade;
+                        chooseEvasionDirection();
                     }
                 }
             }
                 /* FALL THROUGH */
             case State_Evade:
             {
-                chooseEvasionDirection(samePosition);
                 mEvadeDuration += duration;
                 if(mEvadeDuration < DURATION_TO_EVADE)
                     return true;
@@ -188,16 +191,13 @@ namespace MWMechanics
         actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
     }
 
-    void ObstacleCheck::chooseEvasionDirection(bool samePosition)
+    void ObstacleCheck::chooseEvasionDirection()
     {
         // change direction if attempt didn't work
-        if (samePosition && (0 < mEvadeDuration))
+        ++mEvadeDirectionIndex;
+        if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
         {
-            ++mEvadeDirectionIndex;
-            if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
-            {
-                mEvadeDirectionIndex = 0;
-            }
+            mEvadeDirectionIndex = 0;
         }
     }
 

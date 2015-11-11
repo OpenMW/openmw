@@ -61,6 +61,9 @@ public:
 
 private:
     osg::ref_ptr<osg::Node> mNode;
+
+    void operator= (const PartHolder&);
+    PartHolder(const PartHolder&);
 };
 typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
@@ -439,6 +442,7 @@ public:
     virtual void setHeadYaw(float yawRadians);
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
+    virtual void setAccurateAiming(bool enabled) {}
 
 private:
     Animation(const Animation&);

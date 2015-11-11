@@ -3,6 +3,7 @@
 #include <osg/Node>
 #include <osg/Geode>
 #include <osg/UserDataContainer>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 
@@ -25,35 +26,54 @@ namespace
     class InitWorldSpaceParticlesVisitor : public osg::NodeVisitor
     {
     public:
-        InitWorldSpaceParticlesVisitor()
+        /// @param mask The node mask to set on ParticleSystem nodes.
+        InitWorldSpaceParticlesVisitor(unsigned int mask)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMask(mask)
         {
         }
 
-        void apply(osg::Node& node)
+        bool isWorldSpaceParticleSystem(osgParticle::ParticleSystem* partsys)
         {
-            if (osg::Geode* geode = node.asGeode())
+            // HACK: ParticleSystem has no getReferenceFrame()
+            return (partsys->getUserDataContainer()
+                    && partsys->getUserDataContainer()->getNumDescriptions() > 0
+                    && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
+        }
+
+        void apply(osg::Geode& geode)
+        {
+            for (unsigned int i=0;i<geode.getNumDrawables();++i)
             {
-                for (unsigned int i=0;i<geode->getNumDrawables();++i)
+                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(geode.getDrawable(i)))
                 {
-                    if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(geode->getDrawable(i)))
+                    if (isWorldSpaceParticleSystem(partsys))
                     {
-                        // HACK: ParticleSystem has no getReferenceFrame()
-                        if (partsys->getUserDataContainer()
-                                && partsys->getUserDataContainer()->getNumDescriptions() > 0
-                                && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace")
-                        {
-                            // HACK: Ignore the InverseWorldMatrix transform the geode is attached to
-                            if (geode->getNumParents() && geode->getParent(0)->getNumParents())
-                                transformInitialParticles(partsys, geode->getParent(0)->getParent(0));
-                        }
-                        geode->setNodeMask((1<<10)); //MWRender::Mask_ParticleSystem
+                        // HACK: Ignore the InverseWorldMatrix transform the geode is attached to
+                        if (geode.getNumParents() && geode.getParent(0)->getNumParents())
+                            transformInitialParticles(partsys, geode.getParent(0)->getParent(0));
                     }
+                    geode.setNodeMask(mMask);
                 }
             }
-
-            traverse(node);
         }
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        // in OSG 3.3 and up Drawables can be directly in the scene graph without a Geode decorating them.
+        void apply(osg::Drawable& drw)
+        {
+            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+            {
+                if (isWorldSpaceParticleSystem(partsys))
+                {
+                    // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
+                    if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
+                        transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
+                }
+                partsys->setNodeMask(mMask);
+            }
+        }
+#endif
 
         void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
         {
@@ -74,8 +94,9 @@ namespace
             box.expandBy(sphere);
             partsys->setInitialBound(box);
         }
+    private:
+        unsigned int mMask;
     };
-
 }
 
 namespace Resource
@@ -84,6 +105,7 @@ namespace Resource
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager)
         : mVFS(vfs)
         , mTextureManager(textureManager)
+        , mParticleSystemMask(~0u)
     {
     }
 
@@ -183,7 +205,7 @@ namespace Resource
 
     void SceneManager::notifyAttached(osg::Node *node) const
     {
-        InitWorldSpaceParticlesVisitor visitor;
+        InitWorldSpaceParticlesVisitor visitor (mParticleSystemMask);
         node->accept(visitor);
     }
 
@@ -195,6 +217,11 @@ namespace Resource
     Resource::TextureManager* SceneManager::getTextureManager()
     {
         return mTextureManager;
+    }
+
+    void SceneManager::setParticleSystemMask(unsigned int mask)
+    {
+        mParticleSystemMask = mask;
     }
 
 }

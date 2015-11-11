@@ -22,11 +22,13 @@ namespace SceneUtil
     void DisableFreezeOnCullVisitor::apply(osg::Geode &geode)
     {
         for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-        {
-            osg::Drawable* drw = geode.getDrawable(i);
-            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(drw))
-                partsys->setFreezeOnCull(false);
-        }
+            apply(*geode.getDrawable(i));
+    }
+
+    void DisableFreezeOnCullVisitor::apply(osg::Drawable& drw)
+    {
+        if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+            partsys->setFreezeOnCull(false);
     }
 
 }

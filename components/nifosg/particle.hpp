@@ -60,7 +60,7 @@ namespace NifOsg
         InverseWorldMatrix()
         {
         }
-        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op = osg::CopyOp::SHALLOW_COPY)
+        InverseWorldMatrix(const InverseWorldMatrix& copy, const osg::CopyOp& op)
             : osg::Object(), osg::NodeCallback()
         {
         }
@@ -138,9 +138,6 @@ namespace NifOsg
         ParticleColorAffector(const ParticleColorAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
         META_Object(NifOsg, ParticleColorAffector)
-
-        // TODO: very similar to vec3 version, refactor to a template
-        osg::Vec4f interpolate(const float time, const Nif::Vector4KeyMap::MapType& keys);
 
         virtual void operate(osgParticle::Particle* particle, double dt);
 

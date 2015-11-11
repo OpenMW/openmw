@@ -27,7 +27,7 @@ protected:
 
     bool mEnabled;
     osg::Quat mRotate;
-    osg::ref_ptr<osg::Node> mRelativeTo;
+    osg::Node* mRelativeTo;
 };
 
 

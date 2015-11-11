@@ -137,7 +137,10 @@ namespace MWRender
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
     {
+        resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
+        lightRoot->setLightingMask(Mask_Lighting);
         mLightRoot = lightRoot;
         lightRoot->setStartLight(1);
 
@@ -163,7 +166,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(SceneUtil::Mask_Lit);
+        source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -439,6 +442,9 @@ namespace MWRender
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
     {
         ptr.getRefData().getBaseNode()->setScale(scale);
+
+        if (ptr == mCamera->getTrackingPtr()) // update height of camera
+            mCamera->processViewChange();
     }
 
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)

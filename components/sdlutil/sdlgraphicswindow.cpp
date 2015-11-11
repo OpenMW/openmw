@@ -2,7 +2,6 @@
 
 #include <SDL_video.h>
 
-#include <osg/DeleteHandler>
 #include <osg/Version>
 
 namespace SDLUtil
@@ -79,15 +78,13 @@ void GraphicsWindowSDL2::init()
     if(!_traits.valid())
         return;
 
-    // getEventQueue()->setCurrentEventState(osgGA::GUIEventAdapter::getAccumulatedEventState().get());
-
     WindowData *inheritedWindowData = dynamic_cast<WindowData*>(_traits->inheritedWindowData.get());
     mWindow = inheritedWindowData ? inheritedWindowData->mWindow : NULL;
 
     mOwnsWindow = (mWindow == 0);
     if(mOwnsWindow)
     {
-        OSG_NOTICE<<"Error: No SDL window provided."<<std::endl;
+        OSG_FATAL<<"Error: No SDL window provided."<<std::endl;
         return;
     }
 
@@ -99,7 +96,7 @@ void GraphicsWindowSDL2::init()
     mContext = SDL_GL_CreateContext(mWindow);
     if(!mContext)
     {
-        OSG_NOTICE<< "Error: Unable to create OpenGL graphics context: "<<SDL_GetError() <<std::endl;
+        OSG_FATAL<< "Error: Unable to create OpenGL graphics context: "<<SDL_GetError() <<std::endl;
         return;
     }
 
@@ -109,7 +106,7 @@ void GraphicsWindowSDL2::init()
 
     mValid = true;
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
@@ -130,7 +127,7 @@ bool GraphicsWindowSDL2::realizeImplementation()
 
     SDL_ShowWindow(mWindow);
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,4)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,4)
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
 #else
     getEventQueue()->syncWindowRectangleWithGraphcisContext();
@@ -145,7 +142,7 @@ bool GraphicsWindowSDL2::makeCurrentImplementation()
 {
     if(!mRealized)
     {
-        OSG_NOTICE<<"Warning: GraphicsWindow not realized, cannot do makeCurrent."<<std::endl;
+        OSG_WARN<<"Warning: GraphicsWindow not realized, cannot do makeCurrent."<<std::endl;
         return false;
     }
 
@@ -156,7 +153,7 @@ bool GraphicsWindowSDL2::releaseContextImplementation()
 {
     if(!mRealized)
     {
-        OSG_NOTICE<< "Warning: GraphicsWindow not realized, cannot do releaseContext." <<std::endl;
+        OSG_WARN<< "Warning: GraphicsWindow not realized, cannot do releaseContext." <<std::endl;
         return false;
     }
 
@@ -166,8 +163,6 @@ bool GraphicsWindowSDL2::releaseContextImplementation()
 
 void GraphicsWindowSDL2::closeImplementation()
 {
-    // OSG_NOTICE<<"Closing GraphicsWindowSDL2"<<std::endl;
-
     if(mContext)
         SDL_GL_DeleteContext(mContext);
     mContext = NULL;
@@ -183,8 +178,6 @@ void GraphicsWindowSDL2::closeImplementation()
 void GraphicsWindowSDL2::swapBuffersImplementation()
 {
     if(!mRealized) return;
-
-    //OSG_NOTICE<< "swapBuffersImplementation "<<this<<" "<<OpenThreads::Thread::CurrentThread()<<std::endl;
 
     SDL_GL_SwapWindow(mWindow);
 }

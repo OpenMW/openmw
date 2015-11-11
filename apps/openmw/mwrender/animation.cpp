@@ -11,6 +11,7 @@
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 
@@ -174,72 +175,93 @@ namespace
         return 0.0f;
     }
 
-
-    // Removes all drawables from a graph.
-    class RemoveDrawableVisitor : public osg::NodeVisitor
+    /// @brief Base class for visitors that remove nodes from a scene graph.
+    /// Subclasses need to fill the mToRemove vector.
+    /// To use, node->accept(removeVisitor); removeVisitor.remove();
+    class RemoveVisitor : public osg::NodeVisitor
     {
     public:
-        RemoveDrawableVisitor()
+        RemoveVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
-        }
-
-        virtual void apply(osg::Geode &node)
-        {
-            // Not safe to remove in apply(), since the visitor is still iterating the child list
-            osg::Group* parent = node.getParent(0);
-            // prune nodes that would be empty after the removal
-            if (parent->getNumChildren() == 1 && parent->getDataVariance() == osg::Object::STATIC)
-                mToRemove.push_back(parent);
-            else
-                mToRemove.push_back(&node);
-            traverse(node);
         }
 
         void remove()
         {
-            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                osg::Node* node = *it;
-                if (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-            }
+            for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+                it->second->removeChild(it->first);
         }
 
-    private:
-        std::vector<osg::Node*> mToRemove;
+    protected:
+        // <node to remove, parent node to remove it from>
+        typedef std::vector<std::pair<osg::Node*, osg::Group*> > RemoveVec;
+        std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
     };
 
-    class RemoveTriBipVisitor : public osg::NodeVisitor
+    // Removes all drawables from a graph.
+    class RemoveDrawableVisitor : public RemoveVisitor
     {
     public:
-        RemoveTriBipVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        virtual void apply(osg::Geode &geode)
         {
+            applyImpl(geode);
         }
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            applyImpl(drw);
+        }
+#endif
+
+        void applyImpl(osg::Node& node)
+        {
+            osg::NodePath::iterator parent = getNodePath().end()-2;
+            // We know that the parent is a Group because only Groups can have children.
+            osg::Group* parentGroup = static_cast<osg::Group*>(*parent);
+
+            // Try to prune nodes that would be empty after the removal
+            if (parent != getNodePath().begin())
+            {
+                // This could be extended to remove the parent's parent, and so on if they are empty as well.
+                // But for NIF files, there won't be a benefit since only TriShapes can be set to STATIC dataVariance.
+                osg::Group* parentParent = static_cast<osg::Group*>(*(parent - 1));
+                if (parentGroup->getNumChildren() == 1 && parentGroup->getDataVariance() == osg::Object::STATIC)
+                {
+                    mToRemove.push_back(std::make_pair(parentGroup, parentParent));
+                    return;
+                }
+            }
+
+            mToRemove.push_back(std::make_pair(&node, parentGroup));
+        }
+    };
+
+    class RemoveTriBipVisitor : public RemoveVisitor
+    {
+    public:
         virtual void apply(osg::Geode &node)
+        {
+            applyImpl(node);
+        }
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            applyImpl(drw);
+        }
+#endif
+
+        void applyImpl(osg::Node& node)
         {
             const std::string toFind = "tri bip";
             if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
             {
+                osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
                 // Not safe to remove in apply(), since the visitor is still iterating the child list
-                mToRemove.push_back(&node);
+                mToRemove.push_back(std::make_pair(&node, parent));
             }
         }
-
-        void remove()
-        {
-            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                osg::Node* node = *it;
-                if (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-            }
-        }
-
-    private:
-        std::vector<osg::Node*> mToRemove;
     };
 
 }
@@ -1066,6 +1088,7 @@ namespace MWRender
         osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
         osg::Light* light = new osg::Light;
         lightSource->setLight(light);
+        lightSource->setNodeMask(Mask_Lighting);
 
         const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
 
@@ -1294,6 +1317,7 @@ namespace MWRender
             {
                 mGlowLight = new SceneUtil::LightSource;
                 mGlowLight->setLight(new osg::Light);
+                mGlowLight->setNodeMask(Mask_Lighting);
                 osg::Light* light = mGlowLight->getLight();
                 light->setDiffuse(osg::Vec4f(0,0,0,0));
                 light->setSpecular(osg::Vec4f(0,0,0,0));

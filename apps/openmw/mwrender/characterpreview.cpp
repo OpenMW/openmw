@@ -157,11 +157,10 @@ namespace MWRender
 
     void CharacterPreview::rebuild()
     {
-        delete mAnimation;
-        mAnimation = NULL;
+        mAnimation.reset(NULL);
 
-        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
-                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+        mAnimation.reset(new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
+                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal)));
 
         onSetup();
 
@@ -194,7 +193,7 @@ namespace MWRender
 
     void InventoryPreview::update()
     {
-        if (!mAnimation)
+        if (!mAnimation.get())
             return;
 
         mAnimation->showWeapons(true);
