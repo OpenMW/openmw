@@ -338,6 +338,7 @@
     Bug #1730: Scripts names starting with digit(s) fail to compile
     Bug #1743: Moons are transparent
     Bug #1745: Shadows crash: Assertion `mEffects.empty()' failed.
+    Bug #1784: First person weapons always in the same position
     Bug #1785: Can't equip two-handed weapon and shield
     Bug #1809: Player falls too easily
     Bug #1825: Sword of Perithia can´t run in OpenMW
