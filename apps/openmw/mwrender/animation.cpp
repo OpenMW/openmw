@@ -1317,6 +1317,7 @@ namespace MWRender
             {
                 mGlowLight = new SceneUtil::LightSource;
                 mGlowLight->setLight(new osg::Light);
+                mGlowLight->setNodeMask(Mask_Lighting);
                 osg::Light* light = mGlowLight->getLight();
                 light->setDiffuse(osg::Vec4f(0,0,0,0));
                 light->setSpecular(osg::Vec4f(0,0,0,0));
