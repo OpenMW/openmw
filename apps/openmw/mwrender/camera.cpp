@@ -381,7 +381,7 @@ namespace MWRender
             osg::PositionAttitudeTransform* transform = mTrackingPtr.getRefData().getBaseNode();
             mTrackingNode = transform;
             if (transform)
-                mHeightScale = mTrackingPtr.getRefData().getBaseNode()->getScale().z();
+                mHeightScale = transform->getScale().z();
             else
                 mHeightScale = 1.f;
         }
