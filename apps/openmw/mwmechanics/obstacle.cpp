@@ -28,15 +28,15 @@ namespace MWMechanics
     //
     // Limitation: there can be false detections, and does not test whether the
     // actor is facing the door.
-    bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr)
     {
-        if(getNearbyDoor(actor, minSqr, closed)!=MWWorld::Ptr())
+        if(getNearbyDoor(actor, minSqr)!=MWWorld::Ptr())
             return true;
         else
             return false;
     }
 
-    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr)
     {
         MWWorld::CellStore *cell = actor.getCell();
 
@@ -60,12 +60,11 @@ namespace MWMechanics
         for (; it != refList.end(); ++it)
         {
             MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr)
-                if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
-                   (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
-                {
-                    return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
-                }
+            if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr
+                    && ref.mData.getPosition().rot[2] == ref.mRef.getPosition().rot[2])
+            {
+                return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
+            }
         }
         return MWWorld::Ptr(); // none found
     }

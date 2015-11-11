@@ -17,14 +17,12 @@ namespace MWMechanics
 
     /// tests actor's proximity to a closed door by default
     bool proximityToDoor(const MWWorld::Ptr& actor,
-                         float minSqr = MIN_DIST_TO_DOOR_SQUARED,
-                         bool closed = true);
+                         float minSqr = MIN_DIST_TO_DOOR_SQUARED);
 
     /// Returns door pointer within range. No guarentee is given as too which one
     /** \return Pointer to the door, or NULL if none exists **/
     MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor,
-                         float minSqr = MIN_DIST_TO_DOOR_SQUARED,
-                         bool closed = true);
+                         float minSqr = MIN_DIST_TO_DOOR_SQUARED);
 
     class ObstacleCheck
     {

@@ -159,16 +159,17 @@ namespace MWClass
                 boost::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
                 int doorstate = getDoorState(ptr);
                 bool opening = true;
+                float doorRot = ptr.getRefData().getPosition().rot[2] - ptr.getCellRef().getPosition().rot[2];
                 if (doorstate == 1)
                     opening = false;
-                if (doorstate == 0 && ptr.getRefData().getLocalRotation().rot[2] != 0)
+                if (doorstate == 0 && doorRot != 0)
                     opening = false;
 
                 if (opening)
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                             closeSound, 0.5f);
-                    float offset = ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
+                    float offset = doorRot/ 3.14159265f * 2.0f;
                     action->setSoundOffset(offset);
                     action->setSound(openSound);
                 }
@@ -176,7 +177,7 @@ namespace MWClass
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                                                 openSound, 0.5f);
-                    float offset = 1.0f - ptr.getRefData().getLocalRotation().rot[2]/ 3.14159265f * 2.0f;
+                    float offset = 1.0f - doorRot/ 3.14159265f * 2.0f;
                     //most if not all door have closing bang somewhere in the middle of the sound,
                     //so we divide offset by two
                     action->setSoundOffset(offset * 0.5f);

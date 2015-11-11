@@ -1402,12 +1402,17 @@ namespace MWWorld
             }
             else
             {
-                float oldRot = osg::RadiansToDegrees(it->first.getRefData().getLocalRotation().rot[2]);
-                float diff = duration * 90.f;
-                float targetRot = std::min(std::max(0.f, oldRot + diff * (it->second == 1 ? 1 : -1)), 90.f);
-                localRotateObject(it->first, 0, 0, targetRot);
+                const ESM::Position& objPos = it->first.getRefData().getPosition();
+                float oldRot = osg::RadiansToDegrees(objPos.rot[2]);
 
-                bool reached = (targetRot == 90.f && it->second) || targetRot == 0.f;
+                float minRot = osg::RadiansToDegrees(it->first.getCellRef().getPosition().rot[2]);
+                float maxRot = minRot + 90.f;
+
+                float diff = duration * 90.f;
+                float targetRot = std::min(std::max(minRot, oldRot + diff * (it->second == 1 ? 1 : -1)), maxRot);
+                rotateObject(it->first, objPos.rot[0], objPos.rot[1], targetRot);
+
+                bool reached = (targetRot == maxRot && it->second) || targetRot == minRot;
 
                 /// \todo should use convexSweepTest here
                 std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Actor, MWPhysics::CollisionType_Actor);
@@ -1424,7 +1429,7 @@ namespace MWWorld
                         }
 
                         // we need to undo the rotation
-                        localRotateObject(it->first, 0, 0, oldRot);
+                        rotateObject(it->first, objPos.rot[0], objPos.rot[1], oldRot);
                         reached = false;
                     }
                 }
@@ -2103,7 +2108,7 @@ namespace MWWorld
         switch (state)
         {
         case 0:
-            if (door.getRefData().getLocalRotation().rot[2] == 0)
+            if (door.getRefData().getPosition().rot[2] == door.getCellRef().getPosition().rot[2])
                 state = 1; // if closed, then open
             else
                 state = 2; // if open, then close
