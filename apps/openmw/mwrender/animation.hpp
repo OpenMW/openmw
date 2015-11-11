@@ -61,6 +61,9 @@ public:
 
 private:
     osg::ref_ptr<osg::Node> mNode;
+
+    void operator= (const PartHolder&);
+    PartHolder(const PartHolder&);
 };
 typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
