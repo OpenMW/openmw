@@ -402,7 +402,7 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
-                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    Interpreter::Type_Float zRotDegrees = runtime[0].mFloat;
                     runtime.pop();
 
                     MWWorld::CellStore* store = 0;
@@ -429,7 +429,7 @@ namespace MWScript
                         pos.pos[1] = y;
                         pos.pos[2] = z;
                         pos.rot[0] = pos.rot[1] = 0;
-                        pos.rot[2]  = zRot;
+                        pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                         ref.getPtr().getCellRef().setPosition(pos);
                         MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
@@ -454,7 +454,7 @@ namespace MWScript
                     runtime.pop();
                     Interpreter::Type_Float z = runtime[0].mFloat;
                     runtime.pop();
-                    Interpreter::Type_Float zRot = runtime[0].mFloat;
+                    Interpreter::Type_Float zRotDegrees = runtime[0].mFloat;
                     runtime.pop();
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -473,7 +473,7 @@ namespace MWScript
                     pos.pos[1] = y;
                     pos.pos[2] = z;
                     pos.rot[0] = pos.rot[1] = 0;
-                    pos.rot[2]  = zRot;
+                    pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
                     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(),itemID);
                     ref.getPtr().getCellRef().setPosition(pos);
                     MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,pos);
