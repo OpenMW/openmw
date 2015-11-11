@@ -1407,7 +1407,7 @@ namespace NifOsg
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
             int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
-            osg::Material* mat = new osg::Material;
+            osg::ref_ptr<osg::Material> mat (new osg::Material);
             mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
 
             // NIF material defaults don't match OpenGL defaults
@@ -1462,12 +1462,11 @@ namespace NifOsg
                 case Nif::RC_NiAlphaProperty:
                 {
                     const Nif::NiAlphaProperty* alphaprop = static_cast<const Nif::NiAlphaProperty*>(property);
-                    osg::BlendFunc* blendfunc = new osg::BlendFunc;
                     if (alphaprop->flags&1)
                     {
-                        blendfunc->setFunction(getBlendMode((alphaprop->flags>>1)&0xf),
-                                               getBlendMode((alphaprop->flags>>5)&0xf));
-                        stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON);
+                        stateset->setAttributeAndModes(new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
+                                                                          getBlendMode((alphaprop->flags>>5)&0xf)),
+                                                       osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
@@ -1482,11 +1481,10 @@ namespace NifOsg
                         stateset->setRenderBinToInherit();
                     }
 
-                    osg::AlphaFunc* alphafunc = new osg::AlphaFunc;
                     if((alphaprop->flags>>9)&1)
                     {
-                        alphafunc->setFunction(getTestMode((alphaprop->flags>>10)&0x7), alphaprop->data.threshold/255.f);
-                        stateset->setAttributeAndModes(alphafunc, osg::StateAttribute::ON);
+                        stateset->setAttributeAndModes(new osg::AlphaFunc(getTestMode((alphaprop->flags>>10)&0x7),
+                                                                          alphaprop->data.threshold/255.f), osg::StateAttribute::ON);
                     }
                     else
                     {
