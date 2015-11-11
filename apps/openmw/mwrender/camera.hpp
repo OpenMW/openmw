@@ -98,8 +98,6 @@ namespace MWRender
         bool isFirstPerson() const
         { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
 
-        void updateScale();
-
         void processViewChange();
 
         void update(float duration, bool paused=false);
