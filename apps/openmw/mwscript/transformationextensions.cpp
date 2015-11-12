@@ -85,12 +85,12 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float angle = runtime[0].mFloat;
+                    Interpreter::Type_Float angle = osg::DegreesToRadians(runtime[0].mFloat);
                     runtime.pop();
 
-                    float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
-                    float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
-                    float az = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]);
+                    float ax = ptr.getRefData().getPosition().rot[0];
+                    float ay = ptr.getRefData().getPosition().rot[1];
+                    float az = ptr.getRefData().getPosition().rot[2];
 
                     MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
 
@@ -337,7 +337,7 @@ namespace MWScript
                         // See "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
                         if(ptr != MWMechanics::getPlayer())
                             zRot = zRot/60.0f;
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,zRot);
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,osg::DegreesToRadians(zRot));
 
                         ptr.getClass().adjustPosition(ptr, false);
                     }
@@ -603,14 +603,14 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
                     const float *objRot = ptr.getRefData().getPosition().rot;
 
-                    float ax = osg::RadiansToDegrees(objRot[0]);
-                    float ay = osg::RadiansToDegrees(objRot[1]);
-                    float az = osg::RadiansToDegrees(objRot[2]);
+                    float ax = objRot[0];
+                    float ay = objRot[1];
+                    float az = objRot[2];
 
                     if (axis == "x")
                     {

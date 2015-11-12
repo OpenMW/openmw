@@ -419,9 +419,9 @@ namespace MWWorld
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            float x = osg::RadiansToDegrees(pos.rot[0]);
-            float y = osg::RadiansToDegrees(pos.rot[1]);
-            float z = osg::RadiansToDegrees(pos.rot[2]);
+            float x = pos.rot[0];
+            float y = pos.rot[1];
+            float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
             player.getClass().adjustPosition(player, true);
@@ -476,9 +476,9 @@ namespace MWWorld
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
 
-            float x = osg::RadiansToDegrees(position.rot[0]);
-            float y = osg::RadiansToDegrees(position.rot[1]);
-            float z = osg::RadiansToDegrees(position.rot[2]);
+            float x = position.rot[0];
+            float y = position.rot[1];
+            float z = position.rot[2];
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
             world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);

@@ -1317,10 +1317,7 @@ namespace MWWorld
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
     {
-        rotateObjectImp(ptr, osg::Vec3f(osg::DegreesToRadians(x),
-                                           osg::DegreesToRadians(y),
-                                           osg::DegreesToRadians(z)),
-                        adjust);
+        rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
     MWWorld::Ptr World::safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
@@ -1403,12 +1400,12 @@ namespace MWWorld
             else
             {
                 const ESM::Position& objPos = it->first.getRefData().getPosition();
-                float oldRot = osg::RadiansToDegrees(objPos.rot[2]);
+                float oldRot = objPos.rot[2];
 
-                float minRot = osg::RadiansToDegrees(it->first.getCellRef().getPosition().rot[2]);
-                float maxRot = minRot + 90.f;
+                float minRot = it->first.getCellRef().getPosition().rot[2];
+                float maxRot = minRot + osg::DegreesToRadians(90.f);
 
-                float diff = duration * 90.f;
+                float diff = duration * osg::DegreesToRadians(90.f);
                 float targetRot = std::min(std::max(minRot, oldRot + diff * (it->second == 1 ? 1 : -1)), maxRot);
                 rotateObject(it->first, objPos.rot[0], objPos.rot[1], targetRot);
 

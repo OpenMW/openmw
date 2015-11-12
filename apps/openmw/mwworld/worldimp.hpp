@@ -349,7 +349,7 @@ namespace MWWorld
 
             virtual void scaleObject (const Ptr& ptr, float scale);
 
-            /// World rotates object, uses degrees
+            /// World rotates object, uses radians
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
