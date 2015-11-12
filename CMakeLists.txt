@@ -743,7 +743,8 @@ if (APPLE)
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
         set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-        include(BundleUtilitiesWithRPath)
+        include(BundleUtilities)
+        cmake_minimum_required(VERSION 3.1)
     " COMPONENT Runtime)
 
     set(ABSOLUTE_PLUGINS "")
