@@ -42,6 +42,11 @@ CSVRender::ObjectTag::ObjectTag (Object* object)
 : TagBase (Element_Reference), mObject (object)
 {}
 
+QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
+{
+    return QString::fromUtf8 (mObject->getReferenceableId().c_str());
+}
+
 
 void CSVRender::Object::clear()
 {
