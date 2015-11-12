@@ -103,7 +103,6 @@ Weather::Weather(const std::string& name,
                  const MWWorld::Fallback& fallback,
                  float stormWindSpeed,
                  float rainSpeed,
-                 const std::string& ambientLoopSoundID,
                  const std::string& particleEffect)
     : mCloudTexture(fallback.getFallbackString("Weather_" + name + "_Cloud_Texture"))
     , mSkyColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"),
@@ -130,7 +129,6 @@ Weather::Weather(const std::string& name,
     , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
     , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
     , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
-    , mAmbientLoopSoundID(ambientLoopSoundID)
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
     , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
@@ -148,6 +146,18 @@ Weather::Weather(const std::string& name,
     mThunderSoundID[1] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_1");
     mThunderSoundID[2] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_2");
     mThunderSoundID[3] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_3");
+
+    // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both sounds at the same time.
+
+    if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing Using_Precip has no effect
+    {
+        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Rain_Loop_Sound_ID");
+        if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
+            mAmbientLoopSoundID = "rain";
+    }
+    else
+        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Ambient_Loop_Sound_ID");
+
     /*
     Unhandled:
     Rain Diameter=600 ?
@@ -528,12 +538,12 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     addWeather("Cloudy", fallback); // 1
     addWeather("Foggy", fallback); // 2
     addWeather("Overcast", fallback); // 3
-    addWeather("Rain", fallback, "rain"); // 4
-    addWeather("Thunderstorm", fallback, "rain heavy"); // 5
-    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif"); // 6
-    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif"); // 7
-    addWeather("Snow", fallback, "", "meshes\\snow.nif"); // 8
-    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif"); // 9
+    addWeather("Rain", fallback); // 4
+    addWeather("Thunderstorm", fallback); // 5
+    addWeather("Ashstorm", fallback, "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", fallback, "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", fallback, "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", fallback, "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
@@ -852,12 +862,11 @@ void WeatherManager::clear()
 
 inline void WeatherManager::addWeather(const std::string& name,
                                        const MWWorld::Fallback& fallback,
-                                       const std::string& ambientLoopSoundID,
                                        const std::string& particleEffect)
 {
     static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
 
-    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, ambientLoopSoundID, particleEffect);
+    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, particleEffect);
 
     mWeatherSettings.push_back(weather);
 }

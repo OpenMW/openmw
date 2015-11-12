@@ -69,7 +69,6 @@ namespace MWWorld
                 const MWWorld::Fallback& fallback,
                 float stormWindSpeed,
                 float rainSpeed,
-                const std::string& ambientLoopSoundID,
                 const std::string& particleEffect);
 
         std::string mCloudTexture;
@@ -290,7 +289,6 @@ namespace MWWorld
 
         void addWeather(const std::string& name,
                         const MWWorld::Fallback& fallback,
-                        const std::string& ambientLoopSoundID = "",
                         const std::string& particleEffect = "");
 
         void importRegions();
