@@ -1870,7 +1870,7 @@ namespace MWWorld
         orig.z() += 20;
         osg::Vec3f dir (0, 0, -1);
 
-        float len = 100.0;
+        float len = 1000000.0;
 
         MWRender::RenderingManager::RayResult result = mRendering->castRay(orig, orig+dir*len, true, true);
         if (result.mHit)
