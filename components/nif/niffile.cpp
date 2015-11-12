@@ -48,6 +48,8 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
 {
     std::map<std::string,RecordFactoryEntry> newFactory;
     newFactory.insert(makeEntry("NiNode",                     &construct <NiNode>                      , RC_NiNode                        ));
+    newFactory.insert(makeEntry("NiSwitchNode",               &construct <NiSwitchNode>                , RC_NiSwitchNode                  ));
+    newFactory.insert(makeEntry("NiLODNode",                  &construct <NiLODNode>                   , RC_NiLODNode                     ));
     newFactory.insert(makeEntry("AvoidNode",                  &construct <NiNode>                      , RC_AvoidNode                     ));
     newFactory.insert(makeEntry("NiBSParticleNode",           &construct <NiNode>                      , RC_NiBSParticleNode              ));
     newFactory.insert(makeEntry("NiBSAnimationNode",          &construct <NiNode>                      , RC_NiBSAnimationNode             ));
