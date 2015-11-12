@@ -312,8 +312,8 @@ namespace MWScript
                     }
                     if(store)
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
-                        ptr = MWWorld::Ptr(ptr.getBase(), store);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
+
                         dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
 
                         float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
@@ -363,8 +363,7 @@ namespace MWScript
                     if (ptr == MWMechanics::getPlayer())
                     {
                         MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
-                        ptr = MWWorld::Ptr(ptr.getBase(), cell);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
                     }
                     else
                     {
