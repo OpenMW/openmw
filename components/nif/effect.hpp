@@ -29,27 +29,38 @@
 namespace Nif
 {
 
-typedef Node Effect;
-
-// Used for NiAmbientLight and NiDirectionalLight. Might also work for
-// NiPointLight and NiSpotLight?
-struct NiLight : Effect
+struct NiDynamicEffect : public Node
 {
-    struct SLight
+    void read(NIFStream *nif)
     {
-        float dimmer;
-        osg::Vec3f ambient;
-        osg::Vec3f diffuse;
-        osg::Vec3f specular;
+        Node::read(nif);
+        unsigned int numAffectedNodes = nif->getUInt();
+        for (unsigned int i=0; i<numAffectedNodes; ++i)
+            nif->getUInt(); // ref to another Node
+    }
+};
 
-        void read(NIFStream *nif);
-    };
-    SLight light;
+// Used as base for NiAmbientLight, NiDirectionalLight, NiPointLight and NiSpotLight.
+struct NiLight : NiDynamicEffect
+{
+    float dimmer;
+    osg::Vec3f ambient;
+    osg::Vec3f diffuse;
+    osg::Vec3f specular;
 
     void read(NIFStream *nif);
 };
 
-struct NiTextureEffect : Effect
+struct NiPointLight : public NiLight
+{
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+
+    void read(NIFStream *nif);
+};
+
+struct NiTextureEffect : NiDynamicEffect
 {
     NiSourceTexturePtr texture;
 

@@ -5,29 +5,19 @@
 namespace Nif
 {
 
-void NiLight::SLight::read(NIFStream *nif)
+void NiLight::read(NIFStream *nif)
 {
+    NiDynamicEffect::read(nif);
+
     dimmer = nif->getFloat();
     ambient = nif->getVector3();
     diffuse = nif->getVector3();
     specular = nif->getVector3();
 }
 
-void NiLight::read(NIFStream *nif)
-{
-    Effect::read(nif);
-
-    nif->getInt(); // 1
-    nif->getInt(); // 1?
-    light.read(nif);
-}
-
 void NiTextureEffect::read(NIFStream *nif)
 {
-    Effect::read(nif);
-
-    int tmp = nif->getInt();
-    if(tmp) nif->getInt(); // always 1?
+    NiDynamicEffect::read(nif);
 
     /*
            3 x Vector4 = [1,0,0,0]
@@ -52,10 +42,17 @@ void NiTextureEffect::read(NIFStream *nif)
 
 void NiTextureEffect::post(NIFFile *nif)
 {
-    Effect::post(nif);
+    NiDynamicEffect::post(nif);
     texture.post(nif);
 }
 
+void NiPointLight::read(NIFStream *nif)
+{
+    NiLight::read(nif);
 
+    constantAttenuation = nif->getFloat();
+    linearAttenuation = nif->getFloat();
+    quadraticAttenuation = nif->getFloat();
+}
 
 }
