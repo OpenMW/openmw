@@ -42,15 +42,22 @@ namespace
             rendering.addWaterRippleEmitter(ptr);
     }
 
-    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                                    MWRender::RenderingManager& rendering)
+    void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
+                                    MWRender::RenderingManager& rendering, bool inverseRotationOrder)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
         {
             osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
             if (!ptr.getClass().isActor())
-                worldRotQuat = worldRotQuat * osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
-                    osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0));
+            {
+                float xr = ptr.getRefData().getPosition().rot[0];
+                float yr = ptr.getRefData().getPosition().rot[1];
+                if (!inverseRotationOrder)
+                    worldRotQuat = worldRotQuat * osg::Quat(yr, osg::Vec3(0,-1,0)) *
+                        osg::Quat(xr, osg::Vec3(-1,0,0));
+                else
+                    worldRotQuat = osg::Quat(xr, osg::Vec3(-1,0,0)) * osg::Quat(yr, osg::Vec3(0,-1,0)) * worldRotQuat;
+            }
 
             rendering.rotateObject(ptr, worldRotQuat);
             physics.updateRotation(ptr);
@@ -106,7 +113,7 @@ namespace
             try
             {
                 addObject(ptr, mPhysics, mRendering);
-                updateObjectLocalRotation(ptr, mPhysics, mRendering);
+                updateObjectRotation(ptr, mPhysics, mRendering, false);
                 updateObjectScale(ptr, mPhysics, mRendering);
                 ptr.getClass().adjustPosition (ptr, false);
             }
@@ -127,9 +134,9 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::updateObjectLocalRotation (const Ptr& ptr)
+    void Scene::updateObjectRotation (const Ptr& ptr, bool inverseRotationOrder)
     {
-        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
+        ::updateObjectRotation(ptr, *mPhysics, mRendering, inverseRotationOrder);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
@@ -548,7 +555,7 @@ namespace MWWorld
         try
         {
             addObject(ptr, *mPhysics, mRendering);
-            MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+            updateObjectRotation(ptr, false);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
         }
         catch (std::exception& e)
