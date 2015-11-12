@@ -1393,6 +1393,8 @@ namespace MWWorld
                 float diff = duration * osg::DegreesToRadians(90.f);
                 float targetRot = std::min(std::max(minRot, oldRot + diff * (it->second == 1 ? 1 : -1)), maxRot);
                 rotateObject(it->first, objPos.rot[0], objPos.rot[1], targetRot);
+                // the rotation order we want to use
+                mWorldScene->updateObjectRotation(it->first, false);
 
                 bool reached = (targetRot == maxRot && it->second) || targetRot == minRot;
 
