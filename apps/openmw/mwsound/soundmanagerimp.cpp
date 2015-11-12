@@ -364,7 +364,7 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode, float offset)
+    MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, int mode, float offset)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -386,7 +386,7 @@ namespace MWSound
     }
 
     MWBase::SoundPtr SoundManager::playSound3D(const MWWorld::Ptr &ptr, const std::string& soundId,
-                                               float volume, float pitch, PlayType type, PlayMode mode, float offset)
+                                               float volume, float pitch, PlayType type, int mode, float offset)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -419,7 +419,7 @@ namespace MWSound
     }
 
     MWBase::SoundPtr SoundManager::playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                     float volume, float pitch, PlayType type, PlayMode mode, float offset)
+                                                     float volume, float pitch, PlayType type, int mode, float offset)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())
@@ -640,7 +640,7 @@ namespace MWSound
             env = Env_Underwater;
             //play underwater sound
             if(!(mUnderwaterSound && mUnderwaterSound->isPlaying()))
-                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_Loop|Play_NoEnv);
         }
         else if(mUnderwaterSound)
         {

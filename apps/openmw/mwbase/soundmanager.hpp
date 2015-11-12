@@ -35,14 +35,12 @@ namespace MWBase
                 Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
-                Play_RemoveAtDistance = 1<<3, /* (3D only) If the listener gets further than 2000 units away
+                Play_RemoveAtDistance = 1<<3 /* (3D only) If the listener gets further than 2000 units away
                                                 from the sound source, the sound is removed.
                                                 This is weird stuff but apparently how vanilla works for sounds
                                                 played by the PlayLoopSound family of script functions. Perhaps we
                                                 can make this cut off a more subtle fade later, but have to
                                                 be careful to not change the overall volume of areas by too much. */
-                Play_LoopNoEnv = Play_Loop | Play_NoEnv,
-                Play_LoopRemoveAtDistance = Play_Loop | Play_RemoveAtDistance
             };
             enum PlayType {
                 Play_TypeSfx   = 1<<4, /* Normal SFX sound */
@@ -109,19 +107,19 @@ namespace MWBase
             ///< Play a 2D audio track, using a custom decoder
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
-                                       PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
+                                       PlayType type=Play_TypeSfx, int mode=Play_Normal,
                                        float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
             ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                                  float volume, float pitch, PlayType type=Play_TypeSfx,
-                                                 PlayMode mode=Play_Normal, float offset=0) = 0;
+                                                 int mode=Play_Normal, float offset=0) = 0;
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
             ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
             virtual MWBase::SoundPtr playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                             float volume, float pitch, PlayType type, PlayMode mode, float offset=0) = 0;
+                                                             float volume, float pitch, PlayType type, int mode, float offset=0) = 0;
             ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;

@@ -118,10 +118,10 @@ namespace MWScript
                     std::string sound = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0,
-                                                                              MWBase::SoundManager::Play_TypeSfx,
-                                                                              mLoop ? MWBase::SoundManager::Play_LoopRemoveAtDistance
-                                                                                     : MWBase::SoundManager::Play_Normal);
+                    int mode = MWBase::SoundManager::Play_Normal;
+                    if (mLoop)
+                        mode = MWBase::SoundManager::Play_Loop|MWBase::SoundManager::Play_RemoveAtDistance;
+                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, mode);
                 }
         };
 
@@ -147,11 +147,10 @@ namespace MWScript
                     Interpreter::Type_Float pitch = runtime[0].mFloat;
                     runtime.pop();
 
-                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch,
-                                                                              MWBase::SoundManager::Play_TypeSfx,
-                                                                              mLoop ? MWBase::SoundManager::Play_LoopRemoveAtDistance
-                                                                                    : MWBase::SoundManager::Play_Normal);
-
+                    int mode = MWBase::SoundManager::Play_Normal;
+                    if (mLoop)
+                        mode = MWBase::SoundManager::Play_Loop|MWBase::SoundManager::Play_RemoveAtDistance;
+                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch, MWBase::SoundManager::Play_TypeSfx, mode);
                 }
         };
 
