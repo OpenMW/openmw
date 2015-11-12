@@ -264,7 +264,9 @@ void Emitter::emitParticles(double dt)
     osg::MatrixList worldMats = getParticleSystem()->getWorldMatrices();
     if (!worldMats.empty())
     {
-        const osg::Matrix psToWorld = worldMats[0];
+        osg::Matrix psToWorld = worldMats[0];
+        // ignore scales in particlesystem world matrix. this seems wrong, but have to do so for MW compatibility.
+        psToWorld.orthoNormalize(psToWorld);
         worldToPs = osg::Matrix::inverse(psToWorld);
     }
 
