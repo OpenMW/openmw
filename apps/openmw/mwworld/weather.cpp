@@ -714,7 +714,8 @@ void WeatherManager::update(float duration, bool paused)
     {
         stopSounds();
         if (!mResult.mAmbientLoopSoundID.empty())
-            mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            mAmbientSound = MWBase::Environment::get().getSoundManager()->playSound(mResult.mAmbientLoopSoundID, 1.0, 1.0, MWBase::SoundManager::Play_TypeSfx,
+                                                                                    MWBase::SoundManager::Play_Loop|MWBase::SoundManager::Play_NoUnderwater);
 
         mPlayingSoundID = mResult.mAmbientLoopSoundID;
     }

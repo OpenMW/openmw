@@ -35,19 +35,20 @@ namespace MWBase
                 Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
                                       * but do not keep it updated (the sound will not move with
                                       * the object and will not stop when the object is deleted. */
-                Play_RemoveAtDistance = 1<<3 /* (3D only) If the listener gets further than 2000 units away
+                Play_RemoveAtDistance = 1<<3, /* (3D only) If the listener gets further than 2000 units away
                                                 from the sound source, the sound is removed.
                                                 This is weird stuff but apparently how vanilla works for sounds
                                                 played by the PlayLoopSound family of script functions. Perhaps we
                                                 can make this cut off a more subtle fade later, but have to
                                                 be careful to not change the overall volume of areas by too much. */
+                Play_NoUnderwater = 1<<4 /* Do not play the sound when the listener is underwater */
             };
             enum PlayType {
-                Play_TypeSfx   = 1<<4, /* Normal SFX sound */
-                Play_TypeVoice = 1<<5, /* Voice sound */
-                Play_TypeFoot  = 1<<6, /* Footstep sound */
-                Play_TypeMusic = 1<<7, /* Music track */
-                Play_TypeMovie = 1<<8, /* Movie audio track */
+                Play_TypeSfx   = 1<<5, /* Normal SFX sound */
+                Play_TypeVoice = 1<<6, /* Voice sound */
+                Play_TypeFoot  = 1<<7, /* Footstep sound */
+                Play_TypeMusic = 1<<8, /* Music track */
+                Play_TypeMovie = 1<<9, /* Movie audio track */
                 Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 
