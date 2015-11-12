@@ -60,6 +60,13 @@ struct NiPointLight : public NiLight
     void read(NIFStream *nif);
 };
 
+struct NiSpotLight : public NiPointLight
+{
+    float cutoff;
+    float exponent;
+    void read(NIFStream *nif);
+};
+
 struct NiTextureEffect : NiDynamicEffect
 {
     NiSourceTexturePtr texture;

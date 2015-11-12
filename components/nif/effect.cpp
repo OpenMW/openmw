@@ -55,4 +55,12 @@ void NiPointLight::read(NIFStream *nif)
     quadraticAttenuation = nif->getFloat();
 }
 
+void NiSpotLight::read(NIFStream *nif)
+{
+    NiPointLight::read(nif);
+
+    cutoff = nif->getFloat();
+    exponent = nif->getFloat();
+}
+
 }
