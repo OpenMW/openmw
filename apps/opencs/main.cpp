@@ -43,6 +43,10 @@ class Application : public QApplication
 
 int main(int argc, char *argv[])
 {
+    #ifdef Q_OS_MAC
+        setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+    #endif
+
     try
     {
         // To allow background thread drawing in OSG
