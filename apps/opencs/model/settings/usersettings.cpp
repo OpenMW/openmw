@@ -426,6 +426,20 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         dragShiftFactor->setRange (0.001, 100.0);
     }
 
+    declareSection ("tooltips", "Tooltips");
+    {
+        Setting *scene = createSetting (Type_CheckBox, "scene", "Show Tooltips in 3D scenes");
+        scene->setDefaultValue ("true");
+
+        Setting *sceneHideBasic = createSetting (Type_CheckBox, "scene-hide-basic", "Hide basic  3D scenes tooltips");
+        sceneHideBasic->setDefaultValue ("false");
+
+        Setting *sceneDelay = createSetting (Type_SpinBox, "scene-delay",
+            "Tooltip delay in milliseconds");
+        sceneDelay->setDefaultValue (500);
+        sceneDelay->setRange (1, 10000);
+    }
+
     {
         /******************************************************************
         * There are three types of values:

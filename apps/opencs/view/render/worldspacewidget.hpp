@@ -5,6 +5,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <QTimer>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
@@ -47,6 +49,10 @@ namespace CSVRender
             double mDragFactor;
             double mDragWheelFactor;
             double mDragShiftFactor;
+            QTimer mToolTipDelayTimer;
+            QPoint mToolTipPos;
+            bool mShowToolTips;
+            int mToolTipDelay;
 
         public:
 
@@ -147,7 +153,7 @@ namespace CSVRender
             /// \return Is \a key a button mapping setting? (ignored otherwise)
             bool storeMappingSetting (const QString& key, const QString& value);
 
-            osg::ref_ptr<TagBase> mousePick (QMouseEvent *event);
+            osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
 
             std::string mapButton (QMouseEvent *event);
 
@@ -178,6 +184,8 @@ namespace CSVRender
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             void editModeChanged (const std::string& id);
+
+            void showToolTip();
 
         protected slots:
 

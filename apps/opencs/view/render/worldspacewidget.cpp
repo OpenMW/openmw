@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QToolTip>
 
 #include <osgGA/TrackballManipulator>
 #include <osgGA/FirstPersonManipulator>
@@ -43,7 +44,8 @@ namespace
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
-  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false)
+  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false),
+  mToolTipPos (-1, -1)
 {
     setAcceptDrops(true);
 
@@ -85,6 +87,12 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     mDragFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-factor").toDouble();
     mDragWheelFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-wheel-factor").toDouble();
     mDragShiftFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-shift-factor").toDouble();
+
+    mShowToolTips = CSMSettings::UserSettings::instance().settingValue ("tooltips/scene") == "true";
+    mToolTipDelay = CSMSettings::UserSettings::instance().settingValue ("tooltips/scene-delay").toInt();
+
+    mToolTipDelayTimer.setSingleShot (true);
+    connect (&mToolTipDelayTimer, SIGNAL (timeout()), this, SLOT (showToolTip()));
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
@@ -294,6 +302,10 @@ void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const 
         mDragWheelFactor = value.at (0).toDouble();
     else if (name=="scene-input/drag-shift-factor")
         mDragShiftFactor = value.at (0).toDouble();
+    else if (name=="tooltips/scene-delay")
+        mToolTipDelay = value.at (0).toInt();
+    else if (name=="tooltips/scene")
+        mShowToolTips = value.at (0)=="true";
     else
         dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
 }
@@ -368,11 +380,11 @@ bool CSVRender::WorldspaceWidget::storeMappingSetting (const QString& key, const
     return false;
 }
 
-osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (QMouseEvent *event)
+osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (const QPoint& localPos)
 {
     // (0,0) is considered the lower left corner of an OpenGL window
-    int x = event->x();
-    int y = height() - event->y();
+    int x = localPos.x();
+    int y = height() - localPos.y();
 
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
 
@@ -494,6 +506,21 @@ void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
     mDragging = false;
 }
 
+void CSVRender::WorldspaceWidget::showToolTip()
+{
+    if (mShowToolTips)
+    {
+        QPoint pos = QCursor::pos();
+
+        if (osg::ref_ptr<TagBase> tag = mousePick (mapFromGlobal (pos)))
+        {
+            bool hideBasics =
+                CSMSettings::UserSettings::instance().settingValue ("tooltips/scene-hide-basic")=="true";
+            QToolTip::showText (pos, tag->getToolTip (hideBasics), this);
+        }
+    }
+}
+
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
     setVisibilityMask (getVisibilityMask());
@@ -509,13 +536,23 @@ void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
     if (!mDragging)
     {
-        if (mDragMode=="p-navi" || mDragMode=="s-navi")
+        if (mDragMode.empty())
+        {
+            if (event->globalPos()!=mToolTipPos)
+            {
+                mToolTipPos = event->globalPos();
+
+                if (mShowToolTips)
+                    mToolTipDelayTimer.start (mToolTipDelay);
+            }
+        }
+        else if (mDragMode=="p-navi" || mDragMode=="s-navi")
         {
 
         }
         else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="p-select" || mDragMode=="s-select")
         {
-            osg::ref_ptr<TagBase> tag = mousePick (event);
+            osg::ref_ptr<TagBase> tag = mousePick (event->pos());
 
             EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
 
@@ -595,7 +632,7 @@ void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
         else if (button=="p-edit" || button=="s-edit" ||
             button=="p-select" || button=="s-select")
         {
-            osg::ref_ptr<TagBase> tag = mousePick (event);
+            osg::ref_ptr<TagBase> tag = mousePick (event->pos());
 
             handleMouseClick (tag, button, event->modifiers() & Qt::ShiftModifier);
         }
