@@ -57,7 +57,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwsound
-    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness libavwrapper movieaudiofactory
+    soundmanagerimp openal_output ffmpeg_decoder sound sound_decoder sound_output loudness movieaudiofactory
     )
 
 add_openmw_dir (mwworld
