@@ -403,6 +403,10 @@ void OpenAL_SoundStream::update()
         gain *= 0.9f;
         pitch *= 0.7f;
     }
+    if ((mFlags&MWBase::SoundManager::Play_NoUnderwater) && mOutput.mLastEnvironment == Env_Underwater)
+    {
+        gain = 0.f;
+    }
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
@@ -617,6 +621,10 @@ void OpenAL_Sound::update()
         gain *= 0.9f;
         pitch *= 0.7f;
     }
+    if ((mFlags&MWBase::SoundManager::Play_NoUnderwater) && mOutput.mLastEnvironment == Env_Underwater)
+    {
+        gain = 0.f;
+    }
 
     alSourcef(mSource, AL_GAIN, gain);
     alSourcef(mSource, AL_PITCH, pitch);
@@ -636,6 +644,10 @@ void OpenAL_Sound3D::update()
     {
         gain *= 0.9f;
         pitch *= 0.7f;
+    }
+    if ((mFlags&MWBase::SoundManager::Play_NoUnderwater) && mOutput.mLastEnvironment == Env_Underwater)
+    {
+        gain = 0.f;
     }
 
     alSourcef(mSource, AL_GAIN, gain);

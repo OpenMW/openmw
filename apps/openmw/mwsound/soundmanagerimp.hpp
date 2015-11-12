@@ -120,18 +120,18 @@ namespace MWSound
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
-        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0);
+        virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, int mode=Play_Normal, float offset=0);
         ///< Play a sound, independently of 3D-position
         ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
 
         virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                              float volume, float pitch, PlayType type=Play_TypeSfx,
-                                             PlayMode mode=Play_Normal, float offset=0);
+                                             int mode=Play_Normal, float offset=0);
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
         ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
         virtual MWBase::SoundPtr playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                         float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
+                                                         float volume, float pitch, PlayType type, int mode, float offset=0);
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
 
         ///< Play a sound from an object
