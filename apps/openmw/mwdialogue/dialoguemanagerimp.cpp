@@ -713,14 +713,23 @@ namespace MWDialogue
         if (map != mChangedFactionReaction.end() && map->second.find(fact2) != map->second.end())
             return map->second.at(fact2);
 
-        const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
+        try {
+            const ESM::Faction* faction = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(fact1);
 
-        std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
-        for (; it != faction->mReactions.end(); ++it)
-        {
-            if (Misc::StringUtils::ciEqual(it->first, fact2))
+            std::map<std::string, int>::const_iterator it = faction->mReactions.begin();
+            for (; it != faction->mReactions.end(); ++it)
+            {
+                if (Misc::StringUtils::ciEqual(it->first, fact2))
                     return it->second;
+            }
         }
+        catch (const std::exception& e)
+        {
+            // Don't write anything, it creates too much useless output with
+            // some mods like fishing academy
+            // std::cerr << "Error in getFactionReaction: " << e.what() << std::endl;
+        }
+
         return 0;
     }
 
