@@ -1743,6 +1743,7 @@ namespace MWGui
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
 
+        MyGUI::Widget* oldKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         setKeyFocusWidget(mVideoWidget);
 
         mVideoBackground->setVisible(true);
@@ -1769,6 +1770,8 @@ namespace MWGui
         mVideoWidget->stop();
 
         MWBase::Environment::get().getSoundManager()->resumeSounds();
+
+        setKeyFocusWidget(oldKeyFocus);
 
         setCursorVisible(cursorWasVisible);
 
