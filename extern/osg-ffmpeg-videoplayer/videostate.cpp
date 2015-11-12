@@ -85,6 +85,9 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 void PacketQueue::put(AVPacket *pkt)
 {
     AVPacketList *pkt1;
+    if(pkt != &flush_pkt && !pkt->buf && av_dup_packet(pkt) < 0)
+        throw std::runtime_error("Failed to duplicate packet");
+
     pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
