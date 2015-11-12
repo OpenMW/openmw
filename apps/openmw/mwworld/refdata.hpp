@@ -21,9 +21,6 @@ namespace ESM
 
 namespace MWWorld
 {
-    struct LocalRotation{
-        float rot[3];
-    };
 
     class CustomData;
 
@@ -39,8 +36,6 @@ namespace MWWorld
 
 
             ESM::Position mPosition;
-
-            LocalRotation mLocalRotation;
 
             CustomData *mCustomData;
 
@@ -109,9 +104,6 @@ namespace MWWorld
 
             void setPosition (const ESM::Position& pos);
             const ESM::Position& getPosition();
-
-            void setLocalRotation (const LocalRotation& rotation);
-            const LocalRotation& getLocalRotation();
 
             void setCustomData (CustomData *data);
             ///< Set custom data (potentially replacing old custom data). The ownership of \a data is

@@ -353,9 +353,6 @@ namespace MWWorld
             /// \param adjust indicates rotation should be set or adjusted
             virtual void rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust = false);
 
-            /// Local rotates object, uses degrees
-            virtual void localRotateObject (const Ptr& ptr, float x, float y, float z);
-
             virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos);
             ///< place an object in a "safe" location (ie not in the void, etc). Makes a copy of the Ptr.
 

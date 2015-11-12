@@ -17,7 +17,6 @@ namespace MWWorld
         mEnabled = refData.mEnabled;
         mCount = refData.mCount;
         mPosition = refData.mPosition;
-        mLocalRotation = refData.mLocalRotation;
         mChanged = refData.mChanged;
         mDeleted = refData.mDeleted;
 
@@ -37,7 +36,6 @@ namespace MWWorld
     {
         for (int i=0; i<3; ++i)
         {
-            mLocalRotation.rot[i] = 0;
             mPosition.pos[i] = 0;
             mPosition.rot[i] = 0;
         }
@@ -49,9 +47,6 @@ namespace MWWorld
       mCustomData (0),
       mChanged(false) // Loading from ESM/ESP files -> assume unchanged
     {
-        mLocalRotation.rot[0]=0;
-        mLocalRotation.rot[1]=0;
-        mLocalRotation.rot[2]=0;
     }
 
     RefData::RefData (const ESM::ObjectState& objectState)
@@ -62,8 +57,6 @@ namespace MWWorld
       mCustomData (0),
       mChanged(true) // Loading from a savegame -> assume changed
     {
-        for (int i=0; i<3; ++i)
-            mLocalRotation.rot[i] = objectState.mLocalRotation[i];
     }
 
     RefData::RefData (const RefData& refData)
@@ -87,9 +80,6 @@ namespace MWWorld
         objectState.mEnabled = mEnabled;
         objectState.mCount = mCount;
         objectState.mPosition = mPosition;
-
-        for (int i=0; i<3; ++i)
-            objectState.mLocalRotation[i] = mLocalRotation.rot[i];
     }
 
     RefData& RefData::operator= (const RefData& refData)
@@ -195,17 +185,6 @@ namespace MWWorld
     const ESM::Position& RefData::getPosition()
     {
         return mPosition;
-    }
-
-    void RefData::setLocalRotation(const LocalRotation& rot)
-    {
-        mChanged = true;
-        mLocalRotation = rot;
-    }
-
-    const LocalRotation& RefData::getLocalRotation()
-    {
-        return mLocalRotation;
     }
 
     void RefData::setCustomData (CustomData *data)

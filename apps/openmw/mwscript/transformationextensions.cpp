@@ -92,26 +92,12 @@ namespace MWScript
                     float ay = ptr.getRefData().getPosition().rot[1];
                     float az = ptr.getRefData().getPosition().rot[2];
 
-                    MWWorld::LocalRotation localRot = ptr.getRefData().getLocalRotation();
-
                     if (axis == "x")
-                    {
-                        localRot.rot[0] = 0;
-                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,angle,ay,az);
-                    }
                     else if (axis == "y")
-                    {
-                        localRot.rot[1] = 0;
-                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
-                    }
                     else if (axis == "z")
-                    {
-                        localRot.rot[2] = 0;
-                        ptr.getRefData().setLocalRotation(localRot);
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
-                    }
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
@@ -568,25 +554,19 @@ namespace MWScript
 
                     std::string axis = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    Interpreter::Type_Float rotation = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
+                    Interpreter::Type_Float rotation = osg::DegreesToRadians(runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    float ax = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[0]);
-                    float ay = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[1]);
-                    float az = osg::RadiansToDegrees(ptr.getRefData().getLocalRotation().rot[2]);
+                    float ax = ptr.getRefData().getPosition().rot[0];
+                    float ay = ptr.getRefData().getPosition().rot[1];
+                    float az = ptr.getRefData().getPosition().rot[2];
 
                     if (axis == "x")
-                    {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax+rotation,ay,az);
-                    }
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax+rotation,ay,az);
                     else if (axis == "y")
-                    {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay+rotation,az);
-                    }
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
                     else if (axis == "z")
-                    {
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr,ax,ay,az+rotation);
-                    }
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
                     else
                         throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
@@ -641,13 +621,11 @@ namespace MWScript
                     if (!ptr.isInCell())
                         return;
 
-                    MWWorld::LocalRotation rot;
-                    rot.rot[0] = 0;
-                    rot.rot[1] = 0;
-                    rot.rot[2] = 0;
-                    ptr.getRefData().setLocalRotation(rot);
+                    float xr = ptr.getCellRef().getPosition().rot[0];
+                    float yr = ptr.getCellRef().getPosition().rot[1];
+                    float zr = ptr.getCellRef().getPosition().rot[2];
 
-                    MWBase::Environment::get().getWorld()->rotateObject(ptr, 0,0,0,true);
+                    MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
                         MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],

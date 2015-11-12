@@ -270,8 +270,6 @@ namespace MWBase
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
-            virtual void localRotateObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
-
             virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 

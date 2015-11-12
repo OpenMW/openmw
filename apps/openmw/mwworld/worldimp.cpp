@@ -1258,21 +1258,6 @@ namespace MWWorld
             mWorldScene->updateObjectLocalRotation(ptr);
     }
 
-    void World::localRotateObject (const Ptr& ptr, float x, float y, float z)
-    {
-        LocalRotation rot = ptr.getRefData().getLocalRotation();
-        rot.rot[0]=osg::DegreesToRadians(x);
-        rot.rot[1]=osg::DegreesToRadians(y);
-        rot.rot[2]=osg::DegreesToRadians(z);
-
-        ptr.getRefData().setLocalRotation(rot);
-
-        if (ptr.getRefData().getBaseNode() != 0)
-        {
-            mWorldScene->updateObjectLocalRotation(ptr);
-        }
-    }
-
     void World::adjustPosition(const Ptr &ptr, bool force)
     {
         ESM::Position pos (ptr.getRefData().getPosition());
@@ -1829,11 +1814,6 @@ namespace MWWorld
             object.getClass().copyToCell(object, *cell, pos);
 
         // Reset some position values that could be uninitialized if this item came from a container
-        LocalRotation localRotation;
-        localRotation.rot[0] = 0;
-        localRotation.rot[1] = 0;
-        localRotation.rot[2] = 0;
-        dropped.getRefData().setLocalRotation(localRotation);
         dropped.getCellRef().setPosition(pos);
         dropped.getCellRef().unsetRefNum();
 
