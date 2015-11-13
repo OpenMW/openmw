@@ -223,6 +223,7 @@
     Task #2730: Replace hardcoded column numbers in SimpleDialogueSubView/DialogueSubView
     Task #2750: Bullet shape instancing optimization
     Task #2793: Replace grid size setting with half grid size setting
+    Task #3003: Support FFMPEG 2.9 (Debian request)
 
 0.36.1
 ------
