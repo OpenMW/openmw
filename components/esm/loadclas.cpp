@@ -49,7 +49,7 @@ namespace ESM
             esm.getSubName();
             switch (esm.retSubName().val)
             {
-                case ESM::FourCC<'N','A','M','E'>::value:
+                case ESM::SREC_NAME:
                     mId = esm.getHString();
                     hasName = true;
                     break;
@@ -65,7 +65,7 @@ namespace ESM
                 case ESM::FourCC<'D','E','S','C'>::value:
                     mDescription = esm.getHString();
                     break;
-                case ESM::FourCC<'D','E','L','E'>::value:
+                case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

@@ -91,7 +91,7 @@ namespace ESM
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();
                     break;
-                case ESM::FourCC<'D','E','L','E'>::value:
+                case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

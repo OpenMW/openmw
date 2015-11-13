@@ -16,7 +16,7 @@ void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
         uint32_t name = esm.retSubName().val;
         switch (name)
         {
-            case ESM::FourCC<'N','A','M','E'>::value:
+            case ESM::SREC_NAME:
                 mId = esm.getHString();
                 break;
             case ESM::FourCC<'F','I','L','T'>::value:
@@ -25,7 +25,7 @@ void ESM::Filter::load (ESMReader& esm, bool &isDeleted)
             case ESM::FourCC<'D','E','S','C'>::value:
                 mDescription = esm.getHString();
                 break;
-            case ESM::FourCC<'D','E','L','E'>::value:
+            case ESM::SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
                 break;
