@@ -85,20 +85,13 @@ void VideoState::setAudioFactory(MovieAudioFactory *factory)
 void PacketQueue::put(AVPacket *pkt)
 {
     AVPacketList *pkt1;
+    if(pkt != &flush_pkt && !pkt->buf && av_dup_packet(pkt) < 0)
+        throw std::runtime_error("Failed to duplicate packet");
+
     pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
     if(!pkt1) throw std::bad_alloc();
     pkt1->pkt = *pkt;
     pkt1->next = NULL;
-
-    if(pkt->data != flush_pkt.data && pkt1->pkt.destruct == NULL)
-    {
-        if(av_dup_packet(&pkt1->pkt) < 0)
-        {
-            av_free(pkt1);
-            throw std::runtime_error("Failed to duplicate packet");
-        }
-        av_free_packet(pkt);
-    }
 
     this->mutex.lock ();
 
@@ -313,7 +306,7 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
         int w = (*this->video_st)->codec->width;
         int h = (*this->video_st)->codec->height;
         this->sws_context = sws_getContext(w, h, (*this->video_st)->codec->pix_fmt,
-                                           w, h, PIX_FMT_RGBA, SWS_BICUBIC,
+                                           w, h, AV_PIX_FMT_RGBA, SWS_BICUBIC,
                                            NULL, NULL, NULL);
         if(this->sws_context == NULL)
             throw std::runtime_error("Cannot initialize the conversion context!\n");
@@ -354,24 +347,28 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
     return pts;
 }
 
-
+static void our_free_buffer(void *opaque, uint8_t *data);
 /* These are called whenever we allocate a frame
  * buffer. We use this to store the global_pts in
  * a frame at the time it is allocated.
  */
 static int64_t global_video_pkt_pts = AV_NOPTS_VALUE;
-static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic)
+static int our_get_buffer(struct AVCodecContext *c, AVFrame *pic, int flags)
 {
-    int ret = avcodec_default_get_buffer(c, pic);
+    AVBufferRef *ref;
+    int ret = avcodec_default_get_buffer2(c, pic, flags);
     int64_t *pts = (int64_t*)av_malloc(sizeof(int64_t));
     *pts = global_video_pkt_pts;
     pic->opaque = pts;
+    ref = av_buffer_create((uint8_t *)pic->opaque, sizeof(int64_t), our_free_buffer, pic->buf[0], flags);
+    pic->buf[0] = ref;
     return ret;
 }
-static void our_release_buffer(struct AVCodecContext *c, AVFrame *pic)
+static void our_free_buffer(void *opaque, uint8_t *data)
 {
-    if(pic) av_freep(&pic->opaque);
-    avcodec_default_release_buffer(c, pic);
+    AVBufferRef *ref = (AVBufferRef *)opaque;
+    av_buffer_unref(&ref);
+    av_free(data);
 }
 
 
@@ -384,7 +381,7 @@ void VideoState::video_thread_loop(VideoState *self)
     pFrame = av_frame_alloc();
 
     self->rgbaFrame = av_frame_alloc();
-    avpicture_alloc((AVPicture*)self->rgbaFrame, PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
+    avpicture_alloc((AVPicture*)self->rgbaFrame, AV_PIX_FMT_RGBA, (*self->video_st)->codec->width, (*self->video_st)->codec->height);
 
     while(self->videoq.get(packet, self) >= 0)
     {
@@ -589,8 +586,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
     case AVMEDIA_TYPE_VIDEO:
         this->video_st = pFormatCtx->streams + stream_index;
 
-        codecCtx->get_buffer = our_get_buffer;
-        codecCtx->release_buffer = our_release_buffer;
+        codecCtx->get_buffer2 = our_get_buffer;
         this->video_thread = boost::thread(video_thread_loop, this);
         break;
 

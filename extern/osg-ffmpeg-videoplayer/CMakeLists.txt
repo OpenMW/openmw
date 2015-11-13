@@ -6,7 +6,6 @@ set(OSG_FFMPEG_VIDEOPLAYER_SOURCE_FILES
     videoplayer.cpp
     videostate.cpp
     videodefs.hpp
-    libavwrapper.cpp
     audiodecoder.cpp
     audiofactory.hpp
 )
