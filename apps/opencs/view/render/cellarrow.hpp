@@ -26,6 +26,8 @@ namespace CSVRender
             CellArrowTag (CellArrow *arrow);
 
             CellArrow *getCellArrow() const;
+
+            virtual QString getToolTip (bool hideBasics) const;
     };
 
 

@@ -18,6 +18,33 @@ CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
     return mArrow;
 }
 
+QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
+{
+    QString text ("Direction: ");
+
+    switch (mArrow->getDirection())
+    {
+        case CellArrow::Direction_North: text += "North"; break;
+        case CellArrow::Direction_West: text += "West"; break;
+        case CellArrow::Direction_South: text += "South"; break;
+        case CellArrow::Direction_East: text += "East"; break;
+    }
+
+    if (!hideBasics)
+    {
+        text +=
+            "<p>"
+            "Modify which cells are shown"
+            "<ul><li>Primary-Edit: Add cell in given direction</li>"
+            "<li>Secondary-Edit: Add cell and remove old cell</li>"
+            "<li>Shift Primary-Edit: Add cells in given direction</li>"
+            "<li>Shift Secondary-Edit: Add cells and remove old cells</li>"
+            "</ul>";
+    }
+
+    return text;
+}
+
 
 void CSVRender::CellArrow::adjustTransform()
 {
