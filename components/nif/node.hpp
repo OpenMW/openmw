@@ -250,5 +250,41 @@ struct NiRotatingParticles : Node
     }
 };
 
+// A node used as the base to switch between child nodes, such as for LOD levels.
+struct NiSwitchNode : public NiNode
+{
+    void read(NIFStream *nif)
+    {
+        NiNode::read(nif);
+        nif->getInt(); // unknown
+    }
+};
+
+struct NiLODNode : public NiSwitchNode
+{
+    osg::Vec3f lodCenter;
+
+    struct LODRange
+    {
+        float minRange;
+        float maxRange;
+    };
+    std::vector<LODRange> lodLevels;
+
+    void read(NIFStream *nif)
+    {
+        NiSwitchNode::read(nif);
+        lodCenter = nif->getVector3();
+        unsigned int numLodLevels = nif->getUInt();
+        for (unsigned int i=0; i<numLodLevels; ++i)
+        {
+            LODRange r;
+            r.minRange = nif->getFloat();
+            r.maxRange = nif->getFloat();
+            lodLevels.push_back(r);
+        }
+    }
+};
+
 } // Namespace
 #endif

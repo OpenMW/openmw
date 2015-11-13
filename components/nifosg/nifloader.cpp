@@ -6,6 +6,7 @@
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/Version>
+#include <osg/LOD>
 
 // resource
 #include <components/misc/stringops.hpp>
@@ -424,6 +425,20 @@ namespace NifOsg
             // Need to make sure that won't break transparency sorting. Check what the original engine is doing?
         }
 
+        osg::ref_ptr<osg::LOD> handleLodNode(const Nif::NiLODNode* niLodNode)
+        {
+            osg::ref_ptr<osg::LOD> lod (new osg::LOD);
+            lod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
+            lod->setCenter(niLodNode->lodCenter);
+            for (unsigned int i=0; i<niLodNode->lodLevels.size(); ++i)
+            {
+                const Nif::NiLODNode::LODRange& range = niLodNode->lodLevels[i];
+                lod->setRange(i, range.minRange, range.maxRange);
+            }
+            lod->setRangeMode(osg::LOD::DISTANCE_FROM_EYE_POINT);
+            return lod;
+        }
+
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::TextureManager* textureManager,
                                 std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
@@ -554,6 +569,15 @@ namespace NifOsg
 
             // Optimization pass
             optimize(nifNode, node, skipMeshes);
+
+
+            if (nifNode->recType == Nif::RC_NiLODNode)
+            {
+                const Nif::NiLODNode* niLodNode = static_cast<const Nif::NiLODNode*>(nifNode);
+                osg::ref_ptr<osg::LOD> lod = handleLodNode(niLodNode);
+                node->addChild(lod); // unsure if LOD should be above or below this node's transform
+                node = lod;
+            }
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)

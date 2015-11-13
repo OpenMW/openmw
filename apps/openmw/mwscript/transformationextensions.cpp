@@ -186,7 +186,7 @@ namespace MWScript
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
                     else
-                        throw std::runtime_error ("invalid axis: " + axis);                    
+                        throw std::runtime_error ("invalid axis: " + axis);
                 }
         };
 
@@ -232,7 +232,7 @@ namespace MWScript
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
 
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(updated);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,updated);
                 }
         };
 
@@ -300,7 +300,7 @@ namespace MWScript
                     }
                     catch(std::exception&)
                     {
-                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);                        
+                        const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         int cx,cy;
                         MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
@@ -312,9 +312,9 @@ namespace MWScript
                     }
                     if(store)
                     {
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
-                        ptr = MWWorld::Ptr(ptr.getBase(), store);
-                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
+                        MWWorld::Ptr base = ptr;
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,store,x,y,z);
+                        dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
                         float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
                         float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
@@ -360,17 +360,17 @@ namespace MWScript
 
                     // another morrowind oddity: player will be moved to the exterior cell at this location,
                     // non-player actors will move within the cell they are in.
+                    MWWorld::Ptr base = ptr;
                     if (ptr == MWMechanics::getPlayer())
                     {
                         MWWorld::CellStore* cell = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
-                        MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
-                        ptr = MWWorld::Ptr(ptr.getBase(), cell);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr,cell,x,y,z);
                     }
                     else
                     {
                         ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
                     }
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 
                     float ax = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[0]);
                     float ay = osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[1]);
@@ -627,7 +627,7 @@ namespace MWScript
 
                     MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
 
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
                         MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
                             ptr.getCellRef().getPosition().pos[1], ptr.getCellRef().getPosition().pos[2]));
 
@@ -745,8 +745,8 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);            
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);            
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
