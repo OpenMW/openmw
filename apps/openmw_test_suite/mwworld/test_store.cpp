@@ -4,9 +4,13 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/files/memorystream.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
+
+static Loading::Listener dummyListener;
 
 /// Base class for tests of ESMStore that rely on external content files to produce the test data
 struct ContentFileTest : public ::testing::Test
@@ -30,9 +34,7 @@ struct ContentFileTest : public ::testing::Test
             lEsm.setGlobalReaderList(&readerList);
             lEsm.open(it->string());
             readerList[index] = lEsm;
-            std::auto_ptr<Loading::Listener> listener;
-            listener.reset(new Loading::Listener);
-            mEsmStore.load(readerList[index], listener.get());
+            mEsmStore.load(readerList[index], &dummyListener);
 
             ++index;
         }
@@ -208,7 +210,6 @@ TEST_F(ContentFileTest, autocalc_test)
 }
 */
 
-/*
 /// Base class for tests of ESMStore that do not rely on external content files
 struct StoreTest : public ::testing::Test
 {
@@ -216,11 +217,66 @@ protected:
     MWWorld::ESMStore mEsmStore;
 };
 
+
+/// Create an ESM file in-memory containing the specified record.
+/// @param deleted Write record with deleted flag?
+template <typename T>
+Files::IStreamPtr getEsmFile(T record, bool deleted)
+{
+    ESM::ESMWriter writer;
+    std::stringstream* stream = new std::stringstream;
+    writer.setFormat(0);
+    writer.save(*stream);
+    writer.startRecord(T::sRecordId);
+    writer.writeHNString("NAME", record.mId);
+    if (deleted)
+        writer.writeHNT("DELE", (int)1);
+    record.save(writer);
+    writer.endRecord(T::sRecordId);
+
+    return Files::IStreamPtr(stream);
+}
+
 /// Tests deletion of records.
 TEST_F(StoreTest, delete_test)
 {
+    const std::string recordId = "foobar";
 
+    typedef ESM::Apparatus RecordType;
 
+    RecordType record;
+    record.blank();
+    record.mId = recordId;
+
+    ESM::ESMReader reader;
+    std::vector<ESM::ESMReader> readerList;
+    readerList.push_back(reader);
+    reader.setGlobalReaderList(&readerList);
+
+    // master file inserts a record
+    Files::IStreamPtr file = getEsmFile(record, false);
+    reader.open(file, "filename");
+    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.setUp();
+
+    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
+
+    // now a plugin deletes it
+    file = getEsmFile(record, true);
+    reader.open(file, "filename");
+    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.setUp();
+
+    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 0);
+
+    // now another plugin inserts it again
+    // expected behaviour is the record to reappear rather than staying deleted
+    file = getEsmFile(record, false);
+    reader.open(file, "filename");
+    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.setUp();
+
+    ASSERT_TRUE (mEsmStore.get<RecordType>().getSize() == 1);
 }
 
 /// Tests overwriting of records.
@@ -228,4 +284,3 @@ TEST_F(StoreTest, overwrite_test)
 {
 
 }
-*/
