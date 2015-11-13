@@ -786,6 +786,9 @@ if (APPLE)
     install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
     install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
+    set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
+    set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
+
     install(CODE "
         function(gp_item_default_embedded_path_override item  default_embedded_path_var)
             if (\${item} MATCHES ${OSG_PLUGIN_PREFIX_DIR})
