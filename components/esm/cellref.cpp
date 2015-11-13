@@ -108,7 +108,7 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
             case ESM::FourCC<'N','A','M','0'>::value:
                 esm.skipHSub();
                 break;
-            case ESM::FourCC<'D','E','L','E'>::value:
+            case ESM::SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
                 break;

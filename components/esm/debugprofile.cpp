@@ -15,7 +15,7 @@ void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
         esm.getSubName();
         switch (esm.retSubName().val)
         {
-            case ESM::FourCC<'N','A','M','E'>::value:
+            case ESM::SREC_NAME:
                 mId = esm.getHString();
                 break;
             case ESM::FourCC<'D','E','S','C'>::value:
@@ -27,7 +27,7 @@ void ESM::DebugProfile::load (ESMReader& esm, bool &isDeleted)
             case ESM::FourCC<'F','L','A','G'>::value:
                 esm.getHT(mFlags);
                 break;
-            case ESM::FourCC<'D','E','L','E'>::value:
+            case ESM::SREC_DELE:
                 esm.skipHSub();
                 isDeleted = true;
                 break;

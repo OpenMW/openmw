@@ -67,7 +67,7 @@ namespace ESM
                 case ESM::FourCC<'S','N','A','M'>::value:
                     mSound = esm.getHString();
                     break;
-                case ESM::FourCC<'N','A','M','E'>::value:
+                case ESM::SREC_NAME:
                     mResponse = esm.getHString();
                     break;
                 case ESM::FourCC<'S','C','V','R'>::value:
@@ -93,7 +93,7 @@ namespace ESM
                     mQuestStatus = QS_Restart;
                     esm.skipRecord();
                     break;
-                case ESM::FourCC<'D','E','L','E'>::value:
+                case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
                     break;

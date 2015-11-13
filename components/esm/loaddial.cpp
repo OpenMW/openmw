@@ -44,7 +44,7 @@ namespace ESM
                     }
                     break;
                 }
-                case ESM::FourCC<'D','E','L','E'>::value:
+                case ESM::SREC_DELE:
                     esm.skipHSub();
                     mType = Unknown;
                     isDeleted = true;
