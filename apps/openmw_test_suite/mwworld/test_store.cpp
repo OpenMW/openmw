@@ -120,8 +120,61 @@ TEST_F(ContentFileTest, dialogue_merging_test)
     std::cout << "dialogue_merging_test successful, results printed to " << file << std::endl;
 }
 
-/*
-TEST_F(ContentFileTest, diagnostics)
+// Note: here we don't test records that don't use string names (e.g. Land, Pathgrid, Cell)
+#define RUN_TEST_FOR_TYPES(func, arg1, arg2) \
+    func<ESM::Activator>(arg1, arg2); \
+    func<ESM::Apparatus>(arg1, arg2); \
+    func<ESM::Armor>(arg1, arg2); \
+    func<ESM::BirthSign>(arg1, arg2); \
+    func<ESM::BodyPart>(arg1, arg2); \
+    func<ESM::Book>(arg1, arg2); \
+    func<ESM::Class>(arg1, arg2); \
+    func<ESM::Clothing>(arg1, arg2); \
+    func<ESM::Container>(arg1, arg2); \
+    func<ESM::Creature>(arg1, arg2); \
+    func<ESM::CreatureLevList>(arg1, arg2); \
+    func<ESM::Dialogue>(arg1, arg2); \
+    func<ESM::Door>(arg1, arg2); \
+    func<ESM::Enchantment>(arg1, arg2); \
+    func<ESM::Faction>(arg1, arg2); \
+    func<ESM::GameSetting>(arg1, arg2); \
+    func<ESM::Global>(arg1, arg2); \
+    func<ESM::Ingredient>(arg1, arg2); \
+    func<ESM::ItemLevList>(arg1, arg2); \
+    func<ESM::Light>(arg1, arg2); \
+    func<ESM::Lockpick>(arg1, arg2); \
+    func<ESM::Miscellaneous>(arg1, arg2); \
+    func<ESM::NPC>(arg1, arg2); \
+    func<ESM::Potion>(arg1, arg2); \
+    func<ESM::Probe>(arg1, arg2); \
+    func<ESM::Race>(arg1, arg2); \
+    func<ESM::Region>(arg1, arg2); \
+    func<ESM::Repair>(arg1, arg2); \
+    func<ESM::Script>(arg1, arg2); \
+    func<ESM::Sound>(arg1, arg2); \
+    func<ESM::SoundGenerator>(arg1, arg2); \
+    func<ESM::Spell>(arg1, arg2); \
+    func<ESM::StartScript>(arg1, arg2); \
+    func<ESM::Weapon>(arg1, arg2);
+
+template <typename T>
+void printRecords(MWWorld::ESMStore& esmStore, std::ostream& outStream)
+{
+    const MWWorld::Store<T>& store = esmStore.get<T>();
+    outStream << store.getSize() << " " << T::getRecordType() << " records" << std::endl;
+
+    for (typename MWWorld::Store<T>::iterator it = store.begin(); it != store.end(); ++it)
+    {
+        const T& record = *it;
+        outStream << record.mId << std::endl;
+    }
+
+    outStream << std::endl;
+}
+
+/// Print some basic diagnostics about the loaded content files, e.g. number of records and names of those records
+/// Also used to test the iteration order of records
+TEST_F(ContentFileTest, content_diagnostics_test)
 {
     if (mContentFiles.empty())
     {
@@ -129,9 +182,15 @@ TEST_F(ContentFileTest, diagnostics)
         return;
     }
 
+    const std::string file = "test_content_diagnostics.txt";
 
+    boost::filesystem::ofstream stream;
+    stream.open(file);
+
+    RUN_TEST_FOR_TYPES(printRecords, mEsmStore, stream);
+
+    std::cout << "diagnostics_test successful, results printed to " << file << std::endl;
 }
-*/
 
 // TODO:
 /// Print results of autocalculated NPC spell lists. Also serves as test for attribute/skill autocalculation which the spell autocalculation heavily relies on
