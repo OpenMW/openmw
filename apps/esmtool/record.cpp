@@ -867,6 +867,7 @@ void Record<ESM::Land>::print()
         std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
         std::cout << "  Unknown2: " << data->mUnk2 << std::endl;
     }
+    mData.unloadData();
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
