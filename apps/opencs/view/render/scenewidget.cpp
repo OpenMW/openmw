@@ -126,7 +126,7 @@ CompositeViewer::CompositeViewer()
     // Qt5 is currently crashing and reporting "Cannot make QOpenGLContext current in a different thread" when the viewer is run multi-threaded, this is regression from Qt4
     osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::SingleThreaded;
 #else
-    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::CullDrawThreadPerContext;
+    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::DrawThreadPerContext;
 #endif
 
     setThreadingModel(threadingModel);
