@@ -1,19 +1,42 @@
 #include "loadglob.hpp"
 
+#include "esmreader.hpp"
+#include "esmwriter.hpp"
 #include "defs.hpp"
 
 namespace ESM
 {
     unsigned int Global::sRecordId = REC_GLOB;
 
-    void Global::load (ESMReader &esm)
+    void Global::load (ESMReader &esm, bool &isDeleted)
     {
-        mValue.read (esm, ESM::Variant::Format_Global);
+        isDeleted = false;
+
+        mId = esm.getHNString ("NAME");
+
+        if (esm.isNextSub ("DELE"))
+        {
+            esm.skipHSub();
+            isDeleted = true;
+        }
+        else
+        {
+            mValue.read (esm, ESM::Variant::Format_Global);
+        }
     }
 
-    void Global::save (ESMWriter &esm) const
+    void Global::save (ESMWriter &esm, bool isDeleted) const
     {
-        mValue.write (esm, ESM::Variant::Format_Global);
+        esm.writeHNCString ("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString ("DELE", "");
+        }
+        else
+        {
+            mValue.write (esm, ESM::Variant::Format_Global);
+        }
     }
 
     void Global::blank()

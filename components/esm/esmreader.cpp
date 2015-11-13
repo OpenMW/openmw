@@ -187,6 +187,11 @@ bool ESMReader::peekNextSub(const char *name)
     return mCtx.subName == name;
 }
 
+void ESMReader::cacheSubName()
+{
+    mCtx.subCached = true;
+}
+
 // Read subrecord name. This gets called a LOT, so I've optimized it
 // slightly.
 void ESMReader::getSubName()
@@ -276,6 +281,7 @@ void ESMReader::skipRecord()
 {
     skip(mCtx.leftRec);
     mCtx.leftRec = 0;
+    mCtx.subCached = false;
 }
 
 void ESMReader::getRecHeader(uint32_t &flags)

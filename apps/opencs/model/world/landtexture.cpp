@@ -4,10 +4,9 @@
 
 namespace CSMWorld
 {
-
-    void LandTexture::load(ESM::ESMReader &esm)
+    void LandTexture::load(ESM::ESMReader &esm, bool &isDeleted)
     {
-        ESM::LandTexture::load(esm);
+        ESM::LandTexture::load(esm, isDeleted);
 
         mPluginIndex = esm.getIndex();
     }

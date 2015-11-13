@@ -38,8 +38,8 @@ struct Apparatus
     AADTstruct mData;
     std::string mId, mModel, mIcon, mScript, mName;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

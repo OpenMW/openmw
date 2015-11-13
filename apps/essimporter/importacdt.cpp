@@ -32,7 +32,8 @@ namespace ESSImport
         if (esm.isNextSub("MNAM"))
            esm.skipHSub();
 
-        ESM::CellRef::loadData(esm);
+        bool isDeleted = false;
+        ESM::CellRef::loadData(esm, isDeleted);
 
         mHasACDT = false;
         if (esm.isNextSub("ACDT"))

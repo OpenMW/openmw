@@ -32,7 +32,8 @@ namespace ESSImport
                 item.mSCRI.load(esm);
 
                 // for XSOL and XCHG seen so far, but probably others too
-                item.ESM::CellRef::loadData(esm);
+                bool isDeleted = false;
+                item.ESM::CellRef::loadData(esm, isDeleted);
 
                 int charge=-1;
                 esm.getHNOT(charge, "XHLT");
