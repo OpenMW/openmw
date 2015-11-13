@@ -5,14 +5,13 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
-#include <components/files/memorystream.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 
 static Loading::Listener dummyListener;
 
-/// Base class for tests of ESMStore that rely on external content files to produce the test data
+/// Base class for tests of ESMStore that rely on external content files to produce the test results
 struct ContentFileTest : public ::testing::Test
 {
   protected:
@@ -228,10 +227,7 @@ Files::IStreamPtr getEsmFile(T record, bool deleted)
     writer.setFormat(0);
     writer.save(*stream);
     writer.startRecord(T::sRecordId);
-    writer.writeHNString("NAME", record.mId);
-    if (deleted)
-        writer.writeHNT("DELE", (int)1);
-    record.save(writer);
+    record.save(writer, deleted);
     writer.endRecord(T::sRecordId);
 
     return Files::IStreamPtr(stream);
