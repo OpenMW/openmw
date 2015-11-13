@@ -196,7 +196,7 @@ TEST_F(ContentFileTest, content_diagnostics_test)
 
 // TODO:
 /// Print results of autocalculated NPC spell lists. Also serves as test for attribute/skill autocalculation which the spell autocalculation heavily relies on
-/// - even rounding errors can completely change the resulting spell lists.
+/// - even incorrect rounding modes can completely change the resulting spell lists.
 /*
 TEST_F(ContentFileTest, autocalc_test)
 {
@@ -282,5 +282,38 @@ TEST_F(StoreTest, delete_test)
 /// Tests overwriting of records.
 TEST_F(StoreTest, overwrite_test)
 {
+    const std::string recordId = "foobar";
+    const std::string recordIdUpper = "Foobar";
 
+    typedef ESM::Apparatus RecordType;
+
+    RecordType record;
+    record.blank();
+    record.mId = recordId;
+
+    ESM::ESMReader reader;
+    std::vector<ESM::ESMReader> readerList;
+    readerList.push_back(reader);
+    reader.setGlobalReaderList(&readerList);
+
+    // master file inserts a record
+    Files::IStreamPtr file = getEsmFile(record, false);
+    reader.open(file, "filename");
+    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.setUp();
+
+    // now a plugin overwrites it with changed data
+    record.mId = recordIdUpper; // change id to uppercase, to test case smashing while we're at it
+    record.mModel = "the_new_model";
+    file = getEsmFile(record, false);
+    reader.open(file, "filename");
+    mEsmStore.load(reader, &dummyListener);
+    mEsmStore.setUp();
+
+    // verify that changes were actually applied
+    const RecordType* overwrittenRec = mEsmStore.get<RecordType>().search(recordId);
+
+    ASSERT_TRUE (overwrittenRec != NULL);
+
+    ASSERT_TRUE (overwrittenRec && overwrittenRec->mModel == "the_new_model");
 }
