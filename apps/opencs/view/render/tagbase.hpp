@@ -3,6 +3,8 @@
 
 #include <osg/Referenced>
 
+#include <QString>
+
 #include "elements.hpp"
 
 namespace CSVRender
@@ -16,6 +18,9 @@ namespace CSVRender
             TagBase (Elements element);
 
             Elements getElement() const;
+
+            virtual QString getToolTip (bool hideBasics) const;
+
     };
 }
 
