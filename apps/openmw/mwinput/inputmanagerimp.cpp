@@ -31,8 +31,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-using namespace ICS;
-
 namespace MWInput
 {
     InputManager::InputManager(
