@@ -179,8 +179,54 @@ namespace MWWorld
         return (ref.mRef.mRefnum == pRefnum);
     }
 
+    void CellStore::moveFrom(const Ptr &object, CellStore *from)
+    {
+        MovedRefTracker::iterator found = mMovedToAnotherCell.find(object.getBase());
+        if (found != mMovedToAnotherCell.end())
+        {
+            // A cell we had previously moved an object to is returning it to us.
+            assert (found->second == from);
+            mMovedToAnotherCell.erase(found);
+        }
+        else
+        {
+            mMovedHere.insert(std::make_pair(object.getBase(), from));
+        }
+    }
+
+    void CellStore::moveTo(const Ptr &object, CellStore *cellToMoveTo)
+    {
+        MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
+        if (found != mMovedHere.end())
+        {
+            // Special case - object didn't originate in this cell
+            // Move it back to its original cell first
+            CellStore* originalCell = found->second;
+            assert (originalCell != this);
+            originalCell->moveFrom(object, this);
+
+            mMovedHere.erase(found);
+
+            // Now that object is back to its rightful owner, we can move it
+            originalCell->moveTo(object, cellToMoveTo);
+
+            updateMergedRefs();
+            return;
+        }
+
+        cellToMoveTo->moveFrom(object, this);
+        mMovedToAnotherCell.insert(std::make_pair(object.getBase(), cellToMoveTo));
+
+        updateMergedRefs();
+    }
+
+    void CellStore::updateMergedRefs()
+    {
+
+    }
+
     CellStore::CellStore (const ESM::Cell *cell)
-      : mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
+        : mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
     }

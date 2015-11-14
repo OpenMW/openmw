@@ -95,7 +95,28 @@ namespace MWWorld
             CellRefList<ESM::Static>            mStatics;
             CellRefList<ESM::Weapon>            mWeapons;
 
+            typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
+            // References owned by a different cell that have been moved here.
+            // <reference, cell the reference originally came from>
+            MovedRefTracker mMovedHere;
+            // References owned by this cell that have been moved to another cell.
+            // <reference, cell the reference was moved to>
+            MovedRefTracker mMovedToAnotherCell;
+
+            // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from mMovedToAnotherCell
+            std::vector<LiveCellRefBase*> mMergedRefs;
+
+            /// Moves object from the given cell to this cell.
+            void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
+
+            /// Repopulate mMergedRefs.
+            void updateMergedRefs();
+
         public:
+
+            /// Moves object from this cell to the given cell.
+            /// @note automatically updates given cell by calling cellToMoveTo->moveFrom(...)
+            void moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
 
             /// Make a copy of the given object and insert it into this cell.
             /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
