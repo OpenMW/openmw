@@ -1693,6 +1693,7 @@ namespace MWWorld
 
     osg::Vec2f World::getNorthVector (CellStore* cell)
     {
+        /*
         MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();
         MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
         if (!ref)
@@ -1702,10 +1703,13 @@ namespace MWWorld
         osg::Vec3f dir = orient * osg::Vec3f(0,1,0);
         osg::Vec2f d (dir.x(), dir.y());
         return d;
+        */
+        return osg::Vec2f();
     }
 
     void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
     {
+        /*
         MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
         CellRefList<ESM::Door>::List& refList = doors.mList;
         for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
@@ -1744,6 +1748,7 @@ namespace MWWorld
                 out.push_back(newMarker);
             }
         }
+        */
     }
 
     void World::setWaterHeight(const float height)
@@ -2240,6 +2245,7 @@ namespace MWWorld
 
     void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
     {
+        /*
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
@@ -2254,6 +2260,7 @@ namespace MWWorld
                     out.push_back(ptr);
             }
         }
+        */
     }
 
     struct ListObjectsFunctor
@@ -2316,6 +2323,8 @@ namespace MWWorld
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
     {
+        return false;
+        /*
         typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
         typedef MWWorld::CellRefList<ESM::Static>::List StaticList;
 
@@ -2368,6 +2377,7 @@ namespace MWWorld
             pos = statics.begin()->mRef.getPosition();
             return true;
         }
+        */
 
         return false;
     }
@@ -2715,6 +2725,8 @@ namespace MWWorld
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result)
     {
+        return false;
+        /*
         if (cell->isExterior())
             return false;
 
@@ -2732,7 +2744,7 @@ namespace MWWorld
                 MWWorld::CellStore *next = getInterior( *i );
                 if ( !next ) continue;
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
                 const CellRefList<ESM::Door>::List& refList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -2761,10 +2773,12 @@ namespace MWWorld
 
         // No luck :(
         return false;
+        */
     }
 
     MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
     {
+        /*
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
         }
@@ -2792,7 +2806,7 @@ namespace MWWorld
                     return closestMarker;
                 }
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
                 const CellRefList<ESM::Door>::List& doorList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -2816,7 +2830,7 @@ namespace MWWorld
                 }
             }
         }
-
+        */
         return MWWorld::Ptr();
     }
 

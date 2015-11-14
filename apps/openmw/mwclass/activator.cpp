@@ -130,6 +130,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Activator>().insert(*ref), &cell);
+        return MWWorld::Ptr();
+        //return MWWorld::Ptr(&cell.get<ESM::Activator>().insert(*ref), &cell);
     }
 }

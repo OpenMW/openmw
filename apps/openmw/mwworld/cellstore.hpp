@@ -73,6 +73,7 @@ namespace MWWorld
 
             MWWorld::TimeStamp mLastRespawn;
 
+            // List of refs owned by this cell
             CellRefList<ESM::Activator>         mActivators;
             CellRefList<ESM::Potion>            mPotions;
             CellRefList<ESM::Apparatus>         mAppas;
@@ -179,6 +180,8 @@ namespace MWWorld
                     forEachImp (functor, mNpcs);
             }
 
+            /// \todo add const version of forEach
+
             bool isExterior() const;
 
             Ptr searchInContainer (const std::string& id);
@@ -197,16 +200,6 @@ namespace MWWorld
 
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
-
-            template <class T>
-            CellRefList<T>& get() {
-                throw std::runtime_error ("Storage for type " + std::string(typeid(T).name())+ " does not exist in cells");
-            }
-
-            template <class T>
-            const CellRefList<T>& getReadOnly() {
-                throw std::runtime_error ("Read Only CellRefList access not available for type " + std::string(typeid(T).name()) );
-            }
 
             bool isPointConnected(const int start, const int end) const;
 
@@ -240,152 +233,6 @@ namespace MWWorld
 
             MWMechanics::PathgridGraph mPathgridGraph;
     };
-
-    template<>
-    inline CellRefList<ESM::Activator>& CellStore::get<ESM::Activator>()
-    {
-        mHasState = true;
-        return mActivators;
-    }
-
-    template<>
-    inline CellRefList<ESM::Potion>& CellStore::get<ESM::Potion>()
-    {
-        mHasState = true;
-        return mPotions;
-    }
-
-    template<>
-    inline CellRefList<ESM::Apparatus>& CellStore::get<ESM::Apparatus>()
-    {
-        mHasState = true;
-        return mAppas;
-    }
-
-    template<>
-    inline CellRefList<ESM::Armor>& CellStore::get<ESM::Armor>()
-    {
-        mHasState = true;
-        return mArmors;
-    }
-
-    template<>
-    inline CellRefList<ESM::Book>& CellStore::get<ESM::Book>()
-    {
-        mHasState = true;
-        return mBooks;
-    }
-
-    template<>
-    inline CellRefList<ESM::Clothing>& CellStore::get<ESM::Clothing>()
-    {
-        mHasState = true;
-        return mClothes;
-    }
-
-    template<>
-    inline CellRefList<ESM::Container>& CellStore::get<ESM::Container>()
-    {
-        mHasState = true;
-        return mContainers;
-    }
-
-    template<>
-    inline CellRefList<ESM::Creature>& CellStore::get<ESM::Creature>()
-    {
-        mHasState = true;
-        return mCreatures;
-    }
-
-    template<>
-    inline CellRefList<ESM::Door>& CellStore::get<ESM::Door>()
-    {
-        mHasState = true;
-        return mDoors;
-    }
-
-    template<>
-    inline CellRefList<ESM::Ingredient>& CellStore::get<ESM::Ingredient>()
-    {
-        mHasState = true;
-        return mIngreds;
-    }
-
-    template<>
-    inline CellRefList<ESM::CreatureLevList>& CellStore::get<ESM::CreatureLevList>()
-    {
-        mHasState = true;
-        return mCreatureLists;
-    }
-
-    template<>
-    inline CellRefList<ESM::ItemLevList>& CellStore::get<ESM::ItemLevList>()
-    {
-        mHasState = true;
-        return mItemLists;
-    }
-
-    template<>
-    inline CellRefList<ESM::Light>& CellStore::get<ESM::Light>()
-    {
-        mHasState = true;
-        return mLights;
-    }
-
-    template<>
-    inline CellRefList<ESM::Lockpick>& CellStore::get<ESM::Lockpick>()
-    {
-        mHasState = true;
-        return mLockpicks;
-    }
-
-    template<>
-    inline CellRefList<ESM::Miscellaneous>& CellStore::get<ESM::Miscellaneous>()
-    {
-        mHasState = true;
-        return mMiscItems;
-    }
-
-    template<>
-    inline CellRefList<ESM::NPC>& CellStore::get<ESM::NPC>()
-    {
-        mHasState = true;
-        return mNpcs;
-    }
-
-    template<>
-    inline CellRefList<ESM::Probe>& CellStore::get<ESM::Probe>()
-    {
-        mHasState = true;
-        return mProbes;
-    }
-
-    template<>
-    inline CellRefList<ESM::Repair>& CellStore::get<ESM::Repair>()
-    {
-        mHasState = true;
-        return mRepairs;
-    }
-
-    template<>
-    inline CellRefList<ESM::Static>& CellStore::get<ESM::Static>()
-    {
-        mHasState = true;
-        return mStatics;
-    }
-
-    template<>
-    inline CellRefList<ESM::Weapon>& CellStore::get<ESM::Weapon>()
-    {
-        mHasState = true;
-        return mWeapons;
-    }
-
-    template<>
-    inline const CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
-    {
-        return mDoors;
-    }
 
     bool operator== (const CellStore& left, const CellStore& right);
     bool operator!= (const CellStore& left, const CellStore& right);

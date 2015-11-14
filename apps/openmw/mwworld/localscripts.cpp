@@ -116,6 +116,7 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 
 void MWWorld::LocalScripts::addCell (CellStore *cell)
 {
+    /*
     listCellScripts (*this, cell->get<ESM::Activator>(), cell);
     listCellScripts (*this, cell->get<ESM::Potion>(), cell);
     listCellScripts (*this, cell->get<ESM::Apparatus>(), cell);
@@ -136,6 +137,7 @@ void MWWorld::LocalScripts::addCell (CellStore *cell)
     listCellScripts (*this, cell->get<ESM::Probe>(), cell);
     listCellScripts (*this, cell->get<ESM::Repair>(), cell);
     listCellScripts (*this, cell->get<ESM::Weapon>(), cell);
+    */
 }
 
 void MWWorld::LocalScripts::clear()

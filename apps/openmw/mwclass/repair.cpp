@@ -159,8 +159,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
+        return MWWorld::Ptr();
 
-        return MWWorld::Ptr(&cell.get<ESM::Repair>().insert(*ref), &cell);
+        //return MWWorld::Ptr(&cell.get<ESM::Repair>().insert(*ref), &cell);
     }
 
     boost::shared_ptr<MWWorld::Action> Repair::use (const MWWorld::Ptr& ptr) const

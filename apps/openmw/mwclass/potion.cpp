@@ -177,8 +177,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
+        return MWWorld::Ptr();
 
-        return MWWorld::Ptr(&cell.get<ESM::Potion>().insert(*ref), &cell);
+        //return MWWorld::Ptr(&cell.get<ESM::Potion>().insert(*ref), &cell);
     }
 
     bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const

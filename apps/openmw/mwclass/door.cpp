@@ -309,8 +309,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Door> *ref =
             ptr.get<ESM::Door>();
+        return MWWorld::Ptr();
 
-        return MWWorld::Ptr(&cell.get<ESM::Door>().insert(*ref), &cell);
+        //return MWWorld::Ptr(&cell.get<ESM::Door>().insert(*ref), &cell);
     }
 
     void Door::ensureCustomData(const MWWorld::Ptr &ptr) const

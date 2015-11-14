@@ -44,6 +44,7 @@ namespace MWMechanics
             return MWWorld::Ptr(); // check interior cells only
 
         // Check all the doors in this cell
+        /*
         MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
         MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
         MWWorld::CellRefList<ESM::Door>::List::iterator it = refList.begin();
@@ -66,6 +67,7 @@ namespace MWMechanics
                 return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
             }
         }
+        */
         return MWWorld::Ptr(); // none found
     }
 

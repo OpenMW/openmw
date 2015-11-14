@@ -194,6 +194,7 @@ namespace MWClass
     {
         MWWorld::Ptr newPtr;
 
+        /*
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
@@ -223,6 +224,7 @@ namespace MWClass
                 ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(&cell.get<ESM::Miscellaneous>().insert(*ref), &cell);
         }
+        */
         return newPtr;
     }
 

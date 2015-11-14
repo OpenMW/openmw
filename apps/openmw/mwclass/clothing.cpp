@@ -275,8 +275,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Clothing> *ref =
             ptr.get<ESM::Clothing>();
+        return MWWorld::Ptr();
 
-        return MWWorld::Ptr(&cell.get<ESM::Clothing>().insert(*ref), &cell);
+        //return MWWorld::Ptr(&cell.get<ESM::Clothing>().insert(*ref), &cell);
     }
 
     int Clothing::getEnchantmentPoints (const MWWorld::Ptr& ptr) const

@@ -599,8 +599,9 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();
+        return MWWorld::Ptr();
 
-        return MWWorld::Ptr(&cell.get<ESM::Creature>().insert(*ref), &cell);
+        //return MWWorld::Ptr(&cell.get<ESM::Creature>().insert(*ref), &cell);
     }
 
     bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
