@@ -292,9 +292,8 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Container> *ref =
             ptr.get<ESM::Container>();
-        return MWWorld::Ptr();
 
-        //return MWWorld::Ptr(&cell.get<ESM::Container>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const

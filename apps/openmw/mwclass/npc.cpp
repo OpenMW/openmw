@@ -1129,9 +1129,8 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::NPC> *ref =
             ptr.get<ESM::NPC>();
-        return MWWorld::Ptr();
 
-        //return MWWorld::Ptr(&cell.get<ESM::NPC>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const

@@ -417,8 +417,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Weapon> *ref =
             ptr.get<ESM::Weapon>();
 
-        return MWWorld::Ptr();
-        //return MWWorld::Ptr(&cell.get<ESM::Weapon>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     int Weapon::getEnchantmentPoints (const MWWorld::Ptr& ptr) const

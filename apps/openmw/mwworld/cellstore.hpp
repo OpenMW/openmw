@@ -97,6 +97,9 @@ namespace MWWorld
 
         public:
 
+            template <typename T>
+            LiveCellRefBase* insert(const LiveCellRef<T>* ref);
+
             CellStore (const ESM::Cell *cell_);
 
             const ESM::Cell *getCell() const;
@@ -233,6 +236,128 @@ namespace MWWorld
 
             MWMechanics::PathgridGraph mPathgridGraph;
     };
+
+
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Activator>(const LiveCellRef<ESM::Activator>* ref)
+    {
+        mHasState = true;
+        return &mActivators.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Potion>(const LiveCellRef<ESM::Potion>* ref)
+    {
+        mHasState = true;
+        return &mPotions.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Apparatus>(const LiveCellRef<ESM::Apparatus>* ref)
+    {
+        mHasState = true;
+        return &mAppas.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Armor>(const LiveCellRef<ESM::Armor>* ref)
+    {
+        mHasState = true;
+        return &mArmors.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Book>(const LiveCellRef<ESM::Book>* ref)
+    {
+        mHasState = true;
+        return &mBooks.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Clothing>(const LiveCellRef<ESM::Clothing>* ref)
+    {
+        mHasState = true;
+        return &mClothes.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Container>(const LiveCellRef<ESM::Container>* ref)
+    {
+        mHasState = true;
+        return &mContainers.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Creature>(const LiveCellRef<ESM::Creature>* ref)
+    {
+        mHasState = true;
+        return &mCreatures.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Door>(const LiveCellRef<ESM::Door>* ref)
+    {
+        mHasState = true;
+        return &mDoors.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Ingredient>(const LiveCellRef<ESM::Ingredient>* ref)
+    {
+        mHasState = true;
+        return &mIngreds.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::CreatureLevList>(const LiveCellRef<ESM::CreatureLevList>* ref)
+    {
+        mHasState = true;
+        return &mCreatureLists.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::ItemLevList>(const LiveCellRef<ESM::ItemLevList>* ref)
+    {
+        mHasState = true;
+        return &mItemLists.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Light>(const LiveCellRef<ESM::Light>* ref)
+    {
+        mHasState = true;
+        return &mLights.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Lockpick>(const LiveCellRef<ESM::Lockpick>* ref)
+    {
+        mHasState = true;
+        return &mLockpicks.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Miscellaneous>(const LiveCellRef<ESM::Miscellaneous>* ref)
+    {
+        mHasState = true;
+        return &mMiscItems.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::NPC>(const LiveCellRef<ESM::NPC>* ref)
+    {
+        mHasState = true;
+        return &mNpcs.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Probe>(const LiveCellRef<ESM::Probe>* ref)
+    {
+        mHasState = true;
+        return &mProbes.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Repair>(const LiveCellRef<ESM::Repair>* ref)
+    {
+        mHasState = true;
+        return &mRepairs.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Static>(const LiveCellRef<ESM::Static>* ref)
+    {
+        mHasState = true;
+        return &mStatics.insert(*ref);
+    }
+    template<>
+    inline LiveCellRefBase* CellStore::insert<ESM::Weapon>(const LiveCellRef<ESM::Weapon>* ref)
+    {
+        mHasState = true;
+        return &mWeapons.insert(*ref);
+    }
 
     bool operator== (const CellStore& left, const CellStore& right);
     bool operator!= (const CellStore& left, const CellStore& right);
