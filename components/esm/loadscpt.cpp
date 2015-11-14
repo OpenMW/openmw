@@ -8,7 +8,6 @@
 
 namespace ESM
 {
-
     unsigned int Script::sRecordId = REC_SCPT;
 
     void Script::loadSCVR(ESMReader &esm)
@@ -58,21 +57,25 @@ namespace ESM
         }
     }
 
-    void Script::load(ESMReader &esm)
+    void Script::load(ESMReader &esm, bool &isDeleted)
     {
-        SCHD data;
-        esm.getHNT(data, "SCHD", 52);
-        mData = data.mData;
-        mId = data.mName.toString();
+        isDeleted = false;
 
         mVarNames.clear();
 
+        bool hasHeader = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::FourCC<'S','C','H','D'>::value:
+                    SCHD data;
+                    esm.getHT(data, 52);
+                    mData = data.mData;
+                    mId = data.mName.toString();
+                    hasHeader = true;
+                    break;
                 case ESM::FourCC<'S','C','V','R'>::value:
                     // list of local variables
                     loadSCVR(esm);
@@ -85,13 +88,21 @@ namespace ESM
                 case ESM::FourCC<'S','C','T','X'>::value:
                     mScriptText = esm.getHString();
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
+
+        if (!hasHeader)
+            esm.fail("Missing SCHD subrecord");
     }
 
-    void Script::save(ESMWriter &esm) const
+    void Script::save(ESMWriter &esm, bool isDeleted) const
     {
         std::string varNameString;
         if (!mVarNames.empty())
@@ -105,6 +116,12 @@ namespace ESM
         memcpy(data.mName.name, mId.c_str(), mId.size());
 
         esm.writeHNT("SCHD", data, 52);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
 
         if (!mVarNames.empty())
         {

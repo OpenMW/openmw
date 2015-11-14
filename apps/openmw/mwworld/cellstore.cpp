@@ -475,7 +475,7 @@ namespace MWWorld
         switch (store.find (ref.mRefID))
         {
             case ESM::REC_ACTI: mActivators.load(ref, deleted, store); break;
-            case ESM::REC_ALCH: mPotions.load(ref, deleted, store); break;
+            case ESM::REC_ALCH: mPotions.load(ref, deleted,store); break;
             case ESM::REC_APPA: mAppas.load(ref, deleted, store); break;
             case ESM::REC_ARMO: mArmors.load(ref, deleted, store); break;
             case ESM::REC_BOOK: mBooks.load(ref, deleted, store); break;

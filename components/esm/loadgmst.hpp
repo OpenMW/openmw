@@ -26,7 +26,7 @@ struct GameSetting
 
     Variant mValue;
 
-    void load(ESMReader &esm);
+    void load(ESMReader &esm, bool &isDeleted);
 
     /// \todo remove the get* functions (redundant, since mValue has equivalent functions now).
 
@@ -39,7 +39,7 @@ struct GameSetting
     std::string getString() const;
     ///< Throwns an exception if GMST is not of type string.
 
-    void save(ESMWriter &esm) const;
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

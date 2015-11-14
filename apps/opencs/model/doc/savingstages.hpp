@@ -100,26 +100,17 @@ namespace CSMDoc
         if (CSMWorld::getScopeFromId (mCollection.getRecord (stage).get().mId)!=mScope)
             return;
 
+        ESM::ESMWriter& writer = mState.getWriter();
         CSMWorld::RecordBase::State state = mCollection.getRecord (stage).mState;
+        typename CollectionT::ESXRecord record = mCollection.getRecord (stage).get();
 
-        if (state==CSMWorld::RecordBase::State_Modified ||
-            state==CSMWorld::RecordBase::State_ModifiedOnly)
+        if (state == CSMWorld::RecordBase::State_Modified ||
+            state == CSMWorld::RecordBase::State_ModifiedOnly ||
+            state == CSMWorld::RecordBase::State_Deleted)
         {
-            // FIXME: A quick Workaround to support records which should not write
-            // NAME, including SKIL, MGEF and SCPT.  If there are many more
-            // idcollection records that doesn't use NAME then a more generic
-            // solution may be required.
-            uint32_t name = mCollection.getRecord (stage).mModified.sRecordId;
-            mState.getWriter().startRecord (name);
-
-            if(name != ESM::REC_SKIL && name != ESM::REC_MGEF && name != ESM::REC_SCPT)
-                mState.getWriter().writeHNCString ("NAME", mCollection.getId (stage));
-            mCollection.getRecord (stage).mModified.save (mState.getWriter());
-            mState.getWriter().endRecord (mCollection.getRecord (stage).mModified.sRecordId);
-        }
-        else if (state==CSMWorld::RecordBase::State_Deleted)
-        {
-            /// \todo write record with delete flag
+            writer.startRecord (record.sRecordId);
+            record.save (writer, state == CSMWorld::RecordBase::State_Deleted);
+            writer.endRecord (record.sRecordId);
         }
     }
 

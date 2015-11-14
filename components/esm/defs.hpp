@@ -133,5 +133,12 @@ enum RecNameInts
     REC_DBGP = FourCC<'D','B','G','P'>::value ///< only used in project files
 };
 
+/// Common subrecords
+enum SubRecNameInts
+{
+    SREC_DELE = ESM::FourCC<'D','E','L','E'>::value,
+    SREC_NAME = ESM::FourCC<'N','A','M','E'>::value
+};
+
 }
 #endif

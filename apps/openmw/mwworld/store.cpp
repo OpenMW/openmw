@@ -42,6 +42,10 @@ namespace
 
 namespace MWWorld
 {
+    RecordId::RecordId(const std::string &id, bool isDeleted)
+        : mId(id), mIsDeleted(isDeleted)
+    {}
+
     template<typename T> 
     IndexedStore<T>::IndexedStore()
     {
@@ -60,7 +64,9 @@ namespace MWWorld
     void IndexedStore<T>::load(ESM::ESMReader &esm)
     {
         T record;
-        record.load(esm);
+        bool isDeleted = false;
+
+        record.load(esm, isDeleted);
 
         // Try to overwrite existing record
         std::pair<typename Static::iterator, bool> ret = mStatic.insert(std::make_pair(record.mIndex, record));
@@ -178,16 +184,21 @@ namespace MWWorld
         return ptr;
     }
     template<typename T>
-    void Store<T>::load(ESM::ESMReader &esm, const std::string &id) 
+    RecordId Store<T>::load(ESM::ESMReader &esm) 
     {
-        std::string idLower = Misc::StringUtils::lowerCase(id);
+        T record;
+        bool isDeleted = false;
 
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(idLower, T()));
+        record.load(esm, isDeleted);
+        Misc::StringUtils::toLower(record.mId);
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
         if (inserted.second)
             mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = record;
 
-        inserted.first->second.mId = idLower;
-        inserted.first->second.load(esm);
+        return RecordId(record.mId, isDeleted);
     }
     template<typename T>
     void Store<T>::setUp()
@@ -309,20 +320,21 @@ namespace MWWorld
              ++iter)
         {
             writer.startRecord (T::sRecordId);
-            writer.writeHNString ("NAME", iter->second.mId);
             iter->second.save (writer);
             writer.endRecord (T::sRecordId);
         }
     }
     template<typename T>
-    void Store<T>::read(ESM::ESMReader& reader, const std::string& id)
+    RecordId Store<T>::read(ESM::ESMReader& reader)
     {
         T record;
-        record.mId = id;
-        record.load (reader);
-        insert (record);
-    }
+        bool isDeleted = false;
 
+        record.load (reader, isDeleted);
+        insert (record);
+
+        return RecordId(record.mId, isDeleted);
+    }
 
     // LandTexture
     //=========================================================================
@@ -361,11 +373,12 @@ namespace MWWorld
         assert(plugin < mStatic.size());
         return mStatic[plugin].size();
     }
-    void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, const std::string &id, size_t plugin)
+    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm, size_t plugin)
     {
         ESM::LandTexture lt;
-        lt.load(esm);
-        lt.mId = id;
+        bool isDeleted = false;
+
+        lt.load(esm, isDeleted);
 
         // Make sure we have room for the structure
         if (plugin >= mStatic.size()) {
@@ -377,10 +390,12 @@ namespace MWWorld
 
         // Store it
         ltexl[lt.mIndex] = lt;
+
+        return RecordId(lt.mId, isDeleted);
     }
-    void Store<ESM::LandTexture>::load(ESM::ESMReader &esm, const std::string &id)
+    RecordId Store<ESM::LandTexture>::load(ESM::ESMReader &esm)
     {
-        load(esm, id, esm.getIndex());
+        return load(esm, esm.getIndex());
     }
     Store<ESM::LandTexture>::iterator Store<ESM::LandTexture>::begin(size_t plugin) const
     {
@@ -392,7 +407,6 @@ namespace MWWorld
         assert(plugin < mStatic.size());
         return mStatic[plugin].end();
     }
-
     
     // Land
     //=========================================================================
@@ -440,10 +454,12 @@ namespace MWWorld
         }
         return ptr;
     }
-    void Store<ESM::Land>::load(ESM::ESMReader &esm, const std::string &id)
+    RecordId Store<ESM::Land>::load(ESM::ESMReader &esm)
     {
         ESM::Land *ptr = new ESM::Land();
-        ptr->load(esm);
+        bool isDeleted = false;
+
+        ptr->load(esm, isDeleted);
 
         // Same area defined in multiple plugins? -> last plugin wins
         // Can't use search() because we aren't sorted yet - is there any other way to speed this up?
@@ -458,6 +474,8 @@ namespace MWWorld
         }
 
         mStatic.push_back(ptr);
+
+        return RecordId("", isDeleted);
     }
     void Store<ESM::Land>::setUp()
     {
@@ -600,7 +618,7 @@ namespace MWWorld
             mSharedExt.push_back(&(it->second));
         }
     }
-    void Store<ESM::Cell>::load(ESM::ESMReader &esm, const std::string &id)
+    RecordId Store<ESM::Cell>::load(ESM::ESMReader &esm)
     {
         // Don't automatically assume that a new cell must be spawned. Multiple plugins write to the same cell,
         //  and we merge all this data into one Cell object. However, we can't simply search for the cell id,
@@ -608,13 +626,13 @@ namespace MWWorld
         //  are not available until both cells have been loaded at least partially!
 
         // All cells have a name record, even nameless exterior cells.
-        std::string idLower = Misc::StringUtils::lowerCase(id);
         ESM::Cell cell;
-        cell.mName = id;
+        bool isDeleted = false;
 
-        // Load the (x,y) coordinates of the cell, if it is an exterior cell,
+        // Load the (x,y) coordinates of the cell, if it is an exterior cell, 
         // so we can find the cell we need to merge with
-        cell.loadData(esm);
+        cell.loadNameAndData(esm, isDeleted);
+        std::string idLower = Misc::StringUtils::lowerCase(cell.mName);
 
         if(cell.mData.mFlags & ESM::Cell::Interior)
         {
@@ -682,6 +700,8 @@ namespace MWWorld
                 mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
             }
         }
+
+        return RecordId(cell.mName, isDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -837,10 +857,12 @@ namespace MWWorld
     {
         mCells = &cells;
     }
-    void Store<ESM::Pathgrid>::load(ESM::ESMReader &esm, const std::string &id)
+    RecordId Store<ESM::Pathgrid>::load(ESM::ESMReader &esm)
     {
         ESM::Pathgrid pathgrid;
-        pathgrid.load(esm);
+        bool isDeleted = false;
+
+        pathgrid.load(esm, isDeleted);
 
         // Unfortunately the Pathgrid record model does not specify whether the pathgrid belongs to an interior or exterior cell.
         // For interior cells, mCell is the cell name, but for exterior cells it is either the cell name or if that doesn't exist, the cell's region name.
@@ -862,6 +884,8 @@ namespace MWWorld
             if (!ret.second)
                 ret.first->second = pathgrid;
         }
+
+        return RecordId("", isDeleted);
     }
     size_t Store<ESM::Pathgrid>::getSize() const
     {
@@ -1013,51 +1037,29 @@ namespace MWWorld
     }
 
     template <>
-    void Store<ESM::Dialogue>::load(ESM::ESMReader &esm, const std::string &id) {
-        std::string idLower = Misc::StringUtils::lowerCase(id);
+    inline RecordId Store<ESM::Dialogue>::load(ESM::ESMReader &esm) {
+        // The original letter case of a dialogue ID is saved, because it's printed
+        ESM::Dialogue dialogue;
+        bool isDeleted = false;
 
-        std::map<std::string, ESM::Dialogue>::iterator it = mStatic.find(idLower);
-        if (it == mStatic.end()) {
-            it = mStatic.insert( std::make_pair( idLower, ESM::Dialogue() ) ).first;
-            it->second.mId = id; // don't smash case here, as this line is printed
+        dialogue.loadId(esm);
+
+        std::string idLower = Misc::StringUtils::lowerCase(dialogue.mId);
+        std::map<std::string, ESM::Dialogue>::iterator found = mStatic.find(idLower);
+        if (found == mStatic.end())
+        {
+            dialogue.loadData(esm, isDeleted);
+            mStatic.insert(std::make_pair(idLower, dialogue));
+        }
+        else
+        {
+            found->second.loadData(esm, isDeleted);
+            dialogue = found->second;
         }
 
-        it->second.load(esm);
+        return RecordId(dialogue.mId, isDeleted);
     }
 
-
-    // Script
-    //=========================================================================
-
-    template <>
-    void Store<ESM::Script>::load(ESM::ESMReader &esm, const std::string &id) {
-        ESM::Script scpt;
-        scpt.load(esm);
-        Misc::StringUtils::toLower(scpt.mId);
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(scpt.mId, scpt));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = scpt;
-    }
-
-
-    // StartScript
-    //=========================================================================
-
-    template <>
-    void Store<ESM::StartScript>::load(ESM::ESMReader &esm, const std::string &id)
-    {
-        ESM::StartScript s;
-        s.load(esm);
-        s.mId = Misc::StringUtils::toLower(s.mId);
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(s.mId, s));
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-        else
-            inserted.first->second = s;
-    }
 }
 
 template class MWWorld::Store<ESM::Activator>;
@@ -1082,7 +1084,7 @@ template class MWWorld::Store<ESM::Global>;
 template class MWWorld::Store<ESM::Ingredient>;
 template class MWWorld::Store<ESM::ItemLevList>;
 //template class MWWorld::Store<ESM::Land>;
-template class MWWorld::Store<ESM::LandTexture>;
+//template class MWWorld::Store<ESM::LandTexture>;
 template class MWWorld::Store<ESM::Light>;
 template class MWWorld::Store<ESM::Lockpick>;
 //template class MWWorld::Store<ESM::MagicEffect>;

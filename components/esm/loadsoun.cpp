@@ -8,15 +8,21 @@ namespace ESM
 {
     unsigned int Sound::sRecordId = REC_SOUN;
 
-    void Sound::load(ESMReader &esm)
+    void Sound::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mSound = esm.getHString();
                     break;
@@ -24,16 +30,32 @@ namespace ESM
                     esm.getHT(mData, 3);
                     hasData = true;
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
-            esm.fail("Missing DATA");
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing DATA subrecord");
     }
 
-    void Sound::save(ESMWriter &esm) const
+    void Sound::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNOCString("FNAM", mSound);
         esm.writeHNT("DATA", mData, 3);
     }

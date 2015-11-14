@@ -185,6 +185,9 @@ public:
 
   bool peekNextSub(const char* name);
 
+  // Store the current subrecord name for the next call of getSubName()
+  void cacheSubName();
+
   // Read subrecord name. This gets called a LOT, so I've optimized it
   // slightly.
   void getSubName();

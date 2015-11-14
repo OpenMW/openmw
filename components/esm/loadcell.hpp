@@ -116,11 +116,11 @@ struct Cell
 
   // This method is left in for compatibility with esmtool. Parsing moved references currently requires
   //  passing ESMStore, bit it does not know about this parameter, so we do it this way.
-  void load(ESMReader &esm, bool saveContext = true); // Load everything (except references)
-  void loadData(ESMReader &esm); // Load DATAstruct only
-  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except DATAstruct and references
+  void load(ESMReader &esm, bool &isDeleted, bool saveContext = true); // Load everything (except references)
+  void loadNameAndData(ESMReader &esm, bool &isDeleted); // Load NAME and DATAstruct
+  void loadCell(ESMReader &esm, bool saveContext = true); // Load everything, except NAME, DATAstruct and references
 
-  void save(ESMWriter &esm) const;
+  void save(ESMWriter &esm, bool isDeleted = false) const;
 
   bool isExterior() const
   {
@@ -159,8 +159,11 @@ struct Cell
      reuse one memory location without blanking it between calls.
   */
   /// \param ignoreMoves ignore MVRF record and read reference like a regular CellRef.
-  static bool getNextRef(ESMReader &esm,
-          CellRef &ref, bool& deleted, bool ignoreMoves = false, MovedCellRef *mref = 0);
+  static bool getNextRef(ESMReader &esm, 
+                         CellRef &ref, 
+                         bool &isDeleted, 
+                         bool ignoreMoves = false, 
+                         MovedCellRef *mref = 0);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.

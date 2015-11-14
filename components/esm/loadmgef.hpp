@@ -96,8 +96,8 @@ struct MagicEffect
     // sMagicCreature04ID/05ID.
     int mIndex;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
      /// Set record to default state (does not touch the ID/index).
     void blank();
