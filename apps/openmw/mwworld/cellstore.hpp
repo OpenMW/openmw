@@ -97,6 +97,9 @@ namespace MWWorld
 
         public:
 
+            /// Make a copy of the given object and insert it into this cell.
+            /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
+            /// The supported types are defined at the bottom of this file.
             template <typename T>
             LiveCellRefBase* insert(const LiveCellRef<T>* ref);
 
