@@ -4,6 +4,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <osgViewer/ViewerEventHandlers>
+
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
@@ -15,12 +17,11 @@
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
-#include "../engine.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/environment.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -37,15 +38,15 @@ namespace MWInput
     InputManager::InputManager(
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
-            OMW::Engine& engine,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
         , mViewer(viewer)
+        , mScreenCaptureHandler(screenCaptureHandler)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
-        , mEngine(engine)
         , mInputManager(NULL)
         , mVideoWrapper(NULL)
         , mUserFile(userFile)
@@ -952,7 +953,8 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mEngine.screenshot();
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
 
         MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
@@ -1058,7 +1060,7 @@ namespace MWInput
     void InputManager::activate()
     {
         if (mControlSwitch["playercontrols"])
-            mEngine.activate();
+            mPlayer->activate();
     }
 
     void InputManager::toggleAutoMove()

@@ -483,8 +483,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    // FIXME: shouldn't depend on Engine
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, *this, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();
@@ -715,41 +714,6 @@ void OMW::Engine::go()
     settings.saveUser(settingspath);
 
     std::cout << "Quitting peacefully." << std::endl;
-}
-
-void OMW::Engine::activate()
-{
-    if (mEnvironment.getWindowManager()->isGuiMode())
-        return;
-
-    MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
-    const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
-    if (playerStats.isParalyzed() || playerStats.getKnockedDown())
-        return;
-
-    MWWorld::Ptr ptr = mEnvironment.getWorld()->getFacedObject();
-
-    if (ptr.isEmpty())
-        return;
-
-    if (ptr.getClass().getName(ptr) == "") // objects without name presented to user can never be activated
-        return;
-
-    if (ptr.getClass().isActor())
-    {
-        MWMechanics::CreatureStats &stats = ptr.getClass().getCreatureStats(ptr);
-
-        if (stats.getAiSequence().isInCombat() && !stats.isDead())
-            return;
-    }
-
-    mEnvironment.getWorld()->activate(ptr, mEnvironment.getWorld()->getPlayerPtr());
-}
-
-void OMW::Engine::screenshot()
-{
-    mScreenCaptureHandler->setFramesToCapture(1);
-    mScreenCaptureHandler->captureNextFrame(*mViewer);
 }
 
 void OMW::Engine::setCompileAll (bool all)

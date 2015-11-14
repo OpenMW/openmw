@@ -205,6 +205,35 @@ namespace MWWorld
          return ptr.getClass().getNpcStats(ptr).getDrawState();
     }
 
+    void Player::activate()
+    {
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+            return;
+
+        MWWorld::Ptr player = getPlayer();
+        const MWMechanics::NpcStats &playerStats = player.getClass().getNpcStats(player);
+        if (playerStats.isParalyzed() || playerStats.getKnockedDown())
+            return;
+
+        MWWorld::Ptr toActivate = MWBase::Environment::get().getWorld()->getFacedObject();
+
+        if (toActivate.isEmpty())
+            return;
+
+        if (toActivate.getClass().getName(toActivate) == "") // objects without name presented to user can never be activated
+            return;
+
+        if (toActivate.getClass().isActor())
+        {
+            MWMechanics::CreatureStats &stats = toActivate.getClass().getCreatureStats(toActivate);
+
+            if (stats.getAiSequence().isInCombat() && !stats.isDead())
+                return;
+        }
+
+        MWBase::Environment::get().getWorld()->activate(toActivate, player);
+    }
+
     bool Player::wasTeleported() const
     {
         return mTeleported;
