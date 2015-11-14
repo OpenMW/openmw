@@ -109,7 +109,6 @@ endif ()
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
 include_directories(
-    ${SOUND_INPUT_INCLUDES}
     ${FFMPEG_INCLUDE_DIRS}
 )
 
@@ -126,6 +125,9 @@ target_link_libraries(openmw
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_WAVE_LIBRARY}
+    ${OPENAL_LIBRARY}
+    ${FFMPEG_LIBRARIES}
+    ${BULLET_LIBRARIES}
     ${MYGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${MYGUI_PLATFORM_LIBRARIES}
