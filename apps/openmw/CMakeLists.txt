@@ -113,7 +113,10 @@ endif ()
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.
-include_directories(${SOUND_INPUT_INCLUDES})
+include_directories(
+    ${SOUND_INPUT_INCLUDES}
+    ${FFMPEG_INCLUDE_DIRS}
+)
 
 target_link_libraries(openmw
     ${OPENSCENEGRAPH_LIBRARIES}
