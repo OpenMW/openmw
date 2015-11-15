@@ -165,7 +165,7 @@ namespace MWRender
                         int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
                         int texelX = (x-mMinX) * mCellSize + cellX;
-                        int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
+                        int texelY = (y-mMinY) * mCellSize + cellY;
 
                         unsigned char r,g,b;
 
