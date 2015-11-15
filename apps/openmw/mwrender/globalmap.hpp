@@ -70,7 +70,7 @@ namespace MWRender
     private:
         /**
          * Request rendering a 2d quad onto mOverlayTexture.
-         * x, y, width and height are the destination coordinates.
+         * x, y, width and height are the destination coordinates (top-left coordinate origin)
          * @param cpuCopy copy the resulting render onto mOverlayImage as well?
          */
         void requestOverlayTextureUpdate(int x, int y, int width, int height, osg::ref_ptr<osg::Texture2D> texture, bool clear, bool cpuCopy,
