@@ -131,14 +131,12 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                          && topic.mState != CSMWorld::RecordBase::State_ModifiedOnly)
         {
             mState.getWriter().startRecord (topic.mBase.sRecordId);
-            mState.getWriter().writeHNCString ("NAME", topic.mBase.mId);
             topic.mBase.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
             mState.getWriter().endRecord (topic.mBase.sRecordId);
         }
         else
         {
             mState.getWriter().startRecord (topic.mModified.sRecordId);
-            mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
             topic.mModified.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
             mState.getWriter().endRecord (topic.mModified.sRecordId);
         }
