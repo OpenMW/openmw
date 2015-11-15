@@ -251,6 +251,7 @@ namespace MWRender
         camera->setProjectionMatrix(osg::Matrix::identity());
         camera->setProjectionResizePolicy(osg::Camera::FIXED);
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        y = mHeight - y - height; // convert top-left origin to bottom-left
         camera->setViewport(x, y, width, height);
 
         if (clear)
@@ -311,12 +312,12 @@ namespace MWRender
             return;
 
         int originX = (cellX - mMinX) * mCellSize;
-        int originY = (cellY - mMinY) * mCellSize;
+        int originY = (cellY - mMinY + 1) * mCellSize; // +1 because we want the top left corner of the cell, not the bottom left
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
 
-        requestOverlayTextureUpdate(originX, originY, mCellSize, mCellSize, localMapTexture, false, true);
+        requestOverlayTextureUpdate(originX, mHeight - originY, mCellSize, mCellSize, localMapTexture, false, true);
     }
 
     void GlobalMap::clear()
