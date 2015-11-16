@@ -37,7 +37,7 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager texturemanager resourcesystem
+    scenemanager texturemanager resourcesystem bulletshapemanager bulletshape
     )
 
 add_component_dir (sceneutil
@@ -55,7 +55,7 @@ add_component_dir (nifosg
     )
 
 add_component_dir (nifbullet
-    bulletnifloader bulletshapemanager
+    bulletnifloader
     )
 
 add_component_dir (to_utf8

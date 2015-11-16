@@ -17,9 +17,9 @@
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <LinearMath/btQuickprof.h>
 
-#include <components/nifbullet/bulletshapemanager.hpp>
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/resource/bulletshapemanager.hpp>
 
 #include <components/esm/loadgmst.hpp>
 
@@ -520,7 +520,7 @@ namespace MWPhysics
     class Object : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shapeInstance)
+        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance)
             : mShapeInstance(shapeInstance)
         {
             mPtr = ptr;
@@ -599,13 +599,13 @@ namespace MWPhysics
 
     private:
         std::auto_ptr<btCollisionObject> mCollisionObject;
-        osg::ref_ptr<NifBullet::BulletShapeInstance> mShapeInstance;
+        osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
     };
 
     // ---------------------------------------------------------------
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(new NifBullet::BulletShapeManager(resourceSystem->getVFS()))
+        : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS()))
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)
@@ -974,7 +974,7 @@ namespace MWPhysics
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
-        osg::ref_ptr<NifBullet::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
@@ -1115,7 +1115,7 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
-        osg::ref_ptr<NifBullet::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
         if (!shapeInstance)
             return;
 

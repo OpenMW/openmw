@@ -21,7 +21,7 @@ namespace MWRender
     class DebugDrawer;
 }
 
-namespace NifBullet
+namespace Resource
 {
     class BulletShapeManager;
 }
@@ -154,7 +154,7 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<NifBullet::BulletShapeManager> mShapeManager;
+            std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
 
             typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
             ObjectMap mObjects;

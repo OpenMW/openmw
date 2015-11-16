@@ -13,7 +13,7 @@ class btCollisionWorld;
 class btCollisionShape;
 class btCollisionObject;
 
-namespace NifBullet
+namespace Resource
 {
     class BulletShapeInstance;
 }
@@ -43,7 +43,7 @@ namespace MWPhysics
     class Actor : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btCollisionWorld* world);
+        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shape, btCollisionWorld* world);
         ~Actor();
 
         /**

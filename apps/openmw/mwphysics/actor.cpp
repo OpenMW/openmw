@@ -6,7 +6,7 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
-#include <components/nifbullet/bulletnifloader.hpp>
+#include <components/resource/bulletshape.hpp>
 
 #include "../mwworld/class.hpp"
 
@@ -17,7 +17,7 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<NifBullet::BulletShapeInstance> shape, btCollisionWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(0), mForce(0.f, 0.f, 0.f), mOnGround(false)
   , mInternalCollisionMode(true)

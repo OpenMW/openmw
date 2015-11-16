@@ -4,7 +4,9 @@
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
-namespace NifBullet
+#include "bulletshape.hpp"
+
+namespace Resource
 {
 
 BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs)
@@ -38,7 +40,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         if (ext != "nif")
             return NULL;
 
-        BulletNifLoader loader;
+        NifBullet::BulletNifLoader loader;
         // might be worth sharing NIFFiles with SceneManager in some way
         shape = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)));
 
