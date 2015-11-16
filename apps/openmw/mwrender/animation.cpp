@@ -402,7 +402,7 @@ namespace MWRender
         animsrc.reset(new AnimSource);
         animsrc->mKeyframes = mResourceSystem->getSceneManager()->getKeyframes(kfname);
 
-        if (animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
+        if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
             return;
 
         for (NifOsg::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();

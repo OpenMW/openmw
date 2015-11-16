@@ -975,7 +975,7 @@ namespace MWPhysics
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         osg::ref_ptr<NifBullet::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
-        if (!shapeInstance->getCollisionShape())
+        if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
         Object *obj = new Object(ptr, shapeInstance);
@@ -1114,9 +1114,10 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh)
-    {
+    void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
         osg::ref_ptr<NifBullet::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
+        if (!shapeInstance)
+            return;
 
         Actor* actor = new Actor(ptr, shapeInstance, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));

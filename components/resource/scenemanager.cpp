@@ -20,6 +20,8 @@
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include "texturemanager.hpp"
+
 namespace
 {
 
@@ -112,6 +114,73 @@ namespace Resource
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
+
+    }
+
+    /// @brief Callback to read image files from the VFS.
+    class ImageReadCallback : public osgDB::ReadFileCallback
+    {
+    public:
+        ImageReadCallback(Resource::TextureManager* textureMgr)
+            : mTextureManager(textureMgr)
+        {
+        }
+
+        virtual osgDB::ReaderWriter::ReadResult readImage(const std::string& filename, const osgDB::Options* options)
+        {
+            try
+            {
+                mTextureManager->getTexture2D(filename, osg::Texture::CLAMP_TO_EDGE, osg::Texture::CLAMP_TO_EDGE);
+                return osgDB::ReaderWriter::ReadResult(mTextureManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+            }
+            catch (std::exception& e)
+            {
+                return osgDB::ReaderWriter::ReadResult(e.what());
+            }
+        }
+
+    private:
+        Resource::TextureManager* mTextureManager;
+    };
+
+    std::string getFileExtension(const std::string& file)
+    {
+        size_t extPos = file.find_last_of('.');
+        if (extPos != std::string::npos && extPos+1 < file.size())
+            return file.substr(extPos+1);
+        return std::string();
+    }
+
+    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::TextureManager* textureMgr)
+    {
+        std::string ext = getFileExtension(normalizedFilename);
+        if (ext == "nif")
+            return NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalizedFilename)), textureMgr);
+        else
+        {
+            osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
+            if (!reader)
+            {
+                std::stringstream errormsg;
+                errormsg << "Error loading " << normalizedFilename << ": no readerwriter for '" << ext << "' found" << std::endl;
+                throw std::runtime_error(errormsg.str());
+            }
+
+            osg::ref_ptr<osgDB::Options> options (new osgDB::Options);
+            // Set a ReadFileCallback so that image files referenced in the model are read from our virtual file system instead of the osgDB.
+            // Note, for some formats (.obj/.mtl) that reference other (non-image) files a findFileCallback would be necessary.
+            // but findFileCallback does not support virtual files, so we can't implement it.
+            options->setReadFileCallback(new ImageReadCallback(textureMgr));
+
+            osgDB::ReaderWriter::ReadResult result = reader->readNode(*file, options);
+            if (!result.success())
+            {
+                std::stringstream errormsg;
+                errormsg << "Error loading " << normalizedFilename << ": " << result.message() << " code " << result.status() << std::endl;
+                throw std::runtime_error(errormsg.str());
+            }
+            return result.getNode();
+        }
     }
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
@@ -122,19 +191,19 @@ namespace Resource
         Index::iterator it = mIndex.find(normalized);
         if (it == mIndex.end())
         {
-            // TODO: add support for non-NIF formats
             osg::ref_ptr<osg::Node> loaded;
             try
             {
                 Files::IStreamPtr file = mVFS->get(normalized);
 
-                loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+                loaded = load(file, normalized, mTextureManager);
             }
             catch (std::exception& e)
             {
                 std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error.nif instead" << std::endl;
                 Files::IStreamPtr file = mVFS->get("meshes/marker_error.nif");
-                loaded = NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), mTextureManager);
+                normalized = "meshes/marker_error.nif";
+                loaded = load(file, normalized, mTextureManager);
             }
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
@@ -173,6 +242,11 @@ namespace Resource
         if (it == mKeyframeIndex.end())
         {
             Files::IStreamPtr file = mVFS->get(normalized);
+
+            std::string ext = getFileExtension(normalized);
+
+            if (ext != "nif" && ext != "kf")
+                return NULL;
 
             osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
             NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), *loaded.get());

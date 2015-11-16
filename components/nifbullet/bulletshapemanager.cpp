@@ -30,6 +30,13 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         Files::IStreamPtr file = mVFS->get(normalized);
 
         // TODO: add support for non-NIF formats
+        size_t extPos = normalized.find_last_of('.');
+        std::string ext;
+        if (extPos != std::string::npos && extPos+1 < normalized.size())
+            ext = normalized.substr(extPos+1);
+
+        if (ext != "nif")
+            return NULL;
 
         BulletNifLoader loader;
         // might be worth sharing NIFFiles with SceneManager in some way

@@ -34,7 +34,7 @@ namespace Resource
         osg::ref_ptr<osg::Texture2D> getTexture2D(const std::string& filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT);
 
         /// Create or retrieve an Image
-        //osg::ref_ptr<osg::Image> getImage(const std::string& filename);
+        osg::ref_ptr<osg::Image> getImage(const std::string& filename);
 
         const VFS::Manager* getVFS() { return mVFS; }
 
@@ -49,7 +49,7 @@ namespace Resource
 
         typedef std::pair<std::pair<int, int>, std::string> MapKey;
 
-        std::map<std::string, osg::observer_ptr<osg::Image> > mImages;
+        std::map<std::string, osg::ref_ptr<osg::Image> > mImages;
 
         std::map<MapKey, osg::ref_ptr<osg::Texture2D> > mTextures;
 
