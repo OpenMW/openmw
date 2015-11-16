@@ -218,9 +218,9 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     if (!mSkeleton->getActive() && mLastFrameNumber != 0)
         return;
 
-    if (mLastFrameNumber == nv->getFrameStamp()->getFrameNumber())
+    if (mLastFrameNumber == nv->getTraversalNumber())
         return;
-    mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+    mLastFrameNumber = nv->getTraversalNumber();
 
     mSkeleton->updateBoneMatrices(nv);
 

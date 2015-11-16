@@ -104,10 +104,10 @@ Bone* Skeleton::getBone(const std::string &name)
 
 void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
 {
-    if (nv->getFrameStamp()->getFrameNumber() != mLastFrameNumber)
+    if (nv->getTraversalNumber() != mLastFrameNumber)
         mNeedToUpdateBoneMatrices = true;
 
-    mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+    mLastFrameNumber = nv->getTraversalNumber();
 
     if (mNeedToUpdateBoneMatrices)
     {

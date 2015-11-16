@@ -294,9 +294,9 @@ namespace SceneUtil
 
         // update light list if necessary
         // makes sure we don't update it more than once per frame when rendering with multiple cameras
-        if (mLastFrameNumber != nv->getFrameStamp()->getFrameNumber())
+        if (mLastFrameNumber != nv->getTraversalNumber())
         {
-            mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+            mLastFrameNumber = nv->getTraversalNumber();
 
             // Don't use Camera::getViewMatrix, that one might be relative to another camera!
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
