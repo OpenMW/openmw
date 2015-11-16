@@ -605,7 +605,7 @@ namespace MWPhysics
     // ---------------------------------------------------------------
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
-        : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS()))
+        : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager()))
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)
