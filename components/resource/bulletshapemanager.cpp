@@ -80,6 +80,9 @@ public:
 
     osg::ref_ptr<BulletShape> getShape()
     {
+        if (!mTriangleMesh)
+            return osg::ref_ptr<BulletShape>();
+
         osg::ref_ptr<BulletShape> shape (new BulletShape);
         TriangleMeshShape* meshShape = new TriangleMeshShape(mTriangleMesh, true);
         shape->mCollisionShape = meshShape;
@@ -134,6 +137,8 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
             NodeToShapeVisitor visitor;
             node->accept(visitor);
             shape = visitor.getShape();
+            if (!shape)
+                return osg::ref_ptr<BulletShapeInstance>();
         }
 
         mIndex[normalized] = shape;
