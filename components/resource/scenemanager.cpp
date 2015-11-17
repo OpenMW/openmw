@@ -130,7 +130,6 @@ namespace Resource
         {
             try
             {
-                mTextureManager->getTexture2D(filename, osg::Texture::CLAMP_TO_EDGE, osg::Texture::CLAMP_TO_EDGE);
                 return osgDB::ReaderWriter::ReadResult(mTextureManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
