@@ -321,6 +321,10 @@ private:
 
 int main(int argc, char**argv)
 {
+#if defined(__APPLE__)
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
