@@ -218,6 +218,7 @@ namespace MWPhysics
                 resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
 
                 collisionWorld->rayTest(from, to, resultCallback1);
+
                 if (resultCallback1.hasHit() &&
                         ( (toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos).length() > 30
                         || getSlope(tracer.mPlaneNormal) > sMaxSlope))
@@ -746,6 +747,36 @@ namespace MWPhysics
                 return std::make_pair(holder->getPtr(), toOsg(resultCallback.mContactPoint));
         }
         return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
+    }
+
+    float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::Ptr &target) const
+    {
+        btCollisionObject* targetCollisionObj = NULL;
+        const Actor* actor = getActor(target);
+        if (actor)
+            targetCollisionObj = actor->getCollisionObject();
+        if (!targetCollisionObj)
+            return 0.f;
+
+        btTransform rayFrom;
+        rayFrom.setIdentity();
+        rayFrom.setOrigin(toBullet(point));
+
+        // target the collision object's world origin, this should be the center of the collision object
+        btTransform rayTo;
+        rayTo.setIdentity();
+        rayTo.setOrigin(targetCollisionObj->getWorldTransform().getOrigin());
+
+        btCollisionWorld::ClosestRayResultCallback cb(rayFrom.getOrigin(), rayTo.getOrigin());
+
+        btCollisionWorld::rayTestSingle(rayFrom, rayTo, targetCollisionObj, targetCollisionObj->getCollisionShape(), targetCollisionObj->getWorldTransform(), cb);
+        if (!cb.hasHit())
+        {
+            // didn't hit the target. this could happen if point is already inside the collision box
+            return 0.f;
+        }
+        else
+            return (point - toOsg(cb.m_hitPointWorld)).length();
     }
 
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback

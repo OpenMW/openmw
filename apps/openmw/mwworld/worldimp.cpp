@@ -3238,4 +3238,11 @@ namespace MWWorld
         osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
+
+    float World::getHitDistance(const Ptr &actor, const Ptr &target)
+    {
+        osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
+        return mPhysics->getHitDistance(weaponPos, target);
+    }
+
 }

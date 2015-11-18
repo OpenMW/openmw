@@ -543,6 +543,9 @@ namespace MWBase
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
             virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
+
+            /// Return the distance between actor's weapon and target's collision box.
+            virtual float getHitDistance(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
     };
 }
 
