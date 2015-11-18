@@ -234,9 +234,8 @@ namespace MWPhysics
         }
 
         static osg::Vec3f move(const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld
-                                  , std::map<MWWorld::Ptr, MWWorld::Ptr>& collisionTracker
-                                  , std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
+                                  bool isFlying, float waterlevel, float slowFall, btCollisionWorld* collisionWorld,
+                               std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
         {
             const ESM::Position& refpos = ptr.getRefData().getPosition();
             osg::Vec3f position(refpos.asVec3());
@@ -344,13 +343,6 @@ namespace MWPhysics
                     {
                         newPosition = tracer.mEndPos; // ok to move, so set newPosition
                         break;
-                    }
-                    else
-                    {
-                        const btCollisionObject* standingOn = tracer.mHitObject;
-                        const PtrHolder* ptrHolder = static_cast<const PtrHolder*>(standingOn->getUserPointer());
-                        if (ptrHolder)
-                            collisionTracker[ptr] = ptrHolder->getPtr();
                     }
                 }
                 else
@@ -968,11 +960,11 @@ namespace MWPhysics
         }
     };
 
-    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask)
+    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask) const
     {
         btCollisionObject* me = NULL;
 
-        ObjectMap::iterator found = mObjects.find(ptr);
+        ObjectMap::const_iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
             me = found->second->getCollisionObject();
         else
@@ -1081,7 +1073,6 @@ namespace MWPhysics
             mActors.insert(std::make_pair(updated, actor));
         }
 
-        updateCollisionMapPtr(mCollisions, old, updated);
         updateCollisionMapPtr(mStandingCollisions, old, updated);
     }
 
@@ -1197,7 +1188,6 @@ namespace MWPhysics
     void PhysicsSystem::clearQueuedMovement()
     {
         mMovementQueue.clear();
-        mCollisions.clear();
         mStandingCollisions.clear();
     }
 
@@ -1209,7 +1199,6 @@ namespace MWPhysics
         if(mTimeAccum >= 1.0f/60.0f)
         {
             // Collision events should be available on every frame
-            mCollisions.clear();
             mStandingCollisions.clear();
 
             const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -1243,7 +1232,7 @@ namespace MWPhysics
 
                 osg::Vec3f newpos = MovementSolver::move(iter->first, physicActor, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
-                                                            waterlevel, slowFall, mCollisionWorld, mCollisions, mStandingCollisions);
+                                                            waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
 
                 float heightDiff = newpos.z() - oldHeight;
 
@@ -1296,21 +1285,14 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
     {
-        for (CollisionMap::const_iterator it = mCollisions.begin(); it != mCollisions.end(); ++it)
-        {
-            if (it->first == actor && it->second == object)
-                return true;
-        }
-        return false;
+        std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
+        return (std::find(collisions.begin(), collisions.end(), actor) != collisions.end());
     }
 
     void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<MWWorld::Ptr> &out) const
     {
-        for (CollisionMap::const_iterator it = mCollisions.begin(); it != mCollisions.end(); ++it)
-        {
-            if (it->second == object)
-                out.push_back(it->first);
-        }
+        std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
+        out.insert(out.end(), collisions.begin(), collisions.end());
     }
 
     void PhysicsSystem::disableWater()

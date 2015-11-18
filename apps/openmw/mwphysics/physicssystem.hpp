@@ -81,7 +81,7 @@ namespace MWPhysics
             void stepSimulation(float dt);
             void debugDraw();
 
-            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
+            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor,
@@ -174,11 +174,9 @@ namespace MWPhysics
 
             bool mDebugDrawEnabled;
 
-            // Tracks all movement collisions happening during a single frame. <actor handle, collided handle>
-            // This will detect e.g. running against a vertical wall. It will not detect climbing up stairs,
-            // stepping up small objects, etc.
+            // Tracks standing collisions happening during a single frame. <actor handle, collided handle>
+            // This will detect standing on an object, but won't detect running e.g. against a wall.
             typedef std::map<MWWorld::Ptr, MWWorld::Ptr> CollisionMap;
-            CollisionMap mCollisions;
             CollisionMap mStandingCollisions;
 
             // replaces all occurences of 'old' in the map by 'updated', no matter if its a key or value
