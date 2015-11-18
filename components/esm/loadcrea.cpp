@@ -1,5 +1,7 @@
 #include "loadcrea.hpp"
 
+#include <iostream>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
@@ -82,6 +84,12 @@ namespace ESM {
                 case ESM::SREC_DELE:
                     esm.skipHSub();
                     isDeleted = true;
+                    break;
+                case ESM::FourCC<'I','N','D','X'>::value:
+                    // seems to occur only in .ESS files, unsure of purpose
+                    int index;
+                    esm.getHT(index);
+                    std::cerr << "Creature::load: Unhandled INDX " << index << std::endl;
                     break;
                 default:
                     esm.fail("Unknown subrecord");
