@@ -936,6 +936,13 @@ namespace MWPhysics
     class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
     {
     public:
+        ContactTestResultCallback(const btCollisionObject* testedAgainst)
+            : mTestedAgainst(testedAgainst)
+        {
+        }
+
+        const btCollisionObject* mTestedAgainst;
+
         std::vector<MWWorld::Ptr> mResult;
 
 #if BT_BULLET_VERSION >= 281
@@ -944,11 +951,15 @@ namespace MWPhysics
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
         {
             const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
+            if (collisionObject == mTestedAgainst)
+                collisionObject = col1Wrap->m_collisionObject;
 #else
         virtual btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObject* col0, int partId0, int index0,
                                          const btCollisionObject* col1, int partId1, int index1)
         {
             const btCollisionObject* collisionObject = col0;
+            if (collisionObject == mTestedAgainst)
+                collisionObject = col1;
 #endif
             const PtrHolder* holder = static_cast<const PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
@@ -967,7 +978,7 @@ namespace MWPhysics
         else
             return std::vector<MWWorld::Ptr>();
 
-        ContactTestResultCallback resultCallback;
+        ContactTestResultCallback resultCallback (me);
         resultCallback.m_collisionFilterGroup = collisionGroup;
         resultCallback.m_collisionFilterMask = collisionMask;
         mCollisionWorld->contactTest(me, resultCallback);
