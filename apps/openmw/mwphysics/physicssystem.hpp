@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <set>
 
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -165,6 +166,8 @@ namespace MWPhysics
 
             typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
             ObjectMap mObjects;
+
+            std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
 
             typedef std::map<MWWorld::Ptr, Actor*> ActorMap;
             ActorMap mActors;

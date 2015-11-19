@@ -549,6 +549,11 @@ namespace MWPhysics
             return mCollisionObject.get();
         }
 
+        bool isAnimated() const
+        {
+            return !mShapeInstance->mAnimatedShapes.empty();
+        }
+
         void animateCollisionShapes(btCollisionWorld* collisionWorld)
         {
             if (mShapeInstance->mAnimatedShapes.empty())
@@ -1015,6 +1020,9 @@ namespace MWPhysics
         Object *obj = new Object(ptr, shapeInstance);
         mObjects.insert(std::make_pair(ptr, obj));
 
+        if (obj->isAnimated())
+            mAnimatedObjects.insert(obj);
+
         mCollisionWorld->addCollisionObject(obj->getCollisionObject(), CollisionType_World,
                                            CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
@@ -1025,6 +1033,9 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             mCollisionWorld->removeCollisionObject(found->second->getCollisionObject());
+
+            mAnimatedObjects.erase(found->second);
+
             delete found->second;
             mObjects.erase(found);
         }
@@ -1251,8 +1262,8 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        for (ObjectMap::iterator it = mObjects.begin(); it != mObjects.end(); ++it)
-            it->second->animateCollisionShapes(mCollisionWorld);
+        for (std::set<Object*>::iterator it = mAnimatedObjects.begin(); it != mAnimatedObjects.end(); ++it)
+            (*it)->animateCollisionShapes(mCollisionWorld);
 
         CProfileManager::Reset();
         CProfileManager::Increment_Frame_Counter();
