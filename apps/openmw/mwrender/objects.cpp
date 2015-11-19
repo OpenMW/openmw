@@ -125,6 +125,11 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 
     insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
 
+    const float scale = ptr.getCellRef().getScale();
+    osg::Vec3f scaleVec(scale, scale, scale);
+    ptr.getClass().adjustScale(ptr, scaleVec, true);
+    insert->setScale(scaleVec);
+
     ptr.getRefData().setBaseNode(insert);
 }
 
