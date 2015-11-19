@@ -210,6 +210,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     cfgMgr.readConfiguration(variables, desc);
 
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+    std::cout << v.describe() << std::endl;
+
     engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
