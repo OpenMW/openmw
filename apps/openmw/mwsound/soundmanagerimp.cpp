@@ -168,8 +168,8 @@ namespace MWSound
         SoundMap::const_iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
-            if(snditer->second.first == ptr && snditer->second.second == id)
-                return snditer->first->isPlaying();
+            if(snditer->second.first == ptr && snditer->second.second == id && snditer->first->isPlaying())
+                return true;
             ++snditer;
         }
         return false;
