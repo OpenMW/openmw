@@ -78,6 +78,7 @@ void DebugDrawer::step()
         mWorld->debugDrawWorld();
         mDrawArrays->setCount(mVertices->size());
         mVertices->dirty();
+        mGeometry->dirtyBound();
     }
 }
 
