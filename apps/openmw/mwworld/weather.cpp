@@ -680,7 +680,7 @@ void WeatherManager::update(float duration, bool paused)
         if ( !is_night ) {
             theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
         } else {
-            theta = M_PI * (adjustedHour - adjustedNightStart) / nightDuration;
+            theta = M_PI * (1.f - (adjustedHour - adjustedNightStart) / nightDuration);
         }
 
         osg::Vec3f final(
