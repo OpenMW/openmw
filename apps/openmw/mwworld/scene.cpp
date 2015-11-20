@@ -73,6 +73,8 @@ namespace
             osg::Vec3f scaleVec (scale, scale, scale);
             ptr.getClass().adjustScale(ptr, scaleVec, true);
             rendering.scaleObject(ptr, scaleVec);
+
+            physics.updateScale(ptr);
         }
     }
 
@@ -114,7 +116,6 @@ namespace
             {
                 addObject(ptr, mPhysics, mRendering);
                 updateObjectRotation(ptr, mPhysics, mRendering, false);
-                updateObjectScale(ptr, mPhysics, mRendering);
                 ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
