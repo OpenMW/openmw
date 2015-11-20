@@ -2059,11 +2059,10 @@ namespace MWWorld
         if (!actor)
             throw std::runtime_error("can't find player");
 
-        if((!actor->getOnGround()&&actor->getCollisionMode()) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
+        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos))
             return 2;
 
-        if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) ||
-           player.getClass().getNpcStats(player).isWerewolf())
+        if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
             return 1;
 
         return 0;
@@ -2155,6 +2154,8 @@ namespace MWWorld
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
 
+            mPhysics->markAsNonSolid (object);
+
             if (healthPerSecond > 0.0f)
             {
                 if (actor == getPlayerPtr())
@@ -2182,6 +2183,8 @@ namespace MWWorld
             MWMechanics::DynamicStat<float> health = stats.getHealth();
             health.setCurrent(health.getCurrent()-healthPerSecond*MWBase::Environment::get().getFrameDuration());
             stats.setHealth(health);
+
+            mPhysics->markAsNonSolid (object);
 
             if (healthPerSecond > 0.0f)
             {

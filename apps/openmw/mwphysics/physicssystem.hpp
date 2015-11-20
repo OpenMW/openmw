@@ -153,6 +153,12 @@ namespace MWPhysics
 
             bool toggleDebugRendering();
 
+            /// Mark the given object as a 'non-solid' object. A non-solid object means that
+            /// \a isOnSolidGround will return false for actors standing on that object.
+            void markAsNonSolid (const MWWorld::Ptr& ptr);
+
+            bool isOnSolidGround (const MWWorld::Ptr& actor) const;
+
         private:
 
             void updateWater();
