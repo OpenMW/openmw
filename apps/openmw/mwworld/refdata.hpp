@@ -7,7 +7,7 @@
 
 #include <osg/Vec3f>
 
-namespace osg
+namespace SceneUtil
 {
     class PositionAttitudeTransform;
 }
@@ -26,7 +26,7 @@ namespace MWWorld
 
     class RefData
     {
-            osg::PositionAttitudeTransform* mBaseNode;
+            SceneUtil::PositionAttitudeTransform* mBaseNode;
 
             MWScript::Locals mLocals;
 
@@ -69,10 +69,10 @@ namespace MWWorld
             RefData& operator= (const RefData& refData);
 
             /// Return base node (can be a null pointer).
-            osg::PositionAttitudeTransform* getBaseNode();
+            SceneUtil::PositionAttitudeTransform* getBaseNode();
 
             /// Set base node (can be a null pointer).
-            void setBaseNode (osg::PositionAttitudeTransform* base);
+            void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
 
             int getCount() const;
 

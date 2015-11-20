@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include <osg/Group>
-#include <osg/PositionAttitudeTransform>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
@@ -22,6 +21,7 @@
 #include <components/resource/bulletshapemanager.hpp>
 
 #include <components/esm/loadgmst.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 

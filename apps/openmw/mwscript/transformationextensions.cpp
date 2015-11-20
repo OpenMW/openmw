@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <osg/PositionAttitudeTransform>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/esm/loadcell.hpp>
 

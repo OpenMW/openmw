@@ -4,6 +4,7 @@
 #include <string>
 
 #include <osg/ref_ptr>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/effectlist.hpp>
 

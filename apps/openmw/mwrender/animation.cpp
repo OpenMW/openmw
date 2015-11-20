@@ -32,6 +32,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightcontroller.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

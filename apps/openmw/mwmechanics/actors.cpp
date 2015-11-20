@@ -3,11 +3,10 @@
 #include <typeinfo>
 #include <iostream>
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"

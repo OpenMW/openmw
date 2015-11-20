@@ -8,7 +8,6 @@
 #include <osg/Fog>
 #include <osg/PolygonMode>
 #include <osg/Group>
-#include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
 
@@ -26,6 +25,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -706,7 +706,7 @@ namespace MWRender
     {
         if (!mPlayerNode)
         {
-            mPlayerNode = new osg::PositionAttitudeTransform;
+            mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
             mLightRoot->addChild(mPlayerNode);
         }

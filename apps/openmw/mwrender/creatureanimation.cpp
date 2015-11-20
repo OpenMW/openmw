@@ -2,12 +2,11 @@
 
 #include <components/esm/loadcrea.hpp>
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/world.hpp"
 

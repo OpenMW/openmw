@@ -21,7 +21,6 @@
 
 #include <iostream>
 
-#include <osg/PositionAttitudeTransform>
 
 #include "movement.hpp"
 #include "npcstats.hpp"
@@ -32,6 +31,8 @@
 #include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwrender/animation.hpp"
 

@@ -4,6 +4,8 @@
 #include <osg/ref_ptr>
 #include <memory>
 
+#include <osg/PositionAttitudeTransform>
+
 #include <components/esm/loadnpc.hpp>
 
 #include <components/resource/resourcesystem.hpp>

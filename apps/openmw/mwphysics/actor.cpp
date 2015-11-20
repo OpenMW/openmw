@@ -1,11 +1,10 @@
 #include "actor.hpp"
 
-#include <osg/PositionAttitudeTransform>
-
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/resource/bulletshape.hpp>
 
 #include "../mwworld/class.hpp"

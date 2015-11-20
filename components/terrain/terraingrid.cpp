@@ -6,10 +6,10 @@
 #include <components/resource/texturemanager.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/esm/loadland.hpp>
 
-#include <osg/PositionAttitudeTransform>
 #include <osg/Geometry>
 #include <osg/Geode>
 #include <osg/KdTree>
@@ -91,7 +91,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             return NULL; // no terrain defined
 
         osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
-        osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
         transform->setPosition(osg::Vec3f(worldCenter.x(), worldCenter.y(), 0.f));
 
         if (parent)

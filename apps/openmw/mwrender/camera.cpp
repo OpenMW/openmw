@@ -1,7 +1,8 @@
 #include "camera.hpp"
 
-#include <osg/PositionAttitudeTransform>
 #include <osg/Camera>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -378,7 +379,7 @@ namespace MWRender
         else
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            osg::PositionAttitudeTransform* transform = mTrackingPtr.getRefData().getBaseNode();
+            SceneUtil::PositionAttitudeTransform* transform = mTrackingPtr.getRefData().getBaseNode();
             mTrackingNode = transform;
             if (transform)
                 mHeightScale = transform->getScale().z();

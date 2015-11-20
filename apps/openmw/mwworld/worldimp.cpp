@@ -10,7 +10,6 @@
 
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
-#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -21,6 +20,8 @@
 #include <components/files/collections.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"

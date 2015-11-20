@@ -8,6 +8,7 @@
 namespace osg
 {
     class Group;
+    class PositionAttitudeTransform;
 }
 
 namespace osgParticle

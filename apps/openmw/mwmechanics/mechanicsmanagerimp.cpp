@@ -2,12 +2,12 @@
 
 #include <limits.h>
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"

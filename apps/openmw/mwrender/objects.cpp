@@ -4,7 +4,6 @@
 
 #include <osg/Group>
 #include <osg/Geode>
-#include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
 #include <osg/Version>
 
@@ -14,6 +13,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -116,7 +116,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     else
         cellnode = found->second;
 
-    osg::ref_ptr<osg::PositionAttitudeTransform> insert (new osg::PositionAttitudeTransform);
+    osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert (new SceneUtil::PositionAttitudeTransform);
     cellnode->addChild(insert);
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));

@@ -186,7 +186,7 @@ namespace MWRender
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         std::auto_ptr<NpcAnimation> mPlayerAnimation;
-        osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::auto_ptr<Camera> mCamera;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
