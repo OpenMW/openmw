@@ -198,6 +198,7 @@ public:
         mClipNode->getClipPlaneList().clear();
         mClipNode->addClipPlane(new osg::ClipPlane(0, osg::Plane(mPlane.getNormal(), 0))); // mPlane.d() applied in FlipCallback
         mClipNode->setStateSetModes(*getOrCreateStateSet(), osg::StateAttribute::ON);
+        mClipNode->setCullingActive(false);
     }
 
 private:
