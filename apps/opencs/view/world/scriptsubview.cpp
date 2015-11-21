@@ -54,6 +54,7 @@ void CSVWorld::ScriptSubView::updateDeletedState()
     if (isDeleted())
     {
         mErrors->clear();
+        adjustSplitter();
         mEditor->setEnabled (false);
     }
     else
@@ -61,6 +62,22 @@ void CSVWorld::ScriptSubView::updateDeletedState()
         mEditor->setEnabled (true);
         recompile();
     }
+}
+
+void CSVWorld::ScriptSubView::adjustSplitter()
+{
+    QList<int> sizes;
+
+    if (mErrors->rowCount())
+    {
+        sizes << 1 << 1;
+    }
+    else
+    {
+        sizes << 1 << 0;
+    }
+
+    mMain->setSizes (sizes);
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
@@ -347,4 +364,6 @@ void CSVWorld::ScriptSubView::updateRequest()
     QString source = mModel->data (index).toString();
 
     mErrors->update (source.toUtf8().constData());
+
+    adjustSplitter();
 }

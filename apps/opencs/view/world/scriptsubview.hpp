@@ -58,6 +58,8 @@ namespace CSVWorld
 
             void updateDeletedState();
 
+            void adjustSplitter();
+
         public:
 
             ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
