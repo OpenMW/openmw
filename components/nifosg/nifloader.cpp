@@ -843,6 +843,8 @@ namespace NifOsg
                 partsys->getOrCreateUserDataContainer()->addDescription("worldspace");
             }
 
+            partsys->setParticleScaleReferenceFrame(osgParticle::ParticleSystem::LOCAL_COORDINATES);
+
             handleParticleInitialState(nifNode, partsys, partctrl);
 
             partsys->setQuota(partctrl->numParticles);

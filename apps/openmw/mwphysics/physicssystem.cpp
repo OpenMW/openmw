@@ -1062,9 +1062,9 @@ namespace MWPhysics
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
-        float scale = ptr.getCellRef().getScale();
         if (found != mObjects.end())
         {
+            float scale = ptr.getCellRef().getScale();
             found->second->setScale(scale);
             mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
             return;
