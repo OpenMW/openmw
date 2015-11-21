@@ -70,6 +70,9 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 
     if (mErrors->rowCount())
     {
+        if (mErrors->height())
+            return; // keep old height if the error panel was already open
+
         sizes << 1 << 1;
     }
     else
