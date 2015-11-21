@@ -47,6 +47,7 @@ namespace CSVWorld
             QSplitter *mMain;
             ScriptErrorTable *mErrors;
             QTimer *mCompileDelay;
+            int mErrorHeight;
 
         private:
 

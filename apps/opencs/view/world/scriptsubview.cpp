@@ -73,10 +73,13 @@ void CSVWorld::ScriptSubView::adjustSplitter()
         if (mErrors->height())
             return; // keep old height if the error panel was already open
 
-        sizes << 1 << 1;
+        sizes << (mMain->height()-mErrorHeight-mMain->handleWidth()) << mErrorHeight;
     }
     else
     {
+        if (mErrors->height())
+            mErrorHeight = mErrors->height();
+
         sizes << 1 << 0;
     }
 
@@ -85,7 +88,8 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
-  mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType()))
+  mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
+  mErrorHeight (100)
 {
     std::vector<std::string> selection (1, id.getId());
     mCommandDispatcher.setSelection (selection);
@@ -100,6 +104,10 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     mErrors = new ScriptErrorTable (document, this);
     mMain->addWidget (mErrors);
+
+    QList<int> sizes;
+    sizes << 1 << 0;
+    mMain->setSizes (sizes);
 
     QWidget *widget = new QWidget (this);;
     widget->setLayout (&mLayout);
