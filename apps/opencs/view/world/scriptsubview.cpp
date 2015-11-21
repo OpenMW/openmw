@@ -89,7 +89,7 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
-  mErrorHeight (100)
+  mErrorHeight (CSMSettings::UserSettings::instance().setting ("script-editor/error-height").toInt())
 {
     std::vector<std::string> selection (1, id.getId());
     mCommandDispatcher.setSelection (selection);
