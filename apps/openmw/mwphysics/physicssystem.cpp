@@ -515,6 +515,7 @@ namespace MWPhysics
     public:
         Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance)
             : mShapeInstance(shapeInstance)
+            , mSolid(true)
         {
             mPtr = ptr;
 
@@ -547,6 +548,17 @@ namespace MWPhysics
         btCollisionObject* getCollisionObject()
         {
             return mCollisionObject.get();
+        }
+
+        /// Return solid flag. Not used by the object itself, true by default.
+        bool isSolid() const
+        {
+            return mSolid;
+        }
+
+        void setSolid(bool solid)
+        {
+            mSolid = solid;
         }
 
         bool isAnimated() const
@@ -618,6 +630,7 @@ namespace MWPhysics
     private:
         std::auto_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
+        bool mSolid;
     };
 
     // ---------------------------------------------------------------
@@ -682,6 +695,35 @@ namespace MWPhysics
         else if (mDebugDrawer.get())
             mDebugDrawer->setDebugMode(mDebugDrawEnabled);
         return mDebugDrawEnabled;
+    }
+
+    void PhysicsSystem::markAsNonSolid(const MWWorld::Ptr &ptr)
+    {
+        ObjectMap::iterator found = mObjects.find(ptr);
+        if (found == mObjects.end())
+            return;
+
+        found->second->setSolid(false);
+    }
+
+    bool PhysicsSystem::isOnSolidGround (const MWWorld::Ptr& actor) const
+    {
+        const Actor* physactor = getActor(actor);
+        if (!physactor->getOnGround())
+            return false;
+
+        CollisionMap::const_iterator found = mStandingCollisions.find(actor);
+        if (found == mStandingCollisions.end())
+            return true; // assume standing on terrain (which is a non-object, so not collision tracked)
+
+        ObjectMap::const_iterator foundObj = mObjects.find(found->second);
+        if (foundObj == mObjects.end())
+            return false;
+
+        if (!foundObj->second->isSolid())
+            return false;
+
+        return true;
     }
 
     class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
