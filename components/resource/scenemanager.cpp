@@ -206,7 +206,6 @@ namespace Resource
             }
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
-            // TODO: run SharedStateManager::prune on unload
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
