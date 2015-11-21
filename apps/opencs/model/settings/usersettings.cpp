@@ -366,6 +366,11 @@ void CSMSettings::UserSettings::buildSettingModelDefaults()
         delay->setRange (0, 10000);
         delay->setToolTip ("Delay in milliseconds");
 
+        Setting *errorHeight = createSetting (Type_SpinBox, "error-height",
+            "Initial height of the error panel");
+        errorHeight->setDefaultValue (100);
+        errorHeight->setRange (100, 10000);
+
         Setting *formatInt = createSetting (Type_LineEdit, "colour-int", "Highlight Colour: Int");
         formatInt->setDefaultValues (QStringList() << "Dark magenta");
         formatInt->setToolTip ("(Default: Green) Use one of the following formats:" + tooltip);
