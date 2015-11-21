@@ -77,12 +77,12 @@ namespace SceneUtil
         void update();
 
         // Called automatically by the LightSource's UpdateCallback
-        void addLight(LightSource* lightSource, osg::Matrix worldMat);
+        void addLight(LightSource* lightSource, osg::Matrixf worldMat);
 
         struct LightSourceTransform
         {
             LightSource* mLightSource;
-            osg::Matrix mWorldMatrix;
+            osg::Matrixf mWorldMatrix;
         };
 
         const std::vector<LightSourceTransform>& getLights() const;

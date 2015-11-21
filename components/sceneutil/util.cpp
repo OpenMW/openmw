@@ -3,7 +3,7 @@
 namespace SceneUtil
 {
 
-void transformBoundingSphere (const osg::Matrix& matrix, osg::BoundingSphere& bsphere)
+void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
 {
     osg::BoundingSphere::vec_type xdash = bsphere._center;
     xdash.x() += bsphere._radius;

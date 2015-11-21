@@ -164,7 +164,7 @@ namespace SceneUtil
             mStateSetCache.clear();
     }
 
-    void LightManager::addLight(LightSource* lightSource, osg::Matrix worldMat)
+    void LightManager::addLight(LightSource* lightSource, osg::Matrixf worldMat)
     {
         LightSourceTransform l;
         l.mLightSource = lightSource;
@@ -221,7 +221,7 @@ namespace SceneUtil
 
             for (std::vector<LightSourceTransform>::iterator lightIt = mLights.begin(); lightIt != mLights.end(); ++lightIt)
             {
-                osg::Matrix worldViewMat = lightIt->mWorldMatrix * (*viewMatrix);
+                osg::Matrixf worldViewMat = lightIt->mWorldMatrix * (*viewMatrix);
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), lightIt->mLightSource->getRadius());
                 transformBoundingSphere(worldViewMat, viewBound);
 

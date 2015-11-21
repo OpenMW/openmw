@@ -49,7 +49,7 @@ void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
         osg::Matrix mat = osg::computeLocalToWorld( path );
         mat.orthoNormalize(mat); // don't undo the scale
-        mat = osg::Matrix::inverse(mat);
+        mat.invert(mat);
         trans->setMatrix(mat);
     }
     traverse(node,nv);
