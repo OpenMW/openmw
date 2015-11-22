@@ -298,7 +298,7 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 
 void RigGeometry::updateGeomToSkelMatrix(osg::NodeVisitor *nv)
 {
-    osg::NodePath path;
+    mSkelToGeomPath.clear();
     bool foundSkel = false;
     for (osg::NodePath::const_iterator it = nv->getNodePath().begin(); it != nv->getNodePath().end(); ++it)
     {
@@ -308,9 +308,9 @@ void RigGeometry::updateGeomToSkelMatrix(osg::NodeVisitor *nv)
                 foundSkel = true;
         }
         else
-            path.push_back(*it);
+            mSkelToGeomPath.push_back(*it);
     }
-    mGeomToSkelMatrix = osg::computeWorldToLocal(path);
+    mGeomToSkelMatrix = osg::computeWorldToLocal(mSkelToGeomPath);
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
