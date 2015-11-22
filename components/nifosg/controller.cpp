@@ -239,7 +239,7 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
         }
     }
 
-    morphGeom->transformSoftwareMethod();
+    // morphGeometry::transformSoftwareMethod() done in cull callback i.e. only for visible morph geometries
 }
 
 UVController::UVController()
