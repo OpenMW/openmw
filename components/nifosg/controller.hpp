@@ -97,6 +97,7 @@ namespace NifOsg
         virtual float getMaximum() const;
     };
 
+    /// Must be set on an osgAnimation::MorphGeometry.
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller, public ValueInterpolator
     {
     public:

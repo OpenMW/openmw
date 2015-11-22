@@ -221,28 +221,25 @@ GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)
 {
-    osgAnimation::MorphGeometry* morphGeom = dynamic_cast<osgAnimation::MorphGeometry*>(drawable);
-    if (morphGeom)
+    osgAnimation::MorphGeometry* morphGeom = static_cast<osgAnimation::MorphGeometry*>(drawable);
+    if (hasInput())
     {
-        if (hasInput())
+        if (mKeyFrames.size() <= 1)
+            return;
+        float input = getInputValue(nv);
+        int i = 0;
+        for (std::vector<Nif::FloatKeyMapPtr>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
         {
-            if (mKeyFrames.size() <= 1)
-                return;
-            float input = getInputValue(nv);
-            int i = 0;
-            for (std::vector<Nif::FloatKeyMapPtr>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
-            {
-                float val = 0;
-                if (!(*it)->mKeys.empty())
-                    val = interpKey((*it)->mKeys, input);
-                val = std::max(0.f, std::min(1.f, val));
+            float val = 0;
+            if (!(*it)->mKeys.empty())
+                val = interpKey((*it)->mKeys, input);
+            val = std::max(0.f, std::min(1.f, val));
 
-                morphGeom->setWeight(i, val);
-            }
+            morphGeom->setWeight(i, val);
         }
-
-        morphGeom->transformSoftwareMethod();
     }
+
+    morphGeom->transformSoftwareMethod();
 }
 
 UVController::UVController()
