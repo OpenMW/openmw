@@ -85,6 +85,13 @@ namespace MWWorld
             MWPhysics::PhysicsSystem *mPhysics;
             bool mSky;
 
+            ESM::Variant* mGameHour;
+            ESM::Variant* mDaysPassed;
+            ESM::Variant* mDay;
+            ESM::Variant* mMonth;
+            ESM::Variant* mYear;
+            ESM::Variant* mTimeScale;
+
             Cells mCells;
 
             std::string mCurrentWorldSpace;
@@ -134,6 +141,8 @@ namespace MWWorld
             ///< Run physics simulation and modify \a world accordingly.
 
             void ensureNeededRecords();
+
+            void fillGlobalVariables();
 
             /**
              * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
