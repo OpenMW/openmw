@@ -3,6 +3,8 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 #include <OgreManualObject.h>
+#include <OgreMaterialManager.h>
+#include <OgreTechnique.h>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadland.hpp>
