@@ -748,9 +748,10 @@ if (APPLE)
 
     set(ABSOLUTE_PLUGINS "")
     set(USED_OSG_PLUGINS
-                        osgdb_tga
                         osgdb_dds
-                        osgdb_imageio
+                        osgdb_jpeg
+                        osgdb_png
+                        osgdb_tga
                       )
 
     foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
