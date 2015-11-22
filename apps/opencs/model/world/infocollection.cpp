@@ -19,31 +19,31 @@ void CSMWorld::InfoCollection::load (const Info& record, bool base)
         record2.mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
         (base ? record2.mBase : record2.mModified) = record;
 
-        int index = -1;
+        int index2 = -1;
 
         std::string topic = Misc::StringUtils::lowerCase (record2.get().mTopicId);
 
         if (!record2.get().mPrev.empty())
         {
-            index = getInfoIndex (record2.get().mPrev, topic);
+            index2 = getInfoIndex (record2.get().mPrev, topic);
 
-            if (index!=-1)
-                ++index;
+            if (index2!=-1)
+                ++index2;
         }
 
-        if (index==-1 && !record2.get().mNext.empty())
+        if (index2==-1 && !record2.get().mNext.empty())
         {
-            index = getInfoIndex (record2.get().mNext, topic);
+            index2 = getInfoIndex (record2.get().mNext, topic);
         }
 
-        if (index==-1)
+        if (index2==-1)
         {
             Range range = getTopicRange (topic);
 
-            index = std::distance (getRecords().begin(), range.second);
+            index2 = std::distance (getRecords().begin(), range.second);
         }
 
-        insertRecord (record2, index);
+        insertRecord (record2, index2);
     }
     else
     {

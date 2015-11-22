@@ -183,11 +183,11 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
             CSMWorld::LandTexture texture =
                 mState.mSource.getData().getLandTextures().getRecord (index).get();
 
-            std::ostringstream stream;
-            stream << mNext->second-1 << "_0";
+            std::ostringstream stream2;
+            stream2 << mNext->second-1 << "_0";
 
             texture.mIndex = mNext->second-1;
-            texture.mId = stream.str();
+            texture.mId = stream2.str();
 
             CSMWorld::Record<CSMWorld::LandTexture> newRecord (
                 CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture);

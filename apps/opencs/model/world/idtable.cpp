@@ -172,9 +172,9 @@ void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& reco
 
     if (index==-1)
     {
-        int index = mIdCollection->getAppendIndex (id, type);
+        int index2 = mIdCollection->getAppendIndex (id, type);
 
-        beginInsertRows (QModelIndex(), index, index);
+        beginInsertRows (QModelIndex(), index2, index2);
 
         mIdCollection->appendRecord (record, type);
 

@@ -119,11 +119,11 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
 
     for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
     {
-        CSMWorld::RecordBase::State state = iter->mState;
+        CSMWorld::RecordBase::State recState = iter->mState;
 
-        if (state==CSMWorld::RecordBase::State_Modified ||
-            state==CSMWorld::RecordBase::State_ModifiedOnly ||
-            state==CSMWorld::RecordBase::State_Deleted)
+        if (recState==CSMWorld::RecordBase::State_Modified ||
+            recState==CSMWorld::RecordBase::State_ModifiedOnly ||
+            recState==CSMWorld::RecordBase::State_Deleted)
         {
             infoModified = true;
             break;

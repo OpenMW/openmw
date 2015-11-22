@@ -26,22 +26,22 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
         Ogre::StringVectorPtr resources =
             Ogre::ResourceGroupManager::getSingleton().listResourceNames (*iter);
 
-        for (Ogre::StringVector::const_iterator iter (resources->begin());
-            iter!=resources->end(); ++iter)
+        for (Ogre::StringVector::const_iterator iter2 (resources->begin());
+            iter2!=resources->end(); ++iter2)
         {
-            if (static_cast<int> (iter->size())<baseSize+1 ||
-                iter->substr (0, baseSize)!=mBaseDirectory ||
-                ((*iter)[baseSize]!='/' && (*iter)[baseSize]!='\\'))
+            if (static_cast<int> (iter2->size())<baseSize+1 ||
+                iter2->substr (0, baseSize)!=mBaseDirectory ||
+                ((*iter2)[baseSize]!='/' && (*iter2)[baseSize]!='\\'))
                 continue;
 
             if (extensions)
             {
-                std::string::size_type index = iter->find_last_of ('.');
+                std::string::size_type index = iter2->find_last_of ('.');
 
                 if (index==std::string::npos)
                     continue;
 
-                std::string extension = iter->substr (index+1);
+                std::string extension = iter2->substr (index+1);
 
                 int i = 0;
 
@@ -53,7 +53,7 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
                     continue;
             }
 
-            std::string file = iter->substr (baseSize+1);
+            std::string file = iter2->substr (baseSize+1);
             mFiles.push_back (file);
             std::replace (file.begin(), file.end(), '\\', '/');
             mIndex.insert (std::make_pair (

@@ -878,10 +878,10 @@ void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, Univers
         if (index==-1)
         {
             // new record
-            int index = mData.getAppendIndex (type);
+            int newIndex = mData.getAppendIndex (type);
             mData.appendRecord (type, id, base);
 
-            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
+            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (newIndex);
 
             mData.load (localIndex, reader, base);
 
