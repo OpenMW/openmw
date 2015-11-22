@@ -235,7 +235,12 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
                 val = interpKey((*it)->mKeys, input);
             val = std::max(0.f, std::min(1.f, val));
 
-            morphGeom->setWeight(i, val);
+            osgAnimation::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
+            if (target.getWeight() != val)
+            {
+                target.setWeight(val);
+                morphGeom->dirty();
+            }
         }
     }
 
