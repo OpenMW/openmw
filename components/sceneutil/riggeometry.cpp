@@ -224,8 +224,6 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 
     mSkeleton->updateBoneMatrices(nv);
 
-    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
-
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
     osg::Vec3Array* normalSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getNormalArray());
@@ -248,7 +246,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
             accumulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
         }
-        resultMat = resultMat * geomToSkel;
+        resultMat = resultMat * mGeomToSkelMatrix;
 
         for (std::vector<unsigned short>::const_iterator vertexIt = it->second.begin(); vertexIt != it->second.end(); ++vertexIt)
         {
@@ -276,13 +274,14 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 
     mSkeleton->updateBoneMatrices(nv);
 
-    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
+    updateGeomToSkelMatrix(nv);
+
     osg::BoundingBox box;
     for (BoneSphereMap::const_iterator it = mBoneSphereMap.begin(); it != mBoneSphereMap.end(); ++it)
     {
         Bone* bone = it->first;
         osg::BoundingSpheref bs = it->second;
-        transformBoundingSphere(bone->mMatrixInSkeletonSpace * geomToSkel, bs);
+        transformBoundingSphere(bone->mMatrixInSkeletonSpace * mGeomToSkelMatrix, bs);
         box.expandBy(bs);
     }
 
@@ -297,7 +296,7 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         getParent(i)->dirtyBound();
 }
 
-osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
+void RigGeometry::updateGeomToSkelMatrix(osg::NodeVisitor *nv)
 {
     osg::NodePath path;
     bool foundSkel = false;
@@ -311,8 +310,7 @@ osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
         else
             path.push_back(*it);
     }
-    return osg::computeWorldToLocal(path);
-
+    mGeomToSkelMatrix = osg::computeWorldToLocal(path);
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
