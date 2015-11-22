@@ -84,21 +84,21 @@ void CSVRender::UnpagedWorldspaceWidget::cellRowsAboutToBeRemoved (const QModelI
         emit closeRequest();
 }
 
-bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data, DropType type)
+bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& dropData, DropType type)
 {
-    if (WorldspaceWidget::handleDrop (data, type))
+    if (WorldspaceWidget::handleDrop (dropData, type))
         return true;
 
     if (type!=Type_CellsInterior)
         return false;
 
-    mCellId = data.begin()->getId();
+    mCellId = dropData.begin()->getId();
     Cell *cell = new Cell (getDocument(), getSceneManager(), mCellId, getDocument().getPhysics());
     connect (cell->getSignalHandler(), SIGNAL(flagAsModified()), this, SLOT(flagAsModSlot()));
     mCell.reset (cell);
 
     update();
-    emit cellChanged(*data.begin());
+    emit cellChanged(*dropData.begin());
 
     return true;
 }
