@@ -4,7 +4,7 @@
     <Layer name="Overlay" overlapped="false" pick="false"/>
     <Layer name="AdditiveOverlay" type="AdditiveLayer" pick="false"/>
     <Layer name="HUD" overlapped="false" pick="true"/>
-    <Layer name="Menu" overlapped="false" pick="false"/>
+    <Layer name="Menu" overlapped="false" pick="true"/>
     <Layer name="Windows" overlapped="true" pick="true"/>
     <Layer name="JournalBooks" type="ScalingLayer" pick="true">
         <Property key="Size" value="600 520"/>
