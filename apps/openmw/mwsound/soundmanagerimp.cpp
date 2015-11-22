@@ -18,6 +18,7 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "sound_output.hpp"
+#include "sound_buffer.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
 
@@ -103,38 +104,48 @@ namespace MWSound
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
-    // Convert a soundId to file name, and modify the volume
-    // according to the sounds local volume setting, minRange and
-    // maxRange.
-    std::string SoundManager::lookup(const std::string &soundId,
-                       float &volume, float &min, float &max)
+    // Lookup a soundid for its sound data (resource name, local volume,
+    // minRange and maxRange. The returned pointer is only valid temporarily.
+    const Sound_Buffer *SoundManager::lookup(const std::string &soundId)
     {
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-        const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
-
-        volume *= static_cast<float>(pow(10.0, (snd->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
-
-        if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
+        NameBufferMap::iterator sfxiter = mSoundBuffers.find(soundId);
+        if(sfxiter == mSoundBuffers.end())
         {
-            static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
-            static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
-            min = fAudioDefaultMinDistance;
-            max = fAudioDefaultMaxDistance;
-        }
-        else
-        {
-            min = snd->mData.mMinRange;
-            max = snd->mData.mMaxRange;
-        }
+            // TODO: We could process all available ESM::Sound records on init
+            // to pre-fill a non-resizing list, which would allow subsystems to
+            // reference sounds by index instead of string.
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
 
-        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
-        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
-        min *= fAudioMinDistanceMult;
-        max *= fAudioMaxDistanceMult;
-        min = std::max(min, 1.0f);
-        max = std::max(min, max);
+            float volume, min, max;
+            volume = static_cast<float>(pow(10.0, (snd->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
 
-        return "Sound/"+snd->mSound;
+            if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
+            {
+                static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
+                static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
+                min = fAudioDefaultMinDistance;
+                max = fAudioDefaultMaxDistance;
+            }
+            else
+            {
+                min = snd->mData.mMinRange;
+                max = snd->mData.mMaxRange;
+            }
+
+            static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
+            static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+            min *= fAudioMinDistanceMult;
+            max *= fAudioMaxDistanceMult;
+            min = std::max(min, 1.0f);
+            max = std::max(min, max);
+
+            sfxiter = mSoundBuffers.insert(std::make_pair(
+                soundId, Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
+            )).first;
+            mVFS->normalizeFilename(sfxiter->second.mResourceName);
+        }
+        return &sfxiter->second;
     }
 
     // Gets the combined volume settings for the given sound type
@@ -268,7 +279,7 @@ namespace MWSound
         try
         {
             float basevol = volumeFromType(Play_TypeVoice);
-            std::string filePath = "Sound/"+filename;
+            std::string filePath = "sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
 
@@ -371,11 +382,12 @@ namespace MWSound
             return sound;
         try
         {
+            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
-            float min, max;
-            std::string file = lookup(soundId, volume, min, max);
 
-            sound = mOutput->playSound(file, volume, basevol, pitch, mode|type, offset);
+            sound = mOutput->playSound(sfx->mResourceName,
+                volume * sfx->mVolume, basevol, pitch, mode|type, offset
+            );
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception&)
@@ -394,18 +406,17 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
+            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
-            float min, max;
-            std::string file = lookup(soundId, volume, min, max);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
 
-            if ((mode & Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
-            {
+            if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
-            }
 
-            sound = mOutput->playSound3D(file, objpos, volume, basevol, pitch, min, max, mode|type, offset);
+            sound = mOutput->playSound3D(sfx->mResourceName,
+                objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
+            );
             if((mode&Play_NoTrack))
                 mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
             else
@@ -427,11 +438,12 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
+            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
-            float min, max;
-            std::string file = lookup(soundId, volume, min, max);
 
-            sound = mOutput->playSound3D(file, initialPos, volume, basevol, pitch, min, max, mode|type, offset);
+            sound = mOutput->playSound3D(sfx->mResourceName,
+                initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
+            );
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
         }
         catch(std::exception &)

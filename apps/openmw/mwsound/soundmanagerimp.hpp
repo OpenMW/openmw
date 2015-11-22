@@ -21,6 +21,7 @@ namespace MWSound
     class Sound_Output;
     struct Sound_Decoder;
     class Sound;
+    class Sound_Buffer;
 
     enum Environment {
         Env_Normal,
@@ -43,6 +44,9 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
+        typedef std::map<std::string,Sound_Buffer> NameBufferMap;
+        NameBufferMap mSoundBuffers;
+
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
@@ -59,8 +63,8 @@ namespace MWSound
 
         int mPausedSoundTypes;
 
-        std::string lookup(const std::string &soundId,
-                  float &volume, float &min, float &max);
+        const Sound_Buffer *lookup(const std::string &soundId);
+
         void streamMusicFull(const std::string& filename);
         bool isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const;
         void updateSounds(float duration);
