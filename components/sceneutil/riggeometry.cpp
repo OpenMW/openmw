@@ -185,7 +185,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
     return true;
 }
 
-void accummulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
+void accumulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
 {
     osg::Matrixf m = invBindMatrix * matrix;
     float* ptr = m.ptr();
@@ -246,7 +246,7 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             const osg::Matrix& invBindMatrix = weightIt->first.second;
             float weight = weightIt->second;
             const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
-            accummulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
+            accumulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
         }
         resultMat = resultMat * geomToSkel;
 
