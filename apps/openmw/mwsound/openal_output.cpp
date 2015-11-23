@@ -813,6 +813,17 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
     alDeleteBuffers(1, &buffer);
 }
 
+size_t OpenAL_Output::getSoundDataSize(Sound_Handle data) const
+{
+    ALuint buffer = GET_PTRID(data);
+    ALint size = 0;
+
+    alGetBufferi(buffer, AL_SIZE, &size);
+    throwALerror();
+
+    return (ALuint)size;
+}
+
 
 MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags,float offset)
 {

@@ -35,6 +35,7 @@ namespace MWSound
 
         virtual Sound_Handle loadSound(const std::string &fname, Sound_Loudness *loudness);
         virtual void unloadSound(Sound_Handle data);
+        virtual size_t getSoundDataSize(Sound_Handle data) const;
 
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
         virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset);

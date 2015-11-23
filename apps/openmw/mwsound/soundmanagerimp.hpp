@@ -49,6 +49,7 @@ namespace MWSound
 
         typedef std::map<std::string,Sound_Buffer> NameBufferMap;
         NameBufferMap mSoundBuffers;
+        size_t mBufferCacheSize;
         // Should stream voices, but that requires handling the "lip" data
         // separately from buffer loading.
         NameBufferMap mVoiceSoundBuffers;

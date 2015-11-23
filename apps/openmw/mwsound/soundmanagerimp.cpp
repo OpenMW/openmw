@@ -40,6 +40,7 @@ namespace MWSound
         , mMusicVolume(1.0f)
         , mVoiceVolume(1.0f)
         , mFootstepsVolume(1.0f)
+        , mBufferCacheSize(0)
         , mListenerUnderwater(false)
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
@@ -165,6 +166,19 @@ namespace MWSound
         }
 
         sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+        mBufferCacheSize += mOutput->getSoundDataSize(sfxiter->second.mHandle);
+        // NOTE: Max sound buffer cache size is 15MB. Make configurable?
+        while(mBufferCacheSize > 15*1024*1024)
+        {
+            if(mUnusedBuffers.empty())
+            {
+                std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
+                break;
+            }
+            SoundSet::iterator iter = mUnusedBuffers.begin();
+            mBufferCacheSize -= mOutput->getSoundDataSize(*iter);
+            mUnusedBuffers.erase(iter);
+        }
         mUnusedBuffers.insert(sfxiter->second.mHandle);
 
         return &sfxiter->second;
