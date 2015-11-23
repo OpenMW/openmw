@@ -58,6 +58,9 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,SoundNamePairList> SoundMap;
         SoundMap mActiveSounds;
 
+        typedef std::map<MWWorld::Ptr,SoundNamePair> SaySoundMap;
+        SaySoundMap mActiveSaySounds;
+
         MWBase::SoundPtr mUnderwaterSound;
 
         bool mListenerUnderwater;

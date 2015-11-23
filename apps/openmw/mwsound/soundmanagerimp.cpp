@@ -92,6 +92,10 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        mUnderwaterSound.reset();
+        mActiveSounds.clear();
+        mActiveSaySounds.clear();
+        mMusic.reset();
         if(mOutput->isInitialized())
         {
             NameBufferMap::iterator sfxiter = mSoundBuffers.begin();
@@ -109,9 +113,6 @@ namespace MWSound
                 sfxiter->second.mHandle = 0;
             }
         }
-        mUnderwaterSound.reset();
-        mActiveSounds.clear();
-        mMusic.reset();
         mOutput.reset();
     }
 
@@ -224,21 +225,6 @@ namespace MWSound
         return volume;
     }
 
-    bool SoundManager::isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const
-    {
-        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
-        if(snditer != mActiveSounds.end())
-        {
-            SoundNamePairList::const_iterator sndname = snditer->second.begin();
-            for(;sndname != snditer->second.end();++sndname)
-            {
-                if(sndname->second == id && sndname->first->isPlaying())
-                    return true;
-            }
-        }
-        return false;
-    }
-
 
     void SoundManager::stopMusic()
     {
@@ -325,13 +311,15 @@ namespace MWSound
         startRandomTitle();
     }
 
+
     void SoundManager::say(const MWWorld::Ptr &ptr, const std::string &filename)
     {
         if(!mOutput->isInitialized())
             return;
         try
         {
-            const Sound_Buffer *sfx = lookupVoice(Misc::StringUtils::lowerCase(filename));
+            std::string voicefile = Misc::StringUtils::lowerCase(filename);
+            const Sound_Buffer *sfx = lookupVoice(voicefile);
             float basevol = volumeFromType(Play_TypeVoice);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
@@ -339,7 +327,7 @@ namespace MWSound
             MWBase::SoundPtr sound = mOutput->playSound3D(sfx->mHandle,
                 objpos, sfx->mVolume, basevol, 1.0f, sfx->mMinDist, sfx->mMaxDist, Play_Normal|Play_TypeVoice, 0
             );
-            mActiveSounds[ptr].push_back(std::make_pair(sound, std::string("_say_sound")));
+            mActiveSaySounds[ptr] = std::make_pair(sound, voicefile);
         }
         catch(std::exception &e)
         {
@@ -349,14 +337,15 @@ namespace MWSound
 
     float SoundManager::getSaySoundLoudness(const MWWorld::Ptr &ptr) const
     {
-        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
-        if(snditer != mActiveSounds.end())
+        SaySoundMap::const_iterator snditer = mActiveSaySounds.find(ptr);
+        if(snditer != mActiveSaySounds.end())
         {
-            SoundNamePairList::const_iterator sndname = snditer->second.begin();
-            for(;sndname != snditer->second.end();++sndname)
+            NameBufferMap::const_iterator sfxiter = mVoiceSoundBuffers.find(snditer->second.second);
+            if(sfxiter != mVoiceSoundBuffers.end())
             {
-                if(sndname->second == "_say_sound")
-                    return 0.0f;
+                float sec = snditer->second.first->getTimeOffset();
+                if(snditer->second.first->isPlaying())
+                    return sfxiter->second.mLoudness.getLoudnessAtTime(sec);
             }
         }
 
@@ -369,13 +358,14 @@ namespace MWSound
             return;
         try
         {
-            const Sound_Buffer *sfx = lookupVoice(Misc::StringUtils::lowerCase(filename));
+            std::string voicefile = Misc::StringUtils::lowerCase(filename);
+            const Sound_Buffer *sfx = lookupVoice(voicefile);
             float basevol = volumeFromType(Play_TypeVoice);
 
             MWBase::SoundPtr sound = mOutput->playSound(sfx->mHandle,
                 sfx->mVolume, basevol, 1.0f, Play_Normal|Play_TypeVoice, 0
             );
-            mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, std::string("_say_sound")));
+            mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, voicefile);
         }
         catch(std::exception &e)
         {
@@ -385,26 +375,22 @@ namespace MWSound
 
     bool SoundManager::sayDone(const MWWorld::Ptr &ptr) const
     {
-        return !isPlaying(ptr, "_say_sound");
+        SaySoundMap::const_iterator snditer = mActiveSaySounds.find(ptr);
+        if(snditer != mActiveSaySounds.end())
+        {
+            if(snditer->second.first->isPlaying())
+                return false;
+        }
+        return true;
     }
 
     void SoundManager::stopSay(const MWWorld::Ptr &ptr)
     {
-        SoundMap::iterator snditer = mActiveSounds.find(ptr);
-        if(snditer != mActiveSounds.end())
+        SaySoundMap::iterator snditer = mActiveSaySounds.find(ptr);
+        if(snditer != mActiveSaySounds.end())
         {
-            SoundNamePairList::iterator sndname = snditer->second.begin();
-            for(;sndname != snditer->second.end();++sndname)
-            {
-                if(sndname->second != "_say_sound")
-                    continue;
-
-                sndname->first->stop();
-                snditer->second.erase(sndname);
-                if(snditer->second.empty())
-                    mActiveSounds.erase(snditer);
-                return;
-            }
+            snditer->second.first->stop();
+            mActiveSaySounds.erase(snditer);
         }
     }
 
@@ -425,6 +411,21 @@ namespace MWSound
         return track;
     }
 
+
+    bool SoundManager::isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const
+    {
+        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
+        if(snditer != mActiveSounds.end())
+        {
+            SoundNamePairList::const_iterator sndname = snditer->second.begin();
+            for(;sndname != snditer->second.end();++sndname)
+            {
+                if(sndname->second == id && sndname->first->isPlaying())
+                    return true;
+            }
+        }
+        return false;
+    }
 
     MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode, float offset)
     {
@@ -572,6 +573,19 @@ namespace MWSound
             }
             else
                 ++snditer;
+        }
+        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
+        while(sayiter != mActiveSaySounds.end())
+        {
+            if(sayiter->first != MWWorld::Ptr() &&
+               sayiter->first != MWMechanics::getPlayer() &&
+               sayiter->first.getCell() == cell)
+            {
+                sayiter->second.first->stop();
+                mActiveSaySounds.erase(sayiter++);
+            }
+            else
+                ++sayiter;
         }
     }
 
@@ -740,7 +754,8 @@ namespace MWSound
             SoundNamePairList::iterator sndname = snditer->second.begin();
             while(sndname != snditer->second.end())
             {
-                if(!sndname->first->isPlaying())
+                MWBase::SoundPtr sound = sndname->first;
+                if(!sound->isPlaying())
                 {
                     sndname = snditer->second.erase(sndname);
                     continue;
@@ -751,9 +766,9 @@ namespace MWSound
                 {
                     const ESM::Position &pos = ptr.getRefData().getPosition();
                     const osg::Vec3f objpos(pos.asVec3());
-                    sndname->first->setPosition(objpos);
+                    sound->setPosition(objpos);
 
-                    if ((sndname->first->mFlags & Play_RemoveAtDistance)
+                    if ((sound->mFlags & Play_RemoveAtDistance)
                             && (mListenerPos - ptr.getRefData().getPosition().asVec3()).length2() > 2000*2000)
                     {
                         sndname = snditer->second.erase(sndname);
@@ -762,22 +777,61 @@ namespace MWSound
                 }
 
                 //update fade out
-                if(sndname->first->mFadeOutTime > 0.0f)
+                if(sound->mFadeOutTime > 0.0f)
                 {
                     float soundDuration = duration;
-                    if(soundDuration > sndname->first->mFadeOutTime)
-                        soundDuration = sndname->first->mFadeOutTime;
-                    sndname->first->setVolume(sndname->first->mVolume
-                                    - soundDuration / sndname->first->mFadeOutTime * sndname->first->mVolume);
-                    sndname->first->mFadeOutTime -= soundDuration;
+                    if(soundDuration > sound->mFadeOutTime)
+                        soundDuration = sound->mFadeOutTime;
+                    sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
+                    sound->mFadeOutTime -= soundDuration;
                 }
-                sndname->first->update();
+                sound->update();
+
                 ++sndname;
             }
             if(snditer->second.empty())
                 mActiveSounds.erase(snditer++);
             else
                 ++snditer;
+        }
+
+        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
+        while(sayiter != mActiveSaySounds.end())
+        {
+            MWBase::SoundPtr sound = sayiter->second.first;
+            if(!sound->isPlaying())
+            {
+                mActiveSaySounds.erase(sayiter++);
+                continue;
+            }
+
+            const MWWorld::Ptr &ptr = sayiter->first;
+            if(!ptr.isEmpty())
+            {
+                const ESM::Position &pos = ptr.getRefData().getPosition();
+                const osg::Vec3f objpos(pos.asVec3());
+                sound->setPosition(objpos);
+
+                if ((sound->mFlags & Play_RemoveAtDistance)
+                        && (mListenerPos - ptr.getRefData().getPosition().asVec3()).length2() > 2000*2000)
+                {
+                    mActiveSaySounds.erase(sayiter++);
+                    continue;
+                }
+            }
+
+            //update fade out
+            if(sound->mFadeOutTime > 0.0f)
+            {
+                float soundDuration = duration;
+                if(soundDuration > sound->mFadeOutTime)
+                    soundDuration = sound->mFadeOutTime;
+                sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
+                sound->mFadeOutTime -= soundDuration;
+            }
+            sound->update();
+
+            ++sayiter;
         }
     }
 
@@ -840,6 +894,13 @@ namespace MWSound
             SoundNamePairList sndlist = snditer->second;
             mActiveSounds.erase(snditer);
             mActiveSounds[updated] = sndlist;
+        }
+        SaySoundMap::iterator sayiter = mActiveSaySounds.find(old);
+        if(sayiter != mActiveSaySounds.end())
+        {
+            SoundNamePair sndlist = sayiter->second;
+            mActiveSaySounds.erase(sayiter);
+            mActiveSaySounds[updated] = sndlist;
         }
     }
 
@@ -918,6 +979,10 @@ namespace MWSound
                 sndname->first->stop();
         }
         mActiveSounds.clear();
+        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
+        for(;sayiter != mActiveSaySounds.end();++sayiter)
+            sayiter->second.first->stop();
+        mActiveSaySounds.clear();
         stopMusic();
     }
 }
