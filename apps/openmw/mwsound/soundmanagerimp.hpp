@@ -53,8 +53,9 @@ namespace MWSound
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
-        typedef std::pair<MWWorld::Ptr,std::string> PtrIDPair;
-        typedef std::map<MWBase::SoundPtr,PtrIDPair> SoundMap;
+        typedef std::pair<MWBase::SoundPtr,std::string> SoundNamePair;
+        typedef std::vector<SoundNamePair> SoundNamePairList;
+        typedef std::map<MWWorld::Ptr,SoundNamePairList> SoundMap;
         SoundMap mActiveSounds;
 
         MWBase::SoundPtr mUnderwaterSound;
