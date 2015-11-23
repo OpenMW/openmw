@@ -194,7 +194,7 @@ public:
                     if (mit->second == false && mit->first.first == currentCategory) {
                         std::cout << "Added new setting: [" << currentCategory << "] "
                                   << mit->first.second << " = " << settings[mit->first] << std::endl;
-			// With some further code changes, this comment could be more descriptive.
+                        // With some further code changes, this comment could be more descriptive.
                         ostream << "# Automatically added setting." << std::endl;
                         ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
                         mit->second = true;
@@ -223,9 +223,9 @@ public:
             if (!skipWhiteSpace(i, line))
                 continue;
 
-	    // If we'cve found settings befor ethe first category, something's wrong.  This
+            // If we'cve found settings befor ethe first category, something's wrong.  This
             // should never happen unless the player edited the file while playing, since
-	    // the loadSettingsFile() logic rejects it.
+            // the loadSettingsFile() logic rejects it.
             if (currentCategory.empty()) {
                 ostream << "# empty category name: " << line << std::endl;
                 changed = true;
@@ -276,7 +276,7 @@ public:
             }
             // No need to write the current line, because we just emitted a replacement.
 
-	    // Curiously, it appears that comments at the ends of lines with settings are not
+            // Curiously, it appears that comments at the ends of lines with settings are not
             // allowed, and the comment becomes part of the value.  Was that intended?
         }
 
@@ -290,7 +290,7 @@ public:
             if (mit->second == false && mit->first.first == currentCategory) {
                 std::cout << "Added new setting: [" << mit->first.first << "] "
                           << mit->first.second << " = " << settings[mit->first] << std::endl;
-		// With some further code changes, this comment could be more descriptive.
+                // With some further code changes, this comment could be more descriptive.
                 ostream << std::endl << "# Automatically added setting." << std::endl;
                 ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
                 mit->second = true;
@@ -301,10 +301,10 @@ public:
             if (missed) ostream << std::endl;
         }
 
-	// This logic triggers when the input file was effectively empty.  It could be extended
-	// to doing something more intelligent instead, like make a copy of the default settings
-	// file (complete with comments) before continuing.  Other code prevents OpenMW from
-	// executing to this point with a missing config file.
+        // This logic triggers when the input file was effectively empty.  It could be extended
+        // to doing something more intelligent instead, like make a copy of the default settings
+        // file (complete with comments) before continuing.  Other code prevents OpenMW from
+        // executing to this point with a missing config file.
         if (!existing) {
             ostream << "# This file was automatically generated." << std::endl << std::endl;
         }
