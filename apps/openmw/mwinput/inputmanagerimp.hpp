@@ -174,7 +174,6 @@ namespace MWInput
         bool mControlsDisabled;
 
         float mCameraSensitivity;
-        float mUISensitivity;
         float mCameraYMultiplier;
         float mPreviewPOVDelay;
         float mTimeIdle;
