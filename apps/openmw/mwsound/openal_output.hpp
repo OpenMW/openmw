@@ -16,6 +16,9 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
+    class OpenAL_Sound;
+    class OpenAL_SoundStream;
+
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -24,8 +27,10 @@ namespace MWSound
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
-        typedef std::vector<Sound*> SoundVec;
+        typedef std::vector<OpenAL_Sound*> SoundVec;
         SoundVec mActiveSounds;
+        typedef std::vector<OpenAL_SoundStream*> StreamVec;
+        StreamVec mActiveStreams;
 
         Environment mLastEnvironment;
 

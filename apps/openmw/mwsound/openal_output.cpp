@@ -296,7 +296,7 @@ OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, Decode
         mBufferSize = static_cast<ALuint>(sBufferLength*srate);
         mBufferSize = framesToBytes(mBufferSize, chans, type);
 
-        mOutput.mActiveSounds.push_back(this);
+        mOutput.mActiveStreams.push_back(this);
     }
     catch(std::exception&)
     {
@@ -318,8 +318,8 @@ OpenAL_SoundStream::~OpenAL_SoundStream()
 
     mDecoder->close();
 
-    mOutput.mActiveSounds.erase(std::find(mOutput.mActiveSounds.begin(),
-                                          mOutput.mActiveSounds.end(), this));
+    mOutput.mActiveStreams.erase(std::find(mOutput.mActiveStreams.begin(),
+                                           mOutput.mActiveStreams.end(), this));
 }
 
 void OpenAL_SoundStream::play()
@@ -802,12 +802,11 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
     SoundVec::const_iterator iter = mActiveSounds.begin();
     for(;iter != mActiveSounds.end();++iter)
     {
-        OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
-        if(sound && sound->mSource && sound->mBuffer == buffer)
+        if((*iter)->mSource && (*iter)->mBuffer == buffer)
         {
-            alSourceStop(sound->mSource);
-            alSourcei(sound->mSource, AL_BUFFER, 0);
-            sound->mBuffer = 0;
+            alSourceStop((*iter)->mSource);
+            alSourcei((*iter)->mSource, AL_BUFFER, 0);
+            (*iter)->mBuffer = 0;
         }
     }
     alDeleteBuffers(1, &buffer);
@@ -947,22 +946,17 @@ void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdi
 void OpenAL_Output::pauseSounds(int types)
 {
     std::vector<ALuint> sources;
-    SoundVec::const_iterator iter = mActiveSounds.begin();
-    while(iter != mActiveSounds.end())
+    SoundVec::const_iterator sound = mActiveSounds.begin();
+    for(;sound != mActiveSounds.end();++sound)
     {
-        const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
-        if(stream)
-        {
-            if(stream->mSource && (stream->getPlayType()&types))
-                sources.push_back(stream->mSource);
-        }
-        else
-        {
-            const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
-            if(sound && sound->mSource && (sound->getPlayType()&types))
-                sources.push_back(sound->mSource);
-        }
-        ++iter;
+        if(*sound && (*sound)->mSource && ((*sound)->getPlayType()&types))
+            sources.push_back((*sound)->mSource);
+    }
+    StreamVec::const_iterator stream = mActiveStreams.begin();
+    for(;stream != mActiveStreams.end();++stream)
+    {
+        if(*stream && (*stream)->mSource && ((*stream)->getPlayType()&types))
+            sources.push_back((*stream)->mSource);
     }
     if(!sources.empty())
     {
@@ -974,22 +968,17 @@ void OpenAL_Output::pauseSounds(int types)
 void OpenAL_Output::resumeSounds(int types)
 {
     std::vector<ALuint> sources;
-    SoundVec::const_iterator iter = mActiveSounds.begin();
-    while(iter != mActiveSounds.end())
+    SoundVec::const_iterator sound = mActiveSounds.begin();
+    for(;sound != mActiveSounds.end();++sound)
     {
-        const OpenAL_SoundStream *stream = dynamic_cast<OpenAL_SoundStream*>(*iter);
-        if(stream)
-        {
-            if(stream->mSource && (stream->getPlayType()&types))
-                sources.push_back(stream->mSource);
-        }
-        else
-        {
-            const OpenAL_Sound *sound = dynamic_cast<OpenAL_Sound*>(*iter);
-            if(sound && sound->mSource && (sound->getPlayType()&types))
-                sources.push_back(sound->mSource);
-        }
-        ++iter;
+        if(*sound && (*sound)->mSource && ((*sound)->getPlayType()&types))
+            sources.push_back((*sound)->mSource);
+    }
+    StreamVec::const_iterator stream = mActiveStreams.begin();
+    for(;stream != mActiveStreams.end();++stream)
+    {
+        if(*stream && (*stream)->mSource && ((*stream)->getPlayType()&types))
+            sources.push_back((*stream)->mSource);
     }
     if(!sources.empty())
     {
