@@ -722,12 +722,7 @@ namespace MWSound
 
         Environment env = Env_Normal;
         if (mListenerUnderwater)
-        {
             env = Env_Underwater;
-            //play underwater sound
-            if(!(mUnderwaterSound && mUnderwaterSound->isPlaying()))
-                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
-        }
         else if(mUnderwaterSound)
         {
             mUnderwaterSound->stop();
@@ -741,48 +736,24 @@ namespace MWSound
             env
         );
 
+        if(mListenerUnderwater)
+        {
+            // Play underwater sound (after updating listener)
+            if(!(mUnderwaterSound && mUnderwaterSound->isPlaying()))
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
+        }
+
         // Check if any sounds are finished playing, and trash them
-        // Lower volume on fading out sounds
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
         {
             SoundNamePairList::iterator sndname = snditer->second.begin();
             while(sndname != snditer->second.end())
             {
-                MWBase::SoundPtr sound = sndname->first;
-                if(!sound->isPlaying())
-                {
+                if(!updateSound(sndname->first, snditer->first, duration))
                     sndname = snditer->second.erase(sndname);
-                    continue;
-                }
-
-                const MWWorld::Ptr &ptr = snditer->first;
-                if(!ptr.isEmpty())
-                {
-                    const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const osg::Vec3f objpos(pos.asVec3());
-                    sound->setPosition(objpos);
-
-                    if ((sound->mFlags & Play_RemoveAtDistance)
-                            && (mListenerPos - ptr.getRefData().getPosition().asVec3()).length2() > 2000*2000)
-                    {
-                        sndname = snditer->second.erase(sndname);
-                        continue;
-                    }
-                }
-
-                //update fade out
-                if(sound->mFadeOutTime > 0.0f)
-                {
-                    float soundDuration = duration;
-                    if(soundDuration > sound->mFadeOutTime)
-                        soundDuration = sound->mFadeOutTime;
-                    sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
-                    sound->mFadeOutTime -= soundDuration;
-                }
-                sound->update();
-
-                ++sndname;
+                else
+                    ++sndname;
             }
             if(snditer->second.empty())
                 mActiveSounds.erase(snditer++);
@@ -793,42 +764,45 @@ namespace MWSound
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         while(sayiter != mActiveSaySounds.end())
         {
-            MWBase::SoundPtr sound = sayiter->second.first;
-            if(!sound->isPlaying())
-            {
+            if(!updateSound(sayiter->second.first, sayiter->first, duration))
                 mActiveSaySounds.erase(sayiter++);
-                continue;
-            }
-
-            const MWWorld::Ptr &ptr = sayiter->first;
-            if(!ptr.isEmpty())
-            {
-                const ESM::Position &pos = ptr.getRefData().getPosition();
-                const osg::Vec3f objpos(pos.asVec3());
-                sound->setPosition(objpos);
-
-                if ((sound->mFlags & Play_RemoveAtDistance)
-                        && (mListenerPos - ptr.getRefData().getPosition().asVec3()).length2() > 2000*2000)
-                {
-                    mActiveSaySounds.erase(sayiter++);
-                    continue;
-                }
-            }
-
-            //update fade out
-            if(sound->mFadeOutTime > 0.0f)
-            {
-                float soundDuration = duration;
-                if(soundDuration > sound->mFadeOutTime)
-                    soundDuration = sound->mFadeOutTime;
-                sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
-                sound->mFadeOutTime -= soundDuration;
-            }
-            sound->update();
-
-            ++sayiter;
+            else
+                ++sayiter;
         }
     }
+
+    bool SoundManager::updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr& ptr, float duration)
+    {
+        if(!ptr.isEmpty())
+        {
+            const ESM::Position &pos = ptr.getRefData().getPosition();
+            const osg::Vec3f objpos(pos.asVec3());
+            sound->setPosition(objpos);
+
+            if((sound->mFlags&Play_RemoveAtDistance))
+            {
+                osg::Vec3f diff = mListenerPos - ptr.getRefData().getPosition().asVec3();
+                if(diff.length2() > 2000*2000)
+                    sound->stop();
+            }
+        }
+
+        if(!sound->isPlaying())
+            return false;
+
+        // Update fade out
+        if(sound->mFadeOutTime > 0.0f)
+        {
+            float soundDuration = duration;
+            if(soundDuration > sound->mFadeOutTime)
+                soundDuration = sound->mFadeOutTime;
+            sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
+            sound->mFadeOutTime -= soundDuration;
+        }
+        sound->update();
+        return true;
+    }
+
 
     void SoundManager::update(float duration)
     {
