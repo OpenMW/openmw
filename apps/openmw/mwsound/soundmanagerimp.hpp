@@ -46,6 +46,9 @@ namespace MWSound
 
         typedef std::map<std::string,Sound_Buffer> NameBufferMap;
         NameBufferMap mSoundBuffers;
+        // Should stream voices, but that requires handling the "lip" data
+        // separately from buffer loading.
+        NameBufferMap mVoiceSoundBuffers;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
@@ -64,6 +67,7 @@ namespace MWSound
         int mPausedSoundTypes;
 
         const Sound_Buffer *lookup(const std::string &soundId);
+        const Sound_Buffer *lookupVoice(const std::string &voicefile);
 
         void streamMusicFull(const std::string& filename);
         bool isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const;

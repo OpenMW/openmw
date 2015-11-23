@@ -816,7 +816,7 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
 MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags,float offset)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
-    ALuint src=0;
+    ALuint src;
 
     if(mFreeSources.empty())
         fail("No free sources");
@@ -851,7 +851,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
                                             float min, float max, int flags, float offset)
 {
     boost::shared_ptr<OpenAL_Sound> sound;
-    ALuint src=0;
+    ALuint src;
 
     if(mFreeSources.empty())
         fail("No free sources");
