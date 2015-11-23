@@ -16,12 +16,6 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
-    struct CachedSound
-    {
-        ALuint mALBuffer;
-        std::vector<float> mLoudnessVector;
-    };
-
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -29,21 +23,9 @@ namespace MWSound
 
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
-        IDDq mUnusedBuffers;
-
-        typedef std::map<std::string,CachedSound> NameMap;
-        NameMap mBufferCache;
-
-        typedef std::map<ALuint,ALuint> IDRefMap;
-        IDRefMap mBufferRefs;
-
-        uint64_t mBufferCacheMemSize;
 
         typedef std::vector<Sound*> SoundVec;
         SoundVec mActiveSounds;
-
-        const CachedSound& getBuffer(const std::string &fname);
-        void bufferFinished(ALuint buffer);
 
         Environment mLastEnvironment;
 
@@ -51,11 +33,14 @@ namespace MWSound
         virtual void init(const std::string &devname="");
         virtual void deinit();
 
+        virtual Sound_Handle loadSound(const std::string &fname);
+        virtual void unloadSound(Sound_Handle data);
+
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags, float offset);
+        virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset);
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound3D(const std::string &fname, const osg::Vec3f &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset, bool extractLoudness=false);
+        virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
+                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset);
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags);
 
         virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env);

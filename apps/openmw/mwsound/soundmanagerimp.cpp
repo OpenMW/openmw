@@ -92,6 +92,16 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
+        if(mOutput->isInitialized())
+        {
+            NameBufferMap::iterator sfxiter = mSoundBuffers.begin();
+            for(;sfxiter != mSoundBuffers.end();++sfxiter)
+            {
+                if(sfxiter->second.mHandle)
+                    mOutput->unloadSound(sfxiter->second.mHandle);
+                sfxiter->second.mHandle = 0;
+            }
+        }
         mUnderwaterSound.reset();
         mActiveSounds.clear();
         mMusic.reset();
@@ -144,7 +154,11 @@ namespace MWSound
                 soundId, Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
             )).first;
             mVFS->normalizeFilename(sfxiter->second.mResourceName);
+            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
         }
+        else if(!sfxiter->second.mHandle)
+            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+
         return &sfxiter->second;
     }
 
@@ -278,6 +292,7 @@ namespace MWSound
             return;
         try
         {
+#if 0
             float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "sound/"+filename;
             const ESM::Position &pos = ptr.getRefData().getPosition();
@@ -297,6 +312,9 @@ namespace MWSound
             MWBase::SoundPtr sound = mOutput->playSound3D(filePath, objpos, 1.0f, basevol, 1.0f,
                                                           minDistance, maxDistance, Play_Normal|Play_TypeVoice, 0, true);
             mActiveSounds[sound] = std::make_pair(ptr, std::string("_say_sound"));
+#else
+            throw std::runtime_error("say disabled");
+#endif
         }
         catch(std::exception &e)
         {
@@ -325,11 +343,15 @@ namespace MWSound
             return;
         try
         {
+#if 0
             float basevol = volumeFromType(Play_TypeVoice);
             std::string filePath = "Sound/"+filename;
 
             MWBase::SoundPtr sound = mOutput->playSound(filePath, 1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice, 0);
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), std::string("_say_sound"));
+#else
+            throw std::runtime_error("say disabled");
+#endif
         }
         catch(std::exception &e)
         {
@@ -385,7 +407,7 @@ namespace MWSound
             const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
 
-            sound = mOutput->playSound(sfx->mResourceName,
+            sound = mOutput->playSound(sfx->mHandle,
                 volume * sfx->mVolume, basevol, pitch, mode|type, offset
             );
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);
@@ -414,7 +436,7 @@ namespace MWSound
             if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
 
-            sound = mOutput->playSound3D(sfx->mResourceName,
+            sound = mOutput->playSound3D(sfx->mHandle,
                 objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
             if((mode&Play_NoTrack))
@@ -441,7 +463,7 @@ namespace MWSound
             const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
 
-            sound = mOutput->playSound3D(sfx->mResourceName,
+            sound = mOutput->playSound3D(sfx->mHandle,
                 initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
             mActiveSounds[sound] = std::make_pair(MWWorld::Ptr(), soundId);

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "soundmanagerimp.hpp"
+#include "sound_output.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -17,8 +18,10 @@ namespace MWSound
         float mVolume;
         float mMinDist, mMaxDist;
 
+        Sound_Handle mHandle;
+
         Sound_Buffer(std::string resname, float volume, float mindist, float maxdist)
-          : mResourceName(resname), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist)
+          : mResourceName(resname), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist), mHandle(0)
         { }
     };
 }

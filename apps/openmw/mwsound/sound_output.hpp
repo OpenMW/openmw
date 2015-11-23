@@ -14,6 +14,9 @@ namespace MWSound
     struct Sound_Decoder;
     class Sound;
 
+    // An opaque handle for the implementation's sound buffers.
+    typedef void *Sound_Handle;
+
     class Sound_Output
     {
         SoundManager &mManager;
@@ -22,11 +25,14 @@ namespace MWSound
         virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
+        virtual Sound_Handle loadSound(const std::string &fname) = 0;
+        virtual void unloadSound(Sound_Handle data) = 0;
+
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags, float offset) = 0;
+        virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset) = 0;
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound3D(const std::string &fname, const osg::Vec3f &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset, bool extractLoudness=false) = 0;
+        virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
+                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset) = 0;
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags) = 0;
 
         virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env) = 0;
