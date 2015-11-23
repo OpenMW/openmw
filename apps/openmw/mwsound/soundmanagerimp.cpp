@@ -92,11 +92,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        mUnderwaterSound.reset();
-        mActiveSounds.clear();
-        mActiveSaySounds.clear();
-        mUnderwaterSound.reset();
-        mMusic.reset();
+        clear();
         if(mOutput->isInitialized())
         {
             NameBufferMap::iterator sfxiter = mSoundBuffers.begin();
@@ -128,6 +124,9 @@ namespace MWSound
     const Sound_Buffer *SoundManager::lookup(const std::string &soundId)
     {
         NameBufferMap::iterator sfxiter = mSoundBuffers.find(soundId);
+        if(sfxiter != mSoundBuffers.end() && sfxiter->second.mHandle)
+            return &sfxiter->second;
+
         if(sfxiter == mSoundBuffers.end())
         {
             // TODO: We could process all available ESM::Sound records on init
@@ -163,10 +162,10 @@ namespace MWSound
                 soundId, Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
             )).first;
             mVFS->normalizeFilename(sfxiter->second.mResourceName);
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
         }
-        else if(!sfxiter->second.mHandle)
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+
+        sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+        mUnusedBuffers.insert(sfxiter->second.mHandle);
 
         return &sfxiter->second;
     }
@@ -420,13 +419,16 @@ namespace MWSound
             return sound;
         try
         {
-            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
+            const Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound(sfx->mHandle,
                 volume * sfx->mVolume, basevol, pitch, mode|type, offset
             );
-            mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundId));
+            if(mBufferRefs[sfx->mHandle]++ == 0)
+                mUnusedBuffers.erase(sfx->mHandle);
+            mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
         }
         catch(std::exception&)
         {
@@ -444,7 +446,8 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
+            const Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
@@ -455,10 +458,12 @@ namespace MWSound
             sound = mOutput->playSound3D(sfx->mHandle,
                 objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
+            if(mBufferRefs[sfx->mHandle]++ == 0)
+                mUnusedBuffers.erase(sfx->mHandle);
             if((mode&Play_NoTrack))
-                mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundId));
+                mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
             else
-                mActiveSounds[ptr].push_back(std::make_pair(sound, soundId));
+                mActiveSounds[ptr].push_back(std::make_pair(sound, soundid));
         }
         catch(std::exception&)
         {
@@ -476,13 +481,16 @@ namespace MWSound
         try
         {
             // Look up the sound in the ESM data
-            const Sound_Buffer *sfx = lookup(Misc::StringUtils::lowerCase(soundId));
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
+            const Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound3D(sfx->mHandle,
                 initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
-            mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundId));
+            if(mBufferRefs[sfx->mHandle]++ == 0)
+                mUnusedBuffers.erase(sfx->mHandle);
+            mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
         }
         catch(std::exception &)
         {
@@ -493,22 +501,7 @@ namespace MWSound
 
     void SoundManager::stopSound (MWBase::SoundPtr sound)
     {
-        SoundMap::iterator snditer = mActiveSounds.begin();
-        while(snditer != mActiveSounds.end())
-        {
-            SoundNamePairList::iterator sndname = snditer->second.begin();
-            for(;sndname != snditer->second.end();++sndname)
-            {
-                if(sndname->first != sound)
-                    continue;
-
-                sndname->first->stop();
-                snditer->second.erase(sndname);
-                if(snditer->second.empty())
-                    mActiveSounds.erase(snditer);
-                return;
-            }
-        }
+        sound->stop();
     }
 
     void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
@@ -516,16 +509,13 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
             {
-                if(sndname->second != soundId)
+                if(sndname->second != soundid)
                     continue;
-
                 sndname->first->stop();
-                snditer->second.erase(sndname);
-                if(snditer->second.empty())
-                    mActiveSounds.erase(snditer);
                 return;
             }
         }
@@ -539,7 +529,6 @@ namespace MWSound
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
                 sndname->first->stop();
-            mActiveSounds.erase(snditer);
         }
     }
 
@@ -555,10 +544,8 @@ namespace MWSound
                 SoundNamePairList::iterator sndname = snditer->second.begin();
                 for(;sndname != snditer->second.end();++sndname)
                     sndname->first->stop();
-                mActiveSounds.erase(snditer++);
             }
-            else
-                ++snditer;
+            ++snditer;
         }
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         while(sayiter != mActiveSaySounds.end())
@@ -568,10 +555,8 @@ namespace MWSound
                sayiter->first.getCell() == cell)
             {
                 sayiter->second.first->stop();
-                mActiveSaySounds.erase(sayiter++);
             }
-            else
-                ++sayiter;
+            ++sayiter;
         }
     }
 
@@ -580,16 +565,13 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(MWWorld::Ptr());
         if(snditer != mActiveSounds.end())
         {
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
             {
-                if(sndname->second != soundId)
+                if(sndname->second != soundid)
                     continue;
-
                 sndname->first->stop();
-                snditer->second.erase(sndname);
-                if(snditer->second.empty())
-                    mActiveSounds.erase(snditer);
                 return;
             }
         }
@@ -601,10 +583,11 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
             {
-                if(sndname->second == soundId)
+                if(sndname->second == soundid)
                     sndname->first->setFadeout(duration);
             }
         }
@@ -615,10 +598,11 @@ namespace MWSound
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
+            std::string soundid = Misc::StringUtils::lowerCase(soundId);
             SoundNamePairList::const_iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
             {
-                if(sndname->second == soundId && sndname->first->isPlaying())
+                if(sndname->second == soundid && sndname->first->isPlaying())
                     return true;
             }
         }
@@ -752,7 +736,12 @@ namespace MWSound
             while(sndname != snditer->second.end())
             {
                 if(!updateSound(sndname->first, snditer->first, duration))
+                {
+                    NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
+                    if(mBufferRefs[sfxiter->second.mHandle]-- == 1)
+                        mUnusedBuffers.insert(sfxiter->second.mHandle);
                     sndname = snditer->second.erase(sndname);
+                }
                 else
                     ++sndname;
             }
@@ -954,7 +943,12 @@ namespace MWSound
         {
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
+            {
                 sndname->first->stop();
+                NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
+                if(mBufferRefs[sfxiter->second.mHandle]-- <= 1)
+                    mUnusedBuffers.insert(sfxiter->second.mHandle);
+            }
         }
         mActiveSounds.clear();
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();

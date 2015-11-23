@@ -15,9 +15,6 @@ namespace MWSound
     class Sound;
     class Sound_Loudness;
 
-    // An opaque handle for the implementation's sound buffers.
-    typedef void *Sound_Handle;
-
     class Sound_Output
     {
         SoundManager &mManager;

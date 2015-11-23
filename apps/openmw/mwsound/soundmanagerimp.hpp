@@ -23,6 +23,9 @@ namespace MWSound
     class Sound;
     class Sound_Buffer;
 
+    // An opaque handle for the implementation's sound buffers.
+    typedef void *Sound_Handle;
+
     enum Environment {
         Env_Normal,
         Env_Underwater
@@ -49,6 +52,11 @@ namespace MWSound
         // Should stream voices, but that requires handling the "lip" data
         // separately from buffer loading.
         NameBufferMap mVoiceSoundBuffers;
+
+        typedef std::map<Sound_Handle,size_t> SoundRefMap;
+        SoundRefMap mBufferRefs;
+        typedef std::set<Sound_Handle> SoundSet;
+        SoundSet mUnusedBuffers;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
