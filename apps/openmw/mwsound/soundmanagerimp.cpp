@@ -95,6 +95,7 @@ namespace MWSound
         mUnderwaterSound.reset();
         mActiveSounds.clear();
         mActiveSaySounds.clear();
+        mUnderwaterSound.reset();
         mMusic.reset();
         if(mOutput->isInitialized())
         {
@@ -832,9 +833,17 @@ namespace MWSound
             SoundNamePairList::iterator sndname = snditer->second.begin();
             for(;sndname != snditer->second.end();++sndname)
             {
-                sndname->first->mBaseVolume = volumeFromType(sndname->first->getPlayType());
-                sndname->first->update();
+                MWBase::SoundPtr sound = sndname->first;
+                sound->mBaseVolume = volumeFromType(sound->getPlayType());
+                sound->update();
             }
+        }
+        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
+        for(;sayiter != mActiveSaySounds.end();++sayiter)
+        {
+            MWBase::SoundPtr sound = sayiter->second.first;
+            sound->mBaseVolume = volumeFromType(sound->getPlayType());
+            sound->update();
         }
         if(mMusic)
         {
@@ -952,6 +961,7 @@ namespace MWSound
         for(;sayiter != mActiveSaySounds.end();++sayiter)
             sayiter->second.first->stop();
         mActiveSaySounds.clear();
+        mUnderwaterSound.reset();
         stopMusic();
     }
 }
