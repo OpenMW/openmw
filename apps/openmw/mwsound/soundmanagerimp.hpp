@@ -74,7 +74,6 @@ namespace MWSound
         const Sound_Buffer *lookupVoice(const std::string &voicefile);
 
         void streamMusicFull(const std::string& filename);
-        bool isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const;
         void updateSounds(float duration);
         void updateRegionSound(float duration);
 

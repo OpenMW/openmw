@@ -412,21 +412,6 @@ namespace MWSound
     }
 
 
-    bool SoundManager::isPlaying(const MWWorld::Ptr &ptr, const std::string &id) const
-    {
-        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
-        if(snditer != mActiveSounds.end())
-        {
-            SoundNamePairList::const_iterator sndname = snditer->second.begin();
-            for(;sndname != snditer->second.end();++sndname)
-            {
-                if(sndname->second == id && sndname->first->isPlaying())
-                    return true;
-            }
-        }
-        return false;
-    }
-
     MWBase::SoundPtr SoundManager::playSound(const std::string& soundId, float volume, float pitch, PlayType type, PlayMode mode, float offset)
     {
         MWBase::SoundPtr sound;
@@ -626,7 +611,17 @@ namespace MWSound
 
     bool SoundManager::getSoundPlaying(const MWWorld::Ptr &ptr, const std::string& soundId) const
     {
-        return isPlaying(ptr, soundId);
+        SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
+        if(snditer != mActiveSounds.end())
+        {
+            SoundNamePairList::const_iterator sndname = snditer->second.begin();
+            for(;sndname != snditer->second.end();++sndname)
+            {
+                if(sndname->second == soundId && sndname->first->isPlaying())
+                    return true;
+            }
+        }
+        return false;
     }
 
 
