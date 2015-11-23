@@ -22,8 +22,10 @@ namespace MWSound
         Sound_Handle mHandle;
         Sound_Loudness mLoudness;
 
+        size_t mReferences;
+
         Sound_Buffer(std::string resname, float volume, float mindist, float maxdist)
-          : mResourceName(resname), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist), mHandle(0)
+          : mResourceName(resname), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist), mHandle(0), mReferences(0)
         { }
     };
 }

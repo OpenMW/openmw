@@ -122,7 +122,7 @@ namespace MWSound
 
     // Lookup a soundid for its sound data (resource name, local volume,
     // minRange and maxRange. The returned pointer is only valid temporarily.
-    const Sound_Buffer *SoundManager::lookup(const std::string &soundId)
+    Sound_Buffer *SoundManager::lookup(const std::string &soundId)
     {
         NameBufferMap::iterator sfxiter = mSoundBuffers.find(soundId);
         if(sfxiter != mSoundBuffers.end() && sfxiter->second.mHandle)
@@ -165,8 +165,10 @@ namespace MWSound
             mVFS->normalizeFilename(sfxiter->second.mResourceName);
         }
 
-        sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
-        mBufferCacheSize += mOutput->getSoundDataSize(sfxiter->second.mHandle);
+        Sound_Buffer *sfx = &sfxiter->second;
+        sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
+        mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
+
         // NOTE: Max sound buffer cache size is 15MB. Make configurable?
         while(mBufferCacheSize > 15*1024*1024)
         {
@@ -176,12 +178,14 @@ namespace MWSound
                 break;
             }
             SoundSet::iterator iter = mUnusedBuffers.begin();
-            mBufferCacheSize -= mOutput->getSoundDataSize(*iter);
+            sfxiter = mSoundBuffers.find(*iter);
+            mBufferCacheSize -= mOutput->getSoundDataSize(sfxiter->second.mHandle);
+            mOutput->unloadSound(sfxiter->second.mHandle);
             mUnusedBuffers.erase(iter);
         }
-        mUnusedBuffers.insert(sfxiter->second.mHandle);
+        mUnusedBuffers.insert(soundId);
 
-        return &sfxiter->second;
+        return sfx;
     }
 
     const Sound_Buffer *SoundManager::lookupVoice(const std::string &voicefile)
@@ -434,14 +438,14 @@ namespace MWSound
         try
         {
             std::string soundid = Misc::StringUtils::lowerCase(soundId);
-            const Sound_Buffer *sfx = lookup(soundid);
+            Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound(sfx->mHandle,
                 volume * sfx->mVolume, basevol, pitch, mode|type, offset
             );
-            if(mBufferRefs[sfx->mHandle]++ == 0)
-                mUnusedBuffers.erase(sfx->mHandle);
+            if(sfx->mReferences++ == 0)
+                mUnusedBuffers.erase(soundid);
             mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
         }
         catch(std::exception&)
@@ -461,7 +465,7 @@ namespace MWSound
         {
             // Look up the sound in the ESM data
             std::string soundid = Misc::StringUtils::lowerCase(soundId);
-            const Sound_Buffer *sfx = lookup(soundid);
+            Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
@@ -472,8 +476,8 @@ namespace MWSound
             sound = mOutput->playSound3D(sfx->mHandle,
                 objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
-            if(mBufferRefs[sfx->mHandle]++ == 0)
-                mUnusedBuffers.erase(sfx->mHandle);
+            if(sfx->mReferences++ == 0)
+                mUnusedBuffers.erase(soundid);
             if((mode&Play_NoTrack))
                 mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
             else
@@ -496,14 +500,14 @@ namespace MWSound
         {
             // Look up the sound in the ESM data
             std::string soundid = Misc::StringUtils::lowerCase(soundId);
-            const Sound_Buffer *sfx = lookup(soundid);
+            Sound_Buffer *sfx = lookup(soundid);
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound3D(sfx->mHandle,
                 initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
-            if(mBufferRefs[sfx->mHandle]++ == 0)
-                mUnusedBuffers.erase(sfx->mHandle);
+            if(sfx->mReferences++ == 0)
+                mUnusedBuffers.erase(soundid);
             mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, soundid));
         }
         catch(std::exception &)
@@ -752,8 +756,8 @@ namespace MWSound
                 if(!updateSound(sndname->first, snditer->first, duration))
                 {
                     NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
-                    if(mBufferRefs[sfxiter->second.mHandle]-- == 1)
-                        mUnusedBuffers.insert(sfxiter->second.mHandle);
+                    if(sfxiter->second.mReferences-- == 1)
+                        mUnusedBuffers.insert(sndname->second);
                     sndname = snditer->second.erase(sndname);
                 }
                 else
@@ -960,8 +964,8 @@ namespace MWSound
             {
                 sndname->first->stop();
                 NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
-                if(mBufferRefs[sfxiter->second.mHandle]-- <= 1)
-                    mUnusedBuffers.insert(sfxiter->second.mHandle);
+                if(sfxiter->second.mReferences-- == 1)
+                    mUnusedBuffers.insert(sndname->second);
             }
         }
         mActiveSounds.clear();
