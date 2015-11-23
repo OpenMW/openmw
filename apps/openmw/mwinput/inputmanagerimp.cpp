@@ -53,7 +53,6 @@ namespace MWInput
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
@@ -585,9 +584,6 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
-
-            if (it->first == "Input" && it->second == "ui sensitivity")
-                mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
 
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
