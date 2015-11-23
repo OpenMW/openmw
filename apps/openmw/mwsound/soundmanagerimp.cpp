@@ -189,10 +189,10 @@ namespace MWSound
                 voicefile, Sound_Buffer("sound/"+voicefile, 1.0f, minDistance, maxDistance)
             )).first;
             mVFS->normalizeFilename(sfxiter->second.mResourceName);
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName, &sfxiter->second.mLoudness);
         }
         else if(!sfxiter->second.mHandle)
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName);
+            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName, &sfxiter->second.mLoudness);
 
         return &sfxiter->second;
     }
@@ -356,7 +356,7 @@ namespace MWSound
         if (snditer == mActiveSounds.end())
             return 0.f;
 
-        return snditer->first->getCurrentLoudness();
+        return 0.0f;
     }
 
     void SoundManager::say(const std::string& filename)

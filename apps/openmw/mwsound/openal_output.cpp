@@ -751,7 +751,7 @@ void OpenAL_Output::deinit()
 }
 
 
-Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
+Sound_Handle OpenAL_Output::loadSound(const std::string &fname, Sound_Loudness *loudness)
 {
     throwALerror();
 
@@ -778,7 +778,8 @@ Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
     decoder->readAll(data);
     decoder->close();
 
-    //analyzeLoudness(data, srate, chans, type, cached.mLoudnessVector, static_cast<float>(loudnessFPS));
+    if(loudness != 0)
+        loudness->analyzeLoudness(data, srate, chans, type, static_cast<float>(loudnessFPS));
 
     ALuint buf = 0;
     try {

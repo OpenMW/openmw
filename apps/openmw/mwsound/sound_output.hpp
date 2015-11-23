@@ -13,6 +13,7 @@ namespace MWSound
     class SoundManager;
     struct Sound_Decoder;
     class Sound;
+    class Sound_Loudness;
 
     // An opaque handle for the implementation's sound buffers.
     typedef void *Sound_Handle;
@@ -25,7 +26,7 @@ namespace MWSound
         virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
-        virtual Sound_Handle loadSound(const std::string &fname) = 0;
+        virtual Sound_Handle loadSound(const std::string &fname, Sound_Loudness *loudness=0) = 0;
         virtual void unloadSound(Sound_Handle data) = 0;
 
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.

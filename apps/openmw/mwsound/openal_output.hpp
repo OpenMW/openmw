@@ -33,7 +33,7 @@ namespace MWSound
         virtual void init(const std::string &devname="");
         virtual void deinit();
 
-        virtual Sound_Handle loadSound(const std::string &fname);
+        virtual Sound_Handle loadSound(const std::string &fname, Sound_Loudness *loudness);
         virtual void unloadSound(Sound_Handle data);
 
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
