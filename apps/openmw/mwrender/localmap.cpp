@@ -24,6 +24,11 @@
 
 #include "vismask.hpp"
 
+#ifdef OPENGLES
+ #include <GLES/gl.h>
+#endif
+
+
 namespace
 {
 

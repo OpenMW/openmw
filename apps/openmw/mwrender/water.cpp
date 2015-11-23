@@ -40,6 +40,10 @@
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
 
+#ifdef OPENGLES
+#include <GLES/gl.h>
+#endif
+
 namespace
 {
 
@@ -575,10 +579,13 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     // use a define map to conditionally compile the shader
     std::map<std::string, std::string> defineMap;
     defineMap.insert(std::make_pair(std::string("@refraction_enabled"), std::string(refraction ? "1" : "0")));
-
+#ifdef OPENGLES
+    osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, mResourcePath + "/shaders/watergles_vertex.glsl", defineMap));
+    osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/watergles_fragment.glsl", defineMap));
+#else
     osg::ref_ptr<osg::Shader> vertexShader (readShader(osg::Shader::VERTEX, mResourcePath + "/shaders/water_vertex.glsl", defineMap));
     osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
-
+#endif
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
