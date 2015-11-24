@@ -436,8 +436,8 @@ bool OpenAL_SoundStream::process()
             alGetSourcei(mSource, AL_SOURCE_STATE, &state);
             if(state != AL_PLAYING && state != AL_PAUSED)
             {
-                if(refillQueue() > 0)
-                    alSourcePlay(mSource);
+                refillQueue();
+                alSourcePlay(mSource);
             }
         }
     }
