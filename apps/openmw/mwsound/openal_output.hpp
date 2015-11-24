@@ -47,7 +47,9 @@ namespace MWSound
         /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
         virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
                                              float vol, float basevol, float pitch, float min, float max, int flags, float offset);
-        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags);
+        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags);
+        virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
+                                               float vol, float basevol, float pitch, float min, float max, int flags);
 
         virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env);
 
@@ -66,6 +68,7 @@ namespace MWSound
         friend class OpenAL_Sound;
         friend class OpenAL_Sound3D;
         friend class OpenAL_SoundStream;
+        friend class OpenAL_SoundStream3D;
         friend class SoundManager;
     };
 #ifndef DEFAULT_OUTPUT

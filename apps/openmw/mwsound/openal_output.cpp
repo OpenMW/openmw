@@ -158,9 +158,12 @@ class OpenAL_SoundStream : public Sound
     static const ALuint sNumBuffers = 6;
     static const ALfloat sBufferLength;
 
+protected:
     OpenAL_Output &mOutput;
 
     ALuint mSource;
+
+private:
     ALuint mBuffers[sNumBuffers];
     ALint mCurrentBufIdx;
 
@@ -194,8 +197,21 @@ public:
     bool process();
     ALint refillQueue();
 };
-
 const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
+
+class OpenAL_SoundStream3D : public OpenAL_SoundStream
+{
+    OpenAL_SoundStream3D(const OpenAL_SoundStream3D &rhs);
+    OpenAL_SoundStream3D& operator=(const OpenAL_SoundStream3D &rhs);
+
+public:
+    OpenAL_SoundStream3D(OpenAL_Output &output, ALuint src, DecoderPtr decoder, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+      : OpenAL_SoundStream(output, src, decoder, pos, vol, basevol, pitch, mindist, maxdist, flags)
+    { }
+
+    virtual void update();
+};
+
 
 //
 // A background streaming thread (keeps active streams processed)
@@ -479,6 +495,26 @@ ALint OpenAL_SoundStream::refillQueue()
     }
 
     return queued;
+}
+
+void OpenAL_SoundStream3D::update()
+{
+    ALfloat gain = mVolume*mBaseVolume;
+    ALfloat pitch = mPitch;
+    if((mPos - mOutput.mPos).length2() > mMaxDistance*mMaxDistance)
+        gain = 0.0f;
+    else if(!(mFlags&MWBase::SoundManager::Play_NoEnv) && mOutput.mLastEnvironment == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(mSource, AL_GAIN, gain);
+    alSourcef(mSource, AL_PITCH, pitch);
+    alSource3f(mSource, AL_POSITION, mPos[0], mPos[1], mPos[2]);
+    alSource3f(mSource, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(mSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    throwALerror();
 }
 
 
@@ -903,6 +939,35 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, f
     try
     {
         sound.reset(new OpenAL_SoundStream(*this, src, decoder, osg::Vec3f(0.0f, 0.0f, 0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags));
+    }
+    catch(std::exception&)
+    {
+        mFreeSources.push_back(src);
+        throw;
+    }
+
+    sound->updateAll(true);
+
+    sound->play();
+    return sound;
+}
+
+
+MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos, float volume, float basevol, float pitch, float min, float max, int flags)
+{
+    boost::shared_ptr<OpenAL_SoundStream> sound;
+    ALuint src;
+
+    if(mFreeSources.empty())
+        fail("No free sources");
+    src = mFreeSources.front();
+    mFreeSources.pop_front();
+
+    if((flags&MWBase::SoundManager::Play_Loop))
+        std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
+    try
+    {
+        sound.reset(new OpenAL_SoundStream3D(*this, src, decoder, pos, volume, basevol, pitch, min, max, flags));
     }
     catch(std::exception&)
     {
