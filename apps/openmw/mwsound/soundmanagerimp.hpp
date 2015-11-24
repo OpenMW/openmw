@@ -9,6 +9,7 @@
 
 #include <components/settings/settings.hpp>
 
+#include "loudness.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 namespace VFS
@@ -47,9 +48,9 @@ namespace MWSound
         typedef std::map<std::string,Sound_Buffer> NameBufferMap;
         NameBufferMap mSoundBuffers;
         size_t mBufferCacheSize;
-        // Should stream voices, but that requires handling the "lip" data
-        // separately from buffer loading.
-        NameBufferMap mVoiceSoundBuffers;
+
+        typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
+        NameLoudnessMap mVoiceLipBuffers;
 
         typedef std::set<std::string> SoundSet;
         SoundSet mUnusedBuffers;
@@ -75,7 +76,8 @@ namespace MWSound
         int mPausedSoundTypes;
 
         Sound_Buffer *lookup(const std::string &soundId);
-        const Sound_Buffer *lookupVoice(const std::string &voicefile);
+        // Ensure the loudness/"lip" data is loaded
+        void loadVoice(const std::string &voicefile);
 
         void streamMusicFull(const std::string& filename);
         bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);

@@ -30,6 +30,11 @@
 #endif
 
 
+namespace
+{
+    const int sLoudnessFPS = 20; // loudness values per second of audio
+}
+
 namespace MWSound
 {
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
@@ -98,13 +103,6 @@ namespace MWSound
         {
             NameBufferMap::iterator sfxiter = mSoundBuffers.begin();
             for(;sfxiter != mSoundBuffers.end();++sfxiter)
-            {
-                if(sfxiter->second.mHandle)
-                    mOutput->unloadSound(sfxiter->second.mHandle);
-                sfxiter->second.mHandle = 0;
-            }
-            sfxiter = mVoiceSoundBuffers.begin();
-            for(;sfxiter != mVoiceSoundBuffers.end();++sfxiter)
             {
                 if(sfxiter->second.mHandle)
                     mOutput->unloadSound(sfxiter->second.mHandle);
@@ -188,32 +186,37 @@ namespace MWSound
         return sfx;
     }
 
-    const Sound_Buffer *SoundManager::lookupVoice(const std::string &voicefile)
+    void SoundManager::loadVoice(const std::string &voicefile)
     {
-        NameBufferMap::iterator sfxiter = mVoiceSoundBuffers.find(voicefile);
-        if(sfxiter == mVoiceSoundBuffers.end())
+        NameLoudnessMap::iterator lipiter = mVoiceLipBuffers.find(voicefile);
+        if(lipiter != mVoiceLipBuffers.end()) return;
+
+        DecoderPtr decoder = getDecoder();
+        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+        if(decoder->mResourceMgr->exists(voicefile))
+            decoder->open(voicefile);
+        else
         {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-            static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
-            static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
-            static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->getFloat();
-            static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->getFloat();
-
-            float minDistance = fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult;
-            float maxDistance = fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult;
-            minDistance = std::max(minDistance, 1.f);
-            maxDistance = std::max(minDistance, maxDistance);
-
-            sfxiter = mVoiceSoundBuffers.insert(std::make_pair(
-                voicefile, Sound_Buffer("sound/"+voicefile, 1.0f, minDistance, maxDistance)
-            )).first;
-            mVFS->normalizeFilename(sfxiter->second.mResourceName);
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName, &sfxiter->second.mLoudness);
+            std::string file = voicefile;
+            std::string::size_type pos = file.rfind('.');
+            if(pos != std::string::npos)
+                file = file.substr(0, pos)+".mp3";
+            decoder->open(file);
         }
-        else if(!sfxiter->second.mHandle)
-            sfxiter->second.mHandle = mOutput->loadSound(sfxiter->second.mResourceName, &sfxiter->second.mLoudness);
 
-        return &sfxiter->second;
+        ChannelConfig chans;
+        SampleType type;
+        int srate;
+        decoder->getInfo(&srate, &chans, &type);
+
+        std::vector<char> data;
+        decoder->readAll(data);
+        decoder->close();
+
+        Sound_Loudness loudness;
+        loudness.analyzeLoudness(data, srate, chans, type, static_cast<float>(sLoudnessFPS));
+
+        mVoiceLipBuffers.insert(std::make_pair(voicefile, loudness));
     }
 
 
@@ -336,14 +339,25 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = Misc::StringUtils::lowerCase(filename);
-            const Sound_Buffer *sfx = lookupVoice(voicefile);
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
+            static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+            static const float fAudioVoiceDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMinDistance")->getFloat();
+            static const float fAudioVoiceDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioVoiceDefaultMaxDistance")->getFloat();
+            static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
+            static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
+
+            std::string voicefile = "sound/"+Misc::StringUtils::lowerCase(filename);
             float basevol = volumeFromType(Play_TypeVoice);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
 
-            MWBase::SoundPtr sound = mOutput->playSound3D(sfx->mHandle,
-                objpos, sfx->mVolume, basevol, 1.0f, sfx->mMinDist, sfx->mMaxDist, Play_Normal|Play_TypeVoice, 0
+            loadVoice(voicefile);
+            DecoderPtr decoder = getDecoder();
+            decoder->open(voicefile);
+
+            MWBase::SoundPtr sound = mOutput->streamSound3D(decoder,
+                objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance, Play_Normal|Play_TypeVoice
             );
             mActiveSaySounds[ptr] = std::make_pair(sound, voicefile);
         }
@@ -358,12 +372,13 @@ namespace MWSound
         SaySoundMap::const_iterator snditer = mActiveSaySounds.find(ptr);
         if(snditer != mActiveSaySounds.end())
         {
-            NameBufferMap::const_iterator sfxiter = mVoiceSoundBuffers.find(snditer->second.second);
-            if(sfxiter != mVoiceSoundBuffers.end())
+            MWBase::SoundPtr sound = snditer->second.first;
+            NameLoudnessMap::const_iterator lipiter = mVoiceLipBuffers.find(snditer->second.second);
+            if(lipiter != mVoiceLipBuffers.end())
             {
-                float sec = snditer->second.first->getTimeOffset();
-                if(snditer->second.first->isPlaying())
-                    return sfxiter->second.mLoudness.getLoudnessAtTime(sec);
+                float sec = sound->getTimeOffset();
+                if(sound->isPlaying())
+                    return lipiter->second.getLoudnessAtTime(sec);
             }
         }
 
@@ -376,12 +391,15 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = Misc::StringUtils::lowerCase(filename);
-            const Sound_Buffer *sfx = lookupVoice(voicefile);
+            std::string voicefile = "sound/"+Misc::StringUtils::lowerCase(filename);
             float basevol = volumeFromType(Play_TypeVoice);
 
-            MWBase::SoundPtr sound = mOutput->playSound(sfx->mHandle,
-                sfx->mVolume, basevol, 1.0f, Play_Normal|Play_TypeVoice, 0
+            loadVoice(voicefile);
+            DecoderPtr decoder = getDecoder();
+            decoder->open(voicefile);
+
+            MWBase::SoundPtr sound = mOutput->streamSound(decoder,
+                basevol, 1.0f, Play_Normal|Play_TypeVoice
             );
             mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, voicefile);
         }

@@ -26,7 +26,7 @@ namespace MWSound
         virtual void init(const std::string &devname="") = 0;
         virtual void deinit() = 0;
 
-        virtual Sound_Handle loadSound(const std::string &fname, Sound_Loudness *loudness=0) = 0;
+        virtual Sound_Handle loadSound(const std::string &fname) = 0;
         virtual void unloadSound(Sound_Handle data) = 0;
         virtual size_t getSoundDataSize(Sound_Handle data) const = 0;
 

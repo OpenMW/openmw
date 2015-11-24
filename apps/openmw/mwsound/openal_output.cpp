@@ -19,13 +19,9 @@
 #define ALC_ALL_DEVICES_SPECIFIER 0x1013
 #endif
 
+
 #define MAKE_PTRID(id) ((void*)(uintptr_t)id)
 #define GET_PTRID(ptr) ((ALuint)(uintptr_t)ptr)
-
-namespace
-{
-    const int loudnessFPS = 20; // loudness values per second of audio
-}
 
 namespace MWSound
 {
@@ -779,7 +775,7 @@ void OpenAL_Output::deinit()
 }
 
 
-Sound_Handle OpenAL_Output::loadSound(const std::string &fname, Sound_Loudness *loudness)
+Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
 {
     throwALerror();
 
@@ -805,9 +801,6 @@ Sound_Handle OpenAL_Output::loadSound(const std::string &fname, Sound_Loudness *
 
     decoder->readAll(data);
     decoder->close();
-
-    if(loudness != 0)
-        loudness->analyzeLoudness(data, srate, chans, type, static_cast<float>(loudnessFPS));
 
     ALuint buf = 0;
     try {
@@ -975,7 +968,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec
         throw;
     }
 
-    sound->updateAll(true);
+    sound->updateAll(false);
 
     sound->play();
     return sound;

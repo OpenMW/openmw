@@ -20,7 +20,6 @@ namespace MWSound
         float mMinDist, mMaxDist;
 
         Sound_Handle mHandle;
-        Sound_Loudness mLoudness;
 
         size_t mReferences;
 
