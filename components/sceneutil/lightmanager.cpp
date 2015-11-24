@@ -164,7 +164,7 @@ namespace SceneUtil
             mStateSetCache.clear();
     }
 
-    void LightManager::addLight(LightSource* lightSource, osg::Matrixf worldMat)
+    void LightManager::addLight(LightSource* lightSource, const osg::Matrixf& worldMat)
     {
         LightSourceTransform l;
         l.mLightSource = lightSource;
