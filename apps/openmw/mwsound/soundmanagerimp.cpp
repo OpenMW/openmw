@@ -101,12 +101,12 @@ namespace MWSound
         clear();
         if(mOutput->isInitialized())
         {
-            NameBufferMap::iterator sfxiter = mSoundBuffers.begin();
+            SoundBufferList::iterator sfxiter = mSoundBuffers.begin();
             for(;sfxiter != mSoundBuffers.end();++sfxiter)
             {
-                if(sfxiter->second.mHandle)
-                    mOutput->unloadSound(sfxiter->second.mHandle);
-                sfxiter->second.mHandle = 0;
+                if(sfxiter->mHandle)
+                    mOutput->unloadSound(sfxiter->mHandle);
+                sfxiter->mHandle = 0;
             }
         }
         mOutput.reset();
@@ -122,11 +122,11 @@ namespace MWSound
     // minRange and maxRange. The returned pointer is only valid temporarily.
     Sound_Buffer *SoundManager::lookup(const std::string &soundId)
     {
-        NameBufferMap::iterator sfxiter = mSoundBuffers.find(soundId);
-        if(sfxiter != mSoundBuffers.end() && sfxiter->second.mHandle)
-            return &sfxiter->second;
-
-        if(sfxiter == mSoundBuffers.end())
+        Sound_Buffer *sfx;
+        BufferKeyList::iterator bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(), soundId);
+        if(bufkey != mBufferKeys.end() && *bufkey == soundId)
+            sfx = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
+        else
         {
             // TODO: We could process all available ESM::Sound records on init
             // to pre-fill a non-resizing list, which would allow subsystems to
@@ -157,31 +157,45 @@ namespace MWSound
             min = std::max(min, 1.0f);
             max = std::max(min, max);
 
-            sfxiter = mSoundBuffers.insert(std::make_pair(
-                soundId, Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
-            )).first;
-            mVFS->normalizeFilename(sfxiter->second.mResourceName);
-        }
-
-        Sound_Buffer *sfx = &sfxiter->second;
-        sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
-        mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
-
-        // NOTE: Max sound buffer cache size is 15MB. Make configurable?
-        while(mBufferCacheSize > 15*1024*1024)
-        {
-            if(mUnusedBuffers.empty())
-            {
-                std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
-                break;
+            bufkey = mBufferKeys.insert(bufkey, soundId);
+            try {
+                BufferKeyList::difference_type id;
+                id = std::distance(mBufferKeys.begin(), bufkey);
+                mSoundBuffers.insert(mSoundBuffers.begin()+id,
+                    Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
+                );
+                sfx = &mSoundBuffers[id];
             }
-            SoundSet::iterator iter = mUnusedBuffers.begin();
-            sfxiter = mSoundBuffers.find(*iter);
-            mBufferCacheSize -= mOutput->getSoundDataSize(sfxiter->second.mHandle);
-            mOutput->unloadSound(sfxiter->second.mHandle);
-            mUnusedBuffers.erase(iter);
+            catch(...) {
+                mBufferKeys.erase(bufkey);
+                throw;
+            }
+
+            mVFS->normalizeFilename(sfx->mResourceName);
         }
-        mUnusedBuffers.insert(soundId);
+
+        if(!sfx->mHandle)
+        {
+            sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
+            mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
+
+            // NOTE: Max sound buffer cache size is 15MB. Make configurable?
+            while(mBufferCacheSize > 15*1024*1024)
+            {
+                if(mUnusedBuffers.empty())
+                {
+                    std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
+                    break;
+                }
+                SoundSet::iterator iter = mUnusedBuffers.begin();
+                bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(), *iter);
+                Sound_Buffer *unused = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
+                mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
+                mOutput->unloadSound(unused->mHandle);
+                mUnusedBuffers.erase(iter);
+            }
+            mUnusedBuffers.insert(soundId);
+        }
 
         return sfx;
     }
@@ -773,8 +787,10 @@ namespace MWSound
             {
                 if(!updateSound(sndname->first, snditer->first, duration))
                 {
-                    NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
-                    if(sfxiter->second.mReferences-- == 1)
+                    BufferKeyList::iterator bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(),
+                                                                      sndname->second);
+                    Sound_Buffer *sfx = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
+                    if(sfx->mReferences-- == 1)
                         mUnusedBuffers.insert(sndname->second);
                     sndname = snditer->second.erase(sndname);
                 }
@@ -981,8 +997,10 @@ namespace MWSound
             for(;sndname != snditer->second.end();++sndname)
             {
                 sndname->first->stop();
-                NameBufferMap::iterator sfxiter = mSoundBuffers.find(sndname->second);
-                if(sfxiter->second.mReferences-- == 1)
+                BufferKeyList::iterator bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(),
+                                                                  sndname->second);
+                Sound_Buffer *sfx = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
+                if(sfx->mReferences-- == 1)
                     mUnusedBuffers.insert(sndname->second);
             }
         }

@@ -45,8 +45,13 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        typedef std::map<std::string,Sound_Buffer> NameBufferMap;
-        NameBufferMap mSoundBuffers;
+        typedef std::vector<std::string> BufferKeyList;
+        typedef std::vector<Sound_Buffer> SoundBufferList;
+        // Each mBufferKeys index has a corresponding entry in mSoundBuffers.
+        // That is, if string "foo" is at index 10 in mBufferKeys, index 10 in
+        // mSoundBuffers contains the Sound_Buffer for "foo".
+        BufferKeyList mBufferKeys;
+        SoundBufferList mSoundBuffers;
         size_t mBufferCacheSize;
 
         typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
