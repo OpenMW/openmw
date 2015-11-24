@@ -27,6 +27,7 @@
     Bug #2014: Antialiasing setting does nothing on Linux
     Bug #2037: Some enemies attack the air when spotting the player
     Bug #2052: NIF rotation matrices including scales are not supported
+    Bug #2062: Crank in Old Mournhold: Forgotten Sewer turns about the wrong axis
     Bug #2111: Raindrops in front of fire look wrong
     Bug #2140: [OpenGL] Water effects, flames and parts of creatures solid black when observed through brazier flame
     Bug #2147: Trueflame and Hopesfire flame effects not properly aligned with blade
@@ -176,6 +177,7 @@
     Bug #2980: Editor: Attribute and Skill can be selected for spells that do not require these parameters, leading to non-functional spells
     Bug #2990: Compiling a script with warning mode 2 and enabled error downgrading leads to infinite recursion
     Bug #2992: [Mod: Great House Dagoth] Killing Dagoth Gares freezes the game
+    Bug #3007: PlaceItem takes radians instead of degrees + angle reliability
     Feature #706: Editor: Script Editor enhancements
     Feature #872: Editor: Colour values in tables
     Feature #880: Editor: ID auto-complete
