@@ -232,7 +232,7 @@ struct OpenAL_Output::StreamThread {
     {
         while(1)
         {
-            mMutex.lock();
+            boost::unique_lock<boost::recursive_mutex> lock(mMutex);
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
             {
@@ -241,33 +241,29 @@ struct OpenAL_Output::StreamThread {
                 else
                     ++iter;
             }
-            mMutex.unlock();
+            lock.unlock();
             boost::this_thread::sleep(boost::posix_time::milliseconds(50));
         }
     }
 
     void add(OpenAL_SoundStream *stream)
     {
-        mMutex.lock();
+        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
         if(std::find(mStreams.begin(), mStreams.end(), stream) == mStreams.end())
             mStreams.push_back(stream);
-        mMutex.unlock();
     }
 
     void remove(OpenAL_SoundStream *stream)
     {
-        mMutex.lock();
+        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
         StreamVec::iterator iter = std::find(mStreams.begin(), mStreams.end(), stream);
-        if(iter != mStreams.end())
-            mStreams.erase(iter);
-        mMutex.unlock();
+        if(iter != mStreams.end()) mStreams.erase(iter);
     }
 
     void removeAll()
     {
-        mMutex.lock();
+        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
         mStreams.clear();
-        mMutex.unlock();
     }
 
 private:
@@ -373,7 +369,7 @@ double OpenAL_SoundStream::getTimeOffset()
     ALint offset;
     double t;
 
-    boost::unique_lock<boost::recursive_mutex> lock(mOutput.mStreamThread->mMutex);
+    boost::lock_guard<boost::recursive_mutex> lock(mOutput.mStreamThread->mMutex);
     alGetSourcei(mSource, AL_SAMPLE_OFFSET, &offset);
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     if(state == AL_PLAYING || state == AL_PAUSED)
@@ -389,7 +385,6 @@ double OpenAL_SoundStream::getTimeOffset()
          * next. */
         t = (double)mDecoder->getSampleOffset() / (double)mSampleRate;
     }
-    lock.unlock();
 
     throwALerror();
     return t;
@@ -443,7 +438,6 @@ bool OpenAL_SoundStream::process()
             {
                 if(refillQueue() > 0)
                     alSourcePlay(mSource);
-                throwALerror();
             }
         }
     }
@@ -464,7 +458,6 @@ ALint OpenAL_SoundStream::refillQueue()
         alSourceUnqueueBuffers(mSource, 1, &buf);
         --processed;
     }
-    throwALerror();
 
     ALint queued;
     alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
@@ -484,7 +477,6 @@ ALint OpenAL_SoundStream::refillQueue()
                 ALuint bufid = mBuffers[mCurrentBufIdx];
                 alBufferData(bufid, mFormat, &data[0], data.size(), mSampleRate);
                 alSourceQueueBuffers(mSource, 1, &bufid);
-                throwALerror();
                 mCurrentBufIdx = (mCurrentBufIdx+1) % sNumBuffers;
             }
         }
