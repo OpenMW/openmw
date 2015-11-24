@@ -108,6 +108,7 @@ namespace MWSound
                     mOutput->unloadSound(sfxiter->mHandle);
                 sfxiter->mHandle = 0;
             }
+            mUnusedBuffers.clear();
         }
         mOutput.reset();
     }
