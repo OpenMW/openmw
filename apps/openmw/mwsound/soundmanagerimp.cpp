@@ -241,10 +241,25 @@ namespace MWSound
         return lookup(lookupId(soundId));
     }
 
-    void SoundManager::loadVoice(const std::string &voicefile)
+    DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
     {
         NameLoudnessMap::iterator lipiter = mVoiceLipBuffers.find(voicefile);
-        if(lipiter != mVoiceLipBuffers.end()) return;
+        if(lipiter != mVoiceLipBuffers.end())
+        {
+            DecoderPtr decoder = getDecoder();
+            // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
+            if(decoder->mResourceMgr->exists(voicefile))
+                decoder->open(voicefile);
+            else
+            {
+                std::string file = voicefile;
+                std::string::size_type pos = file.rfind('.');
+                if(pos != std::string::npos)
+                    file = file.substr(0, pos)+".mp3";
+                decoder->open(file);
+            }
+            return decoder;
+        }
 
         DecoderPtr decoder = getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
@@ -266,12 +281,14 @@ namespace MWSound
 
         std::vector<char> data;
         decoder->readAll(data);
-        decoder->close();
 
         Sound_Loudness loudness;
         loudness.analyzeLoudness(data, srate, chans, type, static_cast<float>(sLoudnessFPS));
 
         mVoiceLipBuffers.insert(std::make_pair(voicefile, loudness));
+
+        decoder->rewind();
+        return decoder;
     }
 
 
@@ -407,9 +424,7 @@ namespace MWSound
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
 
-            loadVoice(voicefile);
-            DecoderPtr decoder = getDecoder();
-            decoder->open(voicefile);
+            DecoderPtr decoder = loadVoice(voicefile);
 
             MWBase::SoundPtr sound = mOutput->streamSound3D(decoder,
                 objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance, Play_Normal|Play_TypeVoice
@@ -449,9 +464,7 @@ namespace MWSound
             std::string voicefile = "sound/"+Misc::StringUtils::lowerCase(filename);
             float basevol = volumeFromType(Play_TypeVoice);
 
-            loadVoice(voicefile);
-            DecoderPtr decoder = getDecoder();
-            decoder->open(voicefile);
+            DecoderPtr decoder = loadVoice(voicefile);
 
             MWBase::SoundPtr sound = mOutput->streamSound(decoder,
                 basevol, 1.0f, Play_Normal|Play_TypeVoice

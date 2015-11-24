@@ -93,8 +93,9 @@ namespace MWSound
         Sound_Buffer *lookup(size_t sfxid);
         Sound_Buffer *lookup(const std::string &soundId);
 
-        // Ensure the loudness/"lip" data is loaded
-        void loadVoice(const std::string &voicefile);
+        // Ensures the loudness/"lip" data is loaded, and returns a decoder to
+        // start streaming
+        DecoderPtr loadVoice(const std::string &voicefile);
 
         void streamMusicFull(const std::string& filename);
         bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);
