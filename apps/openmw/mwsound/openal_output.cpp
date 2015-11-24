@@ -376,7 +376,7 @@ double OpenAL_SoundStream::getTimeOffset()
     {
         ALint queued;
         alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
-        ALint inqueue = mBufferSize/mFrameSize*queued + offset;
+        ALint inqueue = mBufferSize/mFrameSize*queued - offset;
         t = (double)(mDecoder->getSampleOffset() - inqueue) / (double)mSampleRate;
     }
     else
