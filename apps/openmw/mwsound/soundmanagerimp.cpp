@@ -603,10 +603,8 @@ namespace MWSound
             SoundIndexPairList::iterator sndidx = snditer->second.begin();
             for(;sndidx != snditer->second.end();++sndidx)
             {
-                if(sndidx->second != sfxid)
-                    continue;
-                sndidx->first->stop();
-                return;
+                if(sndidx->second == sfxid)
+                    sndidx->first->stop();
             }
         }
     }
