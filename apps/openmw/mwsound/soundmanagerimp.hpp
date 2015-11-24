@@ -62,17 +62,18 @@ namespace MWSound
         typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
         NameLoudnessMap mVoiceLipBuffers;
 
-        typedef std::set<std::string> SoundSet;
+        typedef std::set<size_t> SoundSet;
         SoundSet mUnusedBuffers;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
-        typedef std::pair<MWBase::SoundPtr,std::string> SoundNamePair;
-        typedef std::vector<SoundNamePair> SoundNamePairList;
-        typedef std::map<MWWorld::Ptr,SoundNamePairList> SoundMap;
+        typedef std::pair<MWBase::SoundPtr,size_t> SoundIndexPair;
+        typedef std::vector<SoundIndexPair> SoundIndexPairList;
+        typedef std::map<MWWorld::Ptr,SoundIndexPairList> SoundMap;
         SoundMap mActiveSounds;
 
+        typedef std::pair<MWBase::SoundPtr,std::string> SoundNamePair;
         typedef std::map<MWWorld::Ptr,SoundNamePair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
@@ -87,7 +88,11 @@ namespace MWSound
 
         void insertSound(const std::string &soundId, const ESM::Sound *sound);
 
+        size_t lookupId(const std::string &soundId);
+        size_t lookupId(const std::string &soundId) const;
+        Sound_Buffer *lookup(size_t sfxid);
         Sound_Buffer *lookup(const std::string &soundId);
+
         // Ensure the loudness/"lip" data is loaded
         void loadVoice(const std::string &voicefile);
 
