@@ -118,61 +118,83 @@ namespace MWSound
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
+    void SoundManager::insertSound(const std::string &soundId, const ESM::Sound *sound)
+    {
+        BufferKeyList::iterator bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(), soundId);
+        if(bufkey != mBufferKeys.end() && *bufkey == soundId)
+        {
+            std::cerr<< "Duplicate sound record \""<<soundId<<"\"" <<std::endl;
+            return;
+        }
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
+        static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
+        static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
+        static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
+        float volume, min, max;
+
+        volume = static_cast<float>(pow(10.0, (sound->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
+        if(sound->mData.mMinRange == 0 && sound->mData.mMaxRange == 0)
+        {
+            min = fAudioDefaultMinDistance;
+            max = fAudioDefaultMaxDistance;
+        }
+        else
+        {
+            min = sound->mData.mMinRange;
+            max = sound->mData.mMaxRange;
+        }
+
+        min *= fAudioMinDistanceMult;
+        max *= fAudioMaxDistanceMult;
+        min = std::max(min, 1.0f);
+        max = std::max(min, max);
+
+        Sound_Buffer *sfx;
+        bufkey = mBufferKeys.insert(bufkey, soundId);
+        try {
+            BufferKeyList::difference_type id;
+            id = std::distance(mBufferKeys.begin(), bufkey);
+            mSoundBuffers.insert(mSoundBuffers.begin()+id,
+                Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
+            );
+            sfx = &mSoundBuffers[id];
+        }
+        catch(...) {
+            mBufferKeys.erase(bufkey);
+            throw;
+        }
+
+        mVFS->normalizeFilename(sfx->mResourceName);
+    }
+
     // Lookup a soundid for its sound data (resource name, local volume,
-    // minRange and maxRange. The returned pointer is only valid temporarily.
+    // minRange and maxRange).
     Sound_Buffer *SoundManager::lookup(const std::string &soundId)
     {
         Sound_Buffer *sfx;
         BufferKeyList::iterator bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(), soundId);
-        if(bufkey != mBufferKeys.end() && *bufkey == soundId)
-            sfx = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
-        else
+        if(bufkey == mBufferKeys.end() || *bufkey != soundId)
         {
-            // TODO: We could process all available ESM::Sound records on init
-            // to pre-fill a non-resizing list, which would allow subsystems to
-            // reference sounds by index instead of string.
-            MWBase::World* world = MWBase::Environment::get().getWorld();
-            const ESM::Sound *snd = world->getStore().get<ESM::Sound>().find(soundId);
-
-            float volume, min, max;
-            volume = static_cast<float>(pow(10.0, (snd->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
-
-            if(snd->mData.mMinRange == 0 && snd->mData.mMaxRange == 0)
+            if(mBufferKeys.empty())
             {
-                static const float fAudioDefaultMinDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMinDistance")->getFloat();
-                static const float fAudioDefaultMaxDistance = world->getStore().get<ESM::GameSetting>().find("fAudioDefaultMaxDistance")->getFloat();
-                min = fAudioDefaultMinDistance;
-                max = fAudioDefaultMaxDistance;
-            }
-            else
-            {
-                min = snd->mData.mMinRange;
-                max = snd->mData.mMaxRange;
-            }
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                MWWorld::Store<ESM::Sound>::iterator iter = world->getStore().get<ESM::Sound>().begin();
+                MWWorld::Store<ESM::Sound>::iterator end = world->getStore().get<ESM::Sound>().end();
+                size_t storesize = world->getStore().get<ESM::Sound>().getSize();
+                mBufferKeys.reserve(storesize);
+                mSoundBuffers.reserve(storesize);
+                for(;iter != end;++iter)
+                    insertSound(Misc::StringUtils::lowerCase(iter->mId), &*iter);
 
-            static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
-            static const float fAudioMaxDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMaxDistanceMult")->getFloat();
-            min *= fAudioMinDistanceMult;
-            max *= fAudioMaxDistanceMult;
-            min = std::max(min, 1.0f);
-            max = std::max(min, max);
-
-            bufkey = mBufferKeys.insert(bufkey, soundId);
-            try {
-                BufferKeyList::difference_type id;
-                id = std::distance(mBufferKeys.begin(), bufkey);
-                mSoundBuffers.insert(mSoundBuffers.begin()+id,
-                    Sound_Buffer("Sound/"+snd->mSound, volume, min, max)
-                );
-                sfx = &mSoundBuffers[id];
+                bufkey = std::lower_bound(mBufferKeys.begin(), mBufferKeys.end(), soundId);
             }
-            catch(...) {
-                mBufferKeys.erase(bufkey);
-                throw;
-            }
-
-            mVFS->normalizeFilename(sfx->mResourceName);
+            if(bufkey == mBufferKeys.end() || *bufkey != soundId)
+                throw std::runtime_error("Sound "+soundId+" not found");
         }
+
+        sfx = &mSoundBuffers[std::distance(mBufferKeys.begin(), bufkey)];
 
         if(!sfx->mHandle)
         {

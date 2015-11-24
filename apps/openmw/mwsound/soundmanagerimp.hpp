@@ -17,6 +17,11 @@ namespace VFS
     class Manager;
 }
 
+namespace ESM
+{
+    struct Sound;
+}
+
 namespace MWSound
 {
     class Sound_Output;
@@ -79,6 +84,8 @@ namespace MWSound
         osg::Vec3f mListenerUp;
 
         int mPausedSoundTypes;
+
+        void insertSound(const std::string &soundId, const ESM::Sound *sound);
 
         Sound_Buffer *lookup(const std::string &soundId);
         // Ensure the loudness/"lip" data is loaded
