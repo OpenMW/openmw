@@ -244,24 +244,6 @@ namespace MWSound
 
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
     {
-        NameLoudnessMap::iterator lipiter = mVoiceLipBuffers.find(voicefile);
-        if(lipiter != mVoiceLipBuffers.end())
-        {
-            DecoderPtr decoder = getDecoder();
-            // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-            if(decoder->mResourceMgr->exists(voicefile))
-                decoder->open(voicefile);
-            else
-            {
-                std::string file = voicefile;
-                std::string::size_type pos = file.rfind('.');
-                if(pos != std::string::npos)
-                    file = file.substr(0, pos)+".mp3";
-                decoder->open(file);
-            }
-            return decoder;
-        }
-
         DecoderPtr decoder = getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
         if(decoder->mResourceMgr->exists(voicefile))
@@ -274,6 +256,9 @@ namespace MWSound
                 file = file.substr(0, pos)+".mp3";
             decoder->open(file);
         }
+
+        NameLoudnessMap::iterator lipiter = mVoiceLipBuffers.find(voicefile);
+        if(lipiter != mVoiceLipBuffers.end()) return decoder;
 
         ChannelConfig chans;
         SampleType type;
