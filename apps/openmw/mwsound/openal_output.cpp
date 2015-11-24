@@ -182,7 +182,7 @@ class OpenAL_SoundStream : public Sound
     friend class OpenAL_Output;
 
 public:
-    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags);
+    OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
     virtual ~OpenAL_SoundStream();
 
     virtual void stop();
@@ -264,8 +264,8 @@ private:
 };
 
 
-OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, float basevol, float pitch, int flags)
-  : Sound(osg::Vec3f(0.f, 0.f, 0.f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags)
+OpenAL_SoundStream::OpenAL_SoundStream(OpenAL_Output &output, ALuint src, DecoderPtr decoder, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+  : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
   , mOutput(output), mSource(src), mCurrentBufIdx(0), mFrameSize(0), mSilence(0)
   , mDecoder(decoder), mIsFinished(true)
 {
@@ -888,7 +888,7 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
 }
 
 
-MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, float pitch, int flags)
+MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, float pitch, int flags)
 {
     boost::shared_ptr<OpenAL_SoundStream> sound;
     ALuint src;
@@ -902,7 +902,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float volume, fl
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try
     {
-        sound.reset(new OpenAL_SoundStream(*this, src, decoder, volume, pitch, flags));
+        sound.reset(new OpenAL_SoundStream(*this, src, decoder, osg::Vec3f(0.0f, 0.0f, 0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags));
     }
     catch(std::exception&)
     {
