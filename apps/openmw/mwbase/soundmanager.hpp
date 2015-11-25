@@ -127,9 +127,6 @@ namespace MWBase
             virtual void stopSound3D(const MWWorld::Ptr &reference) = 0;
             ///< Stop the given object from playing all sounds.
 
-            virtual void stopSound(MWBase::SoundPtr sound) = 0;
-            ///< Stop the given sound handle
-
             virtual void stopSound(const MWWorld::CellStore *cell) = 0;
             ///< Stop all sounds for the given cell.
 

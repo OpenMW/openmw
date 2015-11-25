@@ -600,11 +600,6 @@ namespace MWSound
         return sound;
     }
 
-    void SoundManager::stopSound (MWBase::SoundPtr sound)
-    {
-        sound->stop();
-    }
-
     void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
