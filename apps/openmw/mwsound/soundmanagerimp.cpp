@@ -223,16 +223,15 @@ namespace MWSound
                     std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
                     break;
                 }
-                SoundSet::iterator iter = mUnusedBuffers.begin();
-                Sound_Buffer *unused = &mSoundBuffers[*iter];
+                Sound_Buffer *unused = &mSoundBuffers[mUnusedBuffers.back()];
 
                 mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
                 mOutput->unloadSound(unused->mHandle);
                 unused->mHandle = 0;
 
-                mUnusedBuffers.erase(iter);
+                mUnusedBuffers.pop_back();
             }
-            mUnusedBuffers.insert(sfxid);
+            mUnusedBuffers.push_front(sfxid);
         }
 
         return sfx;
@@ -520,7 +519,11 @@ namespace MWSound
                 volume * sfx->mVolume, basevol, pitch, mode|type, offset
             );
             if(sfx->mReferences++ == 0)
-                mUnusedBuffers.erase(sfxid);
+            {
+                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
+                if(iter != mUnusedBuffers.end())
+                    mUnusedBuffers.erase(iter);
+            }
             mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, sfxid));
         }
         catch(std::exception&)
@@ -552,7 +555,11 @@ namespace MWSound
                 objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
             if(sfx->mReferences++ == 0)
-                mUnusedBuffers.erase(sfxid);
+            {
+                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
+                if(iter != mUnusedBuffers.end())
+                    mUnusedBuffers.erase(iter);
+            }
             if((mode&Play_NoTrack))
                 mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, sfxid));
             else
@@ -582,7 +589,11 @@ namespace MWSound
                 initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
             if(sfx->mReferences++ == 0)
-                mUnusedBuffers.erase(sfxid);
+            {
+                SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
+                if(iter != mUnusedBuffers.end())
+                    mUnusedBuffers.erase(iter);
+            }
             mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, sfxid));
         }
         catch(std::exception &)
@@ -829,7 +840,7 @@ namespace MWSound
                 {
                     Sound_Buffer *sfx = &mSoundBuffers[sndidx->second];
                     if(sfx->mReferences-- == 1)
-                        mUnusedBuffers.insert(sndidx->second);
+                        mUnusedBuffers.push_front(sndidx->second);
                     sndidx = snditer->second.erase(sndidx);
                 }
                 else
@@ -1042,7 +1053,7 @@ namespace MWSound
                 sndidx->first->stop();
                 Sound_Buffer *sfx = &mSoundBuffers[sndidx->second];
                 if(sfx->mReferences-- == 1)
-                    mUnusedBuffers.insert(sndidx->second);
+                    mUnusedBuffers.push_front(sndidx->second);
             }
         }
         mActiveSounds.clear();

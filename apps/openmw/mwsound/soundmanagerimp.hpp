@@ -3,6 +3,7 @@
 
 #include <string>
 #include <utility>
+#include <deque>
 #include <map>
 
 #include <boost/shared_ptr.hpp>
@@ -62,8 +63,9 @@ namespace MWSound
         typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
         NameLoudnessMap mVoiceLipBuffers;
 
-        typedef std::set<size_t> SoundSet;
-        SoundSet mUnusedBuffers;
+        // NOTE: unused buffers are stored in front-newest order.
+        typedef std::deque<size_t> SoundList;
+        SoundList mUnusedBuffers;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
