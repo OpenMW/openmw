@@ -225,8 +225,11 @@ namespace MWSound
                 }
                 SoundSet::iterator iter = mUnusedBuffers.begin();
                 Sound_Buffer *unused = &mSoundBuffers[*iter];
+
                 mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
                 mOutput->unloadSound(unused->mHandle);
+                unused->mHandle = 0;
+
                 mUnusedBuffers.erase(iter);
             }
             mUnusedBuffers.insert(sfxid);
