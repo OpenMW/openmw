@@ -560,10 +560,7 @@ namespace MWSound
                 if(iter != mUnusedBuffers.end())
                     mUnusedBuffers.erase(iter);
             }
-            if((mode&Play_NoTrack))
-                mActiveSounds[MWWorld::Ptr()].push_back(std::make_pair(sound, sfxid));
-            else
-                mActiveSounds[ptr].push_back(std::make_pair(sound, sfxid));
+            mActiveSounds[ptr].push_back(std::make_pair(sound, sfxid));
         }
         catch(std::exception&)
         {
@@ -572,8 +569,8 @@ namespace MWSound
         return sound;
     }
 
-    MWBase::SoundPtr SoundManager::playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                     float volume, float pitch, PlayType type, PlayMode mode, float offset)
+    MWBase::SoundPtr SoundManager::playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+                                               float volume, float pitch, PlayType type, PlayMode mode, float offset)
     {
         MWBase::SoundPtr sound;
         if(!mOutput->isInitialized())

@@ -107,7 +107,7 @@ namespace MWWorld
         createModel(state, ptr.getClass().getModel(ptr), pos, orient);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        state.mSound = sndMgr->playManualSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+        state.mSound = sndMgr->playSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
 
         mMagicBolts.push_back(state);
     }
@@ -374,8 +374,8 @@ namespace MWWorld
             createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            state.mSound = sndMgr->playManualSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
-                                                     MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
+            state.mSound = sndMgr->playSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
+                                               MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
             state.mSoundId = esm.mSound;
 
             mMagicBolts.push_back(state);

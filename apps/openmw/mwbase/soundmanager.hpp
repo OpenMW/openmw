@@ -29,13 +29,10 @@ namespace MWBase
         public:
             /* These must all fit together */
             enum PlayMode {
-                Play_Normal  = 0, /* tracked, non-looping, multi-instance, environment */
+                Play_Normal  = 0, /* non-looping, affected by environment */
                 Play_Loop    = 1<<0, /* Sound will continually loop until explicitly stopped */
                 Play_NoEnv   = 1<<1, /* Do not apply environment effects (eg, underwater filters) */
-                Play_NoTrack = 1<<2, /* (3D only) Play the sound at the given object's position
-                                      * but do not keep it updated (the sound will not move with
-                                      * the object and will not stop when the object is deleted. */
-                Play_RemoveAtDistance = 1<<3, /* (3D only) If the listener gets further than 2000 units away
+                Play_RemoveAtDistance = 1<<2, /* (3D only) If the listener gets further than 2000 units away
                                                 from the sound source, the sound is removed.
                                                 This is weird stuff but apparently how vanilla works for sounds
                                                 played by the PlayLoopSound family of script functions. Perhaps we
@@ -45,11 +42,11 @@ namespace MWBase
                 Play_LoopRemoveAtDistance = Play_Loop | Play_RemoveAtDistance
             };
             enum PlayType {
-                Play_TypeSfx   = 1<<4, /* Normal SFX sound */
-                Play_TypeVoice = 1<<5, /* Voice sound */
-                Play_TypeFoot  = 1<<6, /* Footstep sound */
-                Play_TypeMusic = 1<<7, /* Music track */
-                Play_TypeMovie = 1<<8, /* Movie audio track */
+                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
+                Play_TypeVoice = 1<<4, /* Voice sound */
+                Play_TypeFoot  = 1<<5, /* Footstep sound */
+                Play_TypeMusic = 1<<6, /* Music track */
+                Play_TypeMovie = 1<<7, /* Movie audio track */
                 Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 
@@ -120,9 +117,9 @@ namespace MWBase
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
             ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
 
-            virtual MWBase::SoundPtr playManualSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                                             float volume, float pitch, PlayType type, PlayMode mode, float offset=0) = 0;
-            ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated manually using Sound::setPosition.
+            virtual MWBase::SoundPtr playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+                                                 float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0) = 0;
+            ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,

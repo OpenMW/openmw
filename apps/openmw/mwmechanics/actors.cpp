@@ -212,8 +212,9 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
                     "", mCreature.getRefData().getPosition().asVec3());
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(mCreature, "conjuration hit", 1.f, 1.f,
-                                                                      MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+            MWBase::Environment::get().getSoundManager()->playSound3D(
+                mCreature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f
+            );
         }
     };
 

@@ -3153,9 +3153,9 @@ namespace MWWorld
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
                 if(!effect->mAreaSound.empty())
-                    sndMgr->playManualSound3D(origin, effect->mAreaSound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playSound3D(origin, effect->mAreaSound, 1.0f, 1.0f);
                 else
-                    sndMgr->playManualSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+                    sndMgr->playSound3D(origin, schools[effect->mData.mSchool]+" area", 1.0f, 1.0f);
             }
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
