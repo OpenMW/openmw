@@ -146,6 +146,19 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
     return AL_NONE;
 }
 
+static double getBufferLength(ALuint buffer)
+{
+    ALint bufferSize, frequency, channels, bitsPerSample;
+    alGetBufferi(buffer, AL_SIZE, &bufferSize);
+    alGetBufferi(buffer, AL_FREQUENCY, &frequency);
+    alGetBufferi(buffer, AL_CHANNELS, &channels);
+    alGetBufferi(buffer, AL_BITS, &bitsPerSample);
+    throwALerror();
+
+    return (8.0*bufferSize)/(frequency*channels*bitsPerSample);
+}
+
+
 //
 // A streaming OpenAL sound.
 //
@@ -515,7 +528,6 @@ protected:
     OpenAL_Output &mOutput;
 
     ALuint mSource;
-    ALuint mBuffer;
 
     friend class OpenAL_Output;
 
@@ -526,13 +538,12 @@ private:
     OpenAL_Sound& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
+    OpenAL_Sound(OpenAL_Output &output, ALuint src, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags);
     virtual ~OpenAL_Sound();
 
     virtual void stop();
     virtual bool isPlaying();
     virtual double getTimeOffset();
-    virtual double getLength();
     virtual void update();
 };
 
@@ -545,16 +556,16 @@ class OpenAL_Sound3D : public OpenAL_Sound
     OpenAL_Sound3D& operator=(const OpenAL_Sound &rhs);
 
 public:
-    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
-      : OpenAL_Sound(output, src, buf, pos, vol, basevol, pitch, mindist, maxdist, flags)
+    OpenAL_Sound3D(OpenAL_Output &output, ALuint src, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+      : OpenAL_Sound(output, src, pos, vol, basevol, pitch, mindist, maxdist, flags)
     { }
 
     virtual void update();
 };
 
-OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, ALuint buf, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
   : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
-  , mOutput(output), mSource(src), mBuffer(buf)
+  , mOutput(output), mSource(src)
 {
     mOutput.mActiveSounds.push_back(this);
 }
@@ -593,17 +604,6 @@ double OpenAL_Sound::getTimeOffset()
     throwALerror();
 
     return t;
-}
-
-double OpenAL_Sound::getLength()
-{
-    ALint bufferSize, frequency, channels, bitsPerSample;
-    alGetBufferi(mBuffer, AL_SIZE, &bufferSize);
-    alGetBufferi(mBuffer, AL_FREQUENCY, &frequency);
-    alGetBufferi(mBuffer, AL_CHANNELS, &channels);
-    alGetBufferi(mBuffer, AL_BITS, &bitsPerSample);
-
-    return (8.0*bufferSize)/(frequency*channels*bitsPerSample);
 }
 
 void OpenAL_Sound::updateAll(bool local)
@@ -815,11 +815,15 @@ void OpenAL_Output::unloadSound(Sound_Handle data)
     SoundVec::const_iterator iter = mActiveSounds.begin();
     for(;iter != mActiveSounds.end();++iter)
     {
-        if((*iter)->mSource && (*iter)->mBuffer == buffer)
+        if(!(*iter)->mSource)
+            continue;
+
+        ALint srcbuf;
+        alGetSourcei((*iter)->mSource, AL_BUFFER, &srcbuf);
+        if((ALuint)srcbuf == buffer)
         {
             alSourceStop((*iter)->mSource);
             alSourcei((*iter)->mSource, AL_BUFFER, 0);
-            (*iter)->mBuffer = 0;
         }
     }
     alDeleteBuffers(1, &buffer);
@@ -847,9 +851,8 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
     src = mFreeSources.front();
     mFreeSources.pop_front();
 
-    ALuint buffer = GET_PTRID(data);
     try {
-        sound.reset(new OpenAL_Sound(*this, src, buffer, osg::Vec3f(0.f, 0.f, 0.f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
+        sound.reset(new OpenAL_Sound(*this, src, osg::Vec3f(0.f, 0.f, 0.f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
     }
     catch(std::exception&)
     {
@@ -858,13 +861,14 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
     }
 
     sound->updateAll(true);
-    if(offset<0)
-        offset=0;
-    if(offset>1)
-        offset=1;
+    if(offset < 0.0f)
+        offset = 0.0f;
+    if(offset > 1.0f)
+        offset = 1.0f;
 
+    ALuint buffer = GET_PTRID(data);
     alSourcei(src, AL_BUFFER, buffer);
-    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(sound->getLength()*offset / pitch));
+    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(getBufferLength(buffer)*offset / pitch));
     alSourcePlay(src);
     throwALerror();
 
@@ -882,9 +886,8 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
     src = mFreeSources.front();
     mFreeSources.pop_front();
 
-    ALuint buffer = GET_PTRID(data);
     try {
-        sound.reset(new OpenAL_Sound3D(*this, src, buffer, pos, vol, basevol, pitch, min, max, flags));
+        sound.reset(new OpenAL_Sound3D(*this, src, pos, vol, basevol, pitch, min, max, flags));
     }
     catch(std::exception&)
     {
@@ -893,14 +896,14 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
     }
 
     sound->updateAll(false);
+    if(offset < 0.0f)
+        offset = 0.0f;
+    if(offset > 1.0f)
+        offset = 1.0f;
 
-    if(offset<0)
-        offset=0;
-    if(offset>1)
-        offset=1;
-
+    ALuint buffer = GET_PTRID(data);
     alSourcei(src, AL_BUFFER, buffer);
-    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(sound->getLength()*offset / pitch));
+    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(getBufferLength(buffer)*offset / pitch));
 
     alSourcePlay(src);
     throwALerror();
