@@ -13,7 +13,7 @@
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 
-#include "settings/graphicssettings.hpp"
+#include <components/settings/settings.hpp>
 
 #include "ui_mainwindow.h"
 
@@ -93,7 +93,7 @@ namespace Launcher
         Files::ConfigurationManager mCfgMgr;
 
         Config::GameSettings mGameSettings;
-        GraphicsSettings mGraphicsSettings;
+        Settings::Manager mEngineSettings;
         Config::LauncherSettings mLauncherSettings;
 
     };

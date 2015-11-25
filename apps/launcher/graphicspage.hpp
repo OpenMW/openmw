@@ -5,6 +5,8 @@
 
 #include "ui_graphicspage.h"
 
+#include <components/settings/settings.hpp>
+
 namespace Files { struct ConfigurationManager; }
 
 namespace Launcher
@@ -16,7 +18,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSettings, QWidget *parent = 0);
+        GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent = 0);
 
         void saveSettings();
         bool loadSettings();
@@ -30,7 +32,7 @@ namespace Launcher
 
     private:
         Files::ConfigurationManager &mCfgMgr;
-        GraphicsSettings &mGraphicsSettings;
+        Settings::Manager &mEngineSettings;
 
         QStringList getAvailableResolutions(int screen);
         QRect getMaximumResolution();
