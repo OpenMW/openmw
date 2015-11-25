@@ -217,6 +217,9 @@ namespace SDLUtil
 
     void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
+        #ifdef ANDROID
+            return;
+        #endif
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 

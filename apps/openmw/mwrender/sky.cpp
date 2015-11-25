@@ -45,6 +45,11 @@
 #include "vismask.hpp"
 #include "renderbin.hpp"
 
+#ifdef OPENGLES
+ #include <GLES/gl.h>
+#endif
+
+
 namespace
 {
 

@@ -134,17 +134,49 @@ target_link_libraries(openmw
 )
 
 if (ANDROID)
+    set (OSG_PLUGINS
+        -Wl,--whole-archive
+        ${OSG_PLUGINS_DIR}/libosgdb_dds.a
+        ${OSG_PLUGINS_DIR}/libosgdb_bmp.a
+        ${OSG_PLUGINS_DIR}/libosgdb_tga.a
+        ${OSG_PLUGINS_DIR}/libosgdb_gif.a
+        ${OSG_PLUGINS_DIR}/libosgdb_jpeg.a
+        ${OSG_PLUGINS_DIR}/libosgdb_png.a
+        -Wl,--no-whole-archive
+    )
     target_link_libraries(openmw
         EGL
         android
         log
         dl
         MyGUIEngineStatic
-        cpufeatures
         BulletCollision
         LinearMath
+        z
+        osg
+        osgDB
+        osgAnimation
+        osgText
+        osgUtil
+        osgShadow
+        ${OPENSCENEGRAPH_LIBRARIES}
+        ${OSG_PLUGINS}
+        ${Boost_SYSTEM_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_FILESYSTEM_LIBRARY}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        jpeg
+	gif
+	png
     )
 endif (ANDROID)
+
+if (OPENGLES)
+    target_link_libraries(openmw
+        ${OPENGLES_gl_LIBRARY}
+        ${OPENGLES2_gl_LIBRARY}
+    )
+endif (OPENGLES)
 
 if (USE_SYSTEM_TINYXML)
     target_link_libraries(openmw ${TINYXML_LIBRARIES})
