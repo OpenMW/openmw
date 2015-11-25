@@ -518,7 +518,7 @@ namespace MWSound
             sound = mOutput->playSound(sfx->mHandle,
                 volume * sfx->mVolume, basevol, pitch, mode|type, offset
             );
-            if(sfx->mReferences++ == 0)
+            if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
                 if(iter != mUnusedBuffers.end())
@@ -554,7 +554,7 @@ namespace MWSound
             sound = mOutput->playSound3D(sfx->mHandle,
                 objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
-            if(sfx->mReferences++ == 0)
+            if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
                 if(iter != mUnusedBuffers.end())
@@ -585,7 +585,7 @@ namespace MWSound
             sound = mOutput->playSound3D(sfx->mHandle,
                 initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
             );
-            if(sfx->mReferences++ == 0)
+            if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfxid);
                 if(iter != mUnusedBuffers.end())
@@ -831,7 +831,7 @@ namespace MWSound
                 if(!updateSound(sndidx->first, snditer->first, duration))
                 {
                     Sound_Buffer *sfx = &mSoundBuffers[sndidx->second];
-                    if(sfx->mReferences-- == 1)
+                    if(sfx->mUses-- == 1)
                         mUnusedBuffers.push_front(sndidx->second);
                     sndidx = snditer->second.erase(sndidx);
                 }
@@ -1044,7 +1044,7 @@ namespace MWSound
             {
                 sndidx->first->stop();
                 Sound_Buffer *sfx = &mSoundBuffers[sndidx->second];
-                if(sfx->mReferences-- == 1)
+                if(sfx->mUses-- == 1)
                     mUnusedBuffers.push_front(sndidx->second);
             }
         }
