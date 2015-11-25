@@ -23,13 +23,17 @@
 #define MAKE_PTRID(id) ((void*)(uintptr_t)id)
 #define GET_PTRID(ptr) ((ALuint)(uintptr_t)ptr)
 
-namespace MWSound
+namespace
 {
 
-static void fail(const std::string &msg)
+template<typename T, size_t N>
+inline size_t countof(const T(&)[N])
+{ return N; }
+
+void fail(const std::string &msg)
 { throw std::runtime_error("OpenAL exception: " + msg); }
 
-static void throwALCerror(ALCdevice *device)
+void throwALCerror(ALCdevice *device)
 {
     ALCenum err = alcGetError(device);
     if(err != ALC_NO_ERROR)
@@ -39,7 +43,7 @@ static void throwALCerror(ALCdevice *device)
     }
 }
 
-static void throwALerror()
+void throwALerror()
 {
     ALenum err = alGetError();
     if(err != AL_NO_ERROR)
@@ -50,21 +54,39 @@ static void throwALerror()
 }
 
 
-static ALenum getALFormat(ChannelConfig chans, SampleType type)
+ALenum getALFormat(MWSound::ChannelConfig chans, MWSound::SampleType type)
 {
     static const struct {
         ALenum format;
-        ChannelConfig chans;
-        SampleType type;
+        MWSound::ChannelConfig chans;
+        MWSound::SampleType type;
     } fmtlist[] = {
-        { AL_FORMAT_MONO16,   ChannelConfig_Mono,   SampleType_Int16 },
-        { AL_FORMAT_MONO8,    ChannelConfig_Mono,   SampleType_UInt8 },
-        { AL_FORMAT_STEREO16, ChannelConfig_Stereo, SampleType_Int16 },
-        { AL_FORMAT_STEREO8,  ChannelConfig_Stereo, SampleType_UInt8 },
+        { AL_FORMAT_MONO16,   MWSound::ChannelConfig_Mono,   MWSound::SampleType_Int16 },
+        { AL_FORMAT_MONO8,    MWSound::ChannelConfig_Mono,   MWSound::SampleType_UInt8 },
+        { AL_FORMAT_STEREO16, MWSound::ChannelConfig_Stereo, MWSound::SampleType_Int16 },
+        { AL_FORMAT_STEREO8,  MWSound::ChannelConfig_Stereo, MWSound::SampleType_UInt8 },
     };
-    static const size_t fmtlistsize = sizeof(fmtlist)/sizeof(fmtlist[0]);
+    static const struct {
+        char name[32];
+        MWSound::ChannelConfig chans;
+        MWSound::SampleType type;
+    } mcfmtlist[] = {
+        { "AL_FORMAT_QUAD16",   MWSound::ChannelConfig_Quad,    MWSound::SampleType_Int16 },
+        { "AL_FORMAT_QUAD8",    MWSound::ChannelConfig_Quad,    MWSound::SampleType_UInt8 },
+        { "AL_FORMAT_51CHN16",  MWSound::ChannelConfig_5point1, MWSound::SampleType_Int16 },
+        { "AL_FORMAT_51CHN8",   MWSound::ChannelConfig_5point1, MWSound::SampleType_UInt8 },
+        { "AL_FORMAT_71CHN16",  MWSound::ChannelConfig_7point1, MWSound::SampleType_Int16 },
+        { "AL_FORMAT_71CHN8",   MWSound::ChannelConfig_7point1, MWSound::SampleType_UInt8 },
+    }, fltfmtlist[] = {
+        { "AL_FORMAT_MONO_FLOAT32",   MWSound::ChannelConfig_Mono,   MWSound::SampleType_Float32 },
+        { "AL_FORMAT_STEREO_FLOAT32", MWSound::ChannelConfig_Stereo, MWSound::SampleType_Float32 },
+    }, fltmcfmtlist[] = {
+        { "AL_FORMAT_QUAD32",  MWSound::ChannelConfig_Quad,    MWSound::SampleType_Float32 },
+        { "AL_FORMAT_51CHN32", MWSound::ChannelConfig_5point1, MWSound::SampleType_Float32 },
+        { "AL_FORMAT_71CHN32", MWSound::ChannelConfig_7point1, MWSound::SampleType_Float32 },
+    };
 
-    for(size_t i = 0;i < fmtlistsize;i++)
+    for(size_t i = 0;i < countof(fmtlist);i++)
     {
         if(fmtlist[i].chans == chans && fmtlist[i].type == type)
             return fmtlist[i].format;
@@ -72,21 +94,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
 
     if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
     {
-        static const struct {
-            char name[32];
-            ChannelConfig chans;
-            SampleType type;
-        } mcfmtlist[] = {
-            { "AL_FORMAT_QUAD16",   ChannelConfig_Quad,    SampleType_Int16 },
-            { "AL_FORMAT_QUAD8",    ChannelConfig_Quad,    SampleType_UInt8 },
-            { "AL_FORMAT_51CHN16",  ChannelConfig_5point1, SampleType_Int16 },
-            { "AL_FORMAT_51CHN8",   ChannelConfig_5point1, SampleType_UInt8 },
-            { "AL_FORMAT_71CHN16",  ChannelConfig_7point1, SampleType_Int16 },
-            { "AL_FORMAT_71CHN8",   ChannelConfig_7point1, SampleType_UInt8 },
-        };
-        static const size_t mcfmtlistsize = sizeof(mcfmtlist)/sizeof(mcfmtlist[0]);
-
-        for(size_t i = 0;i < mcfmtlistsize;i++)
+        for(size_t i = 0;i < countof(mcfmtlist);i++)
         {
             if(mcfmtlist[i].chans == chans && mcfmtlist[i].type == type)
             {
@@ -98,17 +106,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
     }
     if(alIsExtensionPresent("AL_EXT_FLOAT32"))
     {
-        static const struct {
-            char name[32];
-            ChannelConfig chans;
-            SampleType type;
-        } fltfmtlist[] = {
-            { "AL_FORMAT_MONO_FLOAT32",   ChannelConfig_Mono,   SampleType_Float32 },
-            { "AL_FORMAT_STEREO_FLOAT32", ChannelConfig_Stereo, SampleType_Float32 },
-        };
-        static const size_t fltfmtlistsize = sizeof(fltfmtlist)/sizeof(fltfmtlist[0]);
-
-        for(size_t i = 0;i < fltfmtlistsize;i++)
+        for(size_t i = 0;i < countof(fltfmtlist);i++)
         {
             if(fltfmtlist[i].chans == chans && fltfmtlist[i].type == type)
             {
@@ -119,18 +117,7 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         }
         if(alIsExtensionPresent("AL_EXT_MCFORMATS"))
         {
-            static const struct {
-                char name[32];
-                ChannelConfig chans;
-                SampleType type;
-            } fltmcfmtlist[] = {
-                { "AL_FORMAT_QUAD32",  ChannelConfig_Quad,    SampleType_Float32 },
-                { "AL_FORMAT_51CHN32", ChannelConfig_5point1, SampleType_Float32 },
-                { "AL_FORMAT_71CHN32", ChannelConfig_7point1, SampleType_Float32 },
-            };
-            static const size_t fltmcfmtlistsize = sizeof(fltmcfmtlist)/sizeof(fltmcfmtlist[0]);
-
-            for(size_t i = 0;i < fltmcfmtlistsize;i++)
+            for(size_t i = 0;i < countof(fltmcfmtlist);i++)
             {
                 if(fltmcfmtlist[i].chans == chans && fltmcfmtlist[i].type == type)
                 {
@@ -142,11 +129,10 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
         }
     }
 
-    fail(std::string("Unsupported sound format (")+getChannelConfigName(chans)+", "+getSampleTypeName(type)+")");
-    return AL_NONE;
+    throw std::runtime_error(std::string("Unsupported sound format (")+MWSound::getChannelConfigName(chans)+", "+MWSound::getSampleTypeName(type)+")");
 }
 
-static double getBufferLength(ALuint buffer)
+double getBufferLength(ALuint buffer)
 {
     ALint bufferSize, frequency, channels, bitsPerSample;
     alGetBufferi(buffer, AL_SIZE, &bufferSize);
@@ -158,6 +144,10 @@ static double getBufferLength(ALuint buffer)
     return (8.0*bufferSize)/(frequency*channels*bitsPerSample);
 }
 
+}
+
+namespace MWSound
+{
 
 //
 // A streaming OpenAL sound.
