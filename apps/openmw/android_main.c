@@ -1,3 +1,4 @@
+#include "../../SDL_internal.h"
 
 #ifdef __ANDROID__
 #include "SDL_main.h"

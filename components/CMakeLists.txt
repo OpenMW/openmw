@@ -20,9 +20,8 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
-if (NOT ANDROID)
-    find_package(OpenGL REQUIRED)
-endif()
+find_package(OpenGL REQUIRED)
+
 # source files
 
 add_component_dir (settings
@@ -138,31 +137,31 @@ add_component_dir (version
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
-if (NOT ANDROID)
-    add_component_qt_dir (contentselector
-        model/modelitem model/esmfile
-        model/naturalsort model/contentmodel
-        model/loadordererror
-        view/combobox view/contentselector
-        )
-    add_component_qt_dir (config
-        gamesettings
-        launchersettings
-        settingsbase
-        )
+add_component_qt_dir (contentselector
+    model/modelitem model/esmfile
+    model/naturalsort model/contentmodel
+    model/loadordererror
+    view/combobox view/contentselector
+    )
+add_component_qt_dir (config
+    gamesettings
+    launchersettings
+    settingsbase
+    )
 
-    add_component_qt_dir (process
-        processinvoker
-        )
-    if (DESIRED_QT_VERSION MATCHES 4)
-        include(${QT_USE_FILE})
-        QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
-        QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
-    else()
-        QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
-        QT5_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
-     endif()
+add_component_qt_dir (process
+    processinvoker
+)
+
+if (DESIRED_QT_VERSION MATCHES 4)
+    include(${QT_USE_FILE})
+    QT4_WRAP_UI(ESM_UI_HDR ${ESM_UI})
+    QT4_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
+else()
+    QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
+    QT5_WRAP_CPP(MOC_SRCS ${COMPONENT_MOC_FILES})
 endif()
+
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
         add_definitions(-fPIC)
@@ -173,46 +172,32 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-if (NOT ANDROID)
-    target_link_libraries(components 
-     ${Boost_SYSTEM_LIBRARY}
-     ${Boost_FILESYSTEM_LIBRARY}
-     ${Boost_THREAD_LIBRARY}
-     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-     ${OPENSCENEGRAPH_LIBRARIES}
-     ${BULLET_LIBRARIES}
-     ${SDL2_LIBRARY}
-     # For MyGUI platform
-     ${OPENGL_gl_LIBRARY}
-     ${MYGUI_LIBRARIES}
-    )
-else()
-    target_link_libraries(components 
-     ${Boost_SYSTEM_LIBRARY}
-     ${Boost_FILESYSTEM_LIBRARY}
-     ${Boost_THREAD_LIBRARY}
-     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-     ${OPENSCENEGRAPH_LIBRARIES}
-     ${BULLET_LIBRARIES}
-     ${SDL2_LIBRARY}
-     ${MYGUI_LIBRARIES}
-    )
-endif()
+target_link_libraries(components 
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARY}
+    # For MyGUI platform
+    ${OPENGL_gl_LIBRARY}
+    ${MYGUI_LIBRARIES}
+)
 
 if (WIN32)
     target_link_libraries(components
     ${Boost_LOCALE_LIBRARY})
 endif()
 
-if (NOT ANDROID)
-    if (DESIRED_QT_VERSION MATCHES 4)
-        target_link_libraries(components
-        ${QT_QTCORE_LIBRARY}
-        ${QT_QTGUI_LIBRARY})
-    else()
-        qt5_use_modules(components Widgets Core)
-    endif()
+if (DESIRED_QT_VERSION MATCHES 4)
+    target_link_libraries(components
+    ${QT_QTCORE_LIBRARY}
+    ${QT_QTGUI_LIBRARY})
+else()
+    qt5_use_modules(components Widgets Core)
 endif()
+
 if (GIT_CHECKOUT)
     add_dependencies (components git-version)
 endif (GIT_CHECKOUT)
