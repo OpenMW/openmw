@@ -803,6 +803,7 @@ namespace MWSound
             mUnderwaterSound.reset();
         }
 
+        mOutput->startUpdate();
         mOutput->updateListener(
             mListenerPos,
             mListenerDir,
@@ -848,6 +849,7 @@ namespace MWSound
             else
                 ++sayiter;
         }
+        mOutput->finishUpdate();
     }
 
     bool SoundManager::updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr& ptr, float duration)
@@ -905,6 +907,9 @@ namespace MWSound
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
 
+        if(!mOutput->isInitialized())
+            return;
+        mOutput->startUpdate();
         SoundMap::iterator snditer = mActiveSounds.begin();
         for(;snditer != mActiveSounds.end();++snditer)
         {
@@ -928,6 +933,7 @@ namespace MWSound
             mMusic->mBaseVolume = volumeFromType(mMusic->getPlayType());
             mMusic->update();
         }
+        mOutput->finishUpdate();
     }
 
     void SoundManager::setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up)

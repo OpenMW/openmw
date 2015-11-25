@@ -970,6 +970,17 @@ MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec
 }
 
 
+void OpenAL_Output::startUpdate()
+{
+    alcSuspendContext(alcGetCurrentContext());
+}
+
+void OpenAL_Output::finishUpdate()
+{
+    alcProcessContext(alcGetCurrentContext());
+}
+
+
 void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env)
 {
     mPos = pos;

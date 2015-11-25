@@ -39,6 +39,9 @@ namespace MWSound
         virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
                                                float vol, float basevol, float pitch, float min, float max, int flags) = 0;
 
+        virtual void startUpdate() = 0;
+        virtual void finishUpdate() = 0;
+
         virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env) = 0;
 
         virtual void pauseSounds(int types) = 0;
