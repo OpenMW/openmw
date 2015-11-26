@@ -7,8 +7,6 @@ namespace MWSound
 {
     class Sound
     {
-        virtual void update() = 0;
-
         Sound& operator=(const Sound &rhs);
         Sound(const Sound &rhs);
 
@@ -20,19 +18,31 @@ namespace MWSound
         float mMinDistance;
         float mMaxDistance;
         int mFlags;
+
         float mFadeOutTime;
 
     public:
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
         virtual double getTimeOffset() = 0;
+        virtual void update() = 0;
         void setPosition(const osg::Vec3f &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
-        void setFadeout(float duration) { mFadeOutTime=duration; }
+        void setBaseVolume(float volume) { mBaseVolume = volume; }
+        void setFadeout(float duration) { mFadeOutTime = duration; }
+        void updateFade(float duration)
+        {
+            if(mFadeOutTime > 0.0f)
+            {
+                float soundDuration = std::min(duration, mFadeOutTime);
+                mVolume *= (mFadeOutTime-soundDuration) / mFadeOutTime;
+                mFadeOutTime -= soundDuration;
+            }
+        }
 
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
-
+        bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
 
         Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
           : mPos(pos)
@@ -42,12 +52,9 @@ namespace MWSound
           , mMinDistance(mindist)
           , mMaxDistance(maxdist)
           , mFlags(flags)
-          , mFadeOutTime(0)
+          , mFadeOutTime(0.0f)
         { }
         virtual ~Sound() { }
-
-        friend class OpenAL_Output;
-        friend class SoundManager;
     };
 }
 

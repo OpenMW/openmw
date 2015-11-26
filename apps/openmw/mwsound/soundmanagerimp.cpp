@@ -828,10 +828,9 @@ namespace MWSound
             const osg::Vec3f objpos(pos.asVec3());
             sound->setPosition(objpos);
 
-            if((sound->mFlags&Play_RemoveAtDistance))
+            if(sound->getDistanceCull())
             {
-                osg::Vec3f diff = mListenerPos - ptr.getRefData().getPosition().asVec3();
-                if(diff.length2() > 2000*2000)
+                if((mListenerPos - objpos).length2() > 2000*2000)
                     sound->stop();
             }
         }
@@ -839,15 +838,8 @@ namespace MWSound
         if(!sound->isPlaying())
             return false;
 
-        // Update fade out
-        if(sound->mFadeOutTime > 0.0f)
-        {
-            float soundDuration = duration;
-            if(soundDuration > sound->mFadeOutTime)
-                soundDuration = sound->mFadeOutTime;
-            sound->setVolume(sound->mVolume - soundDuration/sound->mFadeOutTime*sound->mVolume);
-            sound->mFadeOutTime -= soundDuration;
-        }
+        sound->updateFade(duration);
+
         sound->update();
         return true;
     }
@@ -885,7 +877,7 @@ namespace MWSound
             for(;sndidx != snditer->second.end();++sndidx)
             {
                 MWBase::SoundPtr sound = sndidx->first;
-                sound->mBaseVolume = volumeFromType(sound->getPlayType());
+                sound->setBaseVolume(volumeFromType(sound->getPlayType()));
                 sound->update();
             }
         }
@@ -893,12 +885,12 @@ namespace MWSound
         for(;sayiter != mActiveSaySounds.end();++sayiter)
         {
             MWBase::SoundPtr sound = sayiter->second.first;
-            sound->mBaseVolume = volumeFromType(sound->getPlayType());
+            sound->setBaseVolume(volumeFromType(sound->getPlayType()));
             sound->update();
         }
         if(mMusic)
         {
-            mMusic->mBaseVolume = volumeFromType(mMusic->getPlayType());
+            mMusic->setBaseVolume(volumeFromType(mMusic->getPlayType()));
             mMusic->update();
         }
         mOutput->finishUpdate();
