@@ -98,8 +98,9 @@ namespace MWGui
         MyGUI::IntSize getToolTipViaPtr (bool image=true);
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createToolTip(const ToolTipInfo& info);
+        MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isFocusObject);
         ///< @return requested tooltip size
+        /// @param isFocusObject Is the object this tooltips originates from mFocusObject?
 
         float mFocusToolTipX;
         float mFocusToolTipY;

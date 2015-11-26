@@ -87,9 +87,9 @@ namespace MWGui
             return;
         }
 
-        bool gameMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
+        bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
 
-        if (gameMode)
+        if (guiMode)
         {
             const MyGUI::IntPoint& mousePos = MyGUI::InputManager::getInstance().getMousePosition();
 
@@ -112,7 +112,7 @@ namespace MWGui
                     if (info.caption.empty())
                         info.caption=mFocusObject.getCellRef().getRefId();
                     info.icon="";
-                    tooltipSize = createToolTip(info);
+                    tooltipSize = createToolTip(info, true);
                 }
                 else
                     tooltipSize = getToolTipViaPtr(true);
@@ -178,7 +178,7 @@ namespace MWGui
                     ToolTipInfo info;
                     info.text = data.caption;
                     info.notes = data.notes;
-                    tooltipSize = createToolTip(info);
+                    tooltipSize = createToolTip(info, false);
                 }
                 else if (type == "ItemPtr")
                 {
@@ -197,7 +197,7 @@ namespace MWGui
                 }
                 else if (type == "ToolTipInfo")
                 {
-                    tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>());
+                    tooltipSize = createToolTip(*focus->getUserData<MWGui::ToolTipInfo>(), false);
                 }
                 else if (type == "AvatarItemSelection")
                 {
@@ -240,7 +240,7 @@ namespace MWGui
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
                     info.effects = effects;
-                    tooltipSize = createToolTip(info);
+                    tooltipSize = createToolTip(info, false);
                 }
                 else if (type == "Layout")
                 {
@@ -345,7 +345,7 @@ namespace MWGui
             ToolTipInfo info = object.getToolTipInfo(mFocusObject);
             if (!image)
                 info.icon = "";
-            tooltipSize = createToolTip(info);
+            tooltipSize = createToolTip(info, true);
         }
 
         return tooltipSize;
@@ -370,13 +370,13 @@ namespace MWGui
         }
     }
 
-    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info)
+    MyGUI::IntSize ToolTips::createToolTip(const MWGui::ToolTipInfo& info, bool isFocusObject)
     {
         mDynamicToolTipBox->setVisible(true);
         
         if(mShowOwned == 1 || mShowOwned == 3)
         {
-            if(checkOwned())
+            if(isFocusObject && checkOwned())
             {
                 mDynamicToolTipBox->changeWidgetSkin("HUD_Box_NoTransp_Owned");
             }
