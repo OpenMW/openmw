@@ -117,25 +117,21 @@ bool Launcher::GraphicsPage::loadSettings()
 
 void Launcher::GraphicsPage::saveSettings()
 {
-    bool iVSync = mEngineSettings.getBool("vsync", "Video");
     bool cVSync = vSyncCheckBox->checkState();
-    if (iVSync != cVSync)
+    if (cVSync != mEngineSettings.getBool("vsync", "Video"))
         mEngineSettings.setBool("vsync", "Video", cVSync);
 
-    bool iFullScreen = mEngineSettings.getBool("fullscreen", "Video");
     bool cFullScreen = fullScreenCheckBox->checkState();
-    if (iFullScreen != cFullScreen)
+    if (cFullScreen != mEngineSettings.getBool("fullscreen", "Video"))
         mEngineSettings.setBool("fullscreen", "Video", cFullScreen);
 
-    bool iWindowBorder = mEngineSettings.getBool("window border", "Video");
     bool cWindowBorder = windowBorderCheckBox->checkState();
-    if (iWindowBorder != cWindowBorder)
+    if (cWindowBorder != mEngineSettings.getBool("window border", "Video"))
         mEngineSettings.setBool("window border", "Video", cWindowBorder);
 
-    int iAAValue = mEngineSettings.getInt("antialiasing", "Video");
     // The atoi() call is safe because the pull down constrains the string values.
     int cAAValue = atoi(antiAliasingComboBox->currentText().toLatin1().data());
-    if (iAAValue != cAAValue)
+    if (cAAValue != mEngineSettings.getInt("antialiasing", "Video"))
         mEngineSettings.setInt("antialiasing", "Video", cAAValue);
 
     int cWidth = 0;
@@ -152,17 +148,14 @@ void Launcher::GraphicsPage::saveSettings()
         cHeight = customHeightSpinBox->value();
     }
 
-    int iWidth = mEngineSettings.getInt("resolution x", "Video");
-    if (iWidth != cWidth)
+    if (cWidth != mEngineSettings.getInt("resolution x", "Video"))
         mEngineSettings.setInt("resolution x", "Video", cWidth);
 
-    int iHeight = mEngineSettings.getInt("resolution y", "Video");
-    if (iHeight != cHeight)
+    if (cHeight != mEngineSettings.getInt("resolution y", "Video"))
         mEngineSettings.setInt("resolution y", "Video", cHeight);
 
-    int iScreen = mEngineSettings.getInt("screen", "Video");
     int cScreen = screenComboBox->currentIndex();
-    if (iScreen != cScreen)
+    if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
 }
 
