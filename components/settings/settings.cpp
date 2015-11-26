@@ -131,9 +131,7 @@ public:
         // Have we substantively changed the settings file?
         bool changed = false;
 
-        // Was there anything in the existing file?  This is intended to permit the deletion of
-        // the settings.cfg file and it's automatic recreation -- a feature not currently
-        // supported elsewhere in the code.
+        // Were there any lines at all in the file?
         bool existing = false;
 
         // The category/section we're currently in.
@@ -145,7 +143,6 @@ public:
         boost::filesystem::ifstream istream;
         boost::filesystem::path ipath(file);
         istream.open(ipath);
-        //std::cout << "Reading previous settings file: " << ipath << std::endl;
 
         // Create a new string stream to write the current settings to.  It's likely that the
         // input file and the output file are the same, so this stream serves as a temporary file
@@ -190,19 +187,13 @@ public:
 
                 // Ensure that all options in the current category have been written.
                 for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
-                    bool missed = false;
                     if (mit->second == false && mit->first.first == currentCategory) {
                         std::cout << "Added new setting: [" << currentCategory << "] "
                                   << mit->first.second << " = " << settings[mit->first] << std::endl;
-                        // With some further code changes, this comment could be more descriptive.
-                        ostream << "# Automatically added setting." << std::endl;
                         ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
                         mit->second = true;
-                        missed = true;
                         changed = true;
                     }
-                    // Ensure that there's a newline before the next section if we added settings.
-                    if (missed) ostream << std::endl;
                 }
 
                 // Update the current category.
@@ -223,7 +214,7 @@ public:
             if (!skipWhiteSpace(i, line))
                 continue;
 
-            // If we'cve found settings befor ethe first category, something's wrong.  This
+            // If we've found settings before the first category, something's wrong.  This
             // should never happen unless the player edited the file while playing, since
             // the loadSettingsFile() logic rejects it.
             if (currentCategory.empty()) {
@@ -286,27 +277,24 @@ public:
         // Ensure that all options in the current category have been written.  We must complete
         // the current category at the end of the file before moving on to any new categories.
         for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
-            bool missed = false;
             if (mit->second == false && mit->first.first == currentCategory) {
                 std::cout << "Added new setting: [" << mit->first.first << "] "
                           << mit->first.second << " = " << settings[mit->first] << std::endl;
-                // With some further code changes, this comment could be more descriptive.
-                ostream << std::endl << "# Automatically added setting." << std::endl;
                 ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
                 mit->second = true;
-                missed = true;
                 changed = true;
             }
-            // Ensure that there's a newline before the next section if we added settings.
-            if (missed) ostream << std::endl;
         }
 
-        // This logic triggers when the input file was effectively empty.  It could be extended
-        // to doing something more intelligent instead, like make a copy of the default settings
-        // file (complete with comments) before continuing.  Other code prevents OpenMW from
-        // executing to this point with a missing config file.
+        // If there was absolutely nothing in the file (or more likely the file didn't
+        // exist), start the newly created file with a helpful comment.
         if (!existing) {
-            ostream << "# This file was automatically generated." << std::endl << std::endl;
+            ostream << "# This is the OpenMW user 'settings.cfg' file.  This file only contains" << std::endl;
+            ostream << "# explicitly changed settings.  If you would like to revert a setting" << std::endl;
+            ostream << "# to its default, simply remove it from this file.  For available" << std::endl;
+            ostream << "# settings, see the file 'settings-default.cfg' or the documentation at:" << std::endl;
+            ostream << "#" << std::endl;
+            ostream << "#   https://wiki.openmw.org/index.php?title=Settings" << std::endl;
         }
 
         // We still have one more thing to do before we're completely done writing the file.
@@ -321,14 +309,11 @@ public:
                     currentCategory = mit->first.first;
                     std::cout << "Created new setting section: " << mit->first.first << std::endl;
                     ostream << std::endl;
-                    // Add new category comments only if we're amending an existing file.
-                    if (existing) ostream << "# Automatically added category." << std::endl;
                     ostream << "[" << currentCategory << "]" << std::endl;
                 }
                 std::cout << "Added new setting: [" << mit->first.first << "] "
                           << mit->first.second << " = " << settings[mit->first] << std::endl;
                 // Then write the setting.  No need to mark it as written because we're done.
-                ostream << std::endl;
                 ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
                 changed = true;
             }

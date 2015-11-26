@@ -33,6 +33,7 @@ namespace Launcher
     private:
         Files::ConfigurationManager &mCfgMgr;
         Settings::Manager &mEngineSettings;
+        Settings::Manager mInitialSettings;
 
         QStringList getAvailableResolutions(int screen);
         QRect getMaximumResolution();
