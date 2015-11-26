@@ -117,6 +117,8 @@ bool Launcher::GraphicsPage::loadSettings()
 
 void Launcher::GraphicsPage::saveSettings()
 {
+    // Ensure we only set the new settings if they changed. This is to avoid cluttering the
+    // user settings file (which by definition should only contain settings the user has touched)
     bool cVSync = vSyncCheckBox->checkState();
     if (cVSync != mEngineSettings.getBool("vsync", "Video"))
         mEngineSettings.setBool("vsync", "Video", cVSync);
