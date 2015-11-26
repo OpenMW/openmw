@@ -475,7 +475,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         MWWorld::Ptr ptr = MWMechanics::getPlayer();
 
-        ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
+        const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);

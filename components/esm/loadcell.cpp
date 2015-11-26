@@ -91,6 +91,21 @@ namespace ESM
 
         if (!hasData)
             esm.fail("Missing DATA subrecord");
+
+        mCellId.mPaged = !(mData.mFlags & Interior);
+
+        if (mCellId.mPaged)
+        {
+            mCellId.mWorldspace = "sys::default";
+            mCellId.mIndex.mX = mData.mX;
+            mCellId.mIndex.mY = mData.mY;
+        }
+        else
+        {
+            mCellId.mWorldspace = Misc::StringUtils::lowerCase (mName);
+            mCellId.mIndex.mX = 0;
+            mCellId.mIndex.mY = 0;
+        }
     }
 
     void Cell::loadCell(ESMReader &esm, bool saveContext)
@@ -266,25 +281,8 @@ namespace ESM
         mAmbi.mFogDensity = 0;
     }
 
-    CellId Cell::getCellId() const
+    const CellId& Cell::getCellId() const
     {
-        CellId id;
-
-        id.mPaged = !(mData.mFlags & Interior);
-
-        if (id.mPaged)
-        {
-            id.mWorldspace = "sys::default";
-            id.mIndex.mX = mData.mX;
-            id.mIndex.mY = mData.mY;
-        }
-        else
-        {
-            id.mWorldspace = Misc::StringUtils::lowerCase (mName);
-            id.mIndex.mX = 0;
-            id.mIndex.mY = 0;
-        }
-
-        return id;
+        return mCellId;
     }
 }

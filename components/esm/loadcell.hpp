@@ -8,6 +8,7 @@
 #include "esmcommon.hpp"
 #include "defs.hpp"
 #include "cellref.hpp"
+#include "cellid.hpp"
 
 namespace MWWorld
 {
@@ -18,7 +19,6 @@ namespace ESM
 {
 class ESMReader;
 class ESMWriter;
-struct CellId;
 
 /* Moved cell reference tracking object. This mainly stores the target cell
         of the reference, so we can easily know where it has been moved when another
@@ -97,6 +97,8 @@ struct Cell
 
   std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
   DATAstruct mData;
+  CellId mCellId;
+
   AMBIstruct mAmbi;
 
   float mWater; // Water level
@@ -173,7 +175,7 @@ struct Cell
     void blank();
     ///< Set record to default state (does not touch the ID/index).
 
-    CellId getCellId() const;
+    const CellId& getCellId() const;
 };
 }
 #endif
