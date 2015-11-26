@@ -43,6 +43,7 @@ namespace MWSound
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
         bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
+        bool getIs3D() const { return mFlags&Play_3D; }
 
         Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
           : mPos(pos)

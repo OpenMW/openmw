@@ -34,6 +34,11 @@ namespace MWSound
         Env_Normal,
         Env_Underwater
     };
+    // Extra play flags, not intended for caller use
+    enum PlayModeEx {
+        Play_2D = 0,
+        Play_3D = 1<<31
+    };
 
     class SoundManager : public MWBase::SoundManager
     {

@@ -483,7 +483,7 @@ namespace MWSound
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound(sfx->mHandle,
-                volume * sfx->mVolume, basevol, pitch, mode|type, offset
+                volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D, offset
             );
             if(sfx->mUses++ == 0)
             {
@@ -518,7 +518,8 @@ namespace MWSound
                 return MWBase::SoundPtr();
 
             sound = mOutput->playSound3D(sfx->mHandle,
-                objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
+                objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
+                mode|type|Play_3D, offset
             );
             if(sfx->mUses++ == 0)
             {
@@ -548,7 +549,8 @@ namespace MWSound
             float basevol = volumeFromType(type);
 
             sound = mOutput->playSound3D(sfx->mHandle,
-                initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist, mode|type, offset
+                initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
+                mode|type|Play_3D, offset
             );
             if(sfx->mUses++ == 0)
             {
@@ -822,7 +824,7 @@ namespace MWSound
 
     bool SoundManager::updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr& ptr, float duration)
     {
-        if(!ptr.isEmpty())
+        if(!ptr.isEmpty() && sound->getIs3D())
         {
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
