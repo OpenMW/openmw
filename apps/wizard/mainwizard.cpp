@@ -138,7 +138,7 @@ void Wizard::MainWizard::setupGameSettings()
     QString path(userPath + QLatin1String("openmw.cfg"));
     QFile file(path);
 
-    qDebug() << "Loading config file:" << qPrintable(path);
+    qDebug() << "Loading config file:" << path.toUtf8().constData();
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -163,7 +163,7 @@ void Wizard::MainWizard::setupGameSettings()
     paths.append(globalPath + QLatin1String("openmw.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << qPrintable(path);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
 
         QFile file(path);
         if (file.exists()) {
@@ -197,7 +197,7 @@ void Wizard::MainWizard::setupLauncherSettings()
 
     QFile file(path);
 
-    qDebug() << "Loading config file:" << qPrintable(path);
+    qDebug() << "Loading config file:" << path.toUtf8().constData();
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
