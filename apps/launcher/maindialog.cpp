@@ -24,6 +24,15 @@
 
 using namespace Process;
 
+void cfgError(const QString& title, const QString& msg) {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setText(msg);
+    msgBox.exec();
+}
+
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
@@ -261,14 +270,10 @@ bool Launcher::MainDialog::setupLauncherSettings()
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
+                cfgError(tr("Error opening OpenMW configuration file"),
+                         tr("<br><b>Could not open %0 for reading</b><br><br> \
+                             Please make sure you have the right permissions \
+                             and try again.<br>").arg(file.fileName()));
                 return false;
             }
             QTextStream stream(&file);
@@ -296,14 +301,10 @@ bool Launcher::MainDialog::setupGameSettings()
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                       Please make sure you have the right permissions \
-                                       and try again.<br>").arg(file.fileName()));
-                                       msgBox.exec();
+            cfgError(tr("Error opening OpenMW configuration file"),
+                     tr("<br><b>Could not open %0 for reading</b><br><br> \
+                         Please make sure you have the right permissions \
+                         and try again.<br>").arg(file.fileName()));
             return false;
         }
         QTextStream stream(&file);
@@ -324,14 +325,10 @@ bool Launcher::MainDialog::setupGameSettings()
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
+                cfgError(tr("Error opening OpenMW configuration file"),
+                         tr("<br><b>Could not open %0 for reading</b><br><br> \
+                             Please make sure you have the right permissions \
+                             and try again.<br>").arg(file.fileName()));
                 return false;
             }
             QTextStream stream(&file);
@@ -381,15 +378,6 @@ bool Launcher::MainDialog::setupGameSettings()
     return true;
 }
 
-void cfgError(const QString& title, const QString& msg) {
-    QMessageBox msgBox;
-    msgBox.setWindowTitle(title);
-    msgBox.setIcon(QMessageBox::Critical);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-    msgBox.setText(msg);
-    msgBox.exec();
-}
-
 bool Launcher::MainDialog::setupGraphicsSettings()
 {
     // This method is almost a copy of OMW::Engine::loadSettings().  They should definitely
@@ -420,8 +408,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
         mEngineSettings.loadDefault(defaultPath);
     }
     catch (std::exception& e) {
-        std::string msg = "<br><b>Error reading settings-default.cfg</b><br><br>" +
-            defaultPath + "<br><br>" + e.what();
+        std::string msg = std::string("<br><b>Error reading settings-default.cfg</b><br><br>") + e.what();
         cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
         return false;
     }
@@ -435,8 +422,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
         mEngineSettings.loadUser(userPath);
     }
     catch (std::exception& e) {
-        std::string msg = "<br><b>Error reading settings-default.cfg</b><br><br>" +
-            defaultPath + "<br><br>" + e.what();
+        std::string msg = std::string("<br><b>Error reading settings.cfg</b><br><br>") + e.what();
         cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
         return false;
     }
@@ -487,15 +473,11 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!dir.exists()) {
         if (!dir.mkpath(userPath)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
-                              Please make sure you have the right permissions \
-                              and try again.<br>").arg(userPath));
-                              msgBox.exec();
-                           return false;
+            cfgError(tr("Error creating OpenMW configuration directory"),
+                     tr("<br><b>Could not create %0</b><br><br> \
+                         Please make sure you have the right permissions \
+                         and try again.<br>").arg(userPath));
+            return false;
         }
     }
 
@@ -504,15 +486,11 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-                          msgBox.exec();
-                       return false;
+        cfgError(tr("Error writing OpenMW configuration file"),
+                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>").arg(file.fileName()));
+        return false;
     }
 
 
@@ -536,15 +514,11 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing Launcher configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-                          msgBox.exec();
-                       return false;
+        cfgError(tr("Error writing Launcher configuration file"),
+                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>").arg(file.fileName()));
+        return false;
     }
 
     QTextStream stream(&file);
