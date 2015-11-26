@@ -385,8 +385,8 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // the filenames should be in the CfgMgr component.
 
     // Create the settings manager and load default settings file
-    const std::string localDefault = mCfgMgr.getLocalPath().string() + "settings-default.cfg";
-    const std::string globalDefault = mCfgMgr.getGlobalPath().string() + "settings-default.cfg";
+    const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
+    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
     std::string defaultPath;
 
     // Prefer the settings-default.cfg in the current directory.
@@ -414,7 +414,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     }
 
     // Load user settings if they exist
-    const std::string userPath = mCfgMgr.getUserConfigPath().string() + "settings.cfg";
+    const std::string userPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     // User settings are not required to exist, so if they don't we're done.
     if (!boost::filesystem::exists(userPath)) return true;
 
@@ -498,7 +498,7 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Graphics settings
-    const std::string settingsPath = mCfgMgr.getUserConfigPath().string() + "settings.cfg";
+    const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
     try {
         mEngineSettings.saveUser(settingsPath);
     }
