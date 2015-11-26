@@ -56,6 +56,8 @@ namespace MWSound
         // back, allowing existing Sound_Buffer references/pointers to remain
         // valid.
         SoundBufferList mSoundBuffers;
+        size_t mBufferCacheMin;
+        size_t mBufferCacheMax;
         size_t mBufferCacheSize;
 
         typedef std::map<std::string,Sound_Buffer*> NameBufferMap;

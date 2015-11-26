@@ -66,6 +66,11 @@ namespace MWSound
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
 
+        mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
+        mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
+        mBufferCacheMax *= 1024*1024;
+        mBufferCacheMin = std::min(mBufferCacheMin*1024*1024, mBufferCacheMax);
+
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
@@ -184,21 +189,22 @@ namespace MWSound
             sfx->mHandle = mOutput->loadSound(sfx->mResourceName);
             mBufferCacheSize += mOutput->getSoundDataSize(sfx->mHandle);
 
-            // NOTE: Max sound buffer cache size is 15MB. Make configurable?
-            while(mBufferCacheSize > 15*1024*1024)
+            if(mBufferCacheSize > mBufferCacheMax)
             {
-                if(mUnusedBuffers.empty())
-                {
-                    std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
-                    break;
-                }
-                Sound_Buffer *unused = mUnusedBuffers.back();
+                do {
+                    if(mUnusedBuffers.empty())
+                    {
+                        std::cerr<< "No unused sound buffers to free, using "<<mBufferCacheSize<<" bytes!" <<std::endl;
+                        break;
+                    }
+                    Sound_Buffer *unused = mUnusedBuffers.back();
 
-                mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
-                mOutput->unloadSound(unused->mHandle);
-                unused->mHandle = 0;
+                    mBufferCacheSize -= mOutput->getSoundDataSize(unused->mHandle);
+                    mOutput->unloadSound(unused->mHandle);
+                    unused->mHandle = 0;
 
-                mUnusedBuffers.pop_back();
+                    mUnusedBuffers.pop_back();
+                } while(mBufferCacheSize > mBufferCacheMin);
             }
             mUnusedBuffers.push_front(sfx);
         }
