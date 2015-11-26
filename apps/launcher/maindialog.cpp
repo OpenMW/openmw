@@ -505,7 +505,7 @@ bool Launcher::MainDialog::writeSettings()
     catch (std::exception& e) {
         std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
             settingsPath + "<br><br>" + e.what();
-        cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
+        cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
         return false;
     }
 
