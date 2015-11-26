@@ -51,28 +51,29 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        typedef std::vector<std::string> BufferKeyList;
-        typedef std::vector<Sound_Buffer> SoundBufferList;
-        // Each mBufferKeys index has a corresponding entry in mSoundBuffers.
-        // That is, if string "foo" is at index 10 in mBufferKeys, index 10 in
-        // mSoundBuffers contains the Sound_Buffer for "foo".
-        BufferKeyList mBufferKeys;
+        typedef std::deque<Sound_Buffer> SoundBufferList;
+        // List of sound buffers, grown as needed. New enties are added to the
+        // back, allowing existing Sound_Buffer references/pointers to remain
+        // valid.
         SoundBufferList mSoundBuffers;
         size_t mBufferCacheSize;
+
+        typedef std::map<std::string,Sound_Buffer*> NameBufferMap;
+        NameBufferMap mBufferNameMap;
 
         typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
         NameLoudnessMap mVoiceLipBuffers;
 
         // NOTE: unused buffers are stored in front-newest order.
-        typedef std::deque<size_t> SoundList;
+        typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
         boost::shared_ptr<Sound> mMusic;
         std::string mCurrentPlaylist;
 
-        typedef std::pair<MWBase::SoundPtr,size_t> SoundIndexPair;
-        typedef std::vector<SoundIndexPair> SoundIndexPairList;
-        typedef std::map<MWWorld::Ptr,SoundIndexPairList> SoundMap;
+        typedef std::pair<MWBase::SoundPtr,Sound_Buffer*> SoundBufferRefPair;
+        typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
+        typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
         typedef std::pair<MWBase::SoundPtr,std::string> SoundNamePair;
@@ -88,12 +89,10 @@ namespace MWSound
 
         int mPausedSoundTypes;
 
-        void insertSound(const std::string &soundId, const ESM::Sound *sound);
+        Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
-        size_t lookupId(const std::string &soundId);
-        size_t lookupId(const std::string &soundId) const;
-        Sound_Buffer *lookup(size_t sfxid);
-        Sound_Buffer *lookup(const std::string &soundId);
+        Sound_Buffer *lookupSound(const std::string &soundId) const;
+        Sound_Buffer *loadSound(const std::string &soundId);
 
         // Ensures the loudness/"lip" data is loaded, and returns a decoder to
         // start streaming
