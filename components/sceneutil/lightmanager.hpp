@@ -77,7 +77,7 @@ namespace SceneUtil
         void update();
 
         // Called automatically by the LightSource's UpdateCallback
-        void addLight(LightSource* lightSource, osg::Matrixf worldMat);
+        void addLight(LightSource* lightSource, const osg::Matrixf& worldMat);
 
         struct LightSourceTransform
         {
