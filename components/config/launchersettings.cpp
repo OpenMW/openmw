@@ -25,8 +25,6 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
     QMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
 
-    qDebug() << keys;
-
     QRegExp keyRe("(.+)/");
 
     QStringList result;

@@ -18,7 +18,7 @@
 
 #include <components/contentselector/model/naturalsort.hpp>
 
-#include "settings/graphicssettings.hpp"
+#include <components/settings/settings.hpp>
 
 QString getAspect(int x, int y)
 {
@@ -32,10 +32,10 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, GraphicsSettings &graphicsSetting, QWidget *parent)
+Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent)
     : QWidget(parent)
     , mCfgMgr(cfg)
-    , mGraphicsSettings(graphicsSetting)
+    , mEngineSettings(engineSettings)
 {
     setObjectName ("GraphicsPage");
     setupUi(this);
@@ -80,25 +80,26 @@ bool Launcher::GraphicsPage::loadSettings()
     if (!setupSDL())
         return false;
 
-    if (mGraphicsSettings.value(QString("Video/vsync")) == QLatin1String("true"))
+    if (mEngineSettings.getBool("vsync", "Video"))
         vSyncCheckBox->setCheckState(Qt::Checked);
 
-    if (mGraphicsSettings.value(QString("Video/fullscreen")) == QLatin1String("true"))
+    if (mEngineSettings.getBool("fullscreen", "Video"))
         fullScreenCheckBox->setCheckState(Qt::Checked);
 
-    if (mGraphicsSettings.value(QString("Video/window border")) == QLatin1String("true"))
+    if (mEngineSettings.getBool("window border", "Video"))
         windowBorderCheckBox->setCheckState(Qt::Checked);
 
-    int aaIndex = antiAliasingComboBox->findText(mGraphicsSettings.value(QString("Video/antialiasing")));
+    // aaValue is the actual value (0, 1, 2, 4, 8, 16)
+    int aaValue = mEngineSettings.getInt("antialiasing", "Video");
+    // aaIndex is the index into the allowed values in the pull down.
+    int aaIndex = antiAliasingComboBox->findText(QString::number(aaValue));
     if (aaIndex != -1)
         antiAliasingComboBox->setCurrentIndex(aaIndex);
 
-    QString width = mGraphicsSettings.value(QString("Video/resolution x"));
-    QString height = mGraphicsSettings.value(QString("Video/resolution y"));
-    QString resolution = width + QString(" x ") + height;
-    QString screen = mGraphicsSettings.value(QString("Video/screen"));
-
-    screenComboBox->setCurrentIndex(screen.toInt());
+    int width = mEngineSettings.getInt("resolution x", "Video");
+    int height = mEngineSettings.getInt("resolution y", "Video");
+    QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
+    screenComboBox->setCurrentIndex(mEngineSettings.getInt("screen", "Video"));
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -107,9 +108,8 @@ bool Launcher::GraphicsPage::loadSettings()
         resolutionComboBox->setCurrentIndex(resIndex);
     } else {
         customRadioButton->toggle();
-        customWidthSpinBox->setValue(width.toInt());
-        customHeightSpinBox->setValue(height.toInt());
-
+        customWidthSpinBox->setValue(width);
+        customHeightSpinBox->setValue(height);
     }
 
     return true;
@@ -117,31 +117,46 @@ bool Launcher::GraphicsPage::loadSettings()
 
 void Launcher::GraphicsPage::saveSettings()
 {
-    vSyncCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/vsync"), QString("true"))
-                                 : mGraphicsSettings.setValue(QString("Video/vsync"), QString("false"));
+    // Ensure we only set the new settings if they changed. This is to avoid cluttering the
+    // user settings file (which by definition should only contain settings the user has touched)
+    bool cVSync = vSyncCheckBox->checkState();
+    if (cVSync != mEngineSettings.getBool("vsync", "Video"))
+        mEngineSettings.setBool("vsync", "Video", cVSync);
 
-    fullScreenCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("true"))
-                                      : mGraphicsSettings.setValue(QString("Video/fullscreen"), QString("false"));
+    bool cFullScreen = fullScreenCheckBox->checkState();
+    if (cFullScreen != mEngineSettings.getBool("fullscreen", "Video"))
+        mEngineSettings.setBool("fullscreen", "Video", cFullScreen);
 
-    windowBorderCheckBox->checkState() ? mGraphicsSettings.setValue(QString("Video/window border"), QString("true"))
-                                      : mGraphicsSettings.setValue(QString("Video/window border"), QString("false"));
+    bool cWindowBorder = windowBorderCheckBox->checkState();
+    if (cWindowBorder != mEngineSettings.getBool("window border", "Video"))
+        mEngineSettings.setBool("window border", "Video", cWindowBorder);
 
-    mGraphicsSettings.setValue(QString("Video/antialiasing"), antiAliasingComboBox->currentText());
+    int cAAValue = antiAliasingComboBox->currentText().toInt();
+    if (cAAValue != mEngineSettings.getInt("antialiasing", "Video"))
+        mEngineSettings.setInt("antialiasing", "Video", cAAValue);
 
-
+    int cWidth = 0;
+    int cHeight = 0;
     if (standardRadioButton->isChecked()) {
         QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
-
         if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified())) {
-            mGraphicsSettings.setValue(QString("Video/resolution x"), resolutionRe.cap(1));
-            mGraphicsSettings.setValue(QString("Video/resolution y"), resolutionRe.cap(2));
+            cWidth = resolutionRe.cap(1).toInt();
+            cHeight = resolutionRe.cap(2).toInt();
         }
     } else {
-        mGraphicsSettings.setValue(QString("Video/resolution x"), QString::number(customWidthSpinBox->value()));
-        mGraphicsSettings.setValue(QString("Video/resolution y"), QString::number(customHeightSpinBox->value()));
+        cWidth = customWidthSpinBox->value();
+        cHeight = customHeightSpinBox->value();
     }
 
-    mGraphicsSettings.setValue(QString("Video/screen"), QString::number(screenComboBox->currentIndex()));
+    if (cWidth != mEngineSettings.getInt("resolution x", "Video"))
+        mEngineSettings.setInt("resolution x", "Video", cWidth);
+
+    if (cHeight != mEngineSettings.getInt("resolution y", "Video"))
+        mEngineSettings.setInt("resolution y", "Video", cHeight);
+
+    int cScreen = screenComboBox->currentIndex();
+    if (cScreen != mEngineSettings.getInt("screen", "Video"))
+        mEngineSettings.setInt("screen", "Video", cScreen);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
