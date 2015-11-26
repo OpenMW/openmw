@@ -129,8 +129,7 @@ void Launcher::GraphicsPage::saveSettings()
     if (cWindowBorder != mEngineSettings.getBool("window border", "Video"))
         mEngineSettings.setBool("window border", "Video", cWindowBorder);
 
-    // The atoi() call is safe because the pull down constrains the string values.
-    int cAAValue = atoi(antiAliasingComboBox->currentText().toLatin1().data());
+    int cAAValue = antiAliasingComboBox->currentText().toInt();
     if (cAAValue != mEngineSettings.getInt("antialiasing", "Video"))
         mEngineSettings.setInt("antialiasing", "Video", cAAValue);
 
@@ -139,9 +138,8 @@ void Launcher::GraphicsPage::saveSettings()
     if (standardRadioButton->isChecked()) {
         QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
         if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified())) {
-            // The atoi() call is safe because the pull down constrains the string values.
-            cWidth = atoi(resolutionRe.cap(1).toLatin1().data());
-            cHeight = atoi(resolutionRe.cap(2).toLatin1().data());
+            cWidth = resolutionRe.cap(1).toInt();
+            cHeight = resolutionRe.cap(2).toInt();
         }
     } else {
         cWidth = customWidthSpinBox->value();
