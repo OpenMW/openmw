@@ -23,6 +23,13 @@
 #define MAKE_PTRID(id) ((void*)(uintptr_t)id)
 #define GET_PTRID(ptr) ((ALuint)(uintptr_t)ptr)
 
+namespace
+{
+
+const int sLoudnessFPS = 20; // loudness values per second of audio
+
+}
+
 namespace MWSound
 {
 
@@ -217,6 +224,10 @@ public:
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
+
+    typedef std::vector<std::pair<DecoderPtr,Sound_Loudness*> > DecoderLoudnessVec;
+    DecoderLoudnessVec mDecoderLoudness;
+
     volatile bool mQuitNow;
     boost::mutex mMutex;
     boost::condition_variable mCondVar;
@@ -248,6 +259,33 @@ struct OpenAL_Output::StreamThread {
                 else
                     ++iter;
             }
+
+            // Only do one loudness decode at a time, in case it takes particularly long we don't
+            // want to block up anything.
+            DecoderLoudnessVec::iterator dliter = mDecoderLoudness.begin();
+            if(dliter != mDecoderLoudness.end())
+            {
+                DecoderPtr decoder = dliter->first;
+                Sound_Loudness *loudness = dliter->second;
+                mDecoderLoudness.erase(dliter);
+                lock.unlock();
+
+                std::vector<char> data;
+                ChannelConfig chans = ChannelConfig_Mono;
+                SampleType type = SampleType_Int16;
+                int srate = 48000;
+                try {
+                    decoder->getInfo(&srate, &chans, &type);
+                    decoder->readAll(data);
+                }
+                catch(std::exception &e) {
+                    std::cerr<< "Failed to decode audio: "<<e.what() <<std::endl;
+                }
+
+                loudness->analyzeLoudness(data, srate, chans, type, static_cast<float>(sLoudnessFPS));
+                lock.lock();
+                continue;
+            }
             mCondVar.timed_wait(lock, boost::posix_time::milliseconds(50));
         }
     }
@@ -274,6 +312,15 @@ struct OpenAL_Output::StreamThread {
     {
         boost::lock_guard<boost::mutex> lock(mMutex);
         mStreams.clear();
+        mDecoderLoudness.clear();
+    }
+
+    void add(DecoderPtr decoder, Sound_Loudness *loudness)
+    {
+        boost::unique_lock<boost::mutex> lock(mMutex);
+        mDecoderLoudness.push_back(std::make_pair(decoder, loudness));
+        lock.unlock();
+        mCondVar.notify_all();
     }
 
 private:
@@ -1049,6 +1096,12 @@ void OpenAL_Output::resumeSounds(int types)
         alSourcePlayv(sources.size(), &sources[0]);
         throwALerror();
     }
+}
+
+
+void OpenAL_Output::loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness)
+{
+    mStreamThread->add(decoder, loudness);
 }
 
 

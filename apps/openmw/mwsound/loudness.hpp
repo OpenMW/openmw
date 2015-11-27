@@ -12,9 +12,10 @@ class Sound_Loudness {
     // Loudness sample info
     float mSamplesPerSec;
     std::vector<float> mSamples;
+    volatile bool mReady;
 
 public:
-    Sound_Loudness() : mSamplesPerSec(0.0f) { }
+    Sound_Loudness() : mSamplesPerSec(0.0f), mReady(false) { }
 
     /**
      * Analyzes the energy (closely related to loudness) of a sound buffer.
@@ -30,6 +31,7 @@ public:
                          ChannelConfig chans, SampleType type,
                          float valuesPerSecond);
 
+    bool isReady() { return mReady; }
     float getLoudnessAtTime(float sec) const;
 };
 

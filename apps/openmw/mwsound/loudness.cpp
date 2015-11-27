@@ -52,6 +52,8 @@ void Sound_Loudness::analyzeLoudness(const std::vector< char >& data, int sample
         mSamples.push_back(rms);
         ++segment;
     }
+
+    mReady = true;
 }
 
 

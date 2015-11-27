@@ -90,6 +90,10 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
+        typedef std::pair<DecoderPtr,Sound_Loudness*> DecoderLoudnessPair;
+        typedef std::map<MWWorld::Ptr,DecoderLoudnessPair> SayDecoderMap;
+        SayDecoderMap mPendingSaySounds;
+
         MWBase::SoundPtr mUnderwaterSound;
 
         bool mListenerUnderwater;
@@ -104,9 +108,11 @@ namespace MWSound
         Sound_Buffer *lookupSound(const std::string &soundId) const;
         Sound_Buffer *loadSound(const std::string &soundId);
 
-        // Ensures the loudness/"lip" data is loaded, and returns a decoder to
-        // start streaming
+        // Ensures the loudness/"lip" data gets loaded, and returns a decoder
+        // to start streaming
         DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
+
+        MWBase::SoundPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
         bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);

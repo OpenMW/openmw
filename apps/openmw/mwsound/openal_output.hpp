@@ -57,6 +57,8 @@ namespace MWSound
         virtual void pauseSounds(int types);
         virtual void resumeSounds(int types);
 
+        virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness);
+
         OpenAL_Output& operator=(const OpenAL_Output &rhs);
         OpenAL_Output(const OpenAL_Output &rhs);
 

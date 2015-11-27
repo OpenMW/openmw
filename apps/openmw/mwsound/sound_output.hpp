@@ -47,6 +47,11 @@ namespace MWSound
         virtual void pauseSounds(int types) = 0;
         virtual void resumeSounds(int types) = 0;
 
+        // HACK: The sound output implementation really shouldn't be handling
+        // asynchronous loudness data loading, but it's currently where we have
+        // a background processing thread.
+        virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness) = 0;
+
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);
 
