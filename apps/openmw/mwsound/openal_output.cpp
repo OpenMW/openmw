@@ -188,7 +188,7 @@ public:
     virtual void stop();
     virtual bool isPlaying();
     virtual double getTimeOffset();
-    virtual void update();
+    virtual void applyUpdates();
 
     void play();
     bool process();
@@ -206,7 +206,7 @@ public:
       : OpenAL_SoundStream(output, src, decoder, pos, vol, basevol, pitch, mindist, maxdist, flags)
     { }
 
-    virtual void update();
+    virtual void applyUpdates();
 };
 
 
@@ -411,10 +411,10 @@ void OpenAL_SoundStream::updateAll(bool local)
     }
     alSourcei(mSource, AL_LOOPING, AL_FALSE);
 
-    update();
+    applyUpdates();
 }
 
-void OpenAL_SoundStream::update()
+void OpenAL_SoundStream::applyUpdates()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
@@ -490,7 +490,7 @@ ALint OpenAL_SoundStream::refillQueue()
     return queued;
 }
 
-void OpenAL_SoundStream3D::update()
+void OpenAL_SoundStream3D::applyUpdates()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
@@ -536,7 +536,7 @@ public:
     virtual void stop();
     virtual bool isPlaying();
     virtual double getTimeOffset();
-    virtual void update();
+    virtual void applyUpdates();
 };
 
 //
@@ -552,7 +552,7 @@ public:
       : OpenAL_Sound(output, src, pos, vol, basevol, pitch, mindist, maxdist, flags)
     { }
 
-    virtual void update();
+    virtual void applyUpdates();
 };
 
 OpenAL_Sound::OpenAL_Sound(OpenAL_Output &output, ALuint src, const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
@@ -614,10 +614,10 @@ void OpenAL_Sound::updateAll(bool local)
     }
     alSourcei(mSource, AL_LOOPING, (mFlags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
 
-    update();
+    applyUpdates();
 }
 
-void OpenAL_Sound::update()
+void OpenAL_Sound::applyUpdates()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;
@@ -636,7 +636,7 @@ void OpenAL_Sound::update()
     throwALerror();
 }
 
-void OpenAL_Sound3D::update()
+void OpenAL_Sound3D::applyUpdates()
 {
     ALfloat gain = mVolume*mBaseVolume;
     ALfloat pitch = mPitch;

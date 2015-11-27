@@ -863,7 +863,7 @@ namespace MWSound
 
         sound->updateFade(duration);
 
-        sound->update();
+        sound->applyUpdates();
         return true;
     }
 
@@ -901,7 +901,7 @@ namespace MWSound
             {
                 MWBase::SoundPtr sound = sndidx->first;
                 sound->setBaseVolume(volumeFromType(sound->getPlayType()));
-                sound->update();
+                sound->applyUpdates();
             }
         }
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
@@ -909,12 +909,12 @@ namespace MWSound
         {
             MWBase::SoundPtr sound = sayiter->second.first;
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
-            sound->update();
+            sound->applyUpdates();
         }
         if(mMusic)
         {
             mMusic->setBaseVolume(volumeFromType(mMusic->getPlayType()));
-            mMusic->update();
+            mMusic->applyUpdates();
         }
         mOutput->finishUpdate();
     }
