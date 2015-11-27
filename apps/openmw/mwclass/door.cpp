@@ -169,7 +169,9 @@ namespace MWClass
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                             closeSound, 0.5f);
-                    float offset = doorRot/ 3.14159265f * 2.0f;
+                    // Doors rotate at 90 degrees per second, so start the sound at
+                    // where it would be at the current rotation.
+                    float offset = doorRot/(3.14159265f * 0.5f);
                     action->setSoundOffset(offset);
                     action->setSound(openSound);
                 }
@@ -177,10 +179,8 @@ namespace MWClass
                 {
                     MWBase::Environment::get().getSoundManager()->fadeOutSound3D(ptr,
                                                 openSound, 0.5f);
-                    float offset = 1.0f - doorRot/ 3.14159265f * 2.0f;
-                    //most if not all door have closing bang somewhere in the middle of the sound,
-                    //so we divide offset by two
-                    action->setSoundOffset(offset * 0.5f);
+                    float offset = 1.0f - doorRot/(3.14159265f * 0.5f);
+                    action->setSoundOffset(std::max(offset, 0.0f));
                     action->setSound(closeSound);
                 }
 

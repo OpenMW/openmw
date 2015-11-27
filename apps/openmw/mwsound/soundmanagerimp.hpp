@@ -166,20 +166,18 @@ namespace MWSound
 
         virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0);
         ///< Play a sound, independently of 3D-position
-        ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
+        ///< @param offset Number of seconds into the sound to start playback.
 
         virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                              float volume, float pitch, PlayType type=Play_TypeSfx,
                                              PlayMode mode=Play_Normal, float offset=0);
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
-        ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+        ///< @param offset Number of seconds into the sound to start playback.
 
         virtual MWBase::SoundPtr playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                              float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
-
-        ///< Play a sound from an object
-        ///< @param offset value from [0,1], when to start playback. 0 is beginning, 1 is end.
+        ///< @param offset Number of seconds into the sound to start playback.
 
         virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,

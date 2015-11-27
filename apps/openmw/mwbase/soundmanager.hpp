@@ -109,13 +109,13 @@ namespace MWBase
                                        PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
                                        float offset=0) = 0;
             ///< Play a sound, independently of 3D-position
-            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+            ///< @param offset Number of seconds into the sound to start playback.
 
             virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
                                                  float volume, float pitch, PlayType type=Play_TypeSfx,
                                                  PlayMode mode=Play_Normal, float offset=0) = 0;
             ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
-            ///< @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+            ///< @param offset Number of seconds into the sound to start playback.
 
             virtual MWBase::SoundPtr playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                                  float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0) = 0;

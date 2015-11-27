@@ -30,9 +30,9 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data) = 0;
         virtual size_t getSoundDataSize(Sound_Handle data) const = 0;
 
-        /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+        /// @param offset Number of seconds into the sound to start playback.
         virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset) = 0;
-        /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
+        /// @param offset Number of seconds into the sound to start playback.
         virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
                                              float vol, float basevol, float pitch, float min, float max, int flags, float offset) = 0;
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags) = 0;

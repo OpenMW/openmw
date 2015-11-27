@@ -146,18 +146,6 @@ static ALenum getALFormat(ChannelConfig chans, SampleType type)
     return AL_NONE;
 }
 
-static double getBufferLength(ALuint buffer)
-{
-    ALint bufferSize, frequency, channels, bitsPerSample;
-    alGetBufferi(buffer, AL_SIZE, &bufferSize);
-    alGetBufferi(buffer, AL_FREQUENCY, &frequency);
-    alGetBufferi(buffer, AL_CHANNELS, &channels);
-    alGetBufferi(buffer, AL_BITS, &bitsPerSample);
-    throwALerror();
-
-    return (8.0*bufferSize)/(frequency*channels*bitsPerSample);
-}
-
 
 //
 // A streaming OpenAL sound.
@@ -863,14 +851,9 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
     }
 
     sound->updateAll(true);
-    if(offset < 0.0f)
-        offset = 0.0f;
-    if(offset > 1.0f)
-        offset = 1.0f;
+    alSourcei(src, AL_BUFFER, GET_PTRID(data));
+    alSourcef(src, AL_SEC_OFFSET, offset/pitch);
 
-    ALuint buffer = GET_PTRID(data);
-    alSourcei(src, AL_BUFFER, buffer);
-    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(getBufferLength(buffer)*offset / pitch));
     alSourcePlay(src);
     throwALerror();
 
@@ -898,14 +881,8 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
     }
 
     sound->updateAll(false);
-    if(offset < 0.0f)
-        offset = 0.0f;
-    if(offset > 1.0f)
-        offset = 1.0f;
-
-    ALuint buffer = GET_PTRID(data);
-    alSourcei(src, AL_BUFFER, buffer);
-    alSourcef(src, AL_SEC_OFFSET, static_cast<ALfloat>(getBufferLength(buffer)*offset / pitch));
+    alSourcei(src, AL_BUFFER, GET_PTRID(data));
+    alSourcef(src, AL_SEC_OFFSET, offset/pitch);
 
     alSourcePlay(src);
     throwALerror();
