@@ -38,15 +38,17 @@ namespace MWBase
                                                 played by the PlayLoopSound family of script functions. Perhaps we
                                                 can make this cut off a more subtle fade later, but have to
                                                 be careful to not change the overall volume of areas by too much. */
+                Play_NoPlayerLocal = 1<<3, /* (3D only) Don't play the sound local to the listener even if the
+                                              player is making it. */
                 Play_LoopNoEnv = Play_Loop | Play_NoEnv,
                 Play_LoopRemoveAtDistance = Play_Loop | Play_RemoveAtDistance
             };
             enum PlayType {
-                Play_TypeSfx   = 1<<3, /* Normal SFX sound */
-                Play_TypeVoice = 1<<4, /* Voice sound */
-                Play_TypeFoot  = 1<<5, /* Footstep sound */
-                Play_TypeMusic = 1<<6, /* Music track */
-                Play_TypeMovie = 1<<7, /* Movie audio track */
+                Play_TypeSfx   = 1<<4, /* Normal SFX sound */
+                Play_TypeVoice = 1<<5, /* Voice sound */
+                Play_TypeFoot  = 1<<6, /* Footstep sound */
+                Play_TypeMusic = 1<<7, /* Music track */
+                Play_TypeMovie = 1<<8, /* Movie audio track */
                 Play_TypeMask  = Play_TypeSfx|Play_TypeVoice|Play_TypeFoot|Play_TypeMusic|Play_TypeMovie
             };
 

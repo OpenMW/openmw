@@ -777,10 +777,15 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
         if(!sound.empty())
         {
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-            MWBase::SoundManager::PlayType type = MWBase::SoundManager::Play_TypeSfx;
             if(evt.compare(10, evt.size()-10, "left") == 0 || evt.compare(10, evt.size()-10, "right") == 0 || evt.compare(10, evt.size()-10, "land") == 0)
-                type = MWBase::SoundManager::Play_TypeFoot;
-            sndMgr->playSound3D(mPtr, sound, volume, pitch, type);
+            {
+                // Don't make foot sounds local for the player, it makes sense to keep them
+                // positioned on the ground.
+                sndMgr->playSound3D(mPtr, sound, volume, pitch, MWBase::SoundManager::Play_TypeFoot,
+                                    MWBase::SoundManager::Play_NoPlayerLocal);
+            }
+            else
+                sndMgr->playSound3D(mPtr, sound, volume, pitch);
         }
         return;
     }

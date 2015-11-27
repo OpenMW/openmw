@@ -517,10 +517,15 @@ namespace MWSound
             if((mode&Play_RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
                 return MWBase::SoundPtr();
 
-            sound = mOutput->playSound3D(sfx->mHandle,
-                objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
-                mode|type|Play_3D, offset
-            );
+            if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
+                sound = mOutput->playSound(sfx->mHandle,
+                    volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D, offset
+                );
+            else
+                sound = mOutput->playSound3D(sfx->mHandle,
+                    objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
+                    mode|type|Play_3D, offset
+                );
             if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
