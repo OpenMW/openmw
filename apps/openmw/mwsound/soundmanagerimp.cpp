@@ -304,7 +304,7 @@ namespace MWSound
             decoder->open(filename);
 
             mMusic = mOutput->streamSound(decoder, volumeFromType(Play_TypeMusic),
-                                          1.0f, Play_NoEnv|Play_TypeMusic);
+                                          1.0f, Play_NoEnv|Play_TypeMusic|Play_2D);
         }
         catch(std::exception &e)
         {
@@ -393,7 +393,8 @@ namespace MWSound
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
             MWBase::SoundPtr sound = mOutput->streamSound3D(decoder,
-                objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance, Play_Normal|Play_TypeVoice
+                objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
+                Play_Normal|Play_TypeVoice|Play_3D
             );
             mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
         }
@@ -432,7 +433,7 @@ namespace MWSound
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
             MWBase::SoundPtr sound = mOutput->streamSound(decoder,
-                basevol, 1.0f, Play_Normal|Play_TypeVoice
+                basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D
             );
             mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, loudness);
         }
