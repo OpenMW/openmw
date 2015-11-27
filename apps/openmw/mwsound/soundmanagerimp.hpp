@@ -68,8 +68,11 @@ namespace MWSound
         typedef std::map<std::string,Sound_Buffer*> NameBufferMap;
         NameBufferMap mBufferNameMap;
 
-        typedef std::map<std::string,Sound_Loudness> NameLoudnessMap;
-        NameLoudnessMap mVoiceLipBuffers;
+        typedef std::deque<Sound_Loudness> LoudnessList;
+        LoudnessList mVoiceLipBuffers;
+
+        typedef std::map<std::string,Sound_Loudness*> NameLoudnessRefMap;
+        NameLoudnessRefMap mVoiceLipNameMap;
 
         // NOTE: unused buffers are stored in front-newest order.
         typedef std::deque<Sound_Buffer*> SoundList;
@@ -83,8 +86,8 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::pair<MWBase::SoundPtr,std::string> SoundNamePair;
-        typedef std::map<MWWorld::Ptr,SoundNamePair> SaySoundMap;
+        typedef std::pair<MWBase::SoundPtr,Sound_Loudness*> SoundLoudnessPair;
+        typedef std::map<MWWorld::Ptr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
         MWBase::SoundPtr mUnderwaterSound;
@@ -103,7 +106,7 @@ namespace MWSound
 
         // Ensures the loudness/"lip" data is loaded, and returns a decoder to
         // start streaming
-        DecoderPtr loadVoice(const std::string &voicefile);
+        DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
 
         void streamMusicFull(const std::string& filename);
         bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);

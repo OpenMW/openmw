@@ -212,7 +212,7 @@ namespace MWSound
         return sfx;
     }
 
-    DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
+    DecoderPtr SoundManager::loadVoice(const std::string &voicefile, Sound_Loudness **lipdata)
     {
         DecoderPtr decoder = getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
@@ -227,8 +227,12 @@ namespace MWSound
             decoder->open(file);
         }
 
-        NameLoudnessMap::iterator lipiter = mVoiceLipBuffers.find(voicefile);
-        if(lipiter != mVoiceLipBuffers.end()) return decoder;
+        NameLoudnessRefMap::iterator lipiter = mVoiceLipNameMap.find(voicefile);
+        if(lipiter != mVoiceLipNameMap.end())
+        {
+            *lipdata = lipiter->second;
+            return decoder;
+        }
 
         ChannelConfig chans;
         SampleType type;
@@ -241,9 +245,13 @@ namespace MWSound
         Sound_Loudness loudness;
         loudness.analyzeLoudness(data, srate, chans, type, static_cast<float>(sLoudnessFPS));
 
-        mVoiceLipBuffers.insert(std::make_pair(voicefile, loudness));
+        mVoiceLipBuffers.insert(mVoiceLipBuffers.end(), loudness);
+        lipiter = mVoiceLipNameMap.insert(
+            std::make_pair(voicefile, &mVoiceLipBuffers.back())
+        ).first;
 
         decoder->rewind();
+        *lipdata = lipiter->second;
         return decoder;
     }
 
@@ -375,17 +383,19 @@ namespace MWSound
             static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
             static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
-            std::string voicefile = "sound/"+Misc::StringUtils::lowerCase(filename);
+            std::string voicefile = "Sound/"+filename;
             float basevol = volumeFromType(Play_TypeVoice);
             const ESM::Position &pos = ptr.getRefData().getPosition();
             const osg::Vec3f objpos(pos.asVec3());
 
-            DecoderPtr decoder = loadVoice(voicefile);
+            Sound_Loudness *loudness;
+            mVFS->normalizeFilename(voicefile);
+            DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
             MWBase::SoundPtr sound = mOutput->streamSound3D(decoder,
                 objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance, Play_Normal|Play_TypeVoice
             );
-            mActiveSaySounds[ptr] = std::make_pair(sound, voicefile);
+            mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
         }
         catch(std::exception &e)
         {
@@ -399,13 +409,10 @@ namespace MWSound
         if(snditer != mActiveSaySounds.end())
         {
             MWBase::SoundPtr sound = snditer->second.first;
-            NameLoudnessMap::const_iterator lipiter = mVoiceLipBuffers.find(snditer->second.second);
-            if(lipiter != mVoiceLipBuffers.end())
-            {
-                float sec = sound->getTimeOffset();
-                if(sound->isPlaying())
-                    return lipiter->second.getLoudnessAtTime(sec);
-            }
+            Sound_Loudness *loudness = snditer->second.second;
+            float sec = sound->getTimeOffset();
+            if(sound->isPlaying())
+                return loudness->getLoudnessAtTime(sec);
         }
 
         return 0.0f;
@@ -417,15 +424,17 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = "sound/"+Misc::StringUtils::lowerCase(filename);
+            std::string voicefile = "Sound/"+filename;
             float basevol = volumeFromType(Play_TypeVoice);
 
-            DecoderPtr decoder = loadVoice(voicefile);
+            Sound_Loudness *loudness;
+            mVFS->normalizeFilename(voicefile);
+            DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
             MWBase::SoundPtr sound = mOutput->streamSound(decoder,
                 basevol, 1.0f, Play_Normal|Play_TypeVoice
             );
-            mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, voicefile);
+            mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, loudness);
         }
         catch(std::exception &e)
         {
@@ -927,7 +936,7 @@ namespace MWSound
         SaySoundMap::iterator sayiter = mActiveSaySounds.find(old);
         if(sayiter != mActiveSaySounds.end())
         {
-            SoundNamePair sndlist = sayiter->second;
+            SoundLoudnessPair sndlist = sayiter->second;
             mActiveSaySounds.erase(sayiter);
             mActiveSaySounds[updated] = sndlist;
         }
