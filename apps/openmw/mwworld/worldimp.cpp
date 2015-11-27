@@ -2281,7 +2281,7 @@ namespace MWWorld
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
-        if (!targetActor.getRefData().getBaseNode() || !targetActor.getRefData().getBaseNode())
+        if (!targetActor.getRefData().getBaseNode() || !actor.getRefData().getBaseNode())
             return false; // not in active cell
 
         return mPhysics->getLineOfSight(actor, targetActor);
