@@ -434,9 +434,11 @@ namespace MWWorld
             assert(plugin < mStatic.size());
             const LandTextureList &ltexl = mStatic[plugin];
 
-            assert(index < ltexl.size());
-            return &ltexl.at(index);
-        }
+        /// Resize the internal store to hold at least \a num plugins.
+        void resize(size_t num);
+
+        size_t getSize() const;
+        size_t getSize(size_t plugin) const;
 
         const ESM::LandTexture *find(size_t index, size_t plugin) const {
             const ESM::LandTexture *ptr = search(index, plugin);
