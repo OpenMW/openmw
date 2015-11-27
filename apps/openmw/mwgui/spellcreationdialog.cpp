@@ -516,8 +516,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (it->first);
+            const ESM::Spell* spell = it->first;
 
             // only normal spells count
             if (spell->mData.mType != ESM::Spell::ST_Spell)

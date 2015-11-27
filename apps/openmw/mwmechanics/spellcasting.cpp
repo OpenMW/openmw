@@ -124,7 +124,7 @@ namespace MWMechanics
         }
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
-            return stats.getSpells().canUsePower(spell->mId) ? 100 : 0;
+            return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
@@ -823,7 +823,7 @@ namespace MWMechanics
 
             // A power can be used once per 24h
             if (spell->mData.mType == ESM::Spell::ST_Power)
-                stats.getSpells().usePower(spell->mId);
+                stats.getSpells().usePower(spell);
         }
 
         if (mCaster == getPlayer() && spellIncreasesSkill(spell))

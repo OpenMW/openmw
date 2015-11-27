@@ -541,7 +541,7 @@ namespace MWMechanics
 
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
+            const ESM::Spell* spell = it->first;
 
             float rating = rateSpell(spell, actor, target);
             if (rating > bestActionRating)
