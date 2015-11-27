@@ -217,6 +217,7 @@ struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
     boost::recursive_mutex mMutex;
+    boost::condition_variable_any mCondVar;
     boost::thread mThread;
 
     StreamThread()
@@ -231,9 +232,9 @@ struct OpenAL_Output::StreamThread {
     // boost::thread entry point
     void operator()()
     {
+        boost::unique_lock<boost::recursive_mutex> lock(mMutex);
         while(1)
         {
-            boost::unique_lock<boost::recursive_mutex> lock(mMutex);
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
             {
@@ -242,16 +243,19 @@ struct OpenAL_Output::StreamThread {
                 else
                     ++iter;
             }
-            lock.unlock();
-            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+            mCondVar.timed_wait(lock, boost::posix_time::milliseconds(50));
         }
     }
 
     void add(OpenAL_SoundStream *stream)
     {
-        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
+        boost::unique_lock<boost::recursive_mutex> lock(mMutex);
         if(std::find(mStreams.begin(), mStreams.end(), stream) == mStreams.end())
+        {
             mStreams.push_back(stream);
+            lock.unlock();
+            mCondVar.notify_all();
+        }
     }
 
     void remove(OpenAL_SoundStream *stream)
