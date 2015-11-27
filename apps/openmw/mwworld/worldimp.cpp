@@ -2581,7 +2581,7 @@ namespace MWWorld
             }
 
             // If this is a power, check if it was already used in the last 24h
-            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell->mId))
+            if (!fail && spell->mData.mType == ESM::Spell::ST_Power && !stats.getSpells().canUsePower(spell))
             {
                 message = "#{sPowerAlreadyUsed}";
                 fail = true;
