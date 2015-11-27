@@ -25,6 +25,7 @@ namespace MWSound
         virtual void stop() = 0;
         virtual bool isPlaying() = 0;
         virtual double getTimeOffset() = 0;
+        virtual double getStreamDelay() const { return 0.0; }
         virtual void applyUpdates() = 0;
         void setPosition(const osg::Vec3f &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }

@@ -188,6 +188,7 @@ public:
     virtual void stop();
     virtual bool isPlaying();
     virtual double getTimeOffset();
+    virtual double getStreamDelay() const;
     virtual void applyUpdates();
 
     void play();
@@ -393,6 +394,26 @@ double OpenAL_SoundStream::getTimeOffset()
 
     throwALerror();
     return t;
+}
+
+double OpenAL_SoundStream::getStreamDelay() const
+{
+    ALint state = AL_STOPPED;
+    double d = 0.0;
+    ALint offset;
+
+    alGetSourcei(mSource, AL_SAMPLE_OFFSET, &offset);
+    alGetSourcei(mSource, AL_SOURCE_STATE, &state);
+    if(state == AL_PLAYING || state == AL_PAUSED)
+    {
+        ALint queued;
+        alGetSourcei(mSource, AL_BUFFERS_QUEUED, &queued);
+        ALint inqueue = mBufferSize/mFrameSize*queued - offset;
+        d = (double)inqueue / (double)mSampleRate;
+    }
+
+    throwALerror();
+    return d;
 }
 
 void OpenAL_SoundStream::updateAll(bool local)
