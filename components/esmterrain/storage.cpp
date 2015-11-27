@@ -1,6 +1,7 @@
 #include "storage.hpp"
 
 #include <set>
+#include <iostream>
 
 #include <osg/Image>
 #include <osg/Plane>
