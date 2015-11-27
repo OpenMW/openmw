@@ -193,7 +193,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
+        return static_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
     }
 
 
@@ -421,13 +421,13 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return *dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return *static_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
     {
         if (hasInventoryStore(ptr))
-            return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
+            return static_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
         else
             throw std::runtime_error("this creature has no inventory store");
     }
@@ -511,7 +511,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return static_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -691,7 +691,7 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
+        const ESM::CreatureState& state2 = static_cast<const ESM::CreatureState&> (state);
 
         if (state.mVersion > 0)
         {
@@ -711,7 +711,7 @@ namespace MWClass
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
-        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = static_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mContainerStore->readState (state2.mInventory);
         customData.mCreatureStats.readState (state2.mCreatureStats);
@@ -720,7 +720,7 @@ namespace MWClass
     void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
         const
     {
-        ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
+        ESM::CreatureState& state2 = static_cast<ESM::CreatureState&> (state);
 
         if (!ptr.getRefData().getCustomData())
         {
@@ -730,7 +730,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = static_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);
