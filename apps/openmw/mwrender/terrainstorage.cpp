@@ -69,7 +69,7 @@ namespace MWRender
     {
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
-        return esmStore.get<ESM::LandTexture>().find(index, plugin);
+        return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }
 
 }
