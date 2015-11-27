@@ -32,6 +32,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
     ESM::Dialogue *dialogue = 0;
 
+    // Land texture loading needs to use a separate internal store for each plugin.
+    // We set the number of plugins here to avoid continual resizes during loading,
+    // and so we can properly verify if valid plugin indices are being passed to the
+    // LandTexture Store retrieval methods.
+    mLandTextures.resize(esm.getGlobalReaderList()->size());
+
     /// \todo Move this to somewhere else. ESMReader?
     // Cache parent esX files by tracking their indices in the global list of
     //  all files/readers used by the engine. This will greaty accelerate
