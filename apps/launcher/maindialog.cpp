@@ -384,6 +384,9 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // remain consistent, and possibly be merged into a shared component.  At the very least
     // the filenames should be in the CfgMgr component.
 
+    // Ensure to clear previous settings in case we had already loaded settings.
+    mEngineSettings.clear();
+
     // Create the settings manager and load default settings file
     const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
     const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
