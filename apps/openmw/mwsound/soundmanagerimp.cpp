@@ -392,10 +392,16 @@ namespace MWSound
             mVFS->normalizeFilename(voicefile);
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
-            MWBase::SoundPtr sound = mOutput->streamSound3D(decoder,
-                objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
-                Play_Normal|Play_TypeVoice|Play_3D
-            );
+            MWBase::SoundPtr sound;
+            if(ptr == MWMechanics::getPlayer())
+                sound = mOutput->streamSound(decoder,
+                    basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D
+                );
+            else
+                sound = mOutput->streamSound3D(decoder,
+                    objpos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
+                    Play_Normal|Play_TypeVoice|Play_3D
+                );
             mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
         }
         catch(std::exception &e)
