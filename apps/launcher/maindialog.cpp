@@ -257,6 +257,8 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
 
 bool Launcher::MainDialog::setupLauncherSettings()
 {
+    mLauncherSettings.clear();
+
     mLauncherSettings.setMultiValueEnabled(true);
 
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
@@ -289,6 +291,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
 bool Launcher::MainDialog::setupGameSettings()
 {
+    mGameSettings.clear();
+
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 

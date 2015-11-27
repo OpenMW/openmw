@@ -454,3 +454,11 @@ QStringList Config::GameSettings::getContentList() const
     return Config::LauncherSettings::reverse(values(sContentKey));
 }
 
+void Config::GameSettings::clear()
+{
+    mSettings.clear();
+    mUserSettings.clear();
+    mDataDirs.clear();
+    mDataLocal.clear();
+}
+
