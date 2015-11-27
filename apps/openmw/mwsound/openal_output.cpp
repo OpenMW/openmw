@@ -217,24 +217,28 @@ public:
 struct OpenAL_Output::StreamThread {
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
-    boost::recursive_mutex mMutex;
-    boost::condition_variable_any mCondVar;
+    volatile bool mQuitNow;
+    boost::mutex mMutex;
+    boost::condition_variable mCondVar;
     boost::thread mThread;
 
     StreamThread()
-      : mThread(boost::ref(*this))
+      : mQuitNow(false), mThread(boost::ref(*this))
     {
     }
     ~StreamThread()
     {
-        mThread.interrupt();
+        mQuitNow = true;
+        mMutex.lock(); mMutex.unlock();
+        mCondVar.notify_all();
+        mThread.join();
     }
 
     // boost::thread entry point
     void operator()()
     {
-        boost::unique_lock<boost::recursive_mutex> lock(mMutex);
-        while(1)
+        boost::unique_lock<boost::mutex> lock(mMutex);
+        while(!mQuitNow)
         {
             StreamVec::iterator iter = mStreams.begin();
             while(iter != mStreams.end())
@@ -250,7 +254,7 @@ struct OpenAL_Output::StreamThread {
 
     void add(OpenAL_SoundStream *stream)
     {
-        boost::unique_lock<boost::recursive_mutex> lock(mMutex);
+        boost::unique_lock<boost::mutex> lock(mMutex);
         if(std::find(mStreams.begin(), mStreams.end(), stream) == mStreams.end())
         {
             mStreams.push_back(stream);
@@ -261,14 +265,14 @@ struct OpenAL_Output::StreamThread {
 
     void remove(OpenAL_SoundStream *stream)
     {
-        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
+        boost::lock_guard<boost::mutex> lock(mMutex);
         StreamVec::iterator iter = std::find(mStreams.begin(), mStreams.end(), stream);
         if(iter != mStreams.end()) mStreams.erase(iter);
     }
 
     void removeAll()
     {
-        boost::lock_guard<boost::recursive_mutex> lock(mMutex);
+        boost::lock_guard<boost::mutex> lock(mMutex);
         mStreams.clear();
     }
 
@@ -360,7 +364,7 @@ bool OpenAL_SoundStream::isPlaying()
 {
     ALint state;
 
-    boost::lock_guard<boost::recursive_mutex> lock(mOutput.mStreamThread->mMutex);
+    boost::lock_guard<boost::mutex> lock(mOutput.mStreamThread->mMutex);
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     throwALerror();
 
@@ -375,7 +379,7 @@ double OpenAL_SoundStream::getTimeOffset()
     ALint offset;
     double t;
 
-    boost::lock_guard<boost::recursive_mutex> lock(mOutput.mStreamThread->mMutex);
+    boost::lock_guard<boost::mutex> lock(mOutput.mStreamThread->mMutex);
     alGetSourcei(mSource, AL_SAMPLE_OFFSET, &offset);
     alGetSourcei(mSource, AL_SOURCE_STATE, &state);
     if(state == AL_PLAYING || state == AL_PAUSED)
