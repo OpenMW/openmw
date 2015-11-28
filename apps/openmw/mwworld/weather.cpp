@@ -158,6 +158,9 @@ Weather::Weather(const std::string& name,
     else
         mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Ambient_Loop_Sound_ID");
 
+    if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
+        mAmbientLoopSoundID.clear();
+
     /*
     Unhandled:
     Rain Diameter=600 ?
