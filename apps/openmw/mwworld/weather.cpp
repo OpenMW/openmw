@@ -627,7 +627,7 @@ void WeatherManager::update(float duration, bool paused)
     MWBase::World& world = *MWBase::Environment::get().getWorld();
     TimeStamp time = world.getTimeStamp();
 
-    if(!paused)
+    if(!paused || mFastForward)
     {
         // Add new transitions when either the player's current external region changes.
         std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
