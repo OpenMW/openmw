@@ -28,8 +28,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "../files/constrainedfilestream.hpp"
-
 using namespace std;
 using namespace Bsa;
 

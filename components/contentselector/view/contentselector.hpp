@@ -4,7 +4,7 @@
 #include <QDialog>
 
 #include "ui_contentselector.h"
-#include "../model/contentmodel.hpp"
+#include <components/contentselector/model/contentmodel.hpp>
 
 class QSortFilterProxyModel;
 
