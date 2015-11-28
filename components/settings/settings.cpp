@@ -353,6 +353,13 @@ private:
     int mLine;
 };
 
+void Manager::clear()
+{
+    mDefaultSettings.clear();
+    mUserSettings.clear();
+    mChangedSettings.clear();
+}
+
 void Manager::loadDefault(const std::string &file)
 {
     SettingsFileParser parser;

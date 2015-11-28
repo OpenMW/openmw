@@ -1,6 +1,7 @@
 #include "storage.hpp"
 
 #include <set>
+#include <iostream>
 
 #include <osg/Image>
 #include <osg/Plane>
@@ -299,11 +300,17 @@ namespace ESMTerrain
 
     std::string Storage::getTextureName(UniqueTextureId id)
     {
+        static const std::string defaultTexture = "textures\\_land_default.dds";
         if (id.first == 0)
-            return "textures\\_land_default.dds"; // Not sure if the default texture really is hardcoded?
+            return defaultTexture; // Not sure if the default texture really is hardcoded?
 
         // NB: All vtex ids are +1 compared to the ltex ids
         const ESM::LandTexture* ltex = getLandTexture(id.first-1, id.second);
+        if (!ltex)
+        {
+            std::cerr << "Unable to find land texture index " << id.first-1 << " in plugin " << id.second << ", using default texture instead" << std::endl;
+            return defaultTexture;
+        }
 
         // this is needed due to MWs messed up texture handling
         std::string texture = Misc::ResourceHelpers::correctTexturePath(ltex->mTexture, mVFS);

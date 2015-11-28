@@ -926,7 +926,7 @@ namespace MWMechanics
         PtrActorMap::iterator iter = mActors.begin();
         while(iter != mActors.end())
         {
-            if(iter->first.getCell()==cellStore && iter->first != ignore)
+            if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
             {
                 delete iter->second;
                 mActors.erase(iter++);

@@ -351,8 +351,9 @@ namespace MWWorld
         assert(plugin < mStatic.size());
         const LandTextureList &ltexl = mStatic[plugin];
 
-        assert(index < ltexl.size());
-        return &ltexl.at(index);
+        if (index >= ltexl.size())
+            return NULL;
+        return &ltexl[index];
     }
     const ESM::LandTexture *Store<ESM::LandTexture>::find(size_t index, size_t plugin) const
     {
@@ -380,10 +381,8 @@ namespace MWWorld
 
         lt.load(esm, isDeleted);
 
-        // Make sure we have room for the structure
-        if (plugin >= mStatic.size()) {
-            mStatic.resize(plugin+1);
-        }
+        assert(plugin < mStatic.size());
+
         LandTextureList &ltexl = mStatic[plugin];
         if(lt.mIndex + 1 > (int)ltexl.size())
             ltexl.resize(lt.mIndex+1);
@@ -406,6 +405,11 @@ namespace MWWorld
     {
         assert(plugin < mStatic.size());
         return mStatic[plugin].end();
+    }
+    void Store<ESM::LandTexture>::resize(size_t num)
+    {
+        if (mStatic.size() < num)
+            mStatic.resize(num);
     }
     
     // Land

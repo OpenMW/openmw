@@ -185,7 +185,7 @@ void RippleSimulation::removeCell(const MWWorld::CellStore *store)
 {
     for (std::vector<Emitter>::iterator it = mEmitters.begin(); it != mEmitters.end();)
     {
-        if (it->mPtr.getCell() == store && it->mPtr != MWMechanics::getPlayer())
+        if ((it->mPtr.isInCell() && it->mPtr.getCell() == store) && it->mPtr != MWMechanics::getPlayer())
         {
             it = mEmitters.erase(it);
         }

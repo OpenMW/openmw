@@ -257,6 +257,8 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
 
 bool Launcher::MainDialog::setupLauncherSettings()
 {
+    mLauncherSettings.clear();
+
     mLauncherSettings.setMultiValueEnabled(true);
 
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
@@ -289,6 +291,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
 bool Launcher::MainDialog::setupGameSettings()
 {
+    mGameSettings.clear();
+
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
@@ -383,6 +387,9 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     // This method is almost a copy of OMW::Engine::loadSettings().  They should definitely
     // remain consistent, and possibly be merged into a shared component.  At the very least
     // the filenames should be in the CfgMgr component.
+
+    // Ensure to clear previous settings in case we had already loaded settings.
+    mEngineSettings.clear();
 
     // Create the settings manager and load default settings file
     const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
