@@ -12,12 +12,11 @@
 
 #include <components/misc/stringops.hpp>
 
-#include "../nif/niffile.hpp"
-#include "../nif/node.hpp"
-#include "../nif/data.hpp"
-#include "../nif/property.hpp"
-#include "../nif/controller.hpp"
-#include "../nif/extra.hpp"
+#include <components/nif/node.hpp>
+#include <components/nif/data.hpp>
+#include <components/nif/property.hpp>
+#include <components/nif/controller.hpp>
+#include <components/nif/extra.hpp>
 
 
 namespace

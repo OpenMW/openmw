@@ -7,7 +7,7 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include "components/esm/esmreader.hpp"
+#include <components/esm/esmreader.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
