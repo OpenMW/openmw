@@ -28,8 +28,8 @@ namespace Files
 
             for (std::size_t i=0; i<len; ++i)
             {
-                char l = std::tolower (left[i]);
-                char r = std::tolower (right[i]);
+                char l = tolower (left[i]);
+                char r = tolower (right[i]);
 
                 if (l!=r)
                     return false;
