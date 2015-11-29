@@ -738,6 +738,11 @@ namespace MWWorld
                     Ptr ptr (&*it, this);
                     ptr.getClass().respawn(ptr);
                 }
+            }
+            static float fCorpseClearDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fCorpseClearDelay")->getFloat();
+            if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > fCorpseClearDelay)
+            {
+                mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
                 for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
                 {
                     Ptr ptr (&*it, this);
