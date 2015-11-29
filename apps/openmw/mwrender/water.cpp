@@ -551,6 +551,8 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     stateset->setRenderBinDetails(MWRender::RenderBin_Water, "RenderBin");
 
+    node->setStateSet(stateset);
+
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
     int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
     std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
@@ -561,12 +563,15 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
         textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
     }
 
+    if (!textures.size())
+        return;
+
     float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
 
     osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 1.f/fps, textures));
     controller->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
     node->setUpdateCallback(controller);
-    node->setStateSet(stateset);
+
     stateset->setTextureAttributeAndModes(0, textures[0], osg::StateAttribute::ON);
 }
 
