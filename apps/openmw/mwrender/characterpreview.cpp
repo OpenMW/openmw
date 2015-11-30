@@ -30,6 +30,7 @@ namespace MWRender
     public:
         DrawOnceCallback ()
             : mRendered(false)
+            , mLastRenderedFrame(0)
         {
         }
 
@@ -38,13 +39,14 @@ namespace MWRender
             if (!mRendered)
             {
                 mRendered = true;
+
+                mLastRenderedFrame = nv->getTraversalNumber();
+                traverse(node, nv);
             }
             else
             {
                 node->setNodeMask(0);
             }
-
-            traverse(node, nv);
         }
 
         void redrawNextFrame()
@@ -52,8 +54,14 @@ namespace MWRender
             mRendered = false;
         }
 
+        unsigned int getLastRenderedFrame() const
+        {
+            return mLastRenderedFrame;
+        }
+
     private:
         bool mRendered;
+        unsigned int mLastRenderedFrame;
     };
 
     CharacterPreview::CharacterPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem,
@@ -262,8 +270,11 @@ namespace MWRender
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, posX, posY));
-        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_ONE);
+        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
         osgUtil::IntersectionVisitor visitor(intersector);
+        visitor.setTraversalMode(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
+        // Set the traversal number from the last draw, so that the frame switch used for RigGeometry double buffering works correctly
+        visitor.setTraversalNumber(mDrawOnceCallback->getLastRenderedFrame());
 
         osg::Node::NodeMask nodeMask = mCamera->getNodeMask();
         mCamera->setNodeMask(~0);
