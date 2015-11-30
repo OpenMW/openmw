@@ -116,7 +116,6 @@ namespace MWSound
         MWBase::SoundPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
-        bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);
         void updateSounds(float duration);
         void updateRegionSound(float duration);
 
@@ -174,6 +173,14 @@ namespace MWSound
         virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
+        virtual void stopTrack(MWBase::SoundPtr sound);
+        ///< Stop the given audio track from playing
+
+        virtual double getTrackTimeDelay(MWBase::SoundPtr sound);
+        ///< Retives the time delay, in seconds, of the audio track (must be a sound
+        /// returned by \ref playTrack). Only intended to be called by the track
+        /// decoder's read method.
+
         virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0);
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
@@ -188,6 +195,9 @@ namespace MWSound
                                              float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
         ///< @param offset Number of seconds into the sound to start playback.
+
+        virtual void stopSound(MWBase::SoundPtr sound);
+        ///< Stop the given sound from playing
 
         virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,

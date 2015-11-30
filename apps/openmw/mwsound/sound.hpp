@@ -10,7 +10,6 @@ namespace MWSound
         Sound& operator=(const Sound &rhs);
         Sound(const Sound &rhs);
 
-    protected:
         osg::Vec3f mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
         float mBaseVolume;
@@ -21,12 +20,13 @@ namespace MWSound
 
         float mFadeOutTime;
 
+    protected:
+        void *mHandle;
+
+        friend class Sound_Output;
+        friend class OpenAL_Output;
+
     public:
-        virtual void stop() = 0;
-        virtual bool isPlaying() = 0;
-        virtual double getTimeOffset() = 0;
-        virtual double getStreamDelay() const { return 0.0; }
-        virtual void applyUpdates() = 0;
         void setPosition(const osg::Vec3f &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
         void setBaseVolume(float volume) { mBaseVolume = volume; }
@@ -47,16 +47,11 @@ namespace MWSound
         bool getIs3D() const { return mFlags&Play_3D; }
 
         Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
-          : mPos(pos)
-          , mVolume(vol)
-          , mBaseVolume(basevol)
-          , mPitch(pitch)
-          , mMinDistance(mindist)
-          , mMaxDistance(maxdist)
-          , mFlags(flags)
-          , mFadeOutTime(0.0f)
+          : mPos(pos), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
+          , mMinDistance(mindist), mMaxDistance(maxdist), mFlags(flags)
+          , mFadeOutTime(0.0f), mHandle(0)
         { }
-        virtual ~Sound() { }
+        ~Sound() { }
     };
 }
 

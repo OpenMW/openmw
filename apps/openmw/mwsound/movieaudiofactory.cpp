@@ -61,7 +61,7 @@ namespace MWSound
         virtual double getAudioClock()
         {
             return (double)getSampleOffset()/(double)mAVStream->codec->sample_rate -
-                   mAudioTrack->getStreamDelay();
+                   MWBase::Environment::get().getSoundManager()->getTrackTimeDelay(mAudioTrack);
         }
 
         virtual void adjustAudioSettings(AVSampleFormat& sampleFormat, uint64_t& channelLayout, int& sampleRate)
@@ -86,6 +86,8 @@ namespace MWSound
     public:
         ~MovieAudioDecoder()
         {
+            if(mAudioTrack.get())
+                MWBase::Environment::get().getSoundManager()->stopTrack(mAudioTrack);
             mAudioTrack.reset();
             mDecoderBridge.reset();
         }

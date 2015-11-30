@@ -16,9 +16,6 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
-    class OpenAL_Sound;
-    class OpenAL_SoundStream;
-
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -27,9 +24,9 @@ namespace MWSound
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
-        typedef std::vector<OpenAL_Sound*> SoundVec;
+        typedef std::vector<MWBase::SoundPtr> SoundVec;
         SoundVec mActiveSounds;
-        typedef std::vector<OpenAL_SoundStream*> StreamVec;
+        typedef std::vector<MWBase::SoundPtr> StreamVec;
         StreamVec mActiveStreams;
 
         Environment mLastEnvironment;
@@ -45,9 +42,16 @@ namespace MWSound
         virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset);
         virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
                                              float vol, float basevol, float pitch, float min, float max, int flags, float offset);
+        virtual void stopSound(MWBase::SoundPtr sound);
+        virtual bool isSoundPlaying(MWBase::SoundPtr sound);
+
         virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags);
         virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
                                                float vol, float basevol, float pitch, float min, float max, int flags);
+        virtual void stopStream(MWBase::SoundPtr sound);
+        virtual double getStreamDelay(MWBase::SoundPtr sound);
+        virtual double getStreamOffset(MWBase::SoundPtr sound);
+        virtual bool isStreamPlaying(MWBase::SoundPtr sound);
 
         virtual void startUpdate();
         virtual void finishUpdate();
