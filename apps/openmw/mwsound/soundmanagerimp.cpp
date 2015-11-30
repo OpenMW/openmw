@@ -853,6 +853,7 @@ namespace MWSound
                 {
                     sound->updateFade(duration);
 
+                    mOutput->updateSound(sound);
                     ++sndidx;
                 }
             }
@@ -918,6 +919,7 @@ namespace MWSound
             {
                 sound->updateFade(duration);
 
+                mOutput->updateStream(sound);
                 ++sayiter;
             }
         }
@@ -958,6 +960,7 @@ namespace MWSound
             {
                 MWBase::SoundPtr sound = sndidx->first;
                 sound->setBaseVolume(volumeFromType(sound->getPlayType()));
+                mOutput->updateSound(sound);
             }
         }
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
@@ -965,10 +968,12 @@ namespace MWSound
         {
             MWBase::SoundStreamPtr sound = sayiter->second.first;
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
+            mOutput->updateStream(sound);
         }
         if(mMusic)
         {
             mMusic->setBaseVolume(volumeFromType(mMusic->getPlayType()));
+            mOutput->updateStream(mMusic);
         }
         mOutput->finishUpdate();
     }

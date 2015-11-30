@@ -40,8 +40,14 @@ namespace MWSound
             }
         }
 
+        const osg::Vec3f &getPosition() const { return mPos; }
+        float getRealVolume() const { return mVolume * mBaseVolume; }
+        float getPitch() const { return mPitch; }
+        float getMaxDistance() const { return mMaxDistance; }
+
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
+        bool getUseEnv() const { return !(mFlags&MWBase::SoundManager::Play_NoEnv); }
         bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
         bool getIs3D() const { return mFlags&Play_3D; }
 

@@ -775,6 +775,33 @@ bool OpenAL_Output::isSoundPlaying(MWBase::SoundPtr sound)
     return state == AL_PLAYING || state == AL_PAUSED;
 }
 
+void OpenAL_Output::updateSound(MWBase::SoundPtr sound)
+{
+    if(!sound->mHandle) return;
+    ALuint source = GET_PTRID(sound->mHandle);
+
+    const osg::Vec3f &pos = sound->getPosition();
+    ALfloat gain = sound->getRealVolume();
+    ALfloat pitch = sound->getPitch();
+    if(sound->getIs3D())
+    {
+        ALfloat maxdist = sound->getMaxDistance();
+        if((pos - mListenerPos).length2() > maxdist*maxdist)
+            gain = 0.0f;
+    }
+    if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    alSourcef(source, AL_PITCH, pitch);
+    alSourcefv(source, AL_POSITION, pos.ptr());
+    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+}
+
 
 MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, float pitch, int flags)
 {
@@ -921,6 +948,34 @@ bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
     return stream->isPlaying();
+}
+
+void OpenAL_Output::updateStream(MWBase::SoundStreamPtr sound)
+{
+    if(!sound->mHandle) return;
+    OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
+    ALuint source = stream->mSource;
+
+    const osg::Vec3f &pos = sound->getPosition();
+    ALfloat gain = sound->getRealVolume();
+    ALfloat pitch = sound->getPitch();
+    if(sound->getIs3D())
+    {
+        ALfloat maxdist = sound->getMaxDistance();
+        if((pos - mListenerPos).length2() > maxdist*maxdist)
+            gain = 0.0f;
+    }
+    if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    alSourcef(source, AL_PITCH, pitch);
+    alSourcefv(source, AL_POSITION, pos.ptr());
+    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 }
 
 
