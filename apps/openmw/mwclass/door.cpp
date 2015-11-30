@@ -65,7 +65,7 @@ namespace MWClass
         // Resume the door's opening/closing animation if it wasn't finished
         if (ptr.getRefData().getCustomData())
         {
-            const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+            const DoorCustomData& customData = static_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
             if (customData.mDoorState > 0)
             {
                 MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
@@ -324,7 +324,7 @@ namespace MWClass
     int Door::getDoorState (const MWWorld::Ptr &ptr) const
     {
         ensureCustomData(ptr);
-        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+        const DoorCustomData& customData = static_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
         return customData.mDoorState;
     }
 
@@ -334,25 +334,25 @@ namespace MWClass
             throw std::runtime_error("load doors can't be moved");
 
         ensureCustomData(ptr);
-        DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
+        DoorCustomData& customData = static_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
         customData.mDoorState = state;
     }
 
     void Door::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
         ensureCustomData(ptr);
-        DoorCustomData& customData = dynamic_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
+        DoorCustomData& customData = static_cast<DoorCustomData&>(*ptr.getRefData().getCustomData());
 
-        const ESM::DoorState& state2 = dynamic_cast<const ESM::DoorState&>(state);
+        const ESM::DoorState& state2 = static_cast<const ESM::DoorState&>(state);
         customData.mDoorState = state2.mDoorState;
     }
 
     void Door::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
     {
         ensureCustomData(ptr);
-        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+        const DoorCustomData& customData = static_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
 
-        ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
+        ESM::DoorState& state2 = static_cast<ESM::DoorState&>(state);
         state2.mDoorState = customData.mDoorState;
     }
 
