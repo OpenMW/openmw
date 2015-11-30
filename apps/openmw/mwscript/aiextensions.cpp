@@ -424,7 +424,7 @@ namespace MWScript
                     MWWorld::Ptr targetPtr;
                     if (creatureStats.getAiSequence().getCombatTarget (targetPtr))
                     {
-                        if (targetPtr.getCellRef().getRefId() == testedTargetId)
+                        if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
                     runtime.push(int(targetsAreEqual));
