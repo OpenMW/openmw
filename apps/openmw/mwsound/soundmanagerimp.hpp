@@ -79,7 +79,7 @@ namespace MWSound
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
-        boost::shared_ptr<Sound> mMusic;
+        MWBase::SoundStreamPtr mMusic;
         std::string mCurrentPlaylist;
 
         typedef std::pair<MWBase::SoundPtr,Sound_Buffer*> SoundBufferRefPair;
@@ -87,7 +87,7 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::pair<MWBase::SoundPtr,Sound_Loudness*> SoundLoudnessPair;
+        typedef std::pair<MWBase::SoundStreamPtr,Sound_Loudness*> SoundLoudnessPair;
         typedef std::map<MWWorld::Ptr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
@@ -113,7 +113,7 @@ namespace MWSound
         // to start streaming
         DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
 
-        MWBase::SoundPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
+        MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
         void updateSounds(float duration);
@@ -170,13 +170,13 @@ namespace MWSound
         /// and get an average loudness value (scale [0,1]) at the current time position.
         /// If the actor is not saying anything, returns 0.
 
-        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
+        virtual MWBase::SoundStreamPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
 
-        virtual void stopTrack(MWBase::SoundPtr sound);
+        virtual void stopTrack(MWBase::SoundStreamPtr stream);
         ///< Stop the given audio track from playing
 
-        virtual double getTrackTimeDelay(MWBase::SoundPtr sound);
+        virtual double getTrackTimeDelay(MWBase::SoundStreamPtr stream);
         ///< Retives the time delay, in seconds, of the audio track (must be a sound
         /// returned by \ref playTrack). Only intended to be called by the track
         /// decoder's read method.

@@ -26,7 +26,7 @@ namespace MWSound
 
         typedef std::vector<MWBase::SoundPtr> SoundVec;
         SoundVec mActiveSounds;
-        typedef std::vector<MWBase::SoundPtr> StreamVec;
+        typedef std::vector<MWBase::SoundStreamPtr> StreamVec;
         StreamVec mActiveStreams;
 
         Environment mLastEnvironment;
@@ -45,13 +45,13 @@ namespace MWSound
         virtual void stopSound(MWBase::SoundPtr sound);
         virtual bool isSoundPlaying(MWBase::SoundPtr sound);
 
-        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags);
-        virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
-                                               float vol, float basevol, float pitch, float min, float max, int flags);
-        virtual void stopStream(MWBase::SoundPtr sound);
-        virtual double getStreamDelay(MWBase::SoundPtr sound);
-        virtual double getStreamOffset(MWBase::SoundPtr sound);
-        virtual bool isStreamPlaying(MWBase::SoundPtr sound);
+        virtual MWBase::SoundStreamPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags);
+        virtual MWBase::SoundStreamPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
+                                                     float vol, float basevol, float pitch, float min, float max, int flags);
+        virtual void stopStream(MWBase::SoundStreamPtr sound);
+        virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
+        virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
+        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
 
         virtual void startUpdate();
         virtual void finishUpdate();

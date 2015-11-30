@@ -241,7 +241,7 @@ namespace MWSound
         return decoder;
     }
 
-    MWBase::SoundPtr SoundManager::playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal)
+    MWBase::SoundStreamPtr SoundManager::playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         static const float fAudioMinDistanceMult = world->getStore().get<ESM::GameSetting>().find("fAudioMinDistanceMult")->getFloat();
@@ -392,7 +392,7 @@ namespace MWSound
                 mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
             else
             {
-                MWBase::SoundPtr sound = playVoice(decoder, objpos, (ptr == MWMechanics::getPlayer()));
+                MWBase::SoundStreamPtr sound = playVoice(decoder, objpos, (ptr == MWMechanics::getPlayer()));
                 mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
             }
         }
@@ -407,7 +407,7 @@ namespace MWSound
         SaySoundMap::const_iterator snditer = mActiveSaySounds.find(ptr);
         if(snditer != mActiveSaySounds.end())
         {
-            MWBase::SoundPtr sound = snditer->second.first;
+            MWBase::SoundStreamPtr sound = snditer->second.first;
             Sound_Loudness *loudness = snditer->second.second;
             float sec = mOutput->getStreamOffset(sound);
             return loudness->getLoudnessAtTime(sec);
@@ -432,7 +432,7 @@ namespace MWSound
                 mPendingSaySounds[MWWorld::Ptr()] = std::make_pair(decoder, loudness);
             else
             {
-                MWBase::SoundPtr sound = playVoice(decoder, osg::Vec3f(), true);
+                MWBase::SoundStreamPtr sound = playVoice(decoder, osg::Vec3f(), true);
                 mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, loudness);
             }
         }
@@ -466,9 +466,9 @@ namespace MWSound
     }
 
 
-    MWBase::SoundPtr SoundManager::playTrack(const DecoderPtr& decoder, PlayType type)
+    MWBase::SoundStreamPtr SoundManager::playTrack(const DecoderPtr& decoder, PlayType type)
     {
-        MWBase::SoundPtr track;
+        MWBase::SoundStreamPtr track;
         if(!mOutput->isInitialized())
             return track;
         try
@@ -482,14 +482,14 @@ namespace MWSound
         return track;
     }
 
-    void SoundManager::stopTrack(MWBase::SoundPtr sound)
+    void SoundManager::stopTrack(MWBase::SoundStreamPtr stream)
     {
-        mOutput->stopStream(sound);
+        mOutput->stopStream(stream);
     }
 
-    double SoundManager::getTrackTimeDelay(MWBase::SoundPtr sound)
+    double SoundManager::getTrackTimeDelay(MWBase::SoundStreamPtr stream)
     {
-        return mOutput->getStreamDelay(sound);
+        return mOutput->getStreamDelay(stream);
     }
 
 
@@ -876,7 +876,7 @@ namespace MWSound
                     const ESM::Position &pos = ptr.getRefData().getPosition();
                     const osg::Vec3f objpos(pos.asVec3());
 
-                    MWBase::SoundPtr sound = playVoice(decoder,
+                    MWBase::SoundStreamPtr sound = playVoice(decoder,
                         objpos, (ptr == MWMechanics::getPlayer())
                     );
                     mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
@@ -895,7 +895,7 @@ namespace MWSound
         while(sayiter != mActiveSaySounds.end())
         {
             MWWorld::Ptr ptr = sayiter->first;
-            MWBase::SoundPtr sound = sayiter->second.first;
+            MWBase::SoundStreamPtr sound = sayiter->second.first;
             if(!ptr.isEmpty() && sound->getIs3D())
             {
                 const ESM::Position &pos = ptr.getRefData().getPosition();
@@ -963,7 +963,7 @@ namespace MWSound
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         for(;sayiter != mActiveSaySounds.end();++sayiter)
         {
-            MWBase::SoundPtr sound = sayiter->second.first;
+            MWBase::SoundStreamPtr sound = sayiter->second.first;
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
         }
         if(mMusic)

@@ -5,8 +5,7 @@
 
 namespace MWSound
 {
-    class Sound
-    {
+    class Sound {
         Sound& operator=(const Sound &rhs);
         Sound(const Sound &rhs);
 
@@ -51,7 +50,17 @@ namespace MWSound
           , mMinDistance(mindist), mMaxDistance(maxdist), mFlags(flags)
           , mFadeOutTime(0.0f), mHandle(0)
         { }
-        ~Sound() { }
+    };
+
+    // Same as above, but it's a different type since the output handles them differently
+    class Stream : public Sound {
+        Stream& operator=(const Stream &rhs);
+        Stream(const Stream &rhs);
+
+    public:
+        Stream(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+          : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
+        { }
     };
 }
 

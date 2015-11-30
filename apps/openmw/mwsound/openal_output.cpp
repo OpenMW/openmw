@@ -776,9 +776,9 @@ bool OpenAL_Output::isSoundPlaying(MWBase::SoundPtr sound)
 }
 
 
-MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, float pitch, int flags)
+MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, float pitch, int flags)
 {
-    boost::shared_ptr<Sound> sound;
+    MWBase::SoundStreamPtr sound;
     OpenAL_SoundStream *stream = 0;
     ALuint source;
 
@@ -810,7 +810,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, f
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
         throwALerror();
 
-        sound.reset(new Sound(osg::Vec3f(0.0f, 0.0f, 0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags));
+        sound.reset(new Stream(osg::Vec3f(0.0f, 0.0f, 0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags));
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
         sound->mHandle = stream;
@@ -826,9 +826,9 @@ MWBase::SoundPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, f
     return sound;
 }
 
-MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos, float volume, float basevol, float pitch, float mindist, float maxdist, int flags)
+MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos, float volume, float basevol, float pitch, float mindist, float maxdist, int flags)
 {
-    boost::shared_ptr<Sound> sound;
+    MWBase::SoundStreamPtr sound;
     OpenAL_SoundStream *stream = 0;
     ALuint source;
 
@@ -862,7 +862,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
         throwALerror();
 
-        sound.reset(new Sound(pos, volume, basevol, pitch, mindist, maxdist, flags));
+        sound.reset(new Stream(pos, volume, basevol, pitch, mindist, maxdist, flags));
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
         sound->mHandle = stream;
@@ -878,7 +878,7 @@ MWBase::SoundPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec
     return sound;
 }
 
-void OpenAL_Output::stopStream(MWBase::SoundPtr sound)
+void OpenAL_Output::stopStream(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle)
         return;
@@ -897,7 +897,7 @@ void OpenAL_Output::stopStream(MWBase::SoundPtr sound)
     delete stream;
 }
 
-double OpenAL_Output::getStreamDelay(MWBase::SoundPtr sound)
+double OpenAL_Output::getStreamDelay(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle)
         return 0.0;
@@ -905,7 +905,7 @@ double OpenAL_Output::getStreamDelay(MWBase::SoundPtr sound)
     return stream->getStreamDelay();
 }
 
-double OpenAL_Output::getStreamOffset(MWBase::SoundPtr sound)
+double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle)
         return 0.0;
@@ -914,7 +914,7 @@ double OpenAL_Output::getStreamOffset(MWBase::SoundPtr sound)
     return stream->getStreamOffset();
 }
 
-bool OpenAL_Output::isStreamPlaying(MWBase::SoundPtr sound)
+bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle)
         return false;

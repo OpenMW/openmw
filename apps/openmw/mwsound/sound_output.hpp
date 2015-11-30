@@ -38,13 +38,13 @@ namespace MWSound
         virtual void stopSound(MWBase::SoundPtr sound) = 0;
         virtual bool isSoundPlaying(MWBase::SoundPtr sound) = 0;
 
-        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags) = 0;
-        virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
-                                               float vol, float basevol, float pitch, float min, float max, int flags) = 0;
-        virtual void stopStream(MWBase::SoundPtr sound) = 0;
-        virtual double getStreamDelay(MWBase::SoundPtr sound) = 0;
-        virtual double getStreamOffset(MWBase::SoundPtr sound) = 0;
-        virtual bool isStreamPlaying(MWBase::SoundPtr sound) = 0;
+        virtual MWBase::SoundStreamPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags) = 0;
+        virtual MWBase::SoundStreamPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
+                                                     float vol, float basevol, float pitch, float min, float max, int flags) = 0;
+        virtual void stopStream(MWBase::SoundStreamPtr sound) = 0;
+        virtual double getStreamDelay(MWBase::SoundStreamPtr sound) = 0;
+        virtual double getStreamOffset(MWBase::SoundStreamPtr sound) = 0;
+        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound) = 0;
 
         virtual void startUpdate() = 0;
         virtual void finishUpdate() = 0;
