@@ -269,7 +269,11 @@ namespace MWRender
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
-        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, posX, posY));
+        float projX = (posX / mCamera->getViewport()->width()) * 2 - 1.f;
+        float projY = (posY / mCamera->getViewport()->height()) * 2 - 1.f;
+        // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. TODO: investigate
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::PROJECTION, projX, projY));
+
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
         osgUtil::IntersectionVisitor visitor(intersector);
         visitor.setTraversalMode(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
