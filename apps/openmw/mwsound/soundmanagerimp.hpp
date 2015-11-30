@@ -57,7 +57,7 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        typedef std::auto_ptr<std::deque<Sound_Buffer>> SoundBufferList;
+        typedef std::auto_ptr<std::deque<Sound_Buffer> > SoundBufferList;
         // List of sound buffers, grown as needed. New enties are added to the
         // back, allowing existing Sound_Buffer references/pointers to remain
         // valid.
