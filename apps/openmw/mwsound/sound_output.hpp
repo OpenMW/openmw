@@ -64,12 +64,9 @@ namespace MWSound
 
     protected:
         bool mInitialized;
-        osg::Vec3f mPos;
 
         Sound_Output(SoundManager &mgr)
-          : mManager(mgr)
-          , mInitialized(false)
-          , mPos(0.0f, 0.0f, 0.0f)
+          : mManager(mgr), mInitialized(false)
         { }
     public:
         virtual ~Sound_Output() { }

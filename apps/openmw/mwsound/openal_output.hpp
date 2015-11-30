@@ -29,8 +29,16 @@ namespace MWSound
         typedef std::vector<MWBase::SoundStreamPtr> StreamVec;
         StreamVec mActiveStreams;
 
-        Environment mLastEnvironment;
+        osg::Vec3f mListenerPos;
+        Environment mListenerEnv;
 
+        struct StreamThread;
+        std::auto_ptr<StreamThread> mStreamThread;
+
+        OpenAL_Output& operator=(const OpenAL_Output &rhs);
+        OpenAL_Output(const OpenAL_Output &rhs);
+
+    public:
         virtual std::vector<std::string> enumerate();
         virtual void init(const std::string &devname="");
         virtual void deinit();
@@ -63,20 +71,8 @@ namespace MWSound
 
         virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness);
 
-        OpenAL_Output& operator=(const OpenAL_Output &rhs);
-        OpenAL_Output(const OpenAL_Output &rhs);
-
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
-
-        struct StreamThread;
-        std::auto_ptr<StreamThread> mStreamThread;
-
-        friend class OpenAL_Sound;
-        friend class OpenAL_Sound3D;
-        friend class OpenAL_SoundStream;
-        friend class OpenAL_SoundStream3D;
-        friend class SoundManager;
     };
 #ifndef DEFAULT_OUTPUT
 #define DEFAULT_OUTPUT(x) ::MWSound::OpenAL_Output((x))

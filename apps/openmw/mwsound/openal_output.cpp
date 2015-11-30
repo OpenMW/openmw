@@ -666,7 +666,7 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
         alSourcei(source, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
 
         ALfloat gain = vol*basevol;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
+        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -715,9 +715,9 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
         alSourcei(source, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
 
         ALfloat gain = vol*basevol;
-        if((pos - mPos).length2() > maxdist*maxdist)
+        if((pos - mListenerPos).length2() > maxdist*maxdist)
             gain = 0.0f;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
+        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -797,7 +797,7 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
         alSourcei(source, AL_LOOPING, AL_FALSE);
 
         ALfloat gain = basevol;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
+        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -847,9 +847,9 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
         alSourcei(source, AL_LOOPING, AL_FALSE);
 
         ALfloat gain = volume*basevol;
-        if((pos - mPos).length2() > maxdist*maxdist)
+        if((pos - mListenerPos).length2() > maxdist*maxdist)
             gain = 0.0f;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mLastEnvironment == Env_Underwater)
+        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -937,19 +937,19 @@ void OpenAL_Output::finishUpdate()
 
 void OpenAL_Output::updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env)
 {
-    mPos = pos;
-    mLastEnvironment = env;
-
     if(mContext)
     {
         ALfloat orient[6] = {
             atdir.x(), atdir.y(), atdir.z(),
             updir.x(), updir.y(), updir.z()
         };
-        alListener3f(AL_POSITION, mPos.x(), mPos.y(), mPos.z());
+        alListenerfv(AL_POSITION, pos.ptr());
         alListenerfv(AL_ORIENTATION, orient);
         throwALerror();
     }
+
+    mListenerPos = pos;
+    mListenerEnv = env;
 }
 
 
@@ -1011,8 +1011,9 @@ void OpenAL_Output::loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudne
 
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr), mDevice(0), mContext(0), mLastEnvironment(Env_Normal),
-    mStreamThread(new StreamThread)
+  : Sound_Output(mgr), mDevice(0), mContext(0)
+  , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
+  , mStreamThread(new StreamThread)
 {
 }
 
