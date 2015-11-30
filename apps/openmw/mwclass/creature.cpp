@@ -40,13 +40,28 @@
 
 namespace
 {
-    struct CreatureCustomData : public MWWorld::CustomData
+    bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask)
     {
+        return (ptr.get<ESM::Creature>()->mBase->mFlags & bitMask) != 0;
+    }
+}
+
+namespace MWClass
+{
+
+    class CreatureCustomData : public MWWorld::CustomData
+    {
+    public:
         MWMechanics::CreatureStats mCreatureStats;
         MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
         MWMechanics::Movement mMovement;
 
         virtual MWWorld::CustomData *clone() const;
+
+        virtual CreatureCustomData& asCreatureCustomData()
+        {
+            return *this;
+        }
 
         CreatureCustomData() : mContainerStore(0) {}
         virtual ~CreatureCustomData() { delete mContainerStore; }
@@ -59,14 +74,6 @@ namespace
         return cloned;
     }
 
-    bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask)
-    {
-        return (ptr.get<ESM::Creature>()->mBase->mFlags & bitMask) != 0;
-    }
-}
-
-namespace MWClass
-{
     const Creature::GMST& Creature::getGmst()
     {
         static GMST gmst;
@@ -193,7 +200,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mCreatureStats;
+        return ptr.getRefData().getCustomData()->asCreatureCustomData().mCreatureStats;
     }
 
 
@@ -421,7 +428,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return *dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
@@ -511,7 +518,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return ptr.getRefData().getCustomData()->asCreatureCustomData().mMovement;
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
@@ -711,7 +718,7 @@ namespace MWClass
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
-        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->readState (state2.mInventory);
         customData.mCreatureStats.readState (state2.mCreatureStats);
@@ -730,7 +737,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        CreatureCustomData& customData = dynamic_cast<CreatureCustomData&> (*ptr.getRefData().getCustomData());
+        CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);

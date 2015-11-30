@@ -42,19 +42,6 @@
 
 namespace
 {
-    struct NpcCustomData : public MWWorld::CustomData
-    {
-        MWMechanics::NpcStats mNpcStats;
-        MWMechanics::Movement mMovement;
-        MWWorld::InventoryStore mInventoryStore;
-
-        virtual MWWorld::CustomData *clone() const;
-    };
-
-    MWWorld::CustomData *NpcCustomData::clone() const
-    {
-        return new NpcCustomData (*this);
-    }
 
     int is_even(double d) {
         double int_part;
@@ -251,6 +238,27 @@ namespace
 
 namespace MWClass
 {
+
+    class NpcCustomData : public MWWorld::CustomData
+    {
+    public:
+        MWMechanics::NpcStats mNpcStats;
+        MWMechanics::Movement mMovement;
+        MWWorld::InventoryStore mInventoryStore;
+
+        virtual MWWorld::CustomData *clone() const;
+
+        virtual NpcCustomData& asNpcCustomData()
+        {
+            return *this;
+        }
+    };
+
+    MWWorld::CustomData *NpcCustomData::clone() const
+    {
+        return new NpcCustomData (*this);
+    }
+
     const Npc::GMST& Npc::getGmst()
     {
         static GMST gmst;
@@ -446,14 +454,14 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats;
     }
 
     MWMechanics::NpcStats& Npc::getNpcStats (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mNpcStats;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats;
     }
 
 
@@ -780,7 +788,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)
@@ -788,7 +796,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mInventoryStore;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
     std::string Npc::getScript (const MWWorld::Ptr& ptr) const
@@ -897,7 +905,7 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData()).mMovement;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mMovement;
     }
 
     bool Npc::isEssential (const MWWorld::Ptr& ptr) const
@@ -1161,7 +1169,7 @@ namespace MWClass
         else
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
-        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
+        NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
 
         customData.mInventoryStore.readState (state2.mInventory);
         customData.mNpcStats.readState (state2.mNpcStats);
@@ -1181,7 +1189,7 @@ namespace MWClass
 
         ensureCustomData (ptr);
 
-        NpcCustomData& customData = dynamic_cast<NpcCustomData&> (*ptr.getRefData().getCustomData());
+        NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
 
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);
