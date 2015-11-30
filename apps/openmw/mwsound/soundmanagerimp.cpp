@@ -104,10 +104,9 @@ namespace MWSound
             SoundBufferList::iterator sfxiter = mSoundBuffers.begin();
             for(;sfxiter != mSoundBuffers.end();++sfxiter)
             {
-                if((*sfxiter)->mHandle)
-                    mOutput->unloadSound((*sfxiter)->mHandle);
-                (*sfxiter)->mHandle = 0;
-                delete (*sfxiter);
+                if(sfxiter->mHandle)
+                    mOutput->unloadSound(sfxiter->mHandle);
+                sfxiter->mHandle = 0;
             }
             mUnusedBuffers.clear();
         }
@@ -146,8 +145,8 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer *sfx = *mSoundBuffers.insert(mSoundBuffers.end(),
-            new Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
+        Sound_Buffer *sfx = &*mSoundBuffers.insert(mSoundBuffers.end(),
+            Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
         );
         mVFS->normalizeFilename(sfx->mResourceName);
 
