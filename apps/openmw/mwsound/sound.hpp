@@ -56,6 +56,11 @@ namespace MWSound
           , mMinDistance(mindist), mMaxDistance(maxdist), mFlags(flags)
           , mFadeOutTime(0.0f), mHandle(0)
         { }
+        Sound(float vol, float basevol, float pitch, int flags)
+          : mPos(0.0f, 0.0f, 0.0f), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
+          , mMinDistance(1.0f), mMaxDistance(1000.0f), mFlags(flags)
+          , mFadeOutTime(0.0f), mHandle(0)
+        { }
     };
 
     // Same as above, but it's a different type since the output handles them differently
@@ -66,6 +71,9 @@ namespace MWSound
     public:
         Stream(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
           : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
+        { }
+        Stream(float vol, float basevol, float pitch, int flags)
+          : Sound(vol, basevol, pitch, flags)
         { }
     };
 }

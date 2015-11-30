@@ -659,6 +659,8 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
     mFreeSources.pop_front();
 
     try {
+        sound.reset(new Sound(vol, basevol, pitch, flags));
+
         alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
         alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
         alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
@@ -684,7 +686,6 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
         alSourcePlay(source);
         throwALerror();
 
-        sound.reset(new Sound(osg::Vec3f(0.f, 0.f, 0.f), vol, basevol, pitch, 1.0f, 1000.0f, flags));
         sound->mHandle = MAKE_PTRID(source);
         mActiveSounds.push_back(sound);
     }
@@ -708,6 +709,8 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
     mFreeSources.pop_front();
 
     try {
+        sound.reset(new Sound(pos, vol, basevol, pitch, mindist, maxdist, flags));
+
         alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
         alSourcef(source, AL_MAX_DISTANCE, maxdist);
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
@@ -735,7 +738,6 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
         alSourcePlay(source);
         throwALerror();
 
-        sound.reset(new Sound(pos, vol, basevol, pitch, mindist, maxdist, flags));
         sound->mHandle = MAKE_PTRID(source);
         mActiveSounds.push_back(sound);
     }
@@ -817,6 +819,8 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
     if((flags&MWBase::SoundManager::Play_Loop))
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
+        sound.reset(new Stream(1.0f, basevol, pitch, flags));
+
         alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
         alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
         alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
@@ -837,7 +841,6 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
         throwALerror();
 
-        sound.reset(new Stream(osg::Vec3f(0.0f, 0.0f, 0.0f), 1.0f, basevol, pitch, 1.0f, 1000.0f, flags));
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
         sound->mHandle = stream;
@@ -867,6 +870,8 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
     if((flags&MWBase::SoundManager::Play_Loop))
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
+        sound.reset(new Stream(pos, volume, basevol, pitch, mindist, maxdist, flags));
+
         alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
         alSourcef(source, AL_MAX_DISTANCE, maxdist);
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
@@ -889,7 +894,6 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
         throwALerror();
 
-        sound.reset(new Stream(pos, volume, basevol, pitch, mindist, maxdist, flags));
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
         sound->mHandle = stream;
