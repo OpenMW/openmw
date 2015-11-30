@@ -130,7 +130,8 @@ namespace NifOsg
         float mCachedDefaultSize;
     };
 
-    class ParticleColorAffector : public osgParticle::Operator, public ValueInterpolator
+    typedef ValueInterpolator<Nif::Vector4KeyMap, LerpFunc> Vec4Interpolator;
+    class ParticleColorAffector : public osgParticle::Operator
     {
     public:
         ParticleColorAffector(const Nif::NiColorData* clrdata);
@@ -142,7 +143,7 @@ namespace NifOsg
         virtual void operate(osgParticle::Particle* particle, double dt);
 
     private:
-        Nif::NiColorData mData;
+        Vec4Interpolator mData;
     };
 
     class GravityAffector : public osgParticle::Operator

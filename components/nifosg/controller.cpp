@@ -86,56 +86,23 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
 
 KeyframeController::KeyframeController(const Nif::NiKeyframeData *data)
     : mRotations(data->mRotations)
-    , mXRotations(data->mXRotations)
-    , mYRotations(data->mYRotations)
-    , mZRotations(data->mZRotations)
-    , mTranslations(data->mTranslations)
-    , mScales(data->mScales)
+    , mXRotations(data->mXRotations, 0.f)
+    , mYRotations(data->mYRotations, 0.f)
+    , mZRotations(data->mZRotations, 0.f)
+    , mTranslations(data->mTranslations, osg::Vec3f())
+    , mScales(data->mScales, 1.f)
 {
-}
-
-osg::Quat KeyframeController::interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time)
-{
-    if(time <= keys.begin()->first)
-        return keys.begin()->second.mValue;
-
-    Nif::QuaternionKeyMap::MapType::const_iterator it = keys.lower_bound(time);
-    if (it != keys.end())
-    {
-        float aTime = it->first;
-        const Nif::QuaternionKey* aKey = &it->second;
-
-        assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
-
-        Nif::QuaternionKeyMap::MapType::const_iterator last = --it;
-        float aLastTime = last->first;
-        const Nif::QuaternionKey* aLastKey = &last->second;
-
-        float a = (time - aLastTime) / (aTime - aLastTime);
-
-        osg::Quat v1 = aLastKey->mValue;
-        osg::Quat v2 = aKey->mValue;
-        // don't take the long path
-        if (v1.x()*v2.x() + v1.y()*v2.y() + v1.z()*v2.z() + v1.w()*v2.w() < 0) // dotProduct(v1,v2)
-            v1 = -v1;
-
-        osg::Quat result;
-        result.slerp(a, v1, v2);
-        return result;
-    }
-    else
-        return keys.rbegin()->second.mValue;
 }
 
 osg::Quat KeyframeController::getXYZRotation(float time) const
 {
     float xrot = 0, yrot = 0, zrot = 0;
-    if (mXRotations.get())
-        xrot = interpKey(mXRotations->mKeys, time);
-    if (mYRotations.get())
-        yrot = interpKey(mYRotations->mKeys, time);
-    if (mZRotations.get())
-        zrot = interpKey(mZRotations->mKeys, time);
+    if (!mXRotations.empty())
+        xrot = mXRotations.interpKey(time);
+    if (!mYRotations.empty())
+        yrot = mYRotations.interpKey(time);
+    if (!mZRotations.empty())
+        zrot = mZRotations.interpKey(time);
     osg::Quat xr(xrot, osg::Vec3f(1,0,0));
     osg::Quat yr(yrot, osg::Vec3f(0,1,0));
     osg::Quat zr(zrot, osg::Vec3f(0,0,1));
@@ -144,8 +111,8 @@ osg::Quat KeyframeController::getXYZRotation(float time) const
 
 osg::Vec3f KeyframeController::getTranslation(float time) const
 {
-    if(mTranslations.get() && mTranslations->mKeys.size() > 0)
-        return interpKey(mTranslations->mKeys, time);
+    if(!mTranslations.empty())
+        return mTranslations.interpKey(time);
     return osg::Vec3f();
 }
 
@@ -162,12 +129,12 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
         Nif::Matrix3& rot = userdata->mRotationScale;
 
         bool setRot = false;
-        if(mRotations.get() && !mRotations->mKeys.empty())
+        if(!mRotations.empty())
         {
-            mat.setRotate(interpKey(mRotations->mKeys, time));
+            mat.setRotate(mRotations.interpKey(time));
             setRot = true;
         }
-        else if (mXRotations.get() || mYRotations.get() || mZRotations.get())
+        else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
         {
             mat.setRotate(getXYZRotation(time));
             setRot = true;
@@ -186,15 +153,15 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
                     rot.mValues[i][j] = mat(j,i); // NB column/row major difference
 
         float& scale = userdata->mScale;
-        if(mScales.get() && !mScales->mKeys.empty())
-            scale = interpKey(mScales->mKeys, time);
+        if(!mScales.empty())
+            scale = mScales.interpKey(time);
 
         for (int i=0;i<3;++i)
             for (int j=0;j<3;++j)
                 mat(i,j) *= scale;
 
-        if(mTranslations.get() && !mTranslations->mKeys.empty())
-            mat.setTrans(interpKey(mTranslations->mKeys, time));
+        if(!mTranslations.empty())
+            mat.setTrans(mTranslations.interpKey(time));
 
         trans->setMatrix(mat);
     }
@@ -216,7 +183,7 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
 GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
 {
     for (unsigned int i=0; i<data->mMorphs.size(); ++i)
-        mKeyFrames.push_back(data->mMorphs[i].mKeyFrames);
+        mKeyFrames.push_back(FloatInterpolator(data->mMorphs[i].mKeyFrames));
 }
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)
@@ -228,11 +195,11 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
             return;
         float input = getInputValue(nv);
         int i = 0;
-        for (std::vector<Nif::FloatKeyMapPtr>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
+        for (std::vector<FloatInterpolator>::iterator it = mKeyFrames.begin()+1; it != mKeyFrames.end(); ++it,++i)
         {
             float val = 0;
-            if (!(*it)->mKeys.empty())
-                val = interpKey((*it)->mKeys, input);
+            if (!(*it).empty())
+                val = it->interpKey(input);
             val = std::max(0.f, std::min(1.f, val));
 
             osgAnimation::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
@@ -252,10 +219,10 @@ UVController::UVController()
 }
 
 UVController::UVController(const Nif::NiUVData *data, std::set<int> textureUnits)
-    : mUTrans(data->mKeyList[0])
-    , mVTrans(data->mKeyList[1])
-    , mUScale(data->mKeyList[2])
-    , mVScale(data->mKeyList[3])
+    : mUTrans(data->mKeyList[0], 0.f)
+    , mVTrans(data->mKeyList[1], 0.f)
+    , mUScale(data->mKeyList[2], 1.f)
+    , mVScale(data->mKeyList[3], 1.f)
     , mTextureUnits(textureUnits)
 {
 }
@@ -282,10 +249,10 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     if (hasInput())
     {
         float value = getInputValue(nv);
-        float uTrans = interpKey(mUTrans->mKeys, value, 0.0f);
-        float vTrans = interpKey(mVTrans->mKeys, value, 0.0f);
-        float uScale = interpKey(mUScale->mKeys, value, 1.0f);
-        float vScale = interpKey(mVScale->mKeys, value, 1.0f);
+        float uTrans = mUTrans.interpKey(value);
+        float vTrans = mVTrans.interpKey(value);
+        float uScale = mUScale.interpKey(value);
+        float vScale = mVScale.interpKey(value);
 
         osg::Matrixf mat = osg::Matrixf::scale(uScale, vScale, 1);
         mat.setTrans(uTrans, vTrans, 0);
@@ -340,7 +307,7 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 }
 
 AlphaController::AlphaController(const Nif::NiFloatData *data)
-    : mData(data->mKeyList)
+    : mData(data->mKeyList, 1.f)
 {
 
 }
@@ -350,7 +317,7 @@ AlphaController::AlphaController()
 }
 
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
-    : StateSetUpdater(copy, copyop), Controller(copy), ValueInterpolator()
+    : StateSetUpdater(copy, copyop), Controller(copy)
     , mData(copy.mData)
 {
 }
@@ -366,7 +333,7 @@ void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
 {
     if (hasInput())
     {
-        float value = interpKey(mData->mKeys, getInputValue(nv));
+        float value = mData.interpKey(getInputValue(nv));
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
         diffuse.a() = value;
@@ -375,7 +342,7 @@ void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
 }
 
 MaterialColorController::MaterialColorController(const Nif::NiPosData *data)
-    : mData(data->mKeyList)
+    : mData(data->mKeyList, osg::Vec3f(1,1,1))
 {
 }
 
@@ -400,7 +367,7 @@ void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *n
 {
     if (hasInput())
     {
-        osg::Vec3f value = interpKey(mData->mKeys, getInputValue(nv));
+        osg::Vec3f value = mData.interpKey(getInputValue(nv));
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
         diffuse.set(value.x(), value.y(), value.z(), diffuse.a());

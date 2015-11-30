@@ -37,6 +37,9 @@ template<typename T, T (NIFStream::*getValue)()>
 struct KeyMapT {
     typedef std::map< float, KeyT<T> > MapType;
 
+    typedef T ValueType;
+    typedef KeyT<T> KeyType;
+
     static const unsigned int sLinearInterpolation = 1;
     static const unsigned int sQuadraticInterpolation = 2;
     static const unsigned int sTBCInterpolation = 3;
