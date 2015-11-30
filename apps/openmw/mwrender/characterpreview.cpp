@@ -271,7 +271,10 @@ namespace MWRender
     {
         float projX = (posX / mCamera->getViewport()->width()) * 2 - 1.f;
         float projY = (posY / mCamera->getViewport()->height()) * 2 - 1.f;
-        // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. TODO: investigate
+        // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. Seems to be a
+        // precision issue - compiling with OSG_USE_FLOAT_MATRIX=0, Intersector::WINDOW works ok.
+        // Using Intersector::PROJECTION results in better precision because the start/end points and the model matrices
+        // don't go through as many transformations.
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::PROJECTION, projX, projY));
 
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
