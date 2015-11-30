@@ -60,8 +60,8 @@ namespace Resource
     // Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
     struct TriangleMeshShape : public btBvhTriangleMeshShape
     {
-        TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
-            : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
+        TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression, bool buildBvh = true)
+            : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression, buildBvh)
         {
         }
 

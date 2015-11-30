@@ -1,7 +1,7 @@
 #include "manager.hpp"
 
+#include <cctype>
 #include <stdexcept>
-#include <locale>
 
 #include "archive.hpp"
 
@@ -15,7 +15,7 @@ namespace
 
     char nonstrict_normalize_char(char ch)
     {
-        return ch == '\\' ? '/' : std::tolower(ch,std::locale::classic());
+        return ch == '\\' ? '/' : tolower(ch);
     }
 
     void normalize_path(std::string& path, bool strict)

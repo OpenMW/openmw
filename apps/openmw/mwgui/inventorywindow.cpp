@@ -167,13 +167,15 @@ namespace MWGui
         MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
                             static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
+        bool needUpdate = (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight());
+
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
 
-        if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
-            updatePreviewSize();
-
         adjustPanes();
+
+        if (needUpdate)
+            updatePreviewSize();
     }
 
     SortFilterItemModel* InventoryWindow::getSortFilterModel()
