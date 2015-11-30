@@ -100,7 +100,7 @@ namespace
 
         virtual void traverse(osg::NodeVisitor& nv)
         {
-            if (nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN)
+            if (nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN && nv.getVisitorType() != osg::NodeVisitor::UPDATE_VISITOR)
                 osg::Group::traverse(nv);
             else
             {
