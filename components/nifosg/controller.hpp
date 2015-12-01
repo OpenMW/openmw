@@ -47,16 +47,14 @@ namespace NifOsg
     class ValueInterpolator
     {
     public:
+        typedef typename MapT::ValueType ValueT;
+
         ValueInterpolator()
-            : mDefaultVal(typename MapT::ValueType())
+            : mDefaultVal(ValueT())
         {
         }
 
-#ifdef _MSC_VER
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, typename MapT::ValueType defaultVal = MapT::ValueType())
-#else
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, typename MapT::ValueType defaultVal = typename MapT::ValueType())
-#endif
+        ValueInterpolator(boost::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
             , mDefaultVal(defaultVal)
         {
@@ -67,7 +65,7 @@ namespace NifOsg
             }
         }
 
-        typename MapT::ValueType interpKey(float time) const
+        ValueT interpKey(float time) const
         {
             if (empty())
                 return mDefaultVal;
@@ -130,7 +128,7 @@ namespace NifOsg
 
         boost::shared_ptr<const MapT> mKeys;
 
-        typename MapT::ValueType mDefaultVal;
+        ValueT mDefaultVal;
     };
 
     struct LerpFunc
