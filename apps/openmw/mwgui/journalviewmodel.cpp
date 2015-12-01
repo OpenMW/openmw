@@ -72,8 +72,6 @@ struct JournalViewModelImpl : JournalViewModel
         }
     }
 
-    wchar_t tolower (wchar_t ch) const { return tolower (ch); }
-
     bool isEmpty () const
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
