@@ -403,6 +403,8 @@ namespace MWWorld
         // Delay the map update until scripts have been given a chance to run.
         // If we don't do this, objects that should be disabled will still appear on the map.
         mNeedMapUpdate = true;
+
+        mRendering.getResourceSystem()->clearCache();
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -518,6 +520,8 @@ namespace MWWorld
         // Delay the map update until scripts have been given a chance to run.
         // If we don't do this, objects that should be disabled will still appear on the map.
         mNeedMapUpdate = true;
+
+        mRendering.getResourceSystem()->clearCache();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos)

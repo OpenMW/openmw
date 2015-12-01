@@ -21,6 +21,7 @@
 #include <components/sceneutil/util.hpp>
 
 #include "texturemanager.hpp"
+#include "niffilemanager.hpp"
 
 namespace
 {
@@ -104,9 +105,10 @@ namespace
 namespace Resource
 {
 
-    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager)
+    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager)
         : mVFS(vfs)
         , mTextureManager(textureManager)
+        , mNifFileManager(nifFileManager)
         , mParticleSystemMask(~0u)
     {
     }
@@ -150,11 +152,11 @@ namespace Resource
         return std::string();
     }
 
-    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::TextureManager* textureMgr)
+    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::TextureManager* textureMgr, Resource::NifFileManager* nifFileManager)
     {
         std::string ext = getFileExtension(normalizedFilename);
         if (ext == "nif")
-            return NifOsg::Loader::load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalizedFilename)), textureMgr);
+            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), textureMgr);
         else
         {
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
@@ -195,14 +197,14 @@ namespace Resource
             {
                 Files::IStreamPtr file = mVFS->get(normalized);
 
-                loaded = load(file, normalized, mTextureManager);
+                loaded = load(file, normalized, mTextureManager, mNifFileManager);
             }
             catch (std::exception& e)
             {
                 std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error.nif instead" << std::endl;
                 Files::IStreamPtr file = mVFS->get("meshes/marker_error.nif");
                 normalized = "meshes/marker_error.nif";
-                loaded = load(file, normalized, mTextureManager);
+                loaded = load(file, normalized, mTextureManager, mNifFileManager);
             }
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());

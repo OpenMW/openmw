@@ -37,7 +37,7 @@ add_component_dir (vfs
     )
 
 add_component_dir (resource
-    scenemanager texturemanager resourcesystem bulletshapemanager bulletshape
+    scenemanager texturemanager resourcesystem bulletshapemanager bulletshape niffilemanager
     )
 
 add_component_dir (sceneutil

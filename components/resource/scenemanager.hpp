@@ -10,6 +10,7 @@
 namespace Resource
 {
     class TextureManager;
+    class NifFileManager;
 }
 
 namespace VFS
@@ -34,7 +35,7 @@ namespace Resource
     class SceneManager
     {
     public:
-        SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager);
+        SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
 
         /// Get a read-only copy of this scene "template"
@@ -66,7 +67,7 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
-        /// @note If you used SceneManager::attachTo, this was called automatically.
+        /// @note SceneManager::attachTo calls this method automatically, only needs to be called by users if manually attaching
         void notifyAttached(osg::Node* node) const;
 
         const VFS::Manager* getVFS() const;
@@ -79,6 +80,7 @@ namespace Resource
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
+        Resource::NifFileManager* mNifFileManager;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 

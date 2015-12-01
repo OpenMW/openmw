@@ -12,6 +12,7 @@
 
 #include "bulletshape.hpp"
 #include "scenemanager.hpp"
+#include "niffilemanager.hpp"
 
 
 namespace Resource
@@ -94,9 +95,10 @@ private:
     btTriangleMesh* mTriangleMesh;
 };
 
-BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr)
+BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
     : mVFS(vfs)
     , mSceneManager(sceneMgr)
+    , mNifFileManager(nifFileManager)
 {
 
 }
@@ -115,8 +117,6 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
     Index::iterator it = mIndex.find(normalized);
     if (it == mIndex.end())
     {
-        Files::IStreamPtr file = mVFS->get(normalized);
-
         size_t extPos = normalized.find_last_of('.');
         std::string ext;
         if (extPos != std::string::npos && extPos+1 < normalized.size())
@@ -126,7 +126,7 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         {
             NifBullet::BulletNifLoader loader;
             // might be worth sharing NIFFiles with SceneManager in some way
-            shape = loader.load(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)));
+            shape = loader.load(mNifFileManager->get(normalized));
         }
         else
         {

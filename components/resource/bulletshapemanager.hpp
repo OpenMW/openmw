@@ -16,6 +16,7 @@ namespace VFS
 namespace Resource
 {
     class SceneManager;
+    class NifFileManager;
 
     class BulletShape;
     class BulletShapeInstance;
@@ -23,7 +24,7 @@ namespace Resource
     class BulletShapeManager
     {
     public:
-        BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr);
+        BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager);
         ~BulletShapeManager();
 
         osg::ref_ptr<BulletShapeInstance> createInstance(const std::string& name);
@@ -31,6 +32,7 @@ namespace Resource
     private:
         const VFS::Manager* mVFS;
         SceneManager* mSceneManager;
+        NifFileManager* mNifFileManager;
 
         typedef std::map<std::string, osg::ref_ptr<BulletShape> > Index;
         Index mIndex;
