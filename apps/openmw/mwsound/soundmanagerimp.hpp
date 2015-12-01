@@ -79,9 +79,6 @@ namespace MWSound
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
-        MWBase::SoundStreamPtr mMusic;
-        std::string mCurrentPlaylist;
-
         typedef std::pair<MWBase::SoundPtr,Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
         typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
@@ -95,7 +92,11 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,DecoderLoudnessPair> SayDecoderMap;
         SayDecoderMap mPendingSaySounds;
 
-        MWBase::SoundPtr mUnderwaterSound;
+        typedef std::vector<MWBase::SoundStreamPtr> TrackList;
+        TrackList mActiveTracks;
+
+        MWBase::SoundStreamPtr mMusic;
+        std::string mCurrentPlaylist;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -103,6 +104,8 @@ namespace MWSound
         osg::Vec3f mListenerUp;
 
         int mPausedSoundTypes;
+
+        MWBase::SoundPtr mUnderwaterSound;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 

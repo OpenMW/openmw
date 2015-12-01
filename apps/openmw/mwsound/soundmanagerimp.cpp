@@ -474,6 +474,8 @@ namespace MWSound
         try
         {
             track = mOutput->streamSound(decoder, volumeFromType(type), 1.0f, Play_NoEnv|type);
+            TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), track);
+            mActiveTracks.insert(iter, track);
         }
         catch(std::exception &e)
         {
@@ -485,6 +487,9 @@ namespace MWSound
     void SoundManager::stopTrack(MWBase::SoundStreamPtr stream)
     {
         mOutput->stopStream(stream);
+        TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), stream);
+        if(iter != mActiveTracks.end() && *iter == stream)
+            mActiveTracks.erase(iter);
     }
 
     double SoundManager::getTrackTimeDelay(MWBase::SoundStreamPtr stream)
@@ -923,6 +928,24 @@ namespace MWSound
                 ++sayiter;
             }
         }
+
+        TrackList::iterator trkiter = mActiveTracks.begin();
+        for(;trkiter != mActiveTracks.end();++trkiter)
+        {
+            MWBase::SoundStreamPtr sound = *trkiter;
+            if(!mOutput->isStreamPlaying(sound))
+            {
+                mOutput->stopStream(sound);
+                trkiter = mActiveTracks.erase(trkiter);
+            }
+            else
+            {
+                sound->updateFade(duration);
+
+                mOutput->updateStream(sound);
+                ++trkiter;
+            }
+        }
         mOutput->finishUpdate();
     }
 
@@ -967,6 +990,13 @@ namespace MWSound
         for(;sayiter != mActiveSaySounds.end();++sayiter)
         {
             MWBase::SoundStreamPtr sound = sayiter->second.first;
+            sound->setBaseVolume(volumeFromType(sound->getPlayType()));
+            mOutput->updateStream(sound);
+        }
+        TrackList::iterator trkiter = mActiveTracks.begin();
+        for(;trkiter != mActiveTracks.end();++trkiter)
+        {
+            MWBase::SoundStreamPtr sound = *trkiter;
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
             mOutput->updateStream(sound);
         }
@@ -1099,6 +1129,10 @@ namespace MWSound
         for(;sayiter != mActiveSaySounds.end();++sayiter)
             mOutput->stopStream(sayiter->second.first);
         mActiveSaySounds.clear();
+        TrackList::iterator trkiter = mActiveTracks.begin();
+        for(;trkiter != mActiveTracks.end();++trkiter)
+            mOutput->stopStream(*trkiter);
+        mActiveTracks.clear();
         mPendingSaySounds.clear();
         mUnderwaterSound.reset();
         stopMusic();
