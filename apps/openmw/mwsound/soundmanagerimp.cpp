@@ -40,6 +40,7 @@ namespace MWSound
         , mMusicVolume(1.0f)
         , mVoiceVolume(1.0f)
         , mFootstepsVolume(1.0f)
+        , mSoundBuffers(new SoundBufferList::element_type())
         , mBufferCacheSize(0)
         , mListenerUnderwater(false)
         , mListenerPos(0,0,0)
@@ -101,8 +102,8 @@ namespace MWSound
         clear();
         if(mOutput->isInitialized())
         {
-            SoundBufferList::iterator sfxiter = mSoundBuffers.begin();
-            for(;sfxiter != mSoundBuffers.end();++sfxiter)
+            SoundBufferList::element_type::iterator sfxiter = mSoundBuffers->begin();
+            for(;sfxiter != mSoundBuffers->end();++sfxiter)
             {
                 if(sfxiter->mHandle)
                     mOutput->unloadSound(sfxiter->mHandle);
@@ -145,7 +146,7 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer *sfx = &*mSoundBuffers.insert(mSoundBuffers.end(),
+        Sound_Buffer *sfx = &*mSoundBuffers->insert(mSoundBuffers->end(),
             Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
         );
         mVFS->normalizeFilename(sfx->mResourceName);
