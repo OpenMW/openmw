@@ -52,7 +52,7 @@ namespace NifOsg
         {
         }
 
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, typename MapT::ValueType defaultVal = typename MapT::ValueType())
+        ValueInterpolator(boost::shared_ptr<const MapT> keys, typename MapT::ValueType defaultVal = MapT::ValueType())
             : mKeys(keys)
             , mDefaultVal(defaultVal)
         {
