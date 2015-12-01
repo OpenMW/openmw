@@ -298,15 +298,18 @@ namespace MWDialogue
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
 
-            // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
-            // in which case it should not be added to the journal.
-            for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
-                iter!=dialogue.mInfo.end(); ++iter)
+            if (dialogue.mType == ESM::Dialogue::Topic)
             {
-                if (iter->mId == info->mId)
+                // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+                // in which case it should not be added to the journal.
+                for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
+                    iter!=dialogue.mInfo.end(); ++iter)
                 {
-                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
-                    break;
+                    if (iter->mId == info->mId)
+                    {
+                        MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
+                        break;
+                    }
                 }
             }
 
