@@ -648,9 +648,8 @@ size_t OpenAL_Output::getSoundDataSize(Sound_Handle data) const
 }
 
 
-MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset)
+void OpenAL_Output::playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset)
 {
-    boost::shared_ptr<Sound> sound;
     ALuint source;
 
     if(mFreeSources.empty())
@@ -659,16 +658,15 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
     mFreeSources.pop_front();
 
     try {
-        sound.reset(new Sound(vol, basevol, pitch, flags));
-
         alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
         alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
         alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
-        alSourcei(source, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
+        alSourcei(source, AL_LOOPING, sound->getIsLooping() ? AL_TRUE : AL_FALSE);
 
-        ALfloat gain = vol*basevol;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
+        ALfloat gain = sound->getRealVolume();
+        ALfloat pitch = sound->getPitch();
+        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -681,12 +679,12 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 
         alSourcef(source, AL_SEC_OFFSET, offset/pitch);
-        alSourcei(source, AL_BUFFER, GET_PTRID(data));
+        throwALerror();
 
+        alSourcei(source, AL_BUFFER, GET_PTRID(data));
         alSourcePlay(source);
         throwALerror();
 
-        sound->mHandle = MAKE_PTRID(source);
         mActiveSounds.push_back(sound);
     }
     catch(std::exception&) {
@@ -694,13 +692,11 @@ MWBase::SoundPtr OpenAL_Output::playSound(Sound_Handle data, float vol, float ba
         throw;
     }
 
-    return sound;
+    sound->mHandle = MAKE_PTRID(source);
 }
 
-MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f &pos, float vol, float basevol, float pitch,
-                                            float mindist, float maxdist, int flags, float offset)
+void OpenAL_Output::playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset)
 {
-    boost::shared_ptr<Sound> sound;
     ALuint source;
 
     if(mFreeSources.empty())
@@ -709,18 +705,19 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
     mFreeSources.pop_front();
 
     try {
-        sound.reset(new Sound(pos, vol, basevol, pitch, mindist, maxdist, flags));
-
-        alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
-        alSourcef(source, AL_MAX_DISTANCE, maxdist);
+        alSourcef(source, AL_REFERENCE_DISTANCE, sound->getMinDistance());
+        alSourcef(source, AL_MAX_DISTANCE, sound->getMaxDistance());
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-        alSourcei(source, AL_LOOPING, (flags&MWBase::SoundManager::Play_Loop) ? AL_TRUE : AL_FALSE);
+        alSourcei(source, AL_LOOPING, sound->getIsLooping() ? AL_TRUE : AL_FALSE);
 
-        ALfloat gain = vol*basevol;
+        const osg::Vec3f &pos = sound->getPosition();
+        ALfloat maxdist = sound->getMaxDistance();
+        ALfloat gain = sound->getRealVolume();
+        ALfloat pitch = sound->getPitch();
         if((pos - mListenerPos).length2() > maxdist*maxdist)
             gain = 0.0f;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
+        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -733,12 +730,12 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
         alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 
         alSourcef(source, AL_SEC_OFFSET, offset/pitch);
-        alSourcei(source, AL_BUFFER, GET_PTRID(data));
+        throwALerror();
 
+        alSourcei(source, AL_BUFFER, GET_PTRID(data));
         alSourcePlay(source);
         throwALerror();
 
-        sound->mHandle = MAKE_PTRID(source);
         mActiveSounds.push_back(sound);
     }
     catch(std::exception&) {
@@ -746,14 +743,12 @@ MWBase::SoundPtr OpenAL_Output::playSound3D(Sound_Handle data, const osg::Vec3f 
         throw;
     }
 
-    return sound;
+    sound->mHandle = MAKE_PTRID(source);
 }
 
 void OpenAL_Output::stopSound(MWBase::SoundPtr sound)
 {
-    if(!sound->mHandle)
-        return;
-
+    if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
     sound->mHandle = 0;
 
@@ -766,8 +761,7 @@ void OpenAL_Output::stopSound(MWBase::SoundPtr sound)
 
 bool OpenAL_Output::isSoundPlaying(MWBase::SoundPtr sound)
 {
-    if(!sound->mHandle)
-        return false;
+    if(!sound->mHandle) return false;
     ALuint source = GET_PTRID(sound->mHandle);
     ALint state;
 
@@ -911,8 +905,7 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
 
 void OpenAL_Output::stopStream(MWBase::SoundStreamPtr sound)
 {
-    if(!sound->mHandle)
-        return;
+    if(!sound->mHandle) return;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     ALuint source = stream->mSource;
 
@@ -930,16 +923,14 @@ void OpenAL_Output::stopStream(MWBase::SoundStreamPtr sound)
 
 double OpenAL_Output::getStreamDelay(MWBase::SoundStreamPtr sound)
 {
-    if(!sound->mHandle)
-        return 0.0;
+    if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     return stream->getStreamDelay();
 }
 
 double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
 {
-    if(!sound->mHandle)
-        return 0.0;
+    if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
     return stream->getStreamOffset();
@@ -947,8 +938,7 @@ double OpenAL_Output::getStreamOffset(MWBase::SoundStreamPtr sound)
 
 bool OpenAL_Output::isStreamPlaying(MWBase::SoundStreamPtr sound)
 {
-    if(!sound->mHandle)
-        return false;
+    if(!sound->mHandle) return false;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     boost::lock_guard<boost::mutex> lock(mStreamThread->mMutex);
     return stream->isPlaying();

@@ -47,9 +47,8 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data);
         virtual size_t getSoundDataSize(Sound_Handle data) const;
 
-        virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset);
-        virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset);
+        virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset);
+        virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset);
         virtual void stopSound(MWBase::SoundPtr sound);
         virtual bool isSoundPlaying(MWBase::SoundPtr sound);
         virtual void updateSound(MWBase::SoundPtr sound);

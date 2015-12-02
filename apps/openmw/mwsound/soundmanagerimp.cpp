@@ -508,9 +508,8 @@ namespace MWSound
             Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
 
-            sound = mOutput->playSound(sfx->mHandle,
-                volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D, offset
-            );
+            sound.reset(new Sound(volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D));
+            mOutput->playSound(sound, sfx->mHandle, offset);
             if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
@@ -522,6 +521,7 @@ namespace MWSound
         catch(std::exception&)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
+            sound.reset();
         }
         return sound;
     }
@@ -544,14 +544,16 @@ namespace MWSound
                 return MWBase::SoundPtr();
 
             if(!(mode&Play_NoPlayerLocal) && ptr == MWMechanics::getPlayer())
-                sound = mOutput->playSound(sfx->mHandle,
-                    volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D, offset
-                );
+            {
+                sound.reset(new Sound(volume * sfx->mVolume, basevol, pitch, mode|type|Play_2D));
+                mOutput->playSound(sound, sfx->mHandle, offset);
+            }
             else
-                sound = mOutput->playSound3D(sfx->mHandle,
-                    objpos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
-                    mode|type|Play_3D, offset
-                );
+            {
+                sound.reset(new Sound(objpos, volume * sfx->mVolume, basevol, pitch,
+                                      sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D));
+                mOutput->playSound3D(sound, sfx->mHandle, offset);
+            }
             if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
@@ -563,6 +565,7 @@ namespace MWSound
         catch(std::exception&)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
+            sound.reset();
         }
         return sound;
     }
@@ -579,10 +582,9 @@ namespace MWSound
             Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
             float basevol = volumeFromType(type);
 
-            sound = mOutput->playSound3D(sfx->mHandle,
-                initialPos, volume * sfx->mVolume, basevol, pitch, sfx->mMinDist, sfx->mMaxDist,
-                mode|type|Play_3D, offset
-            );
+            sound.reset(new Sound(initialPos, volume * sfx->mVolume, basevol, pitch,
+                                  sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D));
+            mOutput->playSound3D(sound, sfx->mHandle, offset);
             if(sfx->mUses++ == 0)
             {
                 SoundList::iterator iter = std::find(mUnusedBuffers.begin(), mUnusedBuffers.end(), sfx);
@@ -594,6 +596,7 @@ namespace MWSound
         catch(std::exception &)
         {
             //std::cout <<"Sound Error: "<<e.what()<< std::endl;
+            sound.reset();
         }
         return sound;
     }
