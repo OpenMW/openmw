@@ -11,11 +11,11 @@
  * OpenSceneGraph Public License for more details.
 */
 
-#include "objectcache.hpp"
+#include <osg/Version>
 
 #if OSG_VERSION_LESS_THAN(3,4,0)
 
-#include <osgDB/ObjectCache>
+#include "objectcache.hpp"
 
 using namespace osgDB;
 
