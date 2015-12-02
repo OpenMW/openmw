@@ -181,7 +181,6 @@ endif (ANDROID)
 if (OPENGL_ES)
     target_link_libraries(openmw
         ${OPENGLES_gl_LIBRARY}
-        ${OPENGLES2_gl_LIBRARY}
     )
 endif (OPENGL_ES)
 
