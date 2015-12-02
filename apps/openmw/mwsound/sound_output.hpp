@@ -3,10 +3,9 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "soundmanagerimp.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MWSound
 {
@@ -17,6 +16,8 @@ namespace MWSound
 
     // An opaque handle for the implementation's sound buffers.
     typedef void *Sound_Handle;
+    // An opaque handle for the implementation's sound instances.
+    typedef void *Sound_Instance;
 
     class Sound_Output
     {

@@ -1,7 +1,7 @@
 #ifndef GAME_SOUND_SOUND_H
 #define GAME_SOUND_SOUND_H
 
-#include "soundmanagerimp.hpp"
+#include "sound_output.hpp"
 
 namespace MWSound
 {
@@ -20,7 +20,7 @@ namespace MWSound
         float mFadeOutTime;
 
     protected:
-        void *mHandle;
+        Sound_Instance mHandle;
 
         friend class Sound_Output;
         friend class OpenAL_Output;
