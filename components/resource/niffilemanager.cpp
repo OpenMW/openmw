@@ -1,7 +1,8 @@
 #include "niffilemanager.hpp"
 
-#include <osgDB/ObjectCache>
 #include <components/vfs/manager.hpp>
+
+#include "objectcache.hpp"
 
 #include <osg/Timer>
 
