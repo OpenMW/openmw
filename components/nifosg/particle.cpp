@@ -23,7 +23,7 @@ ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &co
 {
     // For some reason the osgParticle constructor doesn't copy the particles
     for (int i=0;i<copy.numParticles()-copy.numDeadParticles();++i)
-        _particles.push_back(*copy.getParticle(i));
+        createParticle(copy.getParticle(i));
 }
 
 void ParticleSystem::setQuota(int quota)
