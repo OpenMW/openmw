@@ -648,6 +648,71 @@ size_t OpenAL_Output::getSoundDataSize(Sound_Handle data) const
 }
 
 
+void OpenAL_Output::initCommon2D(ALuint source, const osg::Vec3f &pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv)
+{
+    alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
+    alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
+    alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
+    alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
+    alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+
+    if(useenv && mListenerEnv == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    alSourcef(source, AL_PITCH, pitch);
+    alSourcefv(source, AL_POSITION, pos.ptr());
+    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+}
+
+void OpenAL_Output::initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat mindist, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool loop, bool useenv)
+{
+    alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
+    alSourcef(source, AL_MAX_DISTANCE, maxdist);
+    alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
+    alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
+    alSourcei(source, AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
+
+    if((pos - mListenerPos).length2() > maxdist*maxdist)
+        gain = 0.0f;
+    if(useenv && mListenerEnv == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    alSourcef(source, AL_PITCH, pitch);
+    alSourcefv(source, AL_POSITION, pos.ptr());
+    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+}
+
+void OpenAL_Output::updateCommon(ALuint source, const osg::Vec3f& pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv, bool is3d)
+{
+    if(is3d)
+    {
+        if((pos - mListenerPos).length2() > maxdist*maxdist)
+            gain = 0.0f;
+    }
+    if(useenv && mListenerEnv == Env_Underwater)
+    {
+        gain *= 0.9f;
+        pitch *= 0.7f;
+    }
+
+    alSourcef(source, AL_GAIN, gain);
+    alSourcef(source, AL_PITCH, pitch);
+    alSourcefv(source, AL_POSITION, pos.ptr());
+    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+}
+
+
 void OpenAL_Output::playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset)
 {
     ALuint source;
@@ -658,27 +723,10 @@ void OpenAL_Output::playSound(MWBase::SoundPtr sound, Sound_Handle data, float o
     mFreeSources.pop_front();
 
     try {
-        alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
-        alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
-        alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
-        alSourcei(source, AL_LOOPING, sound->getIsLooping() ? AL_TRUE : AL_FALSE);
+        initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
+                     sound->getIsLooping(), sound->getUseEnv());
 
-        ALfloat gain = sound->getRealVolume();
-        ALfloat pitch = sound->getPitch();
-        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-        {
-            gain *= 0.9f;
-            pitch *= 0.7f;
-        }
-
-        alSourcef(source, AL_GAIN, gain);
-        alSourcef(source, AL_PITCH, pitch);
-        alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-
-        alSourcef(source, AL_SEC_OFFSET, offset/pitch);
+        alSourcef(source, AL_SEC_OFFSET, offset);
         throwALerror();
 
         alSourcei(source, AL_BUFFER, GET_PTRID(data));
@@ -705,31 +753,11 @@ void OpenAL_Output::playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float
     mFreeSources.pop_front();
 
     try {
-        alSourcef(source, AL_REFERENCE_DISTANCE, sound->getMinDistance());
-        alSourcef(source, AL_MAX_DISTANCE, sound->getMaxDistance());
-        alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-        alSourcei(source, AL_LOOPING, sound->getIsLooping() ? AL_TRUE : AL_FALSE);
+        initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
+                     sound->getRealVolume(), sound->getPitch(), sound->getIsLooping(),
+                     sound->getUseEnv());
 
-        const osg::Vec3f &pos = sound->getPosition();
-        ALfloat maxdist = sound->getMaxDistance();
-        ALfloat gain = sound->getRealVolume();
-        ALfloat pitch = sound->getPitch();
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-        {
-            gain *= 0.9f;
-            pitch *= 0.7f;
-        }
-
-        alSourcef(source, AL_GAIN, gain);
-        alSourcef(source, AL_PITCH, pitch);
-        alSourcefv(source, AL_POSITION, pos.ptr());
-        alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
-
-        alSourcef(source, AL_SEC_OFFSET, offset/pitch);
+        alSourcef(source, AL_SEC_OFFSET, offset);
         throwALerror();
 
         alSourcei(source, AL_BUFFER, GET_PTRID(data));
@@ -776,26 +804,8 @@ void OpenAL_Output::updateSound(MWBase::SoundPtr sound)
     if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
 
-    const osg::Vec3f &pos = sound->getPosition();
-    ALfloat gain = sound->getRealVolume();
-    ALfloat pitch = sound->getPitch();
-    if(sound->getIs3D())
-    {
-        ALfloat maxdist = sound->getMaxDistance();
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-    }
-    if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-    {
-        gain *= 0.9f;
-        pitch *= 0.7f;
-    }
-
-    alSourcef(source, AL_GAIN, gain);
-    alSourcef(source, AL_PITCH, pitch);
-    alSourcefv(source, AL_POSITION, pos.ptr());
-    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
+                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
 }
 
 
@@ -812,25 +822,8 @@ void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound
     if(sound->getIsLooping())
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
-        alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
-        alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
-        alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
-        alSourcei(source, AL_LOOPING, AL_FALSE);
-
-        ALfloat gain = sound->getRealVolume();
-        ALfloat pitch = sound->getPitch();
-        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-        {
-            gain *= 0.9f;
-            pitch *= 0.7f;
-        }
-
-        alSourcef(source, AL_GAIN, gain);
-        alSourcef(source, AL_PITCH, pitch);
-        alSource3f(source, AL_POSITION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+        initCommon2D(source, sound->getPosition(), sound->getRealVolume(), sound->getPitch(),
+                     false, sound->getUseEnv());
         throwALerror();
 
         stream = new OpenAL_SoundStream(source, decoder);
@@ -860,29 +853,8 @@ void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sou
     if(sound->getIsLooping())
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
-        alSourcef(source, AL_REFERENCE_DISTANCE, sound->getMinDistance());
-        alSourcef(source, AL_MAX_DISTANCE, sound->getMaxDistance());
-        alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
-        alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
-        alSourcei(source, AL_LOOPING, AL_FALSE);
-
-        const osg::Vec3f &pos = sound->getPosition();
-        ALfloat maxdist = sound->getMaxDistance();
-        ALfloat gain = sound->getRealVolume();
-        ALfloat pitch = sound->getPitch();
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-        {
-            gain *= 0.9f;
-            pitch *= 0.7f;
-        }
-
-        alSourcef(source, AL_GAIN, gain);
-        alSourcef(source, AL_PITCH, pitch);
-        alSourcefv(source, AL_POSITION, pos.ptr());
-        alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-        alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+        initCommon3D(source, sound->getPosition(), sound->getMinDistance(), sound->getMaxDistance(),
+                     sound->getRealVolume(), sound->getPitch(), false, sound->getUseEnv());
         throwALerror();
 
         stream = new OpenAL_SoundStream(source, decoder);
@@ -946,26 +918,8 @@ void OpenAL_Output::updateStream(MWBase::SoundStreamPtr sound)
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     ALuint source = stream->mSource;
 
-    const osg::Vec3f &pos = sound->getPosition();
-    ALfloat gain = sound->getRealVolume();
-    ALfloat pitch = sound->getPitch();
-    if(sound->getIs3D())
-    {
-        ALfloat maxdist = sound->getMaxDistance();
-        if((pos - mListenerPos).length2() > maxdist*maxdist)
-            gain = 0.0f;
-    }
-    if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
-    {
-        gain *= 0.9f;
-        pitch *= 0.7f;
-    }
-
-    alSourcef(source, AL_GAIN, gain);
-    alSourcef(source, AL_PITCH, pitch);
-    alSourcefv(source, AL_POSITION, pos.ptr());
-    alSource3f(source, AL_DIRECTION, 0.0f, 0.0f, 0.0f);
-    alSource3f(source, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    updateCommon(source, sound->getPosition(), sound->getMaxDistance(), sound->getRealVolume(),
+                 sound->getPitch(), sound->getUseEnv(), sound->getIs3D());
 }
 
 
