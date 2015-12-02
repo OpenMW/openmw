@@ -251,15 +251,20 @@ namespace MWSound
         static float minDistance = std::max(fAudioVoiceDefaultMinDistance * fAudioMinDistanceMult, 1.0f);
         static float maxDistance = std::max(fAudioVoiceDefaultMaxDistance * fAudioMaxDistanceMult, minDistance);
 
+        MWBase::SoundStreamPtr sound;
         float basevol = volumeFromType(Play_TypeVoice);
         if(playlocal)
-            return mOutput->streamSound(decoder,
-                basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D
-            );
-        return mOutput->streamSound3D(decoder,
-            pos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
-            Play_Normal|Play_TypeVoice|Play_3D
-        );
+        {
+            sound.reset(new Stream(1.0f, basevol, 1.0f, Play_Normal|Play_TypeVoice|Play_2D));
+            mOutput->streamSound(decoder, sound);
+        }
+        else
+        {
+            sound.reset(new Stream(pos, 1.0f, basevol, 1.0f, minDistance, maxDistance,
+                                   Play_Normal|Play_TypeVoice|Play_3D));
+            mOutput->streamSound3D(decoder, sound);
+        }
+        return sound;
     }
 
 
@@ -309,11 +314,13 @@ namespace MWSound
             DecoderPtr decoder = getDecoder();
             decoder->open(filename);
 
-            mMusic = mOutput->streamSound(decoder, volumeFromType(Play_TypeMusic),
-                                          1.0f, Play_NoEnv|Play_TypeMusic|Play_2D);
+            mMusic.reset(new Stream(1.0f, volumeFromType(Play_TypeMusic), 1.0f,
+                                    Play_NoEnv|Play_TypeMusic|Play_2D));
+            mOutput->streamSound(decoder, mMusic);
         }
         catch(std::exception &e) {
             std::cout << "Music Error: " << e.what() << "\n";
+            mMusic.reset();
         }
     }
 
@@ -473,7 +480,9 @@ namespace MWSound
             return track;
         try
         {
-            track = mOutput->streamSound(decoder, volumeFromType(type), 1.0f, Play_NoEnv|type);
+            track.reset(new Stream(1.0f, volumeFromType(type), 1.0f, Play_NoEnv|type|Play_2D));
+            mOutput->streamSound(decoder, track);
+
             TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), track);
             mActiveTracks.insert(iter, track);
         }

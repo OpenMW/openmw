@@ -799,9 +799,8 @@ void OpenAL_Output::updateSound(MWBase::SoundPtr sound)
 }
 
 
-MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float basevol, float pitch, int flags)
+void OpenAL_Output::streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound)
 {
-    MWBase::SoundStreamPtr sound;
     OpenAL_SoundStream *stream = 0;
     ALuint source;
 
@@ -810,19 +809,18 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
     source = mFreeSources.front();
     mFreeSources.pop_front();
 
-    if((flags&MWBase::SoundManager::Play_Loop))
+    if(sound->getIsLooping())
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
-        sound.reset(new Stream(1.0f, basevol, pitch, flags));
-
         alSourcef(source, AL_REFERENCE_DISTANCE, 1.0f);
         alSourcef(source, AL_MAX_DISTANCE, 1000.0f);
         alSourcef(source, AL_ROLLOFF_FACTOR, 0.0f);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_TRUE);
         alSourcei(source, AL_LOOPING, AL_FALSE);
 
-        ALfloat gain = basevol;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
+        ALfloat gain = sound->getRealVolume();
+        ALfloat pitch = sound->getPitch();
+        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -837,7 +835,6 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
 
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
-        sound->mHandle = stream;
         mActiveStreams.push_back(sound);
     }
     catch(std::exception&) {
@@ -847,12 +844,11 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound(DecoderPtr decoder, float base
         throw;
     }
 
-    return sound;
+    sound->mHandle = stream;
 }
 
-MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos, float volume, float basevol, float pitch, float mindist, float maxdist, int flags)
+void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound)
 {
-    MWBase::SoundStreamPtr sound;
     OpenAL_SoundStream *stream = 0;
     ALuint source;
 
@@ -861,21 +857,22 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
     source = mFreeSources.front();
     mFreeSources.pop_front();
 
-    if((flags&MWBase::SoundManager::Play_Loop))
+    if(sound->getIsLooping())
         std::cout <<"Warning: cannot loop stream \""<<decoder->getName()<<"\""<< std::endl;
     try {
-        sound.reset(new Stream(pos, volume, basevol, pitch, mindist, maxdist, flags));
-
-        alSourcef(source, AL_REFERENCE_DISTANCE, mindist);
-        alSourcef(source, AL_MAX_DISTANCE, maxdist);
+        alSourcef(source, AL_REFERENCE_DISTANCE, sound->getMinDistance());
+        alSourcef(source, AL_MAX_DISTANCE, sound->getMaxDistance());
         alSourcef(source, AL_ROLLOFF_FACTOR, 1.0f);
         alSourcei(source, AL_SOURCE_RELATIVE, AL_FALSE);
         alSourcei(source, AL_LOOPING, AL_FALSE);
 
-        ALfloat gain = volume*basevol;
+        const osg::Vec3f &pos = sound->getPosition();
+        ALfloat maxdist = sound->getMaxDistance();
+        ALfloat gain = sound->getRealVolume();
+        ALfloat pitch = sound->getPitch();
         if((pos - mListenerPos).length2() > maxdist*maxdist)
             gain = 0.0f;
-        if(!(flags&MWBase::SoundManager::Play_NoEnv) && mListenerEnv == Env_Underwater)
+        if(sound->getUseEnv() && mListenerEnv == Env_Underwater)
         {
             gain *= 0.9f;
             pitch *= 0.7f;
@@ -890,7 +887,6 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
 
         stream = new OpenAL_SoundStream(source, decoder);
         mStreamThread->add(stream);
-        sound->mHandle = stream;
         mActiveStreams.push_back(sound);
     }
     catch(std::exception&) {
@@ -900,7 +896,7 @@ MWBase::SoundStreamPtr OpenAL_Output::streamSound3D(DecoderPtr decoder, const os
         throw;
     }
 
-    return sound;
+    sound->mHandle = stream;
 }
 
 void OpenAL_Output::stopStream(MWBase::SoundStreamPtr sound)
