@@ -16,9 +16,6 @@ namespace MWSound
     class SoundManager;
     class Sound;
 
-    class OpenAL_Sound;
-    class OpenAL_SoundStream;
-
     class OpenAL_Output : public Sound_Output
     {
         ALCdevice *mDevice;
@@ -27,13 +24,26 @@ namespace MWSound
         typedef std::deque<ALuint> IDDq;
         IDDq mFreeSources;
 
-        typedef std::vector<OpenAL_Sound*> SoundVec;
+        typedef std::vector<MWBase::SoundPtr> SoundVec;
         SoundVec mActiveSounds;
-        typedef std::vector<OpenAL_SoundStream*> StreamVec;
+        typedef std::vector<MWBase::SoundStreamPtr> StreamVec;
         StreamVec mActiveStreams;
 
-        Environment mLastEnvironment;
+        osg::Vec3f mListenerPos;
+        Environment mListenerEnv;
 
+        struct StreamThread;
+        std::auto_ptr<StreamThread> mStreamThread;
+
+        void initCommon2D(ALuint source, const osg::Vec3f &pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
+        void initCommon3D(ALuint source, const osg::Vec3f &pos, ALfloat mindist, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
+
+        void updateCommon(ALuint source, const osg::Vec3f &pos, ALfloat maxdist, ALfloat gain, ALfloat pitch, bool useenv, bool is3d);
+
+        OpenAL_Output& operator=(const OpenAL_Output &rhs);
+        OpenAL_Output(const OpenAL_Output &rhs);
+
+    public:
         virtual std::vector<std::string> enumerate();
         virtual void init(const std::string &devname="");
         virtual void deinit();
@@ -42,12 +52,19 @@ namespace MWSound
         virtual void unloadSound(Sound_Handle data);
         virtual size_t getSoundDataSize(Sound_Handle data) const;
 
-        virtual MWBase::SoundPtr playSound(Sound_Handle data, float vol, float basevol, float pitch, int flags, float offset);
-        virtual MWBase::SoundPtr playSound3D(Sound_Handle data, const osg::Vec3f &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset);
-        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float basevol, float pitch, int flags);
-        virtual MWBase::SoundPtr streamSound3D(DecoderPtr decoder, const osg::Vec3f &pos,
-                                               float vol, float basevol, float pitch, float min, float max, int flags);
+        virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset);
+        virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset);
+        virtual void stopSound(MWBase::SoundPtr sound);
+        virtual bool isSoundPlaying(MWBase::SoundPtr sound);
+        virtual void updateSound(MWBase::SoundPtr sound);
+
+        virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
+        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
+        virtual void stopStream(MWBase::SoundStreamPtr sound);
+        virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
+        virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
+        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
+        virtual void updateStream(MWBase::SoundStreamPtr sound);
 
         virtual void startUpdate();
         virtual void finishUpdate();
@@ -59,20 +76,8 @@ namespace MWSound
 
         virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness);
 
-        OpenAL_Output& operator=(const OpenAL_Output &rhs);
-        OpenAL_Output(const OpenAL_Output &rhs);
-
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
-
-        struct StreamThread;
-        std::auto_ptr<StreamThread> mStreamThread;
-
-        friend class OpenAL_Sound;
-        friend class OpenAL_Sound3D;
-        friend class OpenAL_SoundStream;
-        friend class OpenAL_SoundStream3D;
-        friend class SoundManager;
     };
 #ifndef DEFAULT_OUTPUT
 #define DEFAULT_OUTPUT(x) ::MWSound::OpenAL_Output((x))

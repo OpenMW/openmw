@@ -190,7 +190,7 @@ namespace MWWorld
             {
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, ESM::RT_Target, it->mSpellId, it->mSourceName);
 
-                it->mSound->stop();
+                MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
                 mParent->removeChild(it->mNode);
 
                 it = mMagicBolts.erase(it);
@@ -264,7 +264,7 @@ namespace MWWorld
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end(); ++it)
         {
             mParent->removeChild(it->mNode);
-            it->mSound->stop();
+            MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
         }
         mMagicBolts.clear();
     }

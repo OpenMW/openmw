@@ -79,15 +79,12 @@ namespace MWSound
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
-        boost::shared_ptr<Sound> mMusic;
-        std::string mCurrentPlaylist;
-
         typedef std::pair<MWBase::SoundPtr,Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
         typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::pair<MWBase::SoundPtr,Sound_Loudness*> SoundLoudnessPair;
+        typedef std::pair<MWBase::SoundStreamPtr,Sound_Loudness*> SoundLoudnessPair;
         typedef std::map<MWWorld::Ptr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
@@ -95,7 +92,11 @@ namespace MWSound
         typedef std::map<MWWorld::Ptr,DecoderLoudnessPair> SayDecoderMap;
         SayDecoderMap mPendingSaySounds;
 
-        MWBase::SoundPtr mUnderwaterSound;
+        typedef std::vector<MWBase::SoundStreamPtr> TrackList;
+        TrackList mActiveTracks;
+
+        MWBase::SoundStreamPtr mMusic;
+        std::string mCurrentPlaylist;
 
         bool mListenerUnderwater;
         osg::Vec3f mListenerPos;
@@ -103,6 +104,8 @@ namespace MWSound
         osg::Vec3f mListenerUp;
 
         int mPausedSoundTypes;
+
+        MWBase::SoundPtr mUnderwaterSound;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
@@ -113,10 +116,9 @@ namespace MWSound
         // to start streaming
         DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
 
-        MWBase::SoundPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
+        MWBase::SoundStreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
-        bool updateSound(MWBase::SoundPtr sound, const MWWorld::Ptr &ptr, float duration);
         void updateSounds(float duration);
         void updateRegionSound(float duration);
 
@@ -171,8 +173,16 @@ namespace MWSound
         /// and get an average loudness value (scale [0,1]) at the current time position.
         /// If the actor is not saying anything, returns 0.
 
-        virtual MWBase::SoundPtr playTrack(const DecoderPtr& decoder, PlayType type);
+        virtual MWBase::SoundStreamPtr playTrack(const DecoderPtr& decoder, PlayType type);
         ///< Play a 2D audio track, using a custom decoder
+
+        virtual void stopTrack(MWBase::SoundStreamPtr stream);
+        ///< Stop the given audio track from playing
+
+        virtual double getTrackTimeDelay(MWBase::SoundStreamPtr stream);
+        ///< Retives the time delay, in seconds, of the audio track (must be a sound
+        /// returned by \ref playTrack). Only intended to be called by the track
+        /// decoder's read method.
 
         virtual MWBase::SoundPtr playSound(const std::string& soundId, float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0);
         ///< Play a sound, independently of 3D-position
@@ -188,6 +198,9 @@ namespace MWSound
                                              float volume, float pitch, PlayType type, PlayMode mode, float offset=0);
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
         ///< @param offset Number of seconds into the sound to start playback.
+
+        virtual void stopSound(MWBase::SoundPtr sound);
+        ///< Stop the given sound from playing
 
         virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,
