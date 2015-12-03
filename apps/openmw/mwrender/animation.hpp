@@ -24,6 +24,7 @@ namespace NifOsg
 namespace SceneUtil
 {
     class LightSource;
+    class Skeleton;
 }
 
 namespace MWRender
@@ -208,6 +209,7 @@ protected:
     osg::ref_ptr<osg::Group> mInsert;
 
     osg::ref_ptr<osg::Node> mObjectRoot;
+    SceneUtil::Skeleton* mSkeleton;
 
     // The node expected to accumulate movement during movement animations.
     osg::ref_ptr<osg::Node> mAccumRoot;
