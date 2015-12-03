@@ -738,7 +738,7 @@ void WeatherManager::update(float duration, bool paused)
 void WeatherManager::stopSounds()
 {
     if (mAmbientSound.get())
-        mAmbientSound->stop();
+        MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
     mAmbientSound.reset();
     mPlayingSoundID.clear();
 }

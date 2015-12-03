@@ -15,6 +15,7 @@ namespace MWWorld
 namespace MWSound
 {
     class Sound;
+    class Stream;
     struct Sound_Decoder;
     typedef boost::shared_ptr<Sound_Decoder> DecoderPtr;
 }
@@ -22,6 +23,7 @@ namespace MWSound
 namespace MWBase
 {
     typedef boost::shared_ptr<MWSound::Sound> SoundPtr;
+    typedef boost::shared_ptr<MWSound::Stream> SoundStreamPtr;
 
     /// \brief Interface for sound manager (implemented in MWSound)
     class SoundManager
@@ -104,8 +106,16 @@ namespace MWBase
             /// and get an average loudness value (scale [0,1]) at the current time position.
             /// If the actor is not saying anything, returns 0.
 
-            virtual SoundPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
+            virtual SoundStreamPtr playTrack(const MWSound::DecoderPtr& decoder, PlayType type) = 0;
             ///< Play a 2D audio track, using a custom decoder
+
+            virtual void stopTrack(SoundStreamPtr stream) = 0;
+            ///< Stop the given audio track from playing
+
+            virtual double getTrackTimeDelay(SoundStreamPtr stream) = 0;
+            ///< Retives the time delay, in seconds, of the audio track (must be a sound
+            /// returned by \ref playTrack). Only intended to be called by the track
+            /// decoder's read method.
 
             virtual SoundPtr playSound(const std::string& soundId, float volume, float pitch,
                                        PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal,
@@ -122,6 +132,9 @@ namespace MWBase
             virtual MWBase::SoundPtr playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
                                                  float volume, float pitch, PlayType type=Play_TypeSfx, PlayMode mode=Play_Normal, float offset=0) = 0;
             ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
+
+            virtual void stopSound(SoundPtr sound) = 0;
+            ///< Stop the given sound from playing
 
             virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId) = 0;
             ///< Stop the given object from playing the given sound,
@@ -155,7 +168,7 @@ namespace MWBase
 
             virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up) = 0;
 
-            virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated) = 0;
+            virtual void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated) = 0;
 
             virtual void clear() = 0;
     };
