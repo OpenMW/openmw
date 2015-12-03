@@ -92,7 +92,13 @@ void GraphicsWindowSDL2::init()
     // have to get the current one to be able to restore it afterward.
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
     SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
-
+   
+#ifdef OPENGL_ES
+     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);    
+#endif
+    
     mContext = SDL_GL_CreateContext(mWindow);
     if(!mContext)
     {
