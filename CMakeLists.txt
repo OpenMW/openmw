@@ -45,10 +45,6 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Macros
 include(OpenMWMacros)
 
-if (ANDROID)
-    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
-endif (ANDROID)
-
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
@@ -161,28 +157,24 @@ endif()
 
 if (ANDROID)
     set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
-    set(OSG_PLUGINS_DIR ${OSG_PLUGINS_DIR})
-    add_definitions (-DOSG_PLUGINS_DIR)
+    add_definitions (-DOSG_PLUGINS_DIR=${OSG_PLUGINS_DIR})
     set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
 endif (ANDROID)
 
 option(OPENGL_ES "enable opengl es support" FALSE )
 
-option(USE_QT "Use Qt in building" TRUE )
+if (OPENGL_ES)
+    add_definitions(-DOPENGL_ES)
+endif(OPENGL_ES)
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
-    set(USE_QT FALSE CACHE BOOL "disable Qt" FORCE )
+   set(USE_QT FALSE)
 else()
-    set(USE_QT TRUE CACHE BOOL "enable Qt" FORCE )
+   set(USE_QT TRUE)
 endif()
 
-add_definitions (-DUSE_QT)
+add_definitions(-DUSE_QT)
  
-if (OPENGL_ES)
-    find_package(OpenGLES)
-    add_definitions (-DOPENGL_ES)
-endif (OPENGLES)
-
 # Dependencies
 if (USE_QT)
     set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
@@ -230,10 +222,11 @@ IF(BOOST_STATIC)
 endif()
 
 if (USE_QT)
-    find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
-else()
-    find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
+    set (OSG_QT osgQt)
 endif()
+
+find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
+
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 if(OSG_STATIC)

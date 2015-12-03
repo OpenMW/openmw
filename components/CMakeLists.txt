@@ -20,7 +20,9 @@ else (GIT_CHECKOUT)
     configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
-if (NOT OPENGL_ES)
+if (OPENGL_ES)
+    find_package(OpenGLES REQUIRED)
+else()    
     find_package(OpenGL REQUIRED)
 endif()
 
