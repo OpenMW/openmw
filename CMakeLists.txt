@@ -170,7 +170,7 @@ option(OPENGL_ES "enable opengl es support" FALSE )
 
 option(USE_QT "Use Qt in building" TRUE )
 
-if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS)
+if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
     set(USE_QT FALSE CACHE BOOL "disable Qt" FORCE )
 else()
     set(USE_QT TRUE CACHE BOOL "enable Qt" FORCE )
