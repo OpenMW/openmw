@@ -890,13 +890,17 @@ namespace MWSound
                     DecoderPtr decoder = penditer->second.first;
                     decoder->rewind();
 
+                    MWBase::SoundStreamPtr sound;
                     MWWorld::Ptr ptr = penditer->first;
-                    const ESM::Position &pos = ptr.getRefData().getPosition();
-                    const osg::Vec3f objpos(pos.asVec3());
+                    if(ptr == MWWorld::Ptr())
+                        sound = playVoice(decoder, osg::Vec3f(), true);
+                    else
+                    {
+                        const ESM::Position &pos = ptr.getRefData().getPosition();
+                        const osg::Vec3f objpos(pos.asVec3());
 
-                    MWBase::SoundStreamPtr sound = playVoice(decoder,
-                        objpos, (ptr == MWMechanics::getPlayer())
-                    );
+                        sound = playVoice(decoder, objpos, (ptr == MWMechanics::getPlayer()));
+                    }
                     mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
                 }
                 catch(std::exception &e) {
