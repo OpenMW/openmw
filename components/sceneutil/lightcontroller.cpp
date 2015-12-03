@@ -118,7 +118,7 @@ namespace SceneUtil
         else if(mType == LT_PulseSlow)
             brightness = 0.7f + pulseAmplitude(mDeltaCount*slow)*0.3f;
 
-        static_cast<SceneUtil::LightSource*>(node)->getLight()->setDiffuse(mDiffuseColor * brightness);
+        static_cast<SceneUtil::LightSource*>(node)->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * brightness);
     }
 
     void LightController::setDiffuse(osg::Vec4f color)

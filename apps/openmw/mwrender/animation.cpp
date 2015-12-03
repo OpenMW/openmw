@@ -1091,8 +1091,7 @@ namespace MWRender
         }
 
         osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
-        osg::Light* light = new osg::Light;
-        lightSource->setLight(light);
+        osg::ref_ptr<osg::Light> light (new osg::Light);
         lightSource->setNodeMask(Mask_Lighting);
 
         const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
@@ -1122,6 +1121,8 @@ namespace MWRender
         light->setDiffuse(diffuse);
         light->setAmbient(osg::Vec4f(0,0,0,1));
         light->setSpecular(osg::Vec4f(0,0,0,0));
+
+        lightSource->setLight(light);
 
         osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
@@ -1318,22 +1319,31 @@ namespace MWRender
         }
         else
         {
-            if (!mGlowLight)
+            effect += 3;
+            float radius = effect * 66.f;
+            float linearAttenuation = 0.5f / effect;
+
+            if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
-                mGlowLight = new SceneUtil::LightSource;
-                mGlowLight->setLight(new osg::Light);
-                mGlowLight->setNodeMask(Mask_Lighting);
-                osg::Light* light = mGlowLight->getLight();
+                if (mGlowLight)
+                {
+                    mInsert->removeChild(mGlowLight);
+                    mGlowLight = NULL;
+                }
+
+                osg::ref_ptr<osg::Light> light (new osg::Light);
                 light->setDiffuse(osg::Vec4f(0,0,0,0));
                 light->setSpecular(osg::Vec4f(0,0,0,0));
                 light->setAmbient(osg::Vec4f(1.5f,1.5f,1.5f,1.f));
+                light->setLinearAttenuation(linearAttenuation);
+
+                mGlowLight = new SceneUtil::LightSource;
+                mGlowLight->setNodeMask(Mask_Lighting);
                 mInsert->addChild(mGlowLight);
+                mGlowLight->setLight(light);
             }
 
-            effect += 3;
-            osg::Light* light = mGlowLight->getLight();
-            mGlowLight->setRadius(effect * 66.f);
-            light->setLinearAttenuation(0.5f/effect);
+            mGlowLight->setRadius(radius);
         }
     }
 

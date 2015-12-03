@@ -12,7 +12,7 @@ namespace SceneUtil
     /// LightSource managed by a LightManager.
     class LightSource : public osg::Node
     {
-        osg::ref_ptr<osg::Light> mLight;
+        osg::ref_ptr<osg::Light> mLight[2];
 
         // The activation radius
         float mRadius;
@@ -37,17 +37,24 @@ namespace SceneUtil
             mRadius = radius;
         }
 
-        osg::Light* getLight()
+        /// Get the osg::Light safe for modification in the given frame.
+        osg::Light* getLight(unsigned int frame)
         {
-            return mLight;
+            return mLight[frame % 2];
         }
 
+        /// @warning It is recommended not to replace an existing osg::Light, because there might still be
+        /// references to it in the light StateSet cache that are associated with this LightSource's ID.
+        /// These references will stay valid due to ref_ptr but will point to the old object.
+        /// @warning Do not modify the \a light after you've called this function.
         void setLight(osg::Light* light)
         {
-            mLight = light;
+            mLight[0] = light;
+            mLight[1] = osg::clone(light);
         }
 
-        int getId()
+        /// Get the unique ID for this light source.
+        int getId() const
         {
             return mId;
         }
@@ -77,7 +84,7 @@ namespace SceneUtil
         void update();
 
         // Called automatically by the LightSource's UpdateCallback
-        void addLight(LightSource* lightSource, const osg::Matrixf& worldMat);
+        void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, unsigned int frameNum);
 
         struct LightSourceTransform
         {
@@ -97,7 +104,7 @@ namespace SceneUtil
 
         typedef std::vector<const LightSourceViewBound*> LightList;
 
-        osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList);
+        osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, unsigned int frameNum);
 
         /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
         void setStartLight(int start);
@@ -113,7 +120,7 @@ namespace SceneUtil
 
         // < Light list hash , StateSet >
         typedef std::map<size_t, osg::ref_ptr<osg::StateSet> > LightStateSetMap;
-        LightStateSetMap mStateSetCache;
+        LightStateSetMap mStateSetCache[2];
 
         int mStartLight;
 

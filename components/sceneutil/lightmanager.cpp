@@ -98,7 +98,7 @@ namespace SceneUtil
                     throw std::runtime_error("can't find parent LightManager");
             }
 
-            mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()));
+            mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()), nv->getTraversalNumber());
 
             traverse(node, nv);
         }
@@ -160,37 +160,42 @@ namespace SceneUtil
         mLightsInViewSpace.clear();
 
         // do an occasional cleanup for orphaned lights
-        if (mStateSetCache.size() > 5000)
-            mStateSetCache.clear();
+        for (int i=0; i<2; ++i)
+        {
+            if (mStateSetCache[i].size() > 5000)
+                mStateSetCache[i].clear();
+        }
     }
 
-    void LightManager::addLight(LightSource* lightSource, const osg::Matrixf& worldMat)
+    void LightManager::addLight(LightSource* lightSource, const osg::Matrixf& worldMat, unsigned int frameNum)
     {
         LightSourceTransform l;
         l.mLightSource = lightSource;
         l.mWorldMatrix = worldMat;
-        lightSource->getLight()->setPosition(osg::Vec4f(worldMat.getTrans().x(),
+        lightSource->getLight(frameNum)->setPosition(osg::Vec4f(worldMat.getTrans().x(),
                                                         worldMat.getTrans().y(),
                                                         worldMat.getTrans().z(), 1.f));
         mLights.push_back(l);
     }
 
-    osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList &lightList)
+    osg::ref_ptr<osg::StateSet> LightManager::getLightListStateSet(const LightList &lightList, unsigned int frameNum)
     {
         // possible optimization: return a StateSet containing all requested lights plus some extra lights (if a suitable one exists)
         size_t hash = 0;
         for (unsigned int i=0; i<lightList.size();++i)
             boost::hash_combine(hash, lightList[i]->mLightSource->getId());
 
-        LightStateSetMap::iterator found = mStateSetCache.find(hash);
-        if (found != mStateSetCache.end())
+        LightStateSetMap& stateSetCache = mStateSetCache[frameNum%2];
+
+        LightStateSetMap::iterator found = stateSetCache.find(hash);
+        if (found != stateSetCache.end())
             return found->second;
         else
         {
 
             std::vector<osg::ref_ptr<osg::Light> > lights;
             for (unsigned int i=0; i<lightList.size();++i)
-                lights.push_back(lightList[i]->mLightSource->getLight());
+                lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
 
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
 
@@ -200,7 +205,7 @@ namespace SceneUtil
             stateset->setAttribute(attr, osg::StateAttribute::ON);
             stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
 
-            mStateSetCache.insert(std::make_pair(hash, stateset));
+            stateSetCache.insert(std::make_pair(hash, stateset));
             return stateset;
         }
     }
@@ -348,10 +353,10 @@ namespace SceneUtil
                     while (lightList.size() > maxLights)
                         lightList.pop_back();
                 }
-                stateset = mLightManager->getLightListStateSet(lightList);
+                stateset = mLightManager->getLightListStateSet(lightList, nv->getTraversalNumber());
             }
             else
-                stateset = mLightManager->getLightListStateSet(mLightList);
+                stateset = mLightManager->getLightListStateSet(mLightList, nv->getTraversalNumber());
 
 
             cv->pushStateSet(stateset);
