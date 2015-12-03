@@ -10,11 +10,19 @@ namespace SceneUtil
 {
 
     /// LightSource managed by a LightManager.
+    /// @par Typically used for point lights. Spot lights are not supported yet. Directional lights affect the whole scene
+    ///     so do not need to be managed by a LightManager - so for directional lights use a plain osg::LightSource instead.
+    /// @note LightSources must be decorated by a LightManager node in order to have an effect. Typical use would
+    ///     be one LightManager as the root of the scene graph.
+    /// @note One needs to attach LightListCallback's to the scene to have objects receive lighting from LightSources.
+    ///     See the documentation of LightListCallback for more information.
+    /// @note The position of the contained osg::Light is automatically updated based on the LightSource's world position.
     class LightSource : public osg::Node
     {
+        // double buffered osg::Light's, since one of them may be in use by the draw thread at any given time
         osg::ref_ptr<osg::Light> mLight[2];
 
-        // The activation radius
+        // LightSource will affect objects within this radius
         float mRadius;
 
         int mId;
@@ -32,12 +40,15 @@ namespace SceneUtil
             return mRadius;
         }
 
+        /// The LightSource will affect objects within this radius.
         void setRadius(float radius)
         {
             mRadius = radius;
         }
 
         /// Get the osg::Light safe for modification in the given frame.
+        /// @par May be used externally to animate the light's color/attenuation properties,
+        /// and is used internally to synchronize the light's position with the position of the LightSource.
         osg::Light* getLight(unsigned int frame)
         {
             return mLight[frame % 2];
@@ -60,8 +71,7 @@ namespace SceneUtil
         }
     };
 
-    /// All light sources must be a child of the LightManager node. The LightManager can be anywhere in the scene graph,
-    /// but would be typically somewhere near the top.
+    /// @brief Decorator node implementing the rendering of any number of LightSources that can be anywhere in the subgraph.
     class LightManager : public osg::Group
     {
     public:
@@ -80,10 +90,15 @@ namespace SceneUtil
 
         unsigned int getLightingMask() const;
 
-        // Called automatically by the UpdateCallback
+        /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
+        void setStartLight(int start);
+
+        int getStartLight() const;
+
+        /// Internal use only, called automatically by the LightManager's UpdateCallback
         void update();
 
-        // Called automatically by the LightSource's UpdateCallback
+        /// Internal use only, called automatically by the LightSource's UpdateCallback
         void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, unsigned int frameNum);
 
         struct LightSourceTransform
@@ -106,11 +121,6 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, unsigned int frameNum);
 
-        /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
-        void setStartLight(int start);
-
-        int getStartLight() const;
-
     private:
         // Lights collected from the scene graph. Only valid during the cull traversal.
         std::vector<LightSourceTransform> mLights;
@@ -127,6 +137,13 @@ namespace SceneUtil
         unsigned int mLightingMask;
     };
 
+    /// To receive lighting, objects must be decorated by a LightListCallback. Light list callbacks must be added via
+    /// node->addCullCallback(new LightListCallback). Once a light list callback is added to a node, that node and all
+    /// its child nodes can receive lighting.
+    /// @par The placement of these LightListCallbacks affects the granularity of light lists. Having too fine grained
+    /// light lists can result in degraded performance. Too coarse grained light lists can result in lights no longer
+    /// rendering when the size of a light list exceeds the OpenGL limit on the number of concurrent lights (8). A good
+    /// starting point is to attach a LightListCallback to each game object's base node.
     /// @note Not thread safe for CullThreadPerCamera threading mode.
     class LightListCallback : public osg::NodeCallback
     {
