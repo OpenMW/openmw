@@ -394,6 +394,8 @@ namespace MWRender
 
         if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
             kfname.replace(kfname.size()-4, 4, ".kf");
+        else
+            return;
 
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
