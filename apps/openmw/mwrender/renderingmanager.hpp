@@ -159,6 +159,7 @@ namespace MWRender
         void resetCamera();
         float getCameraDistance() const;
         Camera* getCamera();
+        const osg::Vec3f& getCameraPosition() const;
         void togglePOV();
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
@@ -188,6 +189,7 @@ namespace MWRender
         std::auto_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::auto_ptr<Camera> mCamera;
+        osg::Vec3f mCurrentCameraPos;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 

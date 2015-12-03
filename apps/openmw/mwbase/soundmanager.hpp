@@ -153,7 +153,7 @@ namespace MWBase
 
             virtual void update(float duration) = 0;
 
-            virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up) = 0;
+            virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater) = 0;
 
             virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated) = 0;
 

@@ -218,7 +218,7 @@ namespace MWSound
 
         virtual void update(float duration);
 
-        virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up);
+        virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater);
 
         virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 

@@ -946,16 +946,13 @@ namespace MWSound
         mOutput->finishUpdate();
     }
 
-    void SoundManager::setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up)
+    void SoundManager::setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater)
     {
         mListenerPos = pos;
         mListenerDir = dir;
         mListenerUp  = up;
 
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        const MWWorld::CellStore *cell = player.getCell();
-
-        mListenerUnderwater = ((cell->getCell()->mData.mFlags&ESM::Cell::HasWater) && mListenerPos.z() < cell->getWaterLevel());
+        mListenerUnderwater = underwater;
     }
 
     void SoundManager::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)

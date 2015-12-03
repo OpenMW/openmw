@@ -387,6 +387,7 @@ namespace MWRender
 
         osg::Vec3f focal, cameraPos;
         mCamera->getPosition(focal, cameraPos);
+        mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
             setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
@@ -863,6 +864,11 @@ namespace MWRender
     Camera* RenderingManager::getCamera()
     {
         return mCamera.get();
+    }
+
+    const osg::Vec3f &RenderingManager::getCameraPosition() const
+    {
+        return mCurrentCameraPos;
     }
 
     void RenderingManager::togglePOV()
