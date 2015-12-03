@@ -296,6 +296,8 @@ namespace MWWorld
 
     float CellStore::getWaterLevel() const
     {
+        if (isExterior())
+            return -1;
         return mWaterLevel;
     }
 
