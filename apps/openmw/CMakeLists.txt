@@ -155,34 +155,14 @@ if (ANDROID)
         android
         log
         dl
-        MyGUIEngineStatic
-        BulletCollision
-        LinearMath
         z
-        osg
-        osgDB
-        osgAnimation
-        osgText
-        osgUtil
-        osgShadow
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OSG_PLUGINS}
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
         jpeg
         gif
-	png
+    	png
     )
 endif (ANDROID)
-
-
-if (OPENGL_ES)
-    target_link_libraries(openmw
-        ${OPENGLES_gl_LIBRARY}
-    )
-endif (OPENGL_ES)
 
 if (USE_SYSTEM_TINYXML)
     target_link_libraries(openmw ${TINYXML_LIBRARIES})

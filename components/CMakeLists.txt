@@ -139,7 +139,7 @@ add_component_dir (version
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 
-if (NOT ANDROID)
+if (USE_QT)
     add_component_qt_dir (contentselector
         model/modelitem model/esmfile
         model/naturalsort model/contentmodel
@@ -176,55 +176,39 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
-if (NOT ANDROID)
-    target_link_libraries(components 
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${OSG_LIBRARIES}
-        ${OPENTHREADS_LIBRARIES}
-        ${OSGPARTICLE_LIBRARIES}
-        ${OSGUTIL_LIBRARIES}
-        ${OSGDB_LIBRARIES}
-        ${OSGVIEWER_LIBRARIES}
-        ${OSGGA_LIBRARIES}
-        ${OSGFX_LIBRARIES}
-        ${OSGANIMATION_LIBRARIES}
-        ${BULLET_LIBRARIES}
-        ${SDL2_LIBRARY}
-        # For MyGUI platform
-        ${OPENGL_gl_LIBRARY}
-        ${MYGUI_LIBRARIES}
-        )
+if (OPENGL_ES)
+    set(GL_LIB ${OPENGLES_gl_LIBRARY})
 else()
-    target_link_libraries(components 
-        ${Boost_SYSTEM_LIBRARY}
-        ${Boost_FILESYSTEM_LIBRARY}
-        ${Boost_THREAD_LIBRARY}
-        ${Boost_PROGRAM_OPTIONS_LIBRARY}
-        ${OSG_LIBRARIES}
-        ${OPENTHREADS_LIBRARIES}
-        ${OSGPARTICLE_LIBRARIES}
-        ${OSGUTIL_LIBRARIES}
-        ${OSGDB_LIBRARIES}
-        ${OSGVIEWER_LIBRARIES}
-        ${OSGGA_LIBRARIES}
-        ${OSGFX_LIBRARIES}
-        ${OSGANIMATION_LIBRARIES}
-        ${BULLET_LIBRARIES}
-        ${SDL2_LIBRARY}
-        # For MyGUI platform
-        ${MYGUI_LIBRARIES}
-        )
+    set(GL_LIB ${OPENGL_gl_LIBRARY})
 endif()
+
+target_link_libraries(components 
+    ${Boost_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_THREAD_LIBRARY}
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${OSG_LIBRARIES}
+    ${OPENTHREADS_LIBRARIES}
+    ${OSGPARTICLE_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGDB_LIBRARIES}
+    ${OSGVIEWER_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${OSGFX_LIBRARIES}
+    ${OSGANIMATION_LIBRARIES}
+    ${BULLET_LIBRARIES}
+    ${SDL2_LIBRARY}
+    # For MyGUI platform
+    ${GL_LIB}
+    ${MYGUI_LIBRARIES}
+    )
 
 if (WIN32)
     target_link_libraries(components
     ${Boost_LOCALE_LIBRARY})
 endif()
 
-if (NOT ANDROID)
+if (USE_QT)
     if (DESIRED_QT_VERSION MATCHES 4)
         target_link_libraries(components
         ${QT_QTCORE_LIBRARY}

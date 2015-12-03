@@ -222,9 +222,6 @@ namespace SDLUtil
          #endif
 
         if (mCursorMap.find(name) != mCursorMap.end())
-             return;
-
-        if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
         osg::ref_ptr<osg::Image> decompressed = decompress(image, static_cast<float>(rotDegrees));

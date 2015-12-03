@@ -168,14 +168,23 @@ endif (ANDROID)
 
 option(OPENGL_ES "enable opengl es support" FALSE )
 
+option(USE_QT "Use Qt in building" TRUE )
+
+if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS)
+    set(USE_QT FALSE CACHE BOOL "disable Qt" FORCE )
+else()
+    set(USE_QT TRUE CACHE BOOL "enable Qt" FORCE )
+endif()
+
+add_definitions (-DUSE_QT)
+ 
 if (OPENGL_ES)
-    INCLUDE(cmake/FindOpenGLES.cmake)
+    find_package(OpenGLES)
     add_definitions (-DOPENGL_ES)
-    INCLUDE_DIRECTORIES(${OPENGLES_INCLUDE_DIR})
 endif (OPENGLES)
 
 # Dependencies
-if (NOT ANDROID)
+if (USE_QT)
     set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
     message(STATUS "Using Qt${DESIRED_QT_VERSION}")
 
@@ -220,7 +229,7 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-if (NOT ANDROID)
+if (USE_QT)
     find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgQt osgUtil osgFX)
 else()
     find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle osgUtil osgFX)
