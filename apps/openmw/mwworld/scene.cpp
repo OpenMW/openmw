@@ -265,7 +265,7 @@ namespace MWWorld
 
             mRendering.addCell(cell);
             bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
-            float waterLevel = cell->isExterior() ? -1.f : cell->getWaterLevel();
+            float waterLevel = cell->getWaterLevel();
             mRendering.setWaterEnabled(waterEnabled);
             if (waterEnabled)
             {

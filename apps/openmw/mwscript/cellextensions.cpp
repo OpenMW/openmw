@@ -144,7 +144,9 @@ namespace MWScript
                         return;
                     }
                     MWWorld::CellStore *cell = MWMechanics::getPlayer().getCell();
-                    if (cell->getCell()->hasWater())
+                    if (cell->isExterior())
+                        runtime.push(0.f); // vanilla oddity, return 0 even though water is actually at -1
+                    else if (cell->getCell()->hasWater())
                         runtime.push (cell->getWaterLevel());
                     else
                         runtime.push (-std::numeric_limits<float>::max());
