@@ -157,7 +157,6 @@ endif()
 
 if (ANDROID)
     set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
-    add_definitions (-DOSG_PLUGINS_DIR=${OSG_PLUGINS_DIR})
     set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
 endif (ANDROID)
 
@@ -172,8 +171,6 @@ if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
 else()
    set(USE_QT TRUE)
 endif()
-
-add_definitions(-DUSE_QT)
  
 # Dependencies
 if (USE_QT)
