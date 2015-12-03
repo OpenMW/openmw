@@ -135,7 +135,10 @@ bool Skeleton::getActive() const
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
-    if (!mActive && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR && mLastFrameNumber != 0)
+    if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR
+            // need to process at least 2 frames before shutting off update, since we need to have both frame-alternating RigGeometries initialized
+            // this would be more naturally handled if the double-buffering was implemented in RigGeometry itself rather than in a FrameSwitch decorator node
+            && mLastFrameNumber != 0 && mLastFrameNumber+2 <= nv.getTraversalNumber())
         return;
     osg::Group::traverse(nv);
 }

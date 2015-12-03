@@ -82,7 +82,7 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mSkeleton(NULL)
     , mInfluenceMap(copy.mInfluenceMap)
     , mLastFrameNumber(0)
-    , mBoundsFirstFrame(copy.mBoundsFirstFrame)
+    , mBoundsFirstFrame(true)
 {
     setSourceGeometry(copy.mSourceGeometry);
 }
@@ -211,6 +211,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
+        std::cerr << "RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
+        // try to recover anyway, though rendering is likely to be incorrect.
         if (!initFromParentSkeleton(nv))
             return;
     }
