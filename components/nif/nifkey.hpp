@@ -138,6 +138,11 @@ private:
         /*key.mBackwardValue = */(nif.*getValue)();
     }
 
+    static void readQuadratic(NIFStream &nif, KeyT<osg::Quat> &key)
+    {
+        readValue(nif, key);
+    }
+
     static void readTBC(NIFStream &nif, KeyT<T> &key)
     {
         readValue(nif, key);
