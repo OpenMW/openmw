@@ -20,11 +20,10 @@ namespace SceneUtil
             }
         }
 
-        // Swap to make the StateSet in [0] writable, [1] is now the StateSet that was queued by the last frame
-        std::swap(mStateSets[0], mStateSets[1]);
-        node->setStateSet(mStateSets[0]);
+        osg::StateSet* stateset = mStateSets[nv->getTraversalNumber()%2];
+        node->setStateSet(stateset);
 
-        apply(mStateSets[0], nv);
+        apply(stateset, nv);
 
         traverse(node, nv);
     }
