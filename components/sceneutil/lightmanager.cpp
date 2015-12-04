@@ -260,10 +260,10 @@ namespace SceneUtil
 
     LightSource::LightSource(const LightSource &copy, const osg::CopyOp &copyop)
         : osg::Node(copy, copyop)
-        , mLight(copy.mLight)
         , mRadius(copy.mRadius)
     {
         mId = sLightId++;
+        std::copy_n(copy.mLight, 2, mLight);
     }
 
 
