@@ -112,11 +112,64 @@ namespace MWWorld
             /// Repopulate mMergedRefs.
             void updateMergedRefs();
 
+            template<typename T>
+            LiveCellRefBase* insertBase(CellRefList<T>& list, const LiveCellRef<T>* ref)
+            {
+                mHasState = true;
+                LiveCellRefBase* ret = &list.insert(*ref);
+                updateMergedRefs();
+                return ret;
+            }
+
+            // helper function for forEachInternal
+            template<class Functor, class List>
+            bool forEachImp (Functor& functor, List& list)
+            {
+                for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
+                    ++iter)
+                {
+                    if (iter->mData.isDeletedByContentFile())
+                        continue;
+                    if (!functor (MWWorld::Ptr(&*iter, this)))
+                        return false;
+                }
+                return true;
+            }
+
+            // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved objects are accounted for.
+            template<class Functor>
+            bool forEachInternal (Functor& functor)
+            {
+                return
+                    forEachImp (functor, mActivators) &&
+                    forEachImp (functor, mPotions) &&
+                    forEachImp (functor, mAppas) &&
+                    forEachImp (functor, mArmors) &&
+                    forEachImp (functor, mBooks) &&
+                    forEachImp (functor, mClothes) &&
+                    forEachImp (functor, mContainers) &&
+                    forEachImp (functor, mDoors) &&
+                    forEachImp (functor, mIngreds) &&
+                    forEachImp (functor, mItemLists) &&
+                    forEachImp (functor, mLights) &&
+                    forEachImp (functor, mLockpicks) &&
+                    forEachImp (functor, mMiscItems) &&
+                    forEachImp (functor, mProbes) &&
+                    forEachImp (functor, mRepairs) &&
+                    forEachImp (functor, mStatics) &&
+                    forEachImp (functor, mWeapons) &&
+                    forEachImp (functor, mCreatures) &&
+                    forEachImp (functor, mNpcs) &&
+                    forEachImp (functor, mCreatureLists);
+            }
+
         public:
 
             /// Moves object from this cell to the given cell.
             /// @note automatically updates given cell by calling cellToMoveTo->moveFrom(...)
-            void moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
+            /// @note throws exception if cellToMoveTo == this
+            /// @return updated MWWorld::Ptr with the new CellStore pointer set.
+            MWWorld::Ptr moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
 
             /// Make a copy of the given object and insert it into this cell.
             /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
@@ -136,6 +189,7 @@ namespace MWWorld
             bool hasId (const std::string& id) const;
             ///< May return true for deleted IDs when in preload state. Will return false, if cell is
             /// unloaded.
+            /// @note Will not account for moved references which may exist in Loaded state. Use search() instead if the cell is loaded.
 
             Ptr search (const std::string& id);
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
@@ -166,45 +220,23 @@ namespace MWWorld
             /// false will abort the iteration.
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
-            ///
-            /// \note Creatures and NPCs are handled last.
             template<class Functor>
             bool forEach (Functor& functor)
             {
+                if (mState != State_Loaded)
+                    return false;
+
                 mHasState = true;
 
-                return
-                    forEachImp (functor, mActivators) &&
-                    forEachImp (functor, mPotions) &&
-                    forEachImp (functor, mAppas) &&
-                    forEachImp (functor, mArmors) &&
-                    forEachImp (functor, mBooks) &&
-                    forEachImp (functor, mClothes) &&
-                    forEachImp (functor, mContainers) &&
-                    forEachImp (functor, mDoors) &&
-                    forEachImp (functor, mIngreds) &&
-                    forEachImp (functor, mItemLists) &&
-                    forEachImp (functor, mLights) &&
-                    forEachImp (functor, mLockpicks) &&
-                    forEachImp (functor, mMiscItems) &&
-                    forEachImp (functor, mProbes) &&
-                    forEachImp (functor, mRepairs) &&
-                    forEachImp (functor, mStatics) &&
-                    forEachImp (functor, mWeapons) &&
-                    forEachImp (functor, mCreatures) &&
-                    forEachImp (functor, mNpcs) &&
-                    forEachImp (functor, mCreatureLists);
-            }
+                for (unsigned int i=0; i<mMergedRefs.size(); ++i)
+                {
+                    if (mMergedRefs[i]->mData.isDeletedByContentFile())
+                        continue;
 
-            template<class Functor>
-            bool forEachContainer (Functor& functor)
-            {
-                mHasState = true;
-
-                return
-                    forEachImp (functor, mContainers) &&
-                    forEachImp (functor, mCreatures) &&
-                    forEachImp (functor, mNpcs);
+                    if (!functor(MWWorld::Ptr(mMergedRefs[i], this)))
+                        return false;
+                }
+                return true;
             }
 
             /// \todo add const version of forEach
@@ -234,20 +266,6 @@ namespace MWWorld
 
         private:
 
-            template<class Functor, class List>
-            bool forEachImp (Functor& functor, List& list)
-            {
-                for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
-                    ++iter)
-                {
-                    if (iter->mData.isDeletedByContentFile())
-                        continue;
-                    if (!functor (MWWorld::Ptr(&*iter, this)))
-                        return false;
-                }
-                return true;
-            }
-
             /// Run through references and store IDs
             void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
 
@@ -261,126 +279,105 @@ namespace MWWorld
             MWMechanics::PathgridGraph mPathgridGraph;
     };
 
-
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Activator>(const LiveCellRef<ESM::Activator>* ref)
     {
-        mHasState = true;
-        return &mActivators.insert(*ref);
+        return insertBase(mActivators, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Potion>(const LiveCellRef<ESM::Potion>* ref)
     {
-        mHasState = true;
-        return &mPotions.insert(*ref);
+        return insertBase(mPotions, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Apparatus>(const LiveCellRef<ESM::Apparatus>* ref)
     {
-        mHasState = true;
-        return &mAppas.insert(*ref);
+        return insertBase(mAppas, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Armor>(const LiveCellRef<ESM::Armor>* ref)
     {
-        mHasState = true;
-        return &mArmors.insert(*ref);
+        return insertBase(mArmors, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Book>(const LiveCellRef<ESM::Book>* ref)
     {
-        mHasState = true;
-        return &mBooks.insert(*ref);
+        return insertBase(mBooks, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Clothing>(const LiveCellRef<ESM::Clothing>* ref)
     {
-        mHasState = true;
-        return &mClothes.insert(*ref);
+        return insertBase(mClothes, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Container>(const LiveCellRef<ESM::Container>* ref)
     {
-        mHasState = true;
-        return &mContainers.insert(*ref);
+        return insertBase(mContainers, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Creature>(const LiveCellRef<ESM::Creature>* ref)
     {
-        mHasState = true;
-        return &mCreatures.insert(*ref);
+        return insertBase(mCreatures, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Door>(const LiveCellRef<ESM::Door>* ref)
     {
-        mHasState = true;
-        return &mDoors.insert(*ref);
+        return insertBase(mDoors, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Ingredient>(const LiveCellRef<ESM::Ingredient>* ref)
     {
-        mHasState = true;
-        return &mIngreds.insert(*ref);
+        return insertBase(mIngreds, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::CreatureLevList>(const LiveCellRef<ESM::CreatureLevList>* ref)
     {
-        mHasState = true;
-        return &mCreatureLists.insert(*ref);
+        return insertBase(mCreatureLists, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::ItemLevList>(const LiveCellRef<ESM::ItemLevList>* ref)
     {
-        mHasState = true;
-        return &mItemLists.insert(*ref);
+        return insertBase(mItemLists, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Light>(const LiveCellRef<ESM::Light>* ref)
     {
-        mHasState = true;
-        return &mLights.insert(*ref);
+        return insertBase(mLights, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Lockpick>(const LiveCellRef<ESM::Lockpick>* ref)
     {
-        mHasState = true;
-        return &mLockpicks.insert(*ref);
+        return insertBase(mLockpicks, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Miscellaneous>(const LiveCellRef<ESM::Miscellaneous>* ref)
     {
-        mHasState = true;
-        return &mMiscItems.insert(*ref);
+        return insertBase(mMiscItems, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::NPC>(const LiveCellRef<ESM::NPC>* ref)
     {
-        mHasState = true;
-        return &mNpcs.insert(*ref);
+        return insertBase(mNpcs, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Probe>(const LiveCellRef<ESM::Probe>* ref)
     {
-        mHasState = true;
-        return &mProbes.insert(*ref);
+        return insertBase(mProbes, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Repair>(const LiveCellRef<ESM::Repair>* ref)
     {
-        mHasState = true;
-        return &mRepairs.insert(*ref);
+        return insertBase(mRepairs, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Static>(const LiveCellRef<ESM::Static>* ref)
     {
-        mHasState = true;
-        return &mStatics.insert(*ref);
+        return insertBase(mStatics, ref);
     }
     template<>
     inline LiveCellRefBase* CellStore::insert<ESM::Weapon>(const LiveCellRef<ESM::Weapon>* ref)
     {
-        mHasState = true;
-        return &mWeapons.insert(*ref);
+        return insertBase(mWeapons, ref);
     }
 
     bool operator== (const CellStore& left, const CellStore& right);

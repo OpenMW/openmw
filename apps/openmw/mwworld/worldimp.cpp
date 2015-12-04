@@ -722,7 +722,7 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
             FindContainerFunctor functor(ptr);
-            (*cellIt)->forEachContainer(functor);
+            //(*cellIt)->forEachContainer(functor);
 
             if (!functor.mResult.isEmpty())
                 return functor.mResult;
@@ -1146,7 +1146,7 @@ namespace MWWorld
                 bool newCellActive = mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = currCell->moveTo(ptr, newCell);
                     mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
@@ -1162,14 +1162,14 @@ namespace MWWorld
                     removeContainerScripts (ptr);
                     haveToMove = false;
 
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = currCell->moveTo(ptr, newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
                 else if (!currCellActive && !newCellActive)
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = currCell->moveTo(ptr, newCell);
                 else // both cells active
                 {
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = currCell->moveTo(ptr, newCell);
 
                     mRendering->updatePtr(ptr, newPtr);
                     ptr.getRefData().setBaseNode(NULL);
@@ -1189,7 +1189,6 @@ namespace MWWorld
                         addContainerScripts (newPtr, newCell);
                     }
                 }
-                ptr.getRefData().setCount(0);
             }
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())

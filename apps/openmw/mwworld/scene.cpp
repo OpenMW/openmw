@@ -116,7 +116,6 @@ namespace
             {
                 addObject(ptr, mPhysics, mRendering);
                 updateObjectRotation(ptr, mPhysics, mRendering, false);
-                ptr.getClass().adjustPosition (ptr, false);
             }
             catch (const std::exception& e)
             {
@@ -129,6 +128,17 @@ namespace
 
         return true;
     }
+
+    struct AdjustPositionFunctor
+    {
+        bool operator() (const MWWorld::Ptr& ptr)
+        {
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+                ptr.getClass().adjustPosition (ptr, false);
+            return true;
+        }
+    };
+
 }
 
 
@@ -553,6 +563,10 @@ namespace MWWorld
     {
         InsertFunctor functor (cell, rescale, *loadingListener, *mPhysics, mRendering);
         cell.forEach (functor);
+
+        // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
+        AdjustPositionFunctor adjustPosFunctor;
+        cell.forEach (adjustPosFunctor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

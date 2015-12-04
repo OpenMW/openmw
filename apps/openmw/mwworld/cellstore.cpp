@@ -47,12 +47,15 @@ namespace
 
     template<typename T>
     MWWorld::Ptr searchViaActorId (MWWorld::CellRefList<T>& actorList, int actorId,
-        MWWorld::CellStore *cell)
+        MWWorld::CellStore *cell, const std::map<MWWorld::LiveCellRefBase*, MWWorld::CellStore*>& toIgnore)
     {
         for (typename MWWorld::CellRefList<T>::List::iterator iter (actorList.mList.begin());
              iter!=actorList.mList.end(); ++iter)
         {
             MWWorld::Ptr actor (&*iter, cell);
+
+            if (toIgnore.find(&*iter) != toIgnore.end())
+                continue;
 
             if (actor.getClass().getCreatureStats (actor).matchesActorId (actorId) && actor.getRefData().getCount() > 0)
                 return actor;
@@ -181,6 +184,7 @@ namespace MWWorld
 
     void CellStore::moveFrom(const Ptr &object, CellStore *from)
     {
+        mHasState = true;
         MovedRefTracker::iterator found = mMovedToAnotherCell.find(object.getBase());
         if (found != mMovedToAnotherCell.end())
         {
@@ -192,10 +196,27 @@ namespace MWWorld
         {
             mMovedHere.insert(std::make_pair(object.getBase(), from));
         }
+
+        if (mState == State_Loaded)
+            updateMergedRefs();
+        else if (mState == State_Preloaded)
+        {
+            mIds.push_back(object.getCellRef().getRefId());
+            std::sort(mIds.begin(), mIds.end());
+        }
     }
 
-    void CellStore::moveTo(const Ptr &object, CellStore *cellToMoveTo)
+    MWWorld::Ptr CellStore::moveTo(const Ptr &object, CellStore *cellToMoveTo)
     {
+        if (cellToMoveTo == this)
+            throw std::runtime_error("object is already in this cell");
+
+        // We assume that *this is in State_Loaded since we could hardly have reference to a live object otherwise.
+        if (mState != State_Loaded)
+            throw std::runtime_error("can't move object from a non-loaded cell (how did you get this object anyway?)");
+
+        // TODO: ensure that the object actually exists in the cell
+
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())
         {
@@ -208,21 +229,59 @@ namespace MWWorld
             mMovedHere.erase(found);
 
             // Now that object is back to its rightful owner, we can move it
-            originalCell->moveTo(object, cellToMoveTo);
+            if (cellToMoveTo != originalCell)
+            {
+                originalCell->moveTo(object, cellToMoveTo);
+            }
 
             updateMergedRefs();
-            return;
+            return MWWorld::Ptr(object.getBase(), cellToMoveTo);
         }
 
         cellToMoveTo->moveFrom(object, this);
         mMovedToAnotherCell.insert(std::make_pair(object.getBase(), cellToMoveTo));
 
         updateMergedRefs();
+        return MWWorld::Ptr(object.getBase(), cellToMoveTo);
     }
+
+    struct MergeFunctor
+    {
+        MergeFunctor(std::vector<LiveCellRefBase*>& mergeTo, const std::map<LiveCellRefBase*, MWWorld::CellStore*>& movedHere,
+                     const std::map<LiveCellRefBase*, MWWorld::CellStore*>& movedToAnotherCell)
+            : mMergeTo(mergeTo)
+            , mMovedHere(movedHere)
+            , mMovedToAnotherCell(movedToAnotherCell)
+        {
+        }
+
+        bool operator() (const MWWorld::Ptr& ptr)
+        {
+            if (mMovedToAnotherCell.find(ptr.getBase()) != mMovedToAnotherCell.end())
+                return true;
+            mMergeTo.push_back(ptr.getBase());
+            return true;
+        }
+
+        void merge()
+        {
+            for (std::map<LiveCellRefBase*, MWWorld::CellStore*>::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
+                mMergeTo.push_back(it->first);
+        }
+
+    private:
+        std::vector<LiveCellRefBase*>& mMergeTo;
+
+        const std::map<LiveCellRefBase*, MWWorld::CellStore*>& mMovedHere;
+        const std::map<LiveCellRefBase*, MWWorld::CellStore*>& mMovedToAnotherCell;
+    };
 
     void CellStore::updateMergedRefs()
     {
-
+        mMergedRefs.clear();
+        MergeFunctor functor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
+        forEachInternal(functor);
+        functor.merge();
     }
 
     CellStore::CellStore (const ESM::Cell *cell)
@@ -258,84 +317,49 @@ namespace MWWorld
         return const_cast<CellStore *> (this)->search (id).isEmpty();
     }
 
+    struct SearchFunctor
+    {
+        MWWorld::Ptr mFound;
+        std::string mIdToFind;
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if (ptr.getCellRef().getRefId() == mIdToFind)
+            {
+                mFound = ptr;
+                return false;
+            }
+            return true;
+        }
+    };
+
     Ptr CellStore::search (const std::string& id)
     {
         bool oldState = mHasState;
 
-        mHasState = true;
-
-        if (LiveCellRef<ESM::Activator> *ref = mActivators.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Potion> *ref = mPotions.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Apparatus> *ref = mAppas.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Armor> *ref = mArmors.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Book> *ref = mBooks.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Clothing> *ref = mClothes.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Container> *ref = mContainers.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Creature> *ref = mCreatures.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Door> *ref = mDoors.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Ingredient> *ref = mIngreds.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::CreatureLevList> *ref = mCreatureLists.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::ItemLevList> *ref = mItemLists.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Light> *ref = mLights.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Lockpick> *ref = mLockpicks.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Miscellaneous> *ref = mMiscItems.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::NPC> *ref = mNpcs.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Probe> *ref = mProbes.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Repair> *ref = mRepairs.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Static> *ref = mStatics.find (id))
-            return Ptr (ref, this);
-
-        if (LiveCellRef<ESM::Weapon> *ref = mWeapons.find (id))
-            return Ptr (ref, this);
+        SearchFunctor searchFunctor;
+        searchFunctor.mIdToFind = id;
+        forEach(searchFunctor);
 
         mHasState = oldState;
-
-        return Ptr();
+        return searchFunctor.mFound;
     }
 
     Ptr CellStore::searchViaActorId (int id)
     {
-        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this))
+        if (Ptr ptr = ::searchViaActorId (mNpcs, id, this, mMovedToAnotherCell))
             return ptr;
 
-        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this))
+        if (Ptr ptr = ::searchViaActorId (mCreatures, id, this, mMovedToAnotherCell))
             return ptr;
+
+        for (MovedRefTracker::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
+        {
+            MWWorld::Ptr actor (it->first, this);
+            if (!actor.getClass().isActor())
+                continue;
+            if (actor.getClass().getCreatureStats (actor).matchesActorId (id) && actor.getRefData().getCount() > 0)
+                return actor;
+        }
 
         return Ptr();
     }
@@ -435,6 +459,8 @@ namespace MWWorld
                     continue;
                 }
 
+                // We don't need to check mMovedToAnotherCell because listRefs isn't used for loaded cells.
+
                 mIds.push_back (Misc::StringUtils::lowerCase (ref.mRefID));
             }
         }
@@ -445,6 +471,12 @@ namespace MWWorld
             const ESM::CellRef &ref = *it;
 
             mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
+        }
+
+        // List runtime moved references
+        for (MovedRefTracker::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
+        {
+            mIds.push_back(Misc::StringUtils::lowerCase(it->first->mRef.getRefId()));
         }
 
         std::sort (mIds.begin(), mIds.end());
@@ -489,6 +521,8 @@ namespace MWWorld
 
             loadRef (ref, false, store);
         }
+
+        updateMergedRefs();
     }
 
     bool CellStore::isExterior() const
@@ -610,11 +644,15 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
         writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
         writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
+
+        // TODO: write moved references
     }
 
     void CellStore::readReferences (ESM::ESMReader& reader,
         const std::map<int, int>& contentFileMap)
     {
+        // TODO: read moved references
+
         mHasState = true;
 
         while (reader.isNextSub ("OBJE"))
