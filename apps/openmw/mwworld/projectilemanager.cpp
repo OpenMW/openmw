@@ -7,6 +7,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -91,6 +92,9 @@ namespace MWWorld
         }
 
         mResourceSystem->getSceneManager()->createInstance(model, attachTo);
+
+        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
+        state.mNode->accept(disableFreezeOnCullVisitor);
 
         mParent->addChild(state.mNode);
 
