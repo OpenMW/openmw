@@ -45,15 +45,54 @@ namespace MWWorld
 
     }
 
-    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient)
+    /// Rotates an osg::PositionAttitudeTransform over time.
+    class RotateCallback : public osg::NodeCallback
+    {
+    public:
+        RotateCallback(const osg::Vec3f& axis = osg::Vec3f(0,-1,0), float rotateSpeed = osg::PI*2)
+            : mAxis(axis)
+            , mRotateSpeed(rotateSpeed)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            osg::PositionAttitudeTransform* transform = static_cast<osg::PositionAttitudeTransform*>(node);
+
+            double time = nv->getFrameStamp()->getSimulationTime();
+
+            osg::Quat orient = osg::Quat(time * mRotateSpeed, mAxis);
+            transform->setAttitude(orient);
+
+            traverse(node, nv);
+        }
+
+    private:
+        osg::Vec3f mAxis;
+        float mRotateSpeed;
+    };
+
+
+    void ProjectileManager::createModel(State &state, const std::string &model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate)
     {
         state.mNode = new osg::PositionAttitudeTransform;
         state.mNode->setNodeMask(MWRender::Mask_Effect);
         state.mNode->setPosition(pos);
         state.mNode->setAttitude(orient);
-        mParent->addChild(state.mNode);
 
-        mResourceSystem->getSceneManager()->createInstance(model, state.mNode);
+        osg::Group* attachTo = state.mNode;
+
+        if (rotate)
+        {
+            osg::ref_ptr<osg::PositionAttitudeTransform> rotateNode (new osg::PositionAttitudeTransform);
+            rotateNode->addUpdateCallback(new RotateCallback());
+            state.mNode->addChild(rotateNode);
+            attachTo = rotateNode;
+        }
+
+        mResourceSystem->getSceneManager()->createInstance(model, attachTo);
+
+        mParent->addChild(state.mNode);
 
         state.mEffectAnimationTime.reset(new MWRender::EffectAnimationTime);
 
@@ -107,7 +146,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), model);
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, true);
 
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
         state.mSound = sndMgr->playSound3D(pos, sound, 1.0f, 1.0f, MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_Loop);
@@ -128,7 +167,7 @@ namespace MWWorld
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
-        createModel(state, ptr.getClass().getModel(ptr), pos, orient);
+        createModel(state, ptr.getClass().getModel(ptr), pos, orient, false);
 
         mProjectiles.push_back(state);
     }
@@ -348,7 +387,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), false);
 
             mProjectiles.push_back(state);
             return true;
@@ -379,7 +418,7 @@ namespace MWWorld
                 return true;
             }
 
-            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation));
+            createModel(state, model, osg::Vec3f(esm.mPosition), osg::Quat(esm.mOrientation), true);
 
             MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
             state.mSound = sndMgr->playSound3D(esm.mPosition, esm.mSound, 1.0f, 1.0f,
