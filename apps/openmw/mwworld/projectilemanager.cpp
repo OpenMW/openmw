@@ -8,6 +8,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -95,6 +96,8 @@ namespace MWWorld
 
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         state.mNode->accept(disableFreezeOnCullVisitor);
+
+        state.mNode->addCullCallback(new SceneUtil::LightListCallback);
 
         mParent->addChild(state.mNode);
 

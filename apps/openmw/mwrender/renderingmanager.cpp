@@ -227,6 +227,11 @@ namespace MWRender
         return mResourceSystem;
     }
 
+    osg::Group* RenderingManager::getLightRoot()
+    {
+        return mLightRoot.get();
+    }
+
     void RenderingManager::setNightEyeFactor(float factor)
     {
         if (factor != mNightEyeFactor)

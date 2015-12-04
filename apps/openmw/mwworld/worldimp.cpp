@@ -164,7 +164,7 @@ namespace MWWorld
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
-        mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mRendering, mPhysics));
+        mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering, mPhysics));
 
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();

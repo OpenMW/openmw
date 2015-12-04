@@ -65,6 +65,8 @@ namespace MWRender
 
         Resource::ResourceSystem* getResourceSystem();
 
+        osg::Group* getLightRoot();
+
         void setNightEyeFactor(float factor);
 
         void setAmbientColour(const osg::Vec4f& colour);
