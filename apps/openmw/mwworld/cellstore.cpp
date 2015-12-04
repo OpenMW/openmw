@@ -379,27 +379,7 @@ namespace MWWorld
 
     int CellStore::count() const
     {
-        return
-            mActivators.mList.size()
-            + mPotions.mList.size()
-            + mAppas.mList.size()
-            + mArmors.mList.size()
-            + mBooks.mList.size()
-            + mClothes.mList.size()
-            + mContainers.mList.size()
-            + mDoors.mList.size()
-            + mIngreds.mList.size()
-            + mCreatureLists.mList.size()
-            + mItemLists.mList.size()
-            + mLights.mList.size()
-            + mLockpicks.mList.size()
-            + mMiscItems.mList.size()
-            + mProbes.mList.size()
-            + mRepairs.mList.size()
-            + mStatics.mList.size()
-            + mWeapons.mList.size()
-            + mCreatures.mList.size()
-            + mNpcs.mList.size();
+        return mMergedRefs.size();
     }
 
     void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
