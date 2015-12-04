@@ -422,9 +422,17 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    runtime.push(ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(
-                                      MWMechanics::EffectKey(key)).getMagnitude() > 0);
-                }
+                    const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                    for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+                    {
+                        if (it->first.mId == key)
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+               }
         };
 
         template<class R>
