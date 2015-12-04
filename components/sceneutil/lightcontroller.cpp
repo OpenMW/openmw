@@ -61,8 +61,10 @@ namespace SceneUtil
     void LightController::operator ()(osg::Node* node, osg::NodeVisitor* nv)
     {
         double time = nv->getFrameStamp()->getSimulationTime();
-        if (time == mLastTime)
-            return;
+
+        // disabled early out, light state needs to be set every frame regardless of change, due to the double buffering
+        //if (time == mLastTime)
+        //    return;
 
         float dt = static_cast<float>(time - mLastTime);
         mLastTime = time;
@@ -119,6 +121,8 @@ namespace SceneUtil
             brightness = 0.7f + pulseAmplitude(mDeltaCount*slow)*0.3f;
 
         static_cast<SceneUtil::LightSource*>(node)->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * brightness);
+
+        traverse(node, nv);
     }
 
     void LightController::setDiffuse(osg::Vec4f color)
