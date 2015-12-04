@@ -263,7 +263,7 @@ namespace SceneUtil
         , mRadius(copy.mRadius)
     {
         mId = sLightId++;
-        std::copy_n(copy.mLight, 2, mLight);
+        std::copy(std::begin(copy.mLight), std::end(copy.mLight), std::begin(mLight));
     }
 
 
