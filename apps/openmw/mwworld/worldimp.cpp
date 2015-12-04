@@ -163,8 +163,8 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0)
     {
         mPhysics = new MWPhysics::PhysicsSystem(resourceSystem, rootNode);
-        mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mPhysics));
         mRendering = new MWRender::RenderingManager(viewer, rootNode, resourceSystem, &mFallback, resourcePath);
+        mProjectileManager.reset(new ProjectileManager(rootNode, resourceSystem, mRendering, mPhysics));
 
         mEsm.resize(contentFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();

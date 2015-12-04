@@ -36,6 +36,7 @@ namespace Resource
 namespace MWRender
 {
     class EffectAnimationTime;
+    class RenderingManager;
 }
 
 namespace MWWorld
@@ -45,7 +46,7 @@ namespace MWWorld
     {
     public:
         ProjectileManager (osg::Group* parent, Resource::ResourceSystem* resourceSystem,
-                MWPhysics::PhysicsSystem* physics);
+                MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
@@ -67,6 +68,7 @@ namespace MWWorld
     private:
         osg::ref_ptr<osg::Group> mParent;
         Resource::ResourceSystem* mResourceSystem;
+        MWRender::RenderingManager* mRendering;
         MWPhysics::PhysicsSystem* mPhysics;
 
         struct State
@@ -120,6 +122,9 @@ namespace MWWorld
 
         void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient);
         void update (State& state, float duration);
+
+        void operator=(const ProjectileManager&);
+        ProjectileManager(const ProjectileManager&);
     };
 
 }

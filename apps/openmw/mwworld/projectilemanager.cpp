@@ -25,6 +25,7 @@
 #include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
+#include "../mwrender/renderingmanager.hpp"
 
 #include "../mwsound/sound.hpp"
 
@@ -34,9 +35,11 @@
 namespace MWWorld
 {
 
-    ProjectileManager::ProjectileManager(osg::Group* parent, Resource::ResourceSystem* resourceSystem, MWPhysics::PhysicsSystem* physics)
+    ProjectileManager::ProjectileManager(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
+                                         MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics)
         : mParent(parent)
         , mResourceSystem(resourceSystem)
+        , mRendering(rendering)
         , mPhysics(physics)
     {
 
@@ -225,32 +228,38 @@ namespace MWWorld
             // TODO: use a proper btRigidBody / btGhostObject?
             MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, 0xff, MWPhysics::CollisionType_Projectile);
 
-            if (result.mHit)
+            bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
+            if (result.mHit || underwater)
             {
-                MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
-
-                // Try to get a Ptr to the bow that was used. It might no longer exist.
-                MWWorld::Ptr bow = projectileRef.getPtr();
-                if (!caster.isEmpty())
+                if (result.mHit)
                 {
-                    MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
-                    MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                    if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
-                        bow = *invIt;
+                    MWWorld::ManualRef projectileRef(MWBase::Environment::get().getWorld()->getStore(), it->mId);
+
+                    // Try to get a Ptr to the bow that was used. It might no longer exist.
+                    MWWorld::Ptr bow = projectileRef.getPtr();
+                    if (!caster.isEmpty())
+                    {
+                        MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
+                        MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                        if (invIt != inv.end() && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), it->mBowId))
+                            bow = *invIt;
+                    }
+
+                    if (caster.isEmpty())
+                        caster = result.mHitObject;
+
+                    MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
                 }
 
-                if (caster.isEmpty())
-                    caster = result.mHitObject;
-
-                MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHitPos, it->mAttackStrength);
+                if (underwater)
+                    mRendering->emitWaterRipple(newPos);
 
                 mParent->removeChild(it->mNode);
-
                 it = mProjectiles.erase(it);
                 continue;
             }
-            else
-                ++it;
+
+            ++it;
         }
     }
 

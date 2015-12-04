@@ -756,6 +756,11 @@ namespace MWRender
         mWater->removeEmitter(ptr);
     }
 
+    void RenderingManager::emitWaterRipple(const osg::Vec3f &pos)
+    {
+        mWater->emitRipple(pos);
+    }
+
     void RenderingManager::updateProjectionMatrix()
     {
         double aspect = mViewer->getCamera()->getViewport()->aspectRatio();

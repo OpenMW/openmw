@@ -52,6 +52,8 @@ namespace MWRender
         void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
         void removeCell(const MWWorld::CellStore* store);
 
+        void emitRipple(const osg::Vec3f& pos);
+
         /// Change the height of the water surface, thus moving all ripples with it
         void setWaterHeight(float height);
 

@@ -138,6 +138,7 @@ namespace MWRender
 
         void addWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
+        void emitWaterRipple(const osg::Vec3f& pos);
 
         void updatePlayerPtr(const MWWorld::Ptr &ptr);
 

@@ -139,9 +139,7 @@ void RippleSimulation::update(float dt)
             if (mParticleSystem->numParticles()-mParticleSystem->numDeadParticles() > 500)
                 continue; // TODO: remove the oldest particle to make room?
 
-            osgParticle::Particle* p = mParticleSystem->createParticle(NULL);
-            p->setPosition(currentPos);
-            p->setAngle(osg::Vec3f(0,0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
+            emitRipple(currentPos);
         }
     }
 }
@@ -191,6 +189,16 @@ void RippleSimulation::removeCell(const MWWorld::CellStore *store)
         }
         else
             ++it;
+    }
+}
+
+void RippleSimulation::emitRipple(const osg::Vec3f &pos)
+{
+    if (std::abs(pos.z() - mParticleNode->getPosition().z()) < 20)
+    {
+        osgParticle::Particle* p = mParticleSystem->createParticle(NULL);
+        p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
+        p->setAngle(osg::Vec3f(0,0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
     }
 }
 

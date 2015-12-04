@@ -731,6 +731,11 @@ void Water::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
     mSimulation->updateEmitterPtr(old, ptr);
 }
 
+void Water::emitRipple(const osg::Vec3f &pos)
+{
+    mSimulation->emitRipple(pos);
+}
+
 void Water::removeCell(const MWWorld::CellStore *store)
 {
     mSimulation->removeCell(store);
