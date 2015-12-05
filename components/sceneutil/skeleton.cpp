@@ -3,6 +3,8 @@
 #include <osg/Transform>
 #include <osg/MatrixTransform>
 
+#include <components/misc/stringops.hpp>
+
 #include <iostream>
 
 namespace SceneUtil
@@ -23,7 +25,7 @@ public:
         if (!bone)
             return;
 
-        mCache[bone->getName()] = std::make_pair(getNodePath(), bone);
+        mCache[Misc::StringUtils::lowerCase(bone->getName())] = std::make_pair(getNodePath(), bone);
 
         traverse(node);
     }
@@ -59,7 +61,7 @@ Bone* Skeleton::getBone(const std::string &name)
         mBoneCacheInit = true;
     }
 
-    BoneCache::iterator found = mBoneCache.find(name);
+    BoneCache::iterator found = mBoneCache.find(Misc::StringUtils::lowerCase(name));
     if (found == mBoneCache.end())
         return NULL;
 
