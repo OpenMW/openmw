@@ -127,26 +127,21 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
 
     if (topic.isModified() || infoModified)
     {
-        ESM::Dialogue dialogue = topic.get();
-        if (infoModified && state != CSMWorld::RecordBase::State_Modified
-                         && state != CSMWorld::RecordBase::State_ModifiedOnly)
+        if (infoModified && topic.mState != CSMWorld::RecordBase::State_Modified
+                         && topic.mState != CSMWorld::RecordBase::State_ModifiedOnly)
         {
             mState.getWriter().startRecord (topic.mBase.sRecordId);
             mState.getWriter().writeHNCString ("NAME", topic.mBase.mId);
-            topic.mBase.save (mState.getWriter());
+            topic.mBase.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
             mState.getWriter().endRecord (topic.mBase.sRecordId);
         }
         else
         {
             mState.getWriter().startRecord (topic.mModified.sRecordId);
             mState.getWriter().writeHNCString ("NAME", topic.mModified.mId);
-            topic.mModified.save (mState.getWriter());
+            topic.mModified.save (mState.getWriter(), topic.mState == CSMWorld::RecordBase::State_Deleted);
             mState.getWriter().endRecord (topic.mModified.sRecordId);
         }
-
-        writer.startRecord (dialogue.sRecordId);
-        dialogue.save (writer);
-        writer.endRecord (dialogue.sRecordId);
 
         // write modified selected info records
         for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
@@ -398,10 +393,14 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
 
     if (land.isModified() || land.mState == CSMWorld::RecordBase::State_Deleted)
     {
-        const CSMWorld::Land& record = land.get();
-        writer.startRecord (record.mLand->sRecordId);
-        record.mLand->save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
-        writer.endRecord (record.mLand->sRecordId);
+        CSMWorld::Land record = land.get();
+        writer.startRecord (record.sRecordId);
+        record.save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
+
+        if (const ESM::Land::LandData *data = record.getLandData (record.mDataTypes))
+            data->save (mState.getWriter());
+
+        writer.endRecord (record.sRecordId);
     }
 }
 

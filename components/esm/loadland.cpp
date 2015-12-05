@@ -55,16 +55,6 @@ namespace ESM
         }
     }
 
-    void Land::LandData::transposeTextureData(const uint16_t *in, uint16_t *out)
-    {
-        int readPos = 0; //bit ugly, but it works
-        for ( int y1 = 0; y1 < 4; y1++ )
-            for ( int x1 = 0; x1 < 4; x1++ )
-                for ( int y2 = 0; y2 < 4; y2++)
-                    for ( int x2 = 0; x2 < 4; x2++ )
-                        out[(y1*4+y2)*16+(x1*4+x2)] = in[readPos++];
-    }
-
     Land::Land()
         : mFlags(0)
         , mX(0)
@@ -75,6 +65,16 @@ namespace ESM
         , mDataLoaded(false)
         , mLandData(NULL)
     {
+    }
+
+    void Land::LandData::transposeTextureData(const uint16_t *in, uint16_t *out)
+    {
+        int readPos = 0; //bit ugly, but it works
+        for ( int y1 = 0; y1 < 4; y1++ )
+            for ( int x1 = 0; x1 < 4; x1++ )
+                for ( int y2 = 0; y2 < 4; y2++)
+                    for ( int x2 = 0; x2 < 4; x2++ )
+                        out[(y1*4+y2)*16+(x1*4+x2)] = in[readPos++];
     }
 
     Land::~Land()
@@ -256,4 +256,69 @@ namespace ESM
         return (mDataLoaded & flags) == (flags & mDataTypes);
     }
 
+    Land::Land (const Land& land)
+    : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
+      mEsm (land.mEsm), mContext (land.mContext), mDataTypes (land.mDataTypes),
+      mDataLoaded (land.mDataLoaded),
+      mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
+    {}
+
+    Land& Land::operator= (Land land)
+    {
+        swap (land);
+        return *this;
+    }
+
+    void Land::swap (Land& land)
+    {
+        std::swap (mFlags, land.mFlags);
+        std::swap (mX, land.mX);
+        std::swap (mY, land.mY);
+        std::swap (mPlugin, land.mPlugin);
+        std::swap (mEsm, land.mEsm);
+        std::swap (mContext, land.mContext);
+        std::swap (mDataTypes, land.mDataTypes);
+        std::swap (mDataLoaded, land.mDataLoaded);
+        std::swap (mLandData, land.mLandData);
+    }
+
+    const Land::LandData *Land::getLandData (int flags) const
+    {
+        if (!(flags & mDataTypes))
+            return 0;
+
+        loadData (flags);
+        return mLandData;
+    }
+
+    const Land::LandData *Land::getLandData() const
+    {
+        return mLandData;
+    }
+
+    Land::LandData *Land::getLandData()
+    {
+        return mLandData;
+    }
+
+    void Land::add (int flags)
+    {
+        if (!mLandData)
+            mLandData = new LandData;
+
+        mDataTypes |= flags;
+        mDataLoaded |= flags;
+    }
+
+    void Land::remove (int flags)
+    {
+        mDataTypes &= ~flags;
+        mDataLoaded &= ~flags;
+
+        if (!mDataLoaded)
+        {
+            delete mLandData;
+            mLandData = 0;
+        }
+    }
 }

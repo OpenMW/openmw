@@ -6,7 +6,7 @@ namespace CSMWorld
 {
     void Land::load(ESM::ESMReader &esm, bool &isDeleted)
     {
-        mLand->load(esm, isDeleted);
+        ESM::Land::load(esm, isDeleted);
 
         std::ostringstream stream;
         stream << "#" << mX << " " << mY;
