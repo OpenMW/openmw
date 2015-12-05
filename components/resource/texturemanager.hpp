@@ -55,6 +55,9 @@ namespace Resource
 
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
 
+#ifdef USE_TGA
+        inline bool ends_with(std::string const & value, std::string const & ending);
+#endif
         bool mUnRefImageDataAfterApply;
 
         TextureManager(const TextureManager&);
