@@ -201,6 +201,7 @@ namespace MWSound
 
         virtual void stopSound(MWBase::SoundPtr sound);
         ///< Stop the given sound from playing
+        /// @note no-op if \a sound is null
 
         virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,

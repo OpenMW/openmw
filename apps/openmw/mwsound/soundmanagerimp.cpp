@@ -612,7 +612,8 @@ namespace MWSound
 
     void SoundManager::stopSound(MWBase::SoundPtr sound)
     {
-        mOutput->stopSound(sound);
+        if (sound.get())
+            mOutput->stopSound(sound);
     }
 
     void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
