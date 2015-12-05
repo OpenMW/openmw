@@ -8,7 +8,7 @@
 #include <stdint.h>
 
 #include <components/interpreter/types.hpp>
-#include <components/esm/variant.hpp>
+#include <components/esm/loadglob.hpp>
 
 namespace ESM
 {
@@ -29,7 +29,7 @@ namespace MWWorld
     {
         private:
 
-            typedef std::map<std::string, ESM::Variant> Collection;
+            typedef std::map<std::string, ESM::Global> Collection;
 
             Collection mVariables; // type, value
 

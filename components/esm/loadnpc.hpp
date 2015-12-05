@@ -130,8 +130,8 @@ struct NPC
     // body parts
     std::string mHair, mHead;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     bool isMale() const;
 

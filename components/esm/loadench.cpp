@@ -8,37 +8,58 @@ namespace ESM
 {
     unsigned int Enchantment::sRecordId = REC_ENCH;
 
-void Enchantment::load(ESMReader &esm)
-{
-    mEffects.mList.clear();
-    bool hasData = false;
-    while (esm.hasMoreSubs())
+    void Enchantment::load(ESMReader &esm, bool &isDeleted)
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
-        {
-            case ESM::FourCC<'E','N','D','T'>::value:
-                esm.getHT(mData, 16);
-                hasData = true;
-                break;
-            case ESM::FourCC<'E','N','A','M'>::value:
-                mEffects.add(esm);
-                break;
-            default:
-                esm.fail("Unknown subrecord");
-                break;
-        }
-    }
-    if (!hasData)
-        esm.fail("Missing ENDT subrecord");
-}
+        isDeleted = false;
+        mEffects.mList.clear();
 
-void Enchantment::save(ESMWriter &esm) const
-{
-    esm.writeHNT("ENDT", mData, 16);
-    mEffects.save(esm);
-}
+        bool hasName = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'E','N','D','T'>::value:
+                    esm.getHT(mData, 16);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'E','N','A','M'>::value:
+                    mEffects.add(esm);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+                    break;
+            }
+        }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing ENDT subrecord");
+    }
+
+    void Enchantment::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNT("ENDT", mData, 16);
+        mEffects.save(esm);
+    }
 
     void Enchantment::blank()
     {

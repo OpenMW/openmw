@@ -20,9 +20,8 @@ namespace CSMWorld
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm, const IdCollection<Cell>& cells);
-
-        void load (ESM::ESMReader &esm);
+        void load (ESM::ESMReader &esm, bool &isDeleted, const IdCollection<Cell>& cells);
+        void load (ESM::ESMReader &esm, bool &isDeleted);
     };
 }
 

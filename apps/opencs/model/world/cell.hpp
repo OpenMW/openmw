@@ -16,7 +16,7 @@ namespace CSMWorld
     {
         std::string mId;
 
-        void load (ESM::ESMReader &esm);
+        void load (ESM::ESMReader &esm, bool &isDeleted);
 
     };
 }

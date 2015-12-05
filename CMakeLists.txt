@@ -119,8 +119,6 @@ else()
     endif()
 endif()
 
-set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
-
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if(USE_SYSTEM_TINYXML)
