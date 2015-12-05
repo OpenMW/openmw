@@ -164,21 +164,15 @@ namespace Resource
             }
 
             osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
+#ifndef USE_TGA 
             opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
+#endif
             size_t extPos = normalized.find_last_of('.');
             std::string ext;
             if (extPos != std::string::npos && extPos+1 < normalized.size())
                 ext = normalized.substr(extPos+1);
 
-#ifdef USE_TGA
-            osgDB::ReaderWriter* reader =NULL;
-            if (ends_with(ext,"dds"))
-              reader = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
-            else
-              reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
-#else
             osgDB::ReaderWriter* reader =osgDB::Registry::instance()->getReaderWriterForExtension(ext);
-#endif 
 
             if (!reader)
             {
@@ -204,14 +198,6 @@ namespace Resource
         }
     }
 
-#ifdef USE_TGA
-    inline bool TextureManager::ends_with(std::string const & value, std::string const & ending)
-    {
-        if (ending.size() > value.size()) return false;
-        return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
-    }
-#endif
-
     osg::ref_ptr<osg::Texture2D> TextureManager::getTexture2D(const std::string &filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT)
     {
         std::string normalized = filename;
@@ -236,20 +222,16 @@ namespace Resource
             }
 
             osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
+#ifndef USE_TGA
             opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
-            size_t extPos = normalized.find_last_of('.');
+#endif 
+           size_t extPos = normalized.find_last_of('.');
             std::string ext;
             if (extPos != std::string::npos && extPos+1 < normalized.size())
                 ext = normalized.substr(extPos+1);
-#ifdef USE_TGA
-            osgDB::ReaderWriter* reader =NULL;
-            if (ends_with(ext,"dds"))
-              reader = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
-            else
-              reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
-#else
+
             osgDB::ReaderWriter* reader =osgDB::Registry::instance()->getReaderWriterForExtension(ext);
-#endif
+
             if (!reader)
             {
                 std::cerr << "Error loading " << filename << ": no readerwriter for '" << ext << "' found" << std::endl;
