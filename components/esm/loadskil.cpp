@@ -129,15 +129,16 @@ namespace ESM
 
     unsigned int Skill::sRecordId = REC_SKIL;
 
-    void Skill::load(ESMReader &esm)
+    void Skill::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false; // Skill record can't be deleted now (may be changed in the future)
+
         bool hasIndex = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
                 case ESM::FourCC<'I','N','D','X'>::value:
                     esm.getHT(mIndex);
@@ -164,7 +165,7 @@ namespace ESM
         mId = indexToId (mIndex);
     }
 
-    void Skill::save(ESMWriter &esm) const
+    void Skill::save(ESMWriter &esm, bool /*isDeleted*/) const
     {
         esm.writeHNT("INDX", mIndex);
         esm.writeHNT("SKDT", mData, 24);

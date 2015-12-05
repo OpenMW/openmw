@@ -106,21 +106,20 @@ bool CSMWorld::InfoCollection::reorderRows (int baseIndex, const std::vector<int
 
 void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue)
 {
-    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" +
-        reader.getHNOString ("INAM");
+    Info info;
+    bool isDeleted = false;
 
-    if (reader.isNextSub ("DELE"))
+    info.load (reader, isDeleted);
+    std::string id = Misc::StringUtils::lowerCase (dialogue.mId) + "#" + info.mId;
+
+    if (isDeleted)
     {
         int index = searchId (id);
-
-        reader.skipRecord();
 
         if (index==-1)
         {
             // deleting a record that does not exist
-
             // ignore it for now
-
             /// \todo report the problem to the user
         }
         else if (base)
@@ -136,12 +135,9 @@ void CSMWorld::InfoCollection::load (ESM::ESMReader& reader, bool base, const ES
     }
     else
     {
-        Info record;
-        record.mTopicId = dialogue.mId;
-        record.mId = id;
-        record.load (reader);
-
-        load (record, base);
+        info.mTopicId = dialogue.mId;
+        info.mId = id;
+        load (info, base);
     }
 }
 
@@ -192,4 +188,40 @@ CSMWorld::InfoCollection::Range CSMWorld::InfoCollection::getTopicRange (const s
             break;
 
     return Range (begin, end);
+}
+
+void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId)
+{
+    std::string id = Misc::StringUtils::lowerCase(dialogueId);
+    std::vector<int> erasedRecords;
+
+    std::map<std::string, int>::const_iterator current = getIdMap().lower_bound(id);
+    std::map<std::string, int>::const_iterator end = getIdMap().end();
+    for (; current != end; ++current)
+    {
+        Record<Info> record = getRecord(current->second);
+
+        if (Misc::StringUtils::ciEqual(dialogueId, record.get().mTopicId))
+        {
+            if (record.mState == RecordBase::State_ModifiedOnly)
+            {
+                erasedRecords.push_back(current->second);
+            }
+            else
+            {
+                record.mState = RecordBase::State_Deleted;
+                setRecord(current->second, record);
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    while (!erasedRecords.empty())
+    {
+        removeRows(erasedRecords.back(), 1);
+        erasedRecords.pop_back();
+    }
 }

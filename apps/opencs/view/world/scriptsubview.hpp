@@ -47,6 +47,7 @@ namespace CSVWorld
             QSplitter *mMain;
             ScriptErrorTable *mErrors;
             QTimer *mCompileDelay;
+            int mErrorHeight;
 
         private:
 
@@ -57,6 +58,8 @@ namespace CSVWorld
             bool isDeleted() const;
 
             void updateDeletedState();
+
+            void adjustSplitter();
 
         public:
 

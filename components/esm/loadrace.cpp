@@ -18,44 +18,65 @@ namespace ESM
         return static_cast<int>(male ? mMale : mFemale);
     }
 
-void Race::load(ESMReader &esm)
-{
-    mPowers.mList.clear();
-
-    bool hasData = false;
-    while (esm.hasMoreSubs())
+    void Race::load(ESMReader &esm, bool &isDeleted)
     {
-        esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        isDeleted = false;
+
+        mPowers.mList.clear();
+
+        bool hasName = false;
+        bool hasData = false;
+        while (esm.hasMoreSubs())
         {
-            case ESM::FourCC<'F','N','A','M'>::value:
-                mName = esm.getHString();
-                break;
-            case ESM::FourCC<'R','A','D','T'>::value:
-                esm.getHT(mData, 140);
-                hasData = true;
-                break;
-            case ESM::FourCC<'D','E','S','C'>::value:
-                mDescription = esm.getHString();
-                break;
-            case ESM::FourCC<'N','P','C','S'>::value:
-                mPowers.add(esm);
-                break;
-            default:
-                esm.fail("Unknown subrecord");
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
+                case ESM::FourCC<'F','N','A','M'>::value:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'R','A','D','T'>::value:
+                    esm.getHT(mData, 140);
+                    hasData = true;
+                    break;
+                case ESM::FourCC<'D','E','S','C'>::value:
+                    mDescription = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','P','C','S'>::value:
+                    mPowers.add(esm);
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.fail("Unknown subrecord");
+            }
         }
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing RADT subrecord");
     }
-    if (!hasData)
-        esm.fail("Missing RADT subrecord");
-}
-void Race::save(ESMWriter &esm) const
-{
-    esm.writeHNOCString("FNAM", mName);
-    esm.writeHNT("RADT", mData, 140);
-    mPowers.save(esm);
-    esm.writeHNOString("DESC", mDescription);
-}
+    void Race::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNT("RADT", mData, 140);
+        mPowers.save(esm);
+        esm.writeHNOString("DESC", mDescription);
+    }
 
     void Race::blank()
     {

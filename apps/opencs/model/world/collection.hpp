@@ -43,6 +43,12 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT> >
     class Collection : public CollectionBase
     {
+        public:
+
+            typedef ESXRecordT ESXRecord;
+
+        private:
+
             std::vector<Record<ESXRecordT> > mRecords;
             std::map<std::string, int> mIndex;
             std::vector<Column<ESXRecordT> *> mColumns;

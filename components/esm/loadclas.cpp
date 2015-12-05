@@ -22,7 +22,6 @@ namespace ESM
       "sSpecializationStealth"
     };
 
-
     int& Class::CLDTstruct::getSkill (int index, bool major)
     {
         if (index<0 || index>=5)
@@ -39,15 +38,21 @@ namespace ESM
         return mSkills[index][major ? 1 : 0];
     }
 
-    void Class::load(ESMReader &esm)
+    void Class::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'F','N','A','M'>::value:
                     mName = esm.getHString();
                     break;
@@ -60,15 +65,31 @@ namespace ESM
                 case ESM::FourCC<'D','E','S','C'>::value:
                     mDescription = esm.getHString();
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
             esm.fail("Missing CLDT subrecord");
     }
-    void Class::save(ESMWriter &esm) const
+    void Class::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CLDT", mData, 60);
         esm.writeHNOString("DESC", mDescription);

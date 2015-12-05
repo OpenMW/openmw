@@ -3,9 +3,19 @@
 #include <cassert>
 #include <memory>
 
-#include <components/misc/stringops.hpp>
-
 CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
+
+
+std::string CSMWorld::RefIdData::getRecordId(const CSMWorld::RefIdData::LocalIndex &index) const
+{
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::const_iterator found =
+        mRecordContainers.find (index.second);
+
+    if (found == mRecordContainers.end())
+        throw std::logic_error ("invalid local index type");
+
+    return found->second->getId(index.first);
+}
 
 CSMWorld::RefIdData::RefIdData()
 {
@@ -161,15 +171,27 @@ int CSMWorld::RefIdData::getAppendIndex (UniversalId::Type type) const
     return index;
 }
 
-void CSMWorld::RefIdData::load (const LocalIndex& index, ESM::ESMReader& reader, bool base)
+void CSMWorld::RefIdData::load (ESM::ESMReader& reader, bool base, CSMWorld::UniversalId::Type type)
 {
-    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator iter =
-        mRecordContainers.find (index.second);
+    std::map<UniversalId::Type, RefIdDataContainerBase *>::iterator found =
+        mRecordContainers.find (type);
 
-    if (iter==mRecordContainers.end())
-        throw std::logic_error ("invalid local index type");
+    if (found == mRecordContainers.end())
+        throw std::logic_error ("Invalid Referenceable ID type");
 
-    iter->second->load (index.first, reader, base);
+    int index = found->second->load(reader, base);
+    if (index != -1)
+    {
+        LocalIndex localIndex = LocalIndex(index, type);
+        if (base && getRecord(localIndex).mState == RecordBase::State_Deleted)
+        {
+            erase(localIndex, 1);
+        }
+        else
+        {
+            mIndex[Misc::StringUtils::lowerCase(getRecordId(localIndex))] = localIndex;
+        }
+    }
 }
 
 void CSMWorld::RefIdData::erase (const LocalIndex& index, int count)

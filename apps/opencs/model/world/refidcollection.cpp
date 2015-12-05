@@ -848,61 +848,7 @@ const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord (int index) con
 
 void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, UniversalId::Type type)
 {
-    std::string id = reader.getHNOString ("NAME");
-
-    int index = searchId (id);
-
-    if (reader.isNextSub ("DELE"))
-    {
-        reader.skipRecord();
-
-        if (index==-1)
-        {
-            // deleting a record that does not exist
-
-            // ignore it for now
-
-            /// \todo report the problem to the user
-        }
-        else if (base)
-        {
-            mData.erase (index, 1);
-        }
-        else
-        {
-            mData.getRecord (mData.globalToLocalIndex (index)).mState = RecordBase::State_Deleted;
-        }
-    }
-    else
-    {
-        if (index==-1)
-        {
-            // new record
-            int newIndex = mData.getAppendIndex (type);
-            mData.appendRecord (type, id, base);
-
-            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (newIndex);
-
-            mData.load (localIndex, reader, base);
-
-            mData.getRecord (localIndex).mState =
-                base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-        }
-        else
-        {
-            // old record
-            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
-
-            if (!base)
-                if (mData.getRecord (localIndex).mState==RecordBase::State_Erased)
-                    throw std::logic_error ("attempt to access a deleted record");
-
-            mData.load (localIndex, reader, base);
-
-            if (!base)
-                mData.getRecord (localIndex).mState = RecordBase::State_Modified;
-        }
-    }
+    mData.load(reader, base, type);
 }
 
 int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const
