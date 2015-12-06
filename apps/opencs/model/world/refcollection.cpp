@@ -12,7 +12,7 @@
 #include "record.hpp"
 
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<ESM::RefNum, std::string>& cache, CSMDoc::Messages& messages)
+    std::map<unsigned int, std::string>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -71,13 +71,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
             ref.mCell = cell2.mId;
 
-        // ignore content file number
-        std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
-        for (; iter != cache.end(); ++iter)
-        {
-            if (ref.mRefNum.mIndex == iter->first.mIndex)
-                break;
-        }
+        std::map<unsigned int, std::string>::iterator iter = cache.find (ref.mRefNum.mIndex);
 
         if (isDeleted)
         {
@@ -114,11 +108,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
+
+            cache.insert (std::make_pair (ref.mRefNum.mIndex, ref.mId));
+
             (base ? record->mBase : record->mModified) = std::move(ref);
 
             appendRecord(std::move(record));
-
-            cache.insert (std::make_pair (ref.mRefNum, ref.mId));
         }
         else
         {
