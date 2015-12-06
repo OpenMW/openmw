@@ -1,12 +1,14 @@
 #include "aiescort.hpp"
 
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -72,6 +74,9 @@ namespace MWMechanics
             if (duration <= 0)
                 return true;
         }
+
+        if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
+            return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
