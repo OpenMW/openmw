@@ -22,7 +22,7 @@
 #include "localscripts.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
-#include "cellfunctors.hpp"
+#include "cellvisitors.hpp"
 #include "cellstore.hpp"
 
 namespace
@@ -78,7 +78,7 @@ namespace
         }
     }
 
-    struct InsertFunctor
+    struct InsertVisitor
     {
         MWWorld::CellStore& mCell;
         bool mRescale;
@@ -86,13 +86,13 @@ namespace
         MWPhysics::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
-        InsertFunctor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
+        InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
             MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
     };
 
-    InsertFunctor::InsertFunctor (MWWorld::CellStore& cell, bool rescale,
+    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale,
         Loading::Listener& loadingListener, MWPhysics::PhysicsSystem& physics,
         MWRender::RenderingManager& rendering)
     : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
@@ -100,7 +100,7 @@ namespace
       mRendering (rendering)
     {}
 
-    bool InsertFunctor::operator() (const MWWorld::Ptr& ptr)
+    bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
     {
         if (mRescale)
         {
@@ -129,7 +129,7 @@ namespace
         return true;
     }
 
-    struct AdjustPositionFunctor
+    struct AdjustPositionVisitor
     {
         bool operator() (const MWWorld::Ptr& ptr)
         {
@@ -206,11 +206,11 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
-        ListAndResetObjects functor;
+        ListAndResetObjectsVisitor visitor;
 
-        (*iter)->forEach<ListAndResetObjects>(functor);
-        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (functor.mObjects.begin());
-            iter2!=functor.mObjects.end(); ++iter2)
+        (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
+        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (visitor.mObjects.begin());
+            iter2!=visitor.mObjects.end(); ++iter2)
         {
             mPhysics->remove(*iter2);
         }
@@ -561,12 +561,12 @@ namespace MWWorld
 
     void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
-        InsertFunctor functor (cell, rescale, *loadingListener, *mPhysics, mRendering);
-        cell.forEach (functor);
+        InsertVisitor insertVisitor (cell, rescale, *loadingListener, *mPhysics, mRendering);
+        cell.forEach (insertVisitor);
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
-        AdjustPositionFunctor adjustPosFunctor;
-        cell.forEach (adjustPosFunctor);
+        AdjustPositionVisitor adjustPosVisitor;
+        cell.forEach (adjustPosVisitor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

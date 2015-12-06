@@ -241,9 +241,9 @@ namespace MWWorld
         return MWWorld::Ptr(object.getBase(), cellToMoveTo);
     }
 
-    struct MergeFunctor
+    struct MergeVisitor
     {
-        MergeFunctor(std::vector<LiveCellRefBase*>& mergeTo, const std::map<LiveCellRefBase*, MWWorld::CellStore*>& movedHere,
+        MergeVisitor(std::vector<LiveCellRefBase*>& mergeTo, const std::map<LiveCellRefBase*, MWWorld::CellStore*>& movedHere,
                      const std::map<LiveCellRefBase*, MWWorld::CellStore*>& movedToAnotherCell)
             : mMergeTo(mergeTo)
             , mMovedHere(movedHere)
@@ -275,9 +275,9 @@ namespace MWWorld
     void CellStore::updateMergedRefs()
     {
         mMergedRefs.clear();
-        MergeFunctor functor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
-        forEachInternal(functor);
-        functor.merge();
+        MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
+        forEachInternal(visitor);
+        visitor.merge();
     }
 
     CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
@@ -313,7 +313,7 @@ namespace MWWorld
         return const_cast<CellStore *> (this)->search (id).isEmpty();
     }
 
-    struct SearchFunctor
+    struct SearchVisitor
     {
         MWWorld::Ptr mFound;
         std::string mIdToFind;
@@ -332,12 +332,12 @@ namespace MWWorld
     {
         bool oldState = mHasState;
 
-        SearchFunctor searchFunctor;
-        searchFunctor.mIdToFind = id;
-        forEach(searchFunctor);
+        SearchVisitor searchVisitor;
+        searchVisitor.mIdToFind = id;
+        forEach(searchVisitor);
 
         mHasState = oldState;
-        return searchFunctor.mFound;
+        return searchVisitor.mFound;
     }
 
     Ptr CellStore::searchViaActorId (int id)

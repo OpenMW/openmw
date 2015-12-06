@@ -125,45 +125,45 @@ namespace MWWorld
             }
 
             // helper function for forEachInternal
-            template<class Functor, class List>
-            bool forEachImp (Functor& functor, List& list)
+            template<class Visitor, class List>
+            bool forEachImp (Visitor& visitor, List& list)
             {
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
                     if (iter->mData.isDeletedByContentFile())
                         continue;
-                    if (!functor (MWWorld::Ptr(&*iter, this)))
+                    if (!visitor (MWWorld::Ptr(&*iter, this)))
                         return false;
                 }
                 return true;
             }
 
             // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved objects are accounted for.
-            template<class Functor>
-            bool forEachInternal (Functor& functor)
+            template<class Visitor>
+            bool forEachInternal (Visitor& visitor)
             {
                 return
-                    forEachImp (functor, mActivators) &&
-                    forEachImp (functor, mPotions) &&
-                    forEachImp (functor, mAppas) &&
-                    forEachImp (functor, mArmors) &&
-                    forEachImp (functor, mBooks) &&
-                    forEachImp (functor, mClothes) &&
-                    forEachImp (functor, mContainers) &&
-                    forEachImp (functor, mDoors) &&
-                    forEachImp (functor, mIngreds) &&
-                    forEachImp (functor, mItemLists) &&
-                    forEachImp (functor, mLights) &&
-                    forEachImp (functor, mLockpicks) &&
-                    forEachImp (functor, mMiscItems) &&
-                    forEachImp (functor, mProbes) &&
-                    forEachImp (functor, mRepairs) &&
-                    forEachImp (functor, mStatics) &&
-                    forEachImp (functor, mWeapons) &&
-                    forEachImp (functor, mCreatures) &&
-                    forEachImp (functor, mNpcs) &&
-                    forEachImp (functor, mCreatureLists);
+                    forEachImp (visitor, mActivators) &&
+                    forEachImp (visitor, mPotions) &&
+                    forEachImp (visitor, mAppas) &&
+                    forEachImp (visitor, mArmors) &&
+                    forEachImp (visitor, mBooks) &&
+                    forEachImp (visitor, mClothes) &&
+                    forEachImp (visitor, mContainers) &&
+                    forEachImp (visitor, mDoors) &&
+                    forEachImp (visitor, mIngreds) &&
+                    forEachImp (visitor, mItemLists) &&
+                    forEachImp (visitor, mLights) &&
+                    forEachImp (visitor, mLockpicks) &&
+                    forEachImp (visitor, mMiscItems) &&
+                    forEachImp (visitor, mProbes) &&
+                    forEachImp (visitor, mRepairs) &&
+                    forEachImp (visitor, mStatics) &&
+                    forEachImp (visitor, mWeapons) &&
+                    forEachImp (visitor, mCreatures) &&
+                    forEachImp (visitor, mNpcs) &&
+                    forEachImp (visitor, mCreatureLists);
             }
 
         public:
@@ -222,12 +222,12 @@ namespace MWWorld
             void preload ();
             ///< Build ID list from content file.
 
-            /// Call functor (ref) for each reference. functor must return a bool. Returning
+            /// Call visitor (ref) for each reference. visitor must return a bool. Returning
             /// false will abort the iteration.
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
-            template<class Functor>
-            bool forEach (Functor& functor)
+            template<class Visitor>
+            bool forEach (Visitor& visitor)
             {
                 if (mState != State_Loaded)
                     return false;
@@ -239,7 +239,7 @@ namespace MWWorld
                     if (mMergedRefs[i]->mData.isDeletedByContentFile())
                         continue;
 
-                    if (!functor(MWWorld::Ptr(mMergedRefs[i], this)))
+                    if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
                         return false;
                 }
                 return true;

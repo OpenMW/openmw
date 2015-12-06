@@ -54,7 +54,6 @@
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellstore.hpp"
-#include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
 #include "actionteleport.hpp"
@@ -690,12 +689,12 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
-    struct FindContainerFunctor
+    struct FindContainerVisitor
     {
         Ptr mContainedPtr;
         Ptr mResult;
 
-        FindContainerFunctor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
+        FindContainerVisitor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
 
         bool operator() (Ptr ptr)
         {
@@ -721,11 +720,11 @@ namespace MWWorld
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            FindContainerFunctor functor(ptr);
-            //(*cellIt)->forEachContainer(functor);
+            FindContainerVisitor visitor(ptr);
+            //(*cellIt)->forEachContainer(visitor);
 
-            if (!functor.mResult.isEmpty())
-                return functor.mResult;
+            if (!visitor.mResult.isEmpty())
+                return visitor.mResult;
         }
 
         return Ptr();
@@ -2262,7 +2261,7 @@ namespace MWWorld
         */
     }
 
-    struct ListObjectsFunctor
+    struct ListObjectsVisitor
     {
         std::vector<MWWorld::Ptr> mObjects;
 
@@ -2279,10 +2278,10 @@ namespace MWWorld
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            ListObjectsFunctor functor;
-            (*cellIt)->forEach<ListObjectsFunctor>(functor);
+            ListObjectsVisitor visitor;
+            (*cellIt)->forEach(visitor);
 
-            for (std::vector<MWWorld::Ptr>::iterator it = functor.mObjects.begin(); it != functor.mObjects.end(); ++it)
+            for (std::vector<MWWorld::Ptr>::iterator it = visitor.mObjects.begin(); it != visitor.mObjects.end(); ++it)
                 if (Misc::StringUtils::ciEqual(it->getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(*it);
         }
@@ -2886,9 +2885,9 @@ namespace MWWorld
         mWeatherManager->update(duration, paused);
     }
 
-    struct AddDetectedReference
+    struct AddDetectedReferenceVisitor
     {
-        AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+        AddDetectedReferenceVisitor(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
             : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }
@@ -2968,13 +2967,13 @@ namespace MWWorld
 
         dist = feetToGameUnits(dist);
 
-        AddDetectedReference functor (out, ptr, type, dist*dist);
+        AddDetectedReferenceVisitor visitor (out, ptr, type, dist*dist);
 
         const Scene::CellStoreCollection& active = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator it = active.begin(); it != active.end(); ++it)
         {
             MWWorld::CellStore* cellStore = *it;
-            cellStore->forEach(functor);
+            cellStore->forEach(visitor);
         }
     }
 
@@ -3230,7 +3229,7 @@ namespace MWWorld
             interpreterContext.executeActivation(object, actor);
     }
 
-    struct ResetActorsFunctor
+    struct ResetActorsVisitor
     {
         bool operator() (Ptr ptr)
         {
@@ -3252,8 +3251,8 @@ namespace MWWorld
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             CellStore* cellstore = *iter;
-            ResetActorsFunctor functor;
-            cellstore->forEach(functor);
+            ResetActorsVisitor visitor;
+            cellstore->forEach(visitor);
         }
     }
 
