@@ -114,7 +114,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-            (base ? record->mBase : record->mModified) = ref;
+            (base ? record->mBase : record->mModified) = std::move(ref);
 
             appendRecord(std::move(record));
 
@@ -129,7 +129,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
-            (base ? record->mBase : record->mModified) = ref;
+            (base ? record->mBase : record->mModified) = std::move(ref);
 
             setRecord(index, std::move(record));
         }

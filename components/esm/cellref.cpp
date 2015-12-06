@@ -206,6 +206,67 @@ void ESM::CellRef::blank()
     }
 }
 
+ESM::CellRef::CellRef ()
+{
+    blank();
+}
+
+ESM::CellRef::CellRef (const CellRef& other)
+  : mRefNum(other.mRefNum)
+  , mRefID(other.mRefID)
+  , mScale(other.mScale)
+  , mOwner(other.mOwner)
+  , mGlobalVariable(other.mGlobalVariable)
+  , mSoul(other.mSoul)
+  , mFaction(other.mFaction)
+  , mFactionRank(other.mFactionRank)
+  , mChargeInt(other.mChargeInt)
+  , mEnchantmentCharge(other.mEnchantmentCharge)
+  , mGoldValue(other.mGoldValue)
+  , mTeleport(other.mTeleport)
+  , mDoorDest(other.mDoorDest)
+  , mDestCell(other.mDestCell)
+  , mLockLevel(other.mLockLevel)
+  , mKey(other.mKey)
+  , mTrap(other.mTrap)
+  , mReferenceBlocked(other.mReferenceBlocked)
+  , mPos(other.mPos)
+{
+}
+
+ESM::CellRef::CellRef (CellRef&& other)
+{
+    *this = std::move(other);
+}
+
+ESM::CellRef& ESM::CellRef::operator= (CellRef&& other)
+{
+    if (this != &other)
+    {
+        mRefNum = other.mRefNum; // RefNum
+        mRefID = std::move(other.mRefID);
+        mScale = other.mScale;
+        mOwner = std::move(other.mOwner);
+        mGlobalVariable = std::move(other.mGlobalVariable);
+        mSoul = std::move(other.mSoul);
+        mFaction = std::move(other.mFaction);
+        mFactionRank = other.mFactionRank;
+        mChargeInt = other.mChargeInt;
+        mEnchantmentCharge = other.mEnchantmentCharge;
+        mGoldValue = other.mGoldValue;
+        mTeleport = other.mTeleport;
+        mDoorDest = other.mDoorDest; // Position
+        mDestCell = std::move(other.mDestCell);
+        mLockLevel = other.mLockLevel;
+        mKey = std::move(other.mKey);
+        mTrap = std::move(other.mTrap);
+        mReferenceBlocked = other.mReferenceBlocked;
+        mPos = other.mPos; // Position
+    }
+
+    return *this;
+}
+
 bool ESM::operator== (const RefNum& left, const RefNum& right)
 {
     return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;

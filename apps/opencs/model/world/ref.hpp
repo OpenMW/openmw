@@ -15,6 +15,11 @@ namespace CSMWorld
         std::string mOriginalCell;
 
         CellRef();
+        CellRef(const CellRef&) = default;
+        CellRef& operator= (const CellRef&) = default;
+
+        CellRef (CellRef&& other);
+        CellRef& operator= (CellRef&& other);
 
         /// Calculate cell index based on coordinates (x and y)
         std::pair<int, int> getCellIndex() const;

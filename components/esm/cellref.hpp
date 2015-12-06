@@ -109,6 +109,15 @@ namespace ESM
             void save (ESMWriter &esm, bool wideRefNum = false, bool inInventory = false, bool isDeleted = false) const;
 
             void blank();
+
+            CellRef();
+            ~CellRef() = default;
+
+            CellRef(const CellRef&);
+            CellRef& operator=(const CellRef&) = default;
+
+            CellRef (CellRef&& other);
+            CellRef& operator=(CellRef&& other);
     };
 
     bool operator== (const RefNum& left, const RefNum& right);
