@@ -2,6 +2,7 @@
 #include "state.hpp"
 
 #include <stdexcept>
+#include <algorithm>
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -27,11 +28,45 @@ void CSMPrefs::State::load()
 
 void CSMPrefs::State::declare()
 {
+    declareCategory ("window", "Windows");
 
+    declareCategory ("records", "Records");
+
+    declareCategory ("table-input", "ID Tables");
+
+    declareCategory ("dialogues", "ID Dialogues");
+
+    declareCategory ("report-input", "Reports");
+
+    declareCategory ("search", "Search & Replace");
+
+    declareCategory ("script-editor", "Scripts");
+
+    declareCategory ("general-input", "General Input");
+
+    declareCategory ("scene-input", "3D Scene Input");
+
+    declareCategory ("tooltips", "Tooltips");
+}
+
+void CSMPrefs::State::declareCategory (const std::string& key, const std::string& name)
+{
+    std::map<std::string, Category>::iterator iter = mCategories.find (key);
+
+    if (iter!=mCategories.end())
+    {
+        mCurrentCategory = iter;
+    }
+    else
+    {
+        mCurrentCategory =
+            mCategories.insert (std::make_pair (key, Category (this, key, name))).first;
+    }
 }
 
 CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
-: mConfigFile ("opencs.ini"), mConfigurationManager (configurationManager)
+: mConfigFile ("opencs.ini"), mConfigurationManager (configurationManager),
+  mCurrentCategory (mCategories.end())
 {
     if (sThis)
         throw std::logic_error ("An instance of CSMPRefs::State already exists");
@@ -51,6 +86,19 @@ void CSMPrefs::State::save()
 {
     boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
     mSettings.saveUser (user.string());
+}
+
+std::vector<std::pair<std::string, std::string> > CSMPrefs::State::listCategories() const
+{
+    std::vector<std::pair<std::string, std::string> > list;
+
+    for (std::map<std::string, Category>::const_iterator iter (mCategories.begin());
+        iter!=mCategories.end(); ++iter)
+        list.push_back (std::make_pair (iter->second.getName(), iter->first));
+
+    std::sort (list.begin(), list.end());
+
+    return list;
 }
 
 CSMPrefs::State& CSMPrefs::State::get()

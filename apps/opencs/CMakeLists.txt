@@ -141,6 +141,10 @@ opencs_units (model/prefs
     state
     )
 
+opencs_units_noqt (model/prefs
+    category
+    )
+
 opencs_units_noqt (model/filter
     node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )

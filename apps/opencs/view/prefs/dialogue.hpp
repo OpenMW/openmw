@@ -15,6 +15,7 @@ namespace CSVPrefs
 
             QListWidget *mList;
             QStackedWidget *mContent;
+            std::vector<std::pair<std::string, std::string> > mCategories;
 
         private:
 

@@ -6,6 +6,7 @@
 #include <QSplitter>
 #include <QListWidget>
 #include <QStackedWidget>
+#include <QListWidgetItem>
 
 #include "../../model/prefs/state.hpp"
 
@@ -19,6 +20,21 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 
     main->addWidget (mList);
 
+    QFontMetrics metrics (QApplication::font());
+
+    int maxWidth = 1;
+
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator iter (mCategories.begin());
+        iter!=mCategories.end(); ++iter)
+    {
+        QString label = QString::fromUtf8 (iter->first.c_str());
+        maxWidth = std::max (maxWidth, metrics.width (label));
+
+        mList->addItem (label);
+    }
+
+    mList->setMaximumWidth (maxWidth + 10);
+
     /// \todo connect to selection signal
 }
 
@@ -30,7 +46,7 @@ void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)
     main->addWidget (mContent);
 }
 
-CSVPrefs::Dialogue::Dialogue()
+CSVPrefs::Dialogue::Dialogue() : mCategories (CSMPrefs::get().listCategories())
 {
     setWindowTitle ("User Settings");
 
