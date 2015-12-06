@@ -260,6 +260,8 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
+            int getTotalRecords (const std::vector<boost::filesystem::path>& files); // for better loading bar
+
             int startLoading (const boost::filesystem::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.
             ///

@@ -897,6 +897,22 @@ void CSMWorld::Data::merge()
     mGlobals.merge();
 }
 
+int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>& files)
+{
+    int records = 0;
+
+    std::unique_ptr<ESM::ESMReader> reader = std::unique_ptr<ESM::ESMReader>(new ESM::ESMReader);
+
+    for (unsigned int i = 0; i < files.size(); ++i)
+    {
+        reader->open(files[i].string());
+        records += reader->getRecordCount();
+        reader->close();
+    }
+
+    return records;
+}
+
 int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base, bool project)
 {
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
