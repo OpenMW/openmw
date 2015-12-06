@@ -810,30 +810,31 @@ int CSMWorld::RefIdCollection::searchId (const std::string& id) const
     return mData.localToGlobalIndex (localIndex);
 }
 
-void CSMWorld::RefIdCollection::replace (int index, const RecordBase& record)
+void CSMWorld::RefIdCollection::replace (int index, std::unique_ptr<RecordBase> record)
 {
-    mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
+    mData.getRecord (mData.globalToLocalIndex (index)).assign (*record.release());
 }
 
 void CSMWorld::RefIdCollection::cloneRecord(const std::string& origin,
                                      const std::string& destination,
                                      const CSMWorld::UniversalId::Type type)
 {
-        std::auto_ptr<RecordBase> newRecord(mData.getRecord(mData.searchId(origin)).modifiedCopy());
+        std::unique_ptr<RecordBase> newRecord =
+            std::move(mData.getRecord(mData.searchId(origin)).modifiedCopy());
         mAdapters.find(type)->second->setId(*newRecord, destination);
-        mData.insertRecord(*newRecord, type, destination);
+        mData.insertRecord(std::move(newRecord), type, destination);
 }
 
-void CSMWorld::RefIdCollection::appendRecord (const RecordBase& record,
+void CSMWorld::RefIdCollection::appendRecord (std::unique_ptr<RecordBase> record,
     UniversalId::Type type)
 {
-    std::string id = findAdapter (type).getId (record);
+    std::string id = findAdapter (type).getId (*record.get());
 
     int index = mData.getAppendIndex (type);
 
     mData.appendRecord (type, id, false);
 
-    mData.getRecord (mData.globalToLocalIndex (index)).assign (record);
+    mData.getRecord (mData.globalToLocalIndex (index)).assign (*record.release());
 }
 
 const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord (const std::string& id) const

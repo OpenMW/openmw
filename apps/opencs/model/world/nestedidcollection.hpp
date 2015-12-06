@@ -90,23 +90,23 @@ namespace CSMWorld
     template<typename ESXRecordT, typename IdAccessorT>
     void NestedIdCollection<ESXRecordT, IdAccessorT>::addNestedRow(int row, int column, int position)
     {
-        Record<ESXRecordT> record;
-        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).addRow(record, position);
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).addRow(*record, position);
 
-        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, std::move(record));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
     void NestedIdCollection<ESXRecordT, IdAccessorT>::removeNestedRows(int row, int column, int subRow)
     {
-        Record<ESXRecordT> record;
-        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
-        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).removeRow(record, subRow);
+        getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).removeRow(*record, subRow);
 
-        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, std::move(record));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -121,13 +121,13 @@ namespace CSMWorld
     void NestedIdCollection<ESXRecordT, IdAccessorT>::setNestedData(int row,
             int column, const QVariant& data, int subRow, int subColumn)
     {
-        Record<ESXRecordT> record;
-        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setData(
-                record, data, subRow, subColumn);
+                *record, data, subRow, subColumn);
 
-        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, std::move(record));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>
@@ -142,13 +142,13 @@ namespace CSMWorld
     void NestedIdCollection<ESXRecordT, IdAccessorT>::setNestedTable(int row,
             int column, const CSMWorld::NestedTableWrapperBase& nestedTable)
     {
-        Record<ESXRecordT> record;
-        record.assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
+        std::unique_ptr<Record<ESXRecordT> > record(new Record<ESXRecordT>);
+        record->assign(Collection<ESXRecordT, IdAccessorT>::getRecord(row));
 
         getAdapter(Collection<ESXRecordT, IdAccessorT>::getColumn(column)).setTable(
-                record, nestedTable);
+                *record, nestedTable);
 
-        Collection<ESXRecordT, IdAccessorT>::setRecord(row, record);
+        Collection<ESXRecordT, IdAccessorT>::setRecord(row, std::move(record));
     }
 
     template<typename ESXRecordT, typename IdAccessorT>

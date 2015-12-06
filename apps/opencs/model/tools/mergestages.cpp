@@ -100,10 +100,9 @@ void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messa
         ref.mRefNum.mIndex = mIndex[Misc::StringUtils::lowerCase (ref.mCell)]++;
         ref.mRefNum.mContentFile = 0;
 
-        CSMWorld::Record<CSMWorld::CellRef> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, 0, &ref);
-
-        mState.mTarget->getData().getReferences().appendRecord (newRecord);
+        mState.mTarget->getData().getReferences().appendRecord (
+                std::make_unique<CSMWorld::Record<CSMWorld::CellRef> >(
+                    CSMWorld::Record<CSMWorld::CellRef>(CSMWorld::RecordBase::State_ModifiedOnly, 0, &ref)));
     }
 }
 
@@ -189,10 +188,9 @@ void CSMTools::MergeLandTexturesStage::perform (int stage, CSMDoc::Messages& mes
             texture.mIndex = mNext->second-1;
             texture.mId = stream2.str();
 
-            CSMWorld::Record<CSMWorld::LandTexture> newRecord (
-                CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture);
-
-            mState.mTarget->getData().getLandTextures().appendRecord (newRecord);
+            mState.mTarget->getData().getLandTextures().appendRecord (
+                std::make_unique<CSMWorld::Record<CSMWorld::LandTexture> >(
+                    CSMWorld::Record<CSMWorld::LandTexture>(CSMWorld::RecordBase::State_ModifiedOnly, 0, &texture)));
 
             found = true;
         }
@@ -250,9 +248,8 @@ void CSMTools::MergeLandStage::perform (int stage, CSMDoc::Messages& messages)
             }
         }
 
-        CSMWorld::Record<CSMWorld::Land> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, 0, &newLand);
-
-        mState.mTarget->getData().getLand().appendRecord (newRecord);
+        mState.mTarget->getData().getLand().appendRecord (
+                std::make_unique<CSMWorld::Record<CSMWorld::Land> >(
+                    CSMWorld::Record<CSMWorld::Land>(CSMWorld::RecordBase::State_ModifiedOnly, 0, &newLand)));
     }
 }
