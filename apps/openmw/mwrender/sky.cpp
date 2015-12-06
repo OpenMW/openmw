@@ -476,7 +476,7 @@ public:
                                                                         osg::Texture::CLAMP);
 
         mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
-
+#ifndef OPENGL_ES
         osg::ref_ptr<osg::Group> queryNode (new osg::Group);
         // Need to render after the world geometry so we can correctly test for occlusions
         queryNode->getOrCreateStateSet()->setRenderBinDetails(RenderBin_OcclusionQuery, "RenderBin");
@@ -495,13 +495,16 @@ public:
 
         createSunFlash(textureManager);
         createSunGlare();
+#endif
     }
 
     ~Sun()
     {
         mTransform->removeUpdateCallback(mUpdater);
+#ifndef OPENGL_ES
         destroySunFlash();
         destroySunGlare();
+#endif
     }
 
     void setColor(const osg::Vec4f& color)
