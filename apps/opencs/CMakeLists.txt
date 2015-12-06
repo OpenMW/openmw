@@ -123,6 +123,10 @@ opencs_units_noqt (view/settings
     frame
     )
 
+opencs_units (view/prefs
+    dialogue
+    )
+
 opencs_units (model/settings
     usersettings
     setting
@@ -131,6 +135,10 @@ opencs_units (model/settings
 
 opencs_hdrs_noqt (model/settings
     support
+    )
+
+opencs_units (model/prefs
+    state
     )
 
 opencs_units_noqt (model/filter
