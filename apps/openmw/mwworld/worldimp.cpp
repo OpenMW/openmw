@@ -1691,31 +1691,32 @@ namespace MWWorld
 
     osg::Vec2f World::getNorthVector (CellStore* cell)
     {
-        /*
-        MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();
-        MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
-        if (!ref)
+        MWWorld::Ptr northmarker = cell->search("northmarker");
+
+        if (northmarker.isEmpty())
             return osg::Vec2f(0, 1);
 
-        osg::Quat orient (-ref->mData.getPosition().rot[2], osg::Vec3f(0,0,1));
+        osg::Quat orient (-northmarker.getRefData().getPosition().rot[2], osg::Vec3f(0,0,1));
         osg::Vec3f dir = orient * osg::Vec3f(0,1,0);
         osg::Vec2f d (dir.x(), dir.y());
         return d;
-        */
-        return osg::Vec2f();
     }
 
-    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
+    struct GetDoorMarkerVisitor
     {
-        /*
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        CellRefList<ESM::Door>::List& refList = doors.mList;
-        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+        GetDoorMarkerVisitor(std::vector<World::DoorMarker>& out)
+            : mOut(out)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+        }
 
-            if (!ref.mData.isEnabled())
-                continue;
+        std::vector<World::DoorMarker>& mOut;
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            MWWorld::LiveCellRef<ESM::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM::Door>* >(ptr.getBase());
+
+            if (!ref.mData.isEnabled() || ref.mData.isDeleted())
+                return true;
 
             if (ref.mRef.getTeleport())
             {
@@ -1731,7 +1732,7 @@ namespace MWWorld
                 else
                 {
                     cellid.mPaged = true;
-                    positionToIndex(
+                    MWBase::Environment::get().getWorld()->positionToIndex(
                                 ref.mRef.getDoorDest().pos[0],
                                 ref.mRef.getDoorDest().pos[1],
                                 cellid.mIndex.mX,
@@ -1743,10 +1744,16 @@ namespace MWWorld
 
                 newMarker.x = pos.pos[0];
                 newMarker.y = pos.pos[1];
-                out.push_back(newMarker);
+                mOut.push_back(newMarker);
             }
+            return true;
         }
-        */
+    };
+
+    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
+    {
+        GetDoorMarkerVisitor visitor(out);
+        cell->forEachType<ESM::Door>(visitor);
     }
 
     void World::setWaterHeight(const float height)
@@ -2241,24 +2248,37 @@ namespace MWWorld
             return osg::Vec3f(0,1,0);
     }
 
-    void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    struct GetContainersOwnedByVisitor
     {
-        /*
+        GetContainersOwnedByVisitor(const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+            : mOwner(owner)
+            , mOut(out)
+        {
+        }
+
+        MWWorld::Ptr mOwner;
+        std::vector<MWWorld::Ptr>& mOut;
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if (ptr.getRefData().isDeleted())
+                return true;
+
+            if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
+                mOut.push_back(ptr);
+
+            return true;
+        }
+    };
+
+    void World::getContainersOwnedBy (const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+    {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            MWWorld::CellRefList<ESM::Container>& containers = (*cellIt)->get<ESM::Container>();
-            CellRefList<ESM::Container>::List& refList = containers.mList;
-            for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
-            {
-                MWWorld::Ptr ptr (&*container, *cellIt);
-                if (ptr.getRefData().isDeleted())
-                    continue;
-                if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(ptr);
-            }
+            GetContainersOwnedByVisitor visitor (owner, out);
+            (*cellIt)->forEachType<ESM::Container>(visitor);
         }
-        */
     }
 
     struct ListObjectsVisitor
@@ -2776,11 +2796,11 @@ namespace MWWorld
 
     MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
     {
-        /*
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
         }
 
+        /*
         // Search for a 'nearest' marker, counting each cell between the starting
         // cell and the exterior as a distance of 1.  If an exterior is found, jump
         // to the nearest exterior marker, without further interior searching.
