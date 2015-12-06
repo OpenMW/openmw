@@ -636,7 +636,15 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
         writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
 
-        // TODO: write moved references
+        for (MovedRefTracker::const_iterator it = mMovedToAnotherCell.begin(); it != mMovedToAnotherCell.end(); ++it)
+        {
+            LiveCellRefBase* base = it->first;
+            ESM::RefNum refNum = base->mRef.getRefNum();
+            ESM::CellId movedTo = it->second->getCell()->getCellId();
+
+            refNum.save(writer, true, "MVRF");
+            movedTo.save(writer);
+        }
     }
 
     void CellStore::readReferences (ESM::ESMReader& reader,
@@ -770,6 +778,18 @@ namespace MWWorld
                     throw std::runtime_error ("unknown type in cell reference section");
             }
         }
+
+        while (reader.isNextSub("MVRF"))
+        {
+            reader.cacheSubName();
+            ESM::RefNum refnum;
+            ESM::CellId movedTo;
+            refnum.load(reader, true, "MVRF");
+            movedTo.load(reader);
+
+            std::cout << "moved to " << movedTo.mWorldspace << " " << movedTo.mIndex.mX << " " << movedTo.mIndex.mY << std::endl;
+        }
+
         updateMergedRefs();
     }
 

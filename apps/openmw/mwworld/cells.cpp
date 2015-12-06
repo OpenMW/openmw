@@ -119,7 +119,6 @@ MWWorld::CellStore *MWWorld::Cells::getExterior (int x, int y)
 
     if (result->second.getState()!=CellStore::State_Loaded)
     {
-        // Multiple plugin support for landscape data is much easier than for references. The last plugin wins.
         result->second.load ();
     }
 

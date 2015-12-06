@@ -12,6 +12,8 @@
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
+#include <components/esm/cellid.hpp>
+
 #include <components/esm/loadacti.hpp>
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
