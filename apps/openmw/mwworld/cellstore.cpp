@@ -284,8 +284,8 @@ namespace MWWorld
         functor.merge();
     }
 
-    CellStore::CellStore (const ESM::Cell *cell)
-        : mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
+    CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
+        : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
     }
@@ -382,14 +382,14 @@ namespace MWWorld
         return mMergedRefs.size();
     }
 
-    void CellStore::load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::load ()
     {
         if (mState!=State_Loaded)
         {
             if (mState==State_Preloaded)
                 mIds.clear();
 
-            loadRefs (store, esm);
+            loadRefs ();
 
             mState = State_Loaded;
 
@@ -399,18 +399,20 @@ namespace MWWorld
         }
     }
 
-    void CellStore::preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::preload ()
     {
         if (mState==State_Unloaded)
         {
-            listRefs (store, esm);
+            listRefs ();
 
             mState = State_Preloaded;
         }
     }
 
-    void CellStore::listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::listRefs()
     {
+        std::vector<ESM::ESMReader>& esm = mReader;
+
         assert (mCell);
 
         if (mCell->mContextList.empty())
@@ -462,8 +464,10 @@ namespace MWWorld
         std::sort (mIds.begin(), mIds.end());
     }
 
-    void CellStore::loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm)
+    void CellStore::loadRefs()
     {
+        std::vector<ESM::ESMReader>& esm = mReader;
+
         assert (mCell);
 
         if (mCell->mContextList.empty())
@@ -490,7 +494,7 @@ namespace MWWorld
                     continue;
                 }
 
-                loadRef (ref, deleted, store);
+                loadRef (ref, deleted);
             }
         }
 
@@ -499,7 +503,7 @@ namespace MWWorld
         {
             ESM::CellRef &ref = const_cast<ESM::CellRef&>(*it);
 
-            loadRef (ref, false, store);
+            loadRef (ref, false);
         }
 
         updateMergedRefs();
@@ -530,9 +534,11 @@ namespace MWWorld
         return Ptr();
     }
 
-    void CellStore::loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store)
+    void CellStore::loadRef (ESM::CellRef& ref, bool deleted)
     {
         Misc::StringUtils::toLower (ref.mRefID);
+
+        const MWWorld::ESMStore& store = mStore;
 
         switch (store.find (ref.mRefID))
         {

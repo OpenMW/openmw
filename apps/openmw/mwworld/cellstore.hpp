@@ -60,6 +60,9 @@ namespace MWWorld
 
         private:
 
+            const MWWorld::ESMStore& mStore;
+            std::vector<ESM::ESMReader>& mReader;
+
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
             // Note this is NULL until the cell is explored to save some memory
@@ -177,7 +180,10 @@ namespace MWWorld
             template <typename T>
             LiveCellRefBase* insert(const LiveCellRef<T>* ref);
 
-            CellStore (const ESM::Cell *cell_);
+            /// @param readerList The readers to use for loading of the cell on-demand.
+            CellStore (const ESM::Cell *cell_,
+                       const MWWorld::ESMStore& store,
+                       std::vector<ESM::ESMReader>& readerList);
 
             const ESM::Cell *getCell() const;
 
@@ -210,10 +216,10 @@ namespace MWWorld
             int count() const;
             ///< Return total number of references, including deleted ones.
 
-            void load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void load ();
             ///< Load references from content file.
 
-            void preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void preload ();
             ///< Build ID list from content file.
 
             /// Call functor (ref) for each reference. functor must return a bool. Returning
@@ -267,11 +273,11 @@ namespace MWWorld
         private:
 
             /// Run through references and store IDs
-            void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void listRefs();
 
-            void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void loadRefs();
 
-            void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
+            void loadRef (ESM::CellRef& ref, bool deleted);
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
