@@ -213,6 +213,15 @@ namespace MWWorld
 
         // TODO: ensure that the object actually exists in the cell
 
+        // Objects with no refnum can't be handled correctly in the merging process that happens
+        // on a save/load, so do a simple copy & delete for these objects.
+        if (!object.getCellRef().getRefNum().hasContentFile())
+        {
+            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo);
+            object.getRefData().setCount(0);
+            return copied;
+        }
+
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())
         {
