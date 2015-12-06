@@ -2341,8 +2341,6 @@ namespace MWWorld
 
     bool World::findInteriorPosition(const std::string &name, ESM::Position &pos)
     {
-        return false;
-        /*
         typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
         typedef MWWorld::CellRefList<ESM::Static>::List StaticList;
 
@@ -2354,7 +2352,8 @@ namespace MWWorld
         if (0 == cellStore) {
             return false;
         }
-        const DoorList &doors = cellStore->get<ESM::Door>().mList;
+
+        const DoorList &doors = cellStore->getReadOnlyDoors().mList;
         for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
             if (!it->mRef.getTeleport()) {
                 continue;
@@ -2376,7 +2375,7 @@ namespace MWWorld
             if (0 != source) {
                 // Find door leading to our current teleport door
                 // and use it destination to position inside cell.
-                const DoorList &doors = source->get<ESM::Door>().mList;
+                const DoorList &doors = source->getReadOnlyDoors().mList;
                 for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
                     if (it->mRef.getTeleport() &&
                         Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
@@ -2390,12 +2389,11 @@ namespace MWWorld
             }
         }
         // Fall back to the first static location.
-        const StaticList &statics = cellStore->get<ESM::Static>().mList;
+        const StaticList &statics = cellStore->getReadOnlyStatics().mList;
         if ( statics.begin() != statics.end() ) {
             pos = statics.begin()->mRef.getPosition();
             return true;
         }
-        */
 
         return false;
     }
@@ -2743,8 +2741,6 @@ namespace MWWorld
 
     bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result)
     {
-        return false;
-        /*
         if (cell->isExterior())
             return false;
 
@@ -2791,7 +2787,6 @@ namespace MWWorld
 
         // No luck :(
         return false;
-        */
     }
 
     MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
@@ -2800,7 +2795,6 @@ namespace MWWorld
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
         }
 
-        /*
         // Search for a 'nearest' marker, counting each cell between the starting
         // cell and the exterior as a distance of 1.  If an exterior is found, jump
         // to the nearest exterior marker, without further interior searching.
@@ -2848,7 +2842,6 @@ namespace MWWorld
                 }
             }
         }
-        */
         return MWWorld::Ptr();
     }
 
@@ -2916,7 +2909,7 @@ namespace MWWorld
         Ptr mDetector;
         float mSquaredDist;
         World::DetectionType mType;
-        bool operator() (MWWorld::Ptr ptr)
+        bool operator() (const MWWorld::Ptr& ptr)
         {
             if ((ptr.getRefData().getPosition().asVec3() - mDetector.getRefData().getPosition().asVec3()).length2() >= mSquaredDist)
                 return true;
@@ -2947,7 +2940,7 @@ namespace MWWorld
             return true;
         }
 
-        bool needToAdd (MWWorld::Ptr ptr, MWWorld::Ptr detector)
+        bool needToAdd (const MWWorld::Ptr& ptr, const MWWorld::Ptr& detector)
         {
             if (mType == World::Detect_Creature)
             {

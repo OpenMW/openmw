@@ -286,6 +286,18 @@ namespace MWWorld
 
             /// \todo add const version of forEach
 
+
+            // NOTE: does not account for moved references
+            // Should be phased out when we have const version of forEach
+            inline const CellRefList<ESM::Door>& getReadOnlyDoors() const
+            {
+                return mDoors;
+            }
+            inline const CellRefList<ESM::Static>& getReadOnlyStatics() const
+            {
+                return mStatics;
+            }
+
             bool isExterior() const;
 
             Ptr searchInContainer (const std::string& id);
