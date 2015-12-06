@@ -260,7 +260,7 @@ public:
     {
     }
 
-    META_Node(MWRender, CameraRelativeTransform)
+    META_Node(OpenMW, CameraRelativeTransform)
 
     const osg::Vec3f& getLastEyePoint() const
     {

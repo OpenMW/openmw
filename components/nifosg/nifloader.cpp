@@ -97,7 +97,7 @@ namespace
         {
         }
 
-        META_Object(NifOsg, UpdateMorphGeometry)
+        META_Object(OpenMW, UpdateMorphGeometry)
 
         virtual bool cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
         {
@@ -137,7 +137,7 @@ namespace
         {
         }
 
-        META_Object(NifOsg, StaticBoundingBoxCallback)
+        META_Object(OpenMW, StaticBoundingBoxCallback)
 
         virtual osg::BoundingBox computeBound(const osg::Drawable&) const
         {

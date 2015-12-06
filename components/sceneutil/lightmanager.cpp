@@ -41,7 +41,7 @@ namespace SceneUtil
             throw std::runtime_error("LightStateAttribute::compare: unimplemented");
         }
 
-        META_StateAttribute(NifOsg, LightStateAttribute, osg::StateAttribute::LIGHT)
+        META_StateAttribute(OpenMW, LightStateAttribute, osg::StateAttribute::LIGHT)
 
         virtual void apply(osg::State& state) const
         {
@@ -86,7 +86,7 @@ namespace SceneUtil
             : osg::NodeCallback(copy, copyop)
             , mLightManager(0) { }
 
-        META_Object(SceneUtil, SceneUtil::CollectLightCallback)
+        META_Object(OpenMW, CollectLightCallback)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {
@@ -118,7 +118,7 @@ namespace SceneUtil
             : osg::NodeCallback(copy, copyop)
             { }
 
-        META_Object(SceneUtil, SceneUtil::LightManagerUpdateCallback)
+        META_Object(OpenMW, LightManagerUpdateCallback)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
         {

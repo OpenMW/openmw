@@ -236,21 +236,44 @@ if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-add_library(osgdb_serializers_nifosg SHARED
-    serializers/nifloader serializers/controller
-    serializers/particle serializers/userdata
+# There's still some brokenness here.  OSG will load:
+#   .../osgPlugins-3.5.1/libOpenMW.so
+#   .../osgPlugins-3.5.1/osgdb_serializers_openmw.so
+#
+# OSG always loads both libraries.  It will look in many more places
+# for each if these two if they are not found, so for performance
+# reasons, we should supply both.  Presumably, the former is for the
+# relevant code, while the latter is just the serializers.  Also,
+# CMake has helpfully prefixed "lib" to the latter, which is not
+# really desired.
+
+add_library(OpenMW SHARED
+    # What's the correct set of files here?
+    nifosg/nifloader nifosg/particle nifosg/controller nifosg/userdata
+    sceneutil/statesetupdater sceneutil/skeleton
     )
 
-target_link_libraries(osgdb_serializers_nifosg components)
+target_link_libraries(OpenMW components)
 
-add_library(osgdb_serializers_sceneutil SHARED
+install(TARGETS OpenMW
+    # Should be set from OSG somehow
+    LIBRARY DESTINATION lib/osgPlugins-3.5.1
+    RUNTIME DESTINATION bin
+    )
+
+add_library(osgdb_serializers_openmw SHARED
+    serializers/nifloader serializers/controller
+    serializers/particle serializers/userdata
     serializers/statesetupdater serializers/skeleton
     )
 
-target_link_libraries(osgdb_serializers_sceneutil components)
+# Is this duplicative?  It appears to statically link OpenMW into the
+# serializer shared library.  But osgconv doesn't work without it.
+target_link_libraries(osgdb_serializers_openmw OpenMW)
 
-install(TARGETS osgdb_serializers_nifosg
-    LIBRARY DESTINATION lib
+install(TARGETS osgdb_serializers_openmw
+    # Should be set from OSG somehow
+    LIBRARY DESTINATION lib/osgPlugins-3.5.1
     RUNTIME DESTINATION bin
     )
 

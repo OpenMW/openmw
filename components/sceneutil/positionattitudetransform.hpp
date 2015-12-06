@@ -20,7 +20,7 @@ class PositionAttitudeTransform : public osg::Transform
             _scale(pat._scale){}
 
 
-        META_Node(SceneUtil, PositionAttitudeTransform)
+        META_Node(OpenMW, PositionAttitudeTransform)
 
         inline void setPosition(const osg::Vec3f& pos) { _position = pos; dirtyBound(); }
         inline const osg::Vec3f& getPosition() const { return _position; }

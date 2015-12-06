@@ -31,7 +31,7 @@ static bool writeRotationScale(osgDB::OutputStream& os,
         for (int j=0; j<3; ++j) {
             os << node.mRotationScale.mValues[i][j];
 #ifdef SERIALIZER_DEBUG
-            std::cout << "Wrote NifOsg::NodeUserData.mRotationScale["
+            std::cout << "Wrote OpenMW::NodeUserData.mRotationScale["
                       << i << "][" << j << "] = "
                       << node.mRotationScale.mValues[i][j]<< std::endl;
 #endif
@@ -50,7 +50,7 @@ static bool readRotationScale(osgDB::InputStream& is,
         for (int j=0; j<3; ++j) {
             is >> node.mRotationScale.mValues[i][j];
 #ifdef SERIALIZER_DEBUG
-            std::cout << "Read NifOsg::NodeUserData.mRotationScale ["
+            std::cout << "Read OpenMW::NodeUserData.mRotationScale ["
                       << i << "][" << j << "] = "
                       << node.mRotationScale.mValues[i][j]<< std::endl;
 #endif
@@ -64,11 +64,11 @@ static bool readRotationScale(osgDB::InputStream& is,
 #define MyClass NifOsg::NodeUserData
 REGISTER_OBJECT_WRAPPER(NifOsg_NodeUserData_Serializer,
                         new NifOsg::NodeUserData,
-                        NifOsg::NodeUserData,
-                        "osg::Object NifOsg::NodeUserData")
+                        "OpenMW::NodeUserData",
+                        "osg::Object OpenMW::NodeUserData")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::NodeUserData serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::NodeUserData serializer..." << std::endl;
 #endif
     
     ADD_INT_SERIALIZER(Index, 0);

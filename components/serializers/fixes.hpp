@@ -4,5 +4,5 @@
     extern void wrapper_propfunc_##NAME(osgDB::ObjectWrapper*); \
     static osg::Object* wrapper_createinstancefunc##NAME() { return CREATEINSTANCE; } \
     osgDB::RegisterWrapperProxy NAME ( \
-        wrapper_createinstancefunc##NAME, #CLASS, ASSOCIATES, &wrapper_propfunc_##NAME); \
+        wrapper_createinstancefunc##NAME, CLASS, ASSOCIATES, &wrapper_propfunc_##NAME); \
     void wrapper_propfunc_##NAME(osgDB::ObjectWrapper* wrapper)

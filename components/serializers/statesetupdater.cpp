@@ -16,11 +16,11 @@
 #define MyClass SceneUtil::StateSetUpdater
 REGISTER_OBJECT_WRAPPER(NifOsg_StateSetUpdater_Serializer,
                         new SceneUtil::StateSetUpdater,
-                        SceneUtil::StateSetUpdater,
-                        "osg::Object osg::NodeCallback SceneUtil::StateSetUpdater")
+                        "OpenMW::StateSetUpdater",
+                        "osg::Object osg::NodeCallback OpenMW::StateSetUpdater")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up SceneUtil::StateSetUpdater serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::StateSetUpdater serializer..." << std::endl;
 #endif
     // No serialization for: osg::ref_ptr<osg::StateSet> mStateSets[2];  Transient?
 }
@@ -29,11 +29,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_StateSetUpdater_Serializer,
 #define MyClass SceneUtil::CompositeStateSetUpdater
 REGISTER_OBJECT_WRAPPER(NifOsg_CompositeStateSetUpdater_Serializer,
                         new SceneUtil::CompositeStateSetUpdater,
-                        SceneUtil::CompositeStateSetUpdater,
-                        "osg::Object osg::NodeCallback SceneUtil::StateSetUpdater SceneUtil::CompositeStateSetUpdater")
+                        "OpenMW::CompositeStateSetUpdater",
+                        "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::CompositeStateSetUpdater")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up SceneUtil::CompositeStateSetUpdater serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::CompositeStateSetUpdater serializer..." << std::endl;
 #endif
     // No serialization for: std::vector<osg::ref_ptr<StateSetUpdater> > mCtrls;  Transient?
 }

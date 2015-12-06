@@ -30,7 +30,7 @@ namespace NifOsg
         ParticleSystem();
         ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, ParticleSystem)
+        META_Object(OpenMW, ParticleSystem)
 
         virtual osgParticle::Particle* createParticle(const osgParticle::Particle *ptemplate);
 
@@ -67,7 +67,7 @@ namespace NifOsg
         {
         }
 
-        META_Object(NifOsg, InverseWorldMatrix)
+        META_Object(OpenMW, InverseWorldMatrix)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
     };
@@ -80,7 +80,7 @@ namespace NifOsg
         ParticleShooter();
         ParticleShooter(const ParticleShooter& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(NifOsg, ParticleShooter)
+        META_Object(OpenMW, ParticleShooter)
 
         virtual void shoot(osgParticle::Particle* particle) const;
 
@@ -120,7 +120,7 @@ namespace NifOsg
         PlanarCollider();
         PlanarCollider(const PlanarCollider& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, PlanarCollider)
+        META_Object(OpenMW, PlanarCollider)
 
         virtual void beginOperate(osgParticle::Program* program);
         virtual void operate(osgParticle::Particle* particle, double dt);
@@ -138,7 +138,7 @@ namespace NifOsg
         GrowFadeAffector();
         GrowFadeAffector(const GrowFadeAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(NifOsg, GrowFadeAffector)
+        META_Object(OpenMW, GrowFadeAffector)
 
         virtual void beginOperate(osgParticle::Program* program);
         virtual void operate(osgParticle::Particle* particle, double dt);
@@ -164,7 +164,7 @@ namespace NifOsg
         ParticleColorAffector();
         ParticleColorAffector(const ParticleColorAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(NifOsg, ParticleColorAffector)
+        META_Object(OpenMW, ParticleColorAffector)
 
         virtual void operate(osgParticle::Particle* particle, double dt);
 
@@ -178,7 +178,7 @@ namespace NifOsg
         GravityAffector();
         GravityAffector(const GravityAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
-        META_Object(NifOsg, GravityAffector)
+        META_Object(OpenMW, GravityAffector)
 
         virtual void operate(osgParticle::Particle* particle, double dt);
         virtual void beginOperate(osgParticle::Program *);
@@ -232,7 +232,7 @@ namespace NifOsg
         Emitter();
         Emitter(const Emitter& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, Emitter)
+        META_Object(OpenMW, Emitter)
 
         virtual void emitParticles(double dt);
 

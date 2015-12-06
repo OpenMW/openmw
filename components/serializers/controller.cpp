@@ -34,11 +34,11 @@ SERIALIZER_KEYMAPT(Translations, NifOsg::Vec3Interpolator::InnerMapType, osg::Ve
 #define MyClass NifOsg::KeyframeController
 REGISTER_OBJECT_WRAPPER(NifOsg_KeyframeController_Serializer,
                         new NifOsg::KeyframeController,
-                        NifOsg::KeyframeController,
-                        "osg::Object osg::NodeCallback NifOsg::KeyframeController")
+                        "OpenMW::KeyframeController",
+                        "osg::Object osg::NodeCallback OpenMW::KeyframeController")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::KeyframeController serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::KeyframeController serializer..." << std::endl;
 #endif
     ADD_USER_SERIALIZER(XRotations);
     ADD_USER_SERIALIZER(YRotations);
@@ -66,7 +66,7 @@ static bool writeTextureUnits(osgDB::OutputStream& os,
     }
     os << os.END_BRACKET << std::endl;
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Wrote NifOsg::UVController.mTextureUnits" << std::endl;
+    std::cout << "Wrote OpenMW::UVController.mTextureUnits" << std::endl;
 #endif
     return true;
 }
@@ -83,7 +83,7 @@ static bool readTextureUnits(osgDB::InputStream& is,
     }
     is >> is.END_BRACKET;
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Read NifOsg::UVController.mTextureUnits" << std::endl;
+    std::cout << "Read OpenMW::UVController.mTextureUnits" << std::endl;
 #endif
     return true;
 }
@@ -92,12 +92,12 @@ static bool readTextureUnits(osgDB::InputStream& is,
 #define MyClass NifOsg::UVController
 REGISTER_OBJECT_WRAPPER(NifOsg_UVController_Serializer,
                         new NifOsg::UVController,
-                        NifOsg::UVController,
-                        // Maybe NOT really an osg::Object?
-                        "osg::Object NifOsg::UVController")
+                        "OpenMW::UVController",
+                        // Maybe NOT really an osg::Object?  Through StateSetUpdater?
+                        "osg::Object OpenMW::UVController")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::UVController serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::UVController serializer..." << std::endl;
 #endif
     ADD_USER_SERIALIZER(UTrans);
     ADD_USER_SERIALIZER(VTrans);
@@ -112,11 +112,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_UVController_Serializer,
 #define MyClass NifOsg::VisController
 REGISTER_OBJECT_WRAPPER(NifOsg_VisController_Serializer,
                         new NifOsg::VisController,
-                        NifOsg::VisController,
-                        "osg::Object osg::NodeCallback NifOsg::VisController")
+                        "OpenMW::VisController",
+                        "osg::Object osg::NodeCallback OpenMW::VisController")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::VisController serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::VisController serializer..." << std::endl;
 #endif
     // std::vector<Nif::NiVisData::VisData> mData;
 }

@@ -28,7 +28,7 @@ namespace NifOsg
         {
         }
 
-        META_Object(NifOsg, NodeUserData)
+        META_Object(OpenMW, NodeUserData)
 
         // NIF record index
         int mIndex;

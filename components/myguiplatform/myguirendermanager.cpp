@@ -226,7 +226,7 @@ public:
         mBatchVector[mWriteTo].clear();
     }
 
-    META_Object(osgMyGUI, Drawable)
+    META_Object(OpenMW, Drawable)
 
 private:
     // 2 would be enough in most cases, use 4 to get stereo working

@@ -19,7 +19,7 @@ namespace SceneUtil
         RigGeometry();
         RigGeometry(const RigGeometry& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, RigGeometry)
+        META_Object(OpenMW, RigGeometry)
 
         struct BoneInfluence
         {

@@ -25,7 +25,7 @@ namespace Resource
         {
         }
 
-        META_Object(Resource, NifFileHolder)
+        META_Object(OpenMW, NifFileHolder)
 
         Nif::NIFFilePtr mNifFile;
     };

@@ -191,7 +191,7 @@ namespace NifOsg
         GeomMorpherController();
         GeomMorpherController(const GeomMorpherController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, GeomMorpherController)
+        META_Object(OpenMW, GeomMorpherController)
 
         virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
 
@@ -206,7 +206,7 @@ namespace NifOsg
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, KeyframeController)
+        META_Object(OpenMW, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const;
 
@@ -235,7 +235,7 @@ namespace NifOsg
         UVController(const UVController&,const osg::CopyOp&);
         UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
 
-        META_Object(NifOsg, UVController)
+        META_Object(OpenMW, UVController)
 
         virtual void setDefaults(osg::StateSet* stateset);
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
@@ -262,7 +262,7 @@ namespace NifOsg
         VisController();
         VisController(const VisController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, VisController)
+        META_Object(OpenMW, VisController)
 
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
@@ -281,7 +281,7 @@ namespace NifOsg
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
 
-        META_Object(NifOsg, AlphaController)
+        META_Object(OpenMW, AlphaController)
     };
 
     class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
@@ -294,7 +294,7 @@ namespace NifOsg
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, MaterialColorController)
+        META_Object(OpenMW, MaterialColorController)
 
         virtual void setDefaults(osg::StateSet* stateset);
 
@@ -314,7 +314,7 @@ namespace NifOsg
         FlipController();
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, FlipController)
+        META_Object(OpenMW, FlipController)
 
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };
@@ -326,7 +326,7 @@ namespace NifOsg
         ParticleSystemController();
         ParticleSystemController(const ParticleSystemController& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, ParticleSystemController)
+        META_Object(OpenMW, ParticleSystemController)
 
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
 

@@ -28,13 +28,13 @@ static bool writeTextKeyMap(osgDB::OutputStream& os,
         os.writeWrappedString(pair.second);
         os << std::endl;
 #ifdef SERIALIZER_DEBUG
-        std::cout << "Wrote NifOsg::TextKeyMapHolder.mTextKeys["
+        std::cout << "Wrote OpenMW::TextKeyMapHolder.mTextKeys["
                   << pair.first << "] = " << pair.second << std::endl;
 #endif
     }
     os << os.END_BRACKET << std::endl;
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Wrote NifOsg::TextKeyMapHolder.mTextKeys" << std::endl;
+    std::cout << "Wrote OpenMW::TextKeyMapHolder.mTextKeys" << std::endl;
 #endif
     return true;
 }
@@ -56,13 +56,13 @@ static bool readTextKeyMap(osgDB::InputStream& is,
         NifOsg::TextKeyMap::value_type pair = NifOsg::TextKeyMap::value_type(time, label);
         it = node.mTextKeys.insert(it, pair);
 #ifdef SERIALIZER_DEBUG
-        std::cout << "Read NifOsg::TextKeyMapHolder.mTextKeys["
+        std::cout << "Read OpenMW::TextKeyMapHolder.mTextKeys["
                   << pair.first << "] = " << pair.second << std::endl;
 #endif
     }
     is >> is.END_BRACKET;
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Read NifOsg::TextKeyMapHolder.mTextKeys" << std::endl;
+    std::cout << "Read OpenMW::TextKeyMapHolder.mTextKeys" << std::endl;
 #endif
     return true;
 }
@@ -70,11 +70,11 @@ static bool readTextKeyMap(osgDB::InputStream& is,
 #define MyClass NifOsg::TextKeyMapHolder
 REGISTER_OBJECT_WRAPPER(NifOsg_TextKeyMapHolder_Serializer,
                         new NifOsg::TextKeyMapHolder,
-                        NifOsg::TextKeyMapHolder,
-                        "osg::Object NifOsg::TextKeyMapHolder")
+                        "OpenMW::TextKeyMapHolder",
+                        "osg::Object OpenMW::TextKeyMapHolder")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::TextKeyMapHolder serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::TextKeyMapHolder serializer..." << std::endl;
 #endif
     ADD_USER_SERIALIZER(TextKeyMap);
     // Complete.
@@ -84,11 +84,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_TextKeyMapHolder_Serializer,
 #define MyClass NifOsg::FrameSwitch
 REGISTER_OBJECT_WRAPPER(NifOsg_FrameSwitch_Serializer,
                         new NifOsg::FrameSwitch,
-                        NifOsg::FrameSwitch,
-                        "osg::Object osg::NodeCallback NifOsg::FrameSwitch")
+                        "OpenMW::FrameSwitch",
+                        "osg::Object osg::NodeCallback OpenMW::FrameSwitch")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::FrameSwitch serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::FrameSwitch serializer..." << std::endl;
 #endif
     // There are no members in the FrameSwitch callback.  It just needs to be created?
     // Scrawl said we didn't need to store this one in the object tree at all, while it
@@ -100,11 +100,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_FrameSwitch_Serializer,
 #define MyClass NifOsg::BillboardCallback
 REGISTER_OBJECT_WRAPPER(NifOsg_BillboardCallback_Serializer,
                         new NifOsg::BillboardCallback,
-                        NifOsg::BillboardCallback,
-                        "osg::Object osg::NodeCallback NifOsg::BillboardCallback")
+                        "OpenMW::BillboardCallback",
+                        "osg::Object osg::NodeCallback OpenMW::BillboardCallback")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::BillboardCallback serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::BillboardCallback serializer..." << std::endl;
 #endif
     // There are no members in the Billboard callback.  It just needs to be created?
 }

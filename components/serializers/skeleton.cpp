@@ -16,11 +16,11 @@
 #define MyClass SceneUtil::Skeleton
 REGISTER_OBJECT_WRAPPER(SceneUtil_Skeleton_Serializer,
                         new SceneUtil::Skeleton,
-                        SceneUtil::Skeleton,
-                        "osg::Object osg::Group SceneUtil::Skeleton")
+                        "OpenMW::Skeleton",
+                        "osg::Object osg::Group OpenMW::Skeleton")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up SceneUtil::Skeleton serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::Skeleton serializer..." << std::endl;
 #endif
     // INCOMPLETE
 }

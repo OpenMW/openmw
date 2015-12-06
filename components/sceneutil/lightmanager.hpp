@@ -29,7 +29,7 @@ namespace SceneUtil
 
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightSource)
+        META_Node(OpenMW, LightSource)
 
         LightSource();
 
@@ -76,7 +76,7 @@ namespace SceneUtil
     {
     public:
 
-        META_Node(SceneUtil, SceneUtil::LightManager)
+        META_Node(OpenMW, LightManager)
 
         LightManager();
 
@@ -158,7 +158,7 @@ namespace SceneUtil
             , mLastFrameNumber(0)
         {}
 
-        META_Object(NifOsg, LightListCallback)
+        META_Object(OpenMW, LightListCallback)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
 

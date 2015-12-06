@@ -51,7 +51,7 @@ public:
     {
     }
 
-    META_Object(MWRender, PtrHolder)
+    META_Object(OpenMW, PtrHolder)
 
     MWWorld::Ptr mPtr;
 };

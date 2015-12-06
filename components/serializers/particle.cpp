@@ -20,11 +20,11 @@
 #define MyClass NifOsg::ParticleSystem
 REGISTER_OBJECT_WRAPPER(NifOsg_ParticleSystem_Serializer,
                         new NifOsg::ParticleSystem,
-                        NifOsg::ParticleSystem,
-                        "osg::Object osgParticle::ParticleSystem NifOsg::ParticleSystem")
+                        "OpenMW::ParticleSystem",
+                        "osg::Object osgParticle::ParticleSystem OpenMW::ParticleSystem")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::ParticleSystem serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::ParticleSystem serializer..." << std::endl;
 #endif
     ADD_INT_SERIALIZER(Quota, 0);
 }
@@ -33,11 +33,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_ParticleSystem_Serializer,
 #define MyClass NifOsg::InverseWorldMatrix
 REGISTER_OBJECT_WRAPPER(NifOsg_InverseWorldMatrix_Serializer,
                         new NifOsg::InverseWorldMatrix,
-                        NifOsg::InverseWorldMatrix,
-                        "osg::Object osg::NodeCallback NifOsg::InverseWorldMatrix")
+                        "OpenMW::InverseWorldMatrix",
+                        "osg::Object osg::NodeCallback OpenMW::InverseWorldMatrix")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::InverseWorldMatrix serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::InverseWorldMatrix serializer..." << std::endl;
 #endif
     // There are no members in the InverseWorldMatrix callback.  It just needs to be created?
 }
@@ -50,7 +50,7 @@ static bool checkColorData(const NifOsg::ParticleColorAffector& node) {
 static bool writeColorData(osgDB::OutputStream& os,
                            const NifOsg::ParticleColorAffector& node) {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Wrote NifOsg::ParticleColorAffector.mData" << std::endl;
+    std::cout << "Wrote OpenMW::ParticleColorAffector.mData" << std::endl;
 #endif
     os << os.BEGIN_BRACKET << std::endl;
     os << os.PROPERTY("Interpolation") << node.mData.getMapTPtr()->mInterpolationType << std::endl;
@@ -62,7 +62,7 @@ static bool writeColorData(osgDB::OutputStream& os,
 static bool readColorData(osgDB::InputStream& is,
                           NifOsg::ParticleColorAffector& node) {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Read NifOsg::ParticleColorAffector.mData" << std::endl;
+    std::cout << "Read OpenMW::ParticleColorAffector.mData" << std::endl;
 #endif
     is >> is.BEGIN_BRACKET;
     node.mData.initMapTPtr();
@@ -76,11 +76,11 @@ static bool readColorData(osgDB::InputStream& is,
 #define MyClass NifOsg::ParticleColorAffector
 REGISTER_OBJECT_WRAPPER(NifOsg_ParticleColorAffector_Serializer,
                         new NifOsg::ParticleColorAffector,
-                        NifOsg::ParticleColorAffector,
-                        "osg::Object osgParticle::Operator NifOsg::ParticleColorAffector")
+                        "OpenMW::ParticleColorAffector",
+                        "osg::Object osgParticle::Operator OpenMW::ParticleColorAffector")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::ParticleColorAffector serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::ParticleColorAffector serializer..." << std::endl;
 #endif
     ADD_USER_SERIALIZER(ColorData); // Nif::NiColorData mData;
 }
@@ -89,11 +89,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_ParticleColorAffector_Serializer,
 #define MyClass NifOsg::GrowFadeAffector
 REGISTER_OBJECT_WRAPPER(NifOsg_GrowFadeAffector_Serializer,
                         new NifOsg::GrowFadeAffector,
-                        NifOsg::GrowFadeAffector,
-                        "osg::Object osgParticle::Operator NifOsg::GrowFadeAffector")
+                        "OpenMW::GrowFadeAffector",
+                        "osg::Object osgParticle::Operator OpenMW::GrowFadeAffector")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::GrowFadeAffector serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::GrowFadeAffector serializer..." << std::endl;
 #endif
     ADD_FLOAT_SERIALIZER(Grow, 0.0f);
     ADD_FLOAT_SERIALIZER(Fade, 0.0f);
@@ -104,11 +104,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_GrowFadeAffector_Serializer,
 #define MyClass NifOsg::Emitter
 REGISTER_OBJECT_WRAPPER(NifOsg_Emitter_Serializer,
                         new NifOsg::Emitter,
-                        NifOsg::Emitter,
-                        "osg::Object osgParticle::Emitter NifOsg::Emitter")
+                        "OpenMW::Emitter",
+                        "osg::Object osgParticle::Emitter OpenMW::Emitter")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::Emitter serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::Emitter serializer..." << std::endl;
 #endif
     ADD_LIST_SERIALIZER(Targets, std::vector<int>);
     ADD_OBJECT_SERIALIZER(Placer, osgParticle::Placer, NULL);
@@ -120,11 +120,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_Emitter_Serializer,
 #define MyClass NifOsg::ParticleShooter
 REGISTER_OBJECT_WRAPPER(NifOsg_ParticleShooter_Serializer,
                         new NifOsg::ParticleShooter,
-                        NifOsg::ParticleShooter,
-                        "osg::Object osgParticle::Shooter NifOsg::ParticleShooter")
+                        "OpenMW::ParticleShooter",
+                        "osg::Object osgParticle::Shooter OpenMW::ParticleShooter")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::ParticleShooter serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::ParticleShooter serializer..." << std::endl;
 #endif
     ADD_FLOAT_SERIALIZER(MinSpeed, 0.0f);
     ADD_FLOAT_SERIALIZER(MaxSpeed, 0.0f);
@@ -140,11 +140,11 @@ REGISTER_OBJECT_WRAPPER(NifOsg_ParticleShooter_Serializer,
 #define MyClass NifOsg::GravityAffector
 REGISTER_OBJECT_WRAPPER(NifOsg_GravityAffector_Serializer,
                         new NifOsg::GravityAffector,
-                        NifOsg::GravityAffector,
-                        "osg::Object osgParticle::Operator NifOsg::GravityAffector")
+                        "OpenMW::GravityAffector",
+                        "osg::Object osgParticle::Operator OpenMW::GravityAffector")
 {
 #ifdef SERIALIZER_DEBUG
-    std::cout << "Setting up NifOsg::GravityAffector serializer..." << std::endl;
+    std::cout << "Setting up OpenMW::GravityAffector serializer..." << std::endl;
 #endif
     ADD_FLOAT_SERIALIZER(Force, 0.0f);
     {

@@ -33,7 +33,7 @@ namespace NifOsg
 
         TextKeyMap mTextKeys;
 
-        META_Object(NifOsg, TextKeyMapHolder)
+        META_Object(OpenMW, TextKeyMapHolder)
 
     };
 
@@ -55,7 +55,7 @@ namespace NifOsg
             : osg::Group(copy, copyop)
         {}
 
-        META_Object(NifOsg, FrameSwitch)
+        META_Object(OpenMW, FrameSwitch)
 
         virtual void traverse(osg::NodeVisitor& nv);
     };
@@ -68,7 +68,7 @@ namespace NifOsg
             : osg::NodeCallback(copy, copyop)
         {}
 
-        META_Object(NifOsg, BillboardCallback)
+        META_Object(OpenMW, BillboardCallback)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
     };

@@ -25,7 +25,7 @@ public:
     {
     }
 
-    META_Object(SceneUtil, UpdateRigBounds)
+    META_Object(OpenMW, UpdateRigBounds)
 
     void update(osg::NodeVisitor* nv, osg::Drawable* drw)
     {
@@ -48,7 +48,7 @@ public:
     {
     }
 
-    META_Object(SceneUtil, UpdateRigGeometry)
+    META_Object(OpenMW, UpdateRigGeometry)
 
     virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const
     {

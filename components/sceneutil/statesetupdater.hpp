@@ -22,7 +22,7 @@ namespace SceneUtil
         StateSetUpdater();
         StateSetUpdater(const StateSetUpdater& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, StateSetUpdater)
+        META_Object(OpenMW, StateSetUpdater)
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
@@ -50,7 +50,7 @@ namespace SceneUtil
         CompositeStateSetUpdater();
         CompositeStateSetUpdater(const CompositeStateSetUpdater& copy, const osg::CopyOp& copyop);
 
-        META_Object(SceneUtil, CompositeStateSetUpdater)
+        META_Object(OpenMW, CompositeStateSetUpdater)
 
         unsigned int getNumControllers();
         StateSetUpdater* getController(int i);
