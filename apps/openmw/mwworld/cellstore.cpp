@@ -184,6 +184,9 @@ namespace MWWorld
 
     void CellStore::moveFrom(const Ptr &object, CellStore *from)
     {
+        if (mState != State_Loaded)
+            load();
+
         mHasState = true;
         MovedRefTracker::iterator found = mMovedToAnotherCell.find(object.getBase());
         if (found != mMovedToAnotherCell.end())
@@ -196,14 +199,7 @@ namespace MWWorld
         {
             mMovedHere.insert(std::make_pair(object.getBase(), from));
         }
-
-        if (mState == State_Loaded)
-            updateMergedRefs();
-        else if (mState == State_Preloaded)
-        {
-            mIds.push_back(object.getCellRef().getRefId());
-            std::sort(mIds.begin(), mIds.end());
-        }
+        updateMergedRefs();
     }
 
     MWWorld::Ptr CellStore::moveTo(const Ptr &object, CellStore *cellToMoveTo)
