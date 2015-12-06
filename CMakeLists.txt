@@ -704,6 +704,11 @@ if (WIN32)
         4800 # Boolean optimization warning, e.g. myBool = (myInt != 0) instead of myBool = myInt
         )
 
+    # MSVC 2015
+    if (MSVC_VERSION GREATER 1899)
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE} 5026 5027)
+    endif()
+
     foreach(d ${WARNINGS_DISABLE})
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
