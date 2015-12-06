@@ -613,6 +613,28 @@ namespace MWWorld
         mFogState->load(reader);
     }
 
+    struct SearchByRefNumVisitor
+    {
+        LiveCellRefBase* mFound;
+        ESM::RefNum mRefNumToFind;
+
+        SearchByRefNumVisitor(const ESM::RefNum& toFind)
+            : mFound(NULL)
+            , mRefNumToFind(toFind)
+        {
+        }
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
+            {
+                mFound = ptr.getBase();
+                return false;
+            }
+            return true;
+        }
+    };
+
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
     {
         writeReferenceCollection<ESM::ObjectState> (writer, mActivators);
@@ -647,11 +669,8 @@ namespace MWWorld
         }
     }
 
-    void CellStore::readReferences (ESM::ESMReader& reader,
-        const std::map<int, int>& contentFileMap)
+    void CellStore::readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback)
     {
-        // TODO: read moved references
-
         mHasState = true;
 
         while (reader.isNextSub ("OBJE"))
@@ -787,7 +806,35 @@ namespace MWWorld
             refnum.load(reader, true, "MVRF");
             movedTo.load(reader);
 
-            std::cout << "moved to " << movedTo.mWorldspace << " " << movedTo.mIndex.mX << " " << movedTo.mIndex.mY << std::endl;
+            // Search for the reference. It might no longer exist if its content file was removed.
+            SearchByRefNumVisitor visitor(refnum);
+            forEachInternal(visitor);
+
+            if (!visitor.mFound)
+            {
+                std::cout << "Dropping moved ref tag for " << visitor.mFound->mRef.getRefId() << " (moved object no longer exists)" << std::endl;
+                continue;
+            }
+
+            CellStore* otherCell = callback->getCellStore(movedTo);
+
+            if (otherCell == NULL)
+            {
+                std::cerr << "Dropping moved ref tag for " << visitor.mFound->mRef.getRefId()
+                          << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location." << std::endl;
+                // Note by dropping tag the object will automatically re-appear in its original cell, though potentially at inapproriate coordinates.
+                // Restore original coordinates:
+                visitor.mFound->mData.setPosition(visitor.mFound->mRef.getPosition());
+                continue;
+            }
+
+            if (otherCell == this)
+            {
+                std::cerr << "Found invalid moved ref, ignoring" << std::endl;
+                continue;
+            }
+
+            moveTo(MWWorld::Ptr(visitor.mFound, this), otherCell);
         }
 
         updateMergedRefs();

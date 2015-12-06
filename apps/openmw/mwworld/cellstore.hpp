@@ -12,8 +12,6 @@
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
-#include <components/esm/cellid.hpp>
-
 #include <components/esm/loadacti.hpp>
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
@@ -42,6 +40,7 @@ namespace ESM
 {
     struct CellState;
     struct FogState;
+    struct CellId;
 }
 
 namespace MWWorld
@@ -263,7 +262,15 @@ namespace MWWorld
 
             void writeReferences (ESM::ESMWriter& writer) const;
 
-            void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+            struct GetCellStoreCallback
+            {
+            public:
+                ///@note must return NULL if the cell is not found
+                virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+            };
+
+            /// @param callback to use for retrieving of additional CellStore objects by ID (required for resolving moved references)
+            void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback);
 
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.

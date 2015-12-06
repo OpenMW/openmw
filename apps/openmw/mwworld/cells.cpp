@@ -1,5 +1,7 @@
 #include "cells.hpp"
 
+#include <iostream>
+
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/defs.hpp>
@@ -303,6 +305,29 @@ void MWWorld::Cells::write (ESM::ESMWriter& writer, Loading::Listener& progress)
         }
 }
 
+struct GetCellStoreCallback : public MWWorld::CellStore::GetCellStoreCallback
+{
+public:
+    GetCellStoreCallback(MWWorld::Cells& cells)
+        : mCells(cells)
+    {
+    }
+
+    MWWorld::Cells& mCells;
+
+    virtual MWWorld::CellStore* getCellStore(const ESM::CellId& cellId)
+    {
+        try
+        {
+            return mCells.getCell(cellId);
+        }
+        catch (...)
+        {
+            return NULL;
+        }
+    }
+};
+
 bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
     const std::map<int, int>& contentFileMap)
 {
@@ -320,9 +345,9 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         catch (...)
         {
             // silently drop cells that don't exist anymore
+            std::cerr << "Dropping state for cell " << state.mId.mWorldspace << " (cell no longer exists)" << std::endl;
             reader.skipRecord();
             return true;
-            /// \todo log
         }
 
         state.load (reader);
@@ -334,7 +359,9 @@ bool MWWorld::Cells::readRecord (ESM::ESMReader& reader, uint32_t type,
         if (cellStore->getState()!=CellStore::State_Loaded)
             cellStore->load ();
 
-        cellStore->readReferences (reader, contentFileMap);
+        GetCellStoreCallback callback(*this);
+
+        cellStore->readReferences (reader, contentFileMap, &callback);
 
         return true;
     }
