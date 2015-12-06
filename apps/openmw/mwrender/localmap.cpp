@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdint.h>
 
+#include <osg/Fog>
 #include <osg/LightModel>
 #include <osg/Texture2D>
 #include <osg/ComputeBoundsVisitor>
