@@ -770,6 +770,7 @@ namespace MWWorld
                     throw std::runtime_error ("unknown type in cell reference section");
             }
         }
+        updateMergedRefs();
     }
 
     bool operator== (const CellStore& left, const CellStore& right)
