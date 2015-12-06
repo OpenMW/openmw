@@ -30,7 +30,7 @@ namespace NifOsg
         ParticleSystem();
         ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, NifOsg::ParticleSystem)
+        META_Object(NifOsg, ParticleSystem)
 
         virtual osgParticle::Particle* createParticle(const osgParticle::Particle *ptemplate);
 
@@ -194,7 +194,7 @@ namespace NifOsg
         Emitter();
         Emitter(const Emitter& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, NifOsg::Emitter)
+        META_Object(NifOsg, Emitter)
 
         virtual void emitParticles(double dt);
 

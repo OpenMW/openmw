@@ -158,7 +158,7 @@ namespace SceneUtil
             , mLastFrameNumber(0)
         {}
 
-        META_Object(NifOsg, LightListCallback)
+        META_Object(SceneUtil, LightListCallback)
 
         void operator()(osg::Node* node, osg::NodeVisitor* nv);
 
