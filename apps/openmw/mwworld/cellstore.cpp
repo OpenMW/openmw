@@ -246,6 +246,7 @@ namespace MWWorld
         {
             MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo);
             object.getRefData().setCount(0);
+            object.getRefData().setBaseNode(NULL);
             return copied;
         }
 

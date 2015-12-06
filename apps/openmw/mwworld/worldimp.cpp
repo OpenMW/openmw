@@ -1171,7 +1171,6 @@ namespace MWWorld
                     newPtr = currCell->moveTo(ptr, newCell);
 
                     mRendering->updatePtr(ptr, newPtr);
-                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
 
