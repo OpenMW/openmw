@@ -119,6 +119,11 @@ namespace MWMechanics
         return TypeIdEscort;
     }
 
+    MWWorld::Ptr AiEscort::getTarget()
+    {
+        return MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
+    }
+
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::auto_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());

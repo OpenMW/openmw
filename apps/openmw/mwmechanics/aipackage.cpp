@@ -20,6 +20,16 @@
 
 MWMechanics::AiPackage::~AiPackage() {}
 
+MWWorld::Ptr MWMechanics::AiPackage::getTarget()
+{
+    return MWWorld::Ptr();
+}
+
+bool MWMechanics::AiPackage::sideWithTarget() const
+{
+    return false;
+}
+
 MWMechanics::AiPackage::AiPackage() : mTimer(0.26f) { //mTimer starts at .26 to force initial pathbuild
 
 }

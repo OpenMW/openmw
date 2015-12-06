@@ -1053,7 +1053,7 @@ namespace MWMechanics
 
     void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
     {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
             if (out.insert(*it).second)
@@ -1310,7 +1310,7 @@ namespace MWMechanics
         if (ptr == getPlayer())
             return false;
 
-        std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(attacker);
         MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
         {
@@ -1487,9 +1487,9 @@ namespace MWMechanics
         mActors.getObjectsInRange(position, radius, objects);
     }
 
-    std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
-        return mActors.getActorsFollowing(actor);
+        return mActors.getActorsSidingWith(actor);
     }
 
     std::list<int> MechanicsManager::getActorsFollowingIndices(const MWWorld::Ptr& actor)

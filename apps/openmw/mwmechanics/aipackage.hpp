@@ -69,6 +69,12 @@ namespace MWMechanics
             /// Simulates the passing of time
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state) {}
 
+            /// Get the target actor the AI is targeted at (not applicable to all AI packages, default return empty Ptr)
+            virtual MWWorld::Ptr getTarget();
+
+            /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
+            virtual bool sideWithTarget() const;
+
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
         protected:
