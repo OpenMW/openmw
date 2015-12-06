@@ -144,6 +144,28 @@ namespace
         ref.load (state);
         collection.mList.push_back (ref);
     }
+
+    struct SearchByRefNumVisitor
+    {
+        MWWorld::LiveCellRefBase* mFound;
+        ESM::RefNum mRefNumToFind;
+
+        SearchByRefNumVisitor(const ESM::RefNum& toFind)
+            : mFound(NULL)
+            , mRefNumToFind(toFind)
+        {
+        }
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
+            {
+                mFound = ptr.getBase();
+                return false;
+            }
+            return true;
+        }
+    };
 }
 
 namespace MWWorld
@@ -205,13 +227,18 @@ namespace MWWorld
     MWWorld::Ptr CellStore::moveTo(const Ptr &object, CellStore *cellToMoveTo)
     {
         if (cellToMoveTo == this)
-            throw std::runtime_error("object is already in this cell");
+            throw std::runtime_error("moveTo: object is already in this cell");
 
         // We assume that *this is in State_Loaded since we could hardly have reference to a live object otherwise.
         if (mState != State_Loaded)
-            throw std::runtime_error("can't move object from a non-loaded cell (how did you get this object anyway?)");
+            throw std::runtime_error("moveTo: can't move object from a non-loaded cell (how did you get this object anyway?)");
 
-        // TODO: ensure that the object actually exists in the cell
+        // Ensure that the object actually exists in the cell
+        SearchByRefNumVisitor searchVisitor(object.getCellRef().getRefNum());
+        forEach(searchVisitor);
+        if (!searchVisitor.mFound)
+            throw std::runtime_error("moveTo: object is not in this cell");
+
 
         // Objects with no refnum can't be handled correctly in the merging process that happens
         // on a save/load, so do a simple copy & delete for these objects.
@@ -613,28 +640,6 @@ namespace MWWorld
         mFogState->load(reader);
     }
 
-    struct SearchByRefNumVisitor
-    {
-        LiveCellRefBase* mFound;
-        ESM::RefNum mRefNumToFind;
-
-        SearchByRefNumVisitor(const ESM::RefNum& toFind)
-            : mFound(NULL)
-            , mRefNumToFind(toFind)
-        {
-        }
-
-        bool operator()(const MWWorld::Ptr& ptr)
-        {
-            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
-            {
-                mFound = ptr.getBase();
-                return false;
-            }
-            return true;
-        }
-    };
-
     void CellStore::writeReferences (ESM::ESMWriter& writer) const
     {
         writeReferenceCollection<ESM::ObjectState> (writer, mActivators);
@@ -830,6 +835,7 @@ namespace MWWorld
 
             if (otherCell == this)
             {
+                // Should never happen unless someone's tampering with files.
                 std::cerr << "Found invalid moved ref, ignoring" << std::endl;
                 continue;
             }
