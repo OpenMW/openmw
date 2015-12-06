@@ -88,6 +88,7 @@ Programmers
     Nikolay Kasyanov (corristo)
     nobrakal
     Nolan Poe (nopoe)
+    Paul Cercueil (pcercuei)
     Paul McElroy (Greendogo)
     Pieter van der Kloet (pvdk)
     pkubik

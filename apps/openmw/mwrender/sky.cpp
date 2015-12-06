@@ -2,6 +2,8 @@
 
 #include <cmath>
 
+#include <osg/ClipPlane>
+#include <osg/Fog>
 #include <osg/Transform>
 #include <osg/Geode>
 #include <osg/Depth>

@@ -2,6 +2,7 @@
 
 #include <iomanip>
 
+#include <osg/Fog>
 #include <osg/Depth>
 #include <osg/Group>
 #include <osg/Geode>
