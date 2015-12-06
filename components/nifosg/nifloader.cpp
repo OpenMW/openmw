@@ -84,82 +84,6 @@ namespace
             collectDrawableProperties(nifNode->parent, out);
     }
 
-    class FrameSwitch : public osg::Group
-    {
-    public:
-        FrameSwitch()
-        {
-        }
-
-        FrameSwitch(const FrameSwitch& copy, const osg::CopyOp& copyop)
-            : osg::Group(copy, copyop)
-        {
-        }
-
-        META_Object(NifOsg, FrameSwitch)
-
-        virtual void traverse(osg::NodeVisitor& nv)
-        {
-            if (nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN && nv.getVisitorType() != osg::NodeVisitor::UPDATE_VISITOR)
-                osg::Group::traverse(nv);
-            else
-            {
-                for (unsigned int i=0; i<getNumChildren(); ++i)
-                {
-                    if (i%2 == nv.getTraversalNumber()%2)
-                        getChild(i)->accept(nv);
-                }
-            }
-        }
-    };
-
-    // NodeCallback used to have a transform always oriented towards the camera. Can have translation and scale
-    // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
-    // Must be set as a cull callback.
-    class BillboardCallback : public osg::NodeCallback
-    {
-    public:
-        BillboardCallback()
-        {
-        }
-        BillboardCallback(const BillboardCallback& copy, const osg::CopyOp& copyop)
-            : osg::NodeCallback(copy, copyop)
-        {
-        }
-
-        META_Object(NifOsg, BillboardCallback)
-
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
-            osg::MatrixTransform* billboardNode = dynamic_cast<osg::MatrixTransform*>(node);
-            if (billboardNode && cv)
-            {
-                osg::Matrix modelView = *cv->getModelViewMatrix();
-
-                // attempt to preserve scale
-                float mag[3];
-                for (int i=0;i<3;++i)
-                {
-                    mag[i] = std::sqrt(modelView(0,i) * modelView(0,i) + modelView(1,i) * modelView(1,i) + modelView(2,i) * modelView(2,i));
-                }
-
-                modelView.setRotate(osg::Quat());
-                modelView(0,0) = mag[0];
-                modelView(1,1) = mag[1];
-                modelView(2,2) = mag[2];
-
-                cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
-
-                traverse(node, nv);
-
-                cv->popModelViewMatrix();
-            }
-            else
-                traverse(node, nv);
-        }
-    };
-
     struct UpdateMorphGeometry : public osg::Drawable::CullCallback
     {
         UpdateMorphGeometry()
@@ -265,6 +189,53 @@ namespace
 
 namespace NifOsg
 {
+
+    void FrameSwitch::traverse(osg::NodeVisitor& nv)
+    {
+        if (nv.getTraversalMode() != osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN && nv.getVisitorType() != osg::NodeVisitor::UPDATE_VISITOR)
+            osg::Group::traverse(nv);
+        else
+            {
+                for (unsigned int i=0; i<getNumChildren(); ++i)
+                    {
+                        if (i%2 == nv.getTraversalNumber()%2)
+                            getChild(i)->accept(nv);
+                    }
+            }
+    }
+
+    // NodeCallback used to have a transform always oriented towards the camera. Can have translation and scale
+    // set just like a regular MatrixTransform, but the rotation set will be overridden in order to face the camera.
+    // Must be set as a cull callback.
+    void BillboardCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(nv);
+        osg::MatrixTransform* billboardNode = dynamic_cast<osg::MatrixTransform*>(node);
+        if (billboardNode && cv)
+            {
+                osg::Matrix modelView = *cv->getModelViewMatrix();
+
+                // attempt to preserve scale
+                float mag[3];
+                for (int i=0;i<3;++i)
+                {
+                    mag[i] = std::sqrt(modelView(0,i) * modelView(0,i) + modelView(1,i) * modelView(1,i) + modelView(2,i) * modelView(2,i));
+                }
+
+                modelView.setRotate(osg::Quat());
+                modelView(0,0) = mag[0];
+                modelView(1,1) = mag[1];
+                modelView(2,2) = mag[2];
+
+                cv->pushModelViewMatrix(new osg::RefMatrix(modelView), osg::Transform::RELATIVE_RF);
+
+                traverse(node, nv);
+
+                cv->popModelViewMatrix();
+            }
+        else
+            traverse(node, nv);
+    }
 
     bool Loader::sShowMarkers = false;
 

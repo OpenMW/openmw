@@ -48,13 +48,14 @@ namespace NifOsg
     {
     public:
         typedef typename MapT::ValueType ValueT;
+        typedef typename MapT::MapType InnerMapType;
 
         ValueInterpolator()
             : mDefaultVal(ValueT())
         {
         }
 
-        ValueInterpolator(boost::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
+        ValueInterpolator(boost::shared_ptr<MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
             , mDefaultVal(defaultVal)
         {
@@ -122,11 +123,16 @@ namespace NifOsg
             return !mKeys || mKeys->mKeys.empty();
         }
 
+        // For serialization.
+        inline void initMapTPtr() { mKeys = boost::shared_ptr<MapT>(new MapT); }
+        inline boost::shared_ptr<MapT> getMapTPtr() const { return mKeys; }
+        inline void setMapTPtr(boost::shared_ptr<MapT> p) { mKeys = p; }
+
     private:
         mutable typename MapT::MapType::const_iterator mLastLowKey;
         mutable typename MapT::MapType::const_iterator mLastHighKey;
 
-        boost::shared_ptr<const MapT> mKeys;
+        boost::shared_ptr<MapT> mKeys;
 
         ValueT mDefaultVal;
     };
@@ -206,7 +212,9 @@ namespace NifOsg
 
         virtual void operator() (osg::Node*, osg::NodeVisitor*);
 
-    private:
+        inline const QuaternionInterpolator& getRotations() const { return mRotations; }
+        inline void setRotations(const QuaternionInterpolator& i) { mRotations = i; }
+
         QuaternionInterpolator mRotations;
 
         FloatInterpolator mXRotations;
@@ -215,6 +223,7 @@ namespace NifOsg
 
         Vec3Interpolator mTranslations;
         FloatInterpolator mScales;
+    private:
 
         osg::Quat getXYZRotation(float time) const;
     };
@@ -226,12 +235,14 @@ namespace NifOsg
         UVController(const UVController&,const osg::CopyOp&);
         UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
 
-        META_Object(NifOsg,UVController)
+        META_Object(NifOsg, UVController)
 
         virtual void setDefaults(osg::StateSet* stateset);
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
 
-    private:
+        //inline const std::set<int>& getTextureUnits() const { return mTextureUnits; }
+        //inline void setTextureUnits(const std::set<int>& tu) { mTextureUnits = tu; }
+
         FloatInterpolator mUTrans;
         FloatInterpolator mVTrans;
         FloatInterpolator mUScale;

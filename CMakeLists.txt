@@ -61,6 +61,7 @@ option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time"
 option(BUILD_OPENMW "build OpenMW" ON)
 option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
+option(BUILD_NIFCONV "build nifconv" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
 option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
 option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
@@ -576,6 +577,10 @@ endif()
 
 if (BUILD_ESMTOOL)
   add_subdirectory( apps/esmtool )
+endif()
+
+if (BUILD_NIFCONV)
+  add_subdirectory( apps/nifconv )
 endif()
 
 if (BUILD_LAUNCHER)

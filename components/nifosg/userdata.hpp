@@ -42,6 +42,12 @@ namespace NifOsg
         // but then we have to fork osgAnimation :/
         float mScale;
         Nif::Matrix3 mRotationScale;
+
+        // For serialization.
+        int getIndex() const { return mIndex; }
+        void setIndex(int i) { mIndex = i; }
+        float getScale() const { return mScale; }
+        void setScale(float s) { mScale = s; }
     };
 
 }

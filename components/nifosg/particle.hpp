@@ -30,11 +30,13 @@ namespace NifOsg
         ParticleSystem();
         ParticleSystem(const ParticleSystem& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, NifOsg::ParticleSystem)
+        META_Object(NifOsg, ParticleSystem)
 
         virtual osgParticle::Particle* createParticle(const osgParticle::Particle *ptemplate);
 
-        void setQuota(int quota);
+        // For serialization.  setQuota used elsewhere as well.
+        inline int getQuota() const { return mQuota; }
+        inline void setQuota(int quota) { mQuota = quota; }
 
     private:
         int mQuota;
@@ -82,6 +84,24 @@ namespace NifOsg
 
         virtual void shoot(osgParticle::Particle* particle) const;
 
+        // For serialization.
+        inline float getMinSpeed() const { return mMinSpeed; }
+        inline void setMinSpeed(float s) { mMinSpeed = s; }
+        inline float getMaxSpeed() const { return mMaxSpeed; }
+        inline void setMaxSpeed(float s) { mMaxSpeed = s; }
+        inline float getHorizontalDir() const { return mHorizontalDir; }
+        inline void setHorizontalDir(float d) { mHorizontalDir = d; }
+        inline float getHorizontalAngle() const { return mHorizontalAngle; }
+        inline void setHorizontalAngle(float a) { mHorizontalAngle = a; }
+        inline float getVerticalDir() const { return mVerticalDir; }
+        inline void setVerticalDir(float d) { mVerticalDir = d; }
+        inline float getVerticalAngle() const { return mVerticalAngle; }
+        inline void setVerticalAngle(float a) { mVerticalAngle = a; }
+        inline float getLifetime() const { return mLifetime; }
+        inline void setLifetime(float l) { mLifetime = l; }
+        inline float getLifetimeRandom() const { return mLifetimeRandom; }
+        inline void setLifetimeRandom(float l) { mLifetimeRandom = l; }
+
     private:
         float mMinSpeed;
         float mMaxSpeed;
@@ -123,6 +143,12 @@ namespace NifOsg
         virtual void beginOperate(osgParticle::Program* program);
         virtual void operate(osgParticle::Particle* particle, double dt);
 
+        // For serialization.
+        inline float getGrow() const { return mGrowTime; }
+        inline void setGrow(float g) { mGrowTime = g; }
+        inline float getFade() const { return mFadeTime; }
+        inline void setFade(float f) { mFadeTime = f; }
+
     private:
         float mGrowTime;
         float mFadeTime;
@@ -142,7 +168,6 @@ namespace NifOsg
 
         virtual void operate(osgParticle::Particle* particle, double dt);
 
-    private:
         Vec4Interpolator mData;
     };
 
@@ -158,12 +183,25 @@ namespace NifOsg
         virtual void operate(osgParticle::Particle* particle, double dt);
         virtual void beginOperate(osgParticle::Program *);
 
-    private:
-        float mForce;
         enum ForceType {
             Type_Wind,
             Type_Point
         };
+
+        // For serialization.
+        inline float getForce() const { return mForce; }
+        inline void setForce(float f) { mForce = f; }
+        inline ForceType getType() const { return mType; }
+        inline void setType(ForceType t) { mType = t; }
+        inline float getDecay() const { return mDecay; }
+        inline void setDecay(float d) { mDecay = d; }
+        inline const osg::Vec3f& getPosition() const { return mPosition; }
+        inline void setPosition(const osg::Vec3f& p) { mPosition = p; }
+        inline const osg::Vec3f& getDirection() const { return mDirection; }
+        inline void setDirection(const osg::Vec3f& d) { mDirection = d; }
+
+    private:
+        float mForce;
         ForceType mType;
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
@@ -194,13 +232,19 @@ namespace NifOsg
         Emitter();
         Emitter(const Emitter& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, NifOsg::Emitter)
+        META_Object(NifOsg, Emitter)
 
         virtual void emitParticles(double dt);
 
-        void setShooter(osgParticle::Shooter* shooter);
-        void setPlacer(osgParticle::Placer* placer);
-        void setCounter(osgParticle::Counter* counter);
+        // For serialization.   setShooter(), setPlacer() and setCounter() used elsewhere.
+        const std::vector<int>& getTargets() const { return mTargets; }
+        void setTargets(const std::vector<int>& targets) { mTargets = targets; }
+        const osgParticle::Shooter* getShooter() const { return mShooter; }
+        void setShooter(osgParticle::Shooter* shooter) { mShooter = shooter; }
+        const osgParticle::Placer* getPlacer() const { return mPlacer; }
+        void setPlacer(osgParticle::Placer* placer) { mPlacer = placer; }
+        const osgParticle::Counter* getCounter() const { return mCounter; }
+        void setCounter(osgParticle::Counter* counter) { mCounter = counter; }
 
     private:
         // NIF Record indices

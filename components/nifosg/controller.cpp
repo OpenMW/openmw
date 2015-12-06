@@ -85,7 +85,7 @@ KeyframeController::KeyframeController(const KeyframeController &copy, const osg
 }
 
 KeyframeController::KeyframeController(const Nif::NiKeyframeData *data)
-    : mRotations(data->mRotations)
+    : mRotations(data->mRotations, osg::Quat())
     , mXRotations(data->mXRotations, 0.f)
     , mYRotations(data->mYRotations, 0.f)
     , mZRotations(data->mZRotations, 0.f)

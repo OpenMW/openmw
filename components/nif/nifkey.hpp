@@ -50,6 +50,12 @@ struct KeyMapT {
 
     KeyMapT() : mInterpolationType(sLinearInterpolation) {}
 
+    // For serializer.
+    unsigned int getType() const { return mInterpolationType; }
+    void setType(unsigned int t) { mInterpolationType = t; }
+    MapType& getKeys() const { return &mKeys; }
+    void setKeys(MapType& m) { mKeys = m; }
+
     //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
     void read(NIFStream *nif, bool force=false)
     {

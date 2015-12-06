@@ -236,6 +236,23 @@ if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
+add_library(osgdb_serializers_nifosg SHARED
+    serializers/nifloader serializers/controller
+    serializers/particle serializers/userdata
+    )
+
+target_link_libraries(osgdb_serializers_nifosg components)
+
+add_library(osgdb_serializers_sceneutil SHARED
+    serializers/statesetupdater serializers/skeleton
+    )
+
+target_link_libraries(osgdb_serializers_sceneutil components)
+
+install(TARGETS osgdb_serializers_nifosg
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    )
 
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)

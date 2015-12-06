@@ -26,11 +26,6 @@ ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &co
         createParticle(copy.getParticle(i));
 }
 
-void ParticleSystem::setQuota(int quota)
-{
-    mQuota = quota;
-}
-
 osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particle *ptemplate)
 {
     if (numParticles()-numDeadParticles() < mQuota)
@@ -235,21 +230,6 @@ Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
 Emitter::Emitter(const std::vector<int> &targets)
     : mTargets(targets)
 {
-}
-
-void Emitter::setShooter(osgParticle::Shooter *shooter)
-{
-    mShooter = shooter;
-}
-
-void Emitter::setPlacer(osgParticle::Placer *placer)
-{
-    mPlacer = placer;
-}
-
-void Emitter::setCounter(osgParticle::Counter *counter)
-{
-    mCounter = counter;
 }
 
 void Emitter::emitParticles(double dt)

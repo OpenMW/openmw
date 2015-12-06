@@ -46,6 +46,33 @@ namespace NifOsg
         KeyframeControllerMap mKeyframeControllers;
     };
 
+    class FrameSwitch : public osg::Group
+    {
+    public:
+        FrameSwitch() {}
+
+        FrameSwitch(const FrameSwitch& copy, const osg::CopyOp& copyop)
+            : osg::Group(copy, copyop)
+        {}
+
+        META_Object(NifOsg, FrameSwitch)
+
+        virtual void traverse(osg::NodeVisitor& nv);
+    };
+
+    class BillboardCallback : public osg::NodeCallback
+    {
+    public:
+        BillboardCallback() {}
+        BillboardCallback(const BillboardCallback& copy, const osg::CopyOp& copyop)
+            : osg::NodeCallback(copy, copyop)
+        {}
+
+        META_Object(NifOsg, BillboardCallback)
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+    };
+
     /// The main class responsible for loading NIF files into an OSG-Scenegraph.
     /// @par This scene graph is self-contained and can be cloned using osg::clone if desired. Particle emitters
     ///      and programs hold a pointer to their ParticleSystem, which would need to be manually updated when cloning.
