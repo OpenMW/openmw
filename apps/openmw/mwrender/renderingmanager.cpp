@@ -208,6 +208,7 @@ namespace MWRender
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
+        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
@@ -729,7 +730,8 @@ namespace MWRender
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
     {
-        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0));
+        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, false, NpcAnimation::VM_Normal,
+                                                mFirstPersonFieldOfView));
 
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);

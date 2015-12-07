@@ -216,6 +216,7 @@ namespace MWRender
         float mFieldOfViewOverride;
         bool mFieldOfViewOverridden;
         float mFieldOfView;
+        float mFirstPersonFieldOfView;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);
