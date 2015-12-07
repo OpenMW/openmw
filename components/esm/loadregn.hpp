@@ -45,7 +45,7 @@ struct Region
     WEATstruct mData;
     int mMapColor; // RGBA
 
-    // sleepList refers to a eveled list of creatures you can meet if
+    // sleepList refers to a leveled list of creatures you can meet if
     // you sleep outside in this region.
     std::string mId, mName, mSleepList;
 
