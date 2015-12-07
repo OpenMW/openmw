@@ -381,7 +381,7 @@ public:
         bool isDeleted = false;
 
         faction.load(esm, isDeleted);
-        std::string id = Misc::StringUtils::toLower(faction.mId);
+        std::string id = Misc::StringUtils::lowerCase(faction.mId);
 
         for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
         {

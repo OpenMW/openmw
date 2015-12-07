@@ -254,7 +254,7 @@ namespace
                     nextpos = std::distance(str.begin(), ++last);
                 }
                 std::string result = str.substr(pos, nextpos-pos);
-                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::toLower(result)));
+                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::lowerCase(result)));
 
                 pos = nextpos;
             }
