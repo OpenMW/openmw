@@ -170,6 +170,11 @@ namespace MWRender
         void togglePlayerLooking(bool enable);
         void changeVanityModeScale(float factor);
 
+        /// temporarily override the field of view with given value.
+        void overrideFieldOfView(float val);
+        /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
+        void resetFieldOfView();
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -208,6 +213,8 @@ namespace MWRender
 
         float mNearClip;
         float mViewDistance;
+        float mFieldOfViewOverride;
+        bool mFieldOfViewOverridden;
         float mFieldOfView;
 
         void operator = (const RenderingManager&);

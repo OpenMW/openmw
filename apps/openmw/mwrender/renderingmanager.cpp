@@ -136,6 +136,8 @@ namespace MWRender
         , mUnderwaterFog(0.f)
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
+        , mFieldOfViewOverride(0.f)
+        , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
 
@@ -769,7 +771,10 @@ namespace MWRender
     void RenderingManager::updateProjectionMatrix()
     {
         double aspect = mViewer->getCamera()->getViewport()->aspectRatio();
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(mFieldOfView, aspect, mNearClip, mViewDistance);
+        float fov = mFieldOfView;
+        if (mFieldOfViewOverridden)
+            fov = mFieldOfViewOverride;
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -910,6 +915,25 @@ namespace MWRender
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
             mCamera->setCameraDistance(-factor/120.f*10, true, true);
+    }
+
+    void RenderingManager::overrideFieldOfView(float val)
+    {
+        if (mFieldOfViewOverridden != true || mFieldOfViewOverride != val)
+        {
+            mFieldOfViewOverridden = true;
+            mFieldOfViewOverride = val;
+            updateProjectionMatrix();
+        }
+    }
+
+    void RenderingManager::resetFieldOfView()
+    {
+        if (mFieldOfViewOverridden == true)
+        {
+            mFieldOfViewOverridden = false;
+            updateProjectionMatrix();
+        }
     }
 
 }

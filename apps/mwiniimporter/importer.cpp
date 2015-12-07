@@ -638,6 +638,9 @@ MwIniImporter::MwIniImporter()
         "Blood:Texture Name 1",
         "Blood:Texture Name 2",
 
+        // werewolf (Bloodmoon)
+        "General:Werewolf FOV",
+
         0
     };
 
