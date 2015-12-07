@@ -430,12 +430,8 @@ NifOgre::TextKeyMap::const_iterator Animation::findGroupStart(const NifOgre::Tex
     NifOgre::TextKeyMap::const_iterator iter(keys.begin());
     for(;iter != keys.end();++iter)
     {
-        if(iter->second.compare(0, groupname.size(), groupname) == 0 &&
-           iter->second.compare(groupname.size(), 2, ": ") == 0)
-            break;
-    }
-    return iter;
-}
+        std::string kfname = model;
+        Misc::StringUtils::lowerCaseInPlace(kfname);
 
 
 bool Animation::hasAnimation(const std::string &anim)

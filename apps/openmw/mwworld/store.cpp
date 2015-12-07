@@ -66,7 +66,51 @@ void Store<ESM::Cell>::load(ESM::ESMReader &esm)
             // spawn a new cell
             cell.loadCell(esm, true);
 
-            mInt[idLower] = cell;
+        record.load(esm, isDeleted);
+        Misc::StringUtils::lowerCaseInPlace(record.mId);
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = record;
+
+        return RecordId(record.mId, isDeleted);
+    }
+    template<typename T>
+    void Store<T>::setUp()
+    {
+    }
+
+    template<typename T>
+    typename Store<T>::iterator Store<T>::begin() const
+    {
+        return mShared.begin(); 
+    }
+    template<typename T>
+    typename Store<T>::iterator Store<T>::end() const
+    {
+        return mShared.end();
+    }
+
+    template<typename T>
+    size_t Store<T>::getSize() const
+    {
+        return mShared.size();
+    }
+
+    template<typename T>
+    int Store<T>::getDynamicSize() const
+    {
+        return mDynamic.size();
+    }
+    template<typename T>
+    void Store<T>::listIdentifier(std::vector<std::string> &list) const
+    {
+        list.reserve(list.size() + getSize());
+        typename std::vector<T *>::const_iterator it = mShared.begin();
+        for (; it != mShared.end(); ++it) {
+            list.push_back((*it)->mId);
         }
     }
     else

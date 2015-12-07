@@ -132,15 +132,11 @@ namespace MWMechanics
         return scaledDuration-usedUp;
     }
 
-    bool ActiveSpells::isSpellActive(std::string id) const
+    bool ActiveSpells::isSpellActive(const std::string& id) const
     {
-        Misc::StringUtils::toLower(id);
         for (TContainer::iterator iter = mSpells.begin(); iter != mSpells.end(); ++iter)
         {
-            std::string left = iter->first;
-            Misc::StringUtils::toLower(left);
-
-            if (iter->first == id)
+            if (Misc::StringUtils::ciEqual(iter->first, id))
                 return true;
         }
         return false;

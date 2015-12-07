@@ -96,7 +96,7 @@ namespace MWWorld
             // This readRecord() method is used when reading a saved game.
             // Deleted globals can't appear there, so isDeleted will be ignored here.
             global.load(reader, isDeleted);
-            Misc::StringUtils::toLower(global.mId);
+            Misc::StringUtils::lowerCaseInPlace(global.mId);
 
             Collection::iterator iter = mVariables.find (global.mId);
             if (iter!=mVariables.end())
