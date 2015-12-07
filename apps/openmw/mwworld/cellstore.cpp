@@ -474,8 +474,6 @@ namespace MWWorld
                     continue;
                 }
 
-                // We don't need to check mMovedToAnotherCell because listRefs isn't used for loaded cells.
-
                 mIds.push_back (Misc::StringUtils::lowerCase (ref.mRefID));
             }
         }
@@ -486,12 +484,6 @@ namespace MWWorld
             const ESM::CellRef &ref = *it;
 
             mIds.push_back(Misc::StringUtils::lowerCase(ref.mRefID));
-        }
-
-        // List runtime moved references
-        for (MovedRefTracker::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
-        {
-            mIds.push_back(Misc::StringUtils::lowerCase(it->first->mRef.getRefId()));
         }
 
         std::sort (mIds.begin(), mIds.end());
