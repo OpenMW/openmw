@@ -26,9 +26,7 @@
 
       <!-- buttons -->
       <Widget type="ImageButton" skin="ImageBox" position="40 350 64 32" name="OptionsBTN">
-        <Property key="ImageHighlighted" value="textures\tx_menubook_options_over.dds"/>
-        <Property key="ImageNormal" value="textures\tx_menubook_options_idle.dds"/>
-        <Property key="ImagePushed" value="textures\tx_menubook_options_pressed.dds"/>
+        <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
       <Widget type="TextBox" skin="NormalText" position="150 350 32 16" name="PageOneNum">
         <Property key="TextColour" value="0 0 0"/>
@@ -66,15 +64,11 @@
       <Widget type="BookPage" skin="MW_BookPage" position="112 15 92 250" name="RightTopicIndex"/>
 
       <Widget type="ImageButton" skin="ImageBox" position="62 15 100 20" Align="Top|Left" name="ShowActiveBTN">
-        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_active_over.dds"/>
-        <Property key="ImageNormal" value="textures\tx_menubook_quests_active_idle.dds"/>
-        <Property key="ImagePushed" value="textures\tx_menubook_quests_active_pressed.dds"/>
+        <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
       <Widget type="ImageButton" skin="ImageBox" position="76 15 72 20" Align="Top|Left" name="ShowAllBTN">
-        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_all_over.dds"/>
-        <Property key="ImageNormal" value="textures\tx_menubook_quests_all_idle.dds"/>
-        <Property key="ImagePushed" value="textures\tx_menubook_quests_all_pressed.dds"/>
+        <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
       <Widget type="MWList" skin="MW_QuestList" position="8 35 208 225" name="TopicsList" align="Right VStretch">
@@ -90,9 +84,7 @@
       </Widget>
 
       <Widget type="ImageButton" skin="ImageBox" position="130 265 56 32" Align="Top|Left" name="QuestsBTN">
-        <Property key="ImageHighlighted" value="textures\tx_menubook_quests_over.dds"/>
-        <Property key="ImageNormal" value="textures\tx_menubook_quests_idle.dds"/>
-        <Property key="ImagePushed" value="textures\tx_menubook_quests_pressed.dds"/>
+        <!-- Image set at runtime since it may not be available in all versions of the game -->
       </Widget>
 
       <Widget type="ImageButton" skin="ImageBox" position="85 290 56 32" Align="Top|Left" name="CancelBTN">

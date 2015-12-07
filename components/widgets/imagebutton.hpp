@@ -14,7 +14,10 @@ namespace Gui
         MYGUI_RTTI_DERIVED(ImageButton)
 
     public:
-        MyGUI::IntSize getRequestedSize(bool logError = true);
+        MyGUI::IntSize getRequestedSize();
+
+        /// Set mImageNormal, mImageHighlighted and mImagePushed based on file convention (image_idle.ext, image_over.ext and image_pressed.ext)
+        void setImage(const std::string& image);
 
     protected:
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);

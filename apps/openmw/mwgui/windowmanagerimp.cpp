@@ -288,7 +288,9 @@ namespace MWGui
         trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
-        mJournal = JournalWindow::create(JournalViewModel::create ());
+
+        bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
+        mJournal = JournalWindow::create(JournalViewModel::create (), questList);
         mMessageBoxManager = new MessageBoxManager(
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
