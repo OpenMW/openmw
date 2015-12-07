@@ -262,9 +262,23 @@ install(TARGETS OpenMW
     )
 
 add_library(osgdb_serializers_openmw SHARED
-    serializers/nifloader serializers/controller
-    serializers/particle serializers/userdata
-    serializers/statesetupdater serializers/skeleton
+    serializers/billboardcallback
+    serializers/compositestatesetupdater
+    serializers/emitter
+    serializers/frameswitch
+    serializers/gravityaffector
+    serializers/growfadeaffector
+    serializers/inverseworldmatrix
+    serializers/keyframecontroller
+    serializers/nodeuserdata
+    serializers/particlecoloraffector
+    serializers/particleshooter
+    serializers/particlesystem
+    serializers/skeleton
+    serializers/statesetupdater
+    serializers/textkeymapholder
+    serializers/uvcontroller
+    serializers/viscontroller
     )
 
 # Is this duplicative?  It appears to statically link OpenMW into the

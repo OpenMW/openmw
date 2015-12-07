@@ -1,3 +1,7 @@
+#ifndef OPENMW_COMPONENTS_SERIALIZER_KEYMAP_HPP
+#define OPENMW_COMPONENTS_SERIALIZER_KEYMAP_HPP
+
+#include <boost/foreach.hpp>
 
 template<typename KeyMapT>
 static void writeKeyMap(osgDB::OutputStream& os, const KeyMapT& keyMap) {
@@ -8,10 +12,6 @@ static void writeKeyMap(osgDB::OutputStream& os, const KeyMapT& keyMap) {
         os << std::endl;
     }
     os << os.END_BRACKET << std::endl;
-
-#ifdef SERIALIZER_DEBUG
-    std::cout << "Wrote KeyMapT<>..." << std::endl;
-#endif
 }
 
 template<typename KeyMapT, typename ValueT>
@@ -34,26 +34,23 @@ static void readKeyMap(osgDB::InputStream& is, KeyMapT& keyMap) {
         it = keyMap.insert(it, pair);
     }
     is >> is.END_BRACKET;
-
-#ifdef SERIALIZER_DEBUG
-    std::cout << "Read KeyMapT<>..." << std::endl;
-#endif
 }
 
-//    std::cout << "Checking NifOsg::KeyframeController.m" << #MEMBER << std::endl;
-//    std::cout << "Writing NifOsg::KeyframeController." << #MEMBER << std::endl;
-//    std::cout << "Reading NifOsg::KeyframeController." << #MEMBER << std::endl;
 #define SERIALIZER_KEYMAPT(MEMBER, MTYPE, VTYPE, NTYPE)   \
 static bool check##MEMBER(const NTYPE & node) { \
+    CHECKMSG(#MEMBER); \
     if (node.m##MEMBER.getMapTPtr() && node.m##MEMBER.getMapTPtr()->mKeys.size() > 0) return true; \
     return false; } \
 static bool write##MEMBER(osgDB::OutputStream& os, const NTYPE & node) { \
+    WRITEMSG(#MEMBER); \
     os << os.BEGIN_BRACKET << std::endl; \
     os << os.PROPERTY("Interpolation") << node.m##MEMBER.getMapTPtr()->mInterpolationType << std::endl; \
     writeKeyMap<MTYPE>(os, node.m##MEMBER.getMapTPtr()->mKeys); \
     os << os.END_BRACKET << std::endl; return true; } \
 static bool read##MEMBER(osgDB::InputStream& is, NTYPE & node) { \
+    READMSG(#MEMBER); \
     is >> is.BEGIN_BRACKET; node.m##MEMBER.initMapTPtr(); \
     is >> is.PROPERTY("Interpolation") >> node.m##MEMBER.getMapTPtr()->mInterpolationType; \
     readKeyMap<MTYPE, VTYPE>(is, node.m##MEMBER.getMapTPtr()->mKeys); \
     is >> is.END_BRACKET; return true; }
+#endif
