@@ -315,7 +315,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            if (i->first [0] != tolower (character))
+            if (i->first [0] != Misc::StringUtils::toLower(character))
                 continue;
 
             visitor (i->second.getName());

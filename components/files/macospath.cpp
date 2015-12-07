@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
+#include <components/misc/stringops.hpp>
+
 namespace
 {
     boost::filesystem::path getUserHome()
@@ -129,7 +131,7 @@ boost::filesystem::path MacOsPath::getInstallPath() const
             if (!mwpath.empty())
             {
                 // Change drive letter to lowercase, so we could use ~/.wine/dosdevice symlinks
-                mwpath[0] = tolower(mwpath[0]);
+                mwpath[0] = Misc::StringUtils::toLower(mwpath[0]);
                 installPath /= homePath;
                 installPath /= ".wine/dosdevices/";
                 installPath /= mwpath;

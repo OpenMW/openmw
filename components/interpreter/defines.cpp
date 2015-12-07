@@ -1,10 +1,11 @@
 #include "defines.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include <components/misc/stringops.hpp>
 
 namespace Interpreter{
 
@@ -35,7 +36,7 @@ namespace Interpreter{
             {
                 retval << text.substr(start, i - start);
                 std::string temp = text.substr(i+1, 100);
-                transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                Misc::StringUtils::lowerCase(temp);
                 
                 bool found = false;
                 try

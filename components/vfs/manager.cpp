@@ -3,6 +3,8 @@
 #include <cctype>
 #include <stdexcept>
 
+#include <components/misc/stringops.hpp>
+
 #include "archive.hpp"
 
 namespace
@@ -15,7 +17,7 @@ namespace
 
     char nonstrict_normalize_char(char ch)
     {
-        return ch == '\\' ? '/' : tolower(ch);
+        return ch == '\\' ? '/' : Misc::StringUtils::toLower(ch);
     }
 
     void normalize_path(std::string& path, bool strict)
