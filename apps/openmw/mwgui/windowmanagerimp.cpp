@@ -330,12 +330,18 @@ namespace MWGui
         if (mResourceSystem->getVFS()->exists(werewolfFaderTex))
             mWerewolfFader = new ScreenFader(werewolfFaderTex);
         mBlindnessFader = new ScreenFader("black");
-        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
-        // TODO: check if non-BM versions actually use player_hit_01.dds
+        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+        const std::string hitFaderLayout = "openmw_screen_fader_hit.layout";
+        MyGUI::FloatCoord hitFaderCoord (0,0,1,1);
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
+        {
             hitFaderTexture = "textures\\player_hit_01.dds";
-        mHitFader = new ScreenFader(hitFaderTexture, "openmw_screen_fader_hit.layout");
+            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+        }
+        mHitFader = new ScreenFader(hitFaderTexture, hitFaderLayout, hitFaderCoord);
+
         mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
