@@ -721,7 +721,11 @@ namespace MWWorld
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
             FindContainerVisitor visitor(ptr);
-            //(*cellIt)->forEachContainer(visitor);
+            (*cellIt)->forEachType<ESM::Container>(visitor);
+            if (visitor.mResult.isEmpty())
+                (*cellIt)->forEachType<ESM::Creature>(visitor);
+            if (visitor.mResult.isEmpty())
+                (*cellIt)->forEachType<ESM::NPC>(visitor);
 
             if (!visitor.mResult.isEmpty())
                 return visitor.mResult;
