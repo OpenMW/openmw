@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
         ("fs-strict", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "strict file system handling (no case folding)")
         ("binary", bpo::value<bool>()->implicit_value(true)
-            ->default_value(false), "write OSG file in binary format (OSGB)")
+            ->default_value(true), "write OSG file in binary format (OSGB)")
         ("data",
          bpo::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")
             ->multitoken()->composing(),
