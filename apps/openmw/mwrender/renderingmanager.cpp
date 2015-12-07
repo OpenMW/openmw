@@ -207,7 +207,7 @@ namespace MWRender
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
@@ -813,9 +813,9 @@ namespace MWRender
     {
         for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
         {
-            if (it->first == "General" && it->second == "field of view")
+            if (it->first == "Camera" && it->second == "field of view")
             {
-                mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+                mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
                 updateProjectionMatrix();
             }
             else if (it->first == "Camera" && it->second == "viewing distance")

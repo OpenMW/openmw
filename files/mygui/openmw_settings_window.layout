@@ -280,7 +280,7 @@
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="30"/>
