@@ -163,7 +163,11 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
 ///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
-    return index(mIdCollection->getIndex (id), column);
+    int idx = mIdCollection->searchId (id);
+    if (idx != -1)
+        return index(mIdCollection->getIndex (id), column);
+    else
+        return QModelIndex();
 }
 
 void CSMWorld::IdTable::setRecord (const std::string& id,
