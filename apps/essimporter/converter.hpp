@@ -398,7 +398,7 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         std::string itemid = esm.getHNString("NAME");
-        Misc::StringUtils::toLower(itemid);
+        Misc::StringUtils::lowerCaseInPlace(itemid);
 
         while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {

@@ -190,7 +190,7 @@ namespace MWWorld
         bool isDeleted = false;
 
         record.load(esm, isDeleted);
-        Misc::StringUtils::toLower(record.mId);
+        Misc::StringUtils::lowerCaseInPlace(record.mId);
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(record.mId, record));
         if (inserted.second)

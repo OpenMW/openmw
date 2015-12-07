@@ -472,7 +472,7 @@ namespace MWWorld
 
     void CellStore::loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store)
     {
-        Misc::StringUtils::toLower (ref.mRefID);
+        Misc::StringUtils::lowerCaseInPlace (ref.mRefID);
 
         switch (store.find (ref.mRefID))
         {

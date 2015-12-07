@@ -390,7 +390,7 @@ namespace MWRender
     void Animation::addAnimSource(const std::string &model)
     {
         std::string kfname = model;
-        Misc::StringUtils::toLower(kfname);
+        Misc::StringUtils::lowerCaseInPlace(kfname);
 
         if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
             kfname.replace(kfname.size()-4, 4, ".kf");

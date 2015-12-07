@@ -543,7 +543,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -575,7 +575,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -614,7 +614,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -645,7 +645,7 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -756,7 +756,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     runtime.push (
@@ -791,7 +791,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId, value);
@@ -825,7 +825,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId,
@@ -870,11 +870,11 @@ namespace MWScript
                     MWWorld::Ptr ptr = R()(runtime);
 
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    ::Misc::StringUtils::toLower(race);
+                    ::Misc::StringUtils::lowerCaseInPlace(race);
                     runtime.pop();
 
                     std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    ::Misc::StringUtils::toLower(npcRace);
+                    ::Misc::StringUtils::lowerCaseInPlace(npcRace);
 
                     runtime.push (npcRace == race);
             }
@@ -911,7 +911,7 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     if(factionID!="")
                     {

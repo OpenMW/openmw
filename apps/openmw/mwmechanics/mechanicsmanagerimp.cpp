@@ -604,7 +604,7 @@ namespace MWMechanics
         int rank = 0;
         std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
-        Misc::StringUtils::toLower(npcFaction);
+        Misc::StringUtils::lowerCaseInPlace(npcFaction);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -1042,7 +1042,7 @@ namespace MWMechanics
             owner.first = ownerCellRef->getFaction();
             owner.second = true;
         }
-        Misc::StringUtils::toLower(owner.first);
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;

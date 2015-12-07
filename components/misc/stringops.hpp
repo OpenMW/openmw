@@ -94,21 +94,16 @@ public:
     }
 
     /// Transforms input string to lower case w/o copy
-    static void toLower(std::string &inout) {
+    static void lowerCaseInPlace(std::string &inout) {
         for (unsigned int i=0; i<inout.size(); ++i)
             inout[i] = toLower(inout[i]);
-    }
-
-    static void toLowerStr(std::string &inout)
-    {
-        toLower(inout);
     }
 
     /// Returns lower case copy of input string
     static std::string lowerCase(const std::string &in)
     {
         std::string out = in;
-        toLower(out);
+        lowerCaseInPlace(out);
         return out;
     }
 };
