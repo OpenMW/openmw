@@ -100,6 +100,11 @@ public:
         return inout;
     }
 
+    static std::string &toLowerStr(std::string &inout)
+    {
+        return toLower(inout);
+    }
+
     /// Returns lower case copy of input string
     static std::string lowerCase(const std::string &in)
     {
