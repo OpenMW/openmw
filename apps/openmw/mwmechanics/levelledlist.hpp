@@ -1,9 +1,12 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
-#include <components/misc/rng.hpp>
-
+#include <algorithm>
+#include <string>
+#include <vector>
 #include <iostream>
+
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -16,7 +19,6 @@
 
 namespace MWMechanics
 {
-
     /// @return ID of resulting item, or empty if none
     inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, unsigned char failChance=0)
     {
@@ -80,7 +82,5 @@ namespace MWMechanics
                 return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, failChance);
         }
     }
-
 }
-
 #endif
