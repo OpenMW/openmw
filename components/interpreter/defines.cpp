@@ -35,8 +35,7 @@ namespace Interpreter{
             if(text[i] == eschar)
             {
                 retval << text.substr(start, i - start);
-                std::string temp = text.substr(i+1, 100);
-                Misc::StringUtils::lowerCase(temp);
+                std::string temp = Misc::StringUtils::lowerCase(text.substr(i+1, 100));
                 
                 bool found = false;
                 try
