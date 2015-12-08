@@ -425,7 +425,7 @@ namespace MWScript
                     const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
                     for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
                     {
-                        if (it->first.mId == key)
+                        if (it->first.mId == key && it->second.getModifier() > 0)
                         {
                             runtime.push(1);
                             return;
