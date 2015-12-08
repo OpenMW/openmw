@@ -67,32 +67,44 @@ namespace MWSound
         mBufferCacheMax *= 1024*1024;
         mBufferCacheMin = std::min(mBufferCacheMin*1024*1024, mBufferCacheMax);
 
+        std::string hrtfname = Settings::Manager::getString("hrtf", "Sound");
+        int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
+
         std::cout << "Sound output: " << SOUND_OUT << std::endl;
         std::cout << "Sound decoder: " << SOUND_IN << std::endl;
 
-        try
-        {
+        try {
             std::vector<std::string> names = mOutput->enumerate();
             std::cout <<"Enumerated output devices:"<< std::endl;
             for(size_t i = 0;i < names.size();i++)
                 std::cout <<"  "<<names[i]<< std::endl;
 
             std::string devname = Settings::Manager::getString("device", "Sound");
-            try
-            {
+            try {
                 mOutput->init(devname);
             }
-            catch(std::exception &e)
-            {
+            catch(std::exception &e) {
                 if(devname.empty())
                     throw;
                 std::cerr <<"Failed to open device \""<<devname<<"\": " << e.what() << std::endl;
                 mOutput->init();
                 Settings::Manager::setString("device", "Sound", "");
             }
+
+            names = mOutput->enumerateHrtf();
+            if(!names.empty())
+            {
+                std::cout <<"Enumerated HRTF names:"<< std::endl;
+                for(size_t i = 0;i < names.size();i++)
+                    std::cout <<"  "<<names[i]<< std::endl;
+            }
+
+            if(hrtfstate == 0)
+                mOutput->disableHrtf();
+            else if(!hrtfname.empty())
+                mOutput->enableHrtf(hrtfname, hrtfstate<0);
         }
-        catch(std::exception &e)
-        {
+        catch(std::exception &e) {
             std::cout <<"Sound init failed: "<<e.what()<< std::endl;
         }
     }
@@ -100,17 +112,14 @@ namespace MWSound
     SoundManager::~SoundManager()
     {
         clear();
-        if(mOutput->isInitialized())
+        SoundBufferList::element_type::iterator sfxiter = mSoundBuffers->begin();
+        for(;sfxiter != mSoundBuffers->end();++sfxiter)
         {
-            SoundBufferList::element_type::iterator sfxiter = mSoundBuffers->begin();
-            for(;sfxiter != mSoundBuffers->end();++sfxiter)
-            {
-                if(sfxiter->mHandle)
-                    mOutput->unloadSound(sfxiter->mHandle);
-                sfxiter->mHandle = 0;
-            }
-            mUnusedBuffers.clear();
+            if(sfxiter->mHandle)
+                mOutput->unloadSound(sfxiter->mHandle);
+            sfxiter->mHandle = 0;
         }
+        mUnusedBuffers.clear();
         mOutput.reset();
     }
 

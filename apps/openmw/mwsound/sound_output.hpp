@@ -24,8 +24,12 @@ namespace MWSound
         SoundManager &mManager;
 
         virtual std::vector<std::string> enumerate() = 0;
-        virtual void init(const std::string &devname="") = 0;
+        virtual void init(const std::string &devname=std::string()) = 0;
         virtual void deinit() = 0;
+
+        virtual std::vector<std::string> enumerateHrtf() = 0;
+        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable) = 0;
+        virtual void disableHrtf() = 0;
 
         virtual Sound_Handle loadSound(const std::string &fname) = 0;
         virtual void unloadSound(Sound_Handle data) = 0;

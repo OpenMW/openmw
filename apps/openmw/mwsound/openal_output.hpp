@@ -45,8 +45,12 @@ namespace MWSound
 
     public:
         virtual std::vector<std::string> enumerate();
-        virtual void init(const std::string &devname="");
+        virtual void init(const std::string &devname=std::string());
         virtual void deinit();
+
+        virtual std::vector<std::string> enumerateHrtf();
+        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable);
+        virtual void disableHrtf();
 
         virtual Sound_Handle loadSound(const std::string &fname);
         virtual void unloadSound(Sound_Handle data);

@@ -1103,7 +1103,7 @@ namespace MWClass
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return "DefaultLandWater";
             if(world->isOnGround(ptr))
-                return "Body Fall Medium";
+                return "DefaultLand";
             return "";
         }
         if(name == "swimleft")
