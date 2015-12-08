@@ -1565,8 +1565,20 @@ namespace MWWorld
             mPlayer->setLastKnownExteriorPosition(pos.asVec3());
         }
 
-        if (player.getClass().getNpcStats(player).isWerewolf())
-            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(mRendering->getCamera()->isFirstPerson());
+        bool isWerewolf = player.getClass().getNpcStats(player).isWerewolf();
+        bool isFirstPerson = mRendering->getCamera()->isFirstPerson();
+        if (isWerewolf && isFirstPerson)
+        {
+            float werewolfFov = mFallback.getFallbackFloat("General_Werewolf_FOV");
+            if (werewolfFov != 0)
+                mRendering->overrideFieldOfView(werewolfFov);
+            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(true);
+        }
+        else
+        {
+            mRendering->resetFieldOfView();
+            MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(false);
+        }
 
         // Sink the camera while sneaking
         bool sneaking = player.getClass().getCreatureStats(getPlayerPtr()).getStance(MWMechanics::CreatureStats::Stance_Sneak);
