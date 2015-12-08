@@ -415,6 +415,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner,
                                               int count, bool topLevel, const std::string& levItem)
 {
+    if (count == 0) return; //Don't restock with nothing.
     try {
         ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
@@ -463,8 +464,8 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
 void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
-    //allowedForReplace - Holds information about how many items from the list were sold;
-    //                    Hence, tells us how many items we need to restock.
+    //allowedForReplace - Holds information about how many items from the list were not sold;
+    //                    Hence, tells us how many items we don't need to restock.
     //allowedForReplace[list] <- How many items we should generate(how many of these were sold)
     std::map<std::string, int> allowedForReplace;
 
@@ -473,20 +474,42 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
     {
         int spawnedCount = it->second.first; //How many items should be in shop originally
         int itemCount = count(it->first); //How many items are there in shop now
-        //If anything was sold
-        if(itemCount < spawnedCount)
+        //If something was not sold
+        if(itemCount >= spawnedCount)
+        {
+            const std::string& ancestor = it->second.second;
+            // Security check for old saves:
+            //If item is imported from old save(doesn't have an ancestor) and wasn't sold
+            if(ancestor == "")
+            {
+                //Remove it, from shop,
+                remove(it->first, itemCount, ptr);//ptr is the NPC
+                //And remove it from map, so that when we restock, the new item will have proper ancestor.
+                mLevelledItemMap.erase(it);
+                continue;
+
+            }
+            //Create the entry if it does not exist yet
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
+                std::make_pair(it->second.second, 0)).first;
+            //And signal that we don't need to restock item from this list
+            listInMap->second += std::abs(itemCount);
+        }
+        //If every of the item was sold
+        else if (itemCount == 0)
+        {
+            mLevelledItemMap.erase(it);
+        }
+        //If some was sold, but some remain
+        else
         {
             //Create entry if it does not exist yet
             std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
                 std::make_pair(it->second.second, 0)).first;
-            //And signal that we need to restock item from this list
-            listInMap->second += std::abs(spawnedCount - itemCount);
-            //Also, remove the record if item no longer figures in the shop
-            if(!itemCount)
-                mLevelledItemMap.erase(it->first);
-            //If there's still item in the shop, change its spawnedCount to current count.
-            else
-                it->second.first -= itemCount;
+            //And signal that we don't need to restock all items from this list
+            listInMap->second += std::abs(itemCount);
+            //And update itemCount so we don't mistake it next time.
+            it->second.first = itemCount;
         }
     }
 
@@ -504,8 +527,14 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
             std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
+
+            int restockNum = it-> mCount;
+            //If we know we must restock less, take it into account
             if(listInMap != allowedForReplace.end())
-                addInitialItem(itemOrList, owner, listInMap->second, true);
+                restockNum += listInMap->second;//We add, because list items have negative count
+            //restock
+            addInitialItem(itemOrList, owner, restockNum, true);
+
         }
         else
         {

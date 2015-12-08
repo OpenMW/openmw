@@ -31,17 +31,20 @@ void ESM::InventoryState::load (ESMReader &esm)
 
         ++index;
     }
-
+    //Next item is Levelled item
     while (esm.isNextSub("LEVM"))
     {
+        //Get its name
         std::string id = esm.getHString();
         int count;
-        std::string parentList;
-        //TODO: How should I handle old saves?
-        if(esm.isNextSub("LLST"))
-            std::string parentList = esm.getHString();
+        std::string parentGroup = "";
+        //Then get its count
         esm.getHNT (count, "COUN");
-        mLevelledItemMap[id] = count;
+        //Old save formats don't have information about parent group; check for that
+        if(esm.isNextSub("LGRP"))
+            //Newest saves contain parent group
+            parentGroup = esm.getHString();
+        mLevelledItemMap[id] = std::make_pair(count, parentGroup);
     }
 
     while (esm.isNextSub("MAGI"))
@@ -87,7 +90,7 @@ void ESM::InventoryState::save (ESMWriter &esm) const
     {
         esm.writeHNString ("LEVM", it->first);
         esm.writeHNT ("COUN", it->second.first);
-        esm.writeHNString("LLST", it->second.second)
+        esm.writeHNString("LGRP", it->second.second);
     }
 
     for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
