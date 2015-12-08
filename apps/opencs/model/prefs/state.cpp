@@ -3,6 +3,9 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
+
+#include "intsetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -29,6 +32,24 @@ void CSMPrefs::State::load()
 void CSMPrefs::State::declare()
 {
     declareCategory ("Windows");
+    declareInt ("default-width", "Default window width", 800).
+        setTooltip ("Newly opened top-level windows will open with this width.").
+        setMin (80);
+    declareInt ("default-height", "Default window height", 600).
+        setTooltip ("Newly opened top-level windows will open with this height.").
+        setMin (80);
+    // reuse
+    // show-statusbar
+    declareInt ("max-subviews", "Maximum number of subviews per top-level window", 256).
+        setTooltip ("If the maximum number is reached and a new subview is opened "
+            "it will be placed into a new top-level window.").
+        setRange (1, 256);
+    // hide-subview
+    declareInt ("minimum-width", "Minimum subview width", 325).
+        setTooltip ("Minimum width of subviews.").
+        setRange (50, 10000);
+    // mainwindow-scrollbar
+    // grow-limit
 
     declareCategory ("Records");
 
@@ -39,14 +60,33 @@ void CSMPrefs::State::declare()
     declareCategory ("Reports");
 
     declareCategory ("Search & Replace");
+    declareInt ("char-before", "Characters before search string", 10).
+        setTooltip ("Maximum number of character to display in search result before the searched text");
+    declareInt ("char-after", "Characters after search string", 10).
+        setTooltip ("Maximum number of character to display in search result after the searched text");
+    // auto-delete
 
     declareCategory ("Scripts");
+    // show-linenum
+    // mono-font
+    // warnings
+    // toolbar
+    declareInt ("compile-delay", "Delay between updating of source errors", 100).
+        setTooltip ("Delay in milliseconds").
+        setRange (0, 10000);
+    declareInt ("error-height", "Initial height of the error panel", 100).
+        setRange (100, 10000);
+    // syntax-colouring
 
     declareCategory ("General Input");
 
     declareCategory ("3D Scene Input");
 
     declareCategory ("Tooltips");
+    // scene
+    // scene-hide-basic
+    declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
+        setMin (1);
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
@@ -62,6 +102,37 @@ void CSMPrefs::State::declareCategory (const std::string& key)
         mCurrentCategory =
             mCategories.insert (std::make_pair (key, Category (this, key))).first;
     }
+}
+
+CSMPrefs::IntSetting& CSMPrefs::State::declareInt (const std::string& key,
+    const std::string& label, int default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    std::ostringstream stream;
+    stream << default_;
+    setDefault (key, stream.str());
+
+    default_ = mSettings.getInt (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::IntSetting *setting =
+        new CSMPrefs::IntSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+void CSMPrefs::State::setDefault (const std::string& key, const std::string& default_)
+{
+    Settings::CategorySetting fullKey (mCurrentCategory->second.getKey(), key);
+
+    Settings::CategorySettingValueMap::iterator iter =
+        mSettings.mDefaultSettings.find (fullKey);
+
+    if (iter==mSettings.mDefaultSettings.end())
+        mSettings.mDefaultSettings.insert (std::make_pair (fullKey, default_));
 }
 
 CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
@@ -106,6 +177,11 @@ CSMPrefs::Category& CSMPrefs::State::getCategory (const std::string& key)
         throw std::logic_error ("Invalid user settings category: " + key);
 
     return iter->second;
+}
+
+void CSMPrefs::State::update (const Setting& setting)
+{
+    emit (settingChanged (setting));
 }
 
 CSMPrefs::State& CSMPrefs::State::get()

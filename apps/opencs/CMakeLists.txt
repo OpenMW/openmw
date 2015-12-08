@@ -124,7 +124,7 @@ opencs_units_noqt (view/settings
     )
 
 opencs_units (view/prefs
-    dialogue pagebase
+    dialogue pagebase page
     )
 
 opencs_units (model/settings
@@ -138,7 +138,7 @@ opencs_hdrs_noqt (model/settings
     )
 
 opencs_units (model/prefs
-    state
+    state setting intsetting
     )
 
 opencs_units_noqt (model/prefs

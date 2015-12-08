@@ -10,6 +10,8 @@ class QListWidgetItem;
 
 namespace CSVPrefs
 {
+    class PageBase;
+
     class Dialogue : public QMainWindow
     {
             Q_OBJECT
@@ -22,6 +24,8 @@ namespace CSVPrefs
             void buildCategorySelector (QSplitter *main);
 
             void buildContentArea (QSplitter *main);
+
+            PageBase *makePage (const std::string& key);
 
         public:
 

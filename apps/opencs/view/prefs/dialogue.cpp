@@ -10,7 +10,7 @@
 
 #include "../../model/prefs/state.hpp"
 
-#include "pagebase.hpp"
+#include "page.hpp"
 
 void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 {
@@ -47,6 +47,13 @@ void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)
     mContent->setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     main->addWidget (mContent);
+}
+
+CSVPrefs::PageBase *CSVPrefs::Dialogue::makePage (const std::string& key)
+{
+    // special case page code goes here
+
+    return new Page (CSMPrefs::get().getCategory (key), mContent);
 }
 
 CSVPrefs::Dialogue::Dialogue()
@@ -107,7 +114,7 @@ void CSVPrefs::Dialogue::selectionChanged (QListWidgetItem *current, QListWidget
             }
         }
 
-        PageBase *page = new PageBase (CSMPrefs::get().getCategory (key), mContent);
+        PageBase *page = makePage (key);
         mContent->setCurrentIndex (mContent->addWidget (page));
     }
 }

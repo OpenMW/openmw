@@ -13,9 +13,12 @@
 #include <components/settings/settings.hpp>
 
 #include "category.hpp"
+#include "setting.hpp"
 
 namespace CSMPrefs
 {
+    class IntSetting;
+
     class State : public QObject
     {
             Q_OBJECT
@@ -47,6 +50,10 @@ namespace CSMPrefs
 
             void declareCategory (const std::string& key);
 
+            IntSetting& declareInt (const std::string& key, const std::string& label, int default_);
+
+            void setDefault (const std::string& key, const std::string& default_);
+
         public:
 
             State (const Files::ConfigurationManager& configurationManager);
@@ -61,7 +68,13 @@ namespace CSMPrefs
 
             Category& getCategory (const std::string& key);
 
+            void update (const Setting& setting);
+
             static State& get();
+
+        signals:
+
+            void settingChanged (const Setting& setting);
     };
 
     // convenience function
