@@ -1073,6 +1073,9 @@ namespace MWWorld
     {
         if (!ptr.getRefData().isDeleted() && ptr.getContainerStore() == NULL)
         {
+            if (ptr == getPlayerPtr())
+                throw std::runtime_error("can not delete player object");
+
             ptr.getRefData().setCount(0);
 
             if (ptr.isInCell()
