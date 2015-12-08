@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include <string.h>
 #endif
 
 #if FILE_API == FILE_API_STDIO
@@ -139,7 +141,7 @@ void LowLevelFile::open (char const * filename)
     if (mHandle == -1)
     {
         std::ostringstream os;
-        os << "Failed to open '" << filename << "' for reading.";
+        os << "Failed to open '" << filename << "' for reading: " << strerror(errno);
         throw std::runtime_error (os.str ());
     }
 }
@@ -160,15 +162,27 @@ size_t LowLevelFile::size ()
     size_t oldPosition = ::lseek (mHandle, 0, SEEK_CUR);
 
     if (oldPosition == size_t (-1))
-        throw std::runtime_error ("A query operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An lseek() call failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 
     size_t Size = ::lseek (mHandle, 0, SEEK_END);
 
     if (Size == size_t (-1))
-        throw std::runtime_error ("A query operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An lseek() call failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 
     if (lseek (mHandle, oldPosition, SEEK_SET) == -1)
-        throw std::runtime_error ("A query operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An lseek() call failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 
     return Size;
 }
@@ -178,7 +192,11 @@ void LowLevelFile::seek (size_t Position)
     assert (mHandle != -1);
 
     if (::lseek (mHandle, Position, SEEK_SET) == -1)
-        throw std::runtime_error ("A seek operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An lseek() call failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 }
 
 size_t LowLevelFile::tell ()
@@ -188,7 +206,11 @@ size_t LowLevelFile::tell ()
     size_t Position = ::lseek (mHandle, 0, SEEK_CUR);
 
     if (Position == size_t (-1))
-        throw std::runtime_error ("A query operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An lseek() call failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 
     return Position;
 }
@@ -200,7 +222,11 @@ size_t LowLevelFile::read (void * data, size_t size)
     int amount = ::read (mHandle, data, size);
 
     if (amount == -1)
-        throw std::runtime_error ("A read operation on a file failed.");
+    {
+        std::ostringstream os;
+        os << "An attempt to read " << size << "bytes failed:" << strerror(errno);
+        throw std::runtime_error (os.str ());
+    }
 
     return amount;
 }
