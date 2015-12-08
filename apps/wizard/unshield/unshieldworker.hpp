@@ -104,7 +104,6 @@ namespace Wizard
         QTextCodec *mIniCodec;
 
         QWaitCondition mWait;
-        QMutex mMutex;
 
         QReadWriteLock mLock;
 
