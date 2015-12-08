@@ -124,7 +124,7 @@ opencs_units_noqt (view/settings
     )
 
 opencs_units (view/prefs
-    dialogue
+    dialogue pagebase
     )
 
 opencs_units (model/settings

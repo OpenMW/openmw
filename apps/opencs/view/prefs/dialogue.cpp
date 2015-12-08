@@ -10,6 +10,8 @@
 
 #include "../../model/prefs/state.hpp"
 
+#include "pagebase.hpp"
+
 void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 {
     mList = new QListWidget (main);
@@ -35,7 +37,8 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 
     mList->setMaximumWidth (maxWidth + 10);
 
-    /// \todo connect to selection signal
+    connect (mList, SIGNAL (currentItemChanged (QListWidgetItem *, QListWidgetItem *)),
+        this, SLOT (selectionChanged (QListWidgetItem *, QListWidgetItem *)));
 }
 
 void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)
@@ -85,4 +88,26 @@ void CSVPrefs::Dialogue::show()
     }
 
     QWidget::show();
+}
+
+void CSVPrefs::Dialogue::selectionChanged (QListWidgetItem *current, QListWidgetItem *previous)
+{
+    if (current)
+    {
+        std::string key = current->text().toUtf8().data();
+
+        for (int i=0; i<mContent->count(); ++i)
+        {
+            PageBase& page = dynamic_cast<PageBase&> (*mContent->widget (i));
+
+            if (page.getCategory().getKey()==key)
+            {
+                mContent->setCurrentIndex (i);
+                return;
+            }
+        }
+
+        PageBase *page = new PageBase (CSMPrefs::get().getCategory (key), mContent);
+        mContent->setCurrentIndex (mContent->addWidget (page));
+    }
 }

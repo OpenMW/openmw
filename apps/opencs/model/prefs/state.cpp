@@ -98,6 +98,16 @@ CSMPrefs::State::Iterator CSMPrefs::State::end()
     return mCategories.end();
 }
 
+CSMPrefs::Category& CSMPrefs::State::getCategory (const std::string& key)
+{
+    Iterator iter = mCategories.find (key);
+
+    if (iter==mCategories.end())
+        throw std::logic_error ("Invalid user settings category: " + key);
+
+    return iter->second;
+}
+
 CSMPrefs::State& CSMPrefs::State::get()
 {
     if (!sThis)

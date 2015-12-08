@@ -6,6 +6,7 @@
 class QSplitter;
 class QListWidget;
 class QStackedWidget;
+class QListWidgetItem;
 
 namespace CSVPrefs
 {
@@ -33,6 +34,10 @@ namespace CSVPrefs
         public slots:
 
             void show();
+
+        private slots:
+
+            void selectionChanged (QListWidgetItem *current, QListWidgetItem *previous);
     };
 }
 

@@ -59,6 +59,8 @@ namespace CSMPrefs
 
             Iterator end();
 
+            Category& getCategory (const std::string& key);
+
             static State& get();
     };
 
