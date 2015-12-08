@@ -162,6 +162,7 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
     if (!mNode)
     {
         std::cerr << "Bone without node " << std::endl;
+        return;
     }
     if (parentMatrixInSkeletonSpace)
         mMatrixInSkeletonSpace = mNode->getMatrix() * (*parentMatrixInSkeletonSpace);
