@@ -48,9 +48,6 @@ namespace MWSound
         , mListenerUp(0,0,1)
         , mPausedSoundTypes(0)
     {
-        if(!useSound)
-            return;
-
         mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
         mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
         mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
@@ -66,6 +63,9 @@ namespace MWSound
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
         mBufferCacheMax *= 1024*1024;
         mBufferCacheMin = std::min(mBufferCacheMin*1024*1024, mBufferCacheMax);
+
+        if(!useSound)
+            return;
 
         std::string hrtfname = Settings::Manager::getString("hrtf", "Sound");
         int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");

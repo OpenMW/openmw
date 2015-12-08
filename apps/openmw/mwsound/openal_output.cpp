@@ -363,9 +363,9 @@ OpenAL_SoundStream::OpenAL_SoundStream(ALuint src, DecoderPtr decoder)
 
         switch(type)
         {
-            case SampleType_UInt8: mSilence = 0x80;
-            case SampleType_Int16: mSilence = 0x00;
-            case SampleType_Float32: mSilence = 0x00;
+            case SampleType_UInt8: mSilence = 0x80; break;
+            case SampleType_Int16: mSilence = 0x00; break;
+            case SampleType_Float32: mSilence = 0x00; break;
         }
 
         mFrameSize = framesToBytes(1, chans, type);

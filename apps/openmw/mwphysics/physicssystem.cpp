@@ -709,7 +709,7 @@ namespace MWPhysics
     bool PhysicsSystem::isOnSolidGround (const MWWorld::Ptr& actor) const
     {
         const Actor* physactor = getActor(actor);
-        if (!physactor->getOnGround())
+        if (!physactor || !physactor->getOnGround())
             return false;
 
         CollisionMap::const_iterator found = mStandingCollisions.find(actor);
