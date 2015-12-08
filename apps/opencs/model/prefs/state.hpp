@@ -22,11 +22,18 @@ namespace CSMPrefs
 
             static State *sThis;
 
+        public:
+
+            typedef std::map<std::string, Category> Collection;
+            typedef Collection::iterator Iterator;
+
+        private:
+
             const std::string mConfigFile;
             const Files::ConfigurationManager& mConfigurationManager;
             Settings::Manager mSettings;
-            std::map<std::string, Category> mCategories;
-            std::map<std::string, Category>::iterator mCurrentCategory;
+            Collection mCategories;
+            Iterator mCurrentCategory;
 
             // not implemented
             State (const State&);
@@ -38,7 +45,7 @@ namespace CSMPrefs
 
             void declare();
 
-            void declareCategory (const std::string& key, const std::string& name);
+            void declareCategory (const std::string& key);
 
         public:
 
@@ -48,8 +55,9 @@ namespace CSMPrefs
 
             void save();
 
-            /// \return collection of name, key pairs (sorted)
-            std::vector<std::pair<std::string, std::string> > listCategories() const;
+            Iterator begin();
+
+            Iterator end();
 
             static State& get();
     };

@@ -28,28 +28,28 @@ void CSMPrefs::State::load()
 
 void CSMPrefs::State::declare()
 {
-    declareCategory ("window", "Windows");
+    declareCategory ("Windows");
 
-    declareCategory ("records", "Records");
+    declareCategory ("Records");
 
-    declareCategory ("table-input", "ID Tables");
+    declareCategory ("ID Tables");
 
-    declareCategory ("dialogues", "ID Dialogues");
+    declareCategory ("ID Dialogues");
 
-    declareCategory ("report-input", "Reports");
+    declareCategory ("Reports");
 
-    declareCategory ("search", "Search & Replace");
+    declareCategory ("Search & Replace");
 
-    declareCategory ("script-editor", "Scripts");
+    declareCategory ("Scripts");
 
-    declareCategory ("general-input", "General Input");
+    declareCategory ("General Input");
 
-    declareCategory ("scene-input", "3D Scene Input");
+    declareCategory ("3D Scene Input");
 
-    declareCategory ("tooltips", "Tooltips");
+    declareCategory ("Tooltips");
 }
 
-void CSMPrefs::State::declareCategory (const std::string& key, const std::string& name)
+void CSMPrefs::State::declareCategory (const std::string& key)
 {
     std::map<std::string, Category>::iterator iter = mCategories.find (key);
 
@@ -60,7 +60,7 @@ void CSMPrefs::State::declareCategory (const std::string& key, const std::string
     else
     {
         mCurrentCategory =
-            mCategories.insert (std::make_pair (key, Category (this, key, name))).first;
+            mCategories.insert (std::make_pair (key, Category (this, key))).first;
     }
 }
 
@@ -88,17 +88,14 @@ void CSMPrefs::State::save()
     mSettings.saveUser (user.string());
 }
 
-std::vector<std::pair<std::string, std::string> > CSMPrefs::State::listCategories() const
+CSMPrefs::State::Iterator CSMPrefs::State::begin()
 {
-    std::vector<std::pair<std::string, std::string> > list;
+    return mCategories.begin();
+}
 
-    for (std::map<std::string, Category>::const_iterator iter (mCategories.begin());
-        iter!=mCategories.end(); ++iter)
-        list.push_back (std::make_pair (iter->second.getName(), iter->first));
-
-    std::sort (list.begin(), list.end());
-
-    return list;
+CSMPrefs::State::Iterator CSMPrefs::State::end()
+{
+    return mCategories.end();
 }
 
 CSMPrefs::State& CSMPrefs::State::get()

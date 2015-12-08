@@ -24,10 +24,10 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
 
     int maxWidth = 1;
 
-    for (std::vector<std::pair<std::string, std::string> >::const_iterator iter (mCategories.begin());
-        iter!=mCategories.end(); ++iter)
+    for (CSMPrefs::State::Iterator iter = CSMPrefs::get().begin(); iter!=CSMPrefs::get().end();
+        ++iter)
     {
-        QString label = QString::fromUtf8 (iter->first.c_str());
+        QString label = QString::fromUtf8 (iter->second.getKey().c_str());
         maxWidth = std::max (maxWidth, metrics.width (label));
 
         mList->addItem (label);
@@ -46,7 +46,7 @@ void CSVPrefs::Dialogue::buildContentArea (QSplitter *main)
     main->addWidget (mContent);
 }
 
-CSVPrefs::Dialogue::Dialogue() : mCategories (CSMPrefs::get().listCategories())
+CSVPrefs::Dialogue::Dialogue()
 {
     setWindowTitle ("User Settings");
 

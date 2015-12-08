@@ -11,15 +11,13 @@ namespace CSMPrefs
     {
             State *mParent;
             std::string mKey;
-            std::string mName;
 
         public:
 
-            Category (State *parent, const std::string& key, const std::string& name);
+            Category (State *parent, const std::string& key);
 
             const std::string& getKey() const;
 
-            const std::string& getName() const;
     };
 }
 
