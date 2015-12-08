@@ -1,7 +1,7 @@
 #ifndef CSV_PREFS_CATEGORY_H
 #define CSM_PREFS_CATEGORY_H
 
-#include <iostream>
+#include <string>
 
 namespace CSMPrefs
 {
