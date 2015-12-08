@@ -477,14 +477,14 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         //If something was not sold
         if(itemCount >= spawnedCount)
         {
-            const std::string& ancestor = it->second.second;
+            const std::string& parent = it->second.second;
             // Security check for old saves:
-            //If item is imported from old save(doesn't have an ancestor) and wasn't sold
-            if(ancestor == "")
+            //If item is imported from old save(doesn't have an parent) and wasn't sold
+            if(parent == "")
             {
                 //Remove it, from shop,
                 remove(it->first, itemCount, ptr);//ptr is the NPC
-                //And remove it from map, so that when we restock, the new item will have proper ancestor.
+                //And remove it from map, so that when we restock, the new item will have proper parent.
                 mLevelledItemMap.erase(it);
                 continue;
 
