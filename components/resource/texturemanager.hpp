@@ -30,6 +30,10 @@ namespace Resource
         /// otherwise should be disabled to reduce memory usage.
         void setUnRefImageDataAfterApply(bool unref);
 
+        /// Store the paths to images in the osg::Image object?  Required for some situations involving serializing
+        /// objects to disk, but consumes otherwise unnecessary memory.  Disabled by default.
+        inline void setStoreImageFilenames(bool b) { mStoreImageFilenames = b; }
+
         /// Create or retrieve a Texture2D using the specified image filename, and wrap parameters.
         osg::ref_ptr<osg::Texture2D> getTexture2D(const std::string& filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT);
 
@@ -56,6 +60,7 @@ namespace Resource
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
 
         bool mUnRefImageDataAfterApply;
+        bool mStoreImageFilenames;
 
         TextureManager(const TextureManager&);
         void operator = (const TextureManager&);

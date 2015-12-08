@@ -51,6 +51,7 @@ namespace Resource
         , mMaxAnisotropy(1)
         , mWarningTexture(createWarningTexture())
         , mUnRefImageDataAfterApply(false)
+        , mStoreImageFilenames(false)
     {
 
     }
@@ -189,6 +190,11 @@ namespace Resource
                 return NULL;
             }
 
+            if (mStoreImageFilenames)
+            {
+                image->setFileName(normalized);
+            }
+
             mImages.insert(std::make_pair(normalized, image));
             return image;
         }
@@ -249,6 +255,11 @@ namespace Resource
             if (ext != "dds")
             {
                 image->flipVertical();
+            }
+
+            if (mStoreImageFilenames)
+            {
+                image->setFileName(normalized);
             }
 
             osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D);
