@@ -50,6 +50,20 @@ namespace
 
 const int sLoudnessFPS = 20; // loudness values per second of audio
 
+// Helper to get an OpenAL extension function
+template<typename T, typename R>
+void convertPointer(T& dest, R src)
+{
+    memcpy(&dest, &src, sizeof(src));
+}
+
+template<typename T>
+void getFunc(T& func, ALCdevice *device, const char *name)
+{
+    void* funcPtr = alcGetProcAddress(device, name);
+    convertPointer(func, funcPtr);
+}
+
 }
 
 namespace MWSound
@@ -602,9 +616,8 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
     if(!alcIsExtensionPresent(mDevice, "ALC_SOFT_HRTF"))
         return ret;
 
-    LPALCGETSTRINGISOFT alcGetStringiSOFT = reinterpret_cast<LPALCGETSTRINGISOFT>(
-        alcGetProcAddress(mDevice, "alcGetStringiSOFT")
-    );
+    LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+    getFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
     ALCint num_hrtf;
     alcGetIntegerv(mDevice, ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, &num_hrtf);
@@ -626,12 +639,12 @@ void OpenAL_Output::enableHrtf(const std::string &hrtfname, bool auto_enable)
         return;
     }
 
-    LPALCGETSTRINGISOFT alcGetStringiSOFT = reinterpret_cast<LPALCGETSTRINGISOFT>(
-        alcGetProcAddress(mDevice, "alcGetStringiSOFT")
-    );
-    LPALCRESETDEVICESOFT alcResetDeviceSOFT = reinterpret_cast<LPALCRESETDEVICESOFT>(
-        alcGetProcAddress(mDevice, "alcResetDeviceSOFT")
-    );
+
+    LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+    getFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
+
+    LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
+    getFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
     attrs.push_back(ALC_HRTF_SOFT);
@@ -681,9 +694,8 @@ void OpenAL_Output::disableHrtf()
         return;
     }
 
-    LPALCRESETDEVICESOFT alcResetDeviceSOFT = reinterpret_cast<LPALCRESETDEVICESOFT>(
-        alcGetProcAddress(mDevice, "alcResetDeviceSOFT")
-    );
+    LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
+    getFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
     attrs.push_back(ALC_HRTF_SOFT);
