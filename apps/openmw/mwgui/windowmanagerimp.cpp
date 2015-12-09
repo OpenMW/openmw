@@ -117,7 +117,8 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
-      : mResourceSystem(resourceSystem)
+      : mStore(NULL)
+      , mResourceSystem(resourceSystem)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
       , mCurrentModals()
@@ -288,9 +289,10 @@ namespace MWGui
         trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
-        mJournal = JournalWindow::create(JournalViewModel::create ());
-        mMessageBoxManager = new MessageBoxManager(
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+
+        bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
+        mJournal = JournalWindow::create(JournalViewModel::create (), questList);
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
@@ -324,14 +326,22 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
         mJailScreen = new JailScreen();
 
-        mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
+        std::string werewolfFaderTex = "textures\\werewolfoverlay.dds";
+        if (mResourceSystem->getVFS()->exists(werewolfFaderTex))
+            mWerewolfFader = new ScreenFader(werewolfFaderTex);
         mBlindnessFader = new ScreenFader("black");
-        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
-        // TODO: check if non-BM versions actually use player_hit_01.dds
+        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+        const std::string hitFaderLayout = "openmw_screen_fader_hit.layout";
+        MyGUI::FloatCoord hitFaderCoord (0,0,1,1);
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
+        {
             hitFaderTexture = "textures\\player_hit_01.dds";
-        mHitFader = new ScreenFader(hitFaderTexture, "openmw_screen_fader_hit.layout");
+            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+        }
+        mHitFader = new ScreenFader(hitFaderTexture, hitFaderLayout, hitFaderCoord);
+
         mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
@@ -449,6 +459,11 @@ namespace MWGui
 
         mGuiPlatform->shutdown();
         delete mGuiPlatform;
+    }
+
+    void WindowManager::setStore(const MWWorld::ESMStore &store)
+    {
+        mStore = &store;
     }
 
     void WindowManager::cleanupGarbage()
@@ -898,8 +913,7 @@ namespace MWGui
 
     std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
     {
-        const ESM::GameSetting *setting =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
+        const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType()==ESM::VT_String)
             return setting->mValue.getString();
@@ -984,7 +998,8 @@ namespace MWGui
         mCompanionWindow->onFrame();
         mJailScreen->onFrame(frameDuration);
 
-        mWerewolfFader->update(frameDuration);
+        if (mWerewolfFader)
+            mWerewolfFader->update(frameDuration);
         mBlindnessFader->update(frameDuration);
         mHitFader->update(frameDuration);
         mScreenFader->update(frameDuration);
@@ -1128,8 +1143,12 @@ namespace MWGui
         }
         else
         {
-            const ESM::GameSetting *setting =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+            if (!mStore)
+            {
+                std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
+                return;
+            }
+            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();
@@ -1252,8 +1271,7 @@ namespace MWGui
         mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        const ESM::Spell* spell = mStore->get<ESM::Spell>().find(spellId);
 
         mSpellWindow->setTitle(spell->mName);
     }
@@ -1261,7 +1279,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedSpell = "";
-        const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
+        const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
@@ -1696,7 +1714,7 @@ namespace MWGui
         {
             reader.getSubNameIs("ID__");
             std::string spell = reader.getHString();
-            if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell))
+            if (mStore->get<ESM::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)
@@ -1878,7 +1896,8 @@ namespace MWGui
         if (!mWerewolfOverlayEnabled)
             return;
 
-        mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
+        if (mWerewolfFader)
+            mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
     void WindowManager::onClipboardChanged(const std::string &_type, const std::string &_data)

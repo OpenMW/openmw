@@ -256,7 +256,7 @@ namespace MWGui
 
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
-        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "Camera"))) + ")");
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");

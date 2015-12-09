@@ -37,6 +37,9 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            MWWorld::Ptr getTarget();
+            virtual bool sideWithTarget() const { return true; }
+
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
         private:

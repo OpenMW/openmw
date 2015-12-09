@@ -28,6 +28,11 @@ namespace MyGUI
     class ImageBox;
 }
 
+namespace MWWorld
+{
+    class ESMStore;
+}
+
 namespace Compiler
 {
     class Extensions;
@@ -118,6 +123,9 @@ namespace MWGui
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts,
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
+
+    /// Set the ESMStore to use for retrieving of GUI-related strings.
+    void setStore (const MWWorld::ESMStore& store);
 
     void initUI();
     void renderWorldMap();
@@ -372,6 +380,7 @@ namespace MWGui
     void writeFog(MWWorld::CellStore* cell);
 
   private:
+    const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
 
     osgMyGUI::Platform* mGuiPlatform;

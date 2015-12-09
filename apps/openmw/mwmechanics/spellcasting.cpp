@@ -365,26 +365,6 @@ namespace MWMechanics
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
-        // Try absorbing if it's a spell
-        // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
-        // if that is worth replicating.
-        bool absorbed = false;
-        if (spell && caster != target && target.getClass().isActor())
-        {
-            float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
-            absorbed = (Misc::Rng::roll0to99() < absorb);
-            if (absorbed)
-            {
-                const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
-                // Magicka is increased by cost of spell
-                DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                target.getClass().getCreatureStats(target).setMagicka(magicka);
-            }
-        }
-
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
         {
@@ -403,6 +383,26 @@ namespace MWMechanics
                     && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
                     && target.getClass().isActor())
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
+
+            // Try absorbing if it's a spell
+            // NOTE: Vanilla does this once per spell absorption effect source instead of adding the % from all sources together, not sure
+            // if that is worth replicating.
+            bool absorbed = false;
+            if (spell && caster != target && target.getClass().isActor())
+            {
+                float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
+                absorbed = (Misc::Rng::roll0to99() < absorb);
+                if (absorbed)
+                {
+                    const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                    MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                                "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                    // Magicka is increased by cost of spell
+                    DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
+                    magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
+                    target.getClass().getCreatureStats(target).setMagicka(magicka);
+                }
+            }
 
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())

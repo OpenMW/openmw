@@ -458,6 +458,10 @@ namespace MWScript
                     runtime.pop();
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
+
+                    if (!player.isInCell())
+                        throw std::runtime_error("player not in a cell");
+
                     MWWorld::CellStore* store = NULL;
                     if (player.getCell()->isExterior())
                     {
@@ -504,6 +508,9 @@ namespace MWScript
 
                     if (count<0)
                         throw std::runtime_error ("count must be non-negative");
+
+                    if (!actor.isInCell())
+                        throw std::runtime_error ("actor is not in a cell");
 
                     for (int i=0; i<count; ++i)
                     {

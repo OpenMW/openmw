@@ -123,7 +123,7 @@ namespace MWScript
                     const MWWorld::CellStore *cell = MWMechanics::getPlayer().getCell();
 
                     std::string current = MWBase::Environment::get().getWorld()->getCellName(cell);
-                    Misc::StringUtils::toLower(current);
+                    Misc::StringUtils::lowerCaseInPlace(current);
 
                     bool match = current.length()>=name.length() &&
                         current.substr (0, name.length())==name;

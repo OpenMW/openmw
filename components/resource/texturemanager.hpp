@@ -35,6 +35,7 @@ namespace Resource
         inline void setStoreImageFilenames(bool b) { mStoreImageFilenames = b; }
 
         /// Create or retrieve a Texture2D using the specified image filename, and wrap parameters.
+        /// Returns the dummy texture if the given texture is not found.
         osg::ref_ptr<osg::Texture2D> getTexture2D(const std::string& filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT);
 
         /// Create or retrieve an Image

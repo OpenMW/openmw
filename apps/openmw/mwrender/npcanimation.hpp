@@ -61,6 +61,8 @@ private:
     int mPartPriorities[ESM::PRT_Count];
 
     osg::Vec3f mFirstPersonOffset;
+    // Field of view to use when rendering first person meshes
+    float mFirstPersonFieldOfView;
 
     boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
@@ -102,7 +104,7 @@ public:
      * @param viewMode
      */
     NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener = false,
-                 bool disableSounds = false, ViewMode viewMode=VM_Normal);
+                 bool disableSounds = false, ViewMode viewMode=VM_Normal, float firstPersonFieldOfView=55.f);
     virtual ~NpcAnimation();
 
     virtual void enableHeadAnimation(bool enable);

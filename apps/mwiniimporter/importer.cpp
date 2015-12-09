@@ -638,6 +638,9 @@ MwIniImporter::MwIniImporter()
         "Blood:Texture Name 1",
         "Blood:Texture Name 2",
 
+        // werewolf (Bloodmoon)
+        "General:Werewolf FOV",
+
         0
     };
 
@@ -846,7 +849,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
         for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
             std::string filetype(entry->substr(entry->length()-3));
-            Misc::StringUtils::toLower(filetype);
+            Misc::StringUtils::lowerCaseInPlace(filetype);
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
                 boost::filesystem::path filepath(gameFilesDir);

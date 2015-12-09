@@ -303,7 +303,7 @@ namespace MWMechanics
         if (againstPlayer)
         {
             // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
-            const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
+            const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor2);
             if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
                 return;
 
@@ -322,7 +322,7 @@ namespace MWMechanics
         }
 
         // start combat if target actor is in combat with one of our followers
-        const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor1);
+        const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor1);
         const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
         for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
         {
@@ -336,20 +336,21 @@ namespace MWMechanics
         // start combat if target actor is in combat with someone we are following
         for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); ++it)
         {
-            if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
-            {
-                MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
-                if (followTarget.isEmpty())
-                    continue;
+            if (!(*it)->sideWithTarget())
+                continue;
 
-                if (creatureStats.getAiSequence().isInCombat(followTarget))
-                    continue;
+            MWWorld::Ptr followTarget = (*it)->getTarget();
 
-                // need to check both ways since player doesn't use AI packages
-                if (creatureStats2.getAiSequence().isInCombat(followTarget)
-                        || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
-                    aggressive = true;
-            }
+            if (followTarget.isEmpty())
+                continue;
+
+            if (creatureStats.getAiSequence().isInCombat(followTarget))
+                continue;
+
+            // need to check both ways since player doesn't use AI packages
+            if (creatureStats2.getAiSequence().isInCombat(followTarget)
+                    || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
+                aggressive = true;
         }
 
         if(aggressive)
@@ -1290,7 +1291,7 @@ namespace MWMechanics
         }
     }
 
-    std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    std::list<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
         for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
@@ -1300,19 +1301,11 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
+            // An actor counts as following if AiFollow or AiEscort is the current AiPackage, or there are only Combat packages before the AiFollow/AiEscort package
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
-                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
-                {
-                    MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
-                    if (followTarget.isEmpty())
-                        continue;
-                    if (followTarget == actor)
-                        list.push_back(iter->first);
-                    else
-                        break;
-                }
+                if ((*it)->sideWithTarget() && (*it)->getTarget() == actor)
+                    list.push_back(iter->first);
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
             }

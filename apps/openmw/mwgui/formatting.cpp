@@ -129,7 +129,7 @@ namespace MWGui
             size_t tagNameEndPos = tag.find(' ');
             mAttributes.clear();
             mTag = tag.substr(0, tagNameEndPos);
-            Misc::StringUtils::toLower(mTag);
+            Misc::StringUtils::lowerCaseInPlace(mTag);
             if (mTag.empty())
                 return;
 
@@ -151,7 +151,7 @@ namespace MWGui
                     return;
 
                 std::string key = tag.substr(0, sepPos);
-                Misc::StringUtils::toLower(key);
+                Misc::StringUtils::lowerCaseInPlace(key);
                 tag.erase(0, sepPos+1);
 
                 std::string value;

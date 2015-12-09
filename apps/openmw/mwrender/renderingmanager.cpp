@@ -136,6 +136,8 @@ namespace MWRender
         , mUnderwaterFog(0.f)
         , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
+        , mFieldOfViewOverride(0.f)
+        , mFieldOfViewOverridden(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
 
@@ -205,7 +207,8 @@ namespace MWRender
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
+        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
 
@@ -727,7 +730,8 @@ namespace MWRender
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
     {
-        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0));
+        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, false, NpcAnimation::VM_Normal,
+                                                mFirstPersonFieldOfView));
 
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
@@ -769,7 +773,10 @@ namespace MWRender
     void RenderingManager::updateProjectionMatrix()
     {
         double aspect = mViewer->getCamera()->getViewport()->aspectRatio();
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(mFieldOfView, aspect, mNearClip, mViewDistance);
+        float fov = mFieldOfView;
+        if (mFieldOfViewOverridden)
+            fov = mFieldOfViewOverride;
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -808,9 +815,9 @@ namespace MWRender
     {
         for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
         {
-            if (it->first == "General" && it->second == "field of view")
+            if (it->first == "Camera" && it->second == "field of view")
             {
-                mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+                mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
                 updateProjectionMatrix();
             }
             else if (it->first == "Camera" && it->second == "viewing distance")
@@ -910,6 +917,25 @@ namespace MWRender
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
             mCamera->setCameraDistance(-factor/120.f*10, true, true);
+    }
+
+    void RenderingManager::overrideFieldOfView(float val)
+    {
+        if (mFieldOfViewOverridden != true || mFieldOfViewOverride != val)
+        {
+            mFieldOfViewOverridden = true;
+            mFieldOfViewOverride = val;
+            updateProjectionMatrix();
+        }
+    }
+
+    void RenderingManager::resetFieldOfView()
+    {
+        if (mFieldOfViewOverridden == true)
+        {
+            mFieldOfViewOverridden = false;
+            updateProjectionMatrix();
+        }
     }
 
 }

@@ -8,6 +8,8 @@
 
 #include <boost/filesystem/path.hpp>
 
+#include <components/misc/stringops.hpp>
+
 namespace Files
 {
     typedef std::vector<boost::filesystem::path> PathContainer;
@@ -27,8 +29,8 @@ namespace Files
 
             for (std::size_t i=0; i<min; ++i)
             {
-                char l = tolower (left[i]);
-                char r = tolower (right[i]);
+                char l = Misc::StringUtils::toLower (left[i]);
+                char r = Misc::StringUtils::toLower (right[i]);
 
                 if (l<r)
                     return true;
