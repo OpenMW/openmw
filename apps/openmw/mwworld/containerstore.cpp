@@ -444,12 +444,12 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             if (!levItem.empty() && count < 0)
             {
                 //If there is no item in map, insert it
-                std::map<std::string, std::pair<int, std::string> >::iterator itemInMap =
-                    mLevelledItemMap.insert(std::make_pair(id, std::make_pair(0, levItem))).first;
+                std::map<std::pair<std::string, std::string>, int>::iterator itemInMap =
+                    mLevelledItemMap.insert(std::make_pair(std::make_pair(id, levItem), 0)).first;
                 //Update spawned count
-                itemInMap->second.first += std::abs(count);
+                itemInMap->second += std::abs(count);
             }
-            count = std::abs(count);
+            count  = std::abs(count);
 
             ref.getPtr().getCellRef().setOwner(owner);
             addImp (ref.getPtr(), count);
@@ -470,47 +470,48 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
     std::map<std::string, int> allowedForReplace;
 
     //Check which lists need restocking:
-    for (std::map<std::string, std::pair<int, std::string> >::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    for (std::map<std::pair<std::string, std::string>, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end();)
     {
-        int spawnedCount = it->second.first; //How many items should be in shop originally
-        int itemCount = count(it->first); //How many items are there in shop now
+        int spawnedCount = it->second; //How many items should be in shop originally
+        int itemCount = count(it->first.first); //How many items are there in shop now
         //If something was not sold
         if(itemCount >= spawnedCount)
         {
-            const std::string& parent = it->second.second;
+            const std::string& parent = it->first.second;
             // Security check for old saves:
             //If item is imported from old save(doesn't have an parent) and wasn't sold
             if(parent == "")
             {
                 //Remove it, from shop,
-                remove(it->first, itemCount, ptr);//ptr is the NPC
+                remove(it->first.first, itemCount, ptr);//ptr is the NPC
                 //And remove it from map, so that when we restock, the new item will have proper parent.
-                mLevelledItemMap.erase(it);
+                mLevelledItemMap.erase(it++);
                 continue;
-
             }
             //Create the entry if it does not exist yet
             std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
-                std::make_pair(it->second.second, 0)).first;
+                std::make_pair(it->first.second, 0)).first;
             //And signal that we don't need to restock item from this list
             listInMap->second += std::abs(itemCount);
         }
         //If every of the item was sold
         else if (itemCount == 0)
         {
-            mLevelledItemMap.erase(it);
+            mLevelledItemMap.erase(it++);
+            continue;
         }
         //If some was sold, but some remain
         else
         {
             //Create entry if it does not exist yet
             std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
-                std::make_pair(it->second.second, 0)).first;
+                std::make_pair(it->first.second, 0)).first;
             //And signal that we don't need to restock all items from this list
             listInMap->second += std::abs(itemCount);
             //And update itemCount so we don't mistake it next time.
-            it->second.first = itemCount;
+            it->second = itemCount;
         }
+        ++it;
     }
 
     //Restock:
@@ -528,13 +529,12 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         {
             std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
 
-            int restockNum = it-> mCount;
+            int restockNum = it->mCount;
             //If we know we must restock less, take it into account
             if(listInMap != allowedForReplace.end())
                 restockNum += listInMap->second;//We add, because list items have negative count
             //restock
             addInitialItem(itemOrList, owner, restockNum, true);
-
         }
         else
         {

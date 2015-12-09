@@ -69,8 +69,8 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::string, std::pair<int, std::string> > mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <refId, pair(count, spawningGroup)>
+            std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
+            ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
             /// This is used to restock levelled items(s) if the old item was sold.
 
             mutable float mCachedWeight;

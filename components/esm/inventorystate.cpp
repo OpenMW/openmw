@@ -44,7 +44,7 @@ void ESM::InventoryState::load (ESMReader &esm)
         if(esm.isNextSub("LGRP"))
             //Newest saves contain parent group
             parentGroup = esm.getHString();
-        mLevelledItemMap[id] = std::make_pair(count, parentGroup);
+        mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
     }
 
     while (esm.isNextSub("MAGI"))
@@ -86,11 +86,11 @@ void ESM::InventoryState::save (ESMWriter &esm) const
         iter->save (esm, true);
     }
 
-    for (std::map<std::string, std::pair<int, std::string> >::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    for (std::map<std::pair<std::string, std::string>, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
     {
-        esm.writeHNString ("LEVM", it->first);
-        esm.writeHNT ("COUN", it->second.first);
-        esm.writeHNString("LGRP", it->second.second);
+        esm.writeHNString ("LEVM", it->first.first);
+        esm.writeHNT ("COUN", it->second);
+        esm.writeHNString("LGRP", it->first.second);
     }
 
     for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)
