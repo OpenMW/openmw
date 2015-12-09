@@ -449,7 +449,7 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                 //Update spawned count
                 itemInMap->second += std::abs(count);
             }
-            count  = std::abs(count);
+            count = std::abs(count);
 
             ref.getPtr().getCellRef().setOwner(owner);
             addImp (ref.getPtr(), count);
