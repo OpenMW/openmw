@@ -117,7 +117,8 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
-      : mResourceSystem(resourceSystem)
+      : mStore(NULL)
+      , mResourceSystem(resourceSystem)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
       , mCurrentModals()
@@ -291,8 +292,7 @@ namespace MWGui
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         mJournal = JournalWindow::create(JournalViewModel::create (), questList);
-        mMessageBoxManager = new MessageBoxManager(
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
@@ -459,6 +459,11 @@ namespace MWGui
 
         mGuiPlatform->shutdown();
         delete mGuiPlatform;
+    }
+
+    void WindowManager::setStore(const MWWorld::ESMStore &store)
+    {
+        mStore = &store;
     }
 
     void WindowManager::cleanupGarbage()
@@ -908,8 +913,7 @@ namespace MWGui
 
     std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
     {
-        const ESM::GameSetting *setting =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
+        const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType()==ESM::VT_String)
             return setting->mValue.getString();
@@ -1139,8 +1143,12 @@ namespace MWGui
         }
         else
         {
-            const ESM::GameSetting *setting =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+            if (!mStore)
+            {
+                std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
+                return;
+            }
+            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();
@@ -1263,8 +1271,7 @@ namespace MWGui
         mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        const ESM::Spell* spell = mStore->get<ESM::Spell>().find(spellId);
 
         mSpellWindow->setTitle(spell->mName);
     }
@@ -1272,7 +1279,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedSpell = "";
-        const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
+        const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
@@ -1707,7 +1714,7 @@ namespace MWGui
         {
             reader.getSubNameIs("ID__");
             std::string spell = reader.getHString();
-            if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell))
+            if (mStore->get<ESM::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)

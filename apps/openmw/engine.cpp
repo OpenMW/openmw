@@ -513,6 +513,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     mEnvironment.getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
+    window->setStore(mEnvironment.getWorld()->getStore());
     window->initUI();
     window->renderWorldMap();
 
