@@ -137,6 +137,9 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    ${OPENSCENEGRAPH_LIBRARIES}
+    ${OSG_PLUGINS_STATIC}
+    ${X11_LIBRARIES}
 )
 
 if (ANDROID)
@@ -151,12 +154,10 @@ if (ANDROID)
         -Wl,--no-whole-archive
     )
     target_link_libraries(openmw
-        EGL
         android
         log
         dl
         z
-        ${OPENSCENEGRAPH_LIBRARIES}
         ${OSG_PLUGINS}
         jpeg
         gif
