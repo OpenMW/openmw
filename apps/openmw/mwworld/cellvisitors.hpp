@@ -1,5 +1,5 @@
-#ifndef GAME_MWWORLD_CELLFUNCTORS_H
-#define GAME_MWWORLD_CELLFUNCTORS_H
+#ifndef GAME_MWWORLD_CELLVISITORS_H
+#define GAME_MWWORLD_CELLVISITORS_H
 
 #include <vector>
 #include <string>
@@ -9,7 +9,7 @@
 
 namespace MWWorld
 {
-    struct ListAndResetObjects
+    struct ListAndResetObjectsVisitor
     {
         std::vector<MWWorld::Ptr> mObjects;
 

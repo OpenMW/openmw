@@ -103,7 +103,7 @@ namespace MWWorld
             void disable();
 
             void setPosition (const ESM::Position& pos);
-            const ESM::Position& getPosition();
+            const ESM::Position& getPosition() const;
 
             void setCustomData (CustomData *data);
             ///< Set custom data (potentially replacing old custom data). The ownership of \a data is

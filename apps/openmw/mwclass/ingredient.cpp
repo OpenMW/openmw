@@ -185,7 +185,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Ingredient> *ref =
             ptr.get<ESM::Ingredient>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Ingredient>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     bool Ingredient::canSell (const MWWorld::Ptr& item, int npcServices) const

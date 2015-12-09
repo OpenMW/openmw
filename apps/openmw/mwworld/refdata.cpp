@@ -182,7 +182,7 @@ namespace MWWorld
         mPosition = pos;
     }
 
-    const ESM::Position& RefData::getPosition()
+    const ESM::Position& RefData::getPosition() const
     {
         return mPosition;
     }
