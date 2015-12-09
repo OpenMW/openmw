@@ -16,18 +16,6 @@
 
 typedef std::vector<std::string> StringsVector;
 
-//#define ACTIVATE
-#ifdef ACTIVATE
-extern osgDB::RegisterWrapperProxy NifOsg_NodeUserData_Serializer;
-extern osgDB::RegisterWrapperProxy NifOsg_ParticleShooter_Serializer;
-extern osgDB::RegisterWrapperProxy NifOsg_TextKeyMapHolder_Serializer;
-extern osgDB::RegisterWrapperProxy NifOsg_KeyframeController_Serializer;
-//extern osgDB::RegisterWrapperProxy NifOsg_UVController_Serializer;
-// bad cast...
-//extern osgDB::RegisterWrapperProxy NifOsg_VisController_Serializer;
-//extern osgDB::RegisterWrapperProxy NifOsg_GrowFadeAffector_Serializer;
-#endif
-
 int main(int argc, char **argv) {
     namespace bpo = boost::program_options;
     bpo::options_description desc("Syntax: nifconv <options>\nAllowed options");
@@ -99,33 +87,35 @@ int main(int argc, char **argv) {
 
     Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
 
-#ifdef ACTIVATE
-    // Register the serializers (simply reference the global object in the library).
-    NifOsg_NodeUserData_Serializer.activate();
-    NifOsg_ParticleShooter_Serializer.activate();
-    NifOsg_TextKeyMapHolder_Serializer.activate();
-    NifOsg_KeyframeController_Serializer.activate();
-    //NifOsg_UVController_Serializer.activate();
-    // bad cast...
-    //NifOsg_VisController_Serializer.activate();
-    //NifOsg_GrowFadeAffector_Serializer.activate();
-#endif
-    
     osgDB::Registry* reg = osgDB::Registry::instance();
     osgDB::ReaderWriter* writer = reg->getReaderWriterForExtension("osgt");
     if (!writer) {
         std::cout << "Failed to create OSGB/OSGT writer." << std::endl;
     }
 
-    osgDB::Options* options = NULL;
     bool binary_format = variables["binary"].as<bool>();
     std::string new_extension = ".osgb";
+
+    std::string ostr = "";
+    // Exported objects should reference textures by name, and not be embedded into the
+    // OSG stream.
+    ostr += "WriteImageHint=UseExternal";
+
+    // "osgconv -O WriteImageHint=WriteOut x.osgb x.osgt" produces these errors:
+    // Empty Image::FileName resetting to image.dds
+    // OutputStream::writeImage(): Write image data to external file image.dds
     if (!binary_format) {
-        // Documentation was wrong.   Has to be "fileType=Ascii". :-(
-        options = new osgDB::Options("fileType=Ascii");
         new_extension = ".osgt";
+        // Filetype is automatically when passing the filename instead of a stream.
+        //ostr += " fileType=Ascii";
     }
-    
+    // ostr += " Compressor=zlib";
+    osgDB::Options* options = new osgDB::Options(ostr);
+
+    Resource::TextureManager* texmgr = sceneManager->getTextureManager();
+    texmgr->setStoreImageFilenames(true);
+
+    size_t cache_count = 0;
     BOOST_FOREACH(const std::string nfile, variables["nif"].as<StringsVector>()) {
         if (nfile.substr(nfile.size() - 4, 4) != ".nif") {
             std::cout << "File to convert is not a NIF: " << nfile << std::endl;
@@ -134,22 +124,22 @@ int main(int argc, char **argv) {
         osg::ref_ptr<const osg::Node> onode = sceneManager->getTemplate(nfile);
         std::string osgfile = nfile.substr(0, nfile.size() - 4) + new_extension;
         
-        std::ofstream ostream;
-        ostream.open(osgfile.c_str(), std::ofstream::out | std::ofstream::trunc);
-        if (ostream.is_open()) {
-            osgDB::ReaderWriter::WriteResult result =
-                writer->writeNode(*onode, ostream, options);
-            if (!result.success()) {
-                std::cout << "Error writing " << osgfile << ": "
-                          << result.message() << " code " << result.status() << std::endl;
-            }
-            else {
-                std::cout << "Succesfully wrote: " << osgfile << std::endl;
-            }
+        osgDB::ReaderWriter::WriteResult result =
+            writer->writeNode(*onode, osgfile, options);
+        if (!result.success()) {
+            std::cout << "Error writing " << osgfile << ": "
+                      << result.message() << " code " << result.status() << std::endl;
         }
         else {
-            std::cout << "Error opening " << osgfile << std::endl;
+            std::cout << "Succesfully wrote: " << osgfile << std::endl;
         }
-        ostream.close();
+
+        // This limit is a rough guess since there's no convenient way to know how many
+        // textures were loaded for each mesh.
+        cache_count++;
+        if (cache_count > 256) {
+            mResourceSystem->clearCache();
+        }
     }
+
 }
