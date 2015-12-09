@@ -127,7 +127,6 @@ void RippleSimulation::update(float dt)
         }
 
         osg::Vec3f currentPos (it->mPtr.getRefData().getPosition().asVec3());
-        currentPos.z() = 0; // Z is set by the Scene Node
 
         if ( (currentPos - it->mLastEmitPosition).length() > 10
              // Only emit when close to the water surface, not above it and not too deep in the water
@@ -135,6 +134,8 @@ void RippleSimulation::update(float dt)
              && !MWBase::Environment::get().getWorld()->isSubmerged(it->mPtr))
         {
             it->mLastEmitPosition = currentPos;
+
+            currentPos.z() = mParticleNode->getPosition().z();
 
             if (mParticleSystem->numParticles()-mParticleSystem->numDeadParticles() > 500)
                 continue; // TODO: remove the oldest particle to make room?
