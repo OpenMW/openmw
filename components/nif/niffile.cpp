@@ -12,9 +12,8 @@ NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
     : ver(0)
     , filename(name)
     , mUseSkinning(false)
-    , mStream(stream)
 {
-    parse();
+    parse(stream);
 }
 
 NIFFile::~NIFFile()
@@ -115,7 +114,6 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
 ///Make the factory map used for parsing the file
 static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
 
-/// Get the file's version in a human readable form
 std::string NIFFile::printVersion(unsigned int version)
 {
     union ver_quad
@@ -134,9 +132,9 @@ std::string NIFFile::printVersion(unsigned int version)
     return stream.str();
 }
 
-void NIFFile::parse()
+void NIFFile::parse(Files::IStreamPtr stream)
 {
-    NIFStream nif (this, mStream);
+    NIFStream nif (this, stream);
 
     // Check the header string
     std::string head = nif.getVersionString();

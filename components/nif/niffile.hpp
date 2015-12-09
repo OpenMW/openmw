@@ -35,7 +35,7 @@ class NIFFile
     bool mUseSkinning;
 
     /// Parse the file
-    void parse();
+    void parse(Files::IStreamPtr stream);
 
     /// Get the file's version in a human readable form
     ///\returns A string containing a human readable NIF version number
@@ -45,8 +45,6 @@ class NIFFile
     NIFFile (NIFFile const &);
     ///\overload
     void operator = (NIFFile const &);
-
-    Files::IStreamPtr mStream;
 
 public:
     /// Used if file parsing fails
