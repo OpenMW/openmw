@@ -221,7 +221,7 @@ namespace MWSound
     {
         DecoderPtr decoder = getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(decoder->mResourceMgr->exists(voicefile))
+        if(mVFS->exists(voicefile))
             decoder->open(voicefile);
         else
         {
