@@ -19,6 +19,7 @@ namespace CSMPrefs
 {
     class IntSetting;
     class DoubleSetting;
+    class BoolSetting;
 
     class State : public QObject
     {
@@ -53,6 +54,8 @@ namespace CSMPrefs
 
             IntSetting& declareInt (const std::string& key, const std::string& label, int default_);
             DoubleSetting& declareDouble (const std::string& key, const std::string& label, double default_);
+
+            BoolSetting& declareBool (const std::string& key, const std::string& label, bool default_);
 
             void setDefault (const std::string& key, const std::string& default_);
 

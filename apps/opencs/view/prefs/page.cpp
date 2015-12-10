@@ -31,7 +31,7 @@ void CSVPrefs::Page::addSetting (CSMPrefs::Setting *setting)
     }
     else if (widgets.second)
     {
-        mGrid->addWidget (widgets.second, next, 0, next, 1);
+        mGrid->addWidget (widgets.second, next, 0, 1, 2);
     }
     else
     {

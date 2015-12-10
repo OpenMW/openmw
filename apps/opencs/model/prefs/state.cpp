@@ -7,6 +7,7 @@
 
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
+#include "boolsetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -39,24 +40,47 @@ void CSMPrefs::State::declare()
     declareInt ("default-height", "Default window height", 600).
         setTooltip ("Newly opened top-level windows will open with this height.").
         setMin (80);
-    // reuse
-    // show-statusbar
+    declareBool ("reuse", "Reuse Subviews", true).
+        setTooltip ("When a new subview is requested and a matching subview already "
+        " exist, do not open a new subview and use the existing one instead.");
+    declareBool ("show-statusbar", "Show Status Bar", true).
+        setTooltip ("If a newly open top level window is showing status bars or not. "
+        " Note that this does not affect existing windows.");
     declareInt ("max-subviews", "Maximum number of subviews per top-level window", 256).
         setTooltip ("If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.").
         setRange (1, 256);
-    // hide-subview
+    declareBool ("hide-subview", "Hide single subview", false).
+        setTooltip ("When a view contains only a single subview, hide the subview title "
+        "bar and if this subview is closed also close the view (unless it is the last "
+        "view for this document)");
     declareInt ("minimum-width", "Minimum subview width", 325).
         setTooltip ("Minimum width of subviews.").
         setRange (50, 10000);
     // mainwindow-scrollbar
-    // grow-limit
+    declareBool ("grow-limit", "Grow Limit Screen", false).
+        setTooltip ("When \"Grow then Scroll\" option is selected, the window size grows to"
+        " the width of the virtual desktop. \nIf this option is selected the the window growth"
+        "is limited to the current screen.");
 
     declareCategory ("Records");
 
     declareCategory ("ID Tables");
+    // double
+    // double-s
+    // double-c
+    // double-sc
+    // jump-to-added
+    declareBool ("extended-config",
+        "Manually specify affected record types for an extended delete/revert", false).
+        setTooltip ("Delete and revert commands have an extended form that also affects "
+        "associated records.\n\n"
+        "If this option is enabled, types of affected records are selected "
+        "manually before a command execution.\nOtherwise, all associated "
+        "records are deleted/reverted immediately.");
 
     declareCategory ("ID Dialogues");
+    declareBool ("toolbar", "Show toolbar", true);
 
     declareCategory ("Reports");
 
@@ -65,13 +89,15 @@ void CSMPrefs::State::declare()
         setTooltip ("Maximum number of character to display in search result before the searched text");
     declareInt ("char-after", "Characters after search string", 10).
         setTooltip ("Maximum number of character to display in search result after the searched text");
-    // auto-delete
+    declareBool ("auto-delete", "Delete row from result table after a successful replace", true);
 
     declareCategory ("Scripts");
-    // show-linenum
-    // mono-font
+    declareBool ("show-linenum", "Show Line Numbers", true).
+        setTooltip ("Show line numbers to the left of the script editor window."
+        "The current row and column numbers of the text cursor are shown at the bottom.");
+    declareBool ("mono-font", "Use monospace font", true);
     // warnings
-    // toolbar
+    declareBool ("toolbar", "Show toolbar", true);
     declareInt ("compile-delay", "Delay between updating of source errors", 100).
         setTooltip ("Delay in milliseconds").
         setRange (0, 10000);
@@ -80,6 +106,9 @@ void CSMPrefs::State::declare()
     // syntax-colouring
 
     declareCategory ("General Input");
+    declareBool ("cycle", "Cyclic next/previous", false).
+        setTooltip ("When using next/previous functions at the last/first item of a "
+        "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
     // p-navi
@@ -88,7 +117,7 @@ void CSMPrefs::State::declare()
     // s-edit
     // p-select
     // s-select
-    // context-select
+    declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
         setRange (0.001, 100.0);
     declareDouble ("drag-wheel-factor", "Mouse wheel sensitivity during drag operations", 1.0).
@@ -99,8 +128,8 @@ void CSMPrefs::State::declare()
         setRange (0.001, 100.0);
 
     declareCategory ("Tooltips");
-    // scene
-    // scene-hide-basic
+    declareBool ("scene", "Show Tooltips in 3D scenes", true);
+    declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
     declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
         setMin (1);
 }
@@ -154,6 +183,24 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
 
     CSMPrefs::DoubleSetting *setting =
         new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::BoolSetting& CSMPrefs::State::declareBool (const std::string& key,
+    const std::string& label, bool default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_ ? "true" : "false");
+
+    default_ = mSettings.getBool (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::BoolSetting *setting =
+        new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
 
