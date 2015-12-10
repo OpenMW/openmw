@@ -19,6 +19,7 @@ namespace CSMPrefs
             DoubleSetting (Category *parent, Settings::Manager *values,
                 const std::string& key, const std::string& label, double default_);
 
+            // defaults to [0, std::numeric_limits<double>::max()]
             DoubleSetting& setRange (double min, double max);
 
             DoubleSetting& setMin (double min);

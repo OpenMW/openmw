@@ -19,6 +19,7 @@ namespace CSMPrefs
             IntSetting (Category *parent, Settings::Manager *values,
                 const std::string& key, const std::string& label, int default_);
 
+            // defaults to [0, std::numeric_limits<int>::max()]
             IntSetting& setRange (int min, int max);
 
             IntSetting& setMin (int min);
