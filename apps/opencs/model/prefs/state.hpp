@@ -14,6 +14,7 @@
 
 #include "category.hpp"
 #include "setting.hpp"
+#include "enumsetting.hpp"
 
 namespace CSMPrefs
 {
@@ -56,6 +57,8 @@ namespace CSMPrefs
             DoubleSetting& declareDouble (const std::string& key, const std::string& label, double default_);
 
             BoolSetting& declareBool (const std::string& key, const std::string& label, bool default_);
+
+            EnumSetting& declareEnum (const std::string& key, const std::string& label, EnumValue default_);
 
             void setDefault (const std::string& key, const std::string& default_);
 

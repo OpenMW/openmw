@@ -138,7 +138,7 @@ opencs_hdrs_noqt (model/settings
     )
 
 opencs_units (model/prefs
-    state setting intsetting doublesetting boolsetting
+    state setting intsetting doublesetting boolsetting enumsetting
     )
 
 opencs_units_noqt (model/prefs

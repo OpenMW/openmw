@@ -57,20 +57,44 @@ void CSMPrefs::State::declare()
     declareInt ("minimum-width", "Minimum subview width", 325).
         setTooltip ("Minimum width of subviews.").
         setRange (50, 10000);
-    // mainwindow-scrollbar
+    EnumValue scrollbarOnly ("Scrollbar Only", "Simple addition of scrollbars, the view window "
+        "does not grow automatically.");
+    declareEnum ("mainwindow-scrollbar", "Horizontal scrollbar mode for main window.", scrollbarOnly).
+        addValue (scrollbarOnly).
+        addValue ("Grow Only", "The view window grows as subviews are added. No scrollbars.").
+        addValue ("Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further.");
     declareBool ("grow-limit", "Grow Limit Screen", false).
         setTooltip ("When \"Grow then Scroll\" option is selected, the window size grows to"
         " the width of the virtual desktop. \nIf this option is selected the the window growth"
         "is limited to the current screen.");
 
     declareCategory ("Records");
+    EnumValue iconAndText ("Icon and Text");
+    EnumValues recordValues;
+    recordValues.add (iconAndText).add ("Icon Only").add ("Text only");
+    declareEnum ("status-format", "Modification status display format", iconAndText).
+        addValues (recordValues);
+    declareEnum ("type-format", "ID type display format", iconAndText).
+        addValues (recordValues);
 
     declareCategory ("ID Tables");
-    // double
-    // double-s
-    // double-c
-    // double-sc
-    // jump-to-added
+    EnumValue inPlaceEdit ("Edit in Place", "Edit the clicked cell");
+    EnumValue editRecord ("Edit Record", "Open a dialogue subview for the clicked record");
+    EnumValue view ("View", "Open a scene subview for the clicked record (not available everywhere)");
+    EnumValue editRecordAndClose ("Edit Record and Close");
+    EnumValues doubleClickValues;
+    doubleClickValues.add (inPlaceEdit).add (editRecord).add (view).add ("Revert").
+        add ("Delete").add (editRecordAndClose).
+        add ("View and Close", "Open a scene subview for the clicked record and close the table subview");
+    declareEnum ("double", "Double Click", inPlaceEdit).addValues (doubleClickValues);
+    declareEnum ("double-s", "Shift Double Click", editRecord).addValues (doubleClickValues);
+    declareEnum ("double-c", "Control Double Click", view).addValues (doubleClickValues);
+    declareEnum ("double-sc", "Shift Control Double Click", editRecordAndClose).addValues (doubleClickValues);
+    EnumValue jumpAndSelect ("Jump and Select", "Scroll new record into view and make it the selection");
+    declareEnum ("jump-to-added", "Action on adding or cloning a record", jumpAndSelect).
+        addValue (jumpAndSelect).
+        addValue ("Jump Only", "Scroll new record into view").
+        addValue ("No Jump", "No special action");
     declareBool ("extended-config",
         "Manually specify affected record types for an extended delete/revert", false).
         setTooltip ("Delete and revert commands have an extended form that also affects "
@@ -83,6 +107,16 @@ void CSMPrefs::State::declare()
     declareBool ("toolbar", "Show toolbar", true);
 
     declareCategory ("Reports");
+    EnumValue actionNone ("None");
+    EnumValue actionEdit ("Edit", "Open a table or dialogue suitable for addressing the listed report");
+    EnumValue actionRemove ("Remove", "Remove the report from the report table");
+    EnumValue actionEditAndRemove ("Edit And Remove", "Open a table or dialogue suitable for addressing the listed report, then remove the report from the report table");
+    EnumValues reportValues;
+    reportValues.add (actionNone).add (actionEdit).add (actionRemove).add (actionEditAndRemove);
+    declareEnum ("double", "Double Click", actionEdit).addValues (reportValues);
+    declareEnum ("double-s", "Shift Double Click", actionRemove).addValues (reportValues);
+    declareEnum ("double-c", "Control Double Click", actionEditAndRemove).addValues (reportValues);
+    declareEnum ("double-sc", "Shift Control Double Click", actionNone).addValues (reportValues);
 
     declareCategory ("Search & Replace");
     declareInt ("char-before", "Characters before search string", 10).
@@ -96,7 +130,11 @@ void CSMPrefs::State::declare()
         setTooltip ("Show line numbers to the left of the script editor window."
         "The current row and column numbers of the text cursor are shown at the bottom.");
     declareBool ("mono-font", "Use monospace font", true);
-    // warnings
+    EnumValue warningsNormal ("Normal", "Report warnings as warning");
+    declareEnum ("warnings", "Warning Mode", warningsNormal).
+        addValue ("Ignore", "Do not report warning").
+        addValue (warningsNormal).
+        addValue ("Strcit", "Promote warning to an error");
     declareBool ("toolbar", "Show toolbar", true);
     declareInt ("compile-delay", "Delay between updating of source errors", 100).
         setTooltip ("Delay in milliseconds").
@@ -111,12 +149,20 @@ void CSMPrefs::State::declare()
         "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
-    // p-navi
-    // s-navi
-    // p-edit
-    // s-edit
-    // p-select
-    // s-select
+    EnumValue left ("Left Mouse-Button");
+    EnumValue cLeft ("Ctrl-Left Mouse-Button");
+    EnumValue right ("Right Mouse-Button");
+    EnumValue cRight ("Ctrl-Right Mouse-Button");
+    EnumValue middle ("Middle Mouse-Button");
+    EnumValue cMiddle ("Ctrl-Middle Mouse-Button");
+    EnumValues inputButtons;
+    inputButtons.add (left).add (cLeft).add (right).add (cRight).add (middle).add (cMiddle);
+    declareEnum ("p-navi", "Primary Camera Navigation Button", left).addValues (inputButtons);
+    declareEnum ("s-navi", "Secondary Camera Navigation Button", cLeft).addValues (inputButtons);
+    declareEnum ("p-edit", "Primary Editing Button", right).addValues (inputButtons);
+    declareEnum ("s-edit", "Secondary Editing Button", cRight).addValues (inputButtons);
+    declareEnum ("p-select", "Primary Selection Button", middle).addValues (inputButtons);
+    declareEnum ("s-select", "Secondary Selection Button", cMiddle).addValues (inputButtons);
     declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
         setRange (0.001, 100.0);
@@ -201,6 +247,24 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool (const std::string& key,
 
     CSMPrefs::BoolSetting *setting =
         new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum (const std::string& key,
+    const std::string& label, EnumValue default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_.mValue);
+
+    default_.mValue = mSettings.getString (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::EnumSetting *setting =
+        new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
 
