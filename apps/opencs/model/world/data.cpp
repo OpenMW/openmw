@@ -927,6 +927,35 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     mReader->setIndex(mReaderIndex++);
     mReader->open (path.string());
 
+    mLoadedFiles.push_back(path.filename().string());
+
+    // at this point mReader->mHeader.mMaster have been populated for the file being loaded
+    for (size_t f = 0; f < mReader->getGameFiles().size(); ++f)
+    {
+        ESM::Header::MasterData& m = const_cast<ESM::Header::MasterData&>(mReader->getGameFiles().at(f));
+
+        int index = -1;
+        for (size_t i = 0; i < mLoadedFiles.size()-1; ++i) // -1 to ignore the current file
+        {
+            if (Misc::StringUtils::ciEqual(m.name, mLoadedFiles.at(i)))
+            {
+                index = static_cast<int>(i);
+                break;
+            }
+        }
+
+        if (index == -1)
+        {
+            // Tried to load a parent file that has not been loaded yet. This is bad,
+            //  the launcher should have taken care of this.
+            std::string fstring = "File " + mReader->getName() + " asks for parent file " + m.name
+                + ", but it has not been loaded yet. Please check your load order.";
+            mReader->fail(fstring);
+        }
+
+        m.index = index;
+    }
+
     mBase = base;
     mProject = project;
 

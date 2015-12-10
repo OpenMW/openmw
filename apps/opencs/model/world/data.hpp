@@ -106,6 +106,7 @@ namespace CSMWorld
             bool mProject;
             std::map<std::string, std::map<unsigned int, std::string> > mRefLoadCache;
             int mReaderIndex;
+            std::vector<std::string> mLoadedFiles;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
