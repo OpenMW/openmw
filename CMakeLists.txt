@@ -229,6 +229,14 @@ find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnim
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 if(OSG_STATIC)
+   
+   FIND_PACKAGE(X11 REQUIRED) 
+
+   set (X11_LIBRARIES 
+    ${X11_Xrandr_LIB}
+    ${X11_X11_LIB}
+    )
+
    macro(use_static_osg_plugin_library PLUGIN_NAME)
       set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
 
@@ -236,11 +244,11 @@ if(OSG_STATIC)
       # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
       find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
       find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
-      make_library_set(${PLUGIN_NAME}_LIBRARY)
+   #   make_library_set(${PLUGIN_NAME}_LIBRARY)
 
-      if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
-         message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
-      endif()
+    #  if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
+    #     message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
+    #  endif()
 
       set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
    endmacro()
@@ -274,6 +282,13 @@ if(OSG_STATIC)
    foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
       use_static_osg_plugin_dep(${DEPENDENCY})
    endforeach()
+
+   set (OSG_PLUGINS_STATIC
+        ${osgdb_dds_LIBRARY_REL}
+        ${osgdb_png_LIBRARY_REL}
+        ${osgdb_tga_LIBRARY_REL}
+        ${osgdb_jpeg_LIBRARY_REL}
+       )
 endif()
 
 if(QT_STATIC)

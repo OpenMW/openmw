@@ -179,7 +179,9 @@ include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 if (OPENGL_ES)
-    set(GL_LIB ${OPENGLES_gl_LIBRARY})
+    set(GL_LIB ${OPENGLES_gl_LIBRARY}
+       EGL
+       )
 else()
     set(GL_LIB ${OPENGL_gl_LIBRARY})
 endif()
