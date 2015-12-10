@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "intsetting.hpp"
+#include "doublesetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -81,6 +82,21 @@ void CSMPrefs::State::declare()
     declareCategory ("General Input");
 
     declareCategory ("3D Scene Input");
+    // p-navi
+    // s-navi
+    // p-edit
+    // s-edit
+    // p-select
+    // s-select
+    // context-select
+    declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
+        setRange (0.001, 100.0);
+    declareDouble ("drag-wheel-factor", "Mouse wheel sensitivity during drag operations", 1.0).
+        setRange (0.001, 100.0);
+    declareDouble ("drag-shift-factor",
+            "Shift-acceleration factor during drag operations", 4.0).
+        setTooltip ("Acceleration factor during drag operations while holding down shift").
+        setRange (0.001, 100.0);
 
     declareCategory ("Tooltips");
     // scene
@@ -118,6 +134,26 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt (const std::string& key,
 
     CSMPrefs::IntSetting *setting =
         new CSMPrefs::IntSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
+    const std::string& label, double default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    std::ostringstream stream;
+    stream << default_;
+    setDefault (key, stream.str());
+
+    default_ = mSettings.getFloat (key, mCurrentCategory->second.getKey());
+
+    CSMPrefs::DoubleSetting *setting =
+        new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
 
