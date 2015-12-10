@@ -180,7 +180,6 @@ add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 if (OPENGL_ES)
     set(GL_LIB ${OPENGLES_gl_LIBRARY}
-       ${OPENGLES_egl_LIBRARY}
        )
 else()
     set(GL_LIB ${OPENGL_gl_LIBRARY})

@@ -165,8 +165,11 @@ option(OPENGL_ES "enable opengl es support" FALSE )
 
 if (OPENGL_ES)
     add_definitions(-DOPENGL_ES)
-    SET(OPENGLES_egl_LIBRARY CACHE STRING "Set the OpenGL ES egl library.")
 endif(OPENGL_ES)
+
+if (OPENGL_ES AND ANDROID)
+    SET(OPENGLES_egl_LIBRARY CACHE STRING "Set the OpenGL ES egl library.")
+endif()
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)

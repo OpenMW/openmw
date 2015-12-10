@@ -151,6 +151,7 @@ if (ANDROID)
         -Wl,--no-whole-archive
     )
     target_link_libraries(openmw
+        ${OPENGLES_egl_LIBRARY}
         android
         log
         dl
