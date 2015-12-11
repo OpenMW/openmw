@@ -915,7 +915,7 @@ void OpenAL_Output::playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float
     sound->mHandle = MAKE_PTRID(source);
 }
 
-void OpenAL_Output::stopSound(MWBase::SoundPtr sound)
+void OpenAL_Output::finishSound(MWBase::SoundPtr sound)
 {
     if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
@@ -1012,7 +1012,7 @@ void OpenAL_Output::streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sou
     sound->mHandle = stream;
 }
 
-void OpenAL_Output::stopStream(MWBase::SoundStreamPtr sound)
+void OpenAL_Output::finishStream(MWBase::SoundStreamPtr sound)
 {
     if(!sound->mHandle) return;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
