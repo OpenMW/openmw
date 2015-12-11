@@ -40,7 +40,7 @@ namespace CSMWorld
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
     std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages)
 {
-    Record<Cell> cell = mCells.getRecord (cellIndex);
+    Record<Cell> cell = mCells.getRecord(cellIndex);
 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
 
@@ -80,8 +80,8 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 // message
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
-                    CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell, mCells.getId (cellIndex));
-                    messages.add (id, "The Position of moved ref " + ref.mRefID + " (#"
+                    CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
+                    messages.add(id, "The Position of moved ref " + ref.mRefID + " (#"
                         + std::to_string(index.first) + " " + std::to_string(index.second)
                         + ") does not match the target cell (#"
                         + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]) + ")",
@@ -103,12 +103,10 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
         if (isDeleted)
         {
-            if (iter==cache.end())
+            if (iter == cache.end())
             {
-                CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
-                    mCells.getId (cellIndex));
-
-                messages.add (id, "Attempt to delete a non-existing reference - RefNum index "
+                CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
+                messages.add(id, "Attempt to delete a non-existing reference - RefNum index "
                         + std::to_string(ref.mRefNum.mIndex) + ", refID " + ref.mRefID + ", content file index "
                         + std::to_string(ref.mRefNum.mContentFile),
                         /*hint*/"",
@@ -116,12 +114,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 continue;
             }
 
-            int index = getIndex (iter->second);
+            int index = getIndex(iter->second);
 
             if (base)
             {
-                removeRows (index, 1);
-                cache.erase (iter);
+                removeRows(index, 1);
+                cache.erase(iter);
             }
             else
             {
@@ -133,7 +131,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             continue;
         }
 
-        if (iter==cache.end())
+        if (iter == cache.end())
         {
             // new reference
             ref.mIdNum = mNextId; // FIXME: fragile
