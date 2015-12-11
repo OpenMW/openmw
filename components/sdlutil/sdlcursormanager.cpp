@@ -217,14 +217,17 @@ namespace SDLUtil
 
     void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image, Uint8 size_x, Uint8 size_y, Uint8 hotspot_x, Uint8 hotspot_y)
     {
-         #ifdef ANDROID
-         return;
-         #endif
+        osg::ref_ptr<osg::Image> decompressed;
 
         if (mCursorMap.find(name) != mCursorMap.end())
             return;
 
-        osg::ref_ptr<osg::Image> decompressed = decompress(image, static_cast<float>(rotDegrees));
+        try {
+            decompressed = decompress(image, static_cast<float>(rotDegrees));
+        } catch (...) {
+            osg::notify(osg::NOTICE)<<"Using default cursor."<<std::endl;
+            return;
+        }
 
         SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, false);
 
