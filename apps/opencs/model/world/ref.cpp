@@ -3,6 +3,7 @@
 #include <cmath>
 
 CSMWorld::CellRef::CellRef()
+  : mIdNum(0)
 {
     mId.clear();
     mCell.clear();
@@ -22,6 +23,7 @@ CSMWorld::CellRef& CSMWorld::CellRef::operator= (CSMWorld::CellRef&& other)
     if (this != &other)
     {
         ESM::CellRef::operator= (other);
+        mIdNum = other.mIdNum;
         mId = std::move(other.mId);
         mCell = std::move(other.mCell);
         mOriginalCell = std::move(other.mOriginalCell);

@@ -104,7 +104,7 @@ namespace CSMWorld
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
-            std::map<std::string, std::map<unsigned int, std::string> > mRefLoadCache;
+            std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
             int mReaderIndex;
             std::vector<std::string> mLoadedFiles;
 

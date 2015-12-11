@@ -10,6 +10,8 @@ namespace CSMWorld
     /// \brief Wrapper for CellRef sub record
     struct CellRef : public ESM::CellRef
     {
+        unsigned int mIdNum;
+
         std::string mId;
         std::string mCell;
         std::string mOriginalCell;

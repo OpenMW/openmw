@@ -11,8 +11,37 @@
 #include "universalid.hpp"
 #include "record.hpp"
 
+namespace CSMWorld
+{
+    template<>
+    void Collection<CellRef, IdAccessor<CellRef> >::removeRows (int index, int count)
+    {
+        mRecords.erase(mRecords.begin()+index, mRecords.begin()+index+count);
+
+        // index map is updated in RefCollection::removeRows()
+    }
+
+    template<>
+    void Collection<CellRef, IdAccessor<CellRef> >::insertRecord (std::unique_ptr<RecordBase> record, int index,
+        UniversalId::Type type)
+    {
+        int size = static_cast<int>(mRecords.size());
+        if (index < 0 || index > size)
+            throw std::runtime_error("index out of range");
+
+        std::unique_ptr<Record<CellRef> > record2(static_cast<Record<CellRef>*>(record.release()));
+
+        if (index == size)
+            mRecords.push_back(std::move(record2));
+        else
+            mRecords.insert(mRecords.begin()+index, std::move(record2));
+
+        // index map is updated in RefCollection::insertRecord()
+    }
+}
+
 void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool base,
-    std::map<unsigned int, std::string>& cache, CSMDoc::Messages& messages)
+    std::map<unsigned int, unsigned int>& cache, CSMDoc::Messages& messages)
 {
     Record<Cell> cell = mCells.getRecord (cellIndex);
 
@@ -74,7 +103,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         unsigned int  refNum = (ref.mRefNum.mIndex & 0x00ffffff) |
             (ref.mRefNum.hasContentFile() ? ref.mRefNum.mContentFile : 0xff) << 24;
 
-        std::map<unsigned int, std::string>::iterator iter = cache.find(refNum);
+        std::map<unsigned int, unsigned int>::iterator iter = cache.find(refNum);
 
         if (isDeleted)
         {
@@ -83,7 +112,11 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                 CSMWorld::UniversalId id (CSMWorld::UniversalId::Type_Cell,
                     mCells.getId (cellIndex));
 
-                messages.add (id, "Attempt to delete a non-existing reference");
+                messages.add (id, "Attempt to delete a non-existing reference - RefNum index "
+                        + std::to_string(ref.mRefNum.mIndex) + ", refID " + ref.mRefID + ", content file index "
+                        + std::to_string(ref.mRefNum.mContentFile),
+                        /*hint*/"",
+                        CSMDoc::Message::Severity_Warning);
                 continue;
             }
 
@@ -107,9 +140,10 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         if (iter==cache.end())
         {
             // new reference
+            ref.mIdNum = mNextId; // FIXME: fragile
             ref.mId = getNewId();
 
-            cache.insert(std::make_pair(refNum, ref.mId));
+            cache.insert(std::make_pair(refNum, ref.mIdNum));
 
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>);
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
@@ -120,9 +154,27 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         else
         {
             // old reference -> merge
-            ref.mId = iter->second;
+            int index = getIndex(iter->second);
+#if 0
+            // ref.mRefNum.mIndex     : the key
+            // iter->second           : previously cached idNum for the key
+            // index                  : position of the record for that idNum
+            // getRecord(index).get() : record in the index position
+            assert(iter->second != getRecord(index).get().mIdNum); // sanity check
 
-            int index = getIndex (ref.mId);
+            // check if the plugin used the same RefNum index for a different record
+            if (ref.mRefID != getRecord(index).get().mRefID)
+            {
+                CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
+                messages.add(id,
+                    "RefNum renamed from RefID \"" + getRecord(index).get().mRefID + "\" to \""
+                    + ref.mRefID + "\" (RefNum index " + std::to_string(ref.mRefNum.mIndex) + ")",
+                    /*hint*/"",
+                    CSMDoc::Message::Severity_Info);
+            }
+#endif
+            ref.mId = getRecord(index).get().mId;
+            ref.mIdNum = extractIdNum(ref.mId);
 
             std::unique_ptr<Record<CellRef> > record(new Record<CellRef>(getRecord(index)));
             record->mState = base ? RecordBase::State_BaseOnly : RecordBase::State_Modified;
@@ -138,4 +190,118 @@ std::string CSMWorld::RefCollection::getNewId()
     std::ostringstream stream;
     stream << "ref#" << mNextId++;
     return stream.str();
+}
+
+unsigned int CSMWorld::RefCollection::extractIdNum (const std::string& id) const
+{
+    std::string::size_type separator = id.find_last_of('#');
+
+    if (separator == std::string::npos)
+        throw std::runtime_error("invalid ref ID: " + id);
+
+    return static_cast<unsigned int>(std::stoi(id.substr(separator+1)));
+}
+
+int CSMWorld::RefCollection::getIndex (unsigned int id) const
+{
+    int index = searchId(id);
+
+    if (index == -1)
+        throw std::runtime_error("invalid RefNum: " + std::to_string(id));
+
+    return index;
+}
+
+int CSMWorld::RefCollection::searchId (unsigned int id) const
+{
+    std::map<unsigned int, int>::const_iterator iter = mRefIndex.find(id);
+
+    if (iter == mRefIndex.end())
+        return -1;
+
+    return iter->second;
+}
+
+void CSMWorld::RefCollection::removeRows (int index, int count)
+{
+    Collection<CellRef, IdAccessor<CellRef> >::removeRows(index, count); // erase records only
+
+    std::map<unsigned int, int>::iterator iter = mRefIndex.begin();
+    while (iter != mRefIndex.end())
+    {
+        if (iter->second>=index)
+        {
+            if (iter->second >= index+count)
+            {
+                iter->second -= count;
+                ++iter;
+            }
+            else
+                mRefIndex.erase(iter++);
+        }
+        else
+            ++iter;
+    }
+}
+
+void  CSMWorld::RefCollection::appendBlankRecord (const std::string& id, UniversalId::Type type)
+{
+    std::unique_ptr<Record<CellRef> > record2(new Record<CellRef>);
+
+    record2->mState = Record<CellRef>::State_ModifiedOnly;
+    record2->mModified.blank();
+
+    record2->get().mId = id;
+    record2->get().mIdNum = extractIdNum(id);
+
+    Collection<CellRef, IdAccessor<CellRef> >::appendRecord(std::move(record2));
+}
+
+void CSMWorld::RefCollection::cloneRecord (const std::string& origin,
+                                           const std::string& destination,
+                                           const UniversalId::Type type)
+{
+   std::unique_ptr<Record<CellRef> > copy(new Record<CellRef>);
+
+   copy->mModified = getRecord(origin).get();
+   copy->mState = RecordBase::State_ModifiedOnly;
+
+   copy->get().mId = destination;
+   copy->get().mIdNum = extractIdNum(destination);
+
+   insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
+}
+
+int CSMWorld::RefCollection::searchId (const std::string& id) const
+{
+    return searchId(extractIdNum(id));
+}
+
+void CSMWorld::RefCollection::appendRecord (std::unique_ptr<RecordBase> record, UniversalId::Type type)
+{
+    int index = getAppendIndex(/*id*/"", type); // for CellRef records id is ignored
+
+    mRefIndex.insert(std::make_pair(static_cast<Record<CellRef>*>(record.get())->get().mIdNum, index));
+
+    Collection<CellRef, IdAccessor<CellRef> >::insertRecord(std::move(record), index, type); // add records only
+}
+
+void CSMWorld::RefCollection::insertRecord (std::unique_ptr<RecordBase> record, int index,
+    UniversalId::Type type)
+{
+    int size = getAppendIndex(/*id*/"", type); // for CellRef records id is ignored
+    unsigned int idNum = static_cast<Record<CellRef>*>(record.get())->get().mIdNum;
+
+    Collection<CellRef, IdAccessor<CellRef> >::insertRecord(std::move(record), index, type); // add records only
+
+    if (index < size-1)
+    {
+        for (std::map<unsigned int, int>::iterator iter(mRefIndex.begin()); iter != mRefIndex.end(); ++iter)
+        {
+            if (iter->second >= index)
+                ++(iter->second);
+        }
+    }
+
+    mRefIndex.insert(std::make_pair(idNum, index));
 }
