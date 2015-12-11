@@ -16,11 +16,14 @@
 #include "setting.hpp"
 #include "enumsetting.hpp"
 
+class QColor;
+
 namespace CSMPrefs
 {
     class IntSetting;
     class DoubleSetting;
     class BoolSetting;
+    class ColourSetting;
 
     class State : public QObject
     {
@@ -59,6 +62,8 @@ namespace CSMPrefs
             BoolSetting& declareBool (const std::string& key, const std::string& label, bool default_);
 
             EnumSetting& declareEnum (const std::string& key, const std::string& label, EnumValue default_);
+
+            ColourSetting& declareColour (const std::string& key, const std::string& label, QColor default_);
 
             void setDefault (const std::string& key, const std::string& default_);
 

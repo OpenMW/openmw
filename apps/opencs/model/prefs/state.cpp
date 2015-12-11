@@ -8,6 +8,7 @@
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
 #include "boolsetting.hpp"
+#include "coloursetting.hpp"
 
 CSMPrefs::State *CSMPrefs::State::sThis = 0;
 
@@ -141,8 +142,13 @@ void CSMPrefs::State::declare()
         setRange (0, 10000);
     declareInt ("error-height", "Initial height of the error panel", 100).
         setRange (100, 10000);
-    // syntax-colouring
-
+    declareColour ("colour-int", "Highlight Colour: Integer Literals", QColor ("darkmagenta"));
+    declareColour ("colour-float", "Highlight Colour: Float Literals", QColor ("magenta"));
+    declareColour ("colour-name", "Highlight Colour: Names", QColor ("grey"));
+    declareColour ("colour-keyword", "Highlight Colour: Keywords", QColor ("red"));
+    declareColour ("colour-special", "Highlight Colour: Special Characters", QColor ("darkorange"));
+    declareColour ("colour-comment", "Highlight Colour: Comments", QColor ("green"));
+    declareColour ("colour-id", "Highlight Colour: IDs", QColor ("blue"));
     declareCategory ("General Input");
     declareBool ("cycle", "Cyclic next/previous", false).
         setTooltip ("When using next/previous functions at the last/first item of a "
@@ -265,6 +271,24 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum (const std::string& key,
 
     CSMPrefs::EnumSetting *setting =
         new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+
+    mCurrentCategory->second.addSetting (setting);
+
+    return *setting;
+}
+
+CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
+    const std::string& label, QColor default_)
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    setDefault (key, default_.name().toUtf8().data());
+
+    default_.setNamedColor (QString::fromUtf8 (mSettings.getString (key, mCurrentCategory->second.getKey()).c_str()));
+
+    CSMPrefs::ColourSetting *setting =
+        new CSMPrefs::ColourSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
 
