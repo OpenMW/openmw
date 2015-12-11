@@ -35,6 +35,7 @@
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
 #include "timestamp.hpp"
+#include "ptr.hpp"
 
 namespace ESM
 {
@@ -45,9 +46,7 @@ namespace ESM
 
 namespace MWWorld
 {
-    class Ptr;
     class ESMStore;
-
 
     /// \brief Mutable state of a cell
     class CellStore

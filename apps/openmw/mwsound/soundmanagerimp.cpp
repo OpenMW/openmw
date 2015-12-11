@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <map>
 
+#include <osg/Matrixf>
+
 #include <components/misc/rng.hpp>
 
 #include <components/vfs/manager.hpp>
@@ -221,7 +223,7 @@ namespace MWSound
     {
         DecoderPtr decoder = getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(decoder->mResourceMgr->exists(voicefile))
+        if(mVFS->exists(voicefile))
             decoder->open(voicefile);
         else
         {
@@ -397,8 +399,6 @@ namespace MWSound
         try
         {
             std::string voicefile = "Sound/"+filename;
-            const ESM::Position &pos = ptr.getRefData().getPosition();
-            const osg::Vec3f objpos(pos.asVec3());
 
             Sound_Loudness *loudness;
             mVFS->normalizeFilename(voicefile);
@@ -408,7 +408,9 @@ namespace MWSound
                 mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
             else
             {
-                MWBase::SoundStreamPtr sound = playVoice(decoder, objpos, (ptr == MWMechanics::getPlayer()));
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
+                MWBase::SoundStreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
                 mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
             }
         }
@@ -906,10 +908,10 @@ namespace MWSound
                         sound = playVoice(decoder, osg::Vec3f(), true);
                     else
                     {
-                        const ESM::Position &pos = ptr.getRefData().getPosition();
-                        const osg::Vec3f objpos(pos.asVec3());
+                        MWBase::World *world = MWBase::Environment::get().getWorld();
+                        const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
 
-                        sound = playVoice(decoder, objpos, (ptr == MWMechanics::getPlayer()));
+                        sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
                     }
                     mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
                 }
@@ -930,13 +932,13 @@ namespace MWSound
             MWBase::SoundStreamPtr sound = sayiter->second.first;
             if(!ptr.isEmpty() && sound->getIs3D())
             {
-                const ESM::Position &pos = ptr.getRefData().getPosition();
-                const osg::Vec3f objpos(pos.asVec3());
-                sound->setPosition(objpos);
+                MWBase::World *world = MWBase::Environment::get().getWorld();
+                const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
+                sound->setPosition(pos);
 
                 if(sound->getDistanceCull())
                 {
-                    if((mListenerPos - objpos).length2() > 2000*2000)
+                    if((mListenerPos - pos).length2() > 2000*2000)
                         mOutput->stopStream(sound);
                 }
             }
