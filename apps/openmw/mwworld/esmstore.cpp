@@ -125,6 +125,8 @@ void ESMStore::setUp()
 
     std::map<int, StoreBase *>::iterator storeIt = mStores.begin();
     for (; storeIt != mStores.end(); ++storeIt) {
+        storeIt->second->setUp();
+
         if (isCacheableRecord(storeIt->first))
         {
             std::vector<std::string> identifiers;
@@ -133,8 +135,6 @@ void ESMStore::setUp()
             for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
                 mIds[*record] = storeIt->first;
         }
-
-        storeIt->second->setUp();
     }
     mSkills.setUp();
     mMagicEffects.setUp();
