@@ -41,12 +41,13 @@ void CSMPrefs::State::declare()
     declareInt ("default-height", "Default window height", 600).
         setTooltip ("Newly opened top-level windows will open with this height.").
         setMin (80);
-    declareBool ("reuse", "Reuse Subviews", true).
-        setTooltip ("When a new subview is requested and a matching subview already "
-        " exist, do not open a new subview and use the existing one instead.");
     declareBool ("show-statusbar", "Show Status Bar", true).
         setTooltip ("If a newly open top level window is showing status bars or not. "
         " Note that this does not affect existing windows.");
+    declareSeparator();
+    declareBool ("reuse", "Reuse Subviews", true).
+        setTooltip ("When a new subview is requested and a matching subview already "
+        " exist, do not open a new subview and use the existing one instead.");
     declareInt ("max-subviews", "Maximum number of subviews per top-level window", 256).
         setTooltip ("If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.").
@@ -58,6 +59,7 @@ void CSMPrefs::State::declare()
     declareInt ("minimum-width", "Minimum subview width", 325).
         setTooltip ("Minimum width of subviews.").
         setRange (50, 10000);
+    declareSeparator();
     EnumValue scrollbarOnly ("Scrollbar Only", "Simple addition of scrollbars, the view window "
         "does not grow automatically.");
     declareEnum ("mainwindow-scrollbar", "Horizontal scrollbar mode for main window.", scrollbarOnly).
@@ -91,6 +93,7 @@ void CSMPrefs::State::declare()
     declareEnum ("double-s", "Shift Double Click", editRecord).addValues (doubleClickValues);
     declareEnum ("double-c", "Control Double Click", view).addValues (doubleClickValues);
     declareEnum ("double-sc", "Shift Control Double Click", editRecordAndClose).addValues (doubleClickValues);
+    declareSeparator();
     EnumValue jumpAndSelect ("Jump and Select", "Scroll new record into view and make it the selection");
     declareEnum ("jump-to-added", "Action on adding or cloning a record", jumpAndSelect).
         addValue (jumpAndSelect).
@@ -142,6 +145,7 @@ void CSMPrefs::State::declare()
         setRange (0, 10000);
     declareInt ("error-height", "Initial height of the error panel", 100).
         setRange (100, 10000);
+    declareSeparator();
     declareColour ("colour-int", "Highlight Colour: Integer Literals", QColor ("darkmagenta"));
     declareColour ("colour-float", "Highlight Colour: Float Literals", QColor ("magenta"));
     declareColour ("colour-name", "Highlight Colour: Names", QColor ("grey"));
@@ -169,6 +173,7 @@ void CSMPrefs::State::declare()
     declareEnum ("s-edit", "Secondary Editing Button", cRight).addValues (inputButtons);
     declareEnum ("p-select", "Primary Selection Button", middle).addValues (inputButtons);
     declareEnum ("s-select", "Secondary Selection Button", cMiddle).addValues (inputButtons);
+    declareSeparator();
     declareBool ("context-select", "Context Sensitive Selection", false);
     declareDouble ("drag-factor", "Mouse sensitivity during drag operations", 1.0).
         setRange (0.001, 100.0);
@@ -293,6 +298,17 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
     mCurrentCategory->second.addSetting (setting);
 
     return *setting;
+}
+
+void CSMPrefs::State::declareSeparator()
+{
+    if (mCurrentCategory==mCategories.end())
+        throw std::logic_error ("no category for setting");
+
+    CSMPrefs::Setting *setting =
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, "", "");
+
+    mCurrentCategory->second.addSetting (setting);
 }
 
 void CSMPrefs::State::setDefault (const std::string& key, const std::string& default_)

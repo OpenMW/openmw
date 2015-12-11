@@ -65,6 +65,8 @@ namespace CSMPrefs
 
             ColourSetting& declareColour (const std::string& key, const std::string& label, QColor default_);
 
+            void declareSeparator();
+
             void setDefault (const std::string& key, const std::string& default_);
 
         public:
