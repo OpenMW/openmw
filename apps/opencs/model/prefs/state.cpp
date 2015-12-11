@@ -368,7 +368,7 @@ CSMPrefs::Category& CSMPrefs::State::operator[] (const std::string& key)
 
 void CSMPrefs::State::update (const Setting& setting)
 {
-    emit (settingChanged (setting));
+    emit (settingChanged (&setting));
 }
 
 CSMPrefs::State& CSMPrefs::State::get()
