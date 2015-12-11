@@ -40,7 +40,7 @@ namespace CSMPrefs
             ///
             /// \note first can be a 0-pointer, which means that the label is part of the input
             /// widget.
-            virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent) = 0;
+            virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
 
             const Category *getParent() const;
 

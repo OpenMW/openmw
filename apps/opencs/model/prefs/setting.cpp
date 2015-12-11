@@ -16,6 +16,11 @@ CSMPrefs::Setting::Setting (Category *parent, Settings::Manager *values,
 
 CSMPrefs::Setting:: ~Setting() {}
 
+std::pair<QWidget *, QWidget *> CSMPrefs::Setting::makeWidgets (QWidget *parent)
+{
+    return std::pair<QWidget *, QWidget *> (0, 0);
+}
+
 const CSMPrefs::Category *CSMPrefs::Setting::getParent() const
 {
     return mParent;
