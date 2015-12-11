@@ -382,7 +382,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Armor> *ref =
             ptr.get<ESM::Armor>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Armor>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     int Armor::getEnchantmentPoints (const MWWorld::Ptr& ptr) const

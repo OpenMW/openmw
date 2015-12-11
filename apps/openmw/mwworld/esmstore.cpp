@@ -114,10 +114,6 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
             } else {
                 dialogue = 0;
             }
-            // Insert the reference into the global lookup
-            if (!id.mId.empty() && isCacheableRecord(n.val)) {
-                mIds[Misc::StringUtils::lowerCase (id.mId)] = n.val;
-            }
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
     }
@@ -125,9 +121,20 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
 void ESMStore::setUp()
 {
-    std::map<int, StoreBase *>::iterator it = mStores.begin();
-    for (; it != mStores.end(); ++it) {
-        it->second->setUp();
+    mIds.clear();
+
+    std::map<int, StoreBase *>::iterator storeIt = mStores.begin();
+    for (; storeIt != mStores.end(); ++storeIt) {
+        storeIt->second->setUp();
+
+        if (isCacheableRecord(storeIt->first))
+        {
+            std::vector<std::string> identifiers;
+            storeIt->second->listIdentifier(identifiers);
+
+            for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
+                mIds[*record] = storeIt->first;
+        }
     }
     mSkills.setUp();
     mMagicEffects.setUp();
@@ -189,18 +196,13 @@ void ESMStore::setUp()
             case ESM::REC_LEVC:
 
                 {
-                    RecordId id = mStores[type]->read (reader);
-
-                    // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
-                    // that really should be cleared instead of just overwritten
-
-                    mIds[id.mId] = type;
+                    mStores[type]->read (reader);
                 }
 
                 if (type==ESM::REC_NPC_)
                 {
                     // NPC record will always be last and we know that there can be only one
-                    // dynamic NPC record (player) -> We are done here with dynamic record laoding
+                    // dynamic NPC record (player) -> We are done here with dynamic record loading
                     setUp();
 
                     const ESM::NPC *player = mNpcs.find ("player");

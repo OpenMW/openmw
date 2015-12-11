@@ -54,7 +54,6 @@
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellstore.hpp"
-#include "cellfunctors.hpp"
 #include "containerstore.hpp"
 #include "inventorystore.hpp"
 #include "actionteleport.hpp"
@@ -690,12 +689,12 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
-    struct FindContainerFunctor
+    struct FindContainerVisitor
     {
         Ptr mContainedPtr;
         Ptr mResult;
 
-        FindContainerFunctor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
+        FindContainerVisitor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
 
         bool operator() (Ptr ptr)
         {
@@ -721,11 +720,15 @@ namespace MWWorld
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            FindContainerFunctor functor(ptr);
-            (*cellIt)->forEachContainer(functor);
+            FindContainerVisitor visitor(ptr);
+            (*cellIt)->forEachType<ESM::Container>(visitor);
+            if (visitor.mResult.isEmpty())
+                (*cellIt)->forEachType<ESM::Creature>(visitor);
+            if (visitor.mResult.isEmpty())
+                (*cellIt)->forEachType<ESM::NPC>(visitor);
 
-            if (!functor.mResult.isEmpty())
-                return functor.mResult;
+            if (!visitor.mResult.isEmpty())
+                return visitor.mResult;
         }
 
         return Ptr();
@@ -1035,32 +1038,30 @@ namespace MWWorld
         return facedObject;
     }
 
-    osg::Vec3f getActorHeadPosition(const MWWorld::Ptr& actor, MWRender::RenderingManager* rendering)
+    osg::Matrixf World::getActorHeadTransform(const MWWorld::Ptr& actor) const
     {
-        osg::Vec3f origin(actor.getRefData().getPosition().asVec3());
-
-        MWRender::Animation* anim = rendering->getAnimation(actor);
-        if (anim != NULL)
+        MWRender::Animation *anim = mRendering->getAnimation(actor);
+        if(anim)
         {
-            const osg::Node* node = anim->getNode("Head");
-            if (node == NULL)
-                node = anim->getNode("Bip01 Head");
-            if (node != NULL)
+            const osg::Node *node = anim->getNode("Head");
+            if(!node) node = anim->getNode("Bip01 Head");
+            if(node)
             {
                 osg::MatrixList mats = node->getWorldMatrices();
-                if (mats.size())
-                    origin = mats[0].getTrans();
+                if(!mats.empty())
+                    return mats[0];
             }
         }
-        return origin;
+        return osg::Matrixf::translate(actor.getRefData().getPosition().asVec3());
     }
+
 
     std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
 
         osg::Quat rot = osg::Quat(posdata.rot[0], osg::Vec3f(-1,0,0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0,0,-1));
-        osg::Vec3f pos = getActorHeadPosition(ptr, mRendering);
+        osg::Vec3f pos = getActorHeadTransform(ptr).getTrans();
 
         std::pair<MWWorld::Ptr,osg::Vec3f> result = mPhysics->getHitContact(ptr, pos, rot, distance);
         if(result.first.isEmpty())
@@ -1149,7 +1150,7 @@ namespace MWWorld
                 bool newCellActive = mWorldScene->isCellActive(*newCell);
                 if (!currCellActive && newCellActive)
                 {
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = currCell->moveTo(ptr, newCell);
                     mWorldScene->addObjectToScene(newPtr);
 
                     std::string script = newPtr.getClass().getScript(newPtr);
@@ -1165,17 +1166,16 @@ namespace MWWorld
                     removeContainerScripts (ptr);
                     haveToMove = false;
 
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = currCell->moveTo(ptr, newCell);
                     newPtr.getRefData().setBaseNode(0);
                 }
                 else if (!currCellActive && !newCellActive)
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell);
+                    newPtr = currCell->moveTo(ptr, newCell);
                 else // both cells active
                 {
-                    newPtr = ptr.getClass().copyToCell(ptr, *newCell, pos);
+                    newPtr = currCell->moveTo(ptr, newCell);
 
                     mRendering->updatePtr(ptr, newPtr);
-                    ptr.getRefData().setBaseNode(NULL);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
 
@@ -1192,7 +1192,6 @@ namespace MWWorld
                         addContainerScripts (newPtr, newCell);
                     }
                 }
-                ptr.getRefData().setCount(0);
             }
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
@@ -1708,27 +1707,32 @@ namespace MWWorld
 
     osg::Vec2f World::getNorthVector (CellStore* cell)
     {
-        MWWorld::CellRefList<ESM::Static>& statics = cell->get<ESM::Static>();
-        MWWorld::LiveCellRef<ESM::Static>* ref = statics.find("northmarker");
-        if (!ref)
+        MWWorld::Ptr northmarker = cell->search("northmarker");
+
+        if (northmarker.isEmpty())
             return osg::Vec2f(0, 1);
 
-        osg::Quat orient (-ref->mData.getPosition().rot[2], osg::Vec3f(0,0,1));
+        osg::Quat orient (-northmarker.getRefData().getPosition().rot[2], osg::Vec3f(0,0,1));
         osg::Vec3f dir = orient * osg::Vec3f(0,1,0);
         osg::Vec2f d (dir.x(), dir.y());
         return d;
     }
 
-    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
+    struct GetDoorMarkerVisitor
     {
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        CellRefList<ESM::Door>::List& refList = doors.mList;
-        for (CellRefList<ESM::Door>::List::iterator it = refList.begin(); it != refList.end(); ++it)
+        GetDoorMarkerVisitor(std::vector<World::DoorMarker>& out)
+            : mOut(out)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+        }
 
-            if (!ref.mData.isEnabled())
-                continue;
+        std::vector<World::DoorMarker>& mOut;
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            MWWorld::LiveCellRef<ESM::Door>& ref = *static_cast<MWWorld::LiveCellRef<ESM::Door>* >(ptr.getBase());
+
+            if (!ref.mData.isEnabled() || ref.mData.isDeleted())
+                return true;
 
             if (ref.mRef.getTeleport())
             {
@@ -1744,7 +1748,7 @@ namespace MWWorld
                 else
                 {
                     cellid.mPaged = true;
-                    positionToIndex(
+                    MWBase::Environment::get().getWorld()->positionToIndex(
                                 ref.mRef.getDoorDest().pos[0],
                                 ref.mRef.getDoorDest().pos[1],
                                 cellid.mIndex.mX,
@@ -1756,9 +1760,16 @@ namespace MWWorld
 
                 newMarker.x = pos.pos[0];
                 newMarker.y = pos.pos[1];
-                out.push_back(newMarker);
+                mOut.push_back(newMarker);
             }
+            return true;
         }
+    };
+
+    void World::getDoorMarkers (CellStore* cell, std::vector<World::DoorMarker>& out)
+    {
+        GetDoorMarkerVisitor visitor(out);
+        cell->forEachType<ESM::Door>(visitor);
     }
 
     void World::setWaterHeight(const float height)
@@ -2253,25 +2264,40 @@ namespace MWWorld
             return osg::Vec3f(0,1,0);
     }
 
-    void World::getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    struct GetContainersOwnedByVisitor
+    {
+        GetContainersOwnedByVisitor(const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+            : mOwner(owner)
+            , mOut(out)
+        {
+        }
+
+        MWWorld::Ptr mOwner;
+        std::vector<MWWorld::Ptr>& mOut;
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if (ptr.getRefData().isDeleted())
+                return true;
+
+            if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), mOwner.getCellRef().getRefId()))
+                mOut.push_back(ptr);
+
+            return true;
+        }
+    };
+
+    void World::getContainersOwnedBy (const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            MWWorld::CellRefList<ESM::Container>& containers = (*cellIt)->get<ESM::Container>();
-            CellRefList<ESM::Container>::List& refList = containers.mList;
-            for (CellRefList<ESM::Container>::List::iterator container = refList.begin(); container != refList.end(); ++container)
-            {
-                MWWorld::Ptr ptr (&*container, *cellIt);
-                if (ptr.getRefData().isDeleted())
-                    continue;
-                if (Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(ptr);
-            }
+            GetContainersOwnedByVisitor visitor (owner, out);
+            (*cellIt)->forEachType<ESM::Container>(visitor);
         }
     }
 
-    struct ListObjectsFunctor
+    struct ListObjectsVisitor
     {
         std::vector<MWWorld::Ptr> mObjects;
 
@@ -2288,10 +2314,10 @@ namespace MWWorld
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
         {
-            ListObjectsFunctor functor;
-            (*cellIt)->forEach<ListObjectsFunctor>(functor);
+            ListObjectsVisitor visitor;
+            (*cellIt)->forEach(visitor);
 
-            for (std::vector<MWWorld::Ptr>::iterator it = functor.mObjects.begin(); it != functor.mObjects.end(); ++it)
+            for (std::vector<MWWorld::Ptr>::iterator it = visitor.mObjects.begin(); it != visitor.mObjects.end(); ++it)
                 if (Misc::StringUtils::ciEqual(it->getCellRef().getOwner(), npc.getCellRef().getRefId()))
                     out.push_back(*it);
         }
@@ -2342,7 +2368,8 @@ namespace MWWorld
         if (0 == cellStore) {
             return false;
         }
-        const DoorList &doors = cellStore->get<ESM::Door>().mList;
+
+        const DoorList &doors = cellStore->getReadOnlyDoors().mList;
         for (DoorList::const_iterator it = doors.begin(); it != doors.end(); ++it) {
             if (!it->mRef.getTeleport()) {
                 continue;
@@ -2364,7 +2391,7 @@ namespace MWWorld
             if (0 != source) {
                 // Find door leading to our current teleport door
                 // and use it destination to position inside cell.
-                const DoorList &doors = source->get<ESM::Door>().mList;
+                const DoorList &doors = source->getReadOnlyDoors().mList;
                 for (DoorList::const_iterator jt = doors.begin(); jt != doors.end(); ++jt) {
                     if (it->mRef.getTeleport() &&
                         Misc::StringUtils::ciEqual(name, jt->mRef.getDestCell()))
@@ -2378,7 +2405,7 @@ namespace MWWorld
             }
         }
         // Fall back to the first static location.
-        const StaticList &statics = cellStore->get<ESM::Static>().mList;
+        const StaticList &statics = cellStore->getReadOnlyStatics().mList;
         if ( statics.begin() != statics.end() ) {
             pos = statics.begin()->mRef.getPosition();
             return true;
@@ -2630,7 +2657,7 @@ namespace MWWorld
         MWWorld::Ptr target;
         float distance = 192.f; // ??
         osg::Vec3f hitPosition = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f origin = getActorHeadPosition(actor, mRendering);
+        osg::Vec3f origin = getActorHeadTransform(actor).getTrans();
 
         osg::Quat orient = osg::Quat(actor.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0))
                 * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0,0,-1));
@@ -2747,7 +2774,7 @@ namespace MWWorld
                 MWWorld::CellStore *next = getInterior( *i );
                 if ( !next ) continue;
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
                 const CellRefList<ESM::Door>::List& refList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -2807,7 +2834,7 @@ namespace MWWorld
                     return closestMarker;
                 }
 
-                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnly<ESM::Door>();
+                const MWWorld::CellRefList<ESM::Door>& doors = next->getReadOnlyDoors();
                 const CellRefList<ESM::Door>::List& doorList = doors.mList;
 
                 // Check if any door in the cell leads to an exterior directly
@@ -2831,7 +2858,6 @@ namespace MWWorld
                 }
             }
         }
-
         return MWWorld::Ptr();
     }
 
@@ -2888,9 +2914,9 @@ namespace MWWorld
         mWeatherManager->update(duration, paused);
     }
 
-    struct AddDetectedReference
+    struct AddDetectedReferenceVisitor
     {
-        AddDetectedReference(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
+        AddDetectedReferenceVisitor(std::vector<Ptr>& out, Ptr detector, World::DetectionType type, float squaredDist)
             : mOut(out), mDetector(detector), mSquaredDist(squaredDist), mType(type)
         {
         }
@@ -2899,7 +2925,7 @@ namespace MWWorld
         Ptr mDetector;
         float mSquaredDist;
         World::DetectionType mType;
-        bool operator() (MWWorld::Ptr ptr)
+        bool operator() (const MWWorld::Ptr& ptr)
         {
             if ((ptr.getRefData().getPosition().asVec3() - mDetector.getRefData().getPosition().asVec3()).length2() >= mSquaredDist)
                 return true;
@@ -2930,7 +2956,7 @@ namespace MWWorld
             return true;
         }
 
-        bool needToAdd (MWWorld::Ptr ptr, MWWorld::Ptr detector)
+        bool needToAdd (const MWWorld::Ptr& ptr, const MWWorld::Ptr& detector)
         {
             if (mType == World::Detect_Creature)
             {
@@ -2970,13 +2996,13 @@ namespace MWWorld
 
         dist = feetToGameUnits(dist);
 
-        AddDetectedReference functor (out, ptr, type, dist*dist);
+        AddDetectedReferenceVisitor visitor (out, ptr, type, dist*dist);
 
         const Scene::CellStoreCollection& active = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator it = active.begin(); it != active.end(); ++it)
         {
             MWWorld::CellStore* cellStore = *it;
-            cellStore->forEach(functor);
+            cellStore->forEach(visitor);
         }
     }
 
@@ -3232,7 +3258,7 @@ namespace MWWorld
             interpreterContext.executeActivation(object, actor);
     }
 
-    struct ResetActorsFunctor
+    struct ResetActorsVisitor
     {
         bool operator() (Ptr ptr)
         {
@@ -3254,8 +3280,8 @@ namespace MWWorld
             iter!=mWorldScene->getActiveCells().end(); ++iter)
         {
             CellStore* cellstore = *iter;
-            ResetActorsFunctor functor;
-            cellstore->forEach(functor);
+            ResetActorsVisitor visitor;
+            cellstore->forEach(visitor);
         }
     }
 
@@ -3269,14 +3295,14 @@ namespace MWWorld
 
     osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
     {
-        osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
+        osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
 
     float World::getHitDistance(const Ptr &actor, const Ptr &target)
     {
-        osg::Vec3f weaponPos = getActorHeadPosition(actor, mRendering);
+        osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         return mPhysics->getHitDistance(weaponPos, target);
     }
 

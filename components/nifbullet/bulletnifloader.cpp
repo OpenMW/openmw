@@ -319,6 +319,9 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
         const osg::Vec3Array& vertices = *data->vertices;
         const osg::DrawElementsUShort& triangles = *data->triangles;
 
+        mStaticMesh->preallocateVertices(data->vertices->size());
+        mStaticMesh->preallocateIndices(data->triangles->size());
+
         size_t numtris = data->triangles->size();
         for(size_t i = 0;i < numtris;i+=3)
         {

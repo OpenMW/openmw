@@ -469,6 +469,8 @@ namespace MWWorld
             virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::Ptr& actor) const;
+
             virtual void togglePOV();
 
             virtual bool isFirstPerson() const;

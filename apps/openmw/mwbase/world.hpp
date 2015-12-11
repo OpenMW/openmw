@@ -14,6 +14,7 @@
 namespace osg
 {
     class Vec3f;
+    class Matrixf;
     class Quat;
     class Image;
 }
@@ -372,6 +373,8 @@ namespace MWBase
             virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
+
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::Ptr& actor) const = 0;
 
             virtual void togglePOV() = 0;
             virtual bool isFirstPerson() const = 0;

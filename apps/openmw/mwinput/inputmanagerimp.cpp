@@ -119,10 +119,11 @@ namespace MWInput
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
                 controllerAdded(mFakeDeviceID, evt);
+                std::cout << "Detected game controller: " << SDL_GameControllerNameForIndex(i) << std::endl;
             }
             else
             {
-                //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
+                std::cout << "Detected unusable controller: " << SDL_JoystickNameForIndex(i) << std::endl;
             }
         }
 

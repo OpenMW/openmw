@@ -397,10 +397,17 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
                 }
                 else
                 {
-                    if (weap != sWeaponTypeListEnd)
-                        movemask = MWRender::Animation::BlendMask_LowerBody;
                     movementAnimName.erase(swimpos, 4);
-                    if(!mAnimation->hasAnimation(movementAnimName))
+                    if (weap != sWeaponTypeListEnd)
+                    {
+                        std::string weapMovementAnimName = movementAnimName + weap->shortgroup;
+                        if(mAnimation->hasAnimation(weapMovementAnimName))
+                            movementAnimName = weapMovementAnimName;
+                        else
+                            movemask = MWRender::Animation::BlendMask_LowerBody;
+                    }
+
+                    if (!mAnimation->hasAnimation(movementAnimName))
                         movementAnimName.clear();
                 }
             }

@@ -300,14 +300,16 @@ namespace MWScript
                     }
                     catch(std::exception&)
                     {
+                        // cell not found, move to exterior instead (vanilla PositionCell compatibility)
                         const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getExterior(cellID);
                         int cx,cy;
                         MWBase::Environment::get().getWorld()->positionToIndex(x,y,cx,cy);
                         store = MWBase::Environment::get().getWorld()->getExterior(cx,cy);
                         if(!cell)
                         {
-                            runtime.getContext().report ("unknown cell (" + cellID + ")");
-                            std::cerr << "unknown cell (" << cellID << ")\n";
+                            std::string error = "PositionCell: unknown interior cell (" + cellID + "), moving to exterior instead";
+                            runtime.getContext().report (error);
+                            std::cerr << error << std::endl;
                         }
                     }
                     if(store)

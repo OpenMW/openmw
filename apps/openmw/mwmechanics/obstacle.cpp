@@ -44,9 +44,9 @@ namespace MWMechanics
             return MWWorld::Ptr(); // check interior cells only
 
         // Check all the doors in this cell
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
-        MWWorld::CellRefList<ESM::Door>::List::iterator it = refList.begin();
+        const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
+        const MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
+        MWWorld::CellRefList<ESM::Door>::List::const_iterator it = refList.begin();
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
 
         /// TODO: How to check whether the actor is facing a door? Below code is for
@@ -59,11 +59,12 @@ namespace MWMechanics
         ///       opposite of the code in World::activateDoor() ::confused::
         for (; it != refList.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
             if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr
                     && ref.mData.getPosition().rot[2] == ref.mRef.getPosition().rot[2])
             {
-                return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
+                // FIXME cast
+                return MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell()); // found, stop searching
             }
         }
         return MWWorld::Ptr(); // none found
