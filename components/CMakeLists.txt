@@ -267,6 +267,7 @@ add_library(osgdb_serializers_openmw SHARED
     serializers/compositestatesetupdater
     serializers/emitter
     serializers/frameswitch
+    serializers/geommorphcontroller
     serializers/gravityaffector
     serializers/growfadeaffector
     serializers/inverseworldmatrix

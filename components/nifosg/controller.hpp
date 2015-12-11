@@ -195,7 +195,6 @@ namespace NifOsg
 
         virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
 
-    private:
         std::vector<FloatInterpolator> mKeyFrames;
     };
 
