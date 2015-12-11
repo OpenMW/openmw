@@ -410,8 +410,10 @@ namespace MWSound
             {
                 MWBase::World *world = MWBase::Environment::get().getWorld();
                 const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-                MWBase::SoundStreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
-                mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
+                SoundLoudnessPair &old = mActiveSaySounds[ptr];
+                if(old.first.get()) mOutput->finishStream(old.first);
+                old = std::make_pair(playVoice(decoder, pos, (ptr == MWMechanics::getPlayer())),
+                                     loudness);
             }
         }
         catch(std::exception &e)
@@ -450,8 +452,9 @@ namespace MWSound
                 mPendingSaySounds[MWWorld::Ptr()] = std::make_pair(decoder, loudness);
             else
             {
-                MWBase::SoundStreamPtr sound = playVoice(decoder, osg::Vec3f(), true);
-                mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, loudness);
+                SoundLoudnessPair &old = mActiveSaySounds[MWWorld::Ptr()];
+                if(old.first.get()) mOutput->finishStream(old.first);
+                old = std::make_pair(playVoice(decoder, osg::Vec3f(), true), loudness);
             }
         }
         catch(std::exception &e)
@@ -904,16 +907,18 @@ namespace MWSound
 
                     MWBase::SoundStreamPtr sound;
                     MWWorld::Ptr ptr = penditer->first;
+
+                    SoundLoudnessPair &old = mActiveSaySounds[ptr];
+                    if(old.first.get()) mOutput->finishStream(old.first);
                     if(ptr == MWWorld::Ptr())
                         sound = playVoice(decoder, osg::Vec3f(), true);
                     else
                     {
                         MWBase::World *world = MWBase::Environment::get().getWorld();
                         const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-
                         sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
                     }
-                    mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
+                    old = std::make_pair(sound, loudness);
                 }
                 catch(std::exception &e) {
                     std::cerr<< "Sound Error: "<<e.what() <<std::endl;
