@@ -282,7 +282,9 @@ add_library(osgdb_serializers_openmw SHARED
     serializers/riggeometry
     serializers/skeleton
     serializers/statesetupdater
+    serializers/staticboundingboxcallback
     serializers/textkeymapholder
+    serializers/updatemorphgeometry
     serializers/updaterigbounds
     serializers/updateriggeometry
     serializers/uvcontroller

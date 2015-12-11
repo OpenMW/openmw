@@ -84,70 +84,6 @@ namespace
             collectDrawableProperties(nifNode->parent, out);
     }
 
-    struct UpdateMorphGeometry : public osg::Drawable::CullCallback
-    {
-        UpdateMorphGeometry()
-            : mLastFrameNumber(0)
-        {
-        }
-
-        UpdateMorphGeometry(const UpdateMorphGeometry& copy, const osg::CopyOp& copyop)
-            : osg::Drawable::CullCallback(copy, copyop)
-            , mLastFrameNumber(0)
-        {
-        }
-
-        META_Object(OpenMW, UpdateMorphGeometry)
-
-        virtual bool cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
-        {
-            osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
-            if (!geom)
-                return false;
-
-            if (mLastFrameNumber == nv->getTraversalNumber())
-                return false;
-            mLastFrameNumber = nv->getTraversalNumber();
-
-            geom->transformSoftwareMethod();
-            return false;
-        }
-
-    private:
-        mutable unsigned int mLastFrameNumber;
-    };
-
-    // Callback to return a static bounding box for a MorphGeometry. The idea is to not recalculate the bounding box
-    // every time the morph weights change. To do so we return a maximum containing box that is big enough for all possible combinations of morph targets.
-    class StaticBoundingBoxCallback : public osg::Drawable::ComputeBoundingBoxCallback
-    {
-    public:
-        StaticBoundingBoxCallback()
-        {
-        }
-
-        StaticBoundingBoxCallback(const osg::BoundingBox& bounds)
-            : mBoundingBox(bounds)
-        {
-        }
-
-        StaticBoundingBoxCallback(const StaticBoundingBoxCallback& copy, const osg::CopyOp& copyop)
-            : osg::Drawable::ComputeBoundingBoxCallback(copy, copyop)
-            , mBoundingBox(copy.mBoundingBox)
-        {
-        }
-
-        META_Object(OpenMW, StaticBoundingBoxCallback)
-
-        virtual osg::BoundingBox computeBound(const osg::Drawable&) const
-        {
-            return mBoundingBox;
-        }
-
-    private:
-        osg::BoundingBox mBoundingBox;
-    };
-
     void extractTextKeys(const Nif::NiTextKeyExtraData *tk, NifOsg::TextKeyMap &textkeys)
     {
         for(size_t i = 0;i < tk->list.size();i++)
@@ -189,6 +125,20 @@ namespace
 
 namespace NifOsg
 {
+
+    bool UpdateMorphGeometry::cull(osg::NodeVisitor* nv, osg::Drawable * drw, osg::State *) const
+    {
+        osgAnimation::MorphGeometry* geom = static_cast<osgAnimation::MorphGeometry*>(drw);
+        if (!geom)
+            return false;
+
+        if (mLastFrameNumber == nv->getTraversalNumber())
+            return false;
+        mLastFrameNumber = nv->getTraversalNumber();
+
+        geom->transformSoftwareMethod();
+        return false;
+    }
 
     void FrameSwitch::traverse(osg::NodeVisitor& nv)
     {
