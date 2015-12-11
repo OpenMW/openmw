@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
 
 #include <SDL_mouse.h>
 #include <SDL_endian.h>
@@ -52,7 +53,7 @@ namespace
 
                 if (!_gc)
                 {
-                    osg::notify(osg::NOTICE)<<"Failed to create pbuffer, failing back to normal graphics window."<<std::endl;
+                    std::cerr << "Failed to create pbuffer, failing back to normal graphics window." << std::endl;
 
                     traits->pbuffer = false;
                     _gc = osg::GraphicsContext::createGraphicsContext(traits.get());
@@ -224,8 +225,9 @@ namespace SDLUtil
 
         try {
             decompressed = decompress(image, static_cast<float>(rotDegrees));
-        } catch (...) {
-            osg::notify(osg::NOTICE)<<"Using default cursor."<<std::endl;
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            std::cerr <<"Using default cursor."<<std::endl;
             return;
         }
 
