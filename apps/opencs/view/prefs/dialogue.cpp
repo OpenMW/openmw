@@ -53,7 +53,7 @@ CSVPrefs::PageBase *CSVPrefs::Dialogue::makePage (const std::string& key)
 {
     // special case page code goes here
 
-    return new Page (CSMPrefs::get().getCategory (key), mContent);
+    return new Page (CSMPrefs::get()[key], mContent);
 }
 
 CSVPrefs::Dialogue::Dialogue()

@@ -81,7 +81,7 @@ namespace CSMPrefs
 
             Iterator end();
 
-            Category& getCategory (const std::string& key);
+            Category& operator[](const std::string& key);
 
             void update (const Setting& setting);
 

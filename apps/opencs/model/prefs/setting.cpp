@@ -1,6 +1,8 @@
 
 #include "setting.hpp"
 
+#include <QColor>
+
 #include "category.hpp"
 #include "state.hpp"
 
@@ -34,4 +36,50 @@ const std::string& CSMPrefs::Setting::getKey() const
 const std::string& CSMPrefs::Setting::getLabel() const
 {
     return mLabel;
+}
+
+int CSMPrefs::Setting::toInt() const
+{
+    return mValues->getInt (mKey, mParent->getKey());
+}
+
+double CSMPrefs::Setting::toDouble() const
+{
+    return mValues->getFloat (mKey, mParent->getKey());
+}
+
+std::string CSMPrefs::Setting::toString() const
+{
+    return mValues->getString (mKey, mParent->getKey());
+}
+
+bool CSMPrefs::Setting::isTrue() const
+{
+    return mValues->getBool (mKey, mParent->getKey());
+}
+
+QColor CSMPrefs::Setting::toColor() const
+{
+    return QColor (QString::fromUtf8 (toString().c_str()));
+}
+
+bool CSMPrefs::operator== (const Setting& setting, const std::string& key)
+{
+    std::string fullKey = setting.getParent()->getKey() + "/" + setting.getKey();
+    return fullKey==key;
+}
+
+bool CSMPrefs::operator== (const std::string& key, const Setting& setting)
+{
+    return setting==key;
+}
+
+bool CSMPrefs::operator!= (const Setting& setting, const std::string& key)
+{
+    return !(setting==key);
+}
+
+bool CSMPrefs::operator!= (const std::string& key, const Setting& setting)
+{
+    return !(key==setting);
 }

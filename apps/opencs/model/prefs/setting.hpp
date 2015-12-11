@@ -7,6 +7,7 @@
 #include <QObject>
 
 class QWidget;
+class QColor;
 
 namespace Settings
 {
@@ -47,7 +48,23 @@ namespace CSMPrefs
             const std::string& getKey() const;
 
             const std::string& getLabel() const;
+
+            int toInt() const;
+
+            double toDouble() const;
+
+            std::string toString() const;
+
+            bool isTrue() const;
+
+            QColor toColor() const;
     };
+
+    // note: fullKeys have the format categoryKey/settingKey
+    bool operator== (const Setting& setting, const std::string& fullKey);
+    bool operator== (const std::string& fullKey, const Setting& setting);
+    bool operator!= (const Setting& setting, const std::string& fullKey);
+    bool operator!= (const std::string& fullKey, const Setting& setting);
 }
 
 #endif

@@ -356,7 +356,7 @@ CSMPrefs::State::Iterator CSMPrefs::State::end()
     return mCategories.end();
 }
 
-CSMPrefs::Category& CSMPrefs::State::getCategory (const std::string& key)
+CSMPrefs::Category& CSMPrefs::State::operator[] (const std::string& key)
 {
     Iterator iter = mCategories.find (key);
 
