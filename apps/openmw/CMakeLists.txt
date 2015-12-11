@@ -151,13 +151,14 @@ if (ANDROID)
         -Wl,--no-whole-archive
     )
     target_link_libraries(openmw
-        EGL
+        ${OPENGLES_egl_LIBRARY}
         android
         log
         dl
         z
         ${OPENSCENEGRAPH_LIBRARIES}
         ${OSG_PLUGINS}
+        freetype
         jpeg
         gif
     	png

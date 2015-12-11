@@ -159,6 +159,7 @@ endif()
 if (ANDROID)
     set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
     set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
+    SET(OPENGLES_egl_LIBRARY CACHE STRING "Set the OpenGL ES egl library.")
 endif (ANDROID)
 
 option(OPENGL_ES "enable opengl es support" FALSE )
