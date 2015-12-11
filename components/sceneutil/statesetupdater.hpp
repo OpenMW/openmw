@@ -52,8 +52,8 @@ namespace SceneUtil
 
         META_Object(OpenMW, CompositeStateSetUpdater)
 
-        unsigned int getNumControllers();
-        StateSetUpdater* getController(int i);
+        unsigned int getNumControllers() const;
+        StateSetUpdater* getController(int i) const;
 
         void addController(StateSetUpdater* ctrl);
 

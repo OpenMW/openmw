@@ -21,22 +21,26 @@ namespace SceneUtil
 
         META_Object(OpenMW, RigGeometry)
 
+        typedef std::map<unsigned short, float> BoneWeightMap;
         struct BoneInfluence
         {
             osg::Matrixf mInvBindMatrix;
             osg::BoundingSpheref mBoundSphere;
             // <vertex index, weight>
-            std::map<unsigned short, float> mWeights;
+            BoneWeightMap mWeights;
         };
 
+        typedef std::map<std::string, BoneInfluence> InfluenceMapType;
         struct InfluenceMap : public osg::Referenced
         {
-            std::map<std::string, BoneInfluence> mMap;
+            InfluenceMapType mMap;
         };
 
         void setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap);
+        inline const osg::ref_ptr<const InfluenceMap> getInfluenceMap() const { return mInfluenceMap; }
 
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
+        inline const osg::ref_ptr<const osg::Geometry> getSourceGeometry() const { return mSourceGeometry; }
 
         // Called automatically by our CullCallback
         void update(osg::NodeVisitor* nv);
@@ -75,6 +79,40 @@ namespace SceneUtil
         void updateGeomToSkelMatrix(osg::NodeVisitor* nv);
     };
 
+    class UpdateRigBounds : public osg::Drawable::UpdateCallback
+    {
+    public:
+        UpdateRigBounds()
+        {
+        }
+
+        UpdateRigBounds(const UpdateRigBounds& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::UpdateCallback(copy, copyop)
+        {
+        }
+
+        META_Object(OpenMW, UpdateRigBounds)
+
+        void update(osg::NodeVisitor* nv, osg::Drawable* drw);
+    };
+
+    // TODO: make threadsafe for multiple cull threads
+    class UpdateRigGeometry : public osg::Drawable::CullCallback
+    {
+    public:
+        UpdateRigGeometry()
+        {
+        }
+
+        UpdateRigGeometry(const UpdateRigGeometry& copy, const osg::CopyOp& copyop)
+            : osg::Drawable::CullCallback(copy, copyop)
+        {
+        }
+
+        META_Object(OpenMW, UpdateRigGeometry)
+
+        virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const;
+    };
 }
 
 #endif

@@ -15,8 +15,8 @@ SERIALIZER_KEYMAPT(VScale, NifOsg::FloatInterpolator::InnerMapType, float, NifOs
 
 static bool checkTextureUnits(const NifOsg::UVController& node) {
     CHECKMSG("TextureUnits");
-    if (node.mTextureUnits.size() > 0) return true;
-    return false;
+    if (node.mTextureUnits.size() == 0) return false;
+    return true;
 }
 
 static bool writeTextureUnits(osgDB::OutputStream& os,

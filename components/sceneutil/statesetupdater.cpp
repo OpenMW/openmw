@@ -68,12 +68,12 @@ namespace SceneUtil
             mCtrls.push_back(static_cast<StateSetUpdater*>(osg::clone(copy.mCtrls[i].get(), copyop)));
     }
 
-    unsigned int CompositeStateSetUpdater::getNumControllers()
+    unsigned int CompositeStateSetUpdater::getNumControllers() const
     {
         return mCtrls.size();
     }
 
-    StateSetUpdater* CompositeStateSetUpdater::getController(int i)
+    StateSetUpdater* CompositeStateSetUpdater::getController(int i) const
     {
         return mCtrls[i];
     }

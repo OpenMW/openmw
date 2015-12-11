@@ -13,51 +13,6 @@
 namespace SceneUtil
 {
 
-class UpdateRigBounds : public osg::Drawable::UpdateCallback
-{
-public:
-    UpdateRigBounds()
-    {
-    }
-
-    UpdateRigBounds(const UpdateRigBounds& copy, const osg::CopyOp& copyop)
-        : osg::Drawable::UpdateCallback(copy, copyop)
-    {
-    }
-
-    META_Object(OpenMW, UpdateRigBounds)
-
-    void update(osg::NodeVisitor* nv, osg::Drawable* drw)
-    {
-        RigGeometry* rig = static_cast<RigGeometry*>(drw);
-
-        rig->updateBounds(nv);
-    }
-};
-
-// TODO: make threadsafe for multiple cull threads
-class UpdateRigGeometry : public osg::Drawable::CullCallback
-{
-public:
-    UpdateRigGeometry()
-    {
-    }
-
-    UpdateRigGeometry(const UpdateRigGeometry& copy, const osg::CopyOp& copyop)
-        : osg::Drawable::CullCallback(copy, copyop)
-    {
-    }
-
-    META_Object(OpenMW, UpdateRigGeometry)
-
-    virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const
-    {
-        RigGeometry* geom = static_cast<RigGeometry*>(drw);
-        geom->update(nv);
-        return false;
-    }
-};
-
 // We can't compute the bounds without a NodeVisitor, since we need the current geomToSkelMatrix.
 // So we return nothing. Bounds are updated every frame in the UpdateCallback.
 class DummyComputeBoundCallback : public osg::Drawable::ComputeBoundingBoxCallback
@@ -65,6 +20,20 @@ class DummyComputeBoundCallback : public osg::Drawable::ComputeBoundingBoxCallba
 public:
     virtual osg::BoundingBox computeBound(const osg::Drawable&) const  { return osg::BoundingBox(); }
 };
+
+void UpdateRigBounds::update(osg::NodeVisitor* nv, osg::Drawable* drw)
+{
+    RigGeometry* rig = static_cast<RigGeometry*>(drw);
+
+    rig->updateBounds(nv);
+}
+
+bool UpdateRigGeometry::cull(osg::NodeVisitor* nv, osg::Drawable* drw, osg::State*) const
+{
+    RigGeometry* geom = static_cast<RigGeometry*>(drw);
+    geom->update(nv);
+    return false;
+}
 
 RigGeometry::RigGeometry()
     : mSkeleton(NULL)

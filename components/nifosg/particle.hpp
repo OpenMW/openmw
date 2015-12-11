@@ -125,6 +125,14 @@ namespace NifOsg
         virtual void beginOperate(osgParticle::Program* program);
         virtual void operate(osgParticle::Particle* particle, double dt);
 
+        // For serialization.
+        inline float getBounceFactor() const { return mBounceFactor; }
+        inline void setBounceFactor(float f) { mBounceFactor = f; }
+        inline const osg::Plane& getPlane() const { return mPlane; }
+        inline void setPlane(const osg::Plane& p) { mPlane = p; }
+        inline const osg::Plane& getPlaneInParticleSpace() const { return mPlaneInParticleSpace; }
+        inline void setPlaneInParticleSpace(const osg::Plane& p) { mPlaneInParticleSpace = p; }
+
     private:
         float mBounceFactor;
         osg::Plane mPlane;

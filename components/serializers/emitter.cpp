@@ -7,7 +7,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_Emitter_Serializer,
                          new NifOsg::Emitter,
                          NifOsg::Emitter,
                          "OpenMW::Emitter",
-                         "osg::Object osgParticle::Emitter OpenMW::Emitter")
+                         "osg::Object osg::Node osgParticle::ParticleProcessor osgParticle::Emitter OpenMW::Emitter")
 {
     SETUPMSG("OpenMW::Emitter");
     ADD_LIST_SERIALIZER(Targets, std::vector<int>);

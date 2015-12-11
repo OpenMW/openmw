@@ -12,5 +12,5 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_GrowFadeAffector_Serializer,
     SETUPMSG("OpenMW::GrowFadeAffector");
     ADD_FLOAT_SERIALIZER(Grow, 0.0f);
     ADD_FLOAT_SERIALIZER(Fade, 0.0f);
-    // No serialization for: float mCachedDefaultSize; Not necessary?
+    // No serialization is required for mCachedDefaultSize
 }

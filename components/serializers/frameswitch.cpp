@@ -7,7 +7,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_FrameSwitch_Serializer,
                          new NifOsg::FrameSwitch,
                          NifOsg::FrameSwitch,
                          "OpenMW::FrameSwitch",
-                         "osg::Object osg::NodeCallback OpenMW::FrameSwitch")
+                         "osg::Object osg::Node osg::Group OpenMW::FrameSwitch")
 {
     SETUPMSG("OpenMW::FrameSwitch");
     // There are no members in the FrameSwitch callback.  It just needs to be created?

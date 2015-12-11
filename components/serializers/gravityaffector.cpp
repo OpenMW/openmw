@@ -10,7 +10,6 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_GravityAffector_Serializer,
                          "osg::Object osgParticle::Operator OpenMW::GravityAffector")
 {
     SETUPMSG("OpenMW::GravityAffector");
-    ADD_FLOAT_SERIALIZER(Force, 0.0f);
     {
         typedef osgDB::EnumSerializer<NifOsg::GravityAffector,
                                       NifOsg::GravityAffector::ForceType, void> MySerializer;
@@ -22,10 +21,9 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_GravityAffector_Serializer,
         serializer->add("Point", NifOsg::GravityAffector::Type_Point);
         wrapper->addSerializer(serializer.get(), osgDB::BaseSerializer::RW_ENUM);
     }
+    ADD_FLOAT_SERIALIZER(Force, 0.0f);
+    ADD_FLOAT_SERIALIZER(Decay, 0.0f);
     ADD_VEC3F_SERIALIZER(Position, osg::Vec3f());
     ADD_VEC3F_SERIALIZER(Direction, osg::Vec3f());        
-    ADD_FLOAT_SERIALIZER(Decay, 0.0f);
-    // No serialization for: osg::Vec3f mCachedWorldPosition;  Transient?
-    // No serialization for: osg::Vec3f mCachedWorldDirection;  Transient?
-    //INCOMPLETE!!!
+    // No serialization is required for mCachedWorldPosition or mCachedWorldDirection
 }

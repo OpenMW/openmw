@@ -262,6 +262,7 @@ install(TARGETS OpenMW
     )
 
 add_library(osgdb_serializers_openmw SHARED
+    serializers/alphacontroller
     serializers/billboardcallback
     serializers/compositestatesetupdater
     serializers/emitter
@@ -270,13 +271,19 @@ add_library(osgdb_serializers_openmw SHARED
     serializers/growfadeaffector
     serializers/inverseworldmatrix
     serializers/keyframecontroller
+    serializers/materialcolorcontroller
     serializers/nodeuserdata
     serializers/particlecoloraffector
     serializers/particleshooter
     serializers/particlesystem
+    serializers/particlesystemcontroller
+    serializers/planarcollider
+    serializers/riggeometry
     serializers/skeleton
     serializers/statesetupdater
     serializers/textkeymapholder
+    serializers/updaterigbounds
+    serializers/updateriggeometry
     serializers/uvcontroller
     serializers/viscontroller
     )

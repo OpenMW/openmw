@@ -253,11 +253,11 @@ namespace NifOsg
     class VisController : public osg::NodeCallback, public SceneUtil::Controller
     {
     private:
-        std::vector<Nif::NiVisData::VisData> mData;
-
         bool calculate(float time) const;
 
     public:
+        std::vector<Nif::NiVisData::VisData> mData;
+
         VisController(const Nif::NiVisData *data);
         VisController();
         VisController(const VisController& copy, const osg::CopyOp& copyop);
@@ -269,10 +269,9 @@ namespace NifOsg
 
     class AlphaController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
-    private:
+    public:
         FloatInterpolator mData;
 
-    public:
         AlphaController(const Nif::NiFloatData *data);
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
@@ -286,10 +285,9 @@ namespace NifOsg
 
     class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
-    private:
+    public:
         Vec3Interpolator mData;
 
-    public:
         MaterialColorController(const Nif::NiPosData *data);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
@@ -329,6 +327,12 @@ namespace NifOsg
         META_Object(OpenMW, ParticleSystemController)
 
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+
+        // For serialization.
+        inline float getEmitStart() const { return mEmitStart; }
+        inline void setEmitStart(float f) { mEmitStart = f; }
+        inline float getEmitStop() const { return mEmitStop; }
+        inline void setEmitStop(float f) { mEmitStop = f; }
 
     private:
         float mEmitStart;
