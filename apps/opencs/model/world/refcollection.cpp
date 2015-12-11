@@ -1,6 +1,5 @@
 #include "refcollection.hpp"
 
-#include <sstream>
 #include <iostream>
 
 #include <components/misc/stringops.hpp>
@@ -63,10 +62,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             // ignoring moved references sub-record; instead calculate cell from coordinates
             std::pair<int, int> index = ref.getCellIndex();
 
-            std::ostringstream stream;
-            stream << "#" << index.first << " " << index.second;
-
-            ref.mCell = stream.str();
+            ref.mCell = "#" + std::to_string(index.first) + " " + std::to_string(index.second);
 
             if (!base &&                  // don't try to update base records
                 mref.mRefNum.mIndex != 0) // MVRF tag found
@@ -91,9 +87,8 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
                     std::cerr << "Position: #" << index.first << " " << index.second
                         <<", Target #"<< mref.mTarget[0] << " " << mref.mTarget[1] << std::endl;
 
-                    std::ostringstream stream2;
-                    stream2 << "#" << mref.mTarget[0] << " " << mref.mTarget[1];
-                    ref.mCell = stream2.str(); // overwrite
+                    // overwrite
+                    ref.mCell = "#" + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]);
                 }
             }
         }
@@ -187,9 +182,7 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
 std::string CSMWorld::RefCollection::getNewId()
 {
-    std::ostringstream stream;
-    stream << "ref#" << mNextId++;
-    return stream.str();
+    return "ref#" + std::to_string(mNextId++);
 }
 
 unsigned int CSMWorld::RefCollection::extractIdNum (const std::string& id) const
