@@ -49,8 +49,8 @@ namespace MWWorld
     {
     }
 
-    RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode(0), mDeleted(false),
+    RefData::RefData (const ESM::ObjectState& objectState, bool deleted)
+    : mBaseNode(0), mDeleted(deleted),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),

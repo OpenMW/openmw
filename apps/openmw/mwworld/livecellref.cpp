@@ -19,7 +19,7 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &
 void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 {
     mRef = state.mRef;
-    mData = RefData (state);
+    mData = RefData (state, mData.isDeletedByContentFile());
 
     Ptr ptr (this);
 
