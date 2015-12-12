@@ -58,13 +58,13 @@ namespace MWSound
 
         virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset);
         virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset);
-        virtual void stopSound(MWBase::SoundPtr sound);
+        virtual void finishSound(MWBase::SoundPtr sound);
         virtual bool isSoundPlaying(MWBase::SoundPtr sound);
         virtual void updateSound(MWBase::SoundPtr sound);
 
         virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
         virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound);
-        virtual void stopStream(MWBase::SoundStreamPtr sound);
+        virtual void finishStream(MWBase::SoundStreamPtr sound);
         virtual double getStreamDelay(MWBase::SoundStreamPtr sound);
         virtual double getStreamOffset(MWBase::SoundStreamPtr sound);
         virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound);
