@@ -89,7 +89,7 @@ namespace CSMPrefs
 
         signals:
 
-            void settingChanged (const Setting *setting);
+            void settingChanged (const CSMPrefs::Setting *setting);
     };
 
     // convenience function
