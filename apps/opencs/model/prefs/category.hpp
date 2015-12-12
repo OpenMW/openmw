@@ -37,6 +37,8 @@ namespace CSMPrefs
             Iterator end();
 
             Setting& operator[] (const std::string& key);
+
+            void update();
     };
 }
 

@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "setting.hpp"
+#include "state.hpp"
 
 CSMPrefs::Category::Category (State *parent, const std::string& key)
 : mParent (parent), mKey (key)
@@ -41,4 +42,10 @@ CSMPrefs::Setting& CSMPrefs::Category::operator[] (const std::string& key)
             return **iter;
 
     throw std::logic_error ("Invalid user setting: " + key);
+}
+
+void CSMPrefs::Category::update()
+{
+    for (Iterator iter = mSettings.begin(); iter!=mSettings.end(); ++iter)
+        mParent->update (**iter);
 }
