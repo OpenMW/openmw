@@ -115,7 +115,6 @@ int main(int argc, char **argv) {
     Resource::TextureManager* texmgr = sceneManager->getTextureManager();
     texmgr->setStoreImageFilenames(true);
 
-    size_t cache_count = 0;
     BOOST_FOREACH(const std::string nfile, variables["nif"].as<StringsVector>()) {
         if (nfile.substr(nfile.size() - 4, 4) != ".nif") {
             std::cout << "File to convert is not a NIF: " << nfile << std::endl;
@@ -124,22 +123,12 @@ int main(int argc, char **argv) {
         osg::ref_ptr<const osg::Node> onode = sceneManager->getTemplate(nfile);
         std::string osgfile = nfile.substr(0, nfile.size() - 4) + new_extension;
         
+        std::cout << "Writing: " << osgfile << std::endl;
         osgDB::ReaderWriter::WriteResult result =
             writer->writeNode(*onode, osgfile, options);
         if (!result.success()) {
             std::cout << "Error writing " << osgfile << ": "
                       << result.message() << " code " << result.status() << std::endl;
         }
-        else {
-            std::cout << "Succesfully wrote: " << osgfile << std::endl;
-        }
-
-        // This limit is a rough guess since there's no convenient way to know how many
-        // textures were loaded for each mesh.
-        cache_count++;
-        if (cache_count > 256) {
-            mResourceSystem->clearCache();
-        }
     }
-
 }

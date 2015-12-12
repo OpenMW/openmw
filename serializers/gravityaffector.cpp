@@ -24,6 +24,6 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_GravityAffector_Serializer,
     ADD_FLOAT_SERIALIZER(Force, 0.0f);
     ADD_FLOAT_SERIALIZER(Decay, 0.0f);
     ADD_VEC3F_SERIALIZER(Position, osg::Vec3f());
-    ADD_VEC3F_SERIALIZER(Direction, osg::Vec3f());        
+    ADD_VEC3F_SERIALIZER(Direction, osg::Vec3f());
     // No serialization is required for mCachedWorldPosition or mCachedWorldDirection
 }

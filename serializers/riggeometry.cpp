@@ -20,7 +20,7 @@ static bool writeInfluence(osgDB::OutputStream& os,
                            const SceneUtil::RigGeometry& node) {
     WRITEMSG("Influence");
     const osg::ref_ptr<const InfluenceMap> imap = node.getInfluenceMap();
-    if (!imap) return false; 
+    if (!imap) return false;
     os << imap->mMap.size() << os.BEGIN_BRACKET << std::endl;
     BOOST_FOREACH(const InfluenceMapType::value_type& pair, imap->mMap) {
         os.writeWrappedString(pair.first);
