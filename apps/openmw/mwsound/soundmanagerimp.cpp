@@ -309,7 +309,7 @@ namespace MWSound
     void SoundManager::stopMusic()
     {
         if(mMusic)
-            mOutput->stopStream(mMusic);
+            mOutput->finishStream(mMusic);
         mMusic.reset();
     }
 
@@ -410,8 +410,10 @@ namespace MWSound
             {
                 MWBase::World *world = MWBase::Environment::get().getWorld();
                 const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-                MWBase::SoundStreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
-                mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
+                SoundLoudnessPair &old = mActiveSaySounds[ptr];
+                if(old.first.get()) mOutput->finishStream(old.first);
+                old = std::make_pair(playVoice(decoder, pos, (ptr == MWMechanics::getPlayer())),
+                                     loudness);
             }
         }
         catch(std::exception &e)
@@ -450,8 +452,9 @@ namespace MWSound
                 mPendingSaySounds[MWWorld::Ptr()] = std::make_pair(decoder, loudness);
             else
             {
-                MWBase::SoundStreamPtr sound = playVoice(decoder, osg::Vec3f(), true);
-                mActiveSaySounds[MWWorld::Ptr()] = std::make_pair(sound, loudness);
+                SoundLoudnessPair &old = mActiveSaySounds[MWWorld::Ptr()];
+                if(old.first.get()) mOutput->finishStream(old.first);
+                old = std::make_pair(playVoice(decoder, osg::Vec3f(), true), loudness);
             }
         }
         catch(std::exception &e)
@@ -477,7 +480,7 @@ namespace MWSound
         SaySoundMap::iterator snditer = mActiveSaySounds.find(ptr);
         if(snditer != mActiveSaySounds.end())
         {
-            mOutput->stopStream(snditer->second.first);
+            mOutput->finishStream(snditer->second.first);
             mActiveSaySounds.erase(snditer);
         }
         mPendingSaySounds.erase(ptr);
@@ -506,7 +509,7 @@ namespace MWSound
 
     void SoundManager::stopTrack(MWBase::SoundStreamPtr stream)
     {
-        mOutput->stopStream(stream);
+        mOutput->finishStream(stream);
         TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), stream);
         if(iter != mActiveTracks.end() && *iter == stream)
             mActiveTracks.erase(iter);
@@ -624,7 +627,7 @@ namespace MWSound
     void SoundManager::stopSound(MWBase::SoundPtr sound)
     {
         if (sound.get())
-            mOutput->stopSound(sound);
+            mOutput->finishSound(sound);
     }
 
     void SoundManager::stopSound3D(const MWWorld::Ptr &ptr, const std::string& soundId)
@@ -637,7 +640,7 @@ namespace MWSound
             for(;sndidx != snditer->second.end();++sndidx)
             {
                 if(sndidx->second == sfx)
-                    mOutput->stopSound(sndidx->first);
+                    mOutput->finishSound(sndidx->first);
             }
         }
     }
@@ -649,7 +652,7 @@ namespace MWSound
         {
             SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
             for(;sndidx != snditer->second.end();++sndidx)
-                mOutput->stopSound(sndidx->first);
+                mOutput->finishSound(sndidx->first);
         }
     }
 
@@ -664,7 +667,7 @@ namespace MWSound
             {
                 SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
                 for(;sndidx != snditer->second.end();++sndidx)
-                    mOutput->stopSound(sndidx->first);
+                    mOutput->finishSound(sndidx->first);
             }
             ++snditer;
         }
@@ -675,7 +678,7 @@ namespace MWSound
                sayiter->first != MWMechanics::getPlayer() &&
                sayiter->first.getCell() == cell)
             {
-                mOutput->stopStream(sayiter->second.first);
+                mOutput->finishStream(sayiter->second.first);
             }
             ++sayiter;
         }
@@ -691,7 +694,7 @@ namespace MWSound
             for(;sndidx != snditer->second.end();++sndidx)
             {
                 if(sndidx->second == sfx)
-                    mOutput->stopSound(sndidx->first);
+                    mOutput->finishSound(sndidx->first);
             }
         }
     }
@@ -829,7 +832,7 @@ namespace MWSound
             env = Env_Underwater;
         else if(mUnderwaterSound)
         {
-            mOutput->stopSound(mUnderwaterSound);
+            mOutput->finishSound(mUnderwaterSound);
             mUnderwaterSound.reset();
         }
 
@@ -866,13 +869,13 @@ namespace MWSound
                     if(sound->getDistanceCull())
                     {
                         if((mListenerPos - objpos).length2() > 2000*2000)
-                            mOutput->stopSound(sound);
+                            mOutput->finishSound(sound);
                     }
                 }
 
                 if(!mOutput->isSoundPlaying(sound))
                 {
-                    mOutput->stopSound(sound);
+                    mOutput->finishSound(sound);
                     Sound_Buffer *sfx = sndidx->second;
                     if(sfx->mUses-- == 1)
                         mUnusedBuffers.push_front(sfx);
@@ -904,16 +907,18 @@ namespace MWSound
 
                     MWBase::SoundStreamPtr sound;
                     MWWorld::Ptr ptr = penditer->first;
+
+                    SoundLoudnessPair &old = mActiveSaySounds[ptr];
+                    if(old.first.get()) mOutput->finishStream(old.first);
                     if(ptr == MWWorld::Ptr())
                         sound = playVoice(decoder, osg::Vec3f(), true);
                     else
                     {
                         MWBase::World *world = MWBase::Environment::get().getWorld();
                         const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-
                         sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
                     }
-                    mActiveSaySounds[ptr] = std::make_pair(sound, loudness);
+                    old = std::make_pair(sound, loudness);
                 }
                 catch(std::exception &e) {
                     std::cerr<< "Sound Error: "<<e.what() <<std::endl;
@@ -939,13 +944,13 @@ namespace MWSound
                 if(sound->getDistanceCull())
                 {
                     if((mListenerPos - pos).length2() > 2000*2000)
-                        mOutput->stopStream(sound);
+                        mOutput->finishStream(sound);
                 }
             }
 
             if(!mOutput->isStreamPlaying(sound))
             {
-                mOutput->stopStream(sound);
+                mOutput->finishStream(sound);
                 mActiveSaySounds.erase(sayiter++);
             }
             else
@@ -963,7 +968,7 @@ namespace MWSound
             MWBase::SoundStreamPtr sound = *trkiter;
             if(!mOutput->isStreamPlaying(sound))
             {
-                mOutput->stopStream(sound);
+                mOutput->finishStream(sound);
                 trkiter = mActiveTracks.erase(trkiter);
             }
             else
@@ -1143,7 +1148,7 @@ namespace MWSound
             SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
             for(;sndidx != snditer->second.end();++sndidx)
             {
-                mOutput->stopSound(sndidx->first);
+                mOutput->finishSound(sndidx->first);
                 Sound_Buffer *sfx = sndidx->second;
                 if(sfx->mUses-- == 1)
                     mUnusedBuffers.push_front(sfx);
@@ -1152,11 +1157,11 @@ namespace MWSound
         mActiveSounds.clear();
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         for(;sayiter != mActiveSaySounds.end();++sayiter)
-            mOutput->stopStream(sayiter->second.first);
+            mOutput->finishStream(sayiter->second.first);
         mActiveSaySounds.clear();
         TrackList::iterator trkiter = mActiveTracks.begin();
         for(;trkiter != mActiveTracks.end();++trkiter)
-            mOutput->stopStream(*trkiter);
+            mOutput->finishStream(*trkiter);
         mActiveTracks.clear();
         mPendingSaySounds.clear();
         mUnderwaterSound.reset();
