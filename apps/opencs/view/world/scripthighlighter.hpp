@@ -11,6 +11,11 @@
 
 #include "../../model/world/scriptcontext.hpp"
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class ScriptHighlighter : public QSyntaxHighlighter, private Compiler::Parser
@@ -19,13 +24,13 @@ namespace CSVWorld
 
             enum Type
             {
-                Type_Int,
-                Type_Float,
-                Type_Name,
-                Type_Keyword,
-                Type_Special,
-                Type_Comment,
-                Type_Id
+                Type_Int = 0,
+                Type_Float = 1,
+                Type_Name = 2,
+                Type_Keyword = 3,
+                Type_Special = 4,
+                Type_Comment = 5,
+                Type_Id = 6
             };
 
             enum Mode
@@ -88,7 +93,7 @@ namespace CSVWorld
 
             void invalidateIds();
 
-            bool updateUserSetting (const QString &name, const QStringList &list);
+            bool settingChanged (const CSMPrefs::Setting *setting);
     };
 }
 

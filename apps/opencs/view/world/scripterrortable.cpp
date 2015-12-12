@@ -9,7 +9,8 @@
 #include <components/compiler/extensions0.hpp>
 
 #include "../../model/doc/document.hpp"
-#include "../../model/settings/usersettings.hpp"
+
+#include "../../model/prefs/state.hpp"
 
 void CSVWorld::ScriptErrorTable::report (const std::string& message, const Compiler::TokenLoc& loc, Type type)
 {
@@ -57,7 +58,7 @@ void CSVWorld::ScriptErrorTable::addMessage (const std::string& message,
     setItem (row, 2, messageItem);
 }
 
-void CSVWorld::ScriptErrorTable::setWarningsMode (const QString& value)
+void CSVWorld::ScriptErrorTable::setWarningsMode (const std::string& value)
 {
     if (value=="Ignore")
         Compiler::ErrorHandler::setWarningsMode (0);
@@ -91,15 +92,11 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     Compiler::registerExtensions (mExtensions);
     mContext.setExtensions (&mExtensions);
 
-    setWarningsMode (CSMSettings::UserSettings::instance().settingValue ("script-editor/warnings"));
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["Scripts"].update();
 
     connect (this, SIGNAL (cellClicked (int, int)), this, SLOT (cellClicked (int, int)));
-}
-
-void CSVWorld::ScriptErrorTable::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (name=="script-editor/warnings" && !value.isEmpty())
-        setWarningsMode (value.at (0));
 }
 
 void CSVWorld::ScriptErrorTable::update (const std::string& source)
@@ -134,6 +131,12 @@ void CSVWorld::ScriptErrorTable::clear()
 bool CSVWorld::ScriptErrorTable::clearLocals (const std::string& script)
 {
     return mContext.clearLocals (script);
+}
+
+void CSVWorld::ScriptErrorTable::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="Scripst/warnings")
+        setWarningsMode (setting->toString());
 }
 
 void CSVWorld::ScriptErrorTable::cellClicked (int row, int column)

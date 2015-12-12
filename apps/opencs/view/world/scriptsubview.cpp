@@ -194,8 +194,6 @@ void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStr
     if (mButtons)
         mButtons->updateUserSetting (name, value);
 
-    mErrors->updateUserSetting (name, value);
-
     if (name=="script-editor/warnings")
         recompile();
 }

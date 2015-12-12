@@ -27,6 +27,11 @@ namespace CSMWorld
     class CommandDispatcher;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class CommandDelegate;
@@ -139,6 +144,8 @@ namespace CSVWorld
             void executeExtendedRevert();
 
         public slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void tableSizeUpdate();
 

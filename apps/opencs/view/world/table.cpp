@@ -23,7 +23,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "recordstatusdelegate.hpp"
 #include "tableeditidaction.hpp"
@@ -232,23 +232,9 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 : DragRecordTable(document), mCreateAction (0),
   mCloneAction(0),mRecordStatusDisplay (0)
 {
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    QString jumpSetting = settings.settingValue ("table-input/jump-to-added");
-    if (jumpSetting.isEmpty() || jumpSetting == "Jump and Select") // default
-    {
-        mJumpToAddedRecord = true;
-        mUnselectAfterJump = false;
-    }
-    else if(jumpSetting == "Jump Only")
-    {
-        mJumpToAddedRecord = true;
-        mUnselectAfterJump = true;
-    }
-    else
-    {
-        mJumpToAddedRecord = false;
-        mUnselectAfterJump = false;
-    }
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["ID Tables"].update();
 
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
@@ -358,7 +344,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 
     //connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
     //    this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
-    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)), 
+    connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
         this, SLOT (rowAdded (const std::string &)));
 
     /// \note This signal could instead be connected to a slot that filters out changes not affecting
@@ -404,7 +390,7 @@ std::vector<std::string> CSVWorld::Table::getSelectedIds() const
     QModelIndexList selectedRows = selectionModel()->selectedRows();
     int columnIndex = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
 
-    for (QModelIndexList::const_iterator iter (selectedRows.begin()); 
+    for (QModelIndexList::const_iterator iter (selectedRows.begin());
          iter != selectedRows.end();
          ++iter)
     {
@@ -548,9 +534,7 @@ void CSVWorld::Table::previewRecord()
 
 void CSVWorld::Table::executeExtendedDelete()
 {
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    QString configSetting = settings.settingValue ("table-input/extended-config");
-    if (configSetting == "true")
+    if (CSMPrefs::get()["ID Tables"]["extended-config"].isTrue())
     {
         emit extendedDeleteConfigRequest(getSelectedIds());
     }
@@ -562,9 +546,7 @@ void CSVWorld::Table::executeExtendedDelete()
 
 void CSVWorld::Table::executeExtendedRevert()
 {
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    QString configSetting = settings.settingValue ("table-input/extended-config");
-    if (configSetting == "true")
+    if (CSMPrefs::get()["ID Tables"]["extended-config"].isTrue())
     {
         emit extendedRevertConfigRequest(getSelectedIds());
     }
@@ -576,25 +558,6 @@ void CSVWorld::Table::executeExtendedRevert()
 
 void CSVWorld::Table::updateUserSetting (const QString &name, const QStringList &list)
 {
-    if (name=="table-input/jump-to-added")
-    {
-        if(list.isEmpty() || list.at(0) == "Jump and Select") // default
-        {
-            mJumpToAddedRecord = true;
-            mUnselectAfterJump = false;
-        }
-        else if(list.at(0) == "Jump Only")
-        {
-            mJumpToAddedRecord = true;
-            mUnselectAfterJump = true;
-        }
-        else // No Jump
-        {
-            mJumpToAddedRecord = false;
-            mUnselectAfterJump = false;
-        }
-    }
-
     if (name=="records/type-format" || name=="records/status-format")
     {
         int columns = mModel->columnCount();
@@ -648,6 +611,29 @@ void CSVWorld::Table::updateUserSetting (const QString &name, const QStringList 
 
         return;
     }
+}
+
+void CSVWorld::Table::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="ID Tables/jump-to-added")
+    {
+        if (setting->toString()=="Jump and Select")
+        {
+            mJumpToAddedRecord = true;
+            mUnselectAfterJump = false;
+        }
+        else if (setting->toString()=="Jump Only")
+        {
+            mJumpToAddedRecord = true;
+            mUnselectAfterJump = true;
+        }
+        else // No Jump
+        {
+            mJumpToAddedRecord = false;
+            mUnselectAfterJump = false;
+        }
+    }
+
 }
 
 void CSVWorld::Table::tableSizeUpdate()
