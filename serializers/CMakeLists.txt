@@ -28,6 +28,7 @@ add_library(osgdb_serializers_openmw SHARED
     billboardcallback
     compositestatesetupdater
     emitter
+    flipcontroller
     frameswitch
     geommorphcontroller
     gravityaffector

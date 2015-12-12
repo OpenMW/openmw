@@ -313,6 +313,14 @@ namespace NifOsg
 
         META_Object(OpenMW, FlipController)
 
+        // For serialization.
+        inline int getTexSlot() const { return mTexSlot; }
+        inline void setTexSlot(int i) { mTexSlot = i; }
+        inline float getDelta() const { return mDelta; }
+        inline void setDelta(float f) { mDelta = f; }
+        inline const std::vector<osg::ref_ptr<osg::Texture2D> >& getTextures() const { return mTextures; }
+        inline void setTextures(const std::vector<osg::ref_ptr<osg::Texture2D> >& t) { mTextures = t; }
+
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };
 
