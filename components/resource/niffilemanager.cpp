@@ -4,8 +4,6 @@
 
 #include "objectcache.hpp"
 
-#include <osg/Timer>
-
 namespace Resource
 {
 

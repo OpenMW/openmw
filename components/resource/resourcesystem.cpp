@@ -3,6 +3,7 @@
 #include "scenemanager.hpp"
 #include "texturemanager.hpp"
 #include "niffilemanager.hpp"
+#include "keyframemanager.hpp"
 
 namespace Resource
 {
@@ -11,6 +12,7 @@ namespace Resource
         : mVFS(vfs)
     {
         mNifFileManager.reset(new NifFileManager(vfs));
+        mKeyframeManager.reset(new KeyframeManager(vfs));
         mTextureManager.reset(new TextureManager(vfs));
         mSceneManager.reset(new SceneManager(vfs, mTextureManager.get(), mNifFileManager.get()));
     }
@@ -30,9 +32,14 @@ namespace Resource
         return mTextureManager.get();
     }
 
-    NifFileManager *ResourceSystem::getNifFileManager()
+    NifFileManager* ResourceSystem::getNifFileManager()
     {
         return mNifFileManager.get();
+    }
+
+    KeyframeManager* ResourceSystem::getKeyframeManager()
+    {
+        return mKeyframeManager.get();
     }
 
     void ResourceSystem::clearCache()
