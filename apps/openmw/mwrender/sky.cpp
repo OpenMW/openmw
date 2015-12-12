@@ -1632,7 +1632,24 @@ void SkyManager::sunDisable()
 
     mSun->setVisible(false);
 }
+#ifdef OPENGL_ES
+void SkyManager::moonsEnable()
+{
+    if (!mCreated) return;
 
+    mSecunda->setVisible(true);
+    mMasser->setVisible(true);
+}
+
+void SkyManager::moonsDisable()
+{
+    if (!mCreated) return;
+
+    mSecunda->setVisible(false);
+    mMasser->setVisible(false);
+}
+
+#endif
 void SkyManager::setStormDirection(const osg::Vec3f &direction)
 {
     mStormDirection = direction;

@@ -136,6 +136,12 @@ namespace MWRender
 
         void sunDisable();
 
+#ifdef OPENGL_ES
+        void moonsEnable();
+
+        void moonsDisable();
+#endif
+
         void setRainSpeed(float speed);
 
         void setStormDirection(const osg::Vec3f& direction);

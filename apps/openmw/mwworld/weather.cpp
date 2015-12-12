@@ -669,9 +669,19 @@ void WeatherManager::update(float duration, bool paused)
 
     // disable sun during night
     if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
+    {
         mRendering.getSkyManager()->sunDisable();
+#ifdef OPENGL_ES
+        mRendering.getSkyManager()->moonsEnable();
+#endif
+    }
     else
+    {
         mRendering.getSkyManager()->sunEnable();
+#ifdef OPENGL_ES
+        mRendering.getSkyManager()->moonsDisable();
+#endif
+    }
 
     // Update the sun direction.  Run it east to west at a fixed angle from overhead.
     // The sun's speed at day and night may differ, since mSunriseTime and mNightStart
