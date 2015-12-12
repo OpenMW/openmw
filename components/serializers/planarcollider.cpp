@@ -13,5 +13,5 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_PlanarCollider_Serializer,
     SETUPMSG("OpenMW::PlanarCollider");
     ADD_FLOAT_SERIALIZER(BounceFactor, 0.0f);
     ADD_PLANE_SERIALIZER(Plane, osg::Plane());
-    ADD_PLANE_SERIALIZER(PlaneInParticleSpace, osg::Plane());
+    // No serialization required for PlaneInParticleSpace, since it's computed in beginUpdate().
 }

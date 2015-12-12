@@ -130,8 +130,6 @@ namespace NifOsg
         inline void setBounceFactor(float f) { mBounceFactor = f; }
         inline const osg::Plane& getPlane() const { return mPlane; }
         inline void setPlane(const osg::Plane& p) { mPlane = p; }
-        inline const osg::Plane& getPlaneInParticleSpace() const { return mPlaneInParticleSpace; }
-        inline void setPlaneInParticleSpace(const osg::Plane& p) { mPlaneInParticleSpace = p; }
 
     private:
         float mBounceFactor;
