@@ -32,7 +32,7 @@ namespace MWWorld
 
             /// separate delete flag used for deletion by a content file
             /// @note not stored in the save game file.
-            bool mDeleted;
+            bool mDeletedByContentFile;
 
             bool mEnabled;
 
@@ -58,7 +58,7 @@ namespace MWWorld
             /// to reset the position as the original data is still held in the CellRef
             RefData (const ESM::CellRef& cellRef);
 
-            RefData (const ESM::ObjectState& objectState, bool deleted);
+            RefData (const ESM::ObjectState& objectState, bool deletedByContentFile);
             ///< Ignores local variables and custom data (not enough context available here to
             /// perform these operations).
 
@@ -91,7 +91,7 @@ namespace MWWorld
 
             /// This flag is only used for content stack loading and will not be stored in the savegame.
             /// If the object was deleted by gameplay, then use setCount(0) instead.
-            void setDeleted(bool deleted);
+            void setDeletedByContentFile(bool deleted);
 
             /// Returns true if the object was either deleted by the content file or by gameplay.
             bool isDeleted() const;
