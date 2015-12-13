@@ -781,11 +781,31 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        osg::Texture::FilterMode min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        osg::Texture::FilterMode min = osg::Texture::LINEAR;
         osg::Texture::FilterMode mag = osg::Texture::LINEAR;
 
-        if (Settings::Manager::getString("texture filtering", "General") == "trilinear")
-            min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        std::string filter = Settings::Manager::getString("texture filtering", "General");
+        if(filter == "nearest")
+        {
+            min = osg::Texture::NEAREST;
+            mag = osg::Texture::NEAREST;
+        }
+
+        std::string mipmap = Settings::Manager::getString("texture mipmapping", "General");
+        if(mipmap == "nearest")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        }
+        else if(mipmap != "none")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        }
 
         int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
 
@@ -826,7 +846,9 @@ namespace MWRender
                 mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
-            else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
+            else if (it->first == "General" && (it->second == "texture filtering" ||
+                                                it->second == "texture mipmapping" ||
+                                                it->second == "anisotropy"))
                 updateTextureFiltering();
             else if (it->first == "Water")
                 mWater->processChangedSettings(changed);

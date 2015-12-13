@@ -322,10 +322,18 @@
                             <Property key="Caption" value="Texture filtering"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="14 28 110 24" align="Left Top" name="TextureFilteringButton">
-                            <Property key="AddItem" value="Bilinear"/>
-                            <Property key="AddItem" value="Trilinear"/>
+                            <Property key="AddItem" value="Nearest"/>
+                            <Property key="AddItem" value="Linear"/>
                         </Widget>
-                        <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
+                        <Widget type="TextBox" skin="NormalText" position="184 4 300 24" align="Left Top">
+                            <Property key="Caption" value="Mipmapping"/>
+                        </Widget>
+                        <Widget type="ComboBox" skin="MW_ComboBox" position="194 28 110 24" align="Left Top" name="TextureMipmappingButton">
+                            <Property key="AddItem" value="None"/>
+                            <Property key="AddItem" value="Nearest"/>
+                            <Property key="AddItem" value="Linear"/>
+                        </Widget>
+                        <Widget type="Widget" skin="" position="4 64 300 50" align="Left Top" name="AnisotropyBox">
                             <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
