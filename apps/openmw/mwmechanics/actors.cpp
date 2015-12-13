@@ -1333,8 +1333,7 @@ namespace MWMechanics
                         continue;
                     if (followTarget == actor)
                         list.push_back(static_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
-                    else
-                        break;
+                    break;
                 }
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
