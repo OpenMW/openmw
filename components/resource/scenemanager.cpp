@@ -232,31 +232,6 @@ namespace Resource
         return cloned;
     }
 
-    osg::ref_ptr<const NifOsg::KeyframeHolder> SceneManager::getKeyframes(const std::string &name)
-    {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
-
-        KeyframeIndex::iterator it = mKeyframeIndex.find(normalized);
-        if (it == mKeyframeIndex.end())
-        {
-            Files::IStreamPtr file = mVFS->get(normalized);
-
-            std::string ext = getFileExtension(normalized);
-
-            if (ext != "nif" && ext != "kf")
-                return NULL;
-
-            osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
-            NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(file, normalized)), *loaded.get());
-
-            mKeyframeIndex[normalized] = loaded;
-            return loaded;
-        }
-        else
-            return it->second;
-    }
-
     void SceneManager::attachTo(osg::Node *instance, osg::Group *parentNode) const
     {
         parentNode->addChild(instance);

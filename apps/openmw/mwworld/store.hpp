@@ -27,8 +27,9 @@ namespace MWWorld
         RecordId(const std::string &id = "", bool isDeleted = false);
     };
 
-    struct StoreBase
+    class StoreBase
     {
+    public:
         virtual ~StoreBase() {}
 
         virtual void setUp() {}
@@ -351,14 +352,16 @@ namespace MWWorld
 
 
     template <>
-    struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
+    class Store<ESM::Skill> : public IndexedStore<ESM::Skill>
     {
+    public:
         Store();
     };
 
     template <>
-    struct Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
+    class Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
     {
+    public:
         Store();
     };
 

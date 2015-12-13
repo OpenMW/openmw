@@ -19,6 +19,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/keyframemanager.hpp>
 #include <components/resource/texturemanager.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
@@ -402,7 +403,7 @@ namespace MWRender
 
         boost::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
-        animsrc->mKeyframes = mResourceSystem->getSceneManager()->getKeyframes(kfname);
+        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
         if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
             return;

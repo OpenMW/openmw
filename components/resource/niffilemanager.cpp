@@ -4,8 +4,6 @@
 
 #include "objectcache.hpp"
 
-#include <osg/Timer>
-
 namespace Resource
 {
 
@@ -55,7 +53,7 @@ namespace Resource
             return static_cast<NifFileHolder*>(obj.get())->mNifFile;
         else
         {
-            Nif::NIFFilePtr file (new Nif::NIFFile(mVFS->get(name), name));
+            Nif::NIFFilePtr file (new Nif::NIFFile(mVFS->getNormalized(name), name));
             obj = new NifFileHolder(file);
             mCache->addEntryToObjectCache(name, obj);
             return file;

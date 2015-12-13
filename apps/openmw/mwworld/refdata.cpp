@@ -18,7 +18,7 @@ namespace MWWorld
         mCount = refData.mCount;
         mPosition = refData.mPosition;
         mChanged = refData.mChanged;
-        mDeleted = refData.mDeleted;
+        mDeletedByContentFile = refData.mDeletedByContentFile;
 
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
     }
@@ -32,7 +32,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(0), mDeleted(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
+    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -42,15 +42,15 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mDeleted(false), mEnabled (true),
+    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
       mChanged(false) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
-    RefData::RefData (const ESM::ObjectState& objectState)
-    : mBaseNode(0), mDeleted(false),
+    RefData::RefData (const ESM::ObjectState& objectState, bool deletedByContentFile)
+    : mBaseNode(0), mDeletedByContentFile(deletedByContentFile),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
@@ -139,19 +139,19 @@ namespace MWWorld
         mCount = count;
     }
 
-    void RefData::setDeleted(bool deleted)
+    void RefData::setDeletedByContentFile(bool deleted)
     {
-        mDeleted = deleted;
+        mDeletedByContentFile = deleted;
     }
 
     bool RefData::isDeleted() const
     {
-        return mDeleted || mCount == 0;
+        return mDeletedByContentFile || mCount == 0;
     }
 
     bool RefData::isDeletedByContentFile() const
     {
-        return mDeleted;
+        return mDeletedByContentFile;
     }
 
     MWScript::Locals& RefData::getLocals()

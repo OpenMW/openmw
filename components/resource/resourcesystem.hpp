@@ -14,6 +14,7 @@ namespace Resource
     class SceneManager;
     class TextureManager;
     class NifFileManager;
+    class KeyframeManager;
 
     /// @brief Wrapper class that constructs and provides access to the most commonly used resource subsystems.
     /// @par Resource subsystems can be used with multiple OpenGL contexts, just like the OSG equivalents, but
@@ -27,6 +28,7 @@ namespace Resource
         SceneManager* getSceneManager();
         TextureManager* getTextureManager();
         NifFileManager* getNifFileManager();
+        KeyframeManager* getKeyframeManager();
 
         /// Indicates to each resource manager to clear the cache, i.e. to drop cached objects that are no longer referenced.
         void clearCache();
@@ -37,6 +39,7 @@ namespace Resource
         std::auto_ptr<SceneManager> mSceneManager;
         std::auto_ptr<TextureManager> mTextureManager;
         std::auto_ptr<NifFileManager> mNifFileManager;
+        std::auto_ptr<KeyframeManager> mKeyframeManager;
 
         const VFS::Manager* mVFS;
 

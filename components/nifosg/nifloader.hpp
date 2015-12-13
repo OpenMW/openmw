@@ -37,10 +37,19 @@ namespace NifOsg
 
     };
 
-    class KeyframeHolder : public osg::Referenced
+    class KeyframeHolder : public osg::Object
     {
     public:
+        KeyframeHolder() {}
+        KeyframeHolder(const KeyframeHolder& copy, const osg::CopyOp& copyop)
+            : mTextKeys(copy.mTextKeys)
+            , mKeyframeControllers(copy.mKeyframeControllers)
+        {
+        }
+
         TextKeyMap mTextKeys;
+
+        META_Object(OpenMW, KeyframeHolder)
 
         typedef std::map<std::string, osg::ref_ptr<const KeyframeController> > KeyframeControllerMap;
         KeyframeControllerMap mKeyframeControllers;
