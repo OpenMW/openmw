@@ -34,7 +34,6 @@ namespace MWGui
             MyGUI::ScrollBar* mDifficultySlider;
             MyGUI::ScrollBar* mAnisotropySlider;
             MyGUI::ComboBox* mTextureFilteringButton;
-            MyGUI::ComboBox* mTextureMipmappingButton;
             MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mShadersButton;
