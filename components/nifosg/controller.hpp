@@ -124,9 +124,19 @@ namespace NifOsg
         }
 
         // For serialization.
-        inline void initMapTPtr() { mKeys = boost::shared_ptr<MapT>(new MapT); }
+        inline void initMapTPtr() {
+            mKeys = boost::shared_ptr<MapT>(new MapT);
+            mLastLowKey = mKeys->mKeys.end();
+            mLastHighKey = mKeys->mKeys.end();
+        }
         inline boost::shared_ptr<MapT> getMapTPtr() const { return mKeys; }
-        inline void setMapTPtr(boost::shared_ptr<MapT> p) { mKeys = p; }
+        inline void setMapTPtr(boost::shared_ptr<MapT> p) {
+            mKeys = p;
+            if (mKeys) {
+                mLastLowKey = mKeys->mKeys.end();
+                mLastHighKey = mKeys->mKeys.end();
+            }
+        }
 
     private:
         mutable typename MapT::MapType::const_iterator mLastLowKey;
