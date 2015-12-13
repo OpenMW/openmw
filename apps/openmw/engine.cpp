@@ -461,6 +461,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
             min = osg::Texture::NEAREST;
             mag = osg::Texture::NEAREST;
         }
+        else if(filter != "linear")
+            std::cerr<< "Invalid texture filtering option: "<<filter <<std::endl;
 
         std::string mipmap = Settings::Manager::getString("texture mipmapping", "General");
         if(mipmap == "nearest")
@@ -472,6 +474,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         }
         else if(mipmap != "none")
         {
+            if(mipmap != "linear")
+                std::cerr<< "Invalid texture mipmapping option: "<<mipmap <<std::endl;
             if(min == osg::Texture::NEAREST)
                 min = osg::Texture::NEAREST_MIPMAP_LINEAR;
             else if(min == osg::Texture::LINEAR)
