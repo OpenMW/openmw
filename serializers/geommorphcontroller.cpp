@@ -2,6 +2,7 @@
 #define OBJECT_CAST dynamic_cast
 
 #include <boost/foreach.hpp>
+#include <osg/Version>
 #include <components/nifosg/controller.hpp>
 
 #define SERIALIZER_DEBUG 0
