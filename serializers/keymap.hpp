@@ -3,6 +3,10 @@
 
 #include <boost/foreach.hpp>
 
+#if SERIALIZER_DEBUG>=3
+#include <iostream>
+#endif
+
 template<typename KeyMapT>
 static void writeKeyMap(osgDB::OutputStream& os, const KeyMapT& keyMap) {
     os << os.PROPERTY("Keys") << keyMap.size() << os.BEGIN_BRACKET << std::endl;
@@ -23,6 +27,9 @@ static void readKeyMap(osgDB::InputStream& is, KeyMapT& keyMap) {
     is >> is.PROPERTY("Keys");
     size_t size;
     is >> size >> is.BEGIN_BRACKET;
+#if SERIALIZER_DEBUG>=3
+    std::cout << "Reading KeyMapT size=" << size << std::endl;
+#endif
     for (size_t i = 0; i < size; i++) {
         typename KeyMapT::key_type time;
         is >> time;
@@ -30,6 +37,9 @@ static void readKeyMap(osgDB::InputStream& is, KeyMapT& keyMap) {
         is >> value;
         Nif::KeyT<ValueT> kval;
         kval.mValue = value;
+#if SERIALIZER_DEBUG>=3
+        std::cout << "Read keymap entry, time=" << time << std::endl;
+#endif
         typename KeyMapT::value_type pair = typename KeyMapT::value_type(time, kval);
         it = keyMap.insert(it, pair);
     }
