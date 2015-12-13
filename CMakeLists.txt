@@ -225,8 +225,6 @@ if (USE_QT)
     set (OSG_QT osgQt)
 endif()
 
-cmake_policy(SET CMP0043 OLD)
-
 find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
