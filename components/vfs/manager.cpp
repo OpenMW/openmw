@@ -115,7 +115,7 @@ namespace VFS
                 }
             }
         }
-        return name;
+        return normalized;
     }
 
 }
