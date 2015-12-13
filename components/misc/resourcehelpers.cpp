@@ -134,9 +134,13 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resP
         mdlname.insert(mdlname.begin()+p+1, 'x');
     else
         mdlname.insert(mdlname.begin(), 'x');
+    // Consider loading xMODEL.osgb instead of xMODEL.nif
+    mdlname = vfs->chooseFilename(mdlname);
     if(!vfs->exists(mdlname))
     {
-        return resPath;
+        // There's no xMODEL.NIF or xMODEL.osgb but there might not be MODEL.nif either,
+        // so check again to decide which to return.
+        return vfs->chooseFilename(resPath);
     }
     return mdlname;
 }

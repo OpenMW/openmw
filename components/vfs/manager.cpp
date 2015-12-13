@@ -91,4 +91,31 @@ namespace VFS
         normalize_path(name, mStrict);
     }
 
+    std::string Manager::chooseFilename(const std::string &name) const
+    {
+        std::string normalized(name);
+        normalize_path(normalized, mStrict);
+
+        // Right now I'm only interested in switching between NIF and OSGB, but there
+        // could be a user configurable system here with priority ordering of extensions.
+        // This is also probably not the most performant way to implement this...
+
+        // First check to see if the normalized NIF file exists.
+        std::map<std::string, File*>::const_iterator found = mIndex.find(normalized);
+        if (found == mIndex.end() && normalized.size() > 4) {
+            // If it's not found, try changing the extension from NIF to OSGB.
+            std::string extension = normalized.substr(normalized.size() - 4, 4);
+            if (Misc::StringUtils::ciEqual(extension, ".nif")) {
+                std::string osgbname = normalized.substr(0, normalized.size() - 4) + ".osgb";
+                // Only return the modified name if it exists however, since it's better
+                // to fail with the original name than the modified one.
+                std::map<std::string, File*>::const_iterator found = mIndex.find(osgbname);
+                if (found != mIndex.end()) {
+                    return osgbname;
+                }
+            }
+        }
+        return name;
+    }
+
 }

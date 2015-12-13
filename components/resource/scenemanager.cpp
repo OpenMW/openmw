@@ -186,8 +186,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
     {
-        std::string normalized = name;
-        mVFS->normalizeFilename(normalized);
+        std::string normalized = mVFS->chooseFilename(name);
 
         Index::iterator it = mIndex.find(normalized);
         if (it == mIndex.end())

@@ -41,6 +41,9 @@ namespace VFS
         /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing if mStrict is false.
         void normalizeFilename(std::string& name) const;
 
+        /// Choose an appropriate existing file based on the filename (and normalize it).
+        std::string chooseFilename(const std::string& name) const;
+
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
         Files::IStreamPtr get(const std::string& name) const;
