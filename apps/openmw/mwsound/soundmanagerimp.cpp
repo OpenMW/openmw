@@ -844,13 +844,6 @@ namespace MWSound
             env
         );
 
-        if(mListenerUnderwater)
-        {
-            // Play underwater sound (after updating listener)
-            if(!(mUnderwaterSound && mOutput->isSoundPlaying(mUnderwaterSound)))
-                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
-        }
-
         // Check if any sounds are finished playing, and trash them
         SoundMap::iterator snditer = mActiveSounds.begin();
         while(snditer != mActiveSounds.end())
@@ -978,6 +971,13 @@ namespace MWSound
                 mOutput->updateStream(sound);
                 ++trkiter;
             }
+        }
+
+        if(mListenerUnderwater)
+        {
+            // Play underwater sound (after updating sounds)
+            if(!(mUnderwaterSound && mOutput->isSoundPlaying(mUnderwaterSound)))
+                mUnderwaterSound = playSound("Underwater", 1.0f, 1.0f, Play_TypeSfx, Play_LoopNoEnv);
         }
         mOutput->finishUpdate();
     }
