@@ -129,8 +129,9 @@ namespace MWWorld
             void updateWindowManager ();
             void updatePlayer(bool paused);
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
-
+    public: // FIXME
             void removeContainerScripts(const Ptr& reference);
+    private:
             void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
