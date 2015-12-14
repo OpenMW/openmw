@@ -3,6 +3,7 @@
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
 #include <osg/Version>
+#include <osgViewer/Viewer>
 
 #include <stdexcept>
 
@@ -64,6 +65,45 @@ namespace Resource
     void TextureManager::setUnRefImageDataAfterApply(bool unref)
     {
         mUnRefImageDataAfterApply = unref;
+    }
+
+    void TextureManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                                           const std::string &mipmap, int maxAnisotropy,
+                                           osgViewer::Viewer *viewer)
+    {
+        osg::Texture::FilterMode min = osg::Texture::LINEAR;
+        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
+
+        if(magfilter == "nearest")
+            mag = osg::Texture::NEAREST;
+        else if(magfilter != "linear")
+            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+
+        if(minfilter == "nearest")
+            min = osg::Texture::NEAREST;
+        else if(minfilter != "linear")
+            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
+
+        if(mipmap == "nearest")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        }
+        else if(mipmap != "none")
+        {
+            if(mipmap != "linear")
+                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        }
+
+        if(viewer) viewer->stopThreading();
+        setFilterSettings(min, mag, maxAnisotropy);
+        if(viewer) viewer->startThreading();
     }
 
     void TextureManager::setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)

@@ -35,12 +35,13 @@ namespace
             return "#{sOn}";
     }
 
-    std::string textureFilteringToStr(const std::string& val)
+    std::string textureMipmappingToStr(const std::string& val)
     {
-        if (val == "trilinear")
-            return "Trilinear";
-        else
-            return "Bilinear";
+        if (val == "linear")  return "Trilinear";
+        if (val == "nearest") return "Bilinear";
+        if (val != "none")
+            std::cerr<< "Invalid texture mipmap option: "<<val <<std::endl;
+        return "Other";
     }
 
     void parseResolution (int &x, int &y, const std::string& str)
@@ -235,8 +236,8 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        std::string tf = Settings::Manager::getString("texture filtering", "General");
-        mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
+        std::string tmip = Settings::Manager::getString("texture mipmap", "General");
+        mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
         mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
         int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
@@ -425,7 +426,12 @@ namespace MWGui
 
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        Settings::Manager::setString("texture filtering", "General", Misc::StringUtils::lowerCase(_sender->getItemNameAt(pos)));
+        if(pos == 0)
+            Settings::Manager::setString("texture mipmap", "General", "nearest");
+        else if(pos == 1)
+            Settings::Manager::setString("texture mipmap", "General", "linear");
+        else
+            std::cerr<< "Unexpected option pos "<<pos <<std::endl;
         apply();
     }
 

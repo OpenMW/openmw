@@ -8,6 +8,11 @@
 #include <osg/Image>
 #include <osg/Texture2D>
 
+namespace osgViewer
+{
+    class Viewer;
+}
+
 namespace VFS
 {
     class Manager;
@@ -23,8 +28,9 @@ namespace Resource
         TextureManager(const VFS::Manager* vfs);
         ~TextureManager();
 
-        /// @warning It is unsafe to call this function when a draw thread is using the textures. Call stopThreading() first!
-        void setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode maxFilter, int maxAnisotropy);
+        void setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                               const std::string &mipmap, int maxAnisotropy,
+                               osgViewer::Viewer *view);
 
         /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
         /// otherwise should be disabled to reduce memory usage.
@@ -62,6 +68,9 @@ namespace Resource
 
         bool mUnRefImageDataAfterApply;
         bool mStoreImageFilenames;
+
+        /// @warning It is unsafe to call this function when a draw thread is using the textures. Call stopThreading() first!
+        void setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode maxFilter, int maxAnisotropy);
 
         TextureManager(const TextureManager&);
         void operator = (const TextureManager&);

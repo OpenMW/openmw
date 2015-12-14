@@ -451,12 +451,13 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
     mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
-    osg::Texture::FilterMode min = osg::Texture::LINEAR_MIPMAP_NEAREST;
-    osg::Texture::FilterMode mag = osg::Texture::LINEAR;
-    if (Settings::Manager::getString("texture filtering", "General") == "trilinear")
-        min = osg::Texture::LINEAR_MIPMAP_LINEAR;
-    int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
-    mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
+    mResourceSystem->getTextureManager()->setFilterSettings(
+        Settings::Manager::getString("texture mag filter", "General"),
+        Settings::Manager::getString("texture min filter", "General"),
+        Settings::Manager::getString("texture mipmap", "General"),
+        Settings::Manager::getInt("anisotropy", "General"),
+        NULL
+    );
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
