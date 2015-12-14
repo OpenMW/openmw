@@ -393,8 +393,28 @@ namespace MWRender
         std::string kfname = model;
         Misc::StringUtils::lowerCaseInPlace(kfname);
 
-        if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
-            kfname.replace(kfname.size()-4, 4, ".kf");
+        if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0) {
+            std::string realkf = kfname;
+            realkf.replace(realkf.size()-4, 4, ".kf");
+            if(mResourceSystem->getVFS()->exists(realkf)) {
+                kfname = realkf;
+            }
+            // If the real KF file doesn't exist, try the OSGB version.
+            else {
+                kfname.replace(kfname.size()-4, 4, "_kf.osgb");
+            }
+        }
+        else if(kfname.size() > 5 && kfname.compare(kfname.size()-5, 5, ".osgb") == 0) {
+            std::string realkf = kfname;
+            realkf.replace(realkf.size()-5, 5, ".kf");
+            if(mResourceSystem->getVFS()->exists(realkf)) {
+                kfname = realkf;
+            }
+            // If the real KF file doesn't exist, try the OSGB version.
+            else {
+                kfname.replace(kfname.size()-5, 5, "_kf.osgb");
+            }
+        }
         else
             return;
 
