@@ -782,7 +782,8 @@ namespace MWRender
     void RenderingManager::updateTextureFiltering()
     {
         mResourceSystem->getTextureManager()->setFilterSettings(
-            Settings::Manager::getString("texture filter", "General"),
+            Settings::Manager::getString("texture mag filter", "General"),
+            Settings::Manager::getString("texture min filter", "General"),
             Settings::Manager::getString("texture mipmap", "General"),
             Settings::Manager::getInt("anisotropy", "General"),
             mViewer

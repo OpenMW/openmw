@@ -66,18 +66,22 @@ namespace Resource
         mUnRefImageDataAfterApply = unref;
     }
 
-    void TextureManager::setFilterSettings(const std::string &filter, const std::string &mipmap, int maxAnisotropy, osgViewer::Viewer *viewer)
+    void TextureManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                                           const std::string &mipmap, int maxAnisotropy,
+                                           osgViewer::Viewer *viewer)
     {
         osg::Texture::FilterMode min = osg::Texture::LINEAR;
         osg::Texture::FilterMode mag = osg::Texture::LINEAR;
 
-        if(filter == "nearest")
-        {
-            min = osg::Texture::NEAREST;
+        if(magfilter == "nearest")
             mag = osg::Texture::NEAREST;
-        }
-        else if(filter != "linear")
-            std::cerr<< "Invalid texture filter: "<<filter <<std::endl;
+        else if(magfilter != "linear")
+            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+
+        if(minfilter == "nearest")
+            min = osg::Texture::NEAREST;
+        else if(minfilter != "linear")
+            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
 
         if(mipmap == "nearest")
         {

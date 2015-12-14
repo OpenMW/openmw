@@ -28,7 +28,8 @@ namespace Resource
         TextureManager(const VFS::Manager* vfs);
         ~TextureManager();
 
-        void setFilterSettings(const std::string &filter, const std::string &mipmap, int maxAnisotropy,
+        void setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                               const std::string &mipmap, int maxAnisotropy,
                                osgViewer::Viewer *view);
 
         /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
