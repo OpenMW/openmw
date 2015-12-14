@@ -784,14 +784,14 @@ namespace MWRender
         osg::Texture::FilterMode min = osg::Texture::LINEAR;
         osg::Texture::FilterMode mag = osg::Texture::LINEAR;
 
-        std::string filter = Settings::Manager::getString("texture filtering", "General");
+        std::string filter = Settings::Manager::getString("texture filter", "General");
         if(filter == "nearest")
         {
             min = osg::Texture::NEAREST;
             mag = osg::Texture::NEAREST;
         }
 
-        std::string mipmap = Settings::Manager::getString("texture mipmapping", "General");
+        std::string mipmap = Settings::Manager::getString("texture mipmap", "General");
         if(mipmap == "nearest")
         {
             if(min == osg::Texture::NEAREST)
@@ -846,8 +846,8 @@ namespace MWRender
                 mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
-            else if (it->first == "General" && (it->second == "texture filtering" ||
-                                                it->second == "texture mipmapping" ||
+            else if (it->first == "General" && (it->second == "texture filter" ||
+                                                it->second == "texture mipmap" ||
                                                 it->second == "anisotropy"))
                 updateTextureFiltering();
             else if (it->first == "Water")

@@ -236,7 +236,7 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        std::string tmip = Settings::Manager::getString("texture mipmapping", "General");
+        std::string tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
         mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
 
@@ -427,9 +427,9 @@ namespace MWGui
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
         if(pos == 0)
-            Settings::Manager::setString("texture mipmapping", "General", "nearest");
+            Settings::Manager::setString("texture mipmap", "General", "nearest");
         else if(pos == 1)
-            Settings::Manager::setString("texture mipmapping", "General", "linear");
+            Settings::Manager::setString("texture mipmap", "General", "linear");
         else
             std::cerr<< "Unexpected option pos "<<pos <<std::endl;
         apply();
