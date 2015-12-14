@@ -313,7 +313,7 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
             int value = 0;
 
-            for (int i=0; i<=15; ++i) // everything except thigns held in hands and amunition
+            for (int i=0; i<=15; ++i) // everything except things held in hands and ammunition
             {
                 MWWorld::ContainerStoreIterator slot = store.getSlot (i);
 
