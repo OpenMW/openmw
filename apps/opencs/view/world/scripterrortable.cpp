@@ -135,7 +135,7 @@ bool CSVWorld::ScriptErrorTable::clearLocals (const std::string& script)
 
 void CSVWorld::ScriptErrorTable::settingChanged (const CSMPrefs::Setting *setting)
 {
-    if (*setting=="Scripst/warnings")
+    if (*setting=="Scripts/warnings")
         setWarningsMode (setting->toString());
 }
 

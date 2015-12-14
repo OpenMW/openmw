@@ -102,11 +102,6 @@ void CSVTools::SearchSubView::setEditLock (bool locked)
     mSearchBox.setEditLock (locked);
 }
 
-void CSVTools::SearchSubView::updateUserSetting (const QString &name, const QStringList &list)
-{
-    mTable->updateUserSetting (name, list);
-}
-
 void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *document)
 {
     mSearchBox.setSearchMode (!(state & CSMDoc::State_Searching));

@@ -13,7 +13,7 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "scriptedit.hpp"
 #include "recordbuttonbar.hpp"
@@ -39,8 +39,7 @@ void CSVWorld::ScriptSubView::addButtonBar()
 void CSVWorld::ScriptSubView::recompile()
 {
     if (!mCompileDelay->isActive() && !isDeleted())
-        mCompileDelay->start (
-            CSMSettings::UserSettings::instance().setting ("script-editor/compile-delay").toInt());
+        mCompileDelay->start (CSMPrefs::get()["Scripts"]["compile-delay"].toInt());
 }
 
 bool CSVWorld::ScriptSubView::isDeleted() const
@@ -89,7 +88,7 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
 : SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
-  mErrorHeight (CSMSettings::UserSettings::instance().setting ("script-editor/error-height").toInt())
+  mErrorHeight (CSMPrefs::get()["Scripts"]["error-height"].toInt())
 {
     std::vector<std::string> selection (1, id.getId());
     mCommandDispatcher.setSelection (selection);
@@ -126,9 +125,6 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     // bottom box and buttons
     mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
-    if (CSMSettings::UserSettings::instance().setting ("script-editor/toolbar", QString("true")) == "true")
-        addButtonBar();
-
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         this, SLOT (switchToId (const std::string&)));
 
@@ -156,51 +152,38 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
     connect (mCompileDelay, SIGNAL (timeout()), this, SLOT (updateRequest()));
 
     updateDeletedState();
-}
 
-void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (name == "script-editor/show-linenum")
-    {
-        std::string showLinenum = value.at(0).toUtf8().constData();
-        mEditor->showLineNum(showLinenum == "true");
-        mBottom->setVisible(showLinenum == "true");
-    }
-    else if (name == "script-editor/mono-font")
-    {
-        mEditor->setMonoFont (value.at(0)==QString ("true"));
-    }
-    else if (name=="script-editor/toolbar")
-    {
-        if (value.at(0)==QString ("true"))
-        {
-            addButtonBar();
-        }
-        else
-        {
-            if (mButtons)
-            {
-                mLayout.removeWidget (mButtons);
-                delete mButtons;
-                mButtons = 0;
-            }
-        }
-    }
-    else if (name=="script-editor/compile-delay")
-    {
-        mCompileDelay->setInterval (value.at (0).toInt());
-    }
-
-    if (mButtons)
-        mButtons->updateUserSetting (name, value);
-
-    if (name=="script-editor/warnings")
-        recompile();
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["Scripts"].update();
 }
 
 void CSVWorld::ScriptSubView::setStatusBar (bool show)
 {
     mBottom->setStatusBar (show);
+}
+
+void CSVWorld::ScriptSubView::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="Scripts/toolbar")
+    {
+        if (setting->isTrue())
+        {
+            addButtonBar();
+        }
+        else if (mButtons)
+        {
+            mLayout.removeWidget (mButtons);
+            delete mButtons;
+            mButtons = 0;
+        }
+    }
+    else if (*setting=="Scripts/compile-delay")
+    {
+        mCompileDelay->setInterval (setting->toInt());
+    }
+    else  if (*setting=="Scripts/warnings")
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()

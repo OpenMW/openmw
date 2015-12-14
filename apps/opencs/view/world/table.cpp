@@ -558,23 +558,6 @@ void CSVWorld::Table::executeExtendedRevert()
 
 void CSVWorld::Table::updateUserSetting (const QString &name, const QStringList &list)
 {
-    if (name=="records/type-format" || name=="records/status-format")
-    {
-        int columns = mModel->columnCount();
-
-        for (int i=0; i<columns; ++i)
-            if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
-            {
-                dynamic_cast<CommandDelegate&>
-                                        (*delegate).updateUserSetting (name, list);
-                {
-                    emit dataChanged (mModel->index (0, i),
-                                    mModel->index (mModel->rowCount()-1, i));
-                }
-            }
-        return;
-    }
-
     QString base ("table-input/double");
     if (name.startsWith (base))
     {
@@ -633,7 +616,18 @@ void CSVWorld::Table::settingChanged (const CSMPrefs::Setting *setting)
             mUnselectAfterJump = false;
         }
     }
+    else if (*setting=="Records/type-format" || *setting=="Records/status-format")
+    {
+        int columns = mModel->columnCount();
 
+        for (int i=0; i<columns; ++i)
+            if (QAbstractItemDelegate *delegate = itemDelegateForColumn (i))
+            {
+                dynamic_cast<CommandDelegate&> (*delegate).settingChanged (setting);
+                emit dataChanged (mModel->index (0, i),
+                    mModel->index (mModel->rowCount()-1, i));
+            }
+    }
 }
 
 void CSVWorld::Table::tableSizeUpdate()

@@ -29,8 +29,6 @@ namespace CSVTools
 
             virtual void setEditLock (bool locked);
 
-            virtual void updateUserSetting (const QString &, const QStringList &);
-
         private slots:
 
             void refreshRequest();

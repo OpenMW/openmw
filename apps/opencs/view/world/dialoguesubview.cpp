@@ -919,9 +919,6 @@ void CSVWorld::DialogueSubView::updateUserSetting (const QString& name, const QS
             }
         }
     }
-
-    if (mButtons)
-        mButtons->updateUserSetting (name, value);
 }
 
 void CSVWorld::DialogueSubView::showPreview ()

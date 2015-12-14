@@ -11,7 +11,7 @@ CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,
                                                      const IconList & icons,
                                                      CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
     : DataDisplayDelegate (values, icons, dispatcher, document,
-                           "records", "status-format",
+                           "Records", "status-format",
                            parent)
 {}
 

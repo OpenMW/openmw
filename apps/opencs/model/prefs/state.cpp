@@ -153,6 +153,7 @@ void CSMPrefs::State::declare()
     declareColour ("colour-special", "Highlight Colour: Special Characters", QColor ("darkorange"));
     declareColour ("colour-comment", "Highlight Colour: Comments", QColor ("green"));
     declareColour ("colour-id", "Highlight Colour: IDs", QColor ("blue"));
+
     declareCategory ("General Input");
     declareBool ("cycle", "Cyclic next/previous", false).
         setTooltip ("When using next/previous functions at the last/first item of a "

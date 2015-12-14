@@ -14,6 +14,11 @@ namespace CSMWorld
     class CommandDispatcher;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class TableBottomBox;
@@ -49,7 +54,7 @@ namespace CSVWorld
             void updateModificationButtons();
 
             void updatePrevNextButtons();
-            
+
         public:
 
             RecordButtonBar (const CSMWorld::UniversalId& id,
@@ -58,13 +63,13 @@ namespace CSVWorld
 
             void setEditLock (bool locked);
 
-            void updateUserSetting (const QString& name, const QStringList& value);
-            
         public slots:
 
             void universalIdChanged (const CSMWorld::UniversalId& id);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void cloneRequest();
 
@@ -73,7 +78,7 @@ namespace CSVWorld
             void prevId();
 
             void rowNumberChanged (const QModelIndex& parent, int start, int end);
-            
+
         signals:
 
             void showPreview();
