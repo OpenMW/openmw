@@ -31,7 +31,7 @@ namespace Resource
             osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
             NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
 
-            mCache->addEntryToObjectCache(name, loaded);
+            mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
     }
