@@ -125,7 +125,6 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
         if (ext == "nif")
         {
             NifBullet::BulletNifLoader loader;
-            // might be worth sharing NIFFiles with SceneManager in some way
             shape = loader.load(mNifFileManager->get(normalized));
         }
         else
