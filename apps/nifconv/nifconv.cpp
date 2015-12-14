@@ -14,10 +14,23 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/keyframemanager.hpp>
 #include <components/misc/stringops.hpp>
+#include <components/nifosg/nifloader.hpp>
 
 typedef std::vector<std::string> StringsVector;
 typedef std::map<std::string, VFS::File*> FileIndexMap;
+
+// The standard boost::filesystem::replace_extension() replaces multiple extensions, which
+// is not what we wanted.  We also wanted case insensitive comparisons, so here it is.
+bool extensionIs(std::string path, std::string ext) {
+    size_t ps = path.size();
+    size_t es = ext.size();
+    if (ps <= es) return false;
+    std::string pext = path.substr(ps - es, es);
+    if (Misc::StringUtils::ciEqual(pext, ext)) return true;
+    return false;
+}
 
 int main(int argc, char **argv) {
     namespace bpo = boost::program_options;
@@ -74,11 +87,11 @@ int main(int argc, char **argv) {
     // Report each file?
     bool quiet = variables["quiet"].as<bool>();
 
-    boost::filesystem::path outdirpath("");
+    boost::filesystem::path outdir("");
     if (variables.count("output") > 0) {
-        outdirpath = variables["output"].as<std::string>();
+        std::string outdirstr = variables["output"].as<std::string>();
+        outdir = boost::filesystem::path(outdirstr);
     }
-    std::cout << "Output directory path is: " << outdirpath << std::endl;
 
     Files::ConfigurationManager cfgMgr;
     cfgMgr.readConfiguration(variables, desc);
@@ -114,6 +127,7 @@ int main(int argc, char **argv) {
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
 
     Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
+    Resource::KeyframeManager* keyframeManager = mResourceSystem->getKeyframeManager();
 
     osgDB::Registry* reg = osgDB::Registry::instance();
     osgDB::ReaderWriter* writer = reg->getReaderWriterForExtension(format);
@@ -140,14 +154,11 @@ int main(int argc, char **argv) {
     // Ask the virtual file system what files are available, make a list of those that end
     // with ".nif".  Use a case insensitive compare regardless of the setting of
     // fs-strict, since we're really just trying to filter by file type.
-    std::set<boost::filesystem::path> nif_files;
+    std::set<std::string> nif_files;
     if (variables["all"].as<bool>()) {
         BOOST_FOREACH(const FileIndexMap::value_type& pair, mVFS->getIndex()) {
-            boost::filesystem::path nifpath(pair.first);
-            std::string extension = nifpath.extension().string();
-            if (Misc::StringUtils::ciEqual(extension, ".nif")) {
-                //std::cout << "Adding archive NIF: " << nifpath << std::endl;
-                nif_files.insert(nifpath);
+            if (extensionIs(pair.first, ".kf") || extensionIs(pair.first, ".nif")) {
+                nif_files.insert(pair.first);
             }
         }
     }
@@ -157,40 +168,74 @@ int main(int argc, char **argv) {
     // based on extension with the presumption that the user knows best.  Maybe the file
     // was named incorrectly, and that's what they're trying to fix?
     if (variables.count("nif") > 0) {
-        BOOST_FOREACH(const std::string filestr, variables["nif"].as<StringsVector>()) {
-            boost::filesystem::path nifpath(filestr);
-            //std::cout << "Adding explicit NIF: " << nifpath << std::endl;
-            nif_files.insert(nifpath);
+        BOOST_FOREACH(const std::string fstr, variables["nif"].as<StringsVector>()) {
+            nif_files.insert(fstr);
         }
     }
 
-    // The number of bytes written to std::cerr.
+    // The number of bytes written to std::cerr (or -1 if it's a console stream).  The
+    // idea was to check how many bytes we've written as a way to check whether there were
+    // problems loading the NIF file or any of it's dependencies.  This approch is a
+    // pretty hackish, but it allows us to provide context for which files had problems
+    // loading without changing the VFS component.  It turns out that this trick only
+    // works if stderr has been redirected to a file, but that's still better then
+    // nothing.  I'd like a better way to detect problems loading and converting assets.
     std::streampos error_position;
-    BOOST_FOREACH(const boost::filesystem::path nifpath, nif_files) {
-        // Build the output path.
-        boost::filesystem::path outpath = outdirpath / nifpath;
-        outpath.replace_extension(format);
+    BOOST_FOREACH(const std::string fpath, nif_files) {
 
-        // Report all conversions unless the user requested that we be quiet.
+        // KF files need a little special renaming attention to avoid conflicts with
+        // OSG conversions of NIF files with the same basename.
+        bool kf_file = false;
+        std::string fstr;
+        if (extensionIs(fpath, ".kf")) {
+            fstr = fpath.substr(0, fpath.size() - 3) + "_kf";
+            kf_file = true;
+        }
+        else {
+            if (extensionIs(fpath, ".nif")) {
+                fstr = fpath.substr(0, fpath.size() - 4);
+            }
+            else {
+                fstr = fpath;
+            }
+            kf_file = false;
+        }
+        fstr += ".";
+        fstr += format;
+
+        // Build the output path.
+        boost::filesystem::path outpath = outdir / boost::filesystem::path(fstr);
+
+        // Report all conversions unless the user requested that we be quiet.  This also
+        // has to go to std::cerr, or it will not be interleaved with the otehr failures
+        // in any intelligble way.
         if (!quiet)
-            std::cout << "Converting: " << nifpath << " -> " << outpath << std::endl;
+            std::cerr << "Converting: '" << fpath << "' -> '" << outpath.string() << "'." << std::endl;
 
         // Create any directories that are required.
         boost::filesystem::create_directories(outpath.parent_path());
 
-        // Check how many bytes we've written to std::cerr as a way to check whether there
-        // were problems loading the NIF file or any of it's dependencies.  This approch
-        // is a little hackish, but it allows us to provide context for which files had
-        // problems loading without changing the VFS component.
         error_position = std::cerr.tellp();
-        osg::ref_ptr<const osg::Node> onode = sceneManager->getTemplate(nifpath.string());
-        if (!onode) {
-            std::cerr << "Complete failure loading: " << nifpath << std::endl;
+
+        // Load kf files differently.  Assume that all other files (regardless of
+        // extension) are NIF files.
+        osg::ref_ptr<const osg::Object> object;
+        if (kf_file) {
+            osg::ref_ptr<const NifOsg::KeyframeHolder> kfh = keyframeManager->get(fpath);
+            object = kfh;
+        }
+        else {
+            osg::ref_ptr<const osg::Node> node = sceneManager->getTemplate(fpath);
+            object = node;
+        }
+
+        if (!object) {
+            std::cerr << "Complete failure loading: '" << fpath << "'." << std::endl;
             // If there's no osg::Object, there's nothing to export.
             continue;
         }
         if (error_position != std::cerr.tellp()) {
-            std::cerr << "Partial failure loading: " << nifpath << std::endl;
+            std::cerr << "Partial failure loading: '" << fpath << "'." << std::endl;
             // We should still try exporting the object because we'll be able to export
             // whatever was loaded successfully.
         }
@@ -199,15 +244,15 @@ int main(int argc, char **argv) {
         // without actually failing.  Detect that as well.
         error_position = std::cerr.tellp();
         osgDB::ReaderWriter::WriteResult result =
-            writer->writeNode(*onode, outpath.string(), options);
+            writer->writeObject(*object, outpath.string(), options);
         if (!result.success()) {
-            std::cerr << "Complete failure converting: " << nifpath << ": "
+            std::cerr << "Complete failure converting: '" << fpath << "': "
                       << result.message() << " code " << result.status() << std::endl;
             // Don't warn twice (if we also wrote to std::cerr).
             continue;
         }
         if (error_position != std::cerr.tellp()) {
-            std::cerr << "Partial failure converting: " << nifpath << std::endl;
+            std::cerr << "Partial failure converting: '" << fpath << "'." << std::endl;
         }
     }
 }
