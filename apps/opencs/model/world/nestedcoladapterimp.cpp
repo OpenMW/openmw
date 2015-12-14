@@ -606,7 +606,7 @@ namespace CSMWorld
         funcMap["09"] = "PC Fatigue";
         funcMap["10"] = "PC Strength";
         funcMap["11"] = "PC Block";
-        funcMap["12"] = "PC Armoror";
+        funcMap["12"] = "PC Armorer";
         funcMap["13"] = "PC Medium Armor";
         funcMap["14"] = "PC Heavy Armor";
         funcMap["15"] = "PC Blunt Weapon";
