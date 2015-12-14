@@ -451,39 +451,12 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
     mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
-    {
-        osg::Texture::FilterMode min = osg::Texture::LINEAR;
-        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
-
-        std::string filter = Settings::Manager::getString("texture filter", "General");
-        if(filter == "nearest")
-        {
-            min = osg::Texture::NEAREST;
-            mag = osg::Texture::NEAREST;
-        }
-        else if(filter != "linear")
-            std::cerr<< "Invalid texture filter option: "<<filter <<std::endl;
-
-        std::string mipmap = Settings::Manager::getString("texture mipmap", "General");
-        if(mipmap == "nearest")
-        {
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
-        }
-        else if(mipmap != "none")
-        {
-            if(mipmap != "linear")
-                std::cerr<< "Invalid texture mipmap option: "<<mipmap <<std::endl;
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
-        }
-        int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
-        mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
-    }
+    mResourceSystem->getTextureManager()->setFilterSettings(
+        Settings::Manager::getString("texture filter", "General"),
+        Settings::Manager::getString("texture mipmap", "General"),
+        Settings::Manager::getInt("anisotropy", "General"),
+        NULL
+    );
 
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so

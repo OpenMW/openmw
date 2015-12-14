@@ -781,37 +781,12 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
-        osg::Texture::FilterMode min = osg::Texture::LINEAR;
-        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
-
-        std::string filter = Settings::Manager::getString("texture filter", "General");
-        if(filter == "nearest")
-        {
-            min = osg::Texture::NEAREST;
-            mag = osg::Texture::NEAREST;
-        }
-
-        std::string mipmap = Settings::Manager::getString("texture mipmap", "General");
-        if(mipmap == "nearest")
-        {
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
-        }
-        else if(mipmap != "none")
-        {
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
-        }
-
-        int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
-
-        mViewer->stopThreading();
-        mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
-        mViewer->startThreading();
+        mResourceSystem->getTextureManager()->setFilterSettings(
+            Settings::Manager::getString("texture filter", "General"),
+            Settings::Manager::getString("texture mipmap", "General"),
+            Settings::Manager::getInt("anisotropy", "General"),
+            mViewer
+        );
     }
 
     void RenderingManager::updateAmbient()
