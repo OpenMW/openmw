@@ -87,8 +87,12 @@ static bool readControllers(osgDB::InputStream& is,
     for (size_t i = 0; i < size; i++) {
         std::string label;
         is.readWrappedString(label);
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        osg::ref_ptr<NifOsg::KeyframeController> ctrl = is.readObjectOfType<NifOsg::KeyframeController>();
+#else
         osg::ref_ptr<NifOsg::KeyframeController> ctrl;
         is >> ctrl;
+#endif
         KFCMap::value_type pair = KFCMap::value_type(label, ctrl);
         it = node.mKeyframeControllers.insert(it, pair);
 #if SERIALIZER_DEBUG==3
