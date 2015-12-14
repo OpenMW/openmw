@@ -35,6 +35,7 @@ add_library(osgdb_serializers_openmw SHARED
     growfadeaffector
     inverseworldmatrix
     keyframecontroller
+    keyframeholder
     materialcolorcontroller
     nodeuserdata
     particlecoloraffector
@@ -62,6 +63,7 @@ add_library(OpenMW SHARED
     ../components/sceneutil/statesetupdater
     ../components/sceneutil/skeleton
     ../components/sceneutil/riggeometry
+    ../components/sceneutil/controller
     )
 
 target_link_libraries(osgdb_serializers_openmw OpenMW)
