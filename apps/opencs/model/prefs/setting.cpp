@@ -71,7 +71,7 @@ bool CSMPrefs::Setting::isTrue() const
 
 QColor CSMPrefs::Setting::toColor() const
 {
-    QMutexLocker lock (mMutex);
+    // toString() handles lock
     return QColor (QString::fromUtf8 (toString().c_str()));
 }
 
