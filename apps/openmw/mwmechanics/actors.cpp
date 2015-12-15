@@ -494,8 +494,11 @@ namespace MWMechanics
                 effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
 
                 // instant effects are already applied on spell impact in spellcasting.cpp, but may also come from permanent abilities
-                CastSpell cast(ptr, ptr);
-                cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude());
+                if (it->second.getMagnitude() > 0)
+                {
+                    CastSpell cast(ptr, ptr);
+                    cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude());
+                }
             }
         }
 
