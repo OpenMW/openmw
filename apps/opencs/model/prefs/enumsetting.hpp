@@ -39,7 +39,8 @@ namespace CSMPrefs
         public:
 
             EnumSetting (Category *parent, Settings::Manager *values,
-                const std::string& key, const std::string& label, const EnumValue& default_);
+                QMutex *mutex, const std::string& key, const std::string& label,
+                const EnumValue& default_);
 
             EnumSetting& setTooltip (const std::string& tooltip);
 

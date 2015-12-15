@@ -5,6 +5,7 @@
 
 #include <QLabel>
 #include <QDoubleSpinBox>
+#include <QMutexLocker>
 
 #include <components/settings/settings.hpp>
 
@@ -12,8 +13,9 @@
 #include "state.hpp"
 
 CSMPrefs::DoubleSetting::DoubleSetting (Category *parent, Settings::Manager *values,
-  const std::string& key, const std::string& label, double default_)
-: Setting (parent, values, key, label), mMin (0), mMax (std::numeric_limits<double>::max()),
+  QMutex *mutex, const std::string& key, const std::string& label, double default_)
+: Setting (parent, values, mutex, key, label),
+  mMin (0), mMax (std::numeric_limits<double>::max()),
   mDefault (default_)
 {}
 
@@ -64,6 +66,10 @@ std::pair<QWidget *, QWidget *> CSMPrefs::DoubleSetting::makeWidgets (QWidget *p
 
 void CSMPrefs::DoubleSetting::valueChanged (double value)
 {
-    getValues().setFloat (getKey(), getParent()->getKey(), value);
+    {
+        QMutexLocker lock (getMutex());
+        getValues().setFloat (getKey(), getParent()->getKey(), value);
+    }
+
     getParent()->getState()->update (*this);
 }

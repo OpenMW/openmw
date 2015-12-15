@@ -5,6 +5,7 @@
 #include <string>
 
 #include <QObject>
+#include <QMutex>
 
 #ifndef Q_MOC_RUN
 #include <components/files/configurationmanager.hpp>
@@ -25,6 +26,10 @@ namespace CSMPrefs
     class BoolSetting;
     class ColourSetting;
 
+    /// \brief User settings state
+    ///
+    /// \note Access to the user settings is thread-safe once all declarations and loading has
+    /// been completed.
     class State : public QObject
     {
             Q_OBJECT
@@ -43,6 +48,7 @@ namespace CSMPrefs
             Settings::Manager mSettings;
             Collection mCategories;
             Iterator mCurrentCategory;
+            QMutex mMutex;
 
             // not implemented
             State (const State&);

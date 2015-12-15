@@ -15,7 +15,7 @@ namespace CSMPrefs
         public:
 
             BoolSetting (Category *parent, Settings::Manager *values,
-                const std::string& key, const std::string& label, bool default_);
+                QMutex *mutex, const std::string& key, const std::string& label, bool default_);
 
             BoolSetting& setTooltip (const std::string& tooltip);
 

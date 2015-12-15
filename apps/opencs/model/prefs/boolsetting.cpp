@@ -2,6 +2,7 @@
 #include "boolsetting.hpp"
 
 #include <QCheckBox>
+#include <QMutexLocker>
 
 #include <components/settings/settings.hpp>
 
@@ -9,8 +10,8 @@
 #include "state.hpp"
 
 CSMPrefs::BoolSetting::BoolSetting (Category *parent, Settings::Manager *values,
-  const std::string& key, const std::string& label, bool default_)
-: Setting (parent, values, key, label),  mDefault (default_)
+  QMutex *mutex, const std::string& key, const std::string& label, bool default_)
+: Setting (parent, values, mutex, key, label),  mDefault (default_)
 {}
 
 CSMPrefs::BoolSetting& CSMPrefs::BoolSetting::setTooltip (const std::string& tooltip)
@@ -37,6 +38,10 @@ std::pair<QWidget *, QWidget *> CSMPrefs::BoolSetting::makeWidgets (QWidget *par
 
 void CSMPrefs::BoolSetting::valueChanged (int value)
 {
-    getValues().setBool (getKey(), getParent()->getKey(), value);
+    {
+        QMutexLocker lock (getMutex());
+        getValues().setBool (getKey(), getParent()->getKey(), value);
+    }
+
     getParent()->getState()->update (*this);
 }

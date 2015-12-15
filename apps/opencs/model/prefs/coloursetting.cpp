@@ -1,9 +1,8 @@
 
 #include "coloursetting.hpp"
 
-#include <limits>
-
 #include <QLabel>
+#include <QMutexLocker>
 
 #include <components/settings/settings.hpp>
 
@@ -13,8 +12,8 @@
 #include "state.hpp"
 
 CSMPrefs::ColourSetting::ColourSetting (Category *parent, Settings::Manager *values,
-  const std::string& key, const std::string& label, QColor default_)
-: Setting (parent, values, key, label), mDefault (default_)
+  QMutex *mutex, const std::string& key, const std::string& label, QColor default_)
+: Setting (parent, values, mutex, key, label), mDefault (default_)
 {}
 
 CSMPrefs::ColourSetting& CSMPrefs::ColourSetting::setTooltip (const std::string& tooltip)
@@ -44,6 +43,10 @@ std::pair<QWidget *, QWidget *> CSMPrefs::ColourSetting::makeWidgets (QWidget *p
 void CSMPrefs::ColourSetting::valueChanged()
 {
     CSVWidget::ColorEditor& widget = dynamic_cast<CSVWidget::ColorEditor&> (*sender());
-    getValues().setString (getKey(), getParent()->getKey(), widget.color().name().toUtf8().data());
+    {
+        QMutexLocker lock (getMutex());
+        getValues().setString (getKey(), getParent()->getKey(), widget.color().name().toUtf8().data());
+    }
+
     getParent()->getState()->update (*this);
 }

@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QComboBox>
+#include <QMutexLocker>
 
 #include <components/settings/settings.hpp>
 
@@ -39,8 +40,8 @@ CSMPrefs::EnumValues& CSMPrefs::EnumValues::add (const std::string& value, const
 
 
 CSMPrefs::EnumSetting::EnumSetting (Category *parent, Settings::Manager *values,
-  const std::string& key, const std::string& label, const EnumValue& default_)
-: Setting (parent, values, key, label), mDefault (default_)
+  QMutex *mutex, const std::string& key, const std::string& label, const EnumValue& default_)
+: Setting (parent, values, mutex, key, label), mDefault (default_)
 {}
 
 CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::setTooltip (const std::string& tooltip)
@@ -102,6 +103,10 @@ std::pair<QWidget *, QWidget *> CSMPrefs::EnumSetting::makeWidgets (QWidget *par
 
 void CSMPrefs::EnumSetting::valueChanged (int value)
 {
-    getValues().setString (getKey(), getParent()->getKey(), mValues.mValues.at (value).mValue);
+    {
+        QMutexLocker lock (getMutex());
+        getValues().setString (getKey(), getParent()->getKey(), mValues.mValues.at (value).mValue);
+    }
+
     getParent()->getState()->update (*this);
 }

@@ -220,7 +220,8 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt (const std::string& key,
     default_ = mSettings.getInt (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::IntSetting *setting =
-        new CSMPrefs::IntSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+        new CSMPrefs::IntSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
 
     mCurrentCategory->second.addSetting (setting);
 
@@ -240,7 +241,8 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
     default_ = mSettings.getFloat (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::DoubleSetting *setting =
-        new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+        new CSMPrefs::DoubleSetting (&mCurrentCategory->second, &mSettings, &mMutex,
+        key, label, default_);
 
     mCurrentCategory->second.addSetting (setting);
 
@@ -258,7 +260,8 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool (const std::string& key,
     default_ = mSettings.getBool (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::BoolSetting *setting =
-        new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+        new CSMPrefs::BoolSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
 
     mCurrentCategory->second.addSetting (setting);
 
@@ -276,7 +279,8 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum (const std::string& key,
     default_.mValue = mSettings.getString (key, mCurrentCategory->second.getKey());
 
     CSMPrefs::EnumSetting *setting =
-        new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+        new CSMPrefs::EnumSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
 
     mCurrentCategory->second.addSetting (setting);
 
@@ -294,7 +298,8 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour (const std::string& key,
     default_.setNamedColor (QString::fromUtf8 (mSettings.getString (key, mCurrentCategory->second.getKey()).c_str()));
 
     CSMPrefs::ColourSetting *setting =
-        new CSMPrefs::ColourSetting (&mCurrentCategory->second, &mSettings, key, label, default_);
+        new CSMPrefs::ColourSetting (&mCurrentCategory->second, &mSettings, &mMutex, key, label,
+        default_);
 
     mCurrentCategory->second.addSetting (setting);
 
@@ -307,7 +312,7 @@ void CSMPrefs::State::declareSeparator()
         throw std::logic_error ("no category for setting");
 
     CSMPrefs::Setting *setting =
-        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, "", "");
+        new CSMPrefs::Setting (&mCurrentCategory->second, &mSettings, &mMutex, "", "");
 
     mCurrentCategory->second.addSetting (setting);
 }

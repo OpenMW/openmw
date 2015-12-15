@@ -17,7 +17,8 @@ namespace CSMPrefs
         public:
 
             ColourSetting (Category *parent, Settings::Manager *values,
-                const std::string& key, const std::string& label, QColor default_);
+                QMutex *mutex, const std::string& key, const std::string& label,
+                QColor default_);
 
             ColourSetting& setTooltip (const std::string& tooltip);
 

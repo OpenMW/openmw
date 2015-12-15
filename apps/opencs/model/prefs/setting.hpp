@@ -8,6 +8,7 @@
 
 class QWidget;
 class QColor;
+class QMutex;
 
 namespace Settings
 {
@@ -24,6 +25,7 @@ namespace CSMPrefs
 
             Category *mParent;
             Settings::Manager *mValues;
+            QMutex *mMutex;
             std::string mKey;
             std::string mLabel;
 
@@ -31,9 +33,11 @@ namespace CSMPrefs
 
             Settings::Manager& getValues();
 
+            QMutex *getMutex();
+
         public:
 
-            Setting (Category *parent, Settings::Manager *values, const std::string& key, const std::string& label);
+            Setting (Category *parent, Settings::Manager *values, QMutex *mutex, const std::string& key, const std::string& label);
 
             virtual ~Setting();
 

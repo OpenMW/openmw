@@ -5,6 +5,7 @@
 
 #include <QLabel>
 #include <QSpinBox>
+#include <QMutexLocker>
 
 #include <components/settings/settings.hpp>
 
@@ -12,8 +13,8 @@
 #include "state.hpp"
 
 CSMPrefs::IntSetting::IntSetting (Category *parent, Settings::Manager *values,
-  const std::string& key, const std::string& label, int default_)
-: Setting (parent, values, key, label), mMin (0), mMax (std::numeric_limits<int>::max()),
+  QMutex *mutex, const std::string& key, const std::string& label, int default_)
+: Setting (parent, values, mutex, key, label), mMin (0), mMax (std::numeric_limits<int>::max()),
   mDefault (default_)
 {}
 
@@ -64,6 +65,10 @@ std::pair<QWidget *, QWidget *> CSMPrefs::IntSetting::makeWidgets (QWidget *pare
 
 void CSMPrefs::IntSetting::valueChanged (int value)
 {
-    getValues().setInt (getKey(), getParent()->getKey(), value);
+    {
+        QMutexLocker lock (getMutex());
+        getValues().setInt (getKey(), getParent()->getKey(), value);
+    }
+
     getParent()->getState()->update (*this);
 }
