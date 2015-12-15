@@ -23,6 +23,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+
 #include "../../model/prefs/state.hpp"
 
 #include "recordstatusdelegate.hpp"
@@ -232,10 +233,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
 : DragRecordTable(document), mCreateAction (0),
   mCloneAction(0),mRecordStatusDisplay (0)
 {
-    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
-        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
-    CSMPrefs::get()["ID Tables"].update();
-
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 
     bool isInfoTable = id.getType() == CSMWorld::UniversalId::Type_TopicInfos ||
@@ -361,6 +358,10 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier, Action_EditRecord));
     mDoubleClickActions.insert (std::make_pair (Qt::ControlModifier, Action_View));
     mDoubleClickActions.insert (std::make_pair (Qt::ShiftModifier | Qt::ControlModifier, Action_EditRecordAndClose));
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["ID Tables"].update();
 }
 
 void CSVWorld::Table::setEditLock (bool locked)
@@ -556,46 +557,6 @@ void CSVWorld::Table::executeExtendedRevert()
     }
 }
 
-void CSVWorld::Table::updateUserSetting (const QString &name, const QStringList &list)
-{
-    QString base ("table-input/double");
-    if (name.startsWith (base))
-    {
-        QString modifierString = name.mid (base.size());
-        Qt::KeyboardModifiers modifiers = 0;
-
-        if (modifierString=="-s")
-            modifiers = Qt::ShiftModifier;
-        else if (modifierString=="-c")
-            modifiers = Qt::ControlModifier;
-        else if (modifierString=="-sc")
-            modifiers = Qt::ShiftModifier | Qt::ControlModifier;
-
-        DoubleClickAction action = Action_None;
-
-        QString value = list.at (0);
-
-        if (value=="Edit in Place")
-            action = Action_InPlaceEdit;
-        else if (value=="Edit Record")
-            action = Action_EditRecord;
-        else if (value=="View")
-            action = Action_View;
-        else if (value=="Revert")
-            action = Action_Revert;
-        else if (value=="Delete")
-            action = Action_Delete;
-        else if (value=="Edit Record and Close")
-            action = Action_EditRecordAndClose;
-        else if (value=="View and Close")
-            action = Action_ViewAndClose;
-
-        mDoubleClickActions[modifiers] = action;
-
-        return;
-    }
-}
-
 void CSVWorld::Table::settingChanged (const CSMPrefs::Setting *setting)
 {
     if (*setting=="ID Tables/jump-to-added")
@@ -627,6 +588,41 @@ void CSVWorld::Table::settingChanged (const CSMPrefs::Setting *setting)
                 emit dataChanged (mModel->index (0, i),
                     mModel->index (mModel->rowCount()-1, i));
             }
+    }
+    else if (setting->getParent()->getKey()=="ID Tables" &&
+        setting->getKey().substr (0, 6)=="double")
+    {
+        std::string modifierString = setting->getKey().substr (6);
+
+        Qt::KeyboardModifiers modifiers = 0;
+
+        if (modifierString=="-s")
+            modifiers = Qt::ShiftModifier;
+        else if (modifierString=="-c")
+            modifiers = Qt::ControlModifier;
+        else if (modifierString=="-sc")
+            modifiers = Qt::ShiftModifier | Qt::ControlModifier;
+
+        DoubleClickAction action = Action_None;
+
+        std::string value = setting->toString();
+
+        if (value=="Edit in Place")
+            action = Action_InPlaceEdit;
+        else if (value=="Edit Record")
+            action = Action_EditRecord;
+        else if (value=="View")
+            action = Action_View;
+        else if (value=="Revert")
+            action = Action_Revert;
+        else if (value=="Delete")
+            action = Action_Delete;
+        else if (value=="Edit Record and Close")
+            action = Action_EditRecordAndClose;
+        else if (value=="View and Close")
+            action = Action_ViewAndClose;
+
+        mDoubleClickActions[modifiers] = action;
     }
 }
 

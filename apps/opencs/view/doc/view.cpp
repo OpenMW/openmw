@@ -15,7 +15,6 @@
 #include <QScrollBar>
 
 #include "../../model/doc/document.hpp"
-#include "../../model/settings/usersettings.hpp"
 #include "../../model/prefs/state.hpp"
 
 #include "../../model/world/idtable.hpp"
@@ -443,6 +442,9 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
 }
 
 CSVDoc::View::~View()
@@ -623,6 +625,45 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 
         QObject::disconnect(mScroll->horizontalScrollBar(),
             SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
+    }
+}
+
+void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="Windows/hide-subview")
+        updateSubViewIndicies (0);
+    else if (*setting=="Windows/mainwindow-scrollbar")
+    {
+        if (setting->toString()!="Grow Only")
+        {
+            if (mScroll)
+            {
+                if (setting->toString()=="Scrollbar Only")
+                {
+                    mScrollbarOnly = true;
+                    mSubViewWindow.setMinimumWidth(0);
+                }
+                else if (mScrollbarOnly)
+                {
+                    mScrollbarOnly = false;
+                    updateScrollbar();
+                }
+            }
+            else
+            {
+                mScroll = new QScrollArea(this);
+                mScroll->setWidgetResizable(true);
+                mScroll->setWidget(&mSubViewWindow);
+                setCentralWidget(mScroll);
+            }
+        }
+        else  if (mScroll)
+        {
+            mScroll->takeWidget();
+            setCentralWidget (&mSubViewWindow);
+            mScroll->deleteLater();
+            mScroll = 0;
+        }
     }
 }
 
@@ -847,60 +888,6 @@ void CSVDoc::View::resizeViewHeight (int height)
 {
     if (height >= 0)
         resize (geometry().width(), height);
-}
-
-void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &list)
-{
-
-    if (name=="window/hide-subview")
-        updateSubViewIndicies (0);
-
-    foreach (SubView *subView, mSubViews)
-    {
-        subView->updateUserSetting (name, list);
-    }
-
-    if (name=="window/mainwindow-scrollbar")
-    {
-        if(list.at(0) != "Grow Only")
-        {
-            if (mScroll)
-            {
-                if (list.at(0).isEmpty() || list.at(0) == "Scrollbar Only")
-                {
-                    mScrollbarOnly = true;
-                    mSubViewWindow.setMinimumWidth(0);
-                }
-                else
-                {
-                    if(!mScrollbarOnly)
-                        return;
-
-                    mScrollbarOnly = false;
-                    updateScrollbar();
-                }
-            }
-            else
-            {
-                mScroll = new QScrollArea(this);
-                mScroll->setWidgetResizable(true);
-                mScroll->setWidget(&mSubViewWindow);
-                setCentralWidget(mScroll);
-            }
-        }
-        else
-        {
-            if (mScroll)
-            {
-                mScroll->takeWidget();
-                setCentralWidget (&mSubViewWindow);
-                mScroll->deleteLater();
-                mScroll = 0;
-            }
-            else
-                return;
-        }
-    }
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)

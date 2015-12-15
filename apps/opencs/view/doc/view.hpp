@@ -22,6 +22,11 @@ namespace CSMWorld
     class UniversalId;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVDoc
 {
     class ViewManager;
@@ -137,14 +142,14 @@ namespace CSVDoc
 
             void abortOperation (int type);
 
-            void updateUserSetting (const QString &, const QStringList &);
-
             void updateTitle();
 
             // called when subviews are added or removed
             void updateSubViewIndicies (SubView *view = 0);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void newView();
 

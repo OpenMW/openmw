@@ -6,7 +6,7 @@
 #include "../../model/tools/search.hpp"
 #include "../../model/tools/reportmodel.hpp"
 #include "../../model/world/idtablebase.hpp"
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "reporttable.hpp"
 #include "searchbox.hpp"
@@ -23,8 +23,7 @@ void CSVTools::SearchSubView::replace (bool selection)
     const CSMTools::ReportModel& model =
         dynamic_cast<const CSMTools::ReportModel&> (*mTable->model());
 
-    bool autoDelete = CSMSettings::UserSettings::instance().setting (
-        "search/auto-delete", QString ("true"))=="true";
+    bool autoDelete = CSMPrefs::get()["Search & Replace"]["auto-delete"].isTrue();
 
     CSMTools::Search search (mSearch);
     CSMWorld::IdTableBase *currentTable = 0;
@@ -109,13 +108,10 @@ void CSVTools::SearchSubView::stateChanged (int state, CSMDoc::Document *documen
 
 void CSVTools::SearchSubView::startSearch (const CSMTools::Search& search)
 {
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-
-    int paddingBefore = userSettings.setting ("search/char-before", QString ("5")).toInt();
-    int paddingAfter = userSettings.setting ("search/char-after", QString ("5")).toInt();
+    CSMPrefs::Category& settings = CSMPrefs::get()["Search & Replace"];
 
     mSearch = search;
-    mSearch.setPadding (paddingBefore, paddingAfter);
+    mSearch.setPadding (settings["char-before"].toInt(), settings["char-after"].toInt());
 
     mTable->clear();
     mDocument.runSearch (getUniversalId(), mSearch);

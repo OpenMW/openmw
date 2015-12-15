@@ -1,7 +1,7 @@
 
 #include "instancemode.hpp"
 
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "elements.hpp"
 #include "object.hpp"
@@ -9,33 +9,20 @@
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
-  parent), mContextSelect (false)
+  parent)
 {
 
-}
-
-void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
-{
-    EditMode::activate (toolbar);
-
-    mContextSelect = CSMSettings::UserSettings::instance().setting ("scene-input/context-select")=="true";
-}
-
-void CSVRender::InstanceMode::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (name=="scene-input/context-select")
-        mContextSelect = value.at (0)=="true";
 }
 
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)
 {
-    if (mContextSelect)
+    if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         primarySelectPressed (tag);
 }
 
 void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
 {
-    if (mContextSelect)
+    if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         secondarySelectPressed (tag);
 }
 

@@ -155,8 +155,6 @@ namespace CSVWorld
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
 
-            void updateUserSetting (const QString &name, const QStringList &list);
-
             void rowAdded(const std::string &id);
     };
 }
