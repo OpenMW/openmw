@@ -33,11 +33,10 @@ namespace MWGui
         LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer);
         virtual ~LoadingScreen();
 
+        /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
         virtual void setLabel (const std::string& label);
-
         virtual void loadingOn();
         virtual void loadingOff();
-
         virtual void setProgressRange (size_t range);
         virtual void setProgress (size_t value);
         virtual void increaseProgress (size_t increase=1);
