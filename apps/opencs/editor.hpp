@@ -17,7 +17,6 @@
 
 #include <components/files/multidircollection.hpp>
 
-#include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
 
 #include "model/prefs/state.hpp"
@@ -26,8 +25,6 @@
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
-
-#include "view/settings/dialog.hpp"
 
 #include "view/prefs/dialogue.hpp"
 
@@ -54,7 +51,6 @@ namespace CS
 
             Files::ConfigurationManager mCfgMgr;
             CSMPrefs::State mSettingsState;
-            CSMSettings::UserSettings mUserSettings;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;

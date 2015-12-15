@@ -4,7 +4,6 @@
 #include <QApplication>
 #include <QUndoStack>
 
-#include "../../model/settings/usersettings.hpp"
 #include "../../model/world/columns.hpp"
 
 CSVWorld::RecordStatusDelegate::RecordStatusDelegate(const ValueList& values,

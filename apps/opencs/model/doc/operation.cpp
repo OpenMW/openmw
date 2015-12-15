@@ -6,7 +6,6 @@
 #include <QTimer>
 
 #include "../world/universalid.hpp"
-#include "../settings/usersettings.hpp"
 
 #include "state.hpp"
 #include "stage.hpp"
