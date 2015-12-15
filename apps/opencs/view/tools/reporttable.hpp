@@ -13,6 +13,11 @@ namespace CSMTools
     class ReportModel;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class CommandDelegate;
@@ -61,8 +66,6 @@ namespace CSVTools
 
             virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
 
-            void updateUserSetting (const QString& name, const QStringList& list);
-
             void clear();
 
             /// Return indices of rows that are suitable for replacement.
@@ -76,6 +79,8 @@ namespace CSVTools
             void flagAsReplaced (int index);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void showSelection();
 

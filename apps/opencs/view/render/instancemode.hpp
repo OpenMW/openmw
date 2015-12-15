@@ -9,15 +9,9 @@ namespace CSVRender
     {
             Q_OBJECT
 
-            bool mContextSelect;
-
         public:
 
             InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
-
-            virtual void activate (CSVWidget::SceneToolbar *toolbar);
-
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
 
             virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
 

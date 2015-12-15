@@ -27,6 +27,11 @@ namespace CSMWorld
     class NestedTableProxyModel;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSMDoc
 {
     class Document;
@@ -271,9 +276,9 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void showPreview();
 

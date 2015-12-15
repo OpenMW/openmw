@@ -59,8 +59,6 @@ namespace CSVWorld
 
             virtual std::string getTitle() const;
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
         private:
 
             void makeConnections(CSVRender::PagedWorldspaceWidget* widget);

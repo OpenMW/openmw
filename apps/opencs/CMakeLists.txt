@@ -106,31 +106,16 @@ opencs_units_noqt (view/tools
     subviews
     )
 
-opencs_units (view/settings
-    settingwindow
-    dialog
-    page
-    view
-    booleanview
-    textview
-    listview
-    rangeview
-    resizeablestackedwidget
-    spinbox
+opencs_units (view/prefs
+    dialogue pagebase page
     )
 
-opencs_units_noqt (view/settings
-    frame
+opencs_units (model/prefs
+    state setting intsetting doublesetting boolsetting enumsetting coloursetting
     )
 
-opencs_units (model/settings
-    usersettings
-    setting
-    connector
-    )
-
-opencs_hdrs_noqt (model/settings
-    support
+opencs_units_noqt (model/prefs
+    category
     )
 
 opencs_units_noqt (model/filter

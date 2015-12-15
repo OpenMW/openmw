@@ -27,6 +27,11 @@ namespace CSMWorld
     class CommandDispatcher;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class CommandDelegate;
@@ -140,6 +145,8 @@ namespace CSVWorld
 
         public slots:
 
+            void settingChanged (const CSMPrefs::Setting *setting);
+
             void tableSizeUpdate();
 
             void selectionSizeUpdate();
@@ -147,8 +154,6 @@ namespace CSVWorld
             void requestFocus (const std::string& id);
 
             void recordFilterChanged (boost::shared_ptr<CSMFilter::Node> filter);
-
-            void updateUserSetting (const QString &name, const QStringList &list);
 
             void rowAdded(const std::string &id);
     };

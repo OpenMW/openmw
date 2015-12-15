@@ -23,6 +23,11 @@ namespace CSMWorld
     class IdTable;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     class ScriptEdit;
@@ -69,8 +74,6 @@ namespace CSVWorld
 
             virtual void useHint (const std::string& hint);
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
             virtual void setStatusBar (bool show);
 
         public slots:
@@ -82,6 +85,8 @@ namespace CSVWorld
             void rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void updateStatusBar();
 

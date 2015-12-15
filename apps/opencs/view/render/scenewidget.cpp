@@ -16,7 +16,6 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../widget/scenetoolmode.hpp"
-#include "../../model/settings/usersettings.hpp"
 
 #include "lighting.hpp"
 

@@ -34,7 +34,6 @@ namespace CSMDoc
             bool mError;
             bool mConnected;
             QTimer *mTimer;
-            std::map<QString, QStringList> mSettings;
             bool mPrepared;
             Message::Severity mDefaultSeverity;
 
@@ -52,11 +51,6 @@ namespace CSMDoc
             ///< The ownership of \a stage is transferred to *this.
             ///
             /// \attention Do no call this function while this Operation is running.
-
-            /// Specify settings to be passed on to stages.
-            ///
-            /// \attention Do no call this function while this Operation is running.
-            void configureSettings (const std::vector<QString>& settings);
 
             /// \attention Do no call this function while this Operation is running.
             void setDefaultSeverity (Message::Severity severity);
@@ -76,8 +70,6 @@ namespace CSMDoc
             void abort();
 
             void run();
-
-            void updateUserSetting (const QString& name, const QStringList& value);
 
         private slots:
 
