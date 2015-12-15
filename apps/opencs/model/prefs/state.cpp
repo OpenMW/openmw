@@ -74,7 +74,7 @@ void CSMPrefs::State::declare()
     declareCategory ("Records");
     EnumValue iconAndText ("Icon and Text");
     EnumValues recordValues;
-    recordValues.add (iconAndText).add ("Icon Only").add ("Text only");
+    recordValues.add (iconAndText).add ("Icon Only").add ("Text Only");
     declareEnum ("status-format", "Modification status display format", iconAndText).
         addValues (recordValues);
     declareEnum ("type-format", "ID type display format", iconAndText).
