@@ -12,9 +12,6 @@ namespace Loading
         virtual void loadingOn() {}
         virtual void loadingOff() {}
 
-        /// Indicate that some progress has been made, without specifying how much
-        virtual void indicateProgress () {}
-
         virtual void setProgressRange (size_t range) {}
         virtual void setProgress (size_t value) {}
         virtual void increaseProgress (size_t increase = 1) {}

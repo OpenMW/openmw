@@ -35,9 +35,6 @@ namespace MWGui
 
         virtual void setLabel (const std::string& label);
 
-        /// Indicate that some progress has been made, without specifying how much
-        virtual void indicateProgress ();
-
         virtual void loadingOn();
         virtual void loadingOff();
 

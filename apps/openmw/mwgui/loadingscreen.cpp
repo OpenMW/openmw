@@ -224,17 +224,6 @@ namespace MWGui
         draw();
     }
 
-    void LoadingScreen::indicateProgress()
-    {
-        float time = (static_cast<int>(mTimer.time_m()) % 2001) / 1000.f;
-        if (time > 1)
-            time = (time-2)*-1;
-
-        mProgressBar->setTrackSize(50);
-        mProgressBar->setScrollPosition(static_cast<size_t>(time * (mProgressBar->getScrollRange() - 1)));
-        draw();
-    }
-
     bool LoadingScreen::needToDrawLoadingScreen()
     {
         if ( mTimer.time_m() <= mLastRenderTime + (1.0/mTargetFrameRate) * 1000.0)
