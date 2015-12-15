@@ -71,6 +71,12 @@ CSVPrefs::Dialogue::Dialogue()
     buildContentArea (main);
 }
 
+CSVPrefs::Dialogue::~Dialogue()
+{
+    if (isVisible())
+        CSMPrefs::State::get().save();
+}
+
 void CSVPrefs::Dialogue::closeEvent (QCloseEvent *event)
 {
     QMainWindow::closeEvent (event);

@@ -31,6 +31,8 @@ namespace CSVPrefs
 
             Dialogue();
 
+            virtual ~Dialogue();
+
         protected:
 
             void closeEvent (QCloseEvent *event);
