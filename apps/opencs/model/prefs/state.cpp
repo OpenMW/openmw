@@ -23,7 +23,7 @@ void CSMPrefs::State::load()
     else if (boost::filesystem::exists (global))
         mSettings.loadDefault (global.string());
     else
-        throw std::runtime_error ("No default settings file found! Make sure the file \"opencs.ini\" was properly installed.");
+        throw std::runtime_error ("No default settings file found! Make sure the file \"openmw-cs.cfg\" was properly installed.");
 
     // user settings file
     boost::filesystem::path user = mConfigurationManager.getUserConfigPath() / mConfigFile;
@@ -329,7 +329,7 @@ void CSMPrefs::State::setDefault (const std::string& key, const std::string& def
 }
 
 CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
-: mConfigFile ("opencs.ini"), mConfigurationManager (configurationManager),
+: mConfigFile ("openmw-cs.cfg"), mConfigurationManager (configurationManager),
   mCurrentCategory (mCategories.end())
 {
     if (sThis)
