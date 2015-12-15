@@ -209,6 +209,7 @@ namespace MWGui
         // skip expensive update if there isn't enough visible progress
         if (value - mProgress < mProgressBar->getScrollRange()/200.f)
             return;
+        value = std::min(value, mProgressBar->getScrollRange()-1);
         mProgress = value;
         mProgressBar->setScrollPosition(0);
         mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
@@ -219,6 +220,7 @@ namespace MWGui
     {
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
+        value = std::min(value, mProgressBar->getScrollRange()-1);
         mProgress = value;
         mProgressBar->setTrackSize(static_cast<int>(value / (float)(mProgressBar->getScrollRange()) * mProgressBar->getLineSize()));
         draw();
