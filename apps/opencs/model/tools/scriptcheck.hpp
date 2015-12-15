@@ -34,7 +34,7 @@ namespace CSMTools
             WarningMode mWarningMode;
 
             CSMDoc::Message::Severity getSeverity (Type type);
-            
+
             virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
             ///< Report error to the user.
 
@@ -50,8 +50,6 @@ namespace CSMTools
 
             virtual void perform (int stage, CSMDoc::Messages& messages);
             ///< Messages resulting from this tage will be appended to \a messages.
-
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
     };
 }
 

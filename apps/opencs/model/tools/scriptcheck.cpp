@@ -10,6 +10,8 @@
 
 #include "../world/data.hpp"
 
+#include "../prefs/state.hpp"
+
 CSMDoc::Message::Severity CSMTools::ScriptCheckStage::getSeverity (Type type)
 {
     switch (type)
@@ -46,7 +48,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 
     std::ostringstream stream;
     stream << "script " << mFile << ": " << message;
-    
+
     mMessages->add (id, stream.str(), "", getSeverity (type));
 }
 
@@ -62,6 +64,15 @@ CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
 
 int CSMTools::ScriptCheckStage::setup()
 {
+    std::string warnings = CSMPrefs::get()["Scripts"]["warnings"].toString();
+
+    if (warnings=="Ignore")
+        mWarningMode = Mode_Ignore;
+    else if (warnings=="Normal")
+        mWarningMode = Mode_Normal;
+    else if (warnings=="Strict")
+        mWarningMode = Mode_Strict;
+
     mContext.clear();
     mMessages = 0;
     mId.clear();
@@ -110,22 +121,9 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
 
         std::ostringstream stream;
         stream << "script " << mFile << ": " << error.what();
-        
+
         messages.add (id, stream.str(), "", CSMDoc::Message::Severity_SeriousError);
     }
 
     mMessages = 0;
-}
-
-void CSMTools::ScriptCheckStage::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (name=="script-editor/warnings" && !value.isEmpty())
-    {
-        if (value.at (0)=="Ignore")
-            mWarningMode = Mode_Ignore;
-        else if (value.at (0)=="Normal")
-            mWarningMode = Mode_Normal;
-        else if (value.at (0)=="Strict")
-            mWarningMode = Mode_Strict;
-    }
 }

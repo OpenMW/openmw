@@ -88,8 +88,6 @@ namespace CSVDoc
 
             void exitApplication();
 
-            void loadUserSettings();
-
             /// User preference function
             void resizeViewWidth (int width);
 
