@@ -242,7 +242,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         // Using only Cells for progress information, since they typically have the largest records by far
         listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
-        listener.setLabel("#{sNotifyMessage4}");
+        listener.setLabel("#{sNotifyMessage4}", true);
 
         Loading::ScopedLoad load(&listener);
 

@@ -36,6 +36,7 @@ namespace MWGui
         , mLastWallpaperChangeTime(0.0)
         , mLastRenderTime(0.0)
         , mLoadingOnTime(0.0)
+        , mImportantLabel(false)
         , mProgress(0)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
@@ -82,8 +83,10 @@ namespace MWGui
             std::cerr << "No splash screens found!" << std::endl;
     }
 
-    void LoadingScreen::setLabel(const std::string &label)
+    void LoadingScreen::setLabel(const std::string &label, bool important)
     {
+        mImportantLabel = important;
+
         mLoadingText->setCaptionWithReplacing(label);
         int padding = mLoadingBox->getWidth() - mLoadingText->getWidth();
         MyGUI::IntSize size(mLoadingText->getTextSize().width+padding, mLoadingBox->getHeight());
@@ -176,6 +179,19 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
+        if (mLastRenderTime < mLoadingOnTime)
+        {
+            // the loading was so fast that we didn't show loading screen at all
+            // we may still want to show the label if the caller requested it
+            if (mImportantLabel)
+            {
+                MWBase::Environment::get().getWindowManager()->messageBox(mLoadingText->getCaption());
+                mImportantLabel = false;
+            }
+        }
+        else
+            mImportantLabel = false; // label was already shown on loading screen
+
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
 
