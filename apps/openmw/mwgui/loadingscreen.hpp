@@ -44,9 +44,6 @@ namespace MWGui
 
         virtual void setVisible(bool visible);
 
-        void setLoadingProgress (const std::string& stage, int depth, int current, int total);
-        void loadingDone();
-
     private:
         void findSplashScreens();
         bool needToDrawLoadingScreen();
