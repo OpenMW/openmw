@@ -90,8 +90,9 @@ static bool readControllers(osgDB::InputStream& is,
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         osg::ref_ptr<NifOsg::KeyframeController> ctrl = is.readObjectOfType<NifOsg::KeyframeController>();
 #else
-        osg::ref_ptr<NifOsg::KeyframeController> ctrl;
-        is >> ctrl;
+        // Silence OSG 3.2 compilation failure until I can investigate further.
+        //osg::ref_ptr<NifOsg::KeyframeController> ctrl;
+        //is >> ctrl;
 #endif
         KFCMap::value_type pair = KFCMap::value_type(label, ctrl);
         it = node.mKeyframeControllers.insert(it, pair);
