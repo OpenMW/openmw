@@ -41,7 +41,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     if (!info.mRace.empty())
     {
         if (isCreature)
-            return false;
+            return true;
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
@@ -53,7 +53,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     if (!info.mClass.empty())
     {
         if (isCreature)
-            return false;
+            return true;
 
         MWWorld::LiveCellRef<ESM::NPC> *cellRef = mActor.get<ESM::NPC>();
 
@@ -65,7 +65,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     if (!info.mFaction.empty())
     {
         if (isCreature)
-            return false;
+            return true;
 
         if (!Misc::StringUtils::ciEqual(mActor.getClass().getPrimaryFaction(mActor), info.mFaction))
             return false;
@@ -77,7 +77,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     else if (info.mData.mRank != -1)
     {
         if (isCreature)
-            return false;
+            return true;
 
         // Rank requirement, but no faction given. Use the actor's faction, if there is one.
         // check rank
@@ -156,10 +156,8 @@ bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
     if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
         // If the actor is a creature, we do not test the conditions applicable
-        // only to NPCs. Such conditions can never be satisfied, apart
-        // inverted ones (NotClass, NotRace, NotFaction return true
-        // because creatures are not of any race, class or faction).
-        return select.getType() == SelectWrapper::Type_Inverted;
+        // only to NPCs.
+        return true;
 
     switch (select.getType())
     {
