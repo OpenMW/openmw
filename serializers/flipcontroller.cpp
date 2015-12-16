@@ -13,7 +13,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_FlipController_Serializer,
                          new NifOsg::FlipController,
                          NifOsg::FlipController,
                          "OpenMW::FlipController",
-                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::FlipController")
+                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::Controller OpenMW::FlipController")
 {
     SETUPMSG("OpenMW::FlipController");
     ADD_INT_SERIALIZER(TexSlot, 0);

@@ -17,7 +17,16 @@
 namespace NifOsg
 {
 
-ControllerFunction::ControllerFunction(const Nif::Controller *ctrl)
+NifControllerFunction::NifControllerFunction()
+    : mFrequency(0.0f)
+    , mPhase(0.0f)
+    , mStartTime(0.0f)
+    , mStopTime(0.0f)
+    , mExtrapolationMode(Cycle)
+{
+}
+
+NifControllerFunction::NifControllerFunction(const Nif::Controller *ctrl)
     : mFrequency(ctrl->frequency)
     , mPhase(ctrl->phase)
     , mStartTime(ctrl->timeStart)
@@ -26,7 +35,17 @@ ControllerFunction::ControllerFunction(const Nif::Controller *ctrl)
 {
 }
 
-float ControllerFunction::calculate(float value) const
+NifControllerFunction::NifControllerFunction(const NifControllerFunction &copy, const osg::CopyOp &copyop)
+    : SceneUtil::ControllerFunction(copy, copyop)
+    , mFrequency(copy.mFrequency)
+    , mPhase(copy.mPhase)
+    , mStartTime(copy.mStartTime)
+    , mStopTime(copy.mStopTime)
+    , mExtrapolationMode(copy.mExtrapolationMode)
+{
+}
+
+float NifControllerFunction::calculate(float value) const
 {
     float time = mFrequency * value + mPhase;
     if (time >= mStartTime && time <= mStopTime)
@@ -63,7 +82,7 @@ float ControllerFunction::calculate(float value) const
     }
 }
 
-float ControllerFunction::getMaximum() const
+float NifControllerFunction::getMaximum() const
 {
     return mStopTime;
 }

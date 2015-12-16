@@ -8,52 +8,75 @@
 namespace SceneUtil
 {
 
-    class ControllerSource
+    class ControllerSource : public osg::Object
     {
     public:
-        virtual ~ControllerSource() { }
-        virtual float getValue(osg::NodeVisitor* nv) = 0;
+        ControllerSource() {}
+        ControllerSource(const ControllerSource& copy,
+                                 const osg::CopyOp& copyop) : osg::Object(copy, copyop) {}
+        virtual ~ControllerSource() {}
+
+        META_Object(OpenMW, ControllerSource)
+
+        virtual float getValue(osg::NodeVisitor* nv) { return 0.0f; }
     };
 
     class FrameTimeSource : public ControllerSource
     {
     public:
-        FrameTimeSource();
+        FrameTimeSource() {}
+        FrameTimeSource(const FrameTimeSource& copy,
+                        const osg::CopyOp& copyop) : ControllerSource(copy, copyop) {}
+        ~FrameTimeSource() {}
+
+        META_Object(OpenMW, FrameTimeSource)
+
         virtual float getValue(osg::NodeVisitor* nv);
     };
 
     /// @note ControllerFunctions may be shared - you should not hold any state in it. That is why all its methods are declared const.
-    class ControllerFunction
+    class ControllerFunction : public osg::Object
     {
     public:
-        virtual float calculate(float input) const = 0;
+        ControllerFunction() { }
+        ControllerFunction(const ControllerFunction& copy,
+                           const osg::CopyOp& copyop) : osg::Object(copy, copyop) { }
+        virtual ~ControllerFunction() { }
+
+        META_Object(OpenMW, ControllerFunction)
+
+        virtual float calculate(float input) const { return 0.0f; }
 
         /// Get the "stop time" of the controller function, typically the maximum of the calculate() function.
         /// May not be meaningful for all types of controller functions.
-        virtual float getMaximum() const = 0;
+        virtual float getMaximum() const { return 0.0f; }
     };
 
-    class Controller
+    class Controller : virtual public osg::Object
     {
     public:
-        Controller();
+        Controller() {}
+        Controller(const Controller& copy, const osg::CopyOp& copyop);
         virtual ~Controller() {}
+
+        META_Object(OpenMW, Controller)
 
         bool hasInput() const;
 
         float getInputValue(osg::NodeVisitor* nv);
 
-        void setSource(boost::shared_ptr<ControllerSource> source);
-        void setFunction(boost::shared_ptr<ControllerFunction> function);
-
-        boost::shared_ptr<ControllerSource> getSource() const;
-        boost::shared_ptr<ControllerFunction> getFunction() const;
+        ControllerSource* getSource() { return mSource.get(); }
+        const ControllerSource* getSource() const { return mSource.get(); }
+        void setSource(ControllerSource* source) { mSource = source; }
+        ControllerFunction* getFunction() { return mFunction.get(); }
+        const ControllerFunction* getFunction() const { return mFunction.get(); }
+        void setFunction(ControllerFunction* function) { mFunction = function; }
 
     private:
-        boost::shared_ptr<ControllerSource> mSource;
+        osg::ref_ptr<ControllerSource> mSource;
 
         // The source value gets passed through this function before it's passed on to the DestValue.
-        boost::shared_ptr<ControllerFunction> mFunction;
+        osg::ref_ptr<ControllerFunction> mFunction;
     };
 
     /// Pure virtual base class - visit() all controllers that are attached as UpdateCallbacks in a scene graph.
@@ -72,14 +95,14 @@ namespace SceneUtil
     {
     public:
         AssignControllerSourcesVisitor();
-        AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign);
+        AssignControllerSourcesVisitor(osg::ref_ptr<ControllerSource> toAssign);
 
         /// Assign the wanted ControllerSource. May be overridden in derived classes.
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
         virtual void visit(osg::Node& node, Controller& ctrl);
 
     private:
-        boost::shared_ptr<ControllerSource> mToAssign;
+        osg::ref_ptr<ControllerSource> mToAssign;
     };
 
     /// Finds the maximum of all controller functions in the given scene graph

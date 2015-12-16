@@ -43,7 +43,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_VisController_Serializer,
                          new NifOsg::VisController,
                          NifOsg::VisController,
                          "OpenMW::VisController",
-                         "osg::Object osg::NodeCallback OpenMW::VisController")
+                         "osg::Object osg::NodeCallback OpenMW::Controller OpenMW::VisController")
 {
     SETUPMSG("OpenMW::VisController");
     ADD_USER_SERIALIZER(Data);

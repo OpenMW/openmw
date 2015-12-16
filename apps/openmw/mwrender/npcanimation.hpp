@@ -64,8 +64,8 @@ private:
     // Field of view to use when rendering first person meshes
     float mFirstPersonFieldOfView;
 
-    boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
-    boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
+    osg::ref_ptr<HeadAnimationTime> mHeadAnimationTime;
+    osg::ref_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     bool mSoundsDisabled;
 

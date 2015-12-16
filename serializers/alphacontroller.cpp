@@ -1,4 +1,4 @@
-// Virtual because of SceneUtil::StateSetUpdater
+// Virtual because of SceneUtil::Controller
 #define OBJECT_CAST dynamic_cast
 
 #include <boost/foreach.hpp>
@@ -14,7 +14,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_AlphaController_Serializer,
                          new NifOsg::AlphaController,
                          NifOsg::AlphaController,
                          "OpenMW::AlphaController",
-                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::AlphaController")
+                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::Controller OpenMW::AlphaController")
 {
     SETUPMSG("OpenMW::AlphaController");
     ADD_USER_SERIALIZER(Data);

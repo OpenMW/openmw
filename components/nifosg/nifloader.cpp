@@ -257,8 +257,8 @@ namespace NifOsg
                 if(key->data.empty())
                     continue;
 
-                osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
-                callback->setFunction(boost::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
+                osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
+                callback->setFunction(osg::ref_ptr<NifControllerFunction>(new NifControllerFunction(key)));
 
                 target.mKeyframeControllers[strdata->string] = callback;
             }
@@ -304,9 +304,9 @@ namespace NifOsg
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
-                toSetup->setSource(boost::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
+                toSetup->setSource(osg::ref_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
 
-            toSetup->setFunction(boost::shared_ptr<ControllerFunction>(new ControllerFunction(ctrl)));
+            toSetup->setFunction(osg::ref_ptr<NifControllerFunction>(new NifControllerFunction(ctrl)));
         }
 
         void optimize (const Nif::Node* nifNode, osg::Group* node, bool skipMeshes)

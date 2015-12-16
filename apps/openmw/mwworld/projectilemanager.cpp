@@ -101,7 +101,7 @@ namespace MWWorld
 
         mParent->addChild(state.mNode);
 
-        state.mEffectAnimationTime.reset(new MWRender::EffectAnimationTime);
+        state.mEffectAnimationTime = new MWRender::EffectAnimationTime;
 
         SceneUtil::AssignControllerSourcesVisitor assignVisitor (state.mEffectAnimationTime);
         state.mNode->accept(assignVisitor);

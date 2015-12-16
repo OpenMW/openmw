@@ -66,9 +66,9 @@ static bool readKeyFrames(osgDB::InputStream& is,
 }
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-#define ASSOCIATES "osg::Object osg::Callback osg::UpdateCallback OpenMW::GeomMorpherController"
+#define ASSOCIATES "osg::Object osg::Callback osg::UpdateCallback OpenMW::Controller OpenMW::GeomMorpherController"
 #else
-#define ASSOCIATES "osg::Object OpenMW::GeomMorpherController"
+#define ASSOCIATES "osg::Object OpenMW::Controller OpenMW::GeomMorpherController"
 #endif
 
 REGISTER_OBJECT_WRAPPER2(NifOsg_GeomMorpherController_Serializer,

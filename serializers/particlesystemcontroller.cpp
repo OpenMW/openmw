@@ -11,7 +11,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_ParticleSystemController_Serializer,
                          new NifOsg::ParticleSystemController,
                          NifOsg::ParticleSystemController,
                          "OpenMW::ParticleSystemController",
-                         "osg::Object osg::NodeCallback OpenMW::ParticleSystemController")
+                         "osg::Object osg::NodeCallback OpenMW::Controller OpenMW::ParticleSystemController")
 {
     SETUPMSG("OpenMW::ParticleSystemController");
     ADD_FLOAT_SERIALIZER(EmitStart, 0.0f);

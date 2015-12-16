@@ -225,7 +225,7 @@ protected:
     typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
     ControllerMap mActiveControllers;
 
-    boost::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
+    osg::ref_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
     // Stored in all lowercase for a case-insensitive lookup
     typedef std::map<std::string, osg::ref_ptr<osg::MatrixTransform> > NodeMap;
@@ -241,7 +241,7 @@ protected:
     {
         std::string mModelName; // Just here so we don't add the same effect twice
         PartHolderPtr mObjects;
-        boost::shared_ptr<EffectAnimationTime> mAnimTime;
+        osg::ref_ptr<EffectAnimationTime> mAnimTime;
         float mMaxControllerLength;
         int mEffectId;
         bool mLoop;

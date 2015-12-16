@@ -14,7 +14,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_MaterialColorController_Serializer,
                          new NifOsg::MaterialColorController,
                          NifOsg::MaterialColorController,
                          "OpenMW::MaterialColorController",
-                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::MaterialColorController")
+                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::Controller OpenMW::MaterialColorController")
 {
     SETUPMSG("OpenMW::MaterialColorController");
     ADD_USER_SERIALIZER(Data);

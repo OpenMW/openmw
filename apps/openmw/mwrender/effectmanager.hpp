@@ -6,8 +6,6 @@
 
 #include <osg/ref_ptr>
 
-#include <boost/shared_ptr.hpp>
-
 namespace osg
 {
     class Group;
@@ -44,7 +42,7 @@ namespace MWRender
         struct Effect
         {
             float mMaxControllerLength;
-            boost::shared_ptr<EffectAnimationTime> mAnimTime;
+            osg::ref_ptr<EffectAnimationTime> mAnimTime;
         };
 
         typedef std::map<osg::ref_ptr<osg::PositionAttitudeTransform>, Effect> EffectMap;

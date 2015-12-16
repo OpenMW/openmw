@@ -18,7 +18,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_KeyframeController_Serializer,
                          new NifOsg::KeyframeController,
                          NifOsg::KeyframeController,
                          "OpenMW::KeyframeController",
-                         "osg::Object osg::NodeCallback OpenMW::KeyframeController")
+                         "osg::Object osg::NodeCallback OpenMW::Controller OpenMW::KeyframeController")
 {
     SETUPMSG("OpenMW::KeyframeController");
     ADD_USER_SERIALIZER(XRotations);

@@ -322,7 +322,7 @@ namespace MWRender
         , mAlpha(1.f)
     {
         for(size_t i = 0;i < sNumBlendMasks;i++)
-            mAnimationTimePtr[i].reset(new AnimationTime);
+            mAnimationTimePtr[i] = new AnimationTime;
     }
 
     Animation::~Animation()
@@ -1205,9 +1205,9 @@ namespace MWRender
         params.mEffectId = effectId;
         params.mBoneName = bonename;
 
-        params.mAnimTime = boost::shared_ptr<EffectAnimationTime>(new EffectAnimationTime);
+        params.mAnimTime = osg::ref_ptr<EffectAnimationTime>(new EffectAnimationTime);
 
-        SceneUtil::AssignControllerSourcesVisitor assignVisitor(boost::shared_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
+        SceneUtil::AssignControllerSourcesVisitor assignVisitor(osg::ref_ptr<SceneUtil::ControllerSource>(params.mAnimTime));
         node->accept(assignVisitor);
 
         overrideTexture(texture, mResourceSystem, node);

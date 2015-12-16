@@ -170,27 +170,45 @@ namespace NifOsg
     typedef ValueInterpolator<Nif::FloatKeyMap, LerpFunc> FloatInterpolator;
     typedef ValueInterpolator<Nif::Vector3KeyMap, LerpFunc> Vec3Interpolator;
 
-    class ControllerFunction : public SceneUtil::ControllerFunction
+    class NifControllerFunction : public SceneUtil::ControllerFunction
     {
-    private:
-        float mFrequency;
-        float mPhase;
-        float mStartTime;
-        float mStopTime;
+    public:
+        NifControllerFunction();
+        NifControllerFunction(const Nif::Controller *ctrl);
+        NifControllerFunction(const NifControllerFunction& copy, const osg::CopyOp& copyop);
+
         enum ExtrapolationMode
         {
             Cycle = 0,
             Reverse = 1,
             Constant = 2
         };
-        ExtrapolationMode mExtrapolationMode;
 
-    public:
-        ControllerFunction(const Nif::Controller *ctrl);
+        META_Object(OpenMW, NifControllerFunction)
 
         float calculate(float value) const;
 
         virtual float getMaximum() const;
+
+        // For serialization.
+        inline float getFrequency() const { return mFrequency; }
+        inline void setFrequency(float f) { mFrequency = f; }
+        inline float getPhase() const { return mPhase; }
+        inline void setPhase(float f) { mPhase = f; }
+        inline float getStartTime() const { return mStartTime; }
+        inline void setStartTime(float f) { mStartTime = f; }
+        inline float getStopTime() const { return mStopTime; }
+        inline void setStopTime(float f) { mStopTime = f; }
+        inline ExtrapolationMode getExtrapolationMode() const { return mExtrapolationMode; }
+        inline void setExtrapolationMode(ExtrapolationMode m) { mExtrapolationMode = m; }
+
+    private:
+        float mFrequency;
+        float mPhase;
+        float mStartTime;
+        float mStopTime;
+        ExtrapolationMode mExtrapolationMode;
+
     };
 
     /// Must be set on an osgAnimation::MorphGeometry.

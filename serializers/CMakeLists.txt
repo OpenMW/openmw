@@ -27,9 +27,13 @@ add_library(osgdb_serializers_openmw SHARED
     alphacontroller
     billboardcallback
     compositestatesetupdater
+    controller
+    controllerfunction
+    controllersource
     emitter
     flipcontroller
     frameswitch
+    frametimesource
     geommorphcontroller
     gravityaffector
     growfadeaffector
@@ -37,6 +41,7 @@ add_library(osgdb_serializers_openmw SHARED
     keyframecontroller
     keyframeholder
     materialcolorcontroller
+    nifcontrollerfunction
     nodeuserdata
     particlecoloraffector
     particleshooter

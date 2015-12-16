@@ -10,8 +10,10 @@
 namespace SceneUtil
 {
 
-
-    Controller::Controller()
+    Controller::Controller(const Controller &copy, const osg::CopyOp &copyop)
+        : osg::Object(copy, copyop)
+        , mSource(copy.mSource)
+        , mFunction(copy.mFunction)
     {
     }
 
@@ -26,30 +28,6 @@ namespace SceneUtil
             return mFunction->calculate(mSource->getValue(nv));
         else
             return mSource->getValue(nv);
-    }
-
-    void Controller::setSource(boost::shared_ptr<ControllerSource> source)
-    {
-        mSource = source;
-    }
-
-    void Controller::setFunction(boost::shared_ptr<ControllerFunction> function)
-    {
-        mFunction = function;
-    }
-
-    boost::shared_ptr<ControllerSource> Controller::getSource() const
-    {
-        return mSource;
-    }
-
-    boost::shared_ptr<ControllerFunction> Controller::getFunction() const
-    {
-        return mFunction;
-    }
-
-    FrameTimeSource::FrameTimeSource()
-    {
     }
 
     float FrameTimeSource::getValue(osg::NodeVisitor *nv)
@@ -114,7 +92,7 @@ namespace SceneUtil
     {
     }
 
-    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(boost::shared_ptr<ControllerSource> toAssign)
+    AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(osg::ref_ptr<ControllerSource> toAssign)
         : ControllerVisitor()
         , mToAssign(toAssign)
     {

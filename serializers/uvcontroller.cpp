@@ -49,7 +49,7 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_UVController_Serializer,
                          new NifOsg::UVController,
                          NifOsg::UVController,
                          "OpenMW::UVController",
-                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::UVController")
+                         "osg::Object osg::NodeCallback OpenMW::StateSetUpdater OpenMW::Controller OpenMW::UVController")
 {
     SETUPMSG("OpenMW::UVController");
     ADD_USER_SERIALIZER(UTrans);
