@@ -36,14 +36,12 @@ namespace CSVTools
         protected:
 
             void showEvent (QShowEvent *event);
-            
+
         public:
 
             SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
-
-            virtual void updateUserSetting (const QString &, const QStringList &);
 
         private slots:
 

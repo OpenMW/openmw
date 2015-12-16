@@ -20,7 +20,7 @@
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
 
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
@@ -30,17 +30,6 @@
 #include "elements.hpp"
 #include "editmode.hpp"
 #include "instancemode.hpp"
-
-namespace
-{
-    static const char * const sMappingSettings[] =
-    {
-        "p-navi", "s-navi",
-        "p-edit", "s-edit",
-        "p-select", "s-select",
-        0
-    };
-}
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
@@ -77,19 +66,10 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    for (int i=0; sMappingSettings[i]; ++i)
-    {
-        QString key ("scene-input/");
-        key += sMappingSettings[i];
-        storeMappingSetting (key, CSMSettings::UserSettings::instance().settingValue (key));
-    }
-
-    mDragFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-factor").toDouble();
-    mDragWheelFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-wheel-factor").toDouble();
-    mDragShiftFactor = CSMSettings::UserSettings::instance().settingValue ("scene-input/drag-shift-factor").toDouble();
-
-    mShowToolTips = CSMSettings::UserSettings::instance().settingValue ("tooltips/scene") == "true";
-    mToolTipDelay = CSMSettings::UserSettings::instance().settingValue ("tooltips/scene-delay").toInt();
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["3D Scene Input"].update();
+    CSMPrefs::get()["Tooltips"].update();
 
     mToolTipDelayTimer.setSingleShot (true);
     connect (&mToolTipDelayTimer, SIGNAL (timeout()), this, SLOT (showToolTip()));
@@ -97,6 +77,23 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
+}
+
+void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (storeMappingSetting (setting))
+        return;
+
+    if (*setting=="3D Scene Input/drag-factor")
+        mDragFactor = setting->toDouble();
+    else if (*setting=="3D Scene Input/drag-wheel-factor")
+        mDragWheelFactor = setting->toDouble();
+    else if (*setting=="3D Scene Input/drag-shift-factor")
+        mDragShiftFactor = setting->toDouble();
+    else if (*setting=="Tooltips/scene-delay")
+        mToolTipDelay = setting->toInt();
+    else if (*setting=="Tooltips/scene")
+        mShowToolTips = setting->isTrue();
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
@@ -291,25 +288,6 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
     return mInteractionMask & getVisibilityMask();
 }
 
-void CSVRender::WorldspaceWidget::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (!value.isEmpty() && storeMappingSetting (name, value.first()))
-        return;
-
-    if (name=="scene-input/drag-factor")
-        mDragFactor = value.at (0).toDouble();
-    else if (name=="scene-input/drag-wheel-factor")
-        mDragWheelFactor = value.at (0).toDouble();
-    else if (name=="scene-input/drag-shift-factor")
-        mDragShiftFactor = value.at (0).toDouble();
-    else if (name=="tooltips/scene-delay")
-        mToolTipDelay = value.at (0).toInt();
-    else if (name=="tooltips/scene")
-        mShowToolTips = value.at (0)=="true";
-    else
-        dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).updateUserSetting (name, value);
-}
-
 void CSVRender::WorldspaceWidget::setEditLock (bool locked)
 {
     dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (locked);
@@ -348,34 +326,40 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 }
 
 
-bool CSVRender::WorldspaceWidget::storeMappingSetting (const QString& key, const QString& value)
+bool CSVRender::WorldspaceWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
 {
-    const QString prefix = "scene-input/";
+    if (setting->getParent()->getKey()!="3D Scene Input")
+        return false;
 
-    if (key.startsWith (prefix))
+    static const char * const sMappingSettings[] =
     {
-        QString key2 (key.mid (prefix.length()));
+        "p-navi", "s-navi",
+        "p-edit", "s-edit",
+        "p-select", "s-select",
+        0
+    };
 
-        for (int i=0; sMappingSettings[i]; ++i)
-            if (key2==sMappingSettings[i])
-            {
-                Qt::MouseButton button = Qt::NoButton;
+    for (int i=0; sMappingSettings[i]; ++i)
+        if (setting->getKey()==sMappingSettings[i])
+        {
+            QString value = QString::fromUtf8 (setting->toString().c_str());
 
-                if (value.endsWith ("Left Mouse-Button"))
-                    button = Qt::LeftButton;
-                else if (value.endsWith ("Right Mouse-Button"))
-                    button = Qt::RightButton;
-                else if (value.endsWith ("Middle Mouse-Button"))
-                    button = Qt::MiddleButton;
-                else
-                    return false;
+            Qt::MouseButton button = Qt::NoButton;
 
-                bool ctrl = value.startsWith ("Ctrl-");
+            if (value.endsWith ("Left Mouse-Button"))
+                button = Qt::LeftButton;
+            else if (value.endsWith ("Right Mouse-Button"))
+                button = Qt::RightButton;
+            else if (value.endsWith ("Middle Mouse-Button"))
+                button = Qt::MiddleButton;
+            else
+                return false;
 
-                mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
-                return true;
-            }
-    }
+            bool ctrl = value.startsWith ("Ctrl-");
+
+            mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
+            return true;
+        }
 
     return false;
 }
@@ -514,8 +498,7 @@ void CSVRender::WorldspaceWidget::showToolTip()
 
         if (osg::ref_ptr<TagBase> tag = mousePick (mapFromGlobal (pos)))
         {
-            bool hideBasics =
-                CSMSettings::UserSettings::instance().settingValue ("tooltips/scene-hide-basic")=="true";
+            bool hideBasics = CSMPrefs::get()["Tooltips"]["scene-hide-basic"].isTrue();
             QToolTip::showText (pos, tag->getToolTip (hideBasics), this);
         }
     }

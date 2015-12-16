@@ -1224,6 +1224,7 @@ namespace MWClass
                 // Reset to original position
                 ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
 
+                MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(NULL);
             }
         }

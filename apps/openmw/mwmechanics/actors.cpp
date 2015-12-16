@@ -486,11 +486,20 @@ namespace MWMechanics
 
         bool wasDead = creatureStats.isDead();
 
-        // tickable effects (i.e. effects having a lasting impact after expiry)
-        // these effects can be applied as "instant" (handled in spellcasting.cpp) or with a duration, handled here
-        for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        if (duration > 0)
         {
-            effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
+            for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+            {
+                // tickable effects (i.e. effects having a lasting impact after expiry)
+                effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
+
+                // instant effects are already applied on spell impact in spellcasting.cpp, but may also come from permanent abilities
+                if (it->second.getMagnitude() > 0)
+                {
+                    CastSpell cast(ptr, ptr);
+                    cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude());
+                }
+            }
         }
 
         // attributes

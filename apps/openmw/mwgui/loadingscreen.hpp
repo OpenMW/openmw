@@ -33,22 +33,15 @@ namespace MWGui
         LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer);
         virtual ~LoadingScreen();
 
-        virtual void setLabel (const std::string& label);
-
-        /// Indicate that some progress has been made, without specifying how much
-        virtual void indicateProgress ();
-
+        /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
+        virtual void setLabel (const std::string& label, bool important);
         virtual void loadingOn();
         virtual void loadingOff();
-
         virtual void setProgressRange (size_t range);
         virtual void setProgress (size_t value);
         virtual void increaseProgress (size_t increase=1);
 
         virtual void setVisible(bool visible);
-
-        void setLoadingProgress (const std::string& stage, int depth, int current, int total);
-        void loadingDone();
 
     private:
         void findSplashScreens();
@@ -63,6 +56,8 @@ namespace MWGui
         double mLastRenderTime;
         osg::Timer mTimer;
         double mLoadingOnTime;
+
+        bool mImportantLabel;
 
         size_t mProgress;
 

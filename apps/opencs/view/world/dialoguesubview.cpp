@@ -31,7 +31,8 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/doc/document.hpp"
-#include "../../model/settings/usersettings.hpp"
+
+#include "../../model/prefs/state.hpp"
 
 #include "../widget/coloreditor.hpp"
 #include "../widget/droplineedit.hpp"
@@ -883,12 +884,12 @@ CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     connect (mBottom, SIGNAL (requestFocus (const std::string&)),
         this, SLOT (requestFocus (const std::string&)));
 
-    // button bar
-    if (CSMSettings::UserSettings::instance().setting ("dialogues/toolbar", QString("true")) == "true")
-        addButtonBar();
-
     // layout
     getMainLayout().addWidget (mBottom);
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["ID Dialogues"].update();
 }
 
 void CSVWorld::DialogueSubView::setEditLock (bool locked)
@@ -899,29 +900,21 @@ void CSVWorld::DialogueSubView::setEditLock (bool locked)
         mButtons->setEditLock (locked);
 }
 
-void CSVWorld::DialogueSubView::updateUserSetting (const QString& name, const QStringList& value)
+void CSVWorld::DialogueSubView::settingChanged (const CSMPrefs::Setting *setting)
 {
-    SimpleDialogueSubView::updateUserSetting (name, value);
-
-    if (name=="dialogues/toolbar")
+    if (*setting=="ID Dialogues/toolbar")
     {
-        if (value.at(0)==QString ("true"))
+        if (setting->isTrue())
         {
             addButtonBar();
         }
-        else
+        else if (mButtons)
         {
-            if (mButtons)
-            {
-                getMainLayout().removeWidget (mButtons);
-                delete mButtons;
-                mButtons = 0;
-            }
+            getMainLayout().removeWidget (mButtons);
+            delete mButtons;
+            mButtons = 0;
         }
     }
-
-    if (mButtons)
-        mButtons->updateUserSetting (name, value);
 }
 
 void CSVWorld::DialogueSubView::showPreview ()

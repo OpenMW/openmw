@@ -30,9 +30,6 @@ namespace CSVRender
 
             virtual void activate (CSVWidget::SceneToolbar *toolbar);
 
-            /// Default-implementation: Do nothing.
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
             /// Default-implementation: Ignored.
             virtual void setEditLock (bool locked);
 

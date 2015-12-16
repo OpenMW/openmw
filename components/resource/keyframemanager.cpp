@@ -51,20 +51,16 @@ namespace Resource
                 NifOsg::KeyframeHolder* kfh = dynamic_cast<NifOsg::KeyframeHolder*>(obj);
                 osg::ref_ptr<NifOsg::KeyframeHolder> loaded(kfh);
 
-                // Why name, and not normalized?
-                mCache->addEntryToObjectCache(name, loaded);
+                mCache->addEntryToObjectCache(normalized, loaded);
                 return loaded;
             }
             else {
                 osg::ref_ptr<NifOsg::KeyframeHolder> loaded (new NifOsg::KeyframeHolder);
                 NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
 
-                mCache->addEntryToObjectCache(name, loaded);
+                mCache->addEntryToObjectCache(normalized, loaded);
                 return loaded;
             }
         }
     }
-
-
-
 }

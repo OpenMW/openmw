@@ -13,6 +13,11 @@
 #include "scenewidget.hpp"
 #include "elements.hpp"
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSMWorld
 {
     class UniversalId;
@@ -115,8 +120,6 @@ namespace CSVRender
             /// marked for interaction.
             unsigned int getInteractionMask() const;
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
             virtual void setEditLock (bool locked);
 
             CSMDoc::Document& getDocument();
@@ -151,7 +154,7 @@ namespace CSVRender
             void dragMoveEvent(QDragMoveEvent *event);
 
             /// \return Is \a key a button mapping setting? (ignored otherwise)
-            bool storeMappingSetting (const QString& key, const QString& value);
+            bool storeMappingSetting (const CSMPrefs::Setting *setting);
 
             osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
 
@@ -160,6 +163,8 @@ namespace CSVRender
             virtual std::string getStartupInstruction() = 0;
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void selectNavigationMode (const std::string& mode);
 
