@@ -497,7 +497,12 @@ namespace MWMechanics
                 if (it->second.getMagnitude() > 0)
                 {
                     CastSpell cast(ptr, ptr);
-                    cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude());
+                    if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
+                    {
+                        creatureStats.getActiveSpells().purgeEffect(it->first.mId);
+                        if (ptr.getClass().hasInventoryStore(ptr))
+                            ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
+                    }
                 }
             }
         }

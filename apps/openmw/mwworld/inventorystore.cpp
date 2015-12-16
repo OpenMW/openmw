@@ -410,11 +410,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // the items should appear as if they'd always been equipped.
                     mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip,
                                                         !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
-
-                    // Apply instant effects
-                    MWMechanics::CastSpell cast(actor, actor);
-                    if (magnitude)
-                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)
