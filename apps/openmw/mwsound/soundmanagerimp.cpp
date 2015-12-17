@@ -131,6 +131,7 @@ namespace MWSound
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
+
     Sound_Buffer *SoundManager::insertSound(const std::string &soundId, const ESM::Sound *sound)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -218,6 +219,14 @@ namespace MWSound
 
         return sfx;
     }
+
+    void SoundManager::releaseSound(Sound_Buffer *buffer)
+    {
+        assert(buffer->mUses > 0);
+        if(buffer->mUses-- == 1)
+            mUnusedBuffers.push_front(buffer);
+    }
+
 
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile, Sound_Loudness **lipdata)
     {
@@ -665,7 +674,11 @@ namespace MWSound
         {
             SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
             for(;sndidx != snditer->second.end();++sndidx)
+            {
                 mOutput->finishSound(sndidx->first);
+                releaseSound(sndidx->second);
+            }
+            mActiveSounds.erase(snditer);
         }
     }
 
@@ -680,10 +693,29 @@ namespace MWSound
             {
                 SoundBufferRefPairList::iterator sndidx = snditer->second.begin();
                 for(;sndidx != snditer->second.end();++sndidx)
+                {
                     mOutput->finishSound(sndidx->first);
+                    releaseSound(sndidx->second);
+                }
+                mActiveSounds.erase(snditer++);
             }
-            ++snditer;
+            else
+                ++snditer;
         }
+
+        SayDecoderMap::iterator penditer = mPendingSaySounds.begin();
+        while(penditer != mPendingSaySounds.end())
+        {
+            if(penditer->first != MWWorld::Ptr() &&
+               penditer->first != MWMechanics::getPlayer() &&
+               penditer->first.getCell() == cell)
+            {
+                mPendingSaySounds.erase(penditer++);
+            }
+            else
+                ++penditer;
+        }
+
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         while(sayiter != mActiveSaySounds.end())
         {
@@ -692,8 +724,10 @@ namespace MWSound
                sayiter->first.getCell() == cell)
             {
                 mOutput->finishStream(sayiter->second.first);
+                mActiveSaySounds.erase(sayiter++);
             }
-            ++sayiter;
+            else
+                ++sayiter;
         }
     }
 
@@ -882,9 +916,7 @@ namespace MWSound
                 if(!mOutput->isSoundPlaying(sound))
                 {
                     mOutput->finishSound(sound);
-                    Sound_Buffer *sfx = sndidx->second;
-                    if(sfx->mUses-- == 1)
-                        mUnusedBuffers.push_front(sfx);
+                    releaseSound(sndidx->second);
                     sndidx = snditer->second.erase(sndidx);
                 }
                 else
@@ -1167,9 +1199,7 @@ namespace MWSound
             for(;sndidx != snditer->second.end();++sndidx)
             {
                 mOutput->finishSound(sndidx->first);
-                Sound_Buffer *sfx = sndidx->second;
-                if(sfx->mUses-- == 1)
-                    mUnusedBuffers.push_front(sfx);
+                releaseSound(sndidx->second);
             }
         }
         mActiveSounds.clear();

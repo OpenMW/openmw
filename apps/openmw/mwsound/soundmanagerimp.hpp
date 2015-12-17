@@ -112,6 +112,8 @@ namespace MWSound
         Sound_Buffer *lookupSound(const std::string &soundId) const;
         Sound_Buffer *loadSound(const std::string &soundId);
 
+        void releaseSound(Sound_Buffer *buffer);
+
         // Ensures the loudness/"lip" data gets loaded, and returns a decoder
         // to start streaming
         DecoderPtr loadVoice(const std::string &voicefile, Sound_Loudness **lipdata);
