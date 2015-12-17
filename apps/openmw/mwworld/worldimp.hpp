@@ -165,8 +165,8 @@ namespace MWWorld
 
             float feetToGameUnits(float feet);
 
-            MWWorld::Ptr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
-            MWWorld::Ptr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
+            MWWorld::ConstPtr getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id );
+            MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
 
         public:
 

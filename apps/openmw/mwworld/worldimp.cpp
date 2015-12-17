@@ -2805,7 +2805,7 @@ namespace MWWorld
         return false;
     }
 
-    MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
+    MWWorld::ConstPtr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
     {
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
@@ -2817,7 +2817,7 @@ namespace MWWorld
         std::set< std::string >checkedCells;
         std::set< std::string >currentCells;
         std::set< std::string >nextCells;
-        MWWorld::Ptr closestMarker;
+        MWWorld::ConstPtr closestMarker;
 
         nextCells.insert( ptr.getCell()->getCell()->mName );
         while ( !nextCells.empty() ) {
@@ -2861,8 +2861,8 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
-        MWWorld::Ptr closestMarker;
+    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
+        MWWorld::ConstPtr closestMarker;
         float closestDistance = std::numeric_limits<float>::max();
 
         std::vector<MWWorld::Ptr> markers;
@@ -2887,7 +2887,7 @@ namespace MWWorld
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                           const std::string& id)
     {
-        MWWorld::Ptr closestMarker = getClosestMarker( ptr, id );
+        MWWorld::ConstPtr closestMarker = getClosestMarker( ptr, id );
 
         if ( closestMarker.isEmpty() )
         {
@@ -3047,13 +3047,13 @@ namespace MWWorld
 
     void World::confiscateStolenItems(const Ptr &ptr)
     {
-        MWWorld::Ptr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
+        MWWorld::ConstPtr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
         if ( prisonMarker.isEmpty() )
         {
             std::cerr << "Failed to confiscate items: no closest prison marker found." << std::endl;
             return;
         }
-        std::string prisonName = prisonMarker.mRef->mRef.getDestCell();
+        std::string prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
             std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
