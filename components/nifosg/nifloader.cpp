@@ -887,7 +887,7 @@ namespace NifOsg
                 // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
                 // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
 
-                FindRecIndexVisitor find (partctrl->emitter->recIndex);
+                FindGroupByRecIndex find (partctrl->emitter->recIndex);
                 rootNode->accept(find);
                 if (!find.mFound)
                 {

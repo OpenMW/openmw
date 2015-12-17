@@ -580,7 +580,7 @@ namespace MWPhysics
                 int recIndex = it->first;
                 int shapeIndex = it->second;
 
-                NifOsg::FindRecIndexVisitor visitor(recIndex);
+                NifOsg::FindGroupByRecIndex visitor(recIndex);
                 mPtr.getRefData().getBaseNode()->accept(visitor);
                 if (!visitor.mFound)
                 {
