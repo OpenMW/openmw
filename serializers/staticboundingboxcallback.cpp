@@ -4,17 +4,18 @@
 #define SERIALIZER_DEBUG 0
 #include "serializer.hpp"
 
-// TODO: Test that OSG 3.2 and OSG 3.3 serializations are identical (already in correct order).
+// OSG 3.2 provides osg::BoundingBoxf, but no way to serialize it.
 
-// The osg::Drawable::ComputeBoundingBoxCallback is serialized (with an empty serializer) as
-// osg::ComputeBoundingBoxCallback.  Or at least that's the beahvior in OSG 3.3.  See the file:
-// src/osgWrappers/serializers/osg/ComputeBoundingBoxCallback.cpp for an example.
+// The initial commit of this capability was on Feb 10 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/8b485f0b588e6311a24b90711ae548e49e0468ae
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-#else
+// This implementation adapted from OSG 3.3.2 in:
+//  src/osgDB/InputStream.cpp
+//  src/osgDB/OutputStream.cpp
+
+#if OSG_VERSION_LESS_THAN(3,3,2)
 static bool checkBoundingBox(const NifOsg::StaticBoundingBoxCallback& node) {
     CHECKMSG("BoundingBox");
-    // if (node.mBoundingBox == osg::BoundingBox()) return false;
     return true;
 }
 
@@ -45,9 +46,9 @@ REGISTER_OBJECT_WRAPPER2(NifOsg_StaticBoundingBoxCallback_Serializer,
                          "osg::Object osg::ComputeBoundingBoxCallback OpenMW::StaticBoundingBoxCallback")
 {
     SETUPMSG("OpenMW::StaticBoundingBoxCallback");
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-    ADD_BOUNDINGBOXF_SERIALIZER(BoundingBox, osg::BoundingBoxf());
-#else
+#if OSG_VERSION_LESS_THAN(3,3,2)
     ADD_USER_SERIALIZER(BoundingBox);
+#else
+    ADD_BOUNDINGBOXF_SERIALIZER(BoundingBox, osg::BoundingBoxf());
 #endif
 }

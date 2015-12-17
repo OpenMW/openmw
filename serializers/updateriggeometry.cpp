@@ -4,13 +4,14 @@
 #define SERIALIZER_DEBUG 0
 #include "serializer.hpp"
 
-// There are no members in the UpdateRigGeometry callback.  It just needs to be created, which the
-// RigGeometry constructor does automatically, so there's no purpose to this serializer except to
-// silence wanrings from the serialization library.   Perhaps there's a better way to handle this?
+// osg::CullCallback was refactored to include osg::Callback as a parent on Jun 5 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/e967420323bb6e500425144cb305cf8060c1c515
 
-// The associated classes for osg::Drawable::CullCallback has apparently changed between OSG 3.2 and
-// OSG 3.3.  It's apparently serialized as simply osg::Callback, that's not documented in the OSG
-// 3.2.0 Doxygen docmentation. See src/osgWrappers/serializers/sdg/Drawable.cpp for an example.
+// osg::Cullback is serialized in src/osgWrappers/serializers/osg/Drawable.cpp as simply osg::Callback
+// The is no src/osgWrappers/serializers/osg/CullCallback.cpp
+// It's unclear if this correct, but we can't associate osg::CullCallback as a result.
+
+// See updaterigbounds.cpp for a history of the related osg::UpdateCallback parentage.
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
 #define ASSOCIATES "osg::Object osg::Callback OpenMW::UpdateRigGeometry"

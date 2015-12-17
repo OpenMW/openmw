@@ -6,6 +6,9 @@
 #define SERIALIZER_DEBUG 0
 #include "serializer.hpp"
 
+// The initial readObjectOfType() capability was added on Feb 24 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/6a1130f2f17c68c22300267d0c584ac82dc3bec0
+
 static bool checkTextKeyMap(const NifOsg::KeyframeHolder& node) {
     CHECKMSG("TextKeys");
     if (node.mTextKeys.size() == 0) return false;

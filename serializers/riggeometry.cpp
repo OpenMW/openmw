@@ -5,6 +5,15 @@
 #define SERIALIZER_DEBUG 0
 #include "serializer.hpp"
 
+// OSG 3.2 provides osg::BoundingSpheref, but no way to serialize it.
+
+// The initial commit of this capability was on Feb 10 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/8b485f0b588e6311a24b90711ae548e49e0468ae
+
+// This implementation adapted from OSG 3.3.2 in:
+//  src/osgDB/InputStream.cpp
+//  src/osgDB/OutputStream.cpp
+
 typedef SceneUtil::RigGeometry::InfluenceMap InfluenceMap;
 typedef SceneUtil::RigGeometry::InfluenceMapType InfluenceMapType;
 typedef SceneUtil::RigGeometry::BoneWeightMap BoneWeightMap;
@@ -28,7 +37,6 @@ static bool writeInfluence(osgDB::OutputStream& os,
         const SceneUtil::RigGeometry::BoneInfluence& bone = pair.second;
         os << os.PROPERTY("InvBindMatrix") << bone.mInvBindMatrix;
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-        // Added in commit: 8b485f0b588e6311a24b90711ae548e49e0468ae
         os << os.PROPERTY("BoundSphere") << bone.mBoundSphere << std::endl;
 #else
         float x = bone.mBoundSphere.center().x();
@@ -63,7 +71,6 @@ static bool readInfluence(osgDB::InputStream& is,
         is >> is.BEGIN_BRACKET;
         is >> is.PROPERTY("InvBindMatrix") >> bone.mInvBindMatrix;
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-        // Added in commit: 8b485f0b588e6311a24b90711ae548e49e0468ae
         is >> is.PROPERTY("BoundSphere") >> bone.mBoundSphere;
 #else
         float x, y, z, r;
@@ -106,12 +113,8 @@ static bool readSourceGeometry(osgDB::InputStream& is,
                                SceneUtil::RigGeometry& node) {
     READMSG("SourceGeometry");
     is >> is.BEGIN_BRACKET;
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-    osg::ref_ptr<osg::Geometry> geom = is.readObjectOfType<osg::Geometry>();
-#else
     osg::ref_ptr<osg::Geometry> geom;
     is >> geom;
-#endif
     node.setSourceGeometry(geom);
     is >> is.END_BRACKET;
     return true;

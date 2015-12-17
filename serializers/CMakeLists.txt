@@ -27,6 +27,7 @@ set(serializer_sources
     alphacontroller
     billboardcallback
     compositestatesetupdater
+    computeboundingboxcallback
     controller
     controllerfunction
     controllersource

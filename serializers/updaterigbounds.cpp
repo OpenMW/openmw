@@ -4,19 +4,20 @@
 #define SERIALIZER_DEBUG 0
 #include "serializer.hpp"
 
-// There are no members in the UpdateRigGeometry callback.  It just needs to be created, which the
-// RigGeometry constructor does automatically, so there's no purpose to this serializer except to
-// silence wanrings from the serialization library.   Perhaps there's a better way to handle this?
+// The parent osg::Object was first added on Oct 8 2003 (OSG 1.9) in:
+// https://github.com/openscenegraph/osg/commit/41cdaf817b8e48bc40568fb6e9ec692fae343fb2
+// The initial serialization capability for osg::UpdateCallback was added on Apr 29 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/d7cf8d9395b29de38f1545c94ff3039aebe6bbde
+// UpdateCallback was refactored to include osg::Callback as a parent on Jun 5 2014 (OSG 3.3.2) in:
+// https://github.com/openscenegraph/osg/commit/e967420323bb6e500425144cb305cf8060c1c515
+// The parent osg::Callback was added to the serializer associates on Mar 17 2015 (OSG 3.3.7) in:
+// https://github.com/openscenegraph/osg/commit/f1d40b80339ff5e8925d4186a4e97664dc28e24b
 
-// The associated classes for osg::Drawable::UpdateCallback has apparently changed between OSG 3.2
-// and OSG 3.3.  It's apparently serialized as osg::UpdateCallback, and has a parent of
-// osg::Callback that's not documented in the OSG 3.2.0 Doxygen docmentation. See
-// src/osgWrappers/serializers/sdg/UpdateCallback.cpp for an example.
-
-// There appears to be a problem with osg::ComputeBoundingBoxCallback serialization in OSG 3.2.  The
-// real class names is osg::Drawable::ComputeBoundingBoxCallaback.
+// UpdateCallback is defined in include/osg/Drawable
+// UpdateCallback is serialized in src/osgWrappers/serializers/osg/UpdateCallback.cpp
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+// Correct the defect in 3.3.2 that was only really fixed upstream in 3.3.7?
 #define ASSOCIATES "osg::Object osg::Callback osg::UpdateCallback OpenMW::UpdateRigBounds"
 #else
 #define ASSOCIATES "osg::Object OpenMW::UpdateRigBounds"

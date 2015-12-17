@@ -65,6 +65,7 @@ static bool readKeyFrames(osgDB::InputStream& is,
     return true;
 }
 
+// See updaterigbounds.cpp for a history of the osg::UpdateCallback parentage.
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
 #define ASSOCIATES "osg::Object osg::Callback osg::UpdateCallback OpenMW::Controller OpenMW::GeomMorpherController"
 #else
