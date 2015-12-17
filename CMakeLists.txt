@@ -114,9 +114,12 @@ endif()
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
+message(STATUS "CMake version=" ${CMAKE_VERSION} " major=" ${CMAKE_MAJOR_VERSION} " minor=" ${CMAKE_MINOR_VERSION} " patch=" ${CMAKE_PATCH_VERSION})
 
 if(COMMAND cmake_policy)
-    cmake_policy(SET CMP0043 OLD)
+    if(CMAKE_MAJOR_VERSION EQUAL 3)
+        cmake_policy(SET CMP0043 OLD)
+    endif()
 endif()
 
 # Sound setup
@@ -237,7 +240,11 @@ include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 list(GET OPENSCENEGRAPH_LIBRARIES 0 OSG_FIRST_LIB)
 # Option PATH is DIRECTORY since 2.8.11
 get_filename_component(OSG_LIB_DIR ${OSG_FIRST_LIB} PATH)
-string(CONCAT OSG_PROPOSED_PLUGIN_PATH ${OSG_LIB_DIR} "/osgPlugins-" ${OPENSCENEGRAPH_VERSION})
+set(OSG_PLUGIN_TMP1 "osgPlugins" ${OPENSCENEGRAPH_VERSION})
+string(REPLACE ";" "-" OSG_PLUGIN_TMP2 "${OSG_PLUGIN_TMP1}")
+set(OSG_PLUGIN_TMP3 ${OSG_LIB_DIR} ${OSG_PLUGIN_TMP2})
+string(REPLACE ";" "/" OSG_PROPOSED_PLUGIN_PATH "${OSG_PLUGIN_TMP3}")
+message(STATUS "OSG_PROPOSED_PLUGIN_PATH: " ${OSG_PROPOSED_PLUGIN_PATH})
 set(OSG_PLUGIN_LIB_SEARCH_PATH ${OSG_PROPOSED_PLUGIN_PATH} CACHE STRING "The directory where OSG plugins are stored.")
 
 if(OSG_STATIC)
