@@ -980,8 +980,10 @@ namespace MWRender
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
             {
+                mInsert->removeChild(created);
                 mObjectRoot = new osg::Group;
                 mObjectRoot->addChild(created);
+                mInsert->addChild(mObjectRoot);
             }
         }
         else
