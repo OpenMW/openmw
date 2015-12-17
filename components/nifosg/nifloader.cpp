@@ -1364,7 +1364,7 @@ namespace NifOsg
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
-                        osg::Texture2D* texture2d = textureManager->getTexture2D(filename,
+                        osg::ref_ptr<osg::Texture2D> texture2d = textureManager->getTexture2D(filename,
                               wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
                               wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
