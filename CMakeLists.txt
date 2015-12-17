@@ -233,6 +233,13 @@ find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnim
 
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
+# Find the path to the OSG plugins?
+list(GET OPENSCENEGRAPH_LIBRARIES 0 OSG_FIRST_LIB)
+# Option PATH is DIRECTORY since 2.8.11
+get_filename_component(OSG_LIB_DIR ${OSG_FIRST_LIB} PATH)
+string(CONCAT OSG_PROPOSED_PLUGIN_PATH ${OSG_LIB_DIR} "/osgPlugins-" ${OPENSCENEGRAPH_VERSION})
+set(OSG_PLUGIN_LIB_SEARCH_PATH ${OSG_PROPOSED_PLUGIN_PATH} CACHE STRING "The directory where OSG plugins are stored.")
+
 if(OSG_STATIC)
    macro(use_static_osg_plugin_library PLUGIN_NAME)
       set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
