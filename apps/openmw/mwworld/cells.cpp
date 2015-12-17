@@ -173,7 +173,7 @@ MWWorld::Ptr MWWorld::Cells::getPtr (const std::string& name, CellStore& cell,
 
     Ptr ptr = cell.search (name);
 
-    if (!ptr.isEmpty() && ptr.getRefData().getCount())
+    if (!ptr.isEmpty() && MWWorld::CellStore::isAccessible(ptr.getRefData(), ptr.getCellRef()))
         return ptr;
 
     if (searchInContainers)

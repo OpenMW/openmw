@@ -122,7 +122,7 @@ namespace MWWorld
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
-                    if (iter->mData.isDeletedByContentFile())
+                    if (!isAccessible(iter->mData, iter->mRef))
                         continue;
                     if (!visitor (MWWorld::Ptr(&*iter, this)))
                         return false;
@@ -163,6 +163,15 @@ namespace MWWorld
             CellRefList<T>& get();
 
         public:
+
+            /// Should this reference be accessible to the outside world (i.e. to scripts / game logic)?
+            /// Determined based on the deletion flags. By default, objects deleted by content files are never accessible;
+            /// objects deleted by setCount(0) are still accessible *if* they came from a content file (needed for vanilla
+            /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
+            static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
+            {
+                return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            }
 
             /// Moves object from this cell to the given cell.
             /// @note automatically updates given cell by calling cellToMoveTo->moveFrom(...)
@@ -239,7 +248,7 @@ namespace MWWorld
 
                 for (unsigned int i=0; i<mMergedRefs.size(); ++i)
                 {
-                    if (mMergedRefs[i]->mData.isDeletedByContentFile())
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
                         continue;
 
                     if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
@@ -267,7 +276,7 @@ namespace MWWorld
                     LiveCellRefBase* base = &*it;
                     if (mMovedToAnotherCell.find(base) != mMovedToAnotherCell.end())
                         continue;
-                    if (base->mData.isDeletedByContentFile())
+                    if (!isAccessible(base->mData, base->mRef))
                         continue;
                     if (!visitor(MWWorld::Ptr(base, this)))
                         return false;
