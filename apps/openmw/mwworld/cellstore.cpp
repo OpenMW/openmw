@@ -810,19 +810,21 @@ namespace MWWorld
 
             if (!visitor.mFound)
             {
-                std::cout << "Dropping moved ref tag for " << visitor.mFound->mRef.getRefId() << " (moved object no longer exists)" << std::endl;
+                std::cerr << "Dropping moved ref tag for " << refnum.mIndex << " (moved object no longer exists)" << std::endl;
                 continue;
             }
+
+            MWWorld::LiveCellRefBase* movedRef = visitor.mFound;
 
             CellStore* otherCell = callback->getCellStore(movedTo);
 
             if (otherCell == NULL)
             {
-                std::cerr << "Dropping moved ref tag for " << visitor.mFound->mRef.getRefId()
+                std::cerr << "Dropping moved ref tag for " << movedRef->mRef.getRefId()
                           << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location." << std::endl;
                 // Note by dropping tag the object will automatically re-appear in its original cell, though potentially at inapproriate coordinates.
                 // Restore original coordinates:
-                visitor.mFound->mData.setPosition(visitor.mFound->mRef.getPosition());
+                movedRef->mData.setPosition(movedRef->mRef.getPosition());
                 continue;
             }
 
@@ -833,7 +835,7 @@ namespace MWWorld
                 continue;
             }
 
-            moveTo(MWWorld::Ptr(visitor.mFound, this), otherCell);
+            moveTo(MWWorld::Ptr(movedRef, this), otherCell);
         }
 
         updateMergedRefs();
