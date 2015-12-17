@@ -95,13 +95,19 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
-# Main executable
+# Make paths to serializer objects.  This is horrible, but I don't know how else to do it.
+# At least this way there's documentation of what's supposed to happen, and it works for me.
+foreach (_src ${serializer_sources})
+    set(serializer_objects ${serializer_objects} ../../serializers/CMakeFiles/osgdb_serializers_openmw.dir/${_src}.cpp.o)
+endforeach (_src ${serializer_sources})
 
+# Main executable
 if (NOT ANDROID)
     add_executable(openmw
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}
+        ${serializer_objects}
     )
 else ()
     add_library(openmw

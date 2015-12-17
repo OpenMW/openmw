@@ -115,6 +115,10 @@ endif()
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
 
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0043 OLD)
+endif()
+
 # Sound setup
 unset(FFMPEG_LIBRARIES CACHE)
 

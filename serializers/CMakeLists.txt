@@ -23,7 +23,7 @@
 # configuration works.  There may be other working configurations as
 # well.
 
-add_library(osgdb_serializers_openmw SHARED
+set(serializer_sources
     alphacontroller
     billboardcallback
     compositestatesetupdater
@@ -60,6 +60,10 @@ add_library(osgdb_serializers_openmw SHARED
     viscontroller
     )
 
+add_library(osgdb_serializers_openmw SHARED
+    ${serializer_sources}
+    )
+
 add_library(OpenMW SHARED
     ../components/nifosg/nifloader
     ../components/nifosg/particle
@@ -71,6 +75,7 @@ add_library(OpenMW SHARED
     ../components/sceneutil/controller
     )
 
+set_target_properties(osgdb_serializers_openmw PROPERTIES PREFIX "")
 target_link_libraries(osgdb_serializers_openmw OpenMW)
 
 target_link_libraries(OpenMW
@@ -80,6 +85,15 @@ target_link_libraries(OpenMW
 
 install(TARGETS osgdb_serializers_openmw
     # Should be set from OSG somehow
-    LIBRARY DESTINATION lib/osgPlugins-3.5.1
+    LIBRARY DESTINATION ${OSG_PLUGIN_LIB_SEARCH_PATH}
     RUNTIME DESTINATION bin
     )
+
+install(TARGETS OpenMW
+    # Should be set from OSG somehow
+    LIBRARY DESTINATION ${OSG_PLUGIN_LIB_SEARCH_PATH}
+    RUNTIME DESTINATION bin
+    )
+
+# Make the variable accessible for other subdirectories
+set(serializer_sources ${serializer_sources} PARENT_SCOPE)
