@@ -1,4 +1,6 @@
 #include <boost/foreach.hpp>
+#include <osg/Version>
+
 #include <components/nifosg/nifloader.hpp>
 
 #define SERIALIZER_DEBUG 0
@@ -66,7 +68,7 @@ static bool writeControllers(osgDB::OutputStream& os,
     BOOST_FOREACH(const KFCMap::value_type& pair, node.mKeyframeControllers) {
         os.writeWrappedString(pair.first);
 #if SERIALIZER_DEBUG==3
-        WRITEVALUE << "KeyframeContollers[" << pair.first << "] = ???" << std::endl;
+        WRITEVALUE << "KeyframeContollers[" << pair.first << "] = " << typeid(ctrl).name() << std::endl;
 #endif
         os.writeObject(pair.second);
     }
@@ -90,14 +92,13 @@ static bool readControllers(osgDB::InputStream& is,
 #if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         osg::ref_ptr<NifOsg::KeyframeController> ctrl = is.readObjectOfType<NifOsg::KeyframeController>();
 #else
-        // Silence OSG 3.2 compilation failure until I can investigate further.
-        //osg::ref_ptr<NifOsg::KeyframeController> ctrl;
-        //is >> ctrl;
+        osg::Object* optr = is.readObject();
+        osg::ref_ptr<NifOsg::KeyframeController> ctrl(dynamic_cast<NifOsg::KeyframeController*>(optr));
 #endif
         KFCMap::value_type pair = KFCMap::value_type(label, ctrl);
         it = node.mKeyframeControllers.insert(it, pair);
 #if SERIALIZER_DEBUG==3
-        READVALUE << "KeyframeContollers[" << pair.first << "] = ???" << std::endl;
+        READVALUE << "KeyframeContollers[" << pair.first << "] = " << typeid(ctrl).name() << std::endl;
 #endif
     }
     is >> is.END_BRACKET;
