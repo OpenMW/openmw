@@ -963,7 +963,9 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
+                    std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
+                    if (data->uvlist.size())
+                        geometry->setTexCoordArray(textureStage, data->uvlist[0]);
                     continue;
                 }
 
