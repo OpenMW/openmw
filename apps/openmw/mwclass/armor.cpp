@@ -83,10 +83,9 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    std::string Armor::getScript (const MWWorld::Ptr& ptr) const
+    std::string Armor::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mScript;
     }

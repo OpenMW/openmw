@@ -209,10 +209,9 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
     }
 
-    std::string Container::getScript (const MWWorld::Ptr& ptr) const
+    std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mScript;
     }

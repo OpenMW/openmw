@@ -158,7 +158,7 @@ namespace MWWorld
         return -1;
     }
 
-    std::string Class::getScript (const Ptr& ptr) const
+    std::string Class::getScript (const ConstPtr& ptr) const
     {
         return "";
     }

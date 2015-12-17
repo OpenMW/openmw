@@ -74,7 +74,7 @@ namespace MWClass
 
             virtual bool hasInventoryStore (const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;

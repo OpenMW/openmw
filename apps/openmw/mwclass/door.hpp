@@ -49,7 +49,7 @@ namespace MWClass
 
             virtual bool canLock(const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             static void registerSelf();

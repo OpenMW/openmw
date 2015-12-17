@@ -78,10 +78,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Miscellaneous::getScript (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         return ref->mBase->mScript;
     }

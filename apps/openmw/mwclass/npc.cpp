@@ -799,10 +799,9 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
-    std::string Npc::getScript (const MWWorld::Ptr& ptr) const
+    std::string Npc::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         return ref->mBase->mScript;
     }

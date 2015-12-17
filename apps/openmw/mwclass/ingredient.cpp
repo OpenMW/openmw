@@ -70,10 +70,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Ingredient::getScript (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mScript;
     }

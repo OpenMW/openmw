@@ -444,9 +444,9 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
-    std::string Creature::getScript (const MWWorld::Ptr& ptr) const
+    std::string Creature::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return ref->mBase->mScript;
     }
