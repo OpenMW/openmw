@@ -208,7 +208,7 @@ protected:
 
     osg::ref_ptr<osg::Group> mInsert;
 
-    osg::ref_ptr<osg::Node> mObjectRoot;
+    osg::ref_ptr<osg::Group> mObjectRoot;
     SceneUtil::Skeleton* mSkeleton;
 
     // The node expected to accumulate movement during movement animations.

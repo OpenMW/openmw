@@ -216,11 +216,12 @@ namespace NifOsg
         osg::Vec3f mCachedWorldDirection;
     };
 
-    // NodeVisitor to find a child node with the given record index, stored in the node's user data container.
-    class FindRecIndexVisitor : public osg::NodeVisitor
+    // NodeVisitor to find a Group node with the given record index, stored in the node's user data container.
+    // Alternatively, returns the node's parent Group if that node is not a Group (i.e. a leaf node).
+    class FindGroupByRecIndex : public osg::NodeVisitor
     {
     public:
-        FindRecIndexVisitor(int recIndex);
+        FindGroupByRecIndex(int recIndex);
 
         virtual void apply(osg::Node &searchNode);
 

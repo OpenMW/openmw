@@ -256,7 +256,7 @@ void Emitter::emitParticles(double dt)
         int randomRecIndex = mTargets[(std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * mTargets.size()];
 
         // we could use a map here for faster lookup
-        FindRecIndexVisitor visitor(randomRecIndex);
+        FindGroupByRecIndex visitor(randomRecIndex);
         getParent(0)->accept(visitor);
 
         if (!visitor.mFound)
@@ -286,21 +286,25 @@ void Emitter::emitParticles(double dt)
     }
 }
 
-FindRecIndexVisitor::FindRecIndexVisitor(int recIndex)
+FindGroupByRecIndex::FindGroupByRecIndex(int recIndex)
     : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     , mFound(NULL)
     , mRecIndex(recIndex)
 {
 }
 
-void FindRecIndexVisitor::apply(osg::Node &searchNode)
+void FindGroupByRecIndex::apply(osg::Node &searchNode)
 {
     if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
     {
         NodeUserData* holder = dynamic_cast<NodeUserData*>(searchNode.getUserDataContainer()->getUserObject(0));
         if (holder && holder->mIndex == mRecIndex)
         {
-            mFound = static_cast<osg::Group*>(&searchNode);
+            osg::Group* group = searchNode.asGroup();
+            if (!group)
+                group = searchNode.getParent(0);
+
+            mFound = group;
             mFoundPath = getNodePath();
             return;
         }

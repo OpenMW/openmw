@@ -808,7 +808,7 @@ namespace NifOsg
                 // This seems to be true for all NIF files in the game that I've checked, suggesting that NIFs work similar to OSG with regards to update order.
                 // If something ever violates this assumption, the worst that could happen is the culling being one frame late, which wouldn't be a disaster.
 
-                FindRecIndexVisitor find (partctrl->emitter->recIndex);
+                FindGroupByRecIndex find (partctrl->emitter->recIndex);
                 rootNode->accept(find);
                 if (!find.mFound)
                 {
@@ -884,7 +884,9 @@ namespace NifOsg
                 int uvSet = *it;
                 if (uvSet >= (int)data->uvlist.size())
                 {
-                    std::cerr << "Warning: using an undefined UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
+                    std::cerr << "Warning: out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename << std::endl;
+                    if (data->uvlist.size())
+                        geometry->setTexCoordArray(textureStage, data->uvlist[0]);
                     continue;
                 }
 
@@ -1285,7 +1287,7 @@ namespace NifOsg
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
-                        osg::Texture2D* texture2d = textureManager->getTexture2D(filename,
+                        osg::ref_ptr<osg::Texture2D> texture2d = textureManager->getTexture2D(filename,
                               wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
                               wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
