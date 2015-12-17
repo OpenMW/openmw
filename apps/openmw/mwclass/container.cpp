@@ -299,6 +299,8 @@ namespace MWClass
 
     void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
+        if (!state.mHasCustomState)
+            return;
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
         if (!ptr.getRefData().getCustomData())
@@ -316,7 +318,11 @@ namespace MWClass
     {
         ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
         dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             writeState (state2.mInventory);

@@ -104,6 +104,9 @@ namespace MWClass
     void CreatureLevList::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::CreatureLevListState& state2 = dynamic_cast<const ESM::CreatureLevListState&> (state);
 
         ensureCustomData(ptr);
@@ -117,7 +120,12 @@ namespace MWClass
     {
         ESM::CreatureLevListState& state2 = dynamic_cast<ESM::CreatureLevListState&> (state);
 
-        ensureCustomData(ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
         state2.mSpawnActorId = customData.mSpawnActorId;
         state2.mSpawn = customData.mSpawn;

@@ -1187,8 +1187,6 @@ namespace MWClass
             return;
         }
 
-        ensureCustomData (ptr);
-
         NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
 
         customData.mInventoryStore.writeState (state2.mInventory);

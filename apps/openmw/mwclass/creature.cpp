@@ -735,8 +735,6 @@ namespace MWClass
             return;
         }
 
-        ensureCustomData (ptr);
-
         CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->writeState (state2.mInventory);
