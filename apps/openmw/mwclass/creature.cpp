@@ -724,7 +724,7 @@ namespace MWClass
         customData.mCreatureStats.readState (state2.mCreatureStats);
     }
 
-    void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+    void Creature::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
@@ -735,7 +735,7 @@ namespace MWClass
             return;
         }
 
-        CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
+        const CreatureCustomData& customData = dynamic_cast<const CreatureCustomData&>(*ptr.getRefData().getCustomData());
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);

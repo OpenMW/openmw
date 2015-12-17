@@ -54,8 +54,7 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
 {
     mRef.writeState(state);
 
-    /// \todo get rid of this cast once const-correct Ptr are available
-    Ptr ptr (const_cast<LiveCellRefBase *> (this));
+    ConstPtr ptr (this);
 
     mData.write (state, mClass->getScript (ptr));
 

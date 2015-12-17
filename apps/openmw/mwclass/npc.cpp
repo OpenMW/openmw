@@ -1175,7 +1175,7 @@ namespace MWClass
         static_cast<MWMechanics::CreatureStats&> (customData.mNpcStats).readState (state2.mCreatureStats);
     }
 
-    void Npc::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+    void Npc::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::NpcState& state2 = dynamic_cast<ESM::NpcState&> (state);
@@ -1186,7 +1186,7 @@ namespace MWClass
             return;
         }
 
-        NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
+        const NpcCustomData& customData = dynamic_cast<const NpcCustomData&>(*ptr.getRefData().getCustomData());
 
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);

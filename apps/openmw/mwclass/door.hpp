@@ -66,7 +66,7 @@ namespace MWClass
                 const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
                 const;
             ///< Write additional state from \a ptr into \a state.
     };

@@ -351,14 +351,14 @@ namespace MWClass
         customData.mDoorState = state2.mDoorState;
     }
 
-    void Door::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
+    void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
         if (!ptr.getRefData().getCustomData())
         {
             state.mHasCustomState = false;
             return;
         }
-        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
+        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
 
         ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
         state2.mDoorState = customData.mDoorState;

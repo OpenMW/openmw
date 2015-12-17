@@ -116,6 +116,8 @@ namespace MWWorld
             CustomData *getCustomData();
             ///< May return a 0-pointer. The ownership of the return data object is not transferred.
 
+            const CustomData *getCustomData() const;
+
             bool hasChanged() const;
             ///< Has this RefData changed since it was originally loaded?
     };
