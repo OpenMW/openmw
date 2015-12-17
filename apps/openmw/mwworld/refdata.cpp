@@ -166,14 +166,20 @@ namespace MWWorld
 
     void RefData::enable()
     {
-        mChanged = !mEnabled;
-        mEnabled = true;
+        if (!mEnabled)
+        {
+            mChanged = true;
+            mEnabled = true;
+        }
     }
 
     void RefData::disable()
     {
-        mChanged = mEnabled;
-        mEnabled = false;
+        if (mEnabled)
+        {
+            mChanged = true;
+            mEnabled = false;
+        }
     }
 
     void RefData::setPosition(const ESM::Position& pos)

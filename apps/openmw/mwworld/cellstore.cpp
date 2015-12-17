@@ -347,7 +347,7 @@ namespace MWWorld
             return std::binary_search (mIds.begin(), mIds.end(), id);
 
         /// \todo address const-issues
-        return const_cast<CellStore *> (this)->search (id).isEmpty();
+        return searchConst (id).isEmpty();
     }
 
     struct SearchVisitor
@@ -367,14 +367,19 @@ namespace MWWorld
 
     Ptr CellStore::search (const std::string& id)
     {
-        bool oldState = mHasState;
-
         SearchVisitor searchVisitor;
         searchVisitor.mIdToFind = id;
         forEach(searchVisitor);
-
-        mHasState = oldState;
         return searchVisitor.mFound;
+    }
+
+    Ptr CellStore::searchConst (const std::string& id) const
+    {
+        bool oldState = mHasState;
+        /// \todo address const-issues
+        Ptr result = const_cast<CellStore*>(this)->search(id);
+        const_cast<CellStore*>(this)->mHasState = oldState;
+        return result;
     }
 
     Ptr CellStore::searchViaActorId (int id)

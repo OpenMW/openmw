@@ -2828,7 +2828,7 @@ namespace MWWorld
                 checkedCells.insert( *i );
                 if ( !next ) continue;
 
-                closestMarker = next->search( id );
+                closestMarker = next->searchConst( id );
                 if ( !closestMarker.isEmpty() )
                 {
                     return closestMarker;
