@@ -98,7 +98,7 @@ add_openmw_dir (mwbase
 # Make paths to serializer objects.  This is horrible, but I don't know how else to do it.
 # At least this way there's documentation of what's supposed to happen, and it works for me.
 foreach (_src ${serializer_sources})
-    set(serializer_objects ${serializer_objects} ../../serializers/CMakeFiles/osgdb_serializers_openmw.dir/${_src}.cpp.o)
+    set(remote_serializer_sources ${remote_serializer_sources} ../../serializers/${_src})
 endforeach (_src ${serializer_sources})
 
 # Main executable
@@ -107,7 +107,7 @@ if (NOT ANDROID)
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}
-        ${serializer_objects}
+        ${remote_serializer_sources}
     )
 else ()
     add_library(openmw
