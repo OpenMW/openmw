@@ -153,15 +153,11 @@ namespace MWClass
 
             virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
 
-            virtual bool canSwim (const MWWorld::Ptr &ptr) const {
-                return true;
-            }
+            virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
 
-            virtual bool canWalk (const MWWorld::Ptr &ptr) const {
-                return true;
-            }
+            virtual bool canWalk (const MWWorld::ConstPtr &ptr) const;
 
-            virtual bool isBipedal (const MWWorld::Ptr &ptr) const;
+            virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;
 

@@ -355,7 +355,7 @@ namespace MWWorld
         return newPtr;
     }
 
-    bool Class::isBipedal(const Ptr &ptr) const
+    bool Class::isBipedal(const ConstPtr &ptr) const
     {
         return false;
     }

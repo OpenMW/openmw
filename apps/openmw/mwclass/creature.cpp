@@ -40,7 +40,7 @@
 
 namespace
 {
-    bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask)
+    bool isFlagBitSet(const MWWorld::ConstPtr &ptr, ESM::Creature::Flags bitMask)
     {
         return (ptr.get<ESM::Creature>()->mBase->mFlags & bitMask) != 0;
     }
@@ -599,7 +599,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
+    bool Creature::isBipedal(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Bipedal);
     }

@@ -1208,6 +1208,16 @@ namespace MWClass
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }
 
+    bool Npc::canSwim(const MWWorld::ConstPtr &ptr) const
+    {
+        return true;
+    }
+
+    bool Npc::canWalk(const MWWorld::ConstPtr &ptr) const
+    {
+        return true;
+    }
+
     void Npc::respawn(const MWWorld::Ptr &ptr) const
     {
         if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
@@ -1242,7 +1252,7 @@ namespace MWClass
         return ref->mBase->mAiData.mFight;
     }
 
-    bool Npc::isBipedal(const MWWorld::Ptr &ptr) const
+    bool Npc::isBipedal(const MWWorld::ConstPtr &ptr) const
     {
         return true;
     }

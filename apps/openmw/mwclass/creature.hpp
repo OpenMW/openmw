@@ -107,7 +107,7 @@ namespace MWClass
                 return true;
             }
 
-            virtual bool isBipedal (const MWWorld::Ptr &ptr) const;
+            virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
             virtual bool canFly (const MWWorld::Ptr &ptr) const;
             virtual bool canSwim (const MWWorld::Ptr &ptr) const;
             virtual bool canWalk (const MWWorld::Ptr &ptr) const;
