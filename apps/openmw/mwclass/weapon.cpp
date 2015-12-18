@@ -54,10 +54,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Weapon::getName (const MWWorld::Ptr& ptr) const
+    std::string Weapon::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mName;
     }
@@ -76,10 +75,9 @@ namespace MWClass
         return (ref->mBase->mData.mType < 11); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
-    int Weapon::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Weapon::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mData.mHealth;
     }
@@ -116,10 +114,9 @@ namespace MWClass
         return std::make_pair (slots_, stack);
     }
 
-    int Weapon::getEquipmentSkill (const MWWorld::Ptr& ptr) const
+    int Weapon::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         const int size = 12;
 
@@ -146,10 +143,9 @@ namespace MWClass
         return -1;
     }
 
-    int Weapon::getValue (const MWWorld::Ptr& ptr) const
+    int Weapon::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mData.mValue;
     }
@@ -267,10 +263,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

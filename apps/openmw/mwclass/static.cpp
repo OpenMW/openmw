@@ -42,7 +42,7 @@ namespace MWClass
         return "";
     }
 
-    std::string Static::getName (const MWWorld::Ptr& ptr) const
+    std::string Static::getName (const MWWorld::ConstPtr& ptr) const
     {
         return "";
     }

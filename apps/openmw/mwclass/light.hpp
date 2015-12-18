@@ -20,14 +20,14 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
             virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual boost::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
@@ -41,7 +41,7 @@ namespace MWClass
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
 
-            virtual int getValue (const MWWorld::Ptr& ptr) const;
+            virtual int getValue (const MWWorld::ConstPtr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
             static void registerSelf();
@@ -62,7 +62,7 @@ namespace MWClass
             virtual void setRemainingUsageTime (const MWWorld::Ptr& ptr, float duration) const;
             ///< Sets the remaining duration of the object.
 
-            virtual float getRemainingUsageTime (const MWWorld::Ptr& ptr) const;
+            virtual float getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const;
             ///< Returns the remaining duration of the object.
 
             virtual std::string getModel(const MWWorld::Ptr &ptr) const;

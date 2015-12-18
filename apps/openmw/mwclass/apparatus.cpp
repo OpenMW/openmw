@@ -50,10 +50,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Apparatus::getName (const MWWorld::Ptr& ptr) const
+    std::string Apparatus::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mName;
     }
@@ -71,10 +70,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Apparatus::getValue (const MWWorld::Ptr& ptr) const
+    int Apparatus::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mData.mValue;
     }
@@ -112,10 +110,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Apparatus::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Apparatus::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

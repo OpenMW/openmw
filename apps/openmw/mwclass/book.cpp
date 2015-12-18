@@ -53,10 +53,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Book::getName (const MWWorld::Ptr& ptr) const
+    std::string Book::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mName;
     }
@@ -85,10 +84,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Book::getValue (const MWWorld::Ptr& ptr) const
+    int Book::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mData.mValue;
     }
@@ -126,10 +124,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

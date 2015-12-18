@@ -80,7 +80,7 @@ namespace MWWorld
         return false;
     }
 
-    int Class::getItemHealth(const Ptr &ptr) const
+    int Class::getItemHealth(const ConstPtr &ptr) const
     {
         if (ptr.getCellRef().getCharge() == -1)
             return getItemMaxHealth(ptr);
@@ -88,7 +88,7 @@ namespace MWWorld
             return ptr.getCellRef().getCharge();
     }
 
-    int Class::getItemMaxHealth (const Ptr& ptr) const
+    int Class::getItemMaxHealth (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
     }
@@ -153,7 +153,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not support time-based uses");
     }
 
-    float Class::getRemainingUsageTime (const Ptr& ptr) const
+    float Class::getRemainingUsageTime (const ConstPtr& ptr) const
     {
         return -1;
     }
@@ -193,12 +193,12 @@ namespace MWWorld
         return std::make_pair (std::vector<int>(), false);
     }
 
-    int Class::getEquipmentSkill (const Ptr& ptr) const
+    int Class::getEquipmentSkill (const ConstPtr& ptr) const
     {
         return -1;
     }
 
-    int Class::getValue (const Ptr& ptr) const
+    int Class::getValue (const ConstPtr& ptr) const
     {
         throw std::logic_error ("value not supported by this class");
     }
@@ -272,7 +272,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not have any inventory icon");
     }
 
-    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const
+    MWGui::ToolTipInfo Class::getToolTipInfo (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have a tool tip");
     }
@@ -447,7 +447,7 @@ namespace MWWorld
         return -1;
     }
 
-    int Class::getEffectiveArmorRating(const Ptr &ptr, const Ptr &actor) const
+    int Class::getEffectiveArmorRating(const ConstPtr &armor, const Ptr &actor) const
     {
         throw std::runtime_error("class does not support armor ratings");
     }

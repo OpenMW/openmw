@@ -86,7 +86,7 @@ namespace MWWorld
             virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
-            virtual std::string getName (const Ptr& ptr) const = 0;
+            virtual std::string getName (const ConstPtr& ptr) const = 0;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
@@ -101,7 +101,7 @@ namespace MWWorld
             virtual bool hasToolTip (const Ptr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;
@@ -111,10 +111,10 @@ namespace MWWorld
             virtual bool hasItemHealth (const Ptr& ptr) const;
             ///< \return Item health data available? (default implementation: false)
 
-            virtual int getItemHealth (const Ptr& ptr) const;
+            virtual int getItemHealth (const ConstPtr& ptr) const;
             ///< Return current item health or throw an exception if class does not have item health
 
-            virtual int getItemMaxHealth (const Ptr& ptr) const;
+            virtual int getItemMaxHealth (const ConstPtr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
             /// (default implementation: throw an exception)
 
@@ -167,7 +167,7 @@ namespace MWWorld
             ///< Sets the remaining duration of the object, such as an equippable light
             /// source. (default implementation: throw an exception)
 
-            virtual float getRemainingUsageTime (const Ptr& ptr) const;
+            virtual float getRemainingUsageTime (const ConstPtr& ptr) const;
             ///< Returns the remaining duration of the object, such as an equippable light
             /// source. (default implementation: -1, i.e. infinite)
 
@@ -193,13 +193,13 @@ namespace MWWorld
             ///
             /// Default implementation: return (empty vector, false).
 
-            virtual int getEquipmentSkill (const Ptr& ptr)
+            virtual int getEquipmentSkill (const ConstPtr& ptr)
                 const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
             /// (default implementation: return -1)
 
-            virtual int getValue (const Ptr& ptr) const;
+            virtual int getValue (const ConstPtr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
             /// (default implementation: throws an exception)
 
@@ -279,9 +279,9 @@ namespace MWWorld
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 
-            virtual bool isKey (const MWWorld::Ptr& ptr) const { return false; }
+            virtual bool isKey (const MWWorld::ConstPtr& ptr) const { return false; }
 
-            virtual bool isGold(const MWWorld::Ptr& ptr) const { return false; };
+            virtual bool isGold(const MWWorld::ConstPtr& ptr) const { return false; };
             
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
@@ -344,7 +344,7 @@ namespace MWWorld
             virtual int getPrimaryFactionRank (const MWWorld::Ptr& ptr) const;
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-            virtual int getEffectiveArmorRating(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const;
+            virtual int getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
     };
 }
 

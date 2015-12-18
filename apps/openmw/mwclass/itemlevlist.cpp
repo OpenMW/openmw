@@ -9,7 +9,7 @@ namespace MWClass
         return ptr.get<ESM::ItemLevList>()->mBase->mId;
     }
 
-    std::string ItemLevList::getName (const MWWorld::Ptr& ptr) const
+    std::string ItemLevList::getName (const MWWorld::ConstPtr& ptr) const
     {
         return "";
     }

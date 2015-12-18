@@ -72,10 +72,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Light::getName (const MWWorld::Ptr& ptr) const
+    std::string Light::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
             return "";
@@ -116,10 +115,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Light::getValue (const MWWorld::Ptr& ptr) const
+    int Light::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mData.mValue;
     }
@@ -158,10 +156,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
@@ -201,9 +198,9 @@ namespace MWClass
         ptr.getCellRef().setChargeFloat(duration);
     }
 
-    float Light::getRemainingUsageTime (const MWWorld::Ptr& ptr) const
+    float Light::getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         if (ptr.getCellRef().getCharge() == -1)
             return static_cast<float>(ref->mBase->mData.mTime);
         else

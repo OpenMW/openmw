@@ -91,10 +91,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Door::getName (const MWWorld::Ptr& ptr) const
+    std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return ref->mBase->mName;
     }
@@ -239,10 +238,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName;

@@ -24,7 +24,7 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
@@ -35,7 +35,7 @@ namespace MWClass
             virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);

@@ -26,7 +26,7 @@
 
 namespace MWClass
 {
-    bool Miscellaneous::isGold (const MWWorld::Ptr& ptr) const
+    bool Miscellaneous::isGold (const MWWorld::ConstPtr& ptr) const
     {
         return Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_001")
                         || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_005")
@@ -64,10 +64,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Miscellaneous::getName (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         return ref->mBase->mName;
     }
@@ -85,10 +84,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Miscellaneous::getValue (const MWWorld::Ptr& ptr) const
+    int Miscellaneous::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         int value = ref->mBase->mData.mValue;
         if (ptr.getCellRef().getGoldValue() > 1 && ptr.getRefData().getCount() == 1)
@@ -140,10 +138,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
 
@@ -249,10 +246,9 @@ namespace MWClass
         return ref->mBase->mData.mWeight;
     }
 
-    bool Miscellaneous::isKey(const MWWorld::Ptr &ptr) const
+    bool Miscellaneous::isKey(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mIsKey != 0;
     }
 

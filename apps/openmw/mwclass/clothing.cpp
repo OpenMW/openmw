@@ -52,10 +52,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Clothing::getName (const MWWorld::Ptr& ptr) const
+    std::string Clothing::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         return ref->mBase->mName;
     }
@@ -113,10 +112,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Clothing::getEquipmentSkill (const MWWorld::Ptr& ptr) const
+    int Clothing::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType==ESM::Clothing::Shoes)
             return ESM::Skill::Unarmored;
@@ -124,10 +122,9 @@ namespace MWClass
         return -1;
     }
 
-    int Clothing::getValue (const MWWorld::Ptr& ptr) const
+    int Clothing::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         return ref->mBase->mData.mValue;
     }
@@ -179,10 +176,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Clothing::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

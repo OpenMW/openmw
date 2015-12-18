@@ -50,10 +50,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Repair::getName (const MWWorld::Ptr& ptr) const
+    std::string Repair::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         return ref->mBase->mName;
     }
@@ -72,10 +71,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Repair::getValue (const MWWorld::Ptr& ptr) const
+    int Repair::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         return ref->mBase->mData.mValue;
     }
@@ -118,18 +116,16 @@ namespace MWClass
         return true;
     }
 
-    int Repair::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Repair::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         return ref->mBase->mData.mUses;
     }
 
-    MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Repair::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

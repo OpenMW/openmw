@@ -193,10 +193,9 @@ namespace MWClass
         }
     }
 
-    std::string Container::getName (const MWWorld::Ptr& ptr) const
+    std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mName;
     }
@@ -231,10 +230,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName;

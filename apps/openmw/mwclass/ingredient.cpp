@@ -56,10 +56,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Ingredient::getName (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mName;
     }
@@ -77,10 +76,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Ingredient::getValue (const MWWorld::Ptr& ptr) const
+    int Ingredient::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return ref->mBase->mData.mValue;
     }
@@ -128,10 +126,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Ingredient::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

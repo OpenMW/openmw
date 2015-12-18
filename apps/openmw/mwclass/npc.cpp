@@ -252,6 +252,10 @@ namespace MWClass
         {
             return *this;
         }
+        virtual const NpcCustomData& asNpcCustomData() const
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *NpcCustomData::clone() const
@@ -436,9 +440,9 @@ namespace MWClass
 
     }
 
-    std::string Npc::getName (const MWWorld::Ptr& ptr) const
+    std::string Npc::getName (const MWWorld::ConstPtr& ptr) const
     {
-        if(getNpcStats(ptr).isWerewolf())
+        if(ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
@@ -446,7 +450,7 @@ namespace MWClass
             return store.find("sWerewolfPopup")->getString();
         }
 
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mName;
     }
 
@@ -921,15 +925,15 @@ namespace MWClass
         registerClass (typeid (ESM::NPC).name(), instance);
     }
 
-    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
 
         info.caption = getName(ptr);
-        if(fullHelp && getNpcStats(ptr).isWerewolf())
+        if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
             info.caption += ref->mBase->mName;

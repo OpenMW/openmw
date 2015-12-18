@@ -21,6 +21,13 @@ MWClass::NpcCustomData &CustomData::asNpcCustomData()
     throw std::logic_error(error.str());
 }
 
+const MWClass::NpcCustomData &CustomData::asNpcCustomData() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to NpcCustomData";
+    throw std::logic_error(error.str());
+}
+
 MWClass::ContainerCustomData &CustomData::asContainerCustomData()
 {
     std::stringstream error;

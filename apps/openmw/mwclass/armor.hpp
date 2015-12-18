@@ -22,7 +22,7 @@ namespace MWClass
 
             virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
@@ -33,7 +33,7 @@ namespace MWClass
             virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
             ///< \return Item health data available?
 
-            virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
+            virtual int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
 
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
@@ -43,17 +43,17 @@ namespace MWClass
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
 
-            virtual int getEquipmentSkill (const MWWorld::Ptr& ptr) const;
+            virtual int getEquipmentSkill (const MWWorld::ConstPtr& ptr) const;
             /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
             /// no such skill.
 
             virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            virtual int getValue (const MWWorld::Ptr& ptr) const;
+            virtual int getValue (const MWWorld::ConstPtr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
             static void registerSelf();
@@ -88,7 +88,7 @@ namespace MWClass
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
-            virtual int getEffectiveArmorRating(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const;
+            virtual int getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
     };
 }
 

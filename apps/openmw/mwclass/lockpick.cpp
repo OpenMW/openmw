@@ -51,10 +51,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Lockpick::getName (const MWWorld::Ptr& ptr) const
+    std::string Lockpick::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mName;
     }
@@ -81,10 +80,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Lockpick::getValue (const MWWorld::Ptr& ptr) const
+    int Lockpick::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mData.mValue;
     }
@@ -122,10 +120,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Lockpick::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Lockpick::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
@@ -173,10 +170,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::Picks) != 0;
     }
 
-    int Lockpick::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Lockpick::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mData.mUses;
     }

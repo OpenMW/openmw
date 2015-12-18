@@ -54,10 +54,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Potion::getName (const MWWorld::Ptr& ptr) const
+    std::string Potion::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mName;
     }
@@ -76,10 +75,9 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    int Potion::getValue (const MWWorld::Ptr& ptr) const
+    int Potion::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mData.mValue;
     }
@@ -117,10 +115,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());

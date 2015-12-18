@@ -51,10 +51,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Probe::getName (const MWWorld::Ptr& ptr) const
+    std::string Probe::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return ref->mBase->mName;
     }
@@ -81,10 +80,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Probe::getValue (const MWWorld::Ptr& ptr) const
+    int Probe::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return ref->mBase->mData.mValue;
     }
@@ -122,10 +120,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
@@ -173,10 +170,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::Probes) != 0;
     }
 
-    int Probe::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Probe::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return ref->mBase->mData.mUses;
     }

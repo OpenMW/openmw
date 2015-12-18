@@ -26,6 +26,7 @@ namespace MWWorld
             virtual MWClass::CreatureCustomData& asCreatureCustomData();
 
             virtual MWClass::NpcCustomData& asNpcCustomData();
+            virtual const MWClass::NpcCustomData& asNpcCustomData() const;
 
             virtual MWClass::ContainerCustomData& asContainerCustomData();
 

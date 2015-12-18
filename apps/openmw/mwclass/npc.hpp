@@ -51,7 +51,7 @@ namespace MWClass
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
@@ -64,7 +64,7 @@ namespace MWClass
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;

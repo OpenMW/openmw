@@ -56,10 +56,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Armor::getName (const MWWorld::Ptr& ptr) const
+    std::string Armor::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mName;
     }
@@ -75,10 +74,9 @@ namespace MWClass
         return true;
     }
 
-    int Armor::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Armor::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mHealth;
     }
@@ -92,8 +90,7 @@ namespace MWClass
 
     std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::Ptr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         std::vector<int> slots_;
 
@@ -124,10 +121,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr) const
+    int Armor::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         std::string typeGmst;
 
@@ -169,10 +165,9 @@ namespace MWClass
             return ESM::Skill::HeavyArmor;
     }
 
-    int Armor::getValue (const MWWorld::Ptr& ptr) const
+    int Armor::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mValue;
     }
@@ -222,10 +217,9 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
@@ -289,9 +283,9 @@ namespace MWClass
         return record->mId;
     }
 
-    int Armor::getEffectiveArmorRating(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    int Armor::getEffectiveArmorRating(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         int armorSkillType = getEquipmentSkill(ptr);
         int armorSkill = actor.getClass().getSkill(actor, armorSkillType);
