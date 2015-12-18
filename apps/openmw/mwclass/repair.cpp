@@ -166,10 +166,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::RepairItem) != 0;
     }
 
-    float Repair::getWeight(const MWWorld::Ptr &ptr) const
+    float Repair::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
         return ref->mBase->mData.mWeight;
     }
 }

@@ -149,10 +149,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::Apparatus) != 0;
     }
 
-    float Apparatus::getWeight(const MWWorld::Ptr &ptr) const
+    float Apparatus::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
         return ref->mBase->mData.mWeight;
     }
 }

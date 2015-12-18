@@ -196,10 +196,9 @@ namespace MWClass
                 || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
-    float Book::getWeight(const MWWorld::Ptr &ptr) const
+    float Book::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
         return ref->mBase->mData.mWeight;
     }
 }

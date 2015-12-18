@@ -275,7 +275,7 @@ namespace MWWorld
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
 
-            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+            virtual float getWeight (const MWWorld::ConstPtr& ptr) const;
 
             virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
 

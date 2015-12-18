@@ -174,10 +174,9 @@ namespace MWClass
         return ref->mBase->mData.mUses;
     }
 
-    float Lockpick::getWeight(const MWWorld::Ptr &ptr) const
+    float Lockpick::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
         return ref->mBase->mData.mWeight;
     }
 }

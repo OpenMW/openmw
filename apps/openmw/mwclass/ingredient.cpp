@@ -187,10 +187,9 @@ namespace MWClass
     }
 
 
-    float Ingredient::getWeight(const MWWorld::Ptr &ptr) const
+    float Ingredient::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
         return ref->mBase->mData.mWeight;
     }
 }

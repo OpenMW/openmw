@@ -235,10 +235,9 @@ namespace MWClass
         return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
     }
 
-    float Miscellaneous::getWeight(const MWWorld::Ptr &ptr) const
+    float Miscellaneous::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
         return ref->mBase->mData.mWeight;
     }
 

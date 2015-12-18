@@ -57,7 +57,7 @@ namespace MWClass
                 const;
             ///< Generate action for using via inventory menu
 
-            virtual float getWeight (const MWWorld::Ptr& ptr) const;
+            virtual float getWeight (const MWWorld::ConstPtr& ptr) const;
 
             virtual bool canSell (const MWWorld::ConstPtr& item, int npcServices) const;
 

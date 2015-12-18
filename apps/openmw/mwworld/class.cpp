@@ -208,7 +208,7 @@ namespace MWWorld
         throw std::runtime_error ("capacity not supported by this class");
     }
 
-    float Class::getWeight(const Ptr &ptr) const
+    float Class::getWeight(const ConstPtr &ptr) const
     {
         throw std::runtime_error ("weight not supported by this class");
     }

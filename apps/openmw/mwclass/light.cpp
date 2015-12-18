@@ -218,10 +218,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::Lights) != 0;
     }
 
-    float Light::getWeight(const MWWorld::Ptr &ptr) const
+    float Light::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
         return ref->mBase->mData.mWeight;
     }
 

@@ -180,10 +180,9 @@ namespace MWClass
         return (npcServices & ESM::NPC::Potions) != 0;
     }
 
-    float Potion::getWeight(const MWWorld::Ptr &ptr) const
+    float Potion::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
         return ref->mBase->mData.mWeight;
     }
 }
