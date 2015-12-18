@@ -41,11 +41,9 @@ namespace MWClass
         // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Potion::getModel(const MWWorld::Ptr &ptr) const
+    std::string Potion::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

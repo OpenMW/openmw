@@ -58,7 +58,7 @@ namespace MWClass
                 const;
             ///< Generate action for using via inventory menu
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
     };

@@ -78,11 +78,9 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Door::getModel(const MWWorld::Ptr &ptr) const
+    std::string Door::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

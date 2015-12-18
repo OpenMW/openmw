@@ -54,7 +54,7 @@ namespace MWClass
 
             static void registerSelf();
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             /// 0 = nothing, 1 = opening, 2 = closing
             virtual int getDoorState (const MWWorld::Ptr &ptr) const;

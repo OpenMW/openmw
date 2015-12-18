@@ -55,7 +55,7 @@ namespace MWClass
             virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
             ///< Return name of inventory icon.
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 

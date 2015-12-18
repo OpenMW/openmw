@@ -126,7 +126,7 @@ namespace MWClass
 
             static void registerSelf();
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
 

@@ -59,11 +59,9 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Light::getModel(const MWWorld::Ptr &ptr) const
+    std::string Light::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
-        assert (ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

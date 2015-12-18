@@ -29,11 +29,9 @@ namespace MWClass
             physics.addObject(ptr, model);
     }
 
-    std::string Static::getModel(const MWWorld::Ptr &ptr) const
+    std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Static> *ref =
-            ptr.get<ESM::Static>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

@@ -73,7 +73,7 @@ namespace MWClass
 
             virtual void restock (const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
     };
 }
 

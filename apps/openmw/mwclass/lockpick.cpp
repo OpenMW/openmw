@@ -38,11 +38,9 @@ namespace MWClass
         // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Lockpick::getModel(const MWWorld::Ptr &ptr) const
+    std::string Lockpick::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

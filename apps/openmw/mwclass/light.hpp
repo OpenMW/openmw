@@ -65,7 +65,7 @@ namespace MWClass
             virtual float getRemainingUsageTime (const MWWorld::ConstPtr& ptr) const;
             ///< Returns the remaining duration of the object.
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 

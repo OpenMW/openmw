@@ -107,11 +107,9 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Container::getModel(const MWWorld::Ptr &ptr) const
+    std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

@@ -291,7 +291,7 @@ namespace MWWorld
     {
     }
 
-    std::string Class::getModel(const MWWorld::Ptr &ptr) const
+    std::string Class::getModel(const MWWorld::ConstPtr &ptr) const
     {
         return "";
     }

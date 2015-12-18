@@ -425,11 +425,9 @@ namespace MWClass
         return ref->mBase->mPersistent;
     }
 
-    std::string Npc::getModel(const MWWorld::Ptr &ptr) const
+    std::string Npc::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         std::string model = "meshes\\base_anim.nif";
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
@@ -437,7 +435,6 @@ namespace MWClass
             model = "meshes\\base_animkna.nif";
 
         return model;
-
     }
 
     std::string Npc::getName (const MWWorld::ConstPtr& ptr) const

@@ -37,11 +37,9 @@ namespace MWClass
         // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Repair::getModel(const MWWorld::Ptr &ptr) const
+    std::string Repair::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {

@@ -175,11 +175,9 @@ namespace MWClass
         objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
-    std::string Creature::getModel(const MWWorld::Ptr &ptr) const
+    std::string Creature::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-        assert (ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
