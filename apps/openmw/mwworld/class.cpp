@@ -433,7 +433,7 @@ namespace MWWorld
       return std::string();
     }
 
-    int Class::getBaseFightRating(const Ptr &ptr) const
+    int Class::getBaseFightRating(const ConstPtr &ptr) const
     {
         throw std::runtime_error("class does not support fight rating");
     }

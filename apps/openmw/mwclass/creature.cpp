@@ -770,9 +770,9 @@ namespace MWClass
         store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
-    int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const
+    int Creature::getBaseFightRating(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         return ref->mBase->mAiData.mFight;
     }
 

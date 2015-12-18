@@ -129,7 +129,7 @@ namespace MWClass
 
             virtual void restock (const MWWorld::Ptr &ptr) const;
 
-            virtual int getBaseFightRating(const MWWorld::Ptr &ptr) const;
+            virtual int getBaseFightRating(const MWWorld::ConstPtr &ptr) const;
 
             virtual void adjustScale(const MWWorld::Ptr& ptr, osg::Vec3f& scale, bool rendering) const;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
