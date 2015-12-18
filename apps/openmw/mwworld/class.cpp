@@ -428,7 +428,7 @@ namespace MWWorld
         return getEncumbrance(ptr) / capacity;
     }
 
-    std::string Class::getSound(const MWWorld::Ptr&) const
+    std::string Class::getSound(const MWWorld::ConstPtr&) const
     {
       return std::string();
     }

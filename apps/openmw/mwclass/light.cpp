@@ -250,7 +250,7 @@ namespace MWClass
         return std::make_pair(1,"");
     }
 
-    std::string Light::getSound(const MWWorld::Ptr& ptr) const
+    std::string Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
       return ptr.get<ESM::Light>()->mBase->mSound;
     }

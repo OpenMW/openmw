@@ -73,7 +73,7 @@ namespace MWClass
 
             std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;
 
-            virtual std::string getSound(const MWWorld::Ptr& ptr) const;
+            virtual std::string getSound(const MWWorld::ConstPtr& ptr) const;
     };
 }
 
