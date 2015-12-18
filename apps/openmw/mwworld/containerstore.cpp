@@ -585,7 +585,7 @@ float MWWorld::ContainerStore::getWeight() const
     return mCachedWeight;
 }
 
-int MWWorld::ContainerStore::getType (const Ptr& ptr)
+int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
 {
     if (ptr.isEmpty())
         throw std::runtime_error ("can't put a non-existent object into a container");

@@ -163,7 +163,7 @@ namespace MWWorld
             float getWeight() const;
             ///< Return total weight of the items contained in *this.
 
-            static int getType (const Ptr& ptr);
+            static int getType (const ConstPtr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
 
