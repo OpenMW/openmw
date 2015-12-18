@@ -1192,9 +1192,9 @@ namespace MWClass
         static_cast<const MWMechanics::CreatureStats&> (customData.mNpcStats).writeState (state2.mCreatureStats);
     }
 
-    int Npc::getBaseGold(const MWWorld::Ptr& ptr) const
+    int Npc::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         if(ref->mBase->mNpdtType != ESM::NPC::NPC_WITH_AUTOCALCULATED_STATS)
             return ref->mBase->mNpdt52.mGold;
         else

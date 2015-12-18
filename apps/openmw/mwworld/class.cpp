@@ -399,7 +399,7 @@ namespace MWWorld
 
     void Class::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const {}
 
-    int Class::getBaseGold(const MWWorld::Ptr& ptr) const
+    int Class::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error("class does not support base gold");
     }

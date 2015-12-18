@@ -735,7 +735,7 @@ namespace MWClass
         customData.mCreatureStats.writeState (state2.mCreatureStats);
     }
 
-    int Creature::getBaseGold(const MWWorld::Ptr& ptr) const
+    int Creature::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
         return ptr.get<ESM::Creature>()->mBase->mData.mGold;
     }
