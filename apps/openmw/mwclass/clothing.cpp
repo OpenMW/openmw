@@ -278,7 +278,7 @@ namespace MWClass
         return ref->mBase->mData.mEnchant;
     }
 
-    bool Clothing::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Clothing::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Clothing)
                 || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());

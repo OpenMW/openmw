@@ -55,7 +55,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
-    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Class::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return false;
     }

@@ -144,7 +144,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Apparatus::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Apparatus::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Apparatus) != 0;
     }

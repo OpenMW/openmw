@@ -382,7 +382,7 @@ namespace MWClass
         return ref->mBase->mData.mEnchant;
     }
 
-    bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Armor::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Armor)
                 || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());

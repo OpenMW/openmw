@@ -162,7 +162,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Probe::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Probe::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Probes) != 0;
     }

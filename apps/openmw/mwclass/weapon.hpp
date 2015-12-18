@@ -81,7 +81,7 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            virtual bool canSell (const MWWorld::Ptr& item, int npcServices) const;
+            virtual bool canSell (const MWWorld::ConstPtr& item, int npcServices) const;
 
             virtual float getWeight (const MWWorld::Ptr& ptr) const;
 

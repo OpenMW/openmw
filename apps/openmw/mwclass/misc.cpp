@@ -228,10 +228,9 @@ namespace MWClass
             return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionSoulgem(ptr));
     }
 
-    bool Miscellaneous::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Miscellaneous::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            item.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = item.get<ESM::Miscellaneous>();
 
         return !ref->mBase->mData.mIsKey && (npcServices & ESM::NPC::Misc) && !isGold(item);
     }

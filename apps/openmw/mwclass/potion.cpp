@@ -175,7 +175,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Potion::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Potions) != 0;
     }
