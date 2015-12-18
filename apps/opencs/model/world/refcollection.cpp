@@ -3,6 +3,8 @@
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <libs/platform/strings.h>
+
 #include "ref.hpp"
 #include "cell.hpp"
 #include "universalid.hpp"
@@ -60,7 +62,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
             // ignoring moved references sub-record; instead calculate cell from coordinates
             std::pair<int, int> index = ref.getCellIndex();
 
-            ref.mCell = "#" + std::to_string(index.first) + " " + std::to_string(index.second);
+            char buf[100];
+            int res = snprintf(buf, 100, "#%d %d", index.first, index.second);
+            if (res > 0 && res < 100)
+                ref.mCell = std::string(buf);
+            else
+                throw std::runtime_error("getNewId possible buffer overflow");
 
             if (!base &&                  // don't try to update base records
                 mref.mRefNum.mIndex != 0) // MVRF tag found
@@ -181,7 +188,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
 std::string CSMWorld::RefCollection::getNewId()
 {
-    return "ref#" + std::to_string(mNextId++);
+    char buf[100];
+    int res = snprintf(buf, 100, "ref#%d", mNextId++);
+    if (res > 0 && res < 100)
+        return std::string(buf);
+    else
+        throw std::runtime_error("getNewId possible buffer overflow");
 }
 
 unsigned int CSMWorld::RefCollection::extractIdNum (const std::string& id) const
