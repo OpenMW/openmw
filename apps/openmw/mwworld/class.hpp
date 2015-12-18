@@ -255,7 +255,7 @@ namespace MWWorld
             ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
             /// (default implementation: return empty string)
 
-            virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual int getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const;
             ///< @return the number of enchantment points available for possible enchanting
 
             virtual void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const;

@@ -82,7 +82,7 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual int getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const;
 
             virtual bool canSell (const MWWorld::ConstPtr& item, int npcServices) const;
 

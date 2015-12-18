@@ -74,7 +74,7 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            virtual int getEnchantmentPoints (const MWWorld::Ptr& ptr) const;
+            virtual int getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const;
 
             virtual float getWeight (const MWWorld::ConstPtr& ptr) const;
 
