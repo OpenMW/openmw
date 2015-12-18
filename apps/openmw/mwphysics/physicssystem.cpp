@@ -857,7 +857,7 @@ namespace MWPhysics
         const btCollisionObject* mMe;
     };
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask, int group) const
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore, int mask, int group) const
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
@@ -923,7 +923,7 @@ namespace MWPhysics
         osg::Vec3f pos1 (physactor1->getPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.8)); // eye level
         osg::Vec3f pos2 (physactor2->getPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.8));
 
-        RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap);
+        RayResult result = castRay(pos1, pos2, MWWorld::Ptr(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
 
         return !result.mHit;
     }
@@ -1073,7 +1073,7 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh)
+    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->createInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
@@ -1085,7 +1085,7 @@ namespace MWPhysics
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj);
 
-        mCollisionWorld->addCollisionObject(obj->getCollisionObject(), CollisionType_World,
+        mCollisionWorld->addCollisionObject(obj->getCollisionObject(), collisionType,
                                            CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
 

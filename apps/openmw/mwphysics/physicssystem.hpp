@@ -57,7 +57,7 @@ namespace MWPhysics
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
@@ -106,8 +106,8 @@ namespace MWPhysics
             };
 
             /// @param me Optional, a Ptr to ignore in the list of results
-            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore = MWWorld::Ptr(), int mask =
-                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor, int group=0xff) const;
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(), int mask =
+                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
             RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
 
