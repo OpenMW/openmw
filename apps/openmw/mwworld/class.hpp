@@ -76,12 +76,6 @@ namespace MWWorld
                 return mTypeName;
             }
 
-            virtual std::string getId (const Ptr& ptr) const;
-            ///< Return ID of \a ptr or throw an exception, if class does not support ID retrieval
-            /// (default implementation: throw an exception)
-            /// @note This function is currently redundant; the same ID can be retrieved by CellRef::getRefId.
-            ///       Leaving it here for now in case we want to optimize later.
-
             virtual void insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const;
             virtual void insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const;
             ///< Add reference into a cell for rendering (default implementation: don't render anything).

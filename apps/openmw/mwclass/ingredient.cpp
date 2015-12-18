@@ -23,13 +23,6 @@
 
 namespace MWClass
 {
-    std::string Ingredient::getId (const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
-
-        return ref->mBase->mId;
-    }
 
     void Ingredient::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

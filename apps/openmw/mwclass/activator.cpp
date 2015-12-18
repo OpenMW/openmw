@@ -26,10 +26,6 @@
 
 namespace MWClass
 {
-    std::string Activator::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Activator>()->mBase->mId;
-    }
 
     void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

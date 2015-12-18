@@ -48,11 +48,6 @@ namespace MWClass
         return new DoorCustomData (*this);
     }
 
-    std::string Door::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Door>()->mBase->mId;
-    }
-
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {

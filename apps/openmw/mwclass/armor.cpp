@@ -26,10 +26,6 @@
 
 namespace MWClass
 {
-    std::string Armor::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Armor>()->mBase->mId;
-    }
 
     void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

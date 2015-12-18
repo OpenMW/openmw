@@ -700,7 +700,7 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
         if (*iter==end())
             continue;
 
-        if ((*iter)->getClass().getId(**iter) != sourceId)
+        if ((*iter)->getCellRef().getRefId() != sourceId)
             continue;
 
         std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);

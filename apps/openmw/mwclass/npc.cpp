@@ -395,7 +395,7 @@ namespace MWClass
 
             // inventory
             // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
-            data->mInventoryStore.fill(ref->mBase->mInventory, getId(ptr));
+            data->mInventoryStore.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             data->mNpcStats.setGoldPool(gold);
 
@@ -404,14 +404,6 @@ namespace MWClass
 
             getInventoryStore(ptr).autoEquip(ptr); 
         }
-    }
-
-    std::string Npc::getId (const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
-
-        return ref->mBase->mId;
     }
 
     void Npc::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -603,7 +595,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
 
         if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -621,7 +613,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
 
 
         if (damage > 0.0f && !object.isEmpty())

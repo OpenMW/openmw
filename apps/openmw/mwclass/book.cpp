@@ -23,10 +23,6 @@
 
 namespace MWClass
 {
-    std::string Book::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Book>()->mBase->mId;
-    }
 
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

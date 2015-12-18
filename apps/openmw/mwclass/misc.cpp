@@ -34,10 +34,6 @@ namespace MWClass
                         || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_025")
                         || Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "gold_100");
     }
-    std::string Miscellaneous::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Miscellaneous>()->mBase->mId;
-    }
 
     void Miscellaneous::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

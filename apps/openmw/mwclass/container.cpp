@@ -47,11 +47,6 @@ namespace MWClass
         return new ContainerCustomData (*this);
     }
 
-    std::string Container::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Container>()->mBase->mId;
-    }
-
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())

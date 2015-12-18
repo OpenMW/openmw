@@ -21,10 +21,6 @@
 
 namespace MWClass
 {
-    std::string Probe::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Probe>()->mBase->mId;
-    }
 
     void Probe::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

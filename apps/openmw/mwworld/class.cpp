@@ -30,11 +30,6 @@ namespace MWWorld
 
     Class::~Class() {}
 
-    std::string Class::getId (const Ptr& ptr) const
-    {
-        throw std::runtime_error ("class does not support ID retrieval");
-    }
-
     void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 

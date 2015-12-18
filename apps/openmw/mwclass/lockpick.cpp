@@ -21,10 +21,6 @@
 
 namespace MWClass
 {
-    std::string Lockpick::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Lockpick>()->mBase->mId;
-    }
 
     void Lockpick::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {

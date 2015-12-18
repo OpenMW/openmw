@@ -22,10 +22,6 @@
 
 namespace MWClass
 {
-    std::string Clothing::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Clothing>()->mBase->mId;
-    }
 
     void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
