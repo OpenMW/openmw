@@ -1056,7 +1056,7 @@ namespace MWWorld
     }
 
 
-    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
+    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::ConstPtr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
 

@@ -770,7 +770,7 @@ namespace MWPhysics
         }
     };
 
-    std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::Ptr& actor,
+    std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::ConstPtr& actor,
                                                                      const osg::Vec3f &origin,
                                                                      const osg::Quat &orient,
                                                                       float queryDistance)
@@ -790,7 +790,7 @@ namespace MWPhysics
         object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
 
         const btCollisionObject* me = NULL;
-        Actor* physactor = getActor(actor);
+        const Actor* physactor = getActor(actor);
         if (physactor)
             me = physactor->getCollisionObject();
 

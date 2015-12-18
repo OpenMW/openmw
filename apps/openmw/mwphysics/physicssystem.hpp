@@ -85,7 +85,7 @@ namespace MWPhysics
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
-            std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor,
+            std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
                                                                const osg::Vec3f &origin,
                                                                const osg::Quat &orientation,
                                                                float queryDistance);
