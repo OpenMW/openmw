@@ -2712,7 +2712,7 @@ namespace MWWorld
         }
     }
 
-    void World::launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+    void World::launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                    const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength)
     {
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
