@@ -675,7 +675,7 @@ namespace MWClass
         }
     }
 
-    int Creature::getBloodTexture(const MWWorld::Ptr &ptr) const
+    int Creature::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
         int flags = ptr.get<ESM::Creature>()->mBase->mFlags;
 

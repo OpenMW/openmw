@@ -1136,9 +1136,9 @@ namespace MWClass
         return ptr.getClass().getNpcStats(ptr).getSkill(skill).getModified();
     }
 
-    int Npc::getBloodTexture(const MWWorld::Ptr &ptr) const
+    int Npc::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         if (ref->mBase->mFlags & ESM::NPC::Skeleton)
             return 1;
