@@ -268,7 +268,7 @@ namespace MWWorld
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+            virtual std::string applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
             virtual std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;
@@ -281,7 +281,7 @@ namespace MWWorld
 
             virtual bool isKey (const MWWorld::ConstPtr& ptr) const { return false; }
 
-            virtual bool isGold(const MWWorld::ConstPtr& ptr) const { return false; };
+            virtual bool isGold(const MWWorld::ConstPtr& ptr) const { return false; }
             
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;
