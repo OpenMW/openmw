@@ -60,7 +60,7 @@ namespace MWWorld
         return false;
     }
 
-    int Class::getServices(const Ptr &actor) const
+    int Class::getServices(const ConstPtr &actor) const
     {
         throw std::runtime_error ("class does not have services");
     }

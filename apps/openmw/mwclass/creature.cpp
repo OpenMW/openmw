@@ -545,9 +545,9 @@ namespace MWClass
         return static_cast<float>(stats.getAttribute(0).getModified() * 5);
     }
 
-    int Creature::getServices(const MWWorld::Ptr &actor) const
+    int Creature::getServices(const MWWorld::ConstPtr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
         if (ref->mBase->mHasAI)
             return ref->mBase->mAiData.mServices;
         else

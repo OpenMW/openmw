@@ -264,7 +264,7 @@ namespace MWWorld
             virtual bool canSell (const MWWorld::ConstPtr& item, int npcServices) const;
             ///< Determine whether or not \a item can be sold to an npc with the given \a npcServices
 
-            virtual int getServices (const MWWorld::Ptr& actor) const;
+            virtual int getServices (const MWWorld::ConstPtr& actor) const;
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
