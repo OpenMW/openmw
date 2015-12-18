@@ -706,7 +706,13 @@ if (WIN32)
 
     # MSVC 2015
     if (MSVC_VERSION GREATER 1899)
-        set(WARNINGS_DISABLE ${WARNINGS_DISABLE} 5026 5027)
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
+            4464 # relative include path contains '..'
+            5026 # move constructor was implicitly defined as deleted
+            5027 # move assignment operator was implicitly defined as deleted
+            5031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file
+            5032 # detected #pragma warning(push) with no corresponding #pragma warning(pop)
+            )
     endif()
 
     foreach(d ${WARNINGS_DISABLE})
