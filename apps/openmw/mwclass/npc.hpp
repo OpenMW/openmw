@@ -114,7 +114,7 @@ namespace MWClass
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
             ///< Inform actor \a ptr that a skill use has succeeded.
 
-            virtual bool isEssential (const MWWorld::Ptr& ptr) const;
+            virtual bool isEssential (const MWWorld::ConstPtr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
 
             virtual int getServices (const MWWorld::Ptr& actor) const;

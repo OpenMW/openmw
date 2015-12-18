@@ -218,7 +218,7 @@ namespace MWWorld
         throw std::runtime_error ("encumbrance not supported by class");
     }
 
-    bool Class::isEssential (const MWWorld::Ptr& ptr) const
+    bool Class::isEssential (const MWWorld::ConstPtr& ptr) const
     {
         return false;
     }

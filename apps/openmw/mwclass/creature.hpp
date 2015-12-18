@@ -83,7 +83,7 @@ namespace MWClass
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
             ///< @return combined armor rating of this actor
 
-            virtual bool isEssential (const MWWorld::Ptr& ptr) const;
+            virtual bool isEssential (const MWWorld::ConstPtr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
 
             virtual int getServices (const MWWorld::Ptr& actor) const;

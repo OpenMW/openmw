@@ -229,7 +229,7 @@ namespace MWWorld
             ///
             /// (default implementations: throws an exception)
 
-            virtual bool isEssential (const MWWorld::Ptr& ptr) const;
+            virtual bool isEssential (const MWWorld::ConstPtr& ptr) const;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
             ///
             /// (default implementation: return false)

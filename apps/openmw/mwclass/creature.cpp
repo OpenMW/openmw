@@ -448,7 +448,7 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    bool Creature::isEssential (const MWWorld::Ptr& ptr) const
+    bool Creature::isEssential (const MWWorld::ConstPtr& ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Essential);
     }

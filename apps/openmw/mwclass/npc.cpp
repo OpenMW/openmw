@@ -908,10 +908,9 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asNpcCustomData().mMovement;
     }
 
-    bool Npc::isEssential (const MWWorld::Ptr& ptr) const
+    bool Npc::isEssential (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         return (ref->mBase->mFlags & ESM::NPC::Essential) != 0;
     }
