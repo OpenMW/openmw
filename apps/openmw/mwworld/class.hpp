@@ -108,7 +108,7 @@ namespace MWWorld
             ///< Return NPC stats or throw an exception, if class does not have NPC stats
             /// (default implementation: throw an exception)
 
-            virtual bool hasItemHealth (const Ptr& ptr) const;
+            virtual bool hasItemHealth (const ConstPtr& ptr) const;
             ///< \return Item health data available? (default implementation: false)
 
             virtual int getItemHealth (const ConstPtr& ptr) const;
@@ -187,7 +187,7 @@ namespace MWWorld
             virtual osg::Vec3f getRotationVector (const Ptr& ptr) const;
             ///< Return desired rotations, as euler angles.
 
-            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const Ptr& ptr) const;
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const ConstPtr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
             ///
@@ -271,7 +271,7 @@ namespace MWWorld
             virtual std::string applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
             ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
-            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const;
+            virtual std::pair<int, std::string> canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const;
             ///< Return 0 if player cannot equip item. 1 if can equip. 2 if it's twohanded weapon. 3 if twohanded weapon conflicts with that.
             ///  Second item in the pair specifies the error message
 

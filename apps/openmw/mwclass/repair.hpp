@@ -58,7 +58,7 @@ namespace MWClass
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
 
-            virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const;
+            virtual bool hasItemHealth (const MWWorld::ConstPtr& ptr) const;
             ///< \return Item health data available? (default implementation: false)
 
             virtual int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const;

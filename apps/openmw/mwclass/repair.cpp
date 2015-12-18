@@ -108,7 +108,7 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    bool Repair::hasItemHealth (const MWWorld::Ptr& ptr) const
+    bool Repair::hasItemHealth (const MWWorld::ConstPtr& ptr) const
     {
         return true;
     }

@@ -69,7 +69,7 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    std::pair<std::vector<int>, bool> Lockpick::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Lockpick::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
         std::vector<int> slots_;
 

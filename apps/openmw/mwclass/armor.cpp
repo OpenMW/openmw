@@ -67,7 +67,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    bool Armor::hasItemHealth (const MWWorld::Ptr& ptr) const
+    bool Armor::hasItemHealth (const MWWorld::ConstPtr& ptr) const
     {
         return true;
     }
@@ -86,7 +86,7 @@ namespace MWClass
         return ref->mBase->mScript;
     }
 
-    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
@@ -295,7 +295,7 @@ namespace MWClass
             return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
     }
 
-    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
         MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 

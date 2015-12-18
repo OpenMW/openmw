@@ -75,7 +75,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not have NPC stats");
     }
 
-    bool Class::hasItemHealth (const Ptr& ptr) const
+    bool Class::hasItemHealth (const ConstPtr& ptr) const
     {
         return false;
     }
@@ -188,7 +188,7 @@ namespace MWWorld
         return osg::Vec3f (0, 0, 0);
     }
 
-    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const ConstPtr& ptr) const
     {
         return std::make_pair (std::vector<int>(), false);
     }
@@ -301,7 +301,7 @@ namespace MWWorld
         throw std::runtime_error ("class can't be enchanted");
     }
 
-    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
         return std::make_pair (1, "");
     }

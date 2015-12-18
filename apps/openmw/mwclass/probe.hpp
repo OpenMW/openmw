@@ -37,7 +37,7 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
-            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;
+            virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::ConstPtr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
             /// stay stacked when equipped?
 
@@ -68,7 +68,7 @@ namespace MWClass
             virtual int getItemMaxHealth (const MWWorld::ConstPtr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
 
-            virtual bool hasItemHealth (const MWWorld::Ptr& ptr) const { return true; }
+            virtual bool hasItemHealth (const MWWorld::ConstPtr& ptr) const { return true; }
             ///< \return Item health data available? (default implementation: false)
     };
 }
