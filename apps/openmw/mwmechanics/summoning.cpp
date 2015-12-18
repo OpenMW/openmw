@@ -1,5 +1,7 @@
 #include "summoning.hpp"
 
+#include <iostream>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
