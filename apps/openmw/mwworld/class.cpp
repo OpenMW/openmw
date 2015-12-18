@@ -360,17 +360,17 @@ namespace MWWorld
         return false;
     }
 
-    bool Class::canFly(const Ptr &ptr) const
+    bool Class::canFly(const ConstPtr &ptr) const
     {
         return false;
     }
 
-    bool Class::canSwim(const Ptr &ptr) const
+    bool Class::canSwim(const ConstPtr &ptr) const
     {
         return false;
     }
 
-    bool Class::canWalk(const Ptr &ptr) const
+    bool Class::canWalk(const ConstPtr &ptr) const
     {
         return false;
     }

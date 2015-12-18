@@ -108,9 +108,9 @@ namespace MWClass
             }
 
             virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
-            virtual bool canFly (const MWWorld::Ptr &ptr) const;
-            virtual bool canSwim (const MWWorld::Ptr &ptr) const;
-            virtual bool canWalk (const MWWorld::Ptr &ptr) const;
+            virtual bool canFly (const MWWorld::ConstPtr &ptr) const;
+            virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
+            virtual bool canWalk (const MWWorld::ConstPtr &ptr) const;
 
             virtual int getSkill(const MWWorld::Ptr &ptr, int skill) const;
 

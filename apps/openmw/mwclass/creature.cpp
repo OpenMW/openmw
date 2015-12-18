@@ -604,17 +604,17 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Bipedal);
     }
 
-    bool Creature::canFly(const MWWorld::Ptr &ptr) const
+    bool Creature::canFly(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Flies);
     }
 
-    bool Creature::canSwim(const MWWorld::Ptr &ptr) const
+    bool Creature::canSwim(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Swims | ESM::Creature::Bipedal));
     }
 
-    bool Creature::canWalk(const MWWorld::Ptr &ptr) const
+    bool Creature::canWalk(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Walks | ESM::Creature::Bipedal));
     }
