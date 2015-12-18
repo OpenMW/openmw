@@ -1201,7 +1201,7 @@ namespace MWClass
             return ref->mBase->mNpdt12.mGold;
     }
 
-    bool Npc::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    bool Npc::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const
     {
         return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
     }

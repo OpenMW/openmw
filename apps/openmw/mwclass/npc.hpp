@@ -150,7 +150,7 @@ namespace MWClass
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 
-            virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
+            virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
 
             virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
 

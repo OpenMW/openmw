@@ -322,7 +322,7 @@ namespace MWWorld
 
             virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
 
-            virtual bool isClass(const MWWorld::Ptr& ptr, const std::string &className) const;
+            virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
 
             /// 0 = nothing, 1 = opening, 2 = closing
             virtual int getDoorState (const MWWorld::Ptr &ptr) const;
