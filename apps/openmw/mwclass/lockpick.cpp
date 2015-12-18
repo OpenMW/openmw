@@ -92,12 +92,12 @@ namespace MWClass
         registerClass (typeid (ESM::Lockpick).name(), instance);
     }
 
-    std::string Lockpick::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Lockpick::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Lockpick Up");
     }
 
-    std::string Lockpick::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Lockpick::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Lockpick Down");
     }

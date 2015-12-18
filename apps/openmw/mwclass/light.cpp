@@ -126,12 +126,12 @@ namespace MWClass
         registerClass (typeid (ESM::Light).name(), instance);
     }
 
-    std::string Light::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Light::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Misc Up");
     }
 
-    std::string Light::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Light::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Misc Down");
     }

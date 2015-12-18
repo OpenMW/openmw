@@ -177,7 +177,7 @@ namespace MWClass
         registerClass (typeid (ESM::Armor).name(), instance);
     }
 
-    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
@@ -188,7 +188,7 @@ namespace MWClass
             return std::string("Item Armor Heavy Up");
     }
 
-    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)

@@ -83,12 +83,12 @@ namespace MWClass
         registerClass (typeid (ESM::Repair).name(), instance);
     }
 
-    std::string Repair::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Repair::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Repair Up");
     }
 
-    std::string Repair::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Repair::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Repair Down");
     }

@@ -87,12 +87,12 @@ namespace MWClass
         registerClass (typeid (ESM::Potion).name(), instance);
     }
 
-    std::string Potion::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Potion::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Potion Up");
     }
 
-    std::string Potion::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Potion::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Potion Down");
     }

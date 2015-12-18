@@ -92,12 +92,12 @@ namespace MWClass
         registerClass (typeid (ESM::Probe).name(), instance);
     }
 
-    std::string Probe::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Probe::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Probe Up");
     }
 
-    std::string Probe::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Probe::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Probe Down");
     }

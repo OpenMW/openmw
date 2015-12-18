@@ -133,10 +133,9 @@ namespace MWClass
         registerClass (typeid (ESM::Clothing).name(), instance);
     }
 
-    std::string Clothing::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Clothing::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
-         MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {
@@ -145,10 +144,9 @@ namespace MWClass
         return std::string("Item Clothes Up");
     }
 
-    std::string Clothing::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Clothing::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
-         MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType == 8)
         {

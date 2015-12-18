@@ -42,10 +42,10 @@ namespace MWClass
 
             static void registerSelf();
 
-            virtual std::string getUpSoundId (const MWWorld::Ptr& ptr) const;
+            virtual std::string getUpSoundId (const MWWorld::ConstPtr& ptr) const;
             ///< Return the pick up sound Id
 
-            virtual std::string getDownSoundId (const MWWorld::Ptr& ptr) const;
+            virtual std::string getDownSoundId (const MWWorld::ConstPtr& ptr) const;
             ///< Return the put down sound Id
 
             virtual std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const;

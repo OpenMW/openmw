@@ -96,12 +96,12 @@ namespace MWClass
         registerClass (typeid (ESM::Book).name(), instance);
     }
 
-    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Book Up");
     }
 
-    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Book::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Book Down");
     }

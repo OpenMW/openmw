@@ -106,14 +106,14 @@ namespace MWClass
         registerClass (typeid (ESM::Miscellaneous).name(), instance);
     }
 
-    std::string Miscellaneous::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         if (isGold(ptr))
             return std::string("Item Gold Up");
         return std::string("Item Misc Up");
     }
 
-    std::string Miscellaneous::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Miscellaneous::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         if (isGold(ptr))
             return std::string("Item Gold Down");

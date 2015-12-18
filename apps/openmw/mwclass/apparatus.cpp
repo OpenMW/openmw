@@ -82,12 +82,12 @@ namespace MWClass
         registerClass (typeid (ESM::Apparatus).name(), instance);
     }
 
-    std::string Apparatus::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Apparatus::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Apparatus Up");
     }
 
-    std::string Apparatus::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Apparatus::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Apparatus Down");
     }

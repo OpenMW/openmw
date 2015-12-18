@@ -234,11 +234,11 @@ namespace MWWorld
             ///
             /// (default implementation: return false)
 
-            virtual std::string getUpSoundId (const Ptr& ptr) const;
+            virtual std::string getUpSoundId (const ConstPtr& ptr) const;
             ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 
-            virtual std::string getDownSoundId (const Ptr& ptr) const;
+            virtual std::string getDownSoundId (const ConstPtr& ptr) const;
             ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
             /// (default implementation: throw an exception)
 

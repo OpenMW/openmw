@@ -153,10 +153,9 @@ namespace MWClass
         registerClass (typeid (ESM::Weapon).name(), instance);
     }
 
-    std::string Weapon::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Weapon::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         int type = ref->mBase->mData.mType;
         // Ammo
@@ -198,10 +197,9 @@ namespace MWClass
         return std::string("Item Misc Up");
     }
 
-    std::string Weapon::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Weapon::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         int type = ref->mBase->mData.mType;
         // Ammo

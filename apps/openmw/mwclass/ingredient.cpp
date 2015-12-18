@@ -98,12 +98,12 @@ namespace MWClass
         registerClass (typeid (ESM::Ingredient).name(), instance);
     }
 
-    std::string Ingredient::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Ingredient Up");
     }
 
-    std::string Ingredient::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Ingredient::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Ingredient Down");
     }

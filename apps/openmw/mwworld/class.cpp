@@ -252,12 +252,12 @@ namespace MWWorld
         sClasses.insert(std::make_pair(key, instance));
     }
 
-    std::string Class::getUpSoundId (const Ptr& ptr) const
+    std::string Class::getUpSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an up sound");
     }
 
-    std::string Class::getDownSoundId (const Ptr& ptr) const
+    std::string Class::getDownSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an down sound");
     }
