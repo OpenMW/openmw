@@ -808,7 +808,7 @@ namespace MWPhysics
         return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
     }
 
-    float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::Ptr &target) const
+    float PhysicsSystem::getHitDistance(const osg::Vec3f &point, const MWWorld::ConstPtr &target) const
     {
         btCollisionObject* targetCollisionObj = NULL;
         const Actor* actor = getActor(target);
@@ -965,7 +965,7 @@ namespace MWPhysics
         }
     }
 
-    osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::Ptr &actor) const
+    osg::Vec3f PhysicsSystem::getHalfExtents(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
         if (physactor)
@@ -974,7 +974,7 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::Ptr &actor) const
+    osg::Vec3f PhysicsSystem::getRenderingHalfExtents(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
         if (physactor)
@@ -983,7 +983,7 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    osg::Vec3f PhysicsSystem::getPosition(const MWWorld::Ptr &actor) const
+    osg::Vec3f PhysicsSystem::getPosition(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
         if (physactor)
@@ -1157,7 +1157,7 @@ namespace MWPhysics
         return NULL;
     }
 
-    const Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr) const
+    const Actor *PhysicsSystem::getActor(const MWWorld::ConstPtr &ptr) const
     {
         ActorMap::const_iterator found = mActors.find(ptr);
         if (found != mActors.end())

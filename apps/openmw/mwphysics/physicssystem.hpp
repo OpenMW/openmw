@@ -63,7 +63,7 @@ namespace MWPhysics
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
             Actor* getActor(const MWWorld::Ptr& ptr);
-            const Actor* getActor(const MWWorld::Ptr& ptr) const;
+            const Actor* getActor(const MWWorld::ConstPtr& ptr) const;
 
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
@@ -95,7 +95,7 @@ namespace MWPhysics
             /// target vector hits the collision shape and then calculates distance from the intersection point.
             /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be successful.
             /// \note Only Actor targets are supported at the moment.
-            float getHitDistance(const osg::Vec3f& point, const MWWorld::Ptr& target) const;
+            float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const;
 
             struct RayResult
             {
@@ -117,14 +117,14 @@ namespace MWPhysics
             bool isOnGround (const MWWorld::Ptr& actor);
 
             /// Get physical half extents (scaled) of the given actor.
-            osg::Vec3f getHalfExtents(const MWWorld::Ptr& actor) const;
+            osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor) const;
 
             /// @see MWPhysics::Actor::getRenderingHalfExtents
-            osg::Vec3f getRenderingHalfExtents(const MWWorld::Ptr& actor) const;
+            osg::Vec3f getRenderingHalfExtents(const MWWorld::ConstPtr& actor) const;
 
             /// Get the position of the collision shape for the actor. Use together with getHalfExtents() to get the collision bounds in world space.
             /// @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
-            osg::Vec3f getPosition(const MWWorld::Ptr& actor) const;
+            osg::Vec3f getPosition(const MWWorld::ConstPtr& actor) const;
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.

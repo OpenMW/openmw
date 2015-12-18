@@ -470,7 +470,7 @@ namespace MWWorld
             virtual bool isWading(const MWWorld::Ptr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
-            virtual osg::Matrixf getActorHeadTransform(const MWWorld::Ptr& actor) const;
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const;
 
             virtual void togglePOV();
 
@@ -640,14 +640,14 @@ namespace MWWorld
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors();
 
-            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor);
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor);
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
 
             /// Return the distance between actor's weapon and target's collision box.
-            virtual float getHitDistance(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+            virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
     };
 }
 

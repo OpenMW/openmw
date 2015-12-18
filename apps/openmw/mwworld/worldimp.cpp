@@ -1038,9 +1038,9 @@ namespace MWWorld
         return facedObject;
     }
 
-    osg::Matrixf World::getActorHeadTransform(const MWWorld::Ptr& actor) const
+    osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
     {
-        MWRender::Animation *anim = mRendering->getAnimation(actor);
+        const MWRender::Animation *anim = mRendering->getAnimation(actor);
         if(anim)
         {
             const osg::Node *node = anim->getNode("Head");
@@ -3285,22 +3285,22 @@ namespace MWWorld
         }
     }
 
-    bool World::isWalkingOnWater(const Ptr &actor)
+    bool World::isWalkingOnWater(const ConstPtr &actor)
     {
-        MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
+        const MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
         if (physicActor && physicActor->isWalkingOnWater())
             return true;
         return false;
     }
 
-    osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
+    osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
         osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
 
-    float World::getHitDistance(const Ptr &actor, const Ptr &target)
+    float World::getHitDistance(const ConstPtr &actor, const ConstPtr &target)
     {
         osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         return mPhysics->getHitDistance(weaponPos, target);

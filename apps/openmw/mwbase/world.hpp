@@ -374,7 +374,7 @@ namespace MWBase
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
-            virtual osg::Matrixf getActorHeadTransform(const MWWorld::Ptr& actor) const = 0;
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual void togglePOV() = 0;
             virtual bool isFirstPerson() const = 0;
@@ -541,14 +541,14 @@ namespace MWBase
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors() = 0;
 
-            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor) = 0;
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
+            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             /// Return the distance between actor's weapon and target's collision box.
-            virtual float getHitDistance(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
+            virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
     };
