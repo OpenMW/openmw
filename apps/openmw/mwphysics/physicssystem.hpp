@@ -82,7 +82,7 @@ namespace MWPhysics
             void stepSimulation(float dt);
             void debugDraw();
 
-            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
+            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
@@ -139,23 +139,23 @@ namespace MWPhysics
             /// Return true if \a actor has been standing on \a object in this frame
             /// This will trigger whenever the object is directly below the actor.
             /// It doesn't matter if the actor is stationary or moving.
-            bool isActorStandingOn(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
+            bool isActorStandingOn(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
 
             /// Get the handle of all actors standing on \a object in this frame.
-            void getActorsStandingOn(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
+            void getActorsStandingOn(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
             /// Return true if \a actor has collided with \a object in this frame.
             /// This will detect running into objects, but will not detect climbing stairs, stepping up a small object, etc.
-            bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
+            bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
 
             /// Get the handle of all actors colliding with \a object in this frame.
-            void getActorsCollidingWith(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
+            void getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
             bool toggleDebugRendering();
 
             /// Mark the given object as a 'non-solid' object. A non-solid object means that
             /// \a isOnSolidGround will return false for actors standing on that object.
-            void markAsNonSolid (const MWWorld::Ptr& ptr);
+            void markAsNonSolid (const MWWorld::ConstPtr& ptr);
 
             bool isOnSolidGround (const MWWorld::Ptr& actor) const;
 

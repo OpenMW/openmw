@@ -155,7 +155,7 @@ namespace MWWorld
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
             float mSwimHeightScale;
-            bool isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const;
+            bool isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const;
             ///< helper function for implementing isSwimming(), isSubmerged(), isWading()
 
             bool mTeleportEnabled;
@@ -269,7 +269,7 @@ namespace MWWorld
             virtual Ptr searchPtrViaActorId (int actorId);
             ///< Search is limited to the active cells.
 
-            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr);
+            virtual MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr);
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
 
@@ -464,10 +464,10 @@ namespace MWWorld
             virtual bool isFlying(const MWWorld::Ptr &ptr) const;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const;
             ///Is the head of the creature underwater?
-            virtual bool isSubmerged(const MWWorld::Ptr &object) const;
-            virtual bool isSwimming(const MWWorld::Ptr &object) const;
+            virtual bool isSubmerged(const MWWorld::ConstPtr &object) const;
+            virtual bool isSwimming(const MWWorld::ConstPtr &object) const;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const;
-            virtual bool isWading(const MWWorld::Ptr &object) const;
+            virtual bool isWading(const MWWorld::ConstPtr &object) const;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const;
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const;
@@ -500,14 +500,14 @@ namespace MWWorld
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state);
 
-            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object); ///< @return true if the player is standing on \a object
-            virtual bool getActorStandingOn (const MWWorld::Ptr& object); ///< @return true if any actor is standing on \a object
-            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object); ///< @return true if the player is colliding with \a object
-            virtual bool getActorCollidingWith (const MWWorld::Ptr& object); ///< @return true if any actor is colliding with \a object
-            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object); ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::ConstPtr& object); ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object); ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::ConstPtr& object); ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::ConstPtr& object, float dmgPerSecond);
             ///< Apply a health difference to any actors standing on \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
-            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond);
+            virtual void hurtCollidingActors (const MWWorld::ConstPtr& object, float dmgPerSecond);
             ///< Apply a health difference to any actors colliding with \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 

@@ -697,7 +697,7 @@ namespace MWPhysics
         return mDebugDrawEnabled;
     }
 
-    void PhysicsSystem::markAsNonSolid(const MWWorld::Ptr &ptr)
+    void PhysicsSystem::markAsNonSolid(const MWWorld::ConstPtr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found == mObjects.end())
@@ -1027,7 +1027,7 @@ namespace MWPhysics
         }
     };
 
-    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask) const
+    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
         btCollisionObject* me = NULL;
 
@@ -1337,7 +1337,7 @@ namespace MWPhysics
             mDebugDrawer->step();
     }
 
-    bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
+    bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
     {
         for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
         {
@@ -1347,7 +1347,7 @@ namespace MWPhysics
         return false;
     }
 
-    void PhysicsSystem::getActorsStandingOn(const MWWorld::Ptr &object, std::vector<MWWorld::Ptr> &out) const
+    void PhysicsSystem::getActorsStandingOn(const MWWorld::ConstPtr &object, std::vector<MWWorld::Ptr> &out) const
     {
         for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
         {
@@ -1356,13 +1356,13 @@ namespace MWPhysics
         }
     }
 
-    bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::Ptr &object) const
+    bool PhysicsSystem::isActorCollidingWith(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
     {
         std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
         return (std::find(collisions.begin(), collisions.end(), actor) != collisions.end());
     }
 
-    void PhysicsSystem::getActorsCollidingWith(const MWWorld::Ptr &object, std::vector<MWWorld::Ptr> &out) const
+    void PhysicsSystem::getActorsCollidingWith(const MWWorld::ConstPtr &object, std::vector<MWWorld::Ptr> &out) const
     {
         std::vector<MWWorld::Ptr> collisions = getCollisions(object, CollisionType_World, CollisionType_Actor);
         out.insert(out.end(), collisions.begin(), collisions.end());

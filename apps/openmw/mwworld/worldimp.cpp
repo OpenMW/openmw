@@ -691,10 +691,10 @@ namespace MWWorld
 
     struct FindContainerVisitor
     {
-        Ptr mContainedPtr;
+        ConstPtr mContainedPtr;
         Ptr mResult;
 
-        FindContainerVisitor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
+        FindContainerVisitor(const ConstPtr& containedPtr) : mContainedPtr(containedPtr) {}
 
         bool operator() (Ptr ptr)
         {
@@ -708,7 +708,7 @@ namespace MWWorld
         }
     };
 
-    Ptr World::findContainer(const Ptr& ptr)
+    Ptr World::findContainer(const ConstPtr& ptr)
     {
         if (ptr.isInCell())
             return Ptr();
@@ -1967,23 +1967,23 @@ namespace MWWorld
         return false;
     }
 
-    bool World::isSubmerged(const MWWorld::Ptr &object) const
+    bool World::isSubmerged(const MWWorld::ConstPtr &object) const
     {
         return isUnderwater(object, 1.0f/mSwimHeightScale);
     }
 
-    bool World::isSwimming(const MWWorld::Ptr &object) const
+    bool World::isSwimming(const MWWorld::ConstPtr &object) const
     {
         return isUnderwater(object, mSwimHeightScale);
     }
 
-    bool World::isWading(const MWWorld::Ptr &object) const
+    bool World::isWading(const MWWorld::ConstPtr &object) const
     {
         const float kneeDeep = 0.25f;
         return isUnderwater(object, kneeDeep);
     }
 
-    bool World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
+    bool World::isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const
     {
         osg::Vec3f pos (object.getRefData().getPosition().asVec3());
 
@@ -2148,33 +2148,33 @@ namespace MWWorld
             mDoorStates.erase(door);
     }
 
-    bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
+    bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();
         return mPhysics->isActorStandingOn(player, object);
     }
 
-    bool World::getActorStandingOn (const MWWorld::Ptr& object)
+    bool World::getActorStandingOn (const MWWorld::ConstPtr& object)
     {
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsStandingOn(object, actors);
         return !actors.empty();
     }
 
-    bool World::getPlayerCollidingWith (const MWWorld::Ptr& object)
+    bool World::getPlayerCollidingWith (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();
         return mPhysics->isActorCollidingWith(player, object);
     }
 
-    bool World::getActorCollidingWith (const MWWorld::Ptr& object)
+    bool World::getActorCollidingWith (const MWWorld::ConstPtr& object)
     {
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsCollidingWith(object, actors);
         return !actors.empty();
     }
 
-    void World::hurtStandingActors(const Ptr &object, float healthPerSecond)
+    void World::hurtStandingActors(const ConstPtr &object, float healthPerSecond)
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
@@ -2204,7 +2204,7 @@ namespace MWWorld
         }
     }
 
-    void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
+    void World::hurtCollidingActors(const ConstPtr &object, float healthPerSecond)
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
