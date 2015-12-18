@@ -49,12 +49,22 @@ namespace VFS
         /// @note Throws an exception if the file can not be found.
         Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
 
+        /// Opens a file ignoring the extension, obeying archive priority.
+        /// @note Throws an exception if no such file can be found.
+        Files::IStreamPtr getFirstOf(std::string name) const;
+
+        /// Opens a file ignoring the extension, obeying archive priority (name is already normalized).
+        /// @note Throws an exception if no such file can be found.
+        Files::IStreamPtr getFirstOfNormalized(const std::string &normalizedName) const;
+
     private:
         bool mStrict;
 
         std::vector<Archive*> mArchives;
 
-        std::map<std::string, File*> mIndex;
+        typedef std::map<std::string,File*> NameFileMap;
+        std::vector<NameFileMap> mArchiveIndexes;
+        NameFileMap mMasterIndex;
     };
 
 }
