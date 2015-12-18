@@ -5,6 +5,10 @@
 
 #include "../widget/modebutton.hpp"
 
+class QDragEnterEvent;
+class QDropEvent;
+class QDragMoveEvent;
+
 namespace CSVRender
 {
     class WorldspaceWidget;
@@ -79,6 +83,15 @@ namespace CSVRender
 
             /// Default-implementation: ignored
             virtual void dragWheel (int diff, double speedFactor);
+
+            /// Default-implementation: ignored
+            virtual void dragEnterEvent (QDragEnterEvent *event);
+
+            /// Default-implementation: ignored
+            virtual void dropEvent (QDropEvent* event);
+
+            /// Default-implementation: ignored
+            virtual void dragMoveEvent (QDragMoveEvent *event);
     };
 }
 

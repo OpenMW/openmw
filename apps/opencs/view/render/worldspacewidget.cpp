@@ -330,6 +330,8 @@ void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
             // These drops are handled through the subview object.
             event->accept();
         }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragEnterEvent (event);
     }
 }
 
@@ -348,9 +350,10 @@ void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
             // These drops are handled through the subview object.
             event->accept();
         }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragMoveEvent (event);
     }
 }
-
 
 bool CSVRender::WorldspaceWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
 {
@@ -460,6 +463,8 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
         {
             emit dataDropped(mime->getData());
         }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dropEvent (event);
     }
 }
 
