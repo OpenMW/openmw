@@ -217,7 +217,7 @@ namespace MWWorld
             ConstPtr searchConst (const std::string& id) const;
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
-            /// @note Does not trigger CellStore hasState flag. Do not modify the returned Ptr!
+            /// @note Does not trigger CellStore hasState flag.
 
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
