@@ -209,7 +209,7 @@ namespace MWClass
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
-    bool Door::canLock(const MWWorld::Ptr &ptr) const
+    bool Door::canLock(const MWWorld::ConstPtr &ptr) const
     {
         return true;
     }

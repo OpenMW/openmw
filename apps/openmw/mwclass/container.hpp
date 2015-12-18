@@ -56,7 +56,7 @@ namespace MWClass
             virtual void unlock (const MWWorld::Ptr& ptr) const;
             ///< Unlock object
 
-            virtual bool canLock(const MWWorld::Ptr &ptr) const;
+            virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
                 const;

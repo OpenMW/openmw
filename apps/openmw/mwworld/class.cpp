@@ -143,7 +143,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not support unlocking");
     }
 
-    bool Class::canLock(const Ptr &ptr) const
+    bool Class::canLock(const ConstPtr &ptr) const
     {
         return false;
     }
