@@ -2109,8 +2109,6 @@ namespace MWWorld
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
     {
-        if (ptr == getPlayerPtr())
-            return mRendering->getPlayerAnimation();
         return mRendering->getAnimation(ptr);
     }
 
