@@ -346,7 +346,6 @@ namespace MWWorld
         if (mState==State_Preloaded)
             return std::binary_search (mIds.begin(), mIds.end(), id);
 
-        /// \todo address const-issues
         return searchConst (id).isEmpty();
     }
 
