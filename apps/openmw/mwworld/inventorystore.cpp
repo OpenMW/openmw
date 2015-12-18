@@ -742,7 +742,7 @@ void MWWorld::InventoryStore::clear()
     ContainerStore::clear();
 }
 
-bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
+bool MWWorld::InventoryStore::isEquipped(const MWWorld::ConstPtr &item)
 {
     for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
     {

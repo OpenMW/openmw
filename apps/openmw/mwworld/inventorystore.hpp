@@ -141,7 +141,7 @@ namespace MWWorld
             void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
             ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
-            bool isEquipped(const MWWorld::Ptr& item);
+            bool isEquipped(const MWWorld::ConstPtr& item);
             ///< Utility function, returns true if the given item is equipped in any slot
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
