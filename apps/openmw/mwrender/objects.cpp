@@ -263,4 +263,13 @@ Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)
     return NULL;
 }
 
+const Animation* Objects::getAnimation(const MWWorld::ConstPtr &ptr) const
+{
+    PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
+    if(iter != mObjects.end())
+        return iter->second;
+
+    return NULL;
+}
+
 }

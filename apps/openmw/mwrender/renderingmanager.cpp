@@ -706,6 +706,14 @@ namespace MWRender
         return mObjects->getAnimation(ptr);
     }
 
+    const MWRender::Animation* RenderingManager::getAnimation(const MWWorld::ConstPtr &ptr) const
+    {
+        if (mPlayerAnimation.get() && ptr == mPlayerAnimation->getPtr())
+            return mPlayerAnimation.get();
+
+        return mObjects->getAnimation(ptr);
+    }
+
     MWRender::Animation* RenderingManager::getPlayerAnimation()
     {
         return mPlayerAnimation.get();

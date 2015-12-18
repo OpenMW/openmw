@@ -81,6 +81,7 @@ public:
     void insertCreature (const MWWorld::Ptr& ptr, const std::string& model, bool weaponsShields);
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
+    const Animation* getAnimation(const MWWorld::ConstPtr &ptr) const;
 
     bool removeObject (const MWWorld::Ptr& ptr);
     ///< \return found?
