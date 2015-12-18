@@ -106,10 +106,9 @@ namespace MWClass
         return std::string("Item Book Down");
     }
 
-    std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Book::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mIcon;
     }

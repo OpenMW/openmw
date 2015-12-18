@@ -138,10 +138,9 @@ namespace MWClass
     }
 
 
-    std::string Light::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Light::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return ref->mBase->mIcon;
     }

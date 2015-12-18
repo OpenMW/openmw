@@ -92,10 +92,9 @@ namespace MWClass
         return std::string("Item Apparatus Down");
     }
 
-    std::string Apparatus::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Apparatus::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mIcon;
     }

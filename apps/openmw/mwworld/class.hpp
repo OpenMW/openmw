@@ -248,7 +248,7 @@ namespace MWWorld
             virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
             ///< @return combined armor rating of this actor
 
-            virtual std::string getInventoryIcon (const MWWorld::Ptr& ptr) const;
+            virtual std::string getInventoryIcon (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of inventory icon.
 
             virtual std::string getEnchantment (const MWWorld::Ptr& ptr) const;

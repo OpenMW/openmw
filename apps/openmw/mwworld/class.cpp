@@ -267,7 +267,7 @@ namespace MWWorld
         throw std::runtime_error("class does not support soundgen look up");
     }
 
-    std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Class::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have any inventory icon");
     }
