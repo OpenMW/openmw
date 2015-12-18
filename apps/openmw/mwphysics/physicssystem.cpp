@@ -409,7 +409,7 @@ namespace MWPhysics
                         && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
                 {
                     const btCollisionObject* standingOn = tracer.mHitObject;
-                    const PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
+                    PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
                     if (ptrHolder)
                         standingCollisionTracker[ptr] = ptrHolder->getPtr();
 
@@ -801,7 +801,7 @@ namespace MWPhysics
 
         if (resultCallback.mObject)
         {
-            const PtrHolder* holder = static_cast<const PtrHolder*>(resultCallback.mObject->getUserPointer());
+            PtrHolder* holder = static_cast<PtrHolder*>(resultCallback.mObject->getUserPointer());
             if (holder)
                 return std::make_pair(holder->getPtr(), toOsg(resultCallback.mContactPoint));
         }
@@ -1020,7 +1020,7 @@ namespace MWPhysics
             if (collisionObject == mTestedAgainst)
                 collisionObject = col1;
 #endif
-            const PtrHolder* holder = static_cast<const PtrHolder*>(collisionObject->getUserPointer());
+            PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
             if (holder)
                 mResult.push_back(holder->getPtr());
             return 0.f;
@@ -1303,7 +1303,7 @@ namespace MWPhysics
                 // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
                 float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
-                osg::Vec3f newpos = MovementSolver::move(iter->first, physicActor, iter->second, mTimeAccum,
+                osg::Vec3f newpos = MovementSolver::move(physicActor->getPtr(), physicActor, iter->second, mTimeAccum,
                                                             world->isFlying(iter->first),
                                                             waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
 

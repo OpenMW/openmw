@@ -170,12 +170,12 @@ namespace MWPhysics
 
             std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
 
-            typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
+            typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
             ObjectMap mObjects;
 
             std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
 
-            typedef std::map<MWWorld::Ptr, Actor*> ActorMap;
+            typedef std::map<MWWorld::ConstPtr, Actor*> ActorMap;
             ActorMap mActors;
 
             typedef std::map<std::pair<int, int>, HeightField*> HeightFieldMap;
