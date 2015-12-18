@@ -108,7 +108,7 @@ namespace MWClass
             /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
 
-            virtual void adjustScale (const MWWorld::Ptr &ptr, osg::Vec3f &scale, bool rendering) const;
+            virtual void adjustScale (const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool rendering) const;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
             virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;

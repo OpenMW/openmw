@@ -1019,14 +1019,13 @@ namespace MWClass
                 + shield;
     }
 
-    void Npc::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f&scale, bool rendering) const
+    void Npc::adjustScale(const MWWorld::ConstPtr &ptr, osg::Vec3f&scale, bool rendering) const
     {
         if (!rendering)
             return; // collision meshes are not scaled based on race height
                     // having the same collision extents for all races makes the environments easier to test
 
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         const ESM::Race* race =
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
