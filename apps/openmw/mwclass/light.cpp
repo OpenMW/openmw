@@ -203,11 +203,9 @@ namespace MWClass
             return ptr.getCellRef().getChargeFloat();
     }
 
-    MWWorld::Ptr
-    Light::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Light::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Light> *ref =
-            ptr.get<ESM::Light>();
+        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

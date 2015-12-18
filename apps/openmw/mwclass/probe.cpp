@@ -153,11 +153,9 @@ namespace MWClass
         return action;
     }
 
-    MWWorld::Ptr
-    Probe::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Probe::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

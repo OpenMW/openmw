@@ -299,11 +299,9 @@ namespace MWClass
         return "#{sCell=" + dest + "}";
     }
 
-    MWWorld::Ptr
-    Door::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Door::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

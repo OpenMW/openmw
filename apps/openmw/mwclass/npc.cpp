@@ -1124,11 +1124,9 @@ namespace MWClass
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
-    MWWorld::Ptr
-    Npc::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Npc::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref =
-            ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

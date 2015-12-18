@@ -333,13 +333,13 @@ namespace MWWorld
     }
 
     MWWorld::Ptr
-    Class::copyToCellImpl(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const
     {
-        throw std::runtime_error("unable to move class to cell");
+        throw std::runtime_error("unable to copy class to cell");
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
@@ -347,7 +347,7 @@ namespace MWWorld
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos) const
     {
         Ptr newPtr = copyToCell(ptr, cell);
         newPtr.getRefData().setPosition(pos);

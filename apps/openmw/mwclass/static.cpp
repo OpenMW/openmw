@@ -52,11 +52,9 @@ namespace MWClass
         registerClass (typeid (ESM::Static).name(), instance);
     }
 
-    MWWorld::Ptr
-    Static::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Static> *ref =
-            ptr.get<ESM::Static>();
+        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

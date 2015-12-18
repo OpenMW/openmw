@@ -120,11 +120,9 @@ namespace MWClass
     }
 
 
-    MWWorld::Ptr
-    Activator::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Activator::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }

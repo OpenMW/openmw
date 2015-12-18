@@ -7,8 +7,7 @@ namespace MWClass
 {
     class Probe : public MWWorld::Class
     {
-            virtual MWWorld::Ptr
-            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+            virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
 
         public:
 

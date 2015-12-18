@@ -66,7 +66,7 @@ namespace MWWorld
             boost::shared_ptr<Action> defaultItemActivate(const Ptr &ptr, const Ptr &actor) const;
             ///< Generate default action for activating inventory items
 
-            virtual Ptr copyToCellImpl(const Ptr &ptr, CellStore &cell) const;
+            virtual Ptr copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const;
 
         public:
 
@@ -286,11 +286,9 @@ namespace MWWorld
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
 
-            virtual Ptr
-            copyToCell(const Ptr &ptr, CellStore &cell) const;
+            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell) const;
 
-            virtual Ptr
-            copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const;
+            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos) const;
 
             virtual bool isActor() const {
                 return false;

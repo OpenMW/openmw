@@ -182,8 +182,7 @@ namespace MWClass
         return info;
     }
 
-    MWWorld::Ptr
-    Miscellaneous::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Miscellaneous::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
         MWWorld::Ptr newPtr;
 
@@ -206,14 +205,14 @@ namespace MWClass
             // Really, I have no idea why moving ref out of conditional
             // scope causes list::push_back throwing std::bad_alloc
             MWWorld::ManualRef newRef(store, base);
-            MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 newRef.getPtr().get<ESM::Miscellaneous>();
 
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getCellRef().setGoldValue(goldAmount);
             newPtr.getRefData().setCount(1);
         } else {
-            MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
+            const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
         }
