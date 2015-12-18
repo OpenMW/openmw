@@ -336,7 +336,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     return addNewStack(ptr, count);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const ConstPtr& ptr, int count)
 {
     ContainerStoreIterator it = begin();
 

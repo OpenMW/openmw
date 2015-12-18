@@ -142,7 +142,7 @@ namespace MWWorld
             int count (const std::string& id);
 
         protected:
-            ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
+            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
