@@ -518,7 +518,7 @@ namespace MWWorld
             virtual void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor);
+            virtual bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor);
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist);

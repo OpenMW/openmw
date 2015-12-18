@@ -75,6 +75,9 @@ namespace MWWorld
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
 
+            /// Return base node (can be a null pointer).
+            const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
+
             /// Set base node (can be a null pointer).
             void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
 

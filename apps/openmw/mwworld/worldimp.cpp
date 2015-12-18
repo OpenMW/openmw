@@ -2317,7 +2317,7 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor)
+    bool World::getLOS(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& targetActor)
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled

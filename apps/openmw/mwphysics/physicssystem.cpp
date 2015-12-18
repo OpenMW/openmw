@@ -857,7 +857,7 @@ namespace MWPhysics
         const btCollisionObject* mMe;
     };
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask, int group)
+    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore, int mask, int group) const
     {
         btVector3 btFrom = toBullet(from);
         btVector3 btTo = toBullet(to);
@@ -865,7 +865,7 @@ namespace MWPhysics
         const btCollisionObject* me = NULL;
         if (!ignore.isEmpty())
         {
-            Actor* actor = getActor(ignore);
+            const Actor* actor = getActor(ignore);
             if (actor)
                 me = actor->getCollisionObject();
         }
@@ -912,10 +912,10 @@ namespace MWPhysics
         return result;
     }
 
-    bool PhysicsSystem::getLineOfSight(const MWWorld::Ptr &actor1, const MWWorld::Ptr &actor2)
+    bool PhysicsSystem::getLineOfSight(const MWWorld::ConstPtr &actor1, const MWWorld::ConstPtr &actor2) const
     {
-        Actor* physactor1 = getActor(actor1);
-        Actor* physactor2 = getActor(actor2);
+        const Actor* physactor1 = getActor(actor1);
+        const Actor* physactor2 = getActor(actor2);
 
         if (!physactor1 || !physactor2)
             return false;
