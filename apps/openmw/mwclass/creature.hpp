@@ -88,7 +88,7 @@ namespace MWClass
 
             virtual int getServices (const MWWorld::Ptr& actor) const;
 
-            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+            virtual bool isPersistent (const MWWorld::ConstPtr& ptr) const;
 
             virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
 

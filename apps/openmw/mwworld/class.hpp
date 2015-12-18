@@ -277,7 +277,7 @@ namespace MWWorld
 
             virtual float getWeight (const MWWorld::ConstPtr& ptr) const;
 
-            virtual bool isPersistent (const MWWorld::Ptr& ptr) const;
+            virtual bool isPersistent (const MWWorld::ConstPtr& ptr) const;
 
             virtual bool isKey (const MWWorld::ConstPtr& ptr) const { return false; }
 

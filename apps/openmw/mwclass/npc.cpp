@@ -419,9 +419,9 @@ namespace MWClass
         renderingInterface.getObjects().insertNPC(ptr);
     }
 
-    bool Npc::isPersistent(const MWWorld::Ptr &actor) const
+    bool Npc::isPersistent(const MWWorld::ConstPtr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
         return ref->mBase->mPersistent;
     }
 

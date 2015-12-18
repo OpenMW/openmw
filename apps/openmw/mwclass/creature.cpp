@@ -554,9 +554,9 @@ namespace MWClass
             return 0;
     }
 
-    bool Creature::isPersistent(const MWWorld::Ptr &actor) const
+    bool Creature::isPersistent(const MWWorld::ConstPtr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
         return ref->mBase->mPersistent;
     }
 

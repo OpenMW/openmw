@@ -241,7 +241,7 @@ namespace MWWorld
         return *iter->second;
     }
 
-    bool Class::isPersistent(const Ptr &ptr) const
+    bool Class::isPersistent(const ConstPtr &ptr) const
     {
         throw std::runtime_error ("class does not support persistence");
     }
