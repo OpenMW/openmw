@@ -200,10 +200,9 @@ namespace MWClass
         return info;
     }
 
-    std::string Clothing::getEnchantment (const MWWorld::Ptr& ptr) const
+    std::string Clothing::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         return ref->mBase->mEnchant;
     }

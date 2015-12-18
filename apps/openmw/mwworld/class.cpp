@@ -282,7 +282,7 @@ namespace MWWorld
         return false;
     }
 
-    std::string Class::getEnchantment (const Ptr& ptr) const
+    std::string Class::getEnchantment (const ConstPtr& ptr) const
     {
         return "";
     }

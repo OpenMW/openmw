@@ -347,10 +347,9 @@ namespace MWClass
         return info;
     }
 
-    std::string Weapon::getEnchantment (const MWWorld::Ptr& ptr) const
+    std::string Weapon::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mEnchant;
     }
