@@ -74,7 +74,7 @@ namespace MWClass
 
             virtual bool hasInventoryStore (const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;
@@ -117,12 +117,10 @@ namespace MWClass
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::Ptr& ptr) const;
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-                const;
+            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
-                const;
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const;
             ///< Write additional state from \a ptr into \a state.
 
             virtual int getBaseGold(const MWWorld::Ptr& ptr) const;

@@ -171,7 +171,7 @@ namespace MWWorld
             ///< Returns the remaining duration of the object, such as an equippable light
             /// source. (default implementation: -1, i.e. infinite)
 
-            virtual std::string getScript (const Ptr& ptr) const;
+            virtual std::string getScript (const ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
 
@@ -313,7 +313,7 @@ namespace MWWorld
                 const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
                 const;
             ///< Write additional state from \a ptr into \a state.
 

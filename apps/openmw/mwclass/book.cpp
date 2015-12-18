@@ -78,10 +78,9 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
-    std::string Book::getScript (const MWWorld::Ptr& ptr) const
+    std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mScript;
     }

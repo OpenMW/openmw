@@ -64,9 +64,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Repair::getScript (const MWWorld::Ptr& ptr) const
+    std::string Repair::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
+        const MWWorld::LiveCellRef<ESM::Repair> *ref =
             ptr.get<ESM::Repair>();
 
         return ref->mBase->mScript;

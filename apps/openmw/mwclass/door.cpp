@@ -217,10 +217,9 @@ namespace MWClass
         return true;
     }
 
-    std::string Door::getScript (const MWWorld::Ptr& ptr) const
+    std::string Door::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return ref->mBase->mScript;
     }
@@ -343,6 +342,8 @@ namespace MWClass
 
     void Door::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
+        if (!state.mHasCustomState)
+            return;
         ensureCustomData(ptr);
         DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
 
@@ -350,10 +351,14 @@ namespace MWClass
         customData.mDoorState = state2.mDoorState;
     }
 
-    void Door::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
+    void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
-        ensureCustomData(ptr);
-        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
 
         ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
         state2.mDoorState = customData.mDoorState;

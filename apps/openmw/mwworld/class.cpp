@@ -158,7 +158,7 @@ namespace MWWorld
         return -1;
     }
 
-    std::string Class::getScript (const Ptr& ptr) const
+    std::string Class::getScript (const ConstPtr& ptr) const
     {
         return "";
     }
@@ -397,7 +397,7 @@ namespace MWWorld
 
     void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
 
-    void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
+    void Class::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const {}
 
     int Class::getBaseGold(const MWWorld::Ptr& ptr) const
     {

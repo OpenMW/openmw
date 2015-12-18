@@ -49,7 +49,7 @@ namespace MWClass
 
             virtual bool canLock(const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             static void registerSelf();
@@ -66,7 +66,7 @@ namespace MWClass
                 const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
                 const;
             ///< Write additional state from \a ptr into \a state.
     };

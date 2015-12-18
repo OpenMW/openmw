@@ -65,10 +65,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Lockpick::getScript (const MWWorld::Ptr& ptr) const
+    std::string Lockpick::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Lockpick> *ref =
-            ptr.get<ESM::Lockpick>();
+        const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
 
         return ref->mBase->mScript;
     }

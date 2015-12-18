@@ -214,10 +214,10 @@ namespace MWWorld
             /// containers.
             /// @note Triggers CellStore hasState flag.
 
-            Ptr searchConst (const std::string& id) const;
+            ConstPtr searchConst (const std::string& id) const;
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
-            /// @note Does not trigger CellStore hasState flag. Do not modify the returned Ptr!
+            /// @note Does not trigger CellStore hasState flag.
 
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
@@ -240,8 +240,9 @@ namespace MWWorld
             void preload ();
             ///< Build ID list from content file.
 
-            /// Call visitor (ref) for each reference. visitor must return a bool. Returning
+            /// Call visitor (MWWorld::Ptr) for each reference. visitor must return a bool. Returning
             /// false will abort the iteration.
+            /// \note Prefer using forEachConst when possible.
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
             template<class Visitor>
@@ -262,6 +263,28 @@ namespace MWWorld
                 }
                 return true;
             }
+
+            /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
+            /// false will abort the iteration.
+            /// \attention This function also lists deleted (count 0) objects!
+            /// \return Iteration completed?
+            template<class Visitor>
+            bool forEachConst (Visitor& visitor) const
+            {
+                if (mState != State_Loaded)
+                    return false;
+
+                for (unsigned int i=0; i<mMergedRefs.size(); ++i)
+                {
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                        continue;
+
+                    if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                        return false;
+                }
+                return true;
+            }
+
 
             /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
             /// false will abort the iteration.
@@ -297,9 +320,6 @@ namespace MWWorld
                 }
                 return true;
             }
-
-            /// \todo add const version of forEach
-
 
             // NOTE: does not account for moved references
             // Should be phased out when we have const version of forEach

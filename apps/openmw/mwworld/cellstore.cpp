@@ -346,15 +346,15 @@ namespace MWWorld
         if (mState==State_Preloaded)
             return std::binary_search (mIds.begin(), mIds.end(), id);
 
-        /// \todo address const-issues
         return searchConst (id).isEmpty();
     }
 
+    template <typename PtrType>
     struct SearchVisitor
     {
-        MWWorld::Ptr mFound;
+        PtrType mFound;
         std::string mIdToFind;
-        bool operator()(const MWWorld::Ptr& ptr)
+        bool operator()(const PtrType& ptr)
         {
             if (ptr.getCellRef().getRefId() == mIdToFind)
             {
@@ -367,19 +367,18 @@ namespace MWWorld
 
     Ptr CellStore::search (const std::string& id)
     {
-        SearchVisitor searchVisitor;
+        SearchVisitor<MWWorld::Ptr> searchVisitor;
         searchVisitor.mIdToFind = id;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
 
-    Ptr CellStore::searchConst (const std::string& id) const
+    ConstPtr CellStore::searchConst (const std::string& id) const
     {
-        bool oldState = mHasState;
-        /// \todo address const-issues
-        Ptr result = const_cast<CellStore*>(this)->search(id);
-        const_cast<CellStore*>(this)->mHasState = oldState;
-        return result;
+        SearchVisitor<MWWorld::ConstPtr> searchVisitor;
+        searchVisitor.mIdToFind = id;
+        forEachConst(searchVisitor);
+        return searchVisitor.mFound;
     }
 
     Ptr CellStore::searchViaActorId (int id)

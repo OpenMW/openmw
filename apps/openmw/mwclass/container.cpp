@@ -209,10 +209,9 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
     }
 
-    std::string Container::getScript (const MWWorld::Ptr& ptr) const
+    std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mScript;
     }
@@ -299,6 +298,8 @@ namespace MWClass
 
     void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
+        if (!state.mHasCustomState)
+            return;
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
         if (!ptr.getRefData().getCustomData())
@@ -312,13 +313,17 @@ namespace MWClass
             readState (state2.mInventory);
     }
 
-    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
+    void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
         ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
-        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+        dynamic_cast<const ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             writeState (state2.mInventory);
     }
 }

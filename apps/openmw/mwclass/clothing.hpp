@@ -28,7 +28,7 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;

@@ -36,7 +36,7 @@ namespace MWClass
             virtual int getItemMaxHealth (const MWWorld::Ptr& ptr) const;
             ///< Return item max health or throw an exception, if class does not have item health
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const MWWorld::Ptr& ptr) const;

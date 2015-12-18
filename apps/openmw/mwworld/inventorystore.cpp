@@ -752,7 +752,7 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state)
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
 {
     MWWorld::ContainerStore::writeState(state);
 

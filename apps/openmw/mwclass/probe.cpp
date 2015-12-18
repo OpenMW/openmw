@@ -64,9 +64,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Probe::getScript (const MWWorld::Ptr& ptr) const
+    std::string Probe::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
+        const MWWorld::LiveCellRef<ESM::Probe> *ref =
             ptr.get<ESM::Probe>();
 
         return ref->mBase->mScript;

@@ -64,10 +64,9 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Apparatus::getScript (const MWWorld::Ptr& ptr) const
+    std::string Apparatus::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Apparatus> *ref =
-            ptr.get<ESM::Apparatus>();
+        const MWWorld::LiveCellRef<ESM::Apparatus> *ref = ptr.get<ESM::Apparatus>();
 
         return ref->mBase->mScript;
     }

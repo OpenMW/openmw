@@ -205,6 +205,11 @@ namespace MWWorld
         return mCustomData;
     }
 
+    const CustomData *RefData::getCustomData() const
+    {
+        return mCustomData;
+    }
+
     bool RefData::hasChanged() const
     {
         return mChanged;
