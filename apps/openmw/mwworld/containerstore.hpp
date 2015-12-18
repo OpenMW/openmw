@@ -149,7 +149,7 @@ namespace MWWorld
 
         public:
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
             void fill (const ESM::InventoryList& items, const std::string& owner);
