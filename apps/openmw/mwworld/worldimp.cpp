@@ -1319,7 +1319,7 @@ namespace MWWorld
         rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
-    MWWorld::Ptr World::safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
         return copyObjectToCell(ptr,cell,pos,false);
     }
@@ -1797,7 +1797,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    MWWorld::Ptr World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
+    MWWorld::Ptr World::placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount)
     {
         const float maxDist = 200.f;
 
@@ -1817,10 +1817,8 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         // copy the object and set its count
-        int origCount = object.getRefData().getCount();
-        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, cell, pos, true);
-        object.getRefData().setCount(origCount);
+        dropped.getRefData().setCount(amount);
 
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
@@ -1846,7 +1844,7 @@ namespace MWWorld
     }
 
 
-    Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
+    Ptr World::copyObjectToCell(const ConstPtr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
         if (cell->isExterior())
         {
@@ -1899,7 +1897,7 @@ namespace MWWorld
         return dropped;
     }
 
-    MWWorld::Ptr World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
+    MWWorld::Ptr World::dropObjectOnGround (const Ptr& actor, const ConstPtr& object, int amount)
     {
         MWWorld::CellStore* cell = actor.getCell();
 
@@ -1920,10 +1918,8 @@ namespace MWWorld
             pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
-        int origCount = object.getRefData().getCount();
-        object.getRefData().setCount(amount);
         Ptr dropped = copyObjectToCell(object, cell, pos);
-        object.getRefData().setCount(origCount);
+        dropped.getRefData().setCount(amount);
 
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
