@@ -1255,15 +1255,15 @@ namespace MWClass
         return true;
     }
 
-    std::string Npc::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    std::string Npc::getPrimaryFaction (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->mFaction;
     }
 
-    int Npc::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    int Npc::getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
+        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->getFactionRank();
     }
 }

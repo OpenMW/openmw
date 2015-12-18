@@ -164,8 +164,8 @@ namespace MWClass
 
             virtual int getBaseFightRating (const MWWorld::ConstPtr& ptr) const;
 
-            virtual std::string getPrimaryFaction(const MWWorld::Ptr &ptr) const;
-            virtual int getPrimaryFactionRank(const MWWorld::Ptr &ptr) const;
+            virtual std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const;
+            virtual int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const;
     };
 }
 
