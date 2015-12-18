@@ -2260,13 +2260,13 @@ namespace MWWorld
 
     struct GetContainersOwnedByVisitor
     {
-        GetContainersOwnedByVisitor(const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+        GetContainersOwnedByVisitor(const MWWorld::ConstPtr& owner, std::vector<MWWorld::Ptr>& out)
             : mOwner(owner)
             , mOut(out)
         {
         }
 
-        MWWorld::Ptr mOwner;
+        MWWorld::ConstPtr mOwner;
         std::vector<MWWorld::Ptr>& mOut;
 
         bool operator()(const MWWorld::Ptr& ptr)
@@ -2281,7 +2281,7 @@ namespace MWWorld
         }
     };
 
-    void World::getContainersOwnedBy (const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+    void World::getContainersOwnedBy (const MWWorld::ConstPtr& owner, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
@@ -2303,7 +2303,7 @@ namespace MWWorld
         }
     };
 
-    void World::getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)

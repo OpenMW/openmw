@@ -513,9 +513,9 @@ namespace MWWorld
 
             virtual float getWindSpeed();
 
-            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            virtual void getContainersOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all containers in active cells owned by this Npc
-            virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out);
+            virtual void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out);
             ///< get all items in active cells owned by this Npc
 
             virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor);
