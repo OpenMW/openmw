@@ -796,7 +796,7 @@ namespace MWPhysics
 
         DeepestNotMeContactTestResultCallback resultCallback(me, toBullet(origin));
         resultCallback.m_collisionFilterGroup = CollisionType_Actor;
-        resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap | CollisionType_Actor;
+        resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
         mCollisionWorld->contactTest(&object, resultCallback);
 
         if (resultCallback.mObject)
