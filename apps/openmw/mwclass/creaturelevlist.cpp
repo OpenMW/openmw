@@ -22,6 +22,10 @@ namespace MWClass
         {
             return *this;
         }
+        virtual const CreatureLevListCustomData& asCreatureLevListCustomData() const
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *CreatureLevListCustomData::clone() const
@@ -121,7 +125,7 @@ namespace MWClass
             return;
         }
 
-        const CreatureLevListCustomData& customData = dynamic_cast<const CreatureLevListCustomData&>(*ptr.getRefData().getCustomData());
+        const CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
         state2.mSpawnActorId = customData.mSpawnActorId;
         state2.mSpawn = customData.mSpawn;
     }

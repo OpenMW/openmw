@@ -63,5 +63,12 @@ MWClass::CreatureLevListCustomData &CustomData::asCreatureLevListCustomData()
     throw std::logic_error(error.str());
 }
 
+const MWClass::CreatureLevListCustomData &CustomData::asCreatureLevListCustomData() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureLevListCustomData";
+    throw std::logic_error(error.str());
+}
+
 
 }

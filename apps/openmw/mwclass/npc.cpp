@@ -1184,7 +1184,7 @@ namespace MWClass
             return;
         }
 
-        const NpcCustomData& customData = dynamic_cast<const NpcCustomData&>(*ptr.getRefData().getCustomData());
+        const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
 
         customData.mInventoryStore.writeState (state2.mInventory);
         customData.mNpcStats.writeState (state2.mNpcStats);

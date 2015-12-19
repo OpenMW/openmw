@@ -734,7 +734,7 @@ namespace MWClass
             return;
         }
 
-        const CreatureCustomData& customData = dynamic_cast<const CreatureCustomData&>(*ptr.getRefData().getCustomData());
+        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);

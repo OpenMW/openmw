@@ -351,7 +351,7 @@ namespace MWClass
             state.mHasCustomState = false;
             return;
         }
-        const DoorCustomData& customData = dynamic_cast<const DoorCustomData&>(*ptr.getRefData().getCustomData());
+        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
 
         ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
         state2.mDoorState = customData.mDoorState;
