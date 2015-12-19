@@ -6,9 +6,9 @@
 void ESM::RefNum::load (ESMReader& esm, bool wide)
 {
     if (wide)
-        esm.getHNT (*this, "FRMR", 8);
+        esm.getHNT (*this, SREC_FRMR, 8);
     else
-        esm.getHNT (mIndex, "FRMR");
+        esm.getHNT (mIndex, SREC_FRMR);
 }
 
 void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
@@ -36,14 +36,14 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
     // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
     // because any item can theoretically be moved by a script.
-    if (esm.isNextSub ("NAM0"))
+    if (esm.isNextSub (SREC_NAM0))
         esm.skipHSub();
 
     blank();
 
     mRefNum.load (esm, wideRefNum);
 
-    mRefID = esm.getHNString ("NAME");
+    esm.getHNString (SREC_NAME, mRefID);
 }
 
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
@@ -180,7 +180,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
 void ESM::CellRef::blank()
 {
     mRefNum.unset();
-    mRefID.clear();    
+    mRefID.clear();
     mScale = 1;
     mOwner.clear();
     mGlobalVariable.clear();
@@ -196,7 +196,7 @@ void ESM::CellRef::blank()
     mTrap.clear();
     mReferenceBlocked = -1;
     mTeleport = false;
-    
+
     for (int i=0; i<3; ++i)
     {
         mDoorDest.pos[i] = 0;
