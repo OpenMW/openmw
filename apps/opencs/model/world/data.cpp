@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include <boost/filesystem.hpp>
+
 #include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
@@ -905,9 +907,12 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 
     for (unsigned int i = 0; i < files.size(); ++i)
     {
-        reader->open(files[i].string());
-        records += reader->getRecordCount();
-        reader->close();
+        if (boost::filesystem::exists(files[i].string()))
+        {
+            reader->open(files[i].string());
+            records += reader->getRecordCount();
+            reader->close();
+        }
     }
 
     return records;
@@ -1113,7 +1118,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     mTopics.load (record, mBase);
-                    mDialogue = &mTopics.getRecord (record.mId).get();   
+                    mDialogue = &mTopics.getRecord (record.mId).get();
                 }
             }
 
