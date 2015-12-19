@@ -109,6 +109,12 @@ std::string ESMReader::getHNString(const char* name)
     return getHString();
 }
 
+void ESMReader::getHNString(const int name, std::string& str)
+{
+    getSubNameIs(name);
+    getHString(str);
+}
+
 std::string ESMReader::getHString()
 {
     getSubHeader();
@@ -128,6 +134,28 @@ std::string ESMReader::getHString()
     }
 
     return getString(mCtx.leftSub);
+}
+
+void ESMReader::getHString(std::string& str)
+{
+    getSubHeader();
+
+    // Hack to make MultiMark.esp load. Zero-length strings do not
+    // occur in any of the official mods, but MultiMark makes use of
+    // them. For some reason, they break the rules, and contain a byte
+    // (value 0) even if the header says there is no data. If
+    // Morrowind accepts it, so should we.
+    if (mCtx.leftSub == 0)
+    {
+        // Skip the following zero byte
+        mCtx.leftRec--;
+        char c;
+        getExact(&c, 1);
+        str = "";
+        return;
+    }
+
+    getString(str, mCtx.leftSub);
 }
 
 void ESMReader::getHExact(void*p, int size)
@@ -159,7 +187,40 @@ void ESMReader::getSubNameIs(const char* name)
                         + mCtx.subName.toString());
 }
 
+void ESMReader::getSubNameIs(const int name)
+{
+    getSubName();
+    if (mCtx.subName != name)
+    {
+        unsigned char typeName[4];
+        typeName[0] =  name        & 0xff;
+        typeName[1] = (name >>  8) & 0xff;
+        typeName[2] = (name >> 16) & 0xff;
+        typeName[3] = (name >> 24) & 0xff;
+
+        std::string subName = std::string((char*)typeName, 4);
+
+        fail("Expected subrecord " + subName + " but got "
+                        + mCtx.subName.toString());
+    }
+}
+
 bool ESMReader::isNextSub(const char* name)
+{
+    if (!mCtx.leftRec)
+        return false;
+
+    getSubName();
+
+    // If the name didn't match, then mark the it as 'cached' so it's
+    // available for the next call to getSubName.
+    mCtx.subCached = (mCtx.subName != name);
+
+    // If subCached is false, then subName == name.
+    return !mCtx.subCached;
+}
+
+bool ESMReader::isNextSub(const int name)
 {
     if (!mCtx.leftRec)
         return false;
@@ -345,6 +406,26 @@ std::string ESMReader::getString(int size)
         return mEncoder->getUtf8(ptr, size);
 
     return std::string (ptr, size);
+}
+
+void ESMReader::getString(std::string& str, int size)
+{
+    size_t s = size;
+    if (mBuffer.size() <= s)
+        // Add some extra padding to reduce the chance of having to resize again later.
+        mBuffer.resize(3*s);
+
+    mBuffer[s] = 0; // And make sure the string is zero terminated
+
+    char *ptr = &mBuffer[0];
+    getExact(ptr, size); // read ESM data
+
+    size = static_cast<int>(strnlen(ptr, size));
+
+    if (mEncoder)
+        str = mEncoder->getUtf8(ptr, size); // Convert to UTF8 and return
+    else
+        str = std::string (ptr, size);
 }
 
 void ESMReader::fail(const std::string &msg)

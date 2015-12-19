@@ -49,6 +49,8 @@ using namespace Ogre;
 
 static bool fsstrict = false;
 
+static const std::ctype<char>& facet = std::use_facet<std::ctype<char> >(std::locale::classic());
+
 static char strict_normalize_char(char ch)
 {
     return ch == '\\' ? '/' : ch;
@@ -56,7 +58,7 @@ static char strict_normalize_char(char ch)
 
 static char nonstrict_normalize_char(char ch)
 {
-    return ch == '\\' ? '/' : std::tolower(ch,std::locale::classic());
+    return ch == '\\' ? '/' : facet.tolower(ch);
 }
 
 template<typename T1, typename T2>
@@ -245,7 +247,7 @@ public:
 
   time_t getModifiedTime(const String&) { return 0; }
 
-  // This is never called as far as I can see.
+  // This is never called as far as I can see. (actually called from CSMWorld::Resources ctor)
   StringVectorPtr list(bool recursive = true, bool dirs = false)
   {
     return find ("*", recursive, dirs);

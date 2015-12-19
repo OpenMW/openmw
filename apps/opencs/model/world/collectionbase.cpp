@@ -8,6 +8,11 @@ CSMWorld::CollectionBase::CollectionBase() {}
 
 CSMWorld::CollectionBase::~CollectionBase() {}
 
+int CSMWorld::CollectionBase::getInsertIndex (const std::string& id, UniversalId::Type type, RecordBase *record) const
+{
+    return getAppendIndex(id, type);
+}
+
 int CSMWorld::CollectionBase::searchColumnIndex (Columns::ColumnId id) const
 {
     int columns = getColumns();

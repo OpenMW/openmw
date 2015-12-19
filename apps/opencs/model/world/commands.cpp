@@ -124,16 +124,15 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+    : QUndoCommand (parent), mModel (model), mId (id)
 {
     setText (("Revert record " + id).c_str());
 
-    mOld = model.getRecord (id).clone();
+    mOld = std::move(model.getRecord (id).clone());
 }
 
 CSMWorld::RevertCommand::~RevertCommand()
 {
-    delete mOld;
 }
 
 void CSMWorld::RevertCommand::redo()
@@ -145,6 +144,7 @@ void CSMWorld::RevertCommand::redo()
 
     if (state==RecordBase::State_ModifiedOnly)
     {
+        mOld = std::move(mModel.getRecord (mId).clone());
         mModel.removeRows (index.row(), 1);
     }
     else
@@ -155,21 +155,20 @@ void CSMWorld::RevertCommand::redo()
 
 void CSMWorld::RevertCommand::undo()
 {
-    mModel.setRecord (mId, *mOld);
+    mModel.setRecord (mId, std::move(mOld));
 }
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model,
         const std::string& id, CSMWorld::UniversalId::Type type, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0), mType(type)
+: QUndoCommand (parent), mModel (model), mId (id), mType(type)
 {
     setText (("Delete record " + id).c_str());
 
-    mOld = model.getRecord (id).clone();
+    mOld = std::move(model.getRecord (id).clone());
 }
 
 CSMWorld::DeleteCommand::~DeleteCommand()
 {
-    delete mOld;
 }
 
 void CSMWorld::DeleteCommand::redo()
@@ -181,6 +180,7 @@ void CSMWorld::DeleteCommand::redo()
 
     if (state==RecordBase::State_ModifiedOnly)
     {
+        mOld = std::move(mModel.getRecord (mId).clone());
         mModel.removeRows (index.row(), 1);
     }
     else
@@ -191,7 +191,7 @@ void CSMWorld::DeleteCommand::redo()
 
 void CSMWorld::DeleteCommand::undo()
 {
-    mModel.setRecord (mId, *mOld, mType);
+    mModel.setRecord (mId, std::move(mOld), mType);
 }
 
 

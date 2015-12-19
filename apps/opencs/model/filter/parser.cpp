@@ -313,15 +313,15 @@ boost::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& ke
 
         nodes.push_back (node);
 
-        Token token = getNextToken();
+        Token token2 = getNextToken();
 
-        if (!token || (token.mType!=Token::Type_Close && token.mType!=Token::Type_Comma))
+        if (!token2 || (token2.mType!=Token::Type_Close && token2.mType!=Token::Type_Comma))
         {
             error();
             return boost::shared_ptr<Node>();
         }
 
-        if (token.mType==Token::Type_Close)
+        if (token2.mType==Token::Type_Close)
             break;
     }
 

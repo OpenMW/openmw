@@ -233,15 +233,15 @@ CSVRender::WorldspaceWidget::dropRequirments
     return ignored;
 }
 
-bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::UniversalId>& dropData,
     DropType type)
 {
     if (type==Type_DebugProfile)
     {
         if (mRun)
         {
-            for (std::vector<CSMWorld::UniversalId>::const_iterator iter (data.begin());
-                iter!=data.end(); ++iter)
+            for (std::vector<CSMWorld::UniversalId>::const_iterator iter (dropData.begin());
+                iter!=dropData.end(); ++iter)
                 mRun->addProfile (iter->getId());
         }
 

@@ -3,9 +3,33 @@
 #include <cmath>
 
 CSMWorld::CellRef::CellRef()
+  : mIdNum(0)
 {
+    mId.clear();
+    mCell.clear();
+    mOriginalCell.clear();
+
     mRefNum.mIndex = 0;
     mRefNum.mContentFile = 0;
+}
+
+CSMWorld::CellRef::CellRef (CSMWorld::CellRef&& other) : ESM::CellRef (other)
+{
+    *this = std::move(other);
+}
+
+CSMWorld::CellRef& CSMWorld::CellRef::operator= (CSMWorld::CellRef&& other)
+{
+    if (this != &other)
+    {
+        ESM::CellRef::operator= (other);
+        mIdNum = other.mIdNum;
+        mId = std::move(other.mId);
+        mCell = std::move(other.mCell);
+        mOriginalCell = std::move(other.mOriginalCell);
+    }
+
+    return *this;
 }
 
 std::pair<int, int> CSMWorld::CellRef::getCellIndex() const

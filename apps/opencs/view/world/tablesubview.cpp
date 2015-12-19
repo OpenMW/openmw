@@ -203,14 +203,14 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     {
         if (QDropEvent* drop = dynamic_cast<QDropEvent*>(event))
         {
-            const CSMWorld::TableMimeData* data = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
-            if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
+            const CSMWorld::TableMimeData* mimeData = dynamic_cast<const CSMWorld::TableMimeData*>(drop->mimeData());
+            if (!mimeData) // May happen when non-records (e.g. plain text) are dragged and dropped
                 return false;
 
-            bool handled = data->holdsType(CSMWorld::UniversalId::Type_Filter);
+            bool handled = mimeData->holdsType(CSMWorld::UniversalId::Type_Filter);
             if (handled)
             {
-                mFilterBox->setRecordFilter(data->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
+                mFilterBox->setRecordFilter(mimeData->returnMatching(CSMWorld::UniversalId::Type_Filter).getId());
             }
             return handled;
         }

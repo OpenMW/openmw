@@ -118,7 +118,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
 
     for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
     {
-        if (iter->isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
+        if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
         {
             infoModified = true;
             break;
@@ -144,9 +144,9 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
         // write modified selected info records
         for (CSMWorld::InfoCollection::RecordConstIterator iter (range.first); iter!=range.second; ++iter)
         {
-            if (iter->isModified() || iter->mState == CSMWorld::RecordBase::State_Deleted)
+            if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
             {
-                ESM::DialInfo info = iter->get();
+                ESM::DialInfo info = (*iter)->get();
                 info.mId = info.mId.substr (info.mId.find_last_of ('#')+1);
 
                 info.mPrev = "";
@@ -155,7 +155,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                     CSMWorld::InfoCollection::RecordConstIterator prev = iter;
                     --prev;
 
-                    info.mPrev = prev->get().mId.substr (prev->get().mId.find_last_of ('#')+1);
+                    info.mPrev = (*prev)->get().mId.substr ((*prev)->get().mId.find_last_of ('#')+1);
                 }
 
                 CSMWorld::InfoCollection::RecordConstIterator next = iter;
@@ -164,11 +164,11 @@ void CSMDoc::WriteDialogueCollectionStage::perform (int stage, Messages& message
                 info.mNext = "";
                 if (next!=range.second)
                 {
-                    info.mNext = next->get().mId.substr (next->get().mId.find_last_of ('#')+1);
+                    info.mNext = (*next)->get().mId.substr ((*next)->get().mId.find_last_of ('#')+1);
                 }
 
                 writer.startRecord (info.sRecordId);
-                info.save (writer, iter->mState == CSMWorld::RecordBase::State_Deleted);
+                info.save (writer, (*iter)->mState == CSMWorld::RecordBase::State_Deleted);
                 writer.endRecord (info.sRecordId);
             }
         }

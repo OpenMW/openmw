@@ -61,7 +61,7 @@ namespace CSMWorld
 {
     class ResourcesManager;
     class Resources;
-    class NpcStats;
+    class NpcAutoCalc;
 
     class Data : public QObject
     {
@@ -104,12 +104,13 @@ namespace CSMWorld
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
-            std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
+            std::map<std::string, std::map<unsigned int, unsigned int> > mRefLoadCache;
             int mReaderIndex;
+            std::vector<std::string> mLoadedFiles;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
-            std::map<std::string, NpcStats*> mNpcStatCache;
+            NpcAutoCalc *mNpcAutoCalc;
 
             // not implemented
             Data (const Data&);
@@ -125,8 +126,6 @@ namespace CSMWorld
             static int count (RecordBase::State state, const CollectionBase& collection);
 
             const Data& self ();
-
-            void clearNpcStatsCache ();
 
         public:
 
@@ -262,6 +261,8 @@ namespace CSMWorld
             void merge();
             ///< Merge modified into base.
 
+            int getTotalRecords (const std::vector<boost::filesystem::path>& files); // for better loading bar
+
             int startLoading (const boost::filesystem::path& path, bool base, bool project);
             ///< Begin merging content of a file into base or modified.
             ///
@@ -282,37 +283,17 @@ namespace CSMWorld
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
 
-            NpcStats* npcAutoCalculate (const ESM::NPC& npc) const;
-
-            NpcStats* getCachedNpcData (const std::string& id) const;
+            const NpcAutoCalc& getNpcAutoCalc() const;
 
         signals:
 
             void idListChanged();
-
-            // refresh NPC dialogue subviews via object table model
-            void updateNpcAutocalc (int type, const std::string& id);
-
-            void cacheNpcStats (const std::string& id, NpcStats *stats) const;
 
         private slots:
 
             void dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
             void rowsChanged (const QModelIndex& parent, int start, int end);
-
-            // for autocalc updates when gmst/race/class/skils tables change
-            void gmstDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void raceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void classDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void skillDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void npcDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-            void cacheNpcStatsEvent (const std::string& id, NpcStats *stats);
     };
 }
 

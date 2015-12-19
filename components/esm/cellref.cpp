@@ -6,9 +6,9 @@
 void ESM::RefNum::load (ESMReader& esm, bool wide)
 {
     if (wide)
-        esm.getHNT (*this, "FRMR", 8);
+        esm.getHNT (*this, SREC_FRMR, 8);
     else
-        esm.getHNT (mIndex, "FRMR");
+        esm.getHNT (mIndex, SREC_FRMR);
 }
 
 void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
@@ -36,14 +36,14 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
     // the following refs are part of a "temp refs" section. A temp ref is not being tracked by the moved references system.
     // Its only purpose is a performance optimization for "immovable" things. We don't need this, and it's problematic anyway,
     // because any item can theoretically be moved by a script.
-    if (esm.isNextSub ("NAM0"))
+    if (esm.isNextSub (SREC_NAM0))
         esm.skipHSub();
 
     blank();
 
     mRefNum.load (esm, wideRefNum);
 
-    mRefID = esm.getHNString ("NAME");
+    esm.getHNString (SREC_NAME, mRefID);
 }
 
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
@@ -180,7 +180,7 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
 void ESM::CellRef::blank()
 {
     mRefNum.unset();
-    mRefID.clear();    
+    mRefID.clear();
     mScale = 1;
     mOwner.clear();
     mGlobalVariable.clear();
@@ -196,7 +196,7 @@ void ESM::CellRef::blank()
     mTrap.clear();
     mReferenceBlocked = -1;
     mTeleport = false;
-    
+
     for (int i=0; i<3; ++i)
     {
         mDoorDest.pos[i] = 0;
@@ -204,6 +204,67 @@ void ESM::CellRef::blank()
         mPos.pos[i] = 0;
         mPos.rot[i] = 0;
     }
+}
+
+ESM::CellRef::CellRef ()
+{
+    blank();
+}
+
+ESM::CellRef::CellRef (const CellRef& other)
+  : mRefNum(other.mRefNum)
+  , mRefID(other.mRefID)
+  , mScale(other.mScale)
+  , mOwner(other.mOwner)
+  , mGlobalVariable(other.mGlobalVariable)
+  , mSoul(other.mSoul)
+  , mFaction(other.mFaction)
+  , mFactionRank(other.mFactionRank)
+  , mChargeInt(other.mChargeInt)
+  , mEnchantmentCharge(other.mEnchantmentCharge)
+  , mGoldValue(other.mGoldValue)
+  , mTeleport(other.mTeleport)
+  , mDoorDest(other.mDoorDest)
+  , mDestCell(other.mDestCell)
+  , mLockLevel(other.mLockLevel)
+  , mKey(other.mKey)
+  , mTrap(other.mTrap)
+  , mReferenceBlocked(other.mReferenceBlocked)
+  , mPos(other.mPos)
+{
+}
+
+ESM::CellRef::CellRef (CellRef&& other)
+{
+    *this = std::move(other);
+}
+
+ESM::CellRef& ESM::CellRef::operator= (CellRef&& other)
+{
+    if (this != &other)
+    {
+        mRefNum = other.mRefNum; // RefNum
+        mRefID = std::move(other.mRefID);
+        mScale = other.mScale;
+        mOwner = std::move(other.mOwner);
+        mGlobalVariable = std::move(other.mGlobalVariable);
+        mSoul = std::move(other.mSoul);
+        mFaction = std::move(other.mFaction);
+        mFactionRank = other.mFactionRank;
+        mChargeInt = other.mChargeInt;
+        mEnchantmentCharge = other.mEnchantmentCharge;
+        mGoldValue = other.mGoldValue;
+        mTeleport = other.mTeleport;
+        mDoorDest = other.mDoorDest; // Position
+        mDestCell = std::move(other.mDestCell);
+        mLockLevel = other.mLockLevel;
+        mKey = std::move(other.mKey);
+        mTrap = std::move(other.mTrap);
+        mReferenceBlocked = other.mReferenceBlocked;
+        mPos = other.mPos; // Position
+    }
+
+    return *this;
 }
 
 bool ESM::operator== (const RefNum& left, const RefNum& right)

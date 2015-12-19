@@ -35,6 +35,20 @@ public:
         return true;
     }
 
+    static bool cEqual(const std::string &x, const std::string &y) {
+        if (x.size() != y.size()) {
+            return false;
+        }
+        std::string::const_iterator xit = x.begin();
+        std::string::const_iterator yit = y.begin();
+        for (; xit != x.end(); ++xit, ++yit) {
+            if (*xit != *yit) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     static int ciCompareLen(const std::string &x, const std::string &y, size_t len)
     {
         std::string::const_iterator xit = x.begin();

@@ -105,7 +105,7 @@ TextOverlay::TextOverlay(const Ogre::MovableObject* obj, const Ogre::Camera* cam
                 "TransOverlayMaterial");
     if(mQuadMaterial.isNull())
     {
-        Ogre::MaterialPtr mQuadMaterial = Ogre::MaterialManager::getSingleton().create(
+        mQuadMaterial = Ogre::MaterialManager::getSingleton().create(
                     "TransOverlayMaterial",
                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true );
         Ogre::Pass *pass = mQuadMaterial->getTechnique( 0 )->getPass( 0 );

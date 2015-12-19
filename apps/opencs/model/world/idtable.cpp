@@ -163,26 +163,37 @@ void CSMWorld::IdTable::cloneRecord(const std::string& origin,
 ///This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex (const std::string& id, int column) const
 {
-    return index(mIdCollection->getIndex (id), column);
+    int row = mIdCollection->searchId (id);
+    if (row != -1)
+        return index(row, column);
+    else
+        return QModelIndex();
 }
 
-void CSMWorld::IdTable::setRecord (const std::string& id, const RecordBase& record, CSMWorld::UniversalId::Type type)
+void CSMWorld::IdTable::setRecord (const std::string& id,
+        std::unique_ptr<RecordBase> record, CSMWorld::UniversalId::Type type)
 {
     int index = mIdCollection->searchId (id);
 
     if (index==-1)
     {
-        int index = mIdCollection->getAppendIndex (id, type);
+        // For info records, appendRecord may use a different index than the one returned by
+        // getAppendIndex (because of prev/next links).  This can result in the display not
+        // updating correctly after an undo
+        //
+        // Use an alternative method to get the correct index.  For non-Info records the
+        // record pointer is ignored and internally calls getAppendIndex.
+        int index2 = mIdCollection->getInsertIndex (id, type, record.get());
 
-        beginInsertRows (QModelIndex(), index, index);
+        beginInsertRows (QModelIndex(), index2, index2);
 
-        mIdCollection->appendRecord (record, type);
+        mIdCollection->appendRecord (std::move(record), type);
 
         endInsertRows();
     }
     else
     {
-        mIdCollection->replace (index, record);
+        mIdCollection->replace (index, std::move(record));
         emit dataChanged (CSMWorld::IdTable::index (index, 0),
             CSMWorld::IdTable::index (index, mIdCollection->getColumns()-1));
     }

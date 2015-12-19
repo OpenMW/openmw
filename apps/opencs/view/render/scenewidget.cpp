@@ -74,6 +74,8 @@ namespace CSVRender
         /// \todo make shortcut configurable
         QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);
         connect (focusToolbar, SIGNAL (activated()), this, SIGNAL (focusToolbarRequest()));
+
+        updateOgreWindow();
     }
 
     CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)

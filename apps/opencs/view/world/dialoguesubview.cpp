@@ -667,14 +667,14 @@ void CSVWorld::EditWidget::remake(int row)
                     int displayRole = tree->nestedHeaderData (i, col,
                             Qt::Horizontal, CSMWorld::ColumnBase::Role_Display).toInt();
 
-                    CSMWorld::ColumnBase::Display display =
+                    CSMWorld::ColumnBase::Display display2 =
                         static_cast<CSMWorld::ColumnBase::Display> (displayRole);
 
-                   mNestedTableDispatcher->makeDelegate (display);
+                   mNestedTableDispatcher->makeDelegate (display2);
 
                     // FIXME: assumed all columns are editable
                     QWidget* editor =
-                        mNestedTableDispatcher->makeEditor (display, tree->index (0, col, tree->index(row, i)));
+                        mNestedTableDispatcher->makeEditor (display2, tree->index (0, col, tree->index(row, i)));
                     if (editor)
                     {
                         mNestedTableMapper->addMapping (editor, col);
@@ -699,7 +699,7 @@ void CSVWorld::EditWidget::remake(int row)
                             label->setEnabled(false);
                         }
 
-                        createEditorContextMenu(editor, display, row);
+                        createEditorContextMenu(editor, display2, row);
                     }
                 }
                 mNestedTableMapper->setCurrentModelIndex(tree->index(0, 0, tree->index(row, i)));

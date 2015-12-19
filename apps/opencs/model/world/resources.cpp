@@ -4,44 +4,32 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <OgreResourceGroupManager.h>
-
 #include <components/misc/stringops.hpp>
 
 CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::Type type,
-    const char * const *extensions)
+    std::vector<Ogre::StringVectorPtr> resources, const char * const *extensions)
 : mBaseDirectory (baseDirectory), mType (type)
 {
     int baseSize = mBaseDirectory.size();
 
-    Ogre::StringVector resourcesGroups =
-        Ogre::ResourceGroupManager::getSingleton().getResourceGroups();
-
-    for (Ogre::StringVector::iterator iter (resourcesGroups.begin());
-        iter!=resourcesGroups.end(); ++iter)
+    for (std::vector<Ogre::StringVectorPtr>::iterator iter(resources.begin()); iter != resources.end(); ++iter)
     {
-        if (*iter=="General" || *iter=="Internal" || *iter=="Autodetect")
-            continue;
-
-        Ogre::StringVectorPtr resources =
-            Ogre::ResourceGroupManager::getSingleton().listResourceNames (*iter);
-
-        for (Ogre::StringVector::const_iterator iter (resources->begin());
-            iter!=resources->end(); ++iter)
+        // populate mFiles and mIndex
+        for (Ogre::StringVector::const_iterator iter2 ((*iter)->begin()); iter2 != (*iter)->end(); ++iter2)
         {
-            if (static_cast<int> (iter->size())<baseSize+1 ||
-                iter->substr (0, baseSize)!=mBaseDirectory ||
-                ((*iter)[baseSize]!='/' && (*iter)[baseSize]!='\\'))
+            if (static_cast<int> (iter2->size())<baseSize+1 ||
+                iter2->substr (0, baseSize)!=mBaseDirectory ||
+                ((*iter2)[baseSize]!='/' && (*iter2)[baseSize]!='\\'))
                 continue;
 
             if (extensions)
             {
-                std::string::size_type index = iter->find_last_of ('.');
+                std::string::size_type index = iter2->find_last_of ('.');
 
                 if (index==std::string::npos)
                     continue;
 
-                std::string extension = iter->substr (index+1);
+                std::string extension = iter2->substr (index+1);
 
                 int i = 0;
 
@@ -53,7 +41,7 @@ CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::T
                     continue;
             }
 
-            std::string file = iter->substr (baseSize+1);
+            std::string file = iter2->substr (baseSize+1);
             mFiles.push_back (file);
             std::replace (file.begin(), file.end(), '\\', '/');
             mIndex.insert (std::make_pair (

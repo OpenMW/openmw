@@ -128,7 +128,9 @@ enum RecNameInts
 enum SubRecNameInts
 {
     SREC_DELE = ESM::FourCC<'D','E','L','E'>::value,
-    SREC_NAME = ESM::FourCC<'N','A','M','E'>::value
+    SREC_NAME = ESM::FourCC<'N','A','M','E'>::value,
+    SREC_NAM0 = ESM::FourCC<'N','A','M','0'>::value,
+    SREC_FRMR = ESM::FourCC<'F','R','M','R'>::value
 };
 
 }

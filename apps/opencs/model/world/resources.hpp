@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+#include <OgreStringVector.h>
+
 #include "universalid.hpp"
 
 namespace CSMWorld
@@ -20,6 +22,7 @@ namespace CSMWorld
 
             /// \param type Type of resources in this table.
             Resources (const std::string& baseDirectory, UniversalId::Type type,
+                std::vector<Ogre::StringVectorPtr> resources,
                 const char * const *extensions = 0);
 
             int getSize() const;

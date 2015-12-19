@@ -103,6 +103,13 @@ public:
     getHT(x);
   }
 
+  template <typename X>
+  void getHNT(X &x, const int name)
+  {
+    getSubNameIs(name);
+    getHT(x);
+  }
+
   // Optional version of getHNT
   template <typename X>
   void getHNOT(X &x, const char* name)
@@ -115,6 +122,14 @@ public:
   // doesn't mess up our struct padding.
   template <typename X>
   void getHNT(X &x, const char* name, int size)
+  {
+      assert(sizeof(X) == size);
+      getSubNameIs(name);
+      getHT(x);
+  }
+
+  template <typename X>
+  void getHNT(X &x, const int name, int size)
   {
       assert(sizeof(X) == size);
       getSubNameIs(name);
@@ -159,9 +174,11 @@ public:
 
   // Read a string with the given sub-record name
   std::string getHNString(const char* name);
+  void getHNString(const int name, std::string& str);
 
   // Read a string, including the sub-record header (but not the name)
   std::string getHString();
+  void getHString(std::string& str);
 
   // Read the given number of bytes from a subrecord
   void getHExact(void*p, int size);
@@ -177,6 +194,7 @@ public:
 
   // Get the next subrecord name and check if it matches the parameter
   void getSubNameIs(const char* name);
+  void getSubNameIs(const int name);
 
   /** Checks if the next sub record name matches the parameter. If it
       does, it is read into 'subName' just as if getSubName() was
@@ -184,6 +202,7 @@ public:
       calls to getSubName(), isNextSub() and getSubNameIs().
    */
   bool isNextSub(const char* name);
+  bool isNextSub(const int name);
 
   bool peekNextSub(const char* name);
 
@@ -256,6 +275,7 @@ public:
   // Read the next 'size' bytes and return them as a string. Converts
   // them from native encoding to UTF8 in the process.
   std::string getString(int size);
+  void getString(std::string& str, int size);
 
   void skip(int bytes) { mEsm->seek(mEsm->tell()+bytes); }
   uint64_t getOffset() { return mEsm->tell(); }
