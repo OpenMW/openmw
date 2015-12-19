@@ -177,7 +177,13 @@ void CSMWorld::IdTable::setRecord (const std::string& id,
 
     if (index==-1)
     {
-        int index2 = mIdCollection->getAppendIndex (id, type);
+        // For info records, appendRecord may use a different index than the one returned by
+        // getAppendIndex (because of prev/next links).  This can result in the display not
+        // updating correctly after an undo
+        //
+        // Use an alternative method to get the correct index.  For non-Info records the
+        // record pointer is ignored and internally calls getAppendIndex.
+        int index2 = mIdCollection->getInsertIndex (id, type, record.get());
 
         beginInsertRows (QModelIndex(), index2, index2);
 

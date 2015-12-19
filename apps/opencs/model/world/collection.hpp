@@ -60,8 +60,6 @@ namespace CSMWorld
 
         protected:
 
-            const std::map<std::string, int>& getIdMap() const;
-
             const std::vector<std::unique_ptr<Record<ESXRecordT> > >& getRecords() const;
 
             bool reorderRowsImp (int baseIndex, const std::vector<int>& newOrder);
@@ -158,12 +156,6 @@ namespace CSMWorld
 
             NestableColumn *getNestableColumn (int column) const;
     };
-
-    template<typename ESXRecordT, typename IdAccessorT>
-    const std::map<std::string, int>& Collection<ESXRecordT, IdAccessorT>::getIdMap() const
-    {
-        return mIndex;
-    }
 
     template<typename ESXRecordT, typename IdAccessorT>
     const std::vector<std::unique_ptr<Record<ESXRecordT> > >& Collection<ESXRecordT, IdAccessorT>::getRecords() const

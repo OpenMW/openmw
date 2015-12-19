@@ -98,6 +98,12 @@ namespace CSMWorld
             ///
             /// \return Success?
 
+            virtual int getInsertIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None,
+                RecordBase *record = nullptr) const;
+            ///< Works like getAppendIndex unless an overloaded method uses the record pointer
+            /// to get additional info about the record that results in an alternative index.
+
             int searchColumnIndex (Columns::ColumnId id) const;
             ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
 
