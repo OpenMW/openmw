@@ -4,30 +4,18 @@
 #include <stdexcept>
 #include <algorithm>
 
-#include <OgreResourceGroupManager.h>
-
 #include <components/misc/stringops.hpp>
 
 CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::Type type,
-    const char * const *extensions)
+    std::vector<Ogre::StringVectorPtr> resources, const char * const *extensions)
 : mBaseDirectory (baseDirectory), mType (type)
 {
     int baseSize = mBaseDirectory.size();
 
-    Ogre::StringVector resourcesGroups =
-        Ogre::ResourceGroupManager::getSingleton().getResourceGroups();
-
-    for (Ogre::StringVector::iterator iter (resourcesGroups.begin());
-        iter!=resourcesGroups.end(); ++iter)
+    for (std::vector<Ogre::StringVectorPtr>::iterator iter(resources.begin()); iter != resources.end(); ++iter)
     {
-        if (*iter=="General" || *iter=="Internal" || *iter=="Autodetect")
-            continue;
-
-        Ogre::StringVectorPtr resources =
-            Ogre::ResourceGroupManager::getSingleton().listResourceNames (*iter);
-
-        for (Ogre::StringVector::const_iterator iter2 (resources->begin());
-            iter2!=resources->end(); ++iter2)
+        // populate mFiles and mIndex
+        for (Ogre::StringVector::const_iterator iter2 ((*iter)->begin()); iter2 != (*iter)->end(); ++iter2)
         {
             if (static_cast<int> (iter2->size())<baseSize+1 ||
                 iter2->substr (0, baseSize)!=mBaseDirectory ||
