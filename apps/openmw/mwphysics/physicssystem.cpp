@@ -892,7 +892,7 @@ namespace MWPhysics
     {
         btCollisionWorld::ClosestConvexResultCallback callback(toBullet(from), toBullet(to));
         callback.m_collisionFilterGroup = 0xff;
-        callback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
+        callback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap|CollisionType_Door;
 
         btSphereShape shape(radius);
         const btQuaternion btrot = btQuaternion::getIdentity();
