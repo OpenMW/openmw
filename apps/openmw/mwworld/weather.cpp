@@ -623,7 +623,7 @@ void WeatherManager::playerTeleported()
 
 void WeatherManager::update(float duration, bool paused)
 {
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     MWBase::World& world = *MWBase::Environment::get().getWorld();
     TimeStamp time = world.getTimeStamp();
 
@@ -885,7 +885,7 @@ inline void WeatherManager::importRegions()
 inline void WeatherManager::regionalWeatherChanged(const std::string& regionID, RegionWeather& region)
 {
     // If the region is current, then add a weather transition for it.
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     if(player.isInCell())
     {
         std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);

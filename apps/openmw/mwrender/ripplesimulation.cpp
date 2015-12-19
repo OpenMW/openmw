@@ -146,7 +146,7 @@ void RippleSimulation::update(float dt)
 }
 
 
-void RippleSimulation::addEmitter(const MWWorld::Ptr& ptr, float scale, float force)
+void RippleSimulation::addEmitter(const MWWorld::ConstPtr& ptr, float scale, float force)
 {
     Emitter newEmitter;
     newEmitter.mPtr = ptr;
@@ -156,7 +156,7 @@ void RippleSimulation::addEmitter(const MWWorld::Ptr& ptr, float scale, float fo
     mEmitters.push_back (newEmitter);
 }
 
-void RippleSimulation::removeEmitter (const MWWorld::Ptr& ptr)
+void RippleSimulation::removeEmitter (const MWWorld::ConstPtr& ptr)
 {
     for (std::vector<Emitter>::iterator it = mEmitters.begin(); it != mEmitters.end(); ++it)
     {
@@ -168,7 +168,7 @@ void RippleSimulation::removeEmitter (const MWWorld::Ptr& ptr)
     }
 }
 
-void RippleSimulation::updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr)
+void RippleSimulation::updateEmitterPtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& ptr)
 {
     for (std::vector<Emitter>::iterator it = mEmitters.begin(); it != mEmitters.end(); ++it)
     {

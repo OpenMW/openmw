@@ -482,7 +482,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
             MWBase::Environment::get().getWorld()->togglePOV();
 
-        MWWorld::Ptr ptr = MWMechanics::getPlayer();
+        MWWorld::ConstPtr ptr = MWMechanics::getPlayer();
 
         const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
@@ -529,7 +529,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);

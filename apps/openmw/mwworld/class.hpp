@@ -189,7 +189,7 @@ namespace MWWorld
 
             virtual int getEquipmentSkill (const ConstPtr& ptr)
                 const;
-            /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
+            /// Return the index of the skill this item corresponds to when equipped or -1, if there is
             /// no such skill.
             /// (default implementation: return -1)
 

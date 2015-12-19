@@ -32,7 +32,7 @@ namespace MWClass
             /// stay stacked when equipped?
 
             virtual int getEquipmentSkill (const MWWorld::ConstPtr& ptr) const;
-            /// Return the index of the skill this item corresponds to when equiopped or -1, if there is
+            /// Return the index of the skill this item corresponds to when equipped or -1, if there is
             /// no such skill.
 
             virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
