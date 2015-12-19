@@ -717,17 +717,7 @@ Sound_Handle OpenAL_Output::loadSound(const std::string &fname)
     throwALerror();
 
     DecoderPtr decoder = mManager.getDecoder();
-    // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-    if(decoder->mResourceMgr->exists(fname))
-        decoder->open(fname);
-    else
-    {
-        std::string file = fname;
-        std::string::size_type pos = file.rfind('.');
-        if(pos != std::string::npos)
-            file = file.substr(0, pos)+".mp3";
-        decoder->open(file);
-    }
+    decoder->open(fname);
 
     std::vector<char> data;
     ChannelConfig chans;

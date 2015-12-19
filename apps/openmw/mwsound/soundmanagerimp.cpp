@@ -231,17 +231,7 @@ namespace MWSound
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile, Sound_Loudness **lipdata)
     {
         DecoderPtr decoder = getDecoder();
-        // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(mVFS->exists(voicefile))
-            decoder->open(voicefile);
-        else
-        {
-            std::string file = voicefile;
-            std::string::size_type pos = file.rfind('.');
-            if(pos != std::string::npos)
-                file = file.substr(0, pos)+".mp3";
-            decoder->open(file);
-        }
+        decoder->open(voicefile);
 
         NameLoudnessRefMap::iterator lipiter = mVoiceLipNameMap.find(voicefile);
         if(lipiter != mVoiceLipNameMap.end())
@@ -346,7 +336,9 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        streamMusicFull("Music/"+filename);
+        std::string name = "Music/"+filename;
+        mVFS->normalizeFilename(name);
+        streamMusicFull(name);
     }
 
     void SoundManager::startRandomTitle()

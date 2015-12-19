@@ -183,7 +183,9 @@ size_t FFmpeg_Decoder::readAVAudioData(void *data, size_t length)
 void FFmpeg_Decoder::open(const std::string &fname)
 {
     close();
-    mDataStream = mResourceMgr->get(fname);
+
+    /* Allow using alternate extensions for the sound being opened. */
+    mDataStream = mResourceMgr->getFirstOfNormalized(fname);
 
     if((mFormatCtx=avformat_alloc_context()) == NULL)
         fail("Failed to allocate context");

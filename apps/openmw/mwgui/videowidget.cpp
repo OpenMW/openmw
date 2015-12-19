@@ -33,7 +33,8 @@ void VideoWidget::playVideo(const std::string &video)
     Files::IStreamPtr videoStream;
     try
     {
-        videoStream = mVFS->get(video);
+        /* Allow using alternate extensions for the video being opened. */
+        videoStream = mVFS->getFirstOf(video);
     }
     catch (std::exception& e)
     {
