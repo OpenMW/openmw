@@ -58,7 +58,7 @@ namespace MWGui
 
         void setDelay(float delay);
 
-        void setFocusObject(const MWWorld::Ptr& focus);
+        void setFocusObject(const MWWorld::ConstPtr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object
 
@@ -93,7 +93,7 @@ namespace MWGui
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        MWWorld::Ptr mFocusObject;
+        MWWorld::ConstPtr mFocusObject;
 
         MyGUI::IntSize getToolTipViaPtr (int count, bool image=true);
         ///< @return requested tooltip size
