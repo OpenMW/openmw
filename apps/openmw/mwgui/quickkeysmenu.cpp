@@ -185,7 +185,7 @@ namespace MWGui
 
         button->setItem(item, ItemWidget::Barter);
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(item);
+        button->setUserData(MWWorld::ConstPtr(item));
 
         if (mItemSelectionDialog)
             mItemSelectionDialog->setVisible(false);
@@ -209,7 +209,7 @@ namespace MWGui
         button->setIcon(item);
 
         button->setUserString ("ToolTipType", "ItemPtr");
-        button->setUserData(item);
+        button->setUserData(MWWorld::ConstPtr(item));
 
         if (mMagicSelectionDialog)
             mMagicSelectionDialog->setVisible(false);
@@ -278,7 +278,7 @@ namespace MWGui
                     if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), id))
                     {
                         item = *it;
-                        button->setUserData(item);
+                        button->setUserData(MWWorld::ConstPtr(item));
                         break;
                     }
                 }

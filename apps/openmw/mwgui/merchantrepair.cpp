@@ -87,11 +87,11 @@ void MerchantRepair::startRepair(const MWWorld::Ptr &actor)
             currentY += 18;
 
             button->setUserString("Price", MyGUI::utility::toString(price));
-            button->setUserData(*iter);
             button->setCaptionWithReplacing(name);
             button->setSize(button->getTextSize().width,18);
             button->eventMouseWheel += MyGUI::newDelegate(this, &MerchantRepair::onMouseWheel);
             button->setUserString("ToolTipType", "ItemPtr");
+            button->setUserData(MWWorld::ConstPtr(*iter));
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &MerchantRepair::onRepairButtonClick);
         }
     }

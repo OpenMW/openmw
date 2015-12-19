@@ -56,7 +56,7 @@ void Recharge::start (const MWWorld::Ptr &item)
 {
     mGemIcon->setItem(item);
     mGemIcon->setUserString("ToolTipType", "ItemPtr");
-    mGemIcon->setUserData(item);
+    mGemIcon->setUserData(MWWorld::ConstPtr(item));
 
     updateView();
 }
@@ -116,7 +116,7 @@ void Recharge::updateView()
                     "MW_ItemIconSmall", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
         icon->setItem(*iter);
         icon->setUserString("ToolTipType", "ItemPtr");
-        icon->setUserData(*iter);
+        icon->setUserData(MWWorld::ConstPtr(*iter));
         icon->eventMouseButtonClick += MyGUI::newDelegate(this, &Recharge::onItemClicked);
         icon->eventMouseWheel += MyGUI::newDelegate(this, &Recharge::onMouseWheel);
 

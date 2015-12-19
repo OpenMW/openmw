@@ -79,7 +79,7 @@ namespace MWGui
         {
             mSoulBox->setItem(gem);
             mSoulBox->setUserString ("ToolTipType", "ItemPtr");
-            mSoulBox->setUserData(gem);
+            mSoulBox->setUserData(MWWorld::ConstPtr(gem));
             mEnchanting.setSoulGem(gem);
         }
     }
@@ -97,7 +97,7 @@ namespace MWGui
             mName->setCaption(item.getClass().getName(item));
             mItemBox->setItem(item);
             mItemBox->setUserString ("ToolTipType", "ItemPtr");
-            mItemBox->setUserData(item);
+            mItemBox->setUserData(MWWorld::ConstPtr(item));
             mEnchanting.setOldItem(item);
         }
     }
