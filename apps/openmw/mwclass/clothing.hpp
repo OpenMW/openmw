@@ -35,7 +35,7 @@ namespace MWClass
             /// Return the index of the skill this item corresponds to when equipped or -1, if there is
             /// no such skill.
 
-            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;

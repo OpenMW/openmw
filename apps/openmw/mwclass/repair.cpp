@@ -96,10 +96,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Repair::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Repair::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Repair> *ref =
-            ptr.get<ESM::Repair>();
+        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         return (ref->mBase->mName != "");
     }

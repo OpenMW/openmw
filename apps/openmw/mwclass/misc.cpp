@@ -123,10 +123,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Miscellaneous::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Miscellaneous::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
-            ptr.get<ESM::Miscellaneous>();
+        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         return (ref->mBase->mName != "");
     }

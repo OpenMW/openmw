@@ -109,10 +109,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Book::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return (ref->mBase->mName != "");
     }

@@ -100,10 +100,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Potion::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Potion::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return (ref->mBase->mName != "");
     }

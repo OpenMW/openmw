@@ -227,10 +227,9 @@ namespace MWClass
         registerClass (typeid (ESM::Door).name(), instance);
     }
 
-    bool Door::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Door::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Door> *ref =
-            ptr.get<ESM::Door>();
+        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         return (ref->mBase->mName != "");
     }

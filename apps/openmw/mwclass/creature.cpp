@@ -62,6 +62,10 @@ namespace MWClass
         {
             return *this;
         }
+        virtual const CreatureCustomData& asCreatureCustomData() const
+        {
+            return *this;
+        }
 
         CreatureCustomData() : mContainerStore(0) {}
         virtual ~CreatureCustomData() { delete mContainerStore; }
@@ -508,6 +512,15 @@ namespace MWClass
         ensureCustomData (ptr);
 
         return ptr.getRefData().getCustomData()->asCreatureCustomData().mMovement;
+    }
+
+    bool Creature::hasToolTip(const MWWorld::ConstPtr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+            return true;
+
+        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
+        return !customData.mCreatureStats.getAiSequence().isInCombat() || customData.mCreatureStats.isDead();
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr) const

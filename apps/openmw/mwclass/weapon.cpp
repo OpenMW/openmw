@@ -242,10 +242,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Weapon::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Weapon::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Weapon> *ref =
-            ptr.get<ESM::Weapon>();
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         return (ref->mBase->mName != "");
     }
@@ -391,8 +390,7 @@ namespace MWClass
         return action;
     }
 
-    MWWorld::Ptr
-    Weapon::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Weapon::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 

@@ -158,10 +158,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Clothing::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Clothing::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Clothing> *ref =
-            ptr.get<ESM::Clothing>();
+        const MWWorld::LiveCellRef<ESM::Clothing> *ref = ptr.get<ESM::Clothing>();
 
         return (ref->mBase->mName != "");
     }

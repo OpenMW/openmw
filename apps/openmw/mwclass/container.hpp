@@ -27,7 +27,7 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
-            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr) const;

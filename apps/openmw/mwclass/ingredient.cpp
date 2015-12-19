@@ -108,10 +108,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Ingredient::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Ingredient::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Ingredient> *ref =
-            ptr.get<ESM::Ingredient>();
+        const MWWorld::LiveCellRef<ESM::Ingredient> *ref = ptr.get<ESM::Ingredient>();
 
         return (ref->mBase->mName != "");
     }

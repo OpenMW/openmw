@@ -202,10 +202,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Armor::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Armor::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return (ref->mBase->mName != "");
     }

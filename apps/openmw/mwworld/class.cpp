@@ -272,7 +272,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not have a tool tip");
     }
 
-    bool Class::hasToolTip (const Ptr& ptr) const
+    bool Class::hasToolTip (const ConstPtr& ptr) const
     {
         return false;
     }

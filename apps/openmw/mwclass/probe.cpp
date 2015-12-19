@@ -105,10 +105,9 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Probe::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Probe::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Probe> *ref =
-            ptr.get<ESM::Probe>();
+        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         return (ref->mBase->mName != "");
     }

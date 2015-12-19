@@ -913,6 +913,15 @@ namespace MWClass
         registerClass (typeid (ESM::NPC).name(), instance);
     }
 
+    bool Npc::hasToolTip(const MWWorld::ConstPtr& ptr) const
+    {
+        if (!ptr.getRefData().getCustomData())
+            return true;
+
+        const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
+        return !customData.mNpcStats.getAiSequence().isInCombat() || customData.mNpcStats.isDead();
+    }
+
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();

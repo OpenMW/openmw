@@ -92,7 +92,7 @@ namespace MWWorld
             ///< Return creature stats or throw an exception, if class does not have creature stats
             /// (default implementation: throw an exception)
 
-            virtual bool hasToolTip (const Ptr& ptr) const;
+            virtual bool hasToolTip (const ConstPtr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr) const;

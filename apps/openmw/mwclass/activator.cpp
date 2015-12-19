@@ -74,10 +74,9 @@ namespace MWClass
         registerClass (typeid (ESM::Activator).name(), instance);
     }
 
-    bool Activator::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return (ref->mBase->mName != "");
     }

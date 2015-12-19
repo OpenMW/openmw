@@ -215,10 +215,9 @@ namespace MWClass
         registerClass (typeid (ESM::Container).name(), instance);
     }
 
-    bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return (ref->mBase->mName != "");
     }

@@ -24,6 +24,7 @@ namespace MWWorld
             // Fast version of dynamic_cast<X&>. Needs to be overridden in the respective class.
 
             virtual MWClass::CreatureCustomData& asCreatureCustomData();
+            virtual const MWClass::CreatureCustomData& asCreatureCustomData() const;
 
             virtual MWClass::NpcCustomData& asNpcCustomData();
             virtual const MWClass::NpcCustomData& asNpcCustomData() const;

@@ -14,6 +14,13 @@ MWClass::CreatureCustomData &CustomData::asCreatureCustomData()
     throw std::logic_error(error.str());
 }
 
+const MWClass::CreatureCustomData &CustomData::asCreatureCustomData() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureCustomData";
+    throw std::logic_error(error.str());
+}
+
 MWClass::NpcCustomData &CustomData::asNpcCustomData()
 {
     std::stringstream error;
