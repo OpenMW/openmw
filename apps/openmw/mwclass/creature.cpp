@@ -523,7 +523,7 @@ namespace MWClass
         return !customData.mCreatureStats.getAiSequence().isInCombat() || customData.mCreatureStats.isDead();
     }
 
-    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 

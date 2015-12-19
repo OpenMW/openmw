@@ -234,7 +234,7 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 

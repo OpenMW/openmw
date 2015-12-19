@@ -95,7 +95,7 @@ namespace MWGui
 
         MWWorld::Ptr mFocusObject;
 
-        MyGUI::IntSize getToolTipViaPtr (bool image=true);
+        MyGUI::IntSize getToolTipViaPtr (int count, bool image=true);
         ///< @return requested tooltip size
 
         MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isFocusObject);

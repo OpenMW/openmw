@@ -116,12 +116,12 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

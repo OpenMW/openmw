@@ -222,7 +222,7 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 

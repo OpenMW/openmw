@@ -922,7 +922,7 @@ namespace MWClass
         return !customData.mNpcStats.getAiSequence().isInCombat() || customData.mNpcStats.isDead();
     }
 
-    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 

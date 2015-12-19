@@ -249,12 +249,12 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

@@ -267,7 +267,7 @@ namespace MWWorld
         throw std::runtime_error ("class does not have any inventory icon");
     }
 
-    MWGui::ToolTipInfo Class::getToolTipInfo (const ConstPtr& ptr) const
+    MWGui::ToolTipInfo Class::getToolTipInfo (const ConstPtr& ptr, int count) const
     {
         throw std::runtime_error ("class does not have a tool tip");
     }

@@ -95,7 +95,7 @@ namespace MWWorld
             virtual bool hasToolTip (const ConstPtr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWMechanics::NpcStats& getNpcStats (const Ptr& ptr) const;

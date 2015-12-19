@@ -81,12 +81,12 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

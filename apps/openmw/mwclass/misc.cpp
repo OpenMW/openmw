@@ -130,15 +130,13 @@ namespace MWClass
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr) const
+    MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
-        int count = ptr.getRefData().getCount();
 
         bool gold = isGold(ptr);
         if (gold)
