@@ -123,7 +123,7 @@ namespace MWWorld
             Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z);
             ///< @return an updated Ptr in case the Ptr's cell changes
 
-            Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, bool adjustPos=true);
+            Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
             void updateSoundListener();
             void updateWindowManager ();

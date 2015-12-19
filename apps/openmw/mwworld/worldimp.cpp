@@ -1321,7 +1321,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
-        return copyObjectToCell(ptr,cell,pos,false);
+        return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -1817,8 +1817,7 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         // copy the object and set its count
-        Ptr dropped = copyObjectToCell(object, cell, pos, true);
-        dropped.getRefData().setCount(amount);
+        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
 
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
@@ -1844,7 +1843,7 @@ namespace MWWorld
     }
 
 
-    Ptr World::copyObjectToCell(const ConstPtr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
+    Ptr World::copyObjectToCell(const ConstPtr &object, CellStore* cell, ESM::Position pos, int count, bool adjustPos)
     {
         if (cell->isExterior())
         {
@@ -1854,7 +1853,7 @@ namespace MWWorld
         }
 
         MWWorld::Ptr dropped =
-            object.getClass().copyToCell(object, *cell, pos);
+            object.getClass().copyToCell(object, *cell, pos, count);
 
         // Reset some position values that could be uninitialized if this item came from a container
         dropped.getCellRef().setPosition(pos);
@@ -1918,8 +1917,7 @@ namespace MWWorld
             pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
-        Ptr dropped = copyObjectToCell(object, cell, pos);
-        dropped.getRefData().setCount(amount);
+        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
 
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);

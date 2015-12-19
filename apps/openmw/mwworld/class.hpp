@@ -280,9 +280,9 @@ namespace MWWorld
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;
 
-            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell) const;
+            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell, int count) const;
 
-            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos) const;
+            virtual Ptr copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos, int count) const;
 
             virtual bool isActor() const {
                 return false;

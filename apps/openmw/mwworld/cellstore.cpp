@@ -244,7 +244,7 @@ namespace MWWorld
         // on a save/load, so do a simple copy & delete for these objects.
         if (!object.getCellRef().getRefNum().hasContentFile())
         {
-            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo);
+            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo, object.getRefData().getCount());
             object.getRefData().setCount(0);
             object.getRefData().setBaseNode(NULL);
             return copied;

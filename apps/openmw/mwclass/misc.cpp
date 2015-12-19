@@ -175,7 +175,7 @@ namespace MWClass
         return info;
     }
 
-    MWWorld::Ptr Miscellaneous::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Miscellaneous::copyToCell(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell, int count) const
     {
         MWWorld::Ptr newPtr;
 
@@ -183,7 +183,7 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->getStore();
 
         if (isGold(ptr)) {
-            int goldAmount = getValue(ptr) * ptr.getRefData().getCount();
+            int goldAmount = getValue(ptr) * count;
 
             std::string base = "Gold_001";
             if (goldAmount >= 100)
@@ -208,7 +208,10 @@ namespace MWClass
             const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref =
                 ptr.get<ESM::Miscellaneous>();
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
+            newPtr.getRefData().setCount(count);
         }
+        newPtr.getCellRef().unsetRefNum();
+
         return newPtr;
     }
 

@@ -7,9 +7,9 @@ namespace MWClass
 {
     class Miscellaneous : public MWWorld::Class
     {
-            virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
-
         public:
+
+            virtual MWWorld::Ptr copyToCell(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell, int count) const;
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering

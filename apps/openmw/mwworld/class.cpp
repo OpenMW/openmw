@@ -334,17 +334,18 @@ namespace MWWorld
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const ConstPtr &ptr, CellStore &cell) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, int count) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
+        newPtr.getRefData().setCount(count);
         return newPtr;
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos, int count) const
     {
-        Ptr newPtr = copyToCell(ptr, cell);
+        Ptr newPtr = copyToCell(ptr, cell, count);
         newPtr.getRefData().setPosition(pos);
 
         return newPtr;
