@@ -31,6 +31,7 @@ namespace MWWorld
             virtual MWClass::ContainerCustomData& asContainerCustomData();
 
             virtual MWClass::DoorCustomData& asDoorCustomData();
+            virtual const MWClass::DoorCustomData& asDoorCustomData() const;
 
             virtual MWClass::CreatureLevListCustomData& asCreatureLevListCustomData();
     };

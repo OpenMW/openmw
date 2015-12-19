@@ -42,6 +42,13 @@ MWClass::DoorCustomData &CustomData::asDoorCustomData()
     throw std::logic_error(error.str());
 }
 
+const MWClass::DoorCustomData &CustomData::asDoorCustomData() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to DoorCustomData";
+    throw std::logic_error(error.str());
+}
+
 MWClass::CreatureLevListCustomData &CustomData::asCreatureLevListCustomData()
 {
     std::stringstream error;

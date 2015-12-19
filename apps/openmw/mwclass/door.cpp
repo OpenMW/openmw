@@ -41,6 +41,10 @@ namespace MWClass
         {
             return *this;
         }
+        virtual const DoorCustomData& asDoorCustomData() const
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *DoorCustomData::clone() const
@@ -312,9 +316,10 @@ namespace MWClass
         }
     }
 
-    int Door::getDoorState (const MWWorld::Ptr &ptr) const
+    int Door::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
-        ensureCustomData(ptr);
+        if (!ptr.getRefData().getCustomData())
+            return 0;
         const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
         return customData.mDoorState;
     }

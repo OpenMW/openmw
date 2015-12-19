@@ -404,7 +404,7 @@ namespace MWWorld
         return false;
     }
 
-    int Class::getDoorState (const MWWorld::Ptr &ptr) const
+    int Class::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
         throw std::runtime_error("this is not a door");
     }

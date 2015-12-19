@@ -319,7 +319,7 @@ namespace MWWorld
             virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
 
             /// 0 = nothing, 1 = opening, 2 = closing
-            virtual int getDoorState (const MWWorld::Ptr &ptr) const;
+            virtual int getDoorState (const MWWorld::ConstPtr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
             virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
 
