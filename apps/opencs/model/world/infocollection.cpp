@@ -106,10 +106,11 @@ int CSMWorld::InfoCollection::getInfoIndex (const std::string& id, const std::st
         return -1;
 
     // brute force loop
+    std::string lowerId = Misc::StringUtils::lowerCase (id);
     for (std::vector<std::pair<std::string, int> >::const_iterator it = iter->second.begin();
             it != iter->second.end(); ++it)
     {
-        if (Misc::StringUtils::ciEqual(it->first, id))
+        if (Misc::StringUtils::cEqual(it->first, lowerId))
             return it->second;
     }
 
