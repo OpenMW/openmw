@@ -53,7 +53,7 @@ void Repair::startRepairItem(const MWWorld::Ptr &item)
 
     mToolIcon->setItem(item);
     mToolIcon->setUserString("ToolTipType", "ItemPtr");
-    mToolIcon->setUserData(MWWorld::ConstPtr(item));
+    mToolIcon->setUserData(item);
 
     updateRepairView();
 }
@@ -119,7 +119,7 @@ void Repair::updateRepairView()
                         "MW_ItemIconSmall", MyGUI::IntCoord(16, currentY, 32, 32), MyGUI::Align::Default);
             icon->setItem(*iter);
             icon->setUserString("ToolTipType", "ItemPtr");
-            icon->setUserData(MWWorld::ConstPtr(*iter));
+            icon->setUserData(*iter);
             icon->eventMouseButtonClick += MyGUI::newDelegate(this, &Repair::onRepairItem);
             icon->eventMouseWheel += MyGUI::newDelegate(this, &Repair::onMouseWheel);
 

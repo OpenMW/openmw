@@ -417,7 +417,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(chargePercent);
 
         mSpellBox->setUserString("ToolTipType", "ItemPtr");
-        mSpellBox->setUserData(MWWorld::ConstPtr(item));
+        mSpellBox->setUserData(item);
 
         mSpellImage->setItem(item);
     }
@@ -435,7 +435,7 @@ namespace MWGui
 
         mWeapBox->clearUserStrings();
         mWeapBox->setUserString("ToolTipType", "ItemPtr");
-        mWeapBox->setUserData(MWWorld::ConstPtr(item));
+        mWeapBox->setUserData(item);
 
         mWeapStatus->setProgressRange(100);
         mWeapStatus->setProgressPosition(durabilityPercent);
