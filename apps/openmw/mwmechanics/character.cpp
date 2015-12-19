@@ -2114,7 +2114,7 @@ void CharacterController::setActive(bool active)
     mAnimation->setActive(active);
 }
 
-void CharacterController::setHeadTrackTarget(const MWWorld::Ptr &target)
+void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
 {
     mHeadTrackTarget = target;
 }
@@ -2137,7 +2137,7 @@ void CharacterController::updateHeadTracking(float duration)
         osg::Vec3f headPos = mat.getTrans();
 
         osg::Vec3f direction;
-        if (MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
+        if (const MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mHeadTrackTarget))
         {
             const osg::Node* node = anim->getNode("Head");
             if (node == NULL)

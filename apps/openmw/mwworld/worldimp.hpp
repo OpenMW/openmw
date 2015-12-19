@@ -534,6 +534,7 @@ namespace MWWorld
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr);
+            virtual const MWRender::Animation* getAnimation(const MWWorld::ConstPtr &ptr) const;
             virtual void reattachPlayerCamera();
 
             /// \todo this does not belong here

@@ -2112,6 +2112,11 @@ namespace MWWorld
         return mRendering->getAnimation(ptr);
     }
 
+    const MWRender::Animation* World::getAnimation(const MWWorld::ConstPtr &ptr) const
+    {
+        return mRendering->getAnimation(ptr);
+    }
+
     void World::screenshot(osg::Image* image, int w, int h)
     {
         mRendering->screenshot(image, w, h);
