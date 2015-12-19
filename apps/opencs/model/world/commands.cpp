@@ -144,6 +144,7 @@ void CSMWorld::RevertCommand::redo()
 
     if (state==RecordBase::State_ModifiedOnly)
     {
+        mOld = std::move(mModel.getRecord (mId).clone());
         mModel.removeRows (index.row(), 1);
     }
     else
@@ -179,6 +180,7 @@ void CSMWorld::DeleteCommand::redo()
 
     if (state==RecordBase::State_ModifiedOnly)
     {
+        mOld = std::move(mModel.getRecord (mId).clone());
         mModel.removeRows (index.row(), 1);
     }
     else
