@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <algorithm>
 
+#include <boost/filesystem.hpp>
+
 #include <QAbstractItemModel>
 
 #include <components/esm/esmreader.hpp>
@@ -105,7 +107,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mFactions.addColumn (new StringIdColumn<ESM::Faction>);
     mFactions.addColumn (new RecordStateColumn<ESM::Faction>);
     mFactions.addColumn (new FixedRecordTypeColumn<ESM::Faction> (UniversalId::Type_Faction));
-    mFactions.addColumn (new NameColumn<ESM::Faction>);
+    // The savegame format limits the player faction string to 32 characters.
+    mFactions.addColumn (new NameColumn<ESM::Faction>(ColumnBase::Display_String32));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (0));
     mFactions.addColumn (new AttributesColumn<ESM::Faction> (1));
     mFactions.addColumn (new HiddenColumn<ESM::Faction>);
@@ -115,6 +118,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mFactions.addColumn (new NestedParentColumn<ESM::Faction> (Columns::ColumnId_FactionReactions));
     index = mFactions.getColumns()-1;
     mFactions.addAdapter (std::make_pair(&mFactions.getColumn(index), new FactionReactionsAdapter ()));
+    // NAME32 enforced in IdCompletionDelegate::createEditor()
     mFactions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_Faction, ColumnBase::Display_Faction));
     mFactions.getNestableColumn(index)->addColumn(
@@ -183,6 +187,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     index = mRegions.getColumns()-1;
     mRegions.addAdapter (std::make_pair(&mRegions.getColumn(index), new RegionSoundListAdapter ()));
     mRegions.getNestableColumn(index)->addColumn(
+    // NAME32 enforced in IdCompletionDelegate::createEditor()
         new NestedChildColumn (Columns::ColumnId_SoundName, ColumnBase::Display_Sound));
     mRegions.getNestableColumn(index)->addColumn(
         new NestedChildColumn (Columns::ColumnId_SoundChance, ColumnBase::Display_Integer));
@@ -289,7 +294,8 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourc
     mCells.addColumn (new StringIdColumn<Cell>);
     mCells.addColumn (new RecordStateColumn<Cell>);
     mCells.addColumn (new FixedRecordTypeColumn<Cell> (UniversalId::Type_Cell));
-    mCells.addColumn (new NameColumn<Cell>);
+    // NAME64 enforced in IdCompletionDelegate::createEditor()
+    mCells.addColumn (new NameColumn<Cell>(ColumnBase::Display_String64));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_SleepForbidden, ESM::Cell::NoSleep));
     mCells.addColumn (new FlagColumn<Cell> (Columns::ColumnId_InteriorWater, ESM::Cell::HasWater,
         ColumnBase::Flag_Table | ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_Refresh));
@@ -905,9 +911,12 @@ int CSMWorld::Data::getTotalRecords (const std::vector<boost::filesystem::path>&
 
     for (unsigned int i = 0; i < files.size(); ++i)
     {
-        reader->open(files[i].string());
-        records += reader->getRecordCount();
-        reader->close();
+        if (boost::filesystem::exists(files[i].string()))
+        {
+            reader->open(files[i].string());
+            records += reader->getRecordCount();
+            reader->close();
+        }
     }
 
     return records;
@@ -1113,7 +1122,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
                 else
                 {
                     mTopics.load (record, mBase);
-                    mDialogue = &mTopics.getRecord (record.mId).get();   
+                    mDialogue = &mTopics.getRecord (record.mId).get();
                 }
             }
 

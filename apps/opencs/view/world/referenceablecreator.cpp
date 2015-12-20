@@ -33,6 +33,8 @@ CSVWorld::ReferenceableCreator::ReferenceableCreator (CSMWorld::Data& data, QUnd
     }
 
     insertBeforeButtons (mType, false);
+
+    connect (mType, SIGNAL (currentIndexChanged (int)), this, SLOT (setType (int)));
 }
 
 void CSVWorld::ReferenceableCreator::reset()
@@ -52,4 +54,28 @@ void CSVWorld::ReferenceableCreator::toggleWidgets(bool active)
 {
     CSVWorld::GenericCreator::toggleWidgets(active);
     mType->setEnabled(active);
+}
+
+void CSVWorld::ReferenceableCreator::setType (int index)
+{
+    // container items have name limit of 32 characters
+    std::string text = mType->currentText().toStdString();
+    if (text == "Potion" ||
+        text == "Apparatus" ||
+        text == "Armor" ||
+        text == "Book" ||
+        text == "Clothing" ||
+        text == "Ingredient" ||
+        text == "ItemLevelledList" ||
+        text == "Light" ||
+        text == "Lockpick" ||
+        text == "Miscellaneous" ||
+        text == "Probe" ||
+        text == "Repair" ||
+        text == "Weapon")
+    {
+        GenericCreator::setEditorMaxLength (32);
+    }
+    else
+        GenericCreator::setEditorMaxLength (32767);
 }

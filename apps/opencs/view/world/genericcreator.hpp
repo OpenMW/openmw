@@ -78,6 +78,8 @@ namespace CSVWorld
 
             std::string getNamespace() const;
 
+            void setEditorMaxLength(int length);
+
         private:
 
             void updateNamespace();
