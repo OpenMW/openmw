@@ -317,14 +317,43 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
 
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
-    event->accept();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
+
+    if (mime->fromDocument (mDocument))
+    {
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            // These drops are handled through the subview object.
+            event->accept();
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragEnterEvent (event);
+    }
 }
 
 void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 {
-    event->accept();
-}
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
 
+    if (mime->fromDocument (mDocument))
+    {
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            // These drops are handled through the subview object.
+            event->accept();
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragMoveEvent (event);
+    }
+}
 
 bool CSVRender::WorldspaceWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
 {
@@ -428,8 +457,15 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 
     if (mime->fromDocument (mDocument))
     {
-        emit dataDropped(mime->getData());
-    } //not handling drops from different documents at the moment
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            emit dataDropped(mime->getData());
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dropEvent (event);
+    }
 }
 
 void CSVRender::WorldspaceWidget::runRequest (const std::string& profile)
