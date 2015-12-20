@@ -317,7 +317,8 @@ namespace CSMWorld
     template<typename ESXRecordT>
     struct NameColumn : public Column<ESXRecordT>
     {
-        NameColumn() : Column<ESXRecordT> (Columns::ColumnId_Name, ColumnBase::Display_String) {}
+        NameColumn(ColumnBase::Display display = ColumnBase::Display_String)
+            : Column<ESXRecordT> (Columns::ColumnId_Name, display) {}
 
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {

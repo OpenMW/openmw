@@ -29,6 +29,9 @@ namespace CSVWorld
 
             virtual void toggleWidgets(bool active = true);
 
+        private slots:
+
+            void setType (int index);
     };
 }
 
