@@ -397,6 +397,41 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     //checking for name
     if (container.mName.empty())
         messages.push_back (std::make_pair (id, container.mId + " has an empty name"));
+    
+    //checking contained items
+    const std::vector<ESM::ContItem>& itemList = container.mInventory.mList;
+    for (unsigned i = 0; i < itemList.size(); ++i)
+    {
+        std::string itemName = itemList[i].mItem.toString();
+        CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
+
+        if (localIndex.first == -1)
+            messages.push_back (std::make_pair (id,
+                container.mId + " contains unreferenced item " + itemName));
+        else
+        {
+            switch (localIndex.second)
+            {
+            case CSMWorld::UniversalId::Type_Potion:
+            case CSMWorld::UniversalId::Type_Apparatus:
+            case CSMWorld::UniversalId::Type_Armor:
+            case CSMWorld::UniversalId::Type_Book:
+            case CSMWorld::UniversalId::Type_Clothing:
+            case CSMWorld::UniversalId::Type_Ingredient:
+            case CSMWorld::UniversalId::Type_Light:
+            case CSMWorld::UniversalId::Type_Lockpick:
+            case CSMWorld::UniversalId::Type_Miscellaneous:
+            case CSMWorld::UniversalId::Type_Probe:
+            case CSMWorld::UniversalId::Type_Repair:
+            case CSMWorld::UniversalId::Type_Weapon:
+            case CSMWorld::UniversalId::Type_ItemLevelledList:
+                break;
+            default:
+                messages.push_back (std::make_pair(id,
+                    container.mId + " contains illegal item " + itemName));
+            }
+        }
+    }
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Container>(container, messages, id.toString());
