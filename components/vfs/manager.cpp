@@ -103,10 +103,26 @@ namespace VFS
     Files::IStreamPtr Manager::getFirstOf(std::string name) const
     {
         normalize_path(name, mStrict);
-        return getFirstOfNormalized(name);
+        return getFirstOfEntry(name).second->open();
     }
 
-    Files::IStreamPtr Manager::getFirstOfNormalized(const std::string& normalizedName) const
+    Files::IStreamPtr Manager::getFirstOfNormalized(const std::string &normalizedName) const
+    {
+        return getFirstOfEntry(normalizedName).second->open();
+    }
+
+    const std::string& Manager::findFirstOf(std::string name) const
+    {
+        normalize_path(name, mStrict);
+        return getFirstOfEntry(name).first;
+    }
+
+    const std::string& Manager::findFirstOfNormalized(const std::string &normalizedName) const
+    {
+        return getFirstOfEntry(normalizedName).first;
+    }
+
+    const Manager::NameFileMap::value_type &Manager::getFirstOfEntry(const std::string &normalizedName) const
     {
         size_t extpos = normalizedName.rfind('.');
         if(extpos == std::string::npos || normalizedName.find('/', extpos+1) != std::string::npos)
@@ -124,7 +140,7 @@ namespace VFS
                 if(extpos == std::string::npos || entry->first.find('/', extpos+1) != std::string::npos)
                     extpos = entry->first.length();
                 if(entry->first.compare(0, extpos, basename) == 0)
-                    return entry->second->open();
+                    return *entry;
             }
         }
 
