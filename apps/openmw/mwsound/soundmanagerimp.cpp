@@ -354,10 +354,16 @@ namespace MWSound
             std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(pattern);
             while (found != index.end())
             {
-                if (found->first.size() >= pattern.size() && found->first.substr(0, pattern.size()) == pattern)
-                    filelist.push_back(found->first);
-                else
+                if (found->first.size() < pattern.size() || found->first.compare(0, pattern.size(), pattern) != 0)
                     break;
+
+                /* Only include entries that open a unique resource (e.g. music/foo.mp3 and
+                 * music/foo.ogg will end up playing the same file since one would be a replacement
+                 * for the other).
+                 */
+                const std::string &entry = mVFS->findFirstOfNormalized(found->first);
+                if(filelist.empty() || filelist.back() != entry)
+                    filelist.push_back(found->first);
                 ++found;
             }
 
@@ -367,7 +373,7 @@ namespace MWSound
         else
             filelist = mMusicFiles[mCurrentPlaylist];
 
-        if(!filelist.size())
+        if(filelist.empty())
             return;
 
         int i = Misc::Rng::rollDice(filelist.size());
