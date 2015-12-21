@@ -363,7 +363,7 @@ namespace MWSound
                  */
                 const std::string &entry = mVFS->findFirstOfNormalized(found->first);
                 if(filelist.empty() || filelist.back() != entry)
-                    filelist.push_back(found->first);
+                    filelist.push_back(entry);
                 ++found;
             }
 
