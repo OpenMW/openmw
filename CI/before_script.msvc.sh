@@ -40,7 +40,7 @@ else
 
 	cd $APPVEYOR_BUILD_FOLDER
 	VERSION="$(cat README.md | grep Version: | awk '{ print $3; }')-$(git rev-parse --short HEAD)"
-	appveyor UpdateBuild -Version "$VERSION"
+	appveyor UpdateBuild -Version "$VERSION" > /dev/null &
 fi
 
 run_cmd() {
