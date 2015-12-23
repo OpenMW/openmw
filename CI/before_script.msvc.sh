@@ -225,7 +225,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OpenAL
 	download "OpenAL-Soft 1.16.0" \
-		http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip \
+		http://kcat.strangesoft.net/openal-binaries/openal-soft-1.16.0-bin.zip \
 		OpenAL-Soft-1.16.0.zip
 
 	# OSG
@@ -472,10 +472,8 @@ fi
 			rm -rf Qt
 			eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
 			mv qt-4.8.6-* Qt
-			(
-				cd $QT_SDK
-				eval qtbinpatcher.exe $STRIP
-			)
+			cd Qt
+			eval ./qtbinpatcher.exe $STRIP
 		fi
 
 		cd $QT_SDK
