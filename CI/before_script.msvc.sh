@@ -20,6 +20,14 @@ while [ $# -gt 0 ]; do
 		-u )
 			UNITY_BUILD=true ;;
 
+		-p )
+			PLATFORM=$1
+			shift ;;
+
+		-c )
+			CONFIGURATION=$1
+			shift ;;
+
 		* )
 			echo "Unknown arg $ARG."
 			exit 1 ;;
