@@ -54,6 +54,8 @@ public:
 
     void setContext(Context& context) { mContext = &context; }
 
+    /// @note The load method of ESM records accept the deleted flag as a parameter.
+    /// I don't know can the DELE sub-record appear in saved games, so the deleted flag will be ignored.
     virtual void read(ESM::ESMReader& esm)
     {
     }
@@ -78,10 +80,11 @@ public:
 
     virtual void read(ESM::ESMReader& esm)
     {
-        std::string id = esm.getHNString("NAME");
         T record;
-        record.load(esm);
-        mRecords[id] = record;
+        bool isDeleted = false;
+
+        record.load(esm, isDeleted);
+        mRecords[record.mId] = record;
     }
 
     virtual void write(ESM::ESMWriter& esm)
@@ -89,7 +92,6 @@ public:
         for (typename std::map<std::string, T>::const_iterator it = mRecords.begin(); it != mRecords.end(); ++it)
         {
             esm.startRecord(T::sRecordId);
-            esm.writeHNString("NAME", it->first);
             it->second.save(esm);
             esm.endRecord(T::sRecordId);
         }
@@ -105,14 +107,15 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         ESM::NPC npc;
-        std::string id = esm.getHNString("NAME");
-        npc.load(esm);
-        if (id != "player")
+        bool isDeleted = false;
+
+        npc.load(esm, isDeleted);
+        if (npc.mId != "player")
         {
             // Handles changes to the NPC struct, but since there is no index here
             // it will apply to ALL instances of the class. seems to be the reason for the
             // "feature" in MW where changing AI settings of one guard will change it for all guards of that refID.
-            mContext->mNpcs[Misc::StringUtils::lowerCase(id)] = npc;
+            mContext->mNpcs[Misc::StringUtils::lowerCase(npc.mId)] = npc;
         }
         else
         {
@@ -142,9 +145,10 @@ public:
     {
         // See comment in ConvertNPC
         ESM::Creature creature;
-        std::string id = esm.getHNString("NAME");
-        creature.load(esm);
-        mContext->mCreatures[Misc::StringUtils::lowerCase(id)] = creature;
+        bool isDeleted = false;
+
+        creature.load(esm, isDeleted);
+        mContext->mCreatures[Misc::StringUtils::lowerCase(creature.mId)] = creature;
     }
 };
 
@@ -157,18 +161,19 @@ class ConvertGlobal : public DefaultConverter<ESM::Global>
 public:
     virtual void read(ESM::ESMReader &esm)
     {
-        std::string id = esm.getHNString("NAME");
         ESM::Global global;
-        global.load(esm);
-        if (Misc::StringUtils::ciEqual(id, "gamehour"))
+        bool isDeleted = false;
+
+        global.load(esm, isDeleted);
+        if (Misc::StringUtils::ciEqual(global.mId, "gamehour"))
             mContext->mHour = global.mValue.getFloat();
-        if (Misc::StringUtils::ciEqual(id, "day"))
+        if (Misc::StringUtils::ciEqual(global.mId, "day"))
             mContext->mDay = global.mValue.getInteger();
-        if (Misc::StringUtils::ciEqual(id, "month"))
+        if (Misc::StringUtils::ciEqual(global.mId, "month"))
             mContext->mMonth = global.mValue.getInteger();
-        if (Misc::StringUtils::ciEqual(id, "year"))
+        if (Misc::StringUtils::ciEqual(global.mId, "year"))
             mContext->mYear = global.mValue.getInteger();
-        mRecords[id] = global;
+        mRecords[global.mId] = global;
     }
 };
 
@@ -177,14 +182,14 @@ class ConvertClass : public DefaultConverter<ESM::Class>
 public:
     virtual void read(ESM::ESMReader &esm)
     {
-        std::string id = esm.getHNString("NAME");
         ESM::Class class_;
-        class_.load(esm);
+        bool isDeleted = false;
 
-        if (id == "NEWCLASSID_CHARGEN")
+        class_.load(esm, isDeleted);
+        if (class_.mId == "NEWCLASSID_CHARGEN")
             mContext->mCustomPlayerClassName = class_.mName;
 
-        mRecords[id] = class_;
+        mRecords[class_.mId] = class_;
     }
 };
 
@@ -193,13 +198,14 @@ class ConvertBook : public DefaultConverter<ESM::Book>
 public:
     virtual void read(ESM::ESMReader &esm)
     {
-        std::string id = esm.getHNString("NAME");
         ESM::Book book;
-        book.load(esm);
-        if (book.mData.mSkillID == -1)
-            mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(Misc::StringUtils::lowerCase(id));
+        bool isDeleted = false;
 
-        mRecords[id] = book;
+        book.load(esm, isDeleted);
+        if (book.mData.mSkillID == -1)
+            mContext->mPlayer.mObject.mNpcStats.mUsedIds.push_back(Misc::StringUtils::lowerCase(book.mId));
+
+        mRecords[book.mId] = book;
     }
 };
 
@@ -371,11 +377,12 @@ class ConvertFACT : public Converter
 public:
     virtual void read(ESM::ESMReader& esm)
     {
-        std::string id = esm.getHNString("NAME");
         ESM::Faction faction;
-        faction.load(esm);
+        bool isDeleted = false;
 
-        Misc::StringUtils::toLower(id);
+        faction.load(esm, isDeleted);
+        std::string id = Misc::StringUtils::lowerCase(faction.mId);
+
         for (std::map<std::string, int>::const_iterator it = faction.mReactions.begin(); it != faction.mReactions.end(); ++it)
         {
             std::string faction2 = Misc::StringUtils::lowerCase(it->first);
@@ -391,7 +398,7 @@ public:
     virtual void read(ESM::ESMReader &esm)
     {
         std::string itemid = esm.getHNString("NAME");
-        Misc::StringUtils::toLower(itemid);
+        Misc::StringUtils::lowerCaseInPlace(itemid);
 
         while (esm.isNextSub("FNAM") || esm.isNextSub("ONAM"))
         {

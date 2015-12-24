@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layer" version="1.0">
-    <Layer name="Render" overlapped="false" pick="false"/>
+    <Layer name="Overlay" overlapped="false" pick="false"/>
+    <Layer name="AdditiveOverlay" type="AdditiveLayer" pick="false"/>
     <Layer name="HUD" overlapped="false" pick="true"/>
-    <Layer name="Menu" overlapped="false" pick="false"/>
+    <Layer name="Menu" overlapped="false" pick="true"/>
     <Layer name="Windows" overlapped="true" pick="true"/>
+    <Layer name="JournalBooks" type="ScalingLayer" pick="true">
+        <Property key="Size" value="600 520"/>
+    </Layer>
     <Layer name="Console" overlapped="false" pick="true"/>
     <Layer name="Debug" overlapped="true" pick="true"/>
     <Layer name="Notification" overlapped="false" pick="false"/>
@@ -12,6 +16,6 @@
     <Layer name="DragAndDrop" overlapped="false" pick="false"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="MessageBox" overlapped="false" pick="true"/>
-    <Layer name="Overlay" overlapped="false" pick="true"/>
+    <Layer name="InputBlocker" overlapped="false" pick="true"/>
     <Layer name="Pointer" overlapped="false" pick="false"/>
 </MyGUI>

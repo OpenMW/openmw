@@ -4,6 +4,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <osgViewer/ViewerEventHandlers>
+
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
@@ -15,12 +17,11 @@
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlvideowrapper.hpp>
 
-#include "../engine.hpp"
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/environment.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -30,22 +31,20 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
-using namespace ICS;
-
 namespace MWInput
 {
     InputManager::InputManager(
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
-            OMW::Engine& engine,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
         , mViewer(viewer)
+        , mScreenCaptureHandler(screenCaptureHandler)
         , mJoystickLastUsed(false)
         , mPlayer(NULL)
-        , mEngine(engine)
         , mInputManager(NULL)
         , mVideoWrapper(NULL)
         , mUserFile(userFile)
@@ -54,7 +53,6 @@ namespace MWInput
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
@@ -121,10 +119,11 @@ namespace MWInput
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
                 controllerAdded(mFakeDeviceID, evt);
+                std::cout << "Detected game controller: " << SDL_GameControllerNameForIndex(i) << std::endl;
             }
             else
             {
-                //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
+                std::cout << "Detected unusable controller: " << SDL_JoystickNameForIndex(i) << std::endl;
             }
         }
 
@@ -587,9 +586,6 @@ namespace MWInput
             if (it->first == "Input" && it->second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
 
-            if (it->first == "Input" && it->second == "ui sensitivity")
-                mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
-
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
@@ -952,7 +948,8 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mEngine.screenshot();
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
 
         MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
@@ -1058,7 +1055,7 @@ namespace MWInput
     void InputManager::activate()
     {
         if (mControlSwitch["playercontrols"])
-            mEngine.activate();
+            mPlayer->activate();
     }
 
     void InputManager::toggleAutoMove()

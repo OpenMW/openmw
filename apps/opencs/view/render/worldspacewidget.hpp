@@ -5,11 +5,18 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <QTimer>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
 #include "scenewidget.hpp"
 #include "elements.hpp"
+
+namespace CSMPrefs
+{
+    class Setting;
+}
 
 namespace CSMWorld
 {
@@ -47,6 +54,10 @@ namespace CSVRender
             double mDragFactor;
             double mDragWheelFactor;
             double mDragShiftFactor;
+            QTimer mToolTipDelayTimer;
+            QPoint mToolTipPos;
+            bool mShowToolTips;
+            int mToolTipDelay;
 
         public:
 
@@ -109,8 +120,6 @@ namespace CSVRender
             /// marked for interaction.
             unsigned int getInteractionMask() const;
 
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
             virtual void setEditLock (bool locked);
 
             CSMDoc::Document& getDocument();
@@ -145,15 +154,17 @@ namespace CSVRender
             void dragMoveEvent(QDragMoveEvent *event);
 
             /// \return Is \a key a button mapping setting? (ignored otherwise)
-            bool storeMappingSetting (const QString& key, const QString& value);
+            bool storeMappingSetting (const CSMPrefs::Setting *setting);
 
-            osg::ref_ptr<TagBase> mousePick (QMouseEvent *event);
+            osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
 
             std::string mapButton (QMouseEvent *event);
 
             virtual std::string getStartupInstruction() = 0;
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void selectNavigationMode (const std::string& mode);
 
@@ -178,6 +189,8 @@ namespace CSVRender
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
             void editModeChanged (const std::string& id);
+
+            void showToolTip();
 
         protected slots:
 

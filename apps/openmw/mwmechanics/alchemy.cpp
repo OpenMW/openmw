@@ -421,8 +421,8 @@ int MWMechanics::Alchemy::addIngredient (const MWWorld::Ptr& ingredient)
         return -1;
 
     for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
-        if (!iter->isEmpty() && Misc::StringUtils::ciEqual(ingredient.getClass().getId(ingredient),
-                                                           iter->getClass().getId(*iter)))
+        if (!iter->isEmpty() && Misc::StringUtils::ciEqual(ingredient.getCellRef().getRefId(),
+                                                           iter->getCellRef().getRefId()))
             return -1;
 
     mIngredients[slot] = ingredient;

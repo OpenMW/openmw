@@ -3,48 +3,73 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include "soundmanagerimp.hpp"
-
-#include "../mwworld/ptr.hpp"
 
 namespace MWSound
 {
     class SoundManager;
     struct Sound_Decoder;
     class Sound;
+    class Sound_Loudness;
+
+    // An opaque handle for the implementation's sound buffers.
+    typedef void *Sound_Handle;
+    // An opaque handle for the implementation's sound instances.
+    typedef void *Sound_Instance;
 
     class Sound_Output
     {
         SoundManager &mManager;
 
         virtual std::vector<std::string> enumerate() = 0;
-        virtual void init(const std::string &devname="") = 0;
+        virtual void init(const std::string &devname=std::string()) = 0;
         virtual void deinit() = 0;
 
-        /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound(const std::string &fname, float vol, float basevol, float pitch, int flags, float offset) = 0;
-        /// @param offset Value from [0,1] meaning from which fraction the sound the playback starts.
-        virtual MWBase::SoundPtr playSound3D(const std::string &fname, const osg::Vec3f &pos,
-                                             float vol, float basevol, float pitch, float min, float max, int flags, float offset, bool extractLoudness=false) = 0;
-        virtual MWBase::SoundPtr streamSound(DecoderPtr decoder, float volume, float pitch, int flags) = 0;
+        virtual std::vector<std::string> enumerateHrtf() = 0;
+        virtual void enableHrtf(const std::string &hrtfname, bool auto_enable) = 0;
+        virtual void disableHrtf() = 0;
+
+        virtual Sound_Handle loadSound(const std::string &fname) = 0;
+        virtual void unloadSound(Sound_Handle data) = 0;
+        virtual size_t getSoundDataSize(Sound_Handle data) const = 0;
+
+        virtual void playSound(MWBase::SoundPtr sound, Sound_Handle data, float offset) = 0;
+        virtual void playSound3D(MWBase::SoundPtr sound, Sound_Handle data, float offset) = 0;
+        virtual void finishSound(MWBase::SoundPtr sound) = 0;
+        virtual bool isSoundPlaying(MWBase::SoundPtr sound) = 0;
+        virtual void updateSound(MWBase::SoundPtr sound) = 0;
+
+        virtual void streamSound(DecoderPtr decoder, MWBase::SoundStreamPtr sound) = 0;
+        virtual void streamSound3D(DecoderPtr decoder, MWBase::SoundStreamPtr sound) = 0;
+        virtual void finishStream(MWBase::SoundStreamPtr sound) = 0;
+        virtual double getStreamDelay(MWBase::SoundStreamPtr sound) = 0;
+        virtual double getStreamOffset(MWBase::SoundStreamPtr sound) = 0;
+        virtual bool isStreamPlaying(MWBase::SoundStreamPtr sound) = 0;
+        virtual void updateStream(MWBase::SoundStreamPtr sound) = 0;
+
+        virtual void startUpdate() = 0;
+        virtual void finishUpdate() = 0;
 
         virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env) = 0;
 
         virtual void pauseSounds(int types) = 0;
         virtual void resumeSounds(int types) = 0;
 
+        // HACK: The sound output implementation really shouldn't be handling
+        // asynchronous loudness data loading, but it's currently where we have
+        // a background processing thread.
+        virtual void loadLoudnessAsync(DecoderPtr decoder, Sound_Loudness *loudness) = 0;
+
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);
 
     protected:
         bool mInitialized;
-        osg::Vec3f mPos;
 
         Sound_Output(SoundManager &mgr)
-          : mManager(mgr)
-          , mInitialized(false)
-          , mPos(0.0f, 0.0f, 0.0f)
+          : mManager(mgr), mInitialized(false)
         { }
     public:
         virtual ~Sound_Output() { }

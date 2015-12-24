@@ -10,20 +10,16 @@ namespace MWClass
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
 
-            virtual MWWorld::Ptr
-            copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const;
+            virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
 
         public:
-
-            /// Return ID of \a ptr
-            virtual std::string getId (const MWWorld::Ptr& ptr) const;
 
             virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
             ///< Add reference into a cell for rendering
 
             virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
 
-            virtual std::string getName (const MWWorld::Ptr& ptr) const;
+            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
@@ -31,16 +27,16 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
-            virtual bool hasToolTip (const MWWorld::Ptr& ptr) const;
+            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
             ///< @return true if this object has a tooltip when focused (default implementation: false)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::Ptr& ptr) const;
+            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
-            virtual std::string getScript (const MWWorld::Ptr& ptr) const;
+            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
             virtual float getCapacity (const MWWorld::Ptr& ptr) const;
@@ -57,13 +53,13 @@ namespace MWClass
             virtual void unlock (const MWWorld::Ptr& ptr) const;
             ///< Unlock object
 
-            virtual bool canLock(const MWWorld::Ptr &ptr) const;
+            virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
                 const;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
                 const;
             ///< Write additional state from \a ptr into \a state.
 
@@ -73,7 +69,7 @@ namespace MWClass
 
             virtual void restock (const MWWorld::Ptr &ptr) const;
 
-            virtual std::string getModel(const MWWorld::Ptr &ptr) const;
+            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
     };
 }
 

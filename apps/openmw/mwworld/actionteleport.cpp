@@ -3,6 +3,9 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
+#include "../mwworld/class.hpp"
+
 #include "player.hpp"
 
 namespace
@@ -40,6 +43,11 @@ namespace MWWorld
             for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
             {
                 MWWorld::Ptr follower = *it;
+
+                std::string script = follower.getClass().getScript(follower);
+                if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
+                    continue;
+
                 if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2()
                         <= 800*800)
                     teleport(*it);

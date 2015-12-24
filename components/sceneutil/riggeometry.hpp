@@ -19,7 +19,7 @@ namespace SceneUtil
         RigGeometry();
         RigGeometry(const RigGeometry& copy, const osg::CopyOp& copyop);
 
-        META_Object(NifOsg, RigGeometry)
+        META_Object(SceneUtil, RigGeometry)
 
         struct BoneInfluence
         {
@@ -48,6 +48,9 @@ namespace SceneUtil
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
         Skeleton* mSkeleton;
 
+        osg::NodePath mSkelToGeomPath;
+        osg::Matrixf mGeomToSkelMatrix;
+
         osg::ref_ptr<InfluenceMap> mInfluenceMap;
 
         typedef std::pair<Bone*, osg::Matrixf> BoneBindMatrixPair;
@@ -69,7 +72,7 @@ namespace SceneUtil
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
-        osg::Matrixf getGeomToSkelMatrix(osg::NodeVisitor* nv);
+        void updateGeomToSkelMatrix(osg::NodeVisitor* nv);
     };
 
 }

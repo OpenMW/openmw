@@ -1,7 +1,8 @@
 #include "camera.hpp"
 
-#include <osg/PositionAttitudeTransform>
 #include <osg/Camera>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -42,7 +43,8 @@ namespace MWRender
 {
 
     Camera::Camera (osg::Camera* camera)
-    : mCamera(camera),
+    : mHeightScale(1.f),
+      mCamera(camera),
       mAnimation(NULL),
       mFirstPersonView(true),
       mPreviewMode(false),
@@ -93,7 +95,7 @@ namespace MWRender
 
         osg::Vec3d position = worldMat.getTrans();
         if (!isFirstPerson())
-            position.z() += mHeight;
+            position.z() += mHeight * mHeightScale;
         return position;
     }
 
@@ -372,11 +374,17 @@ namespace MWRender
             mTrackingNode = mAnimation->getNode("Camera");
             if (!mTrackingNode)
                 mTrackingNode = mAnimation->getNode("Head");
+            mHeightScale = 1.f;
         }
         else
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            mTrackingNode = mTrackingPtr.getRefData().getBaseNode();
+            SceneUtil::PositionAttitudeTransform* transform = mTrackingPtr.getRefData().getBaseNode();
+            mTrackingNode = transform;
+            if (transform)
+                mHeightScale = transform->getScale().z();
+            else
+                mHeightScale = 1.f;
         }
         rotateCamera(getPitch(), getYaw(), false);
     }

@@ -37,7 +37,7 @@ namespace
 
     void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
+        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end(); ++it)
         {
             if (it->mLevel == level && itemId == it->mId)
                 return;
@@ -188,7 +188,12 @@ namespace MWScript
                     if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
                     {
                         MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
-                        MWBase::Environment::get().getWorld()->localRotateObject(ptr, 0, 0, 0);
+
+                        float xr = ptr.getCellRef().getPosition().rot[0];
+                        float yr = ptr.getCellRef().getPosition().rot[1];
+                        float zr = ptr.getCellRef().getPosition().rot[2];
+
+                        MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
                     }
                 }
         };
@@ -417,9 +422,17 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    runtime.push(ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(
-                                      MWMechanics::EffectKey(key)).getMagnitude() > 0);
-                }
+                    const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                    for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+                    {
+                        if (it->first.mId == key && it->second.getModifier() > 0)
+                        {
+                            runtime.push(1);
+                            return;
+                        }
+                    }
+                    runtime.push(0);
+               }
         };
 
         template<class R>
@@ -1037,6 +1050,11 @@ namespace MWScript
                     msg << contentFiles.at (ptr.getCellRef().getRefNum().mContentFile) << std::endl;
                     msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
                 }
+
+                if (ptr.getRefData().isDeletedByContentFile())
+                    msg << "[Deleted by content file]" << std::endl;
+                if (!ptr.getRefData().getCount())
+                    msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
 

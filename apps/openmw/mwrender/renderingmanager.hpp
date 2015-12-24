@@ -57,12 +57,15 @@ namespace MWRender
     class RenderingManager : public MWRender::RenderingInterface
     {
     public:
-        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback);
+        RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+                         const MWWorld::Fallback* fallback, const std::string& resourcePath);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();
 
         Resource::ResourceSystem* getResourceSystem();
+
+        osg::Group* getLightRoot();
 
         void setNightEyeFactor(float factor);
 
@@ -78,7 +81,7 @@ namespace MWRender
 
         void configureAmbient(const ESM::Cell* cell);
         void configureFog(const ESM::Cell* cell);
-        void configureFog(float fogDepth, const osg::Vec4f& colour);
+        void configureFog(float fogDepth, float underwaterFog, const osg::Vec4f& colour);
 
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
@@ -133,10 +136,11 @@ namespace MWRender
         void update(float dt, bool paused);
 
         Animation* getAnimation(const MWWorld::Ptr& ptr);
-        Animation* getPlayerAnimation();
+        const Animation* getAnimation(const MWWorld::ConstPtr& ptr) const;
 
         void addWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);
+        void emitWaterRipple(const osg::Vec3f& pos);
 
         void updatePlayerPtr(const MWWorld::Ptr &ptr);
 
@@ -158,12 +162,18 @@ namespace MWRender
         void resetCamera();
         float getCameraDistance() const;
         Camera* getCamera();
+        const osg::Vec3f& getCameraPosition() const;
         void togglePOV();
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
         void togglePlayerLooking(bool enable);
         void changeVanityModeScale(float factor);
+
+        /// temporarily override the field of view with given value.
+        void overrideFieldOfView(float val);
+        /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
+        void resetFieldOfView();
 
     private:
         void updateProjectionMatrix();
@@ -185,12 +195,17 @@ namespace MWRender
         std::auto_ptr<SkyManager> mSky;
         std::auto_ptr<EffectManager> mEffectManager;
         std::auto_ptr<NpcAnimation> mPlayerAnimation;
-        osg::ref_ptr<osg::PositionAttitudeTransform> mPlayerNode;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::auto_ptr<Camera> mCamera;
+        osg::Vec3f mCurrentCameraPos;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;
 
         float mFogDepth;
+        osg::Vec4f mUnderwaterColor;
+        float mUnderwaterWeight;
+        float mUnderwaterFog;
+        float mUnderwaterIndoorFog;
         osg::Vec4f mFogColor;
 
         osg::Vec4f mAmbientColor;
@@ -198,7 +213,10 @@ namespace MWRender
 
         float mNearClip;
         float mViewDistance;
+        float mFieldOfViewOverride;
+        bool mFieldOfViewOverridden;
         float mFieldOfView;
+        float mFirstPersonFieldOfView;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);

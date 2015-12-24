@@ -36,6 +36,8 @@ enum RecordType
 {
   RC_MISSING = 0,
   RC_NiNode,
+  RC_NiSwitchNode,
+  RC_NiLODNode,
   RC_NiBillboardNode,
   RC_AvoidNode,
   RC_NiTriShape,

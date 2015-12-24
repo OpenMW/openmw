@@ -23,10 +23,6 @@
 
 namespace MWClass
 {
-    std::string Book::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Book>()->mBase->mId;
-    }
 
     void Book::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -40,11 +36,9 @@ namespace MWClass
         // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Book::getModel(const MWWorld::Ptr &ptr) const
+    std::string Book::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -53,10 +47,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Book::getName (const MWWorld::Ptr& ptr) const
+    std::string Book::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mName;
     }
@@ -78,18 +71,16 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
-    std::string Book::getScript (const MWWorld::Ptr& ptr) const
+    std::string Book::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mScript;
     }
 
-    int Book::getValue (const MWWorld::Ptr& ptr) const
+    int Book::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mData.mValue;
     }
@@ -101,39 +92,36 @@ namespace MWClass
         registerClass (typeid (ESM::Book).name(), instance);
     }
 
-    std::string Book::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Book::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Book Up");
     }
 
-    std::string Book::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Book::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Book Down");
     }
 
-    std::string Book::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Book::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mIcon;
     }
 
-    bool Book::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Book::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -153,18 +141,16 @@ namespace MWClass
         return info;
     }
 
-    std::string Book::getEnchantment (const MWWorld::Ptr& ptr) const
+    std::string Book::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Book::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Book::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         ESM::Book newItem = *ref->mBase;
         newItem.mId="";
@@ -181,33 +167,29 @@ namespace MWClass
         return boost::shared_ptr<MWWorld::Action>(new MWWorld::ActionRead(ptr));
     }
 
-    MWWorld::Ptr
-    Book::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Book::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Book>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    int Book::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Book::getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-                ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         return ref->mBase->mData.mEnchant;
     }
 
-    bool Book::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Book::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Books)
                 || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
-    float Book::getWeight(const MWWorld::Ptr &ptr) const
+    float Book::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Book> *ref =
-            ptr.get<ESM::Book>();
+        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
         return ref->mBase->mData.mWeight;
     }
 }

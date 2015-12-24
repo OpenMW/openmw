@@ -11,7 +11,7 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 
-MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &cref)
+MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
   : mClass(&Class::get(type)), mRef(cref), mData(cref)
 {
 }
@@ -19,7 +19,7 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(std::string type, const ESM::CellRef &
 void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
 {
     mRef = state.mRef;
-    mData = RefData (state);
+    mData = RefData (state, mData.isDeletedByContentFile());
 
     Ptr ptr (this);
 
@@ -54,8 +54,7 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
 {
     mRef.writeState(state);
 
-    /// \todo get rid of this cast once const-correct Ptr are available
-    Ptr ptr (const_cast<LiveCellRefBase *> (this));
+    ConstPtr ptr (this);
 
     mData.write (state, mClass->getScript (ptr));
 

@@ -35,12 +35,13 @@ namespace
             return "#{sOn}";
     }
 
-    std::string textureFilteringToStr(const std::string& val)
+    std::string textureMipmappingToStr(const std::string& val)
     {
-        if (val == "trilinear")
-            return "Trilinear";
-        else
-            return "Bilinear";
+        if (val == "linear")  return "Trilinear";
+        if (val == "nearest") return "Bilinear";
+        if (val != "none")
+            std::cerr<< "Invalid texture mipmap option: "<<val <<std::endl;
+        return "Other";
     }
 
     void parseResolution (int &x, int &y, const std::string& str)
@@ -166,7 +167,6 @@ namespace MWGui
         getWidget(mFullscreenButton, "FullscreenButton");
         getWidget(mVSyncButton, "VSyncButton");
         getWidget(mWindowBorderButton, "WindowBorderButton");
-        getWidget(mFPSButton, "FPSButton");
         getWidget(mFOVSlider, "FOVSlider");
         getWidget(mAnisotropySlider, "AnisotropySlider");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
@@ -177,10 +177,10 @@ namespace MWGui
         getWidget(mShadowsTextureSize, "ShadowsTextureSize");
         getWidget(mControlsBox, "ControlsBox");
         getWidget(mResetControlsButton, "ResetControlsButton");
-        getWidget(mRefractionButton, "RefractionButton");
         getWidget(mDifficultySlider, "DifficultySlider");
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
+        getWidget(mWaterTextureSize, "WaterTextureSize");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -201,8 +201,9 @@ namespace MWGui
         mSettingsTab->eventTabChangeSelect += MyGUI::newDelegate(this, &SettingsWindow::onTabChanged);
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onOkButtonClicked);
         mTextureFilteringButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onTextureFilteringChanged);
-        mFPSButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onFpsToggled);
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
+
+        mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
 
         mShadowsTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
@@ -235,23 +236,28 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        std::string tf = Settings::Manager::getString("texture filtering", "General");
-        mTextureFilteringButton->setCaption(textureFilteringToStr(tf));
+        std::string tmip = Settings::Manager::getString("texture mipmap", "General");
+        mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
         mAnisotropyLabel->setCaption("Anisotropy (" + MyGUI::utility::toString(Settings::Manager::getInt("anisotropy", "General")) + ")");
+
+        int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
+        if (waterTextureSize >= 512)
+            mWaterTextureSize->setIndexSelected(0);
+        if (waterTextureSize >= 1024)
+            mWaterTextureSize->setIndexSelected(1);
+        if (waterTextureSize >= 2048)
+            mWaterTextureSize->setIndexSelected(2);
 
         mShadowsTextureSize->setCaption (Settings::Manager::getString ("texture size", "Shadows"));
 
         if (!Settings::Manager::getBool("shaders", "Objects"))
         {
-            mRefractionButton->setEnabled(false);
             mShadowsEnabledButton->setEnabled(false);
         }
 
-        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(Settings::Manager::getInt("fps", "HUD")));
-
         MyGUI::TextBox* fovText;
         getWidget(fovText, "FovText");
-        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "General"))) + ")");
+        fovText->setCaption("Field of View (" + MyGUI::utility::toString(int(Settings::Manager::getInt("field of view", "Camera"))) + ")");
 
         MyGUI::TextBox* diffText;
         getWidget(diffText, "DifficultyText");
@@ -324,6 +330,19 @@ namespace MWGui
         }
     }
 
+    void SettingsWindow::onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        int size = 0;
+        if (pos == 0)
+            size = 512;
+        else if (pos == 1)
+            size = 1024;
+        else if (pos == 2)
+            size = 2048;
+        Settings::Manager::setInt("rtt size", "Water", size);
+        apply();
+    }
+
     void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox *_sender, size_t pos)
     {
         Settings::Manager::setString("texture size", "Shadows", _sender->getItemNameAt(pos));
@@ -350,12 +369,6 @@ namespace MWGui
         {
             if (newState == false)
             {
-                // refraction needs shaders to display underwater fog
-                mRefractionButton->setCaptionWithReplacing("#{sOff}");
-                mRefractionButton->setEnabled(false);
-
-                Settings::Manager::setBool("refraction", "Water", false);
-
                 // shadows not supported
                 mShadowsEnabledButton->setEnabled(false);
                 mShadowsEnabledButton->setCaptionWithReplacing("#{sOff}");
@@ -363,9 +376,6 @@ namespace MWGui
             }
             else
             {
-                // re-enable
-                mRefractionButton->setEnabled(true);
-
                 mShadowsEnabledButton->setEnabled(true);
             }
         }
@@ -414,17 +424,14 @@ namespace MWGui
         }
     }
 
-    void SettingsWindow::onFpsToggled(MyGUI::Widget* _sender)
-    {
-        int newLevel = (Settings::Manager::getInt("fps", "HUD") + 1) % 2;
-        Settings::Manager::setInt("fps", "HUD", newLevel);
-        mFPSButton->setCaptionWithReplacing(fpsLevelToStr(newLevel));
-        apply();
-    }
-
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        Settings::Manager::setString("texture filtering", "General", Misc::StringUtils::lowerCase(_sender->getItemNameAt(pos)));
+        if(pos == 0)
+            Settings::Manager::setString("texture mipmap", "General", "nearest");
+        else if(pos == 1)
+            Settings::Manager::setString("texture mipmap", "General", "linear");
+        else
+            std::cerr<< "Unexpected option pos "<<pos <<std::endl;
         apply();
     }
 

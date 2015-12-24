@@ -61,11 +61,16 @@ private:
     int mPartPriorities[ESM::PRT_Count];
 
     osg::Vec3f mFirstPersonOffset;
+    // Field of view to use when rendering first person meshes
+    float mFirstPersonFieldOfView;
 
     boost::shared_ptr<HeadAnimationTime> mHeadAnimationTime;
     boost::shared_ptr<WeaponAnimationTime> mWeaponAnimationTime;
 
     bool mSoundsDisabled;
+
+    bool mAccurateAiming;
+    float mAimingFactor;
 
     void updateNpcBase();
 
@@ -99,10 +104,14 @@ public:
      * @param viewMode
      */
     NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener = false,
-                 bool disableSounds = false, ViewMode viewMode=VM_Normal);
+                 bool disableSounds = false, ViewMode viewMode=VM_Normal, float firstPersonFieldOfView=55.f);
     virtual ~NpcAnimation();
 
     virtual void enableHeadAnimation(bool enable);
+
+    /// 1: the first person meshes follow the camera's rotation completely
+    /// 0: the first person meshes follow the camera with a reduced factor, so you can look down at your own hands
+    virtual void setAccurateAiming(bool enabled);
 
     virtual void setWeaponGroup(const std::string& group);
 

@@ -189,8 +189,10 @@ namespace ESM
 {
     unsigned int MagicEffect::sRecordId = REC_MGEF;
 
-void MagicEffect::load(ESMReader &esm)
+void MagicEffect::load(ESMReader &esm, bool &isDeleted)
 {
+    isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)
+
     esm.getHNT(mIndex, "INDX");
 
     mId = indexToId (mIndex);
@@ -209,8 +211,7 @@ void MagicEffect::load(ESMReader &esm)
     while (esm.hasMoreSubs())
     {
         esm.getSubName();
-        uint32_t name = esm.retSubName().val;
-        switch (name)
+        switch (esm.retSubName().val)
         {
             case ESM::FourCC<'I','T','E','X'>::value:
                 mIcon = esm.getHString();
@@ -250,7 +251,7 @@ void MagicEffect::load(ESMReader &esm)
         }
     }
 }
-void MagicEffect::save(ESMWriter &esm) const
+void MagicEffect::save(ESMWriter &esm, bool /*isDeleted*/) const
 {
     esm.writeHNT("INDX", mIndex);
 

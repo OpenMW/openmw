@@ -2,12 +2,12 @@
 
 #include <limits.h>
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -604,7 +604,7 @@ namespace MWMechanics
         int rank = 0;
         std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
-        Misc::StringUtils::toLower(npcFaction);
+        Misc::StringUtils::lowerCaseInPlace(npcFaction);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -983,7 +983,7 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            StolenItemsMap::iterator stolenIt = mStolenItems.find(Misc::StringUtils::lowerCase(it->getClass().getId(*it)));
+            StolenItemsMap::iterator stolenIt = mStolenItems.find(Misc::StringUtils::lowerCase(it->getCellRef().getRefId()));
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
@@ -1042,10 +1042,10 @@ namespace MWMechanics
             owner.first = ownerCellRef->getFaction();
             owner.second = true;
         }
-        Misc::StringUtils::toLower(owner.first);
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
-            mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;
+            mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
     }
@@ -1053,7 +1053,7 @@ namespace MWMechanics
 
     void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
     {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
             if (out.insert(*it).second)
@@ -1310,7 +1310,7 @@ namespace MWMechanics
         if (ptr == getPlayer())
             return false;
 
-        std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(attacker);
         MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
         {
@@ -1485,6 +1485,11 @@ namespace MWMechanics
     void MechanicsManager::getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
+    }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor)
+    {
+        return mActors.getActorsSidingWith(actor);
     }
 
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)

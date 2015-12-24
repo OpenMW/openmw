@@ -24,6 +24,15 @@
 
 using namespace Process;
 
+void cfgError(const QString& title, const QString& msg) {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(title);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setText(msg);
+    msgBox.exec();
+}
+
 Launcher::MainDialog::MainDialog(QWidget *parent)
     : QMainWindow(parent), mGameSettings (mCfgMgr)
 {
@@ -105,7 +114,7 @@ void Launcher::MainDialog::createPages()
 {
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mGraphicsPage = new GraphicsPage(mCfgMgr, mGraphicsSettings, this);
+    mGraphicsPage = new GraphicsPage(mCfgMgr, mEngineSettings, this);
     mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
 
     // Set the combobox of the play page to imitate the combobox on the datafilespage
@@ -248,6 +257,8 @@ void Launcher::MainDialog::changePage(QListWidgetItem *current, QListWidgetItem 
 
 bool Launcher::MainDialog::setupLauncherSettings()
 {
+    mLauncherSettings.clear();
+
     mLauncherSettings.setMultiValueEnabled(true);
 
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
@@ -257,18 +268,14 @@ bool Launcher::MainDialog::setupLauncherSettings()
     paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << qPrintable(path);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
+                cfgError(tr("Error opening OpenMW configuration file"),
+                         tr("<br><b>Could not open %0 for reading</b><br><br> \
+                             Please make sure you have the right permissions \
+                             and try again.<br>").arg(file.fileName()));
                 return false;
             }
             QTextStream stream(&file);
@@ -284,6 +291,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
 bool Launcher::MainDialog::setupGameSettings()
 {
+    mGameSettings.clear();
+
     QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
     QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
 
@@ -292,18 +301,14 @@ bool Launcher::MainDialog::setupGameSettings()
     QString path = userPath + QLatin1String("openmw.cfg");
     QFile file(path);
 
-    qDebug() << "Loading config file:" << qPrintable(path);
+    qDebug() << "Loading config file:" << path.toUtf8().constData();
 
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                       Please make sure you have the right permissions \
-                                       and try again.<br>").arg(file.fileName()));
-                                       msgBox.exec();
+            cfgError(tr("Error opening OpenMW configuration file"),
+                     tr("<br><b>Could not open %0 for reading</b><br><br> \
+                         Please make sure you have the right permissions \
+                         and try again.<br>").arg(file.fileName()));
             return false;
         }
         QTextStream stream(&file);
@@ -319,19 +324,15 @@ bool Launcher::MainDialog::setupGameSettings()
     paths.append(userPath + QString("openmw.cfg"));
 
     foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << qPrintable(path);
+        qDebug() << "Loading config file:" << path.toUtf8().constData();
 
         QFile file(path);
         if (file.exists()) {
             if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
+                cfgError(tr("Error opening OpenMW configuration file"),
+                         tr("<br><b>Could not open %0 for reading</b><br><br> \
+                             Please make sure you have the right permissions \
+                             and try again.<br>").arg(file.fileName()));
                 return false;
             }
             QTextStream stream(&file);
@@ -383,53 +384,54 @@ bool Launcher::MainDialog::setupGameSettings()
 
 bool Launcher::MainDialog::setupGraphicsSettings()
 {
-    mGraphicsSettings.setMultiValueEnabled(false);
+    // This method is almost a copy of OMW::Engine::loadSettings().  They should definitely
+    // remain consistent, and possibly be merged into a shared component.  At the very least
+    // the filenames should be in the CfgMgr component.
 
-    QString userPath = QString::fromUtf8(mCfgMgr.getUserConfigPath().string().c_str());
-    QString globalPath = QString::fromUtf8(mCfgMgr.getGlobalPath().string().c_str());
+    // Ensure to clear previous settings in case we had already loaded settings.
+    mEngineSettings.clear();
 
-    QFile localDefault(QString("settings-default.cfg"));
-    QFile globalDefault(globalPath + QString("settings-default.cfg"));
+    // Create the settings manager and load default settings file
+    const std::string localDefault = (mCfgMgr.getLocalPath() / "settings-default.cfg").string();
+    const std::string globalDefault = (mCfgMgr.getGlobalPath() / "settings-default.cfg").string();
+    std::string defaultPath;
 
-    if (!localDefault.exists() && !globalDefault.exists()) {
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error reading OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not find settings-default.cfg</b><br><br> \
-                                   The problem may be due to an incomplete installation of OpenMW.<br> \
-                                   Reinstalling OpenMW may resolve the problem."));
-                                   msgBox.exec();
+    // Prefer the settings-default.cfg in the current directory.
+    if (boost::filesystem::exists(localDefault))
+        defaultPath = localDefault;
+    else if (boost::filesystem::exists(globalDefault))
+        defaultPath = globalDefault;
+    // Something's very wrong if we can't find the file at all.
+    else {
+        cfgError(tr("Error reading OpenMW configuration file"),
+                 tr("<br><b>Could not find settings-default.cfg</b><br><br> \
+                     The problem may be due to an incomplete installation of OpenMW.<br> \
+                     Reinstalling OpenMW may resolve the problem."));
         return false;
     }
 
+    // Load the default settings, report any parsing errors.
+    try {
+        mEngineSettings.loadDefault(defaultPath);
+    }
+    catch (std::exception& e) {
+        std::string msg = std::string("<br><b>Error reading settings-default.cfg</b><br><br>") + e.what();
+        cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
+        return false;
+    }
 
-    QStringList paths;
-    paths.append(globalPath + QString("settings-default.cfg"));
-    paths.append(QString("settings-default.cfg"));
-    paths.append(userPath + QString("settings.cfg"));
+    // Load user settings if they exist
+    const std::string userPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    // User settings are not required to exist, so if they don't we're done.
+    if (!boost::filesystem::exists(userPath)) return true;
 
-    foreach (const QString &path, paths) {
-        qDebug() << "Loading config file:" << qPrintable(path);
-        QFile file(path);
-        if (file.exists()) {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QMessageBox msgBox;
-                msgBox.setWindowTitle(tr("Error opening OpenMW configuration file"));
-                msgBox.setIcon(QMessageBox::Critical);
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setText(tr("<br><b>Could not open %0 for reading</b><br><br> \
-                                           Please make sure you have the right permissions \
-                                           and try again.<br>").arg(file.fileName()));
-                                           msgBox.exec();
-                return false;
-            }
-            QTextStream stream(&file);
-            stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-            mGraphicsSettings.readFile(stream);
-        }
-        file.close();
+    try {
+        mEngineSettings.loadUser(userPath);
+    }
+    catch (std::exception& e) {
+        std::string msg = std::string("<br><b>Error reading settings.cfg</b><br><br>") + e.what();
+        cfgError(tr("Error reading OpenMW configuration file"), tr(msg.c_str()));
+        return false;
     }
 
     return true;
@@ -478,15 +480,11 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!dir.exists()) {
         if (!dir.mkpath(userPath)) {
-            QMessageBox msgBox;
-            msgBox.setWindowTitle(tr("Error creating OpenMW configuration directory"));
-            msgBox.setIcon(QMessageBox::Critical);
-            msgBox.setStandardButtons(QMessageBox::Ok);
-            msgBox.setText(tr("<br><b>Could not create %0</b><br><br> \
-                              Please make sure you have the right permissions \
-                              and try again.<br>").arg(userPath));
-                              msgBox.exec();
-                           return false;
+            cfgError(tr("Error creating OpenMW configuration directory"),
+                     tr("<br><b>Could not create %0</b><br><br> \
+                         Please make sure you have the right permissions \
+                         and try again.<br>").arg(userPath));
+            return false;
         }
     }
 
@@ -495,15 +493,11 @@ bool Launcher::MainDialog::writeSettings()
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
         // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-                          msgBox.exec();
-                       return false;
+        cfgError(tr("Error writing OpenMW configuration file"),
+                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>").arg(file.fileName()));
+        return false;
     }
 
 
@@ -511,44 +505,30 @@ bool Launcher::MainDialog::writeSettings()
     file.close();
 
     // Graphics settings
-    file.setFileName(userPath + QString("settings.cfg"));
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
-        // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing OpenMW configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-                          msgBox.exec();
-                       return false;
+    const std::string settingsPath = (mCfgMgr.getUserConfigPath() / "settings.cfg").string();
+    try {
+        mEngineSettings.saveUser(settingsPath);
     }
-
-    QTextStream stream(&file);
-    stream.setDevice(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
-
-    mGraphicsSettings.writeFile(stream);
-    file.close();
+    catch (std::exception& e) {
+        std::string msg = "<br><b>Error writing settings.cfg</b><br><br>" +
+            settingsPath + "<br><br>" + e.what();
+        cfgError(tr("Error writing user settings file"), tr(msg.c_str()));
+        return false;
+    }
 
     // Launcher settings
     file.setFileName(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         // File cannot be opened or created
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Error writing Launcher configuration file"));
-        msgBox.setIcon(QMessageBox::Critical);
-        msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>Could not open or create %0 for writing</b><br><br> \
-                          Please make sure you have the right permissions \
-                          and try again.<br>").arg(file.fileName()));
-                          msgBox.exec();
-                       return false;
+        cfgError(tr("Error writing Launcher configuration file"),
+                 tr("<br><b>Could not open or create %0 for writing</b><br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>").arg(file.fileName()));
+        return false;
     }
 
+    QTextStream stream(&file);
     stream.setDevice(&file);
     stream.setCodec(QTextCodec::codecForName("UTF-8"));
 

@@ -6,23 +6,11 @@ extern "C"
 
     #include <libavcodec/avcodec.h>
 
-    #ifdef HAVE_LIBSWRESAMPLE
     #include <libswresample/swresample.h>
-    #else
-    // FIXME: remove this section once libswresample is packaged for Debian
-    #include <libavresample/avresample.h>
-    #include <libavutil/opt.h>
-    #define SwrContext AVAudioResampleContext
-    int  swr_init(AVAudioResampleContext *avr);
-    void  swr_free(AVAudioResampleContext **avr);
-    int swr_convert( AVAudioResampleContext *avr, uint8_t** output, int out_samples, const uint8_t** input, int in_samples);
-    AVAudioResampleContext * swr_alloc_set_opts( AVAudioResampleContext *avr, int64_t out_ch_layout, AVSampleFormat out_fmt, int out_rate, int64_t in_ch_layout, AVSampleFormat in_fmt, int in_rate, int o, void* l);
-    #endif
 
     #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(55,28,1)
     #define av_frame_alloc  avcodec_alloc_frame
     #endif
-
 
 }
 

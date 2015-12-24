@@ -12,9 +12,9 @@ namespace SceneUtil
     ///     DYNAMIC data variance but that would undo all the benefits of the threading model - having the cull and draw
     ///     traversals run in parallel can yield up to 200% framerates.
     /// @par Race conditions are prevented using a "double buffering" scheme - we have two StateSets that take turns,
-    ///     the first StateSet is the one we can write to, the second is the one currently in use by the draw traversal of the last frame.
-    ///     After a frame is completed the places are swapped.
+    ///     one StateSet we can write to, the second one is currently in use by the draw traversal of the last frame.
     /// @par Must be set as UpdateCallback on a Node.
+    /// @note Do not add the same StateSetUpdater to multiple nodes.
     /// @note Do not add multiple StateSetControllers on the same Node as they will conflict - instead use the CompositeStateSetUpdater.
     class StateSetUpdater : public osg::NodeCallback
     {

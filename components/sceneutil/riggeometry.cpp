@@ -2,9 +2,9 @@
 
 #include <stdexcept>
 #include <iostream>
-
 #include <cstdlib>
 
+#include <osg/Version>
 #include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
@@ -58,6 +58,14 @@ public:
     }
 };
 
+// We can't compute the bounds without a NodeVisitor, since we need the current geomToSkelMatrix.
+// So we return nothing. Bounds are updated every frame in the UpdateCallback.
+class DummyComputeBoundCallback : public osg::Drawable::ComputeBoundingBoxCallback
+{
+public:
+    virtual osg::BoundingBox computeBound(const osg::Drawable&) const  { return osg::BoundingBox(); }
+};
+
 RigGeometry::RigGeometry()
     : mSkeleton(NULL)
     , mLastFrameNumber(0)
@@ -66,6 +74,7 @@ RigGeometry::RigGeometry()
     setCullCallback(new UpdateRigGeometry);
     setUpdateCallback(new UpdateRigBounds);
     setSupportsDisplayList(false);
+    setComputeBoundingBoxCallback(new DummyComputeBoundCallback);
 }
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
@@ -73,7 +82,7 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mSkeleton(NULL)
     , mInfluenceMap(copy.mInfluenceMap)
     , mLastFrameNumber(0)
-    , mBoundsFirstFrame(copy.mBoundsFirstFrame)
+    , mBoundsFirstFrame(true)
 {
     setSourceGeometry(copy.mSourceGeometry);
 }
@@ -176,7 +185,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
     return true;
 }
 
-void accummulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
+void accumulateMatrix(const osg::Matrixf& invBindMatrix, const osg::Matrixf& matrix, float weight, osg::Matrixf& result)
 {
     osg::Matrixf m = invBindMatrix * matrix;
     float* ptr = m.ptr();
@@ -202,6 +211,8 @@ void RigGeometry::update(osg::NodeVisitor* nv)
 {
     if (!mSkeleton)
     {
+        std::cerr << "RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor" << std::endl;
+        // try to recover anyway, though rendering is likely to be incorrect.
         if (!initFromParentSkeleton(nv))
             return;
     }
@@ -209,13 +220,11 @@ void RigGeometry::update(osg::NodeVisitor* nv)
     if (!mSkeleton->getActive() && mLastFrameNumber != 0)
         return;
 
-    if (mLastFrameNumber == nv->getFrameStamp()->getFrameNumber())
+    if (mLastFrameNumber == nv->getTraversalNumber())
         return;
-    mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+    mLastFrameNumber = nv->getTraversalNumber();
 
     mSkeleton->updateBoneMatrices(nv);
-
-    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
 
     // skinning
     osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -237,9 +246,9 @@ void RigGeometry::update(osg::NodeVisitor* nv)
             const osg::Matrix& invBindMatrix = weightIt->first.second;
             float weight = weightIt->second;
             const osg::Matrixf& boneMatrix = bone->mMatrixInSkeletonSpace;
-            accummulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
+            accumulateMatrix(invBindMatrix, boneMatrix, weight, resultMat);
         }
-        resultMat = resultMat * geomToSkel;
+        resultMat = resultMat * mGeomToSkelMatrix;
 
         for (std::vector<unsigned short>::const_iterator vertexIt = it->second.begin(); vertexIt != it->second.end(); ++vertexIt)
         {
@@ -267,24 +276,31 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
 
     mSkeleton->updateBoneMatrices(nv);
 
-    osg::Matrixf geomToSkel = getGeomToSkelMatrix(nv);
+    updateGeomToSkelMatrix(nv);
+
     osg::BoundingBox box;
     for (BoneSphereMap::const_iterator it = mBoneSphereMap.begin(); it != mBoneSphereMap.end(); ++it)
     {
         Bone* bone = it->first;
         osg::BoundingSpheref bs = it->second;
-        transformBoundingSphere(bone->mMatrixInSkeletonSpace * geomToSkel, bs);
+        transformBoundingSphere(bone->mMatrixInSkeletonSpace * mGeomToSkelMatrix, bs);
         box.expandBy(bs);
     }
 
     _boundingBox = box;
+    _boundingBoxComputed = true;
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+    // in OSG 3.3.3 and up Drawable inherits from Node, so has a bounding sphere as well.
+    _boundingSphere = osg::BoundingSphere(_boundingBox);
+    _boundingSphereComputed = true;
+#endif
     for (unsigned int i=0; i<getNumParents(); ++i)
         getParent(i)->dirtyBound();
 }
 
-osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
+void RigGeometry::updateGeomToSkelMatrix(osg::NodeVisitor *nv)
 {
-    osg::NodePath path;
+    mSkelToGeomPath.clear();
     bool foundSkel = false;
     for (osg::NodePath::const_iterator it = nv->getNodePath().begin(); it != nv->getNodePath().end(); ++it)
     {
@@ -294,10 +310,9 @@ osg::Matrixf RigGeometry::getGeomToSkelMatrix(osg::NodeVisitor *nv)
                 foundSkel = true;
         }
         else
-            path.push_back(*it);
+            mSkelToGeomPath.push_back(*it);
     }
-    return osg::computeWorldToLocal(path);
-
+    mGeomToSkelMatrix = osg::computeWorldToLocal(mSkelToGeomPath);
 }
 
 void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)

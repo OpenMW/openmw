@@ -11,10 +11,6 @@
 
 namespace MWClass
 {
-    std::string Static::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Static>()->mBase->mId;
-    }
 
     void Static::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -29,11 +25,9 @@ namespace MWClass
             physics.addObject(ptr, model);
     }
 
-    std::string Static::getModel(const MWWorld::Ptr &ptr) const
+    std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Static> *ref =
-            ptr.get<ESM::Static>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -42,7 +36,7 @@ namespace MWClass
         return "";
     }
 
-    std::string Static::getName (const MWWorld::Ptr& ptr) const
+    std::string Static::getName (const MWWorld::ConstPtr& ptr) const
     {
         return "";
     }
@@ -54,12 +48,10 @@ namespace MWClass
         registerClass (typeid (ESM::Static).name(), instance);
     }
 
-    MWWorld::Ptr
-    Static::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Static::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Static> *ref =
-            ptr.get<ESM::Static>();
+        const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Static>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 }

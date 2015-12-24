@@ -58,7 +58,7 @@ struct ConfigurationManager
         typedef std::tr1::unordered_map<std::string, path_type_f> TokensMappingContainer;
     #endif
 
-        void loadConfig(const boost::filesystem::path& path,
+        bool loadConfig(const boost::filesystem::path& path,
             boost::program_options::variables_map& variables,
             boost::program_options::options_description& description);
 

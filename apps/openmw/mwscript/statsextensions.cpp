@@ -32,7 +32,7 @@
 
 namespace
 {
-    std::string getDialogueActorFaction(MWWorld::Ptr actor)
+    std::string getDialogueActorFaction(MWWorld::ConstPtr actor)
     {
         std::string factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
@@ -530,7 +530,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -543,7 +543,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -562,7 +562,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -575,7 +575,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -601,7 +601,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -614,7 +614,7 @@ namespace MWScript
                         factionID = runtime.getStringLiteral (runtime[0].mInteger);
                         runtime.pop();
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -633,7 +633,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0)
@@ -645,7 +645,7 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     // Make sure this faction exists
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
 
@@ -739,7 +739,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionId;
 
@@ -756,7 +756,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     runtime.push (
@@ -771,7 +771,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
@@ -791,7 +791,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId, value);
@@ -805,7 +805,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
@@ -825,7 +825,7 @@ namespace MWScript
                     if (factionId.empty())
                         throw std::runtime_error ("failed to determine faction");
 
-                    ::Misc::StringUtils::toLower (factionId);
+                    ::Misc::StringUtils::lowerCaseInPlace (factionId);
 
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     player.getClass().getNpcStats (player).setFactionReputation (factionId,
@@ -867,14 +867,14 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
+                    MWWorld::ConstPtr ptr = R()(runtime);
 
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
-                    ::Misc::StringUtils::toLower(race);
+                    ::Misc::StringUtils::lowerCaseInPlace(race);
                     runtime.pop();
 
                     std::string npcRace = ptr.get<ESM::NPC>()->mBase->mRace;
-                    ::Misc::StringUtils::toLower(npcRace);
+                    ::Misc::StringUtils::lowerCaseInPlace(npcRace);
 
                     runtime.push (npcRace == race);
             }
@@ -899,7 +899,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -911,7 +911,7 @@ namespace MWScript
                     {
                         factionID = ptr.getClass().getPrimaryFaction(ptr);
                     }
-                    ::Misc::StringUtils::toLower(factionID);
+                    ::Misc::StringUtils::lowerCaseInPlace(factionID);
                     MWWorld::Ptr player = MWMechanics::getPlayer();
                     if(factionID!="")
                     {
@@ -931,7 +931,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -958,7 +958,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -1127,6 +1127,7 @@ namespace MWScript
                     {
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
                         // resets runtime state such as inventory, stats and AI. does not reset position in the world
+                        MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                         ptr.getRefData().setCustomData(NULL);
                     }
                 }

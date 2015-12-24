@@ -71,6 +71,21 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_CoinValue, ColumnBase::Display_Integer));
     inventoryColumns.mValue = &mColumns.back();
 
+    IngredientColumns ingredientColumns (inventoryColumns);
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,
+        ColumnBase::Display_NestedHeader, ColumnBase::Flag_Dialogue));
+    ingredientColumns.mEffects = &mColumns.back();
+    std::map<UniversalId::Type, NestedRefIdAdapterBase*> ingredientEffectsMap;
+    ingredientEffectsMap.insert(std::make_pair(UniversalId::Type_Ingredient,
+        new IngredEffectRefIdAdapter ()));
+    mNestedAdapters.push_back (std::make_pair(&mColumns.back(), ingredientEffectsMap));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_IngredEffectId));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
+    mColumns.back().addColumn(
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
+
     // nested table
     PotionColumns potionColumns (inventoryColumns);
     mColumns.push_back (RefIdColumn (Columns::ColumnId_EffectList,
@@ -83,9 +98,9 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectId, ColumnBase::Display_EffectId));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_SkillId));
+        new NestedChildColumn (Columns::ColumnId_Skill, ColumnBase::Display_EffectSkill));
     mColumns.back().addColumn(
-        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_Attribute));
+        new NestedChildColumn (Columns::ColumnId_Attribute, ColumnBase::Display_EffectAttribute));
     mColumns.back().addColumn(
         new NestedChildColumn (Columns::ColumnId_EffectRange, ColumnBase::Display_EffectRange));
     mColumns.back().addColumn(
@@ -651,7 +666,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mAdapters.insert (std::make_pair (UniversalId::Type_Door,
         new DoorRefIdAdapter (nameColumns, openSound, closeSound)));
     mAdapters.insert (std::make_pair (UniversalId::Type_Ingredient,
-        new InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, inventoryColumns)));
+        new IngredientRefIdAdapter (ingredientColumns)));
     mAdapters.insert (std::make_pair (UniversalId::Type_CreatureLevelledList,
         new LevelledListRefIdAdapter<ESM::CreatureLevList> (
         UniversalId::Type_CreatureLevelledList, levListColumns)));
@@ -822,61 +837,7 @@ const CSMWorld::RecordBase& CSMWorld::RefIdCollection::getRecord (int index) con
 
 void CSMWorld::RefIdCollection::load (ESM::ESMReader& reader, bool base, UniversalId::Type type)
 {
-    std::string id = reader.getHNOString ("NAME");
-
-    int index = searchId (id);
-
-    if (reader.isNextSub ("DELE"))
-    {
-        reader.skipRecord();
-
-        if (index==-1)
-        {
-            // deleting a record that does not exist
-
-            // ignore it for now
-
-            /// \todo report the problem to the user
-        }
-        else if (base)
-        {
-            mData.erase (index, 1);
-        }
-        else
-        {
-            mData.getRecord (mData.globalToLocalIndex (index)).mState = RecordBase::State_Deleted;
-        }
-    }
-    else
-    {
-        if (index==-1)
-        {
-            // new record
-            int index = mData.getAppendIndex (type);
-            mData.appendRecord (type, id, base);
-
-            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
-
-            mData.load (localIndex, reader, base);
-
-            mData.getRecord (localIndex).mState =
-                base ? RecordBase::State_BaseOnly : RecordBase::State_ModifiedOnly;
-        }
-        else
-        {
-            // old record
-            RefIdData::LocalIndex localIndex = mData.globalToLocalIndex (index);
-
-            if (!base)
-                if (mData.getRecord (localIndex).mState==RecordBase::State_Erased)
-                    throw std::logic_error ("attempt to access a deleted record");
-
-            mData.load (localIndex, reader, base);
-
-            if (!base)
-                mData.getRecord (localIndex).mState = RecordBase::State_Modified;
-        }
-    }
+    mData.load(reader, base, type);
 }
 
 int CSMWorld::RefIdCollection::getAppendIndex (const std::string& id, UniversalId::Type type) const

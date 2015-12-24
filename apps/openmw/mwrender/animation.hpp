@@ -24,6 +24,7 @@ namespace NifOsg
 namespace SceneUtil
 {
     class LightSource;
+    class Skeleton;
 }
 
 namespace MWRender
@@ -61,6 +62,9 @@ public:
 
 private:
     osg::ref_ptr<osg::Node> mNode;
+
+    void operator= (const PartHolder&);
+    PartHolder(const PartHolder&);
 };
 typedef boost::shared_ptr<PartHolder> PartHolderPtr;
 
@@ -204,7 +208,8 @@ protected:
 
     osg::ref_ptr<osg::Group> mInsert;
 
-    osg::ref_ptr<osg::Node> mObjectRoot;
+    osg::ref_ptr<osg::Group> mObjectRoot;
+    SceneUtil::Skeleton* mSkeleton;
 
     // The node expected to accumulate movement during movement animations.
     osg::ref_ptr<osg::Node> mAccumRoot;
@@ -439,6 +444,7 @@ public:
     virtual void setHeadYaw(float yawRadians);
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
+    virtual void setAccurateAiming(bool enabled) {}
 
 private:
     Animation(const Animation&);

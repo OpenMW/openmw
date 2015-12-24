@@ -347,7 +347,7 @@ namespace MWMechanics
         osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
 
         osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
-        float distToTarget = (vTargetPos - vActorPos).length();
+        float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
         
         osg::Vec3f& lastActorPos = storage.mLastActorPos;
         bool& followTarget = storage.mFollowTarget;

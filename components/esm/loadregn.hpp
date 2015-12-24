@@ -45,14 +45,14 @@ struct Region
     WEATstruct mData;
     int mMapColor; // RGBA
 
-    // sleepList refers to a eveled list of creatures you can meet if
+    // sleepList refers to a leveled list of creatures you can meet if
     // you sleep outside in this region.
     std::string mId, mName, mSleepList;
 
     std::vector<SoundRef> mSoundList;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID/index).

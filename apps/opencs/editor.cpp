@@ -18,7 +18,7 @@
 #endif
 
 CS::Editor::Editor ()
-: mUserSettings (mCfgMgr), mDocumentManager (mCfgMgr),
+: mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
   mViewManager (mDocumentManager), mPid(""),
   mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(NULL), mClientSocket(NULL)
@@ -26,9 +26,6 @@ CS::Editor::Editor ()
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     setupDataFiles (config.first);
-
-    CSMSettings::UserSettings::instance().loadSettings ("opencs.ini");
-    mSettings.setModel (CSMSettings::UserSettings::instance());
 
     NifOsg::Loader::setShowMarkers(true);
 

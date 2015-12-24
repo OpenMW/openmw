@@ -19,7 +19,9 @@ void CSMWorld::ResourcesManager::setVFS(const VFS::Manager *vfs)
     mVFS = vfs;
     mResources.clear();
 
-    static const char * const sMeshTypes[] = { "nif", 0 };
+    // maybe we could go over the osgDB::Registry to list all supported node formats
+
+    static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", 0 };
 
     addResources (Resources (vfs, "meshes", UniversalId::Type_Mesh, sMeshTypes));
     addResources (Resources (vfs, "icons", UniversalId::Type_Icon));

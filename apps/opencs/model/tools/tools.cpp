@@ -53,11 +53,6 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
     {
         mVerifierOperation = new CSMDoc::Operation (CSMDoc::State_Verifying, false);
 
-        std::vector<QString> settings;
-        settings.push_back ("script-editor/warnings");
-
-        mVerifierOperation->configureSettings (settings);
-
         connect (&mVerifier, SIGNAL (progress (int, int, int)), this, SIGNAL (progress (int, int, int)));
         connect (&mVerifier, SIGNAL (done (int, bool)), this, SIGNAL (done (int, bool)));
         connect (&mVerifier, SIGNAL (reportMessage (const CSMDoc::Message&, int)),

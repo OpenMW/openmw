@@ -1,6 +1,7 @@
 #include "clone.hpp"
 
 #include <osg/StateSet>
+#include <osg/Version>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
@@ -53,6 +54,7 @@ namespace SceneUtil
             osg::CopyOp copyop = *this;
             copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_ARRAYS);
 
+#if OSG_VERSION_LESS_THAN(3,5,0)
             /*
 
             Deep copy of primitives required to work around the following (bad?) code in osg::Geometry copy constructor:
@@ -71,12 +73,12 @@ namespace SceneUtil
             In case of DEEP_COPY_PRIMITIVES=Off, DEEP_COPY_ARRAYS=On, the above code makes a modification to the original const Geometry& we copied from,
             causing problems if we relied on the original Geometry to remain static such as when it was added to an osgUtil::IncrementalCompileOperation.
 
-            Possible fix submitted to osg-submissions ( http://forum.openscenegraph.org/viewtopic.php?t=15217 ).
+            Fixed in OSG 3.5 ( http://forum.openscenegraph.org/viewtopic.php?t=15217 ).
 
             */
 
             copyop.setCopyFlags(copyop.getCopyFlags()|osg::CopyOp::DEEP_COPY_PRIMITIVES);
-
+#endif
 
             osg::Drawable* cloned = osg::clone(drawable, copyop);
             if (cloned->getUpdateCallback())

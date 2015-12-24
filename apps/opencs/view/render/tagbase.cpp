@@ -7,3 +7,8 @@ CSVRender::Elements CSVRender::TagBase::getElement() const
 {
     return mElement;
 }
+
+QString CSVRender::TagBase::getToolTip (bool hideBasics) const
+{
+    return "";
+}

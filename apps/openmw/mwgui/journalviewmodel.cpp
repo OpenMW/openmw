@@ -29,8 +29,6 @@ struct JournalViewModelImpl : JournalViewModel
     mutable bool             mKeywordSearchLoaded;
     mutable KeywordSearchT mKeywordSearch;
 
-    std::locale mLocale;
-
     JournalViewModelImpl ()
     {
         mKeywordSearchLoaded = false;
@@ -73,8 +71,6 @@ struct JournalViewModelImpl : JournalViewModel
             mKeywordSearchLoaded = true;
         }
     }
-
-    wchar_t tolower (wchar_t ch) const { return std::tolower (ch, mLocale); }
 
     bool isEmpty () const
     {
@@ -319,7 +315,7 @@ struct JournalViewModelImpl : JournalViewModel
 
         for (MWBase::Journal::TTopicIter i = journal->topicBegin (); i != journal->topicEnd (); ++i)
         {
-            if (i->first [0] != std::tolower (character, mLocale))
+            if (i->first [0] != Misc::StringUtils::toLower(character))
                 continue;
 
             visitor (i->second.getName());

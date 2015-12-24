@@ -1,8 +1,8 @@
 #include "combat.hpp"
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/misc/rng.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"

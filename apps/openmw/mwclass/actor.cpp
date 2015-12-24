@@ -61,11 +61,6 @@ namespace MWClass
         }
     }
 
-    bool Actor::hasToolTip(const MWWorld::Ptr& ptr) const
-    {
-        return !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat() || getCreatureStats(ptr).isDead();
-    }
-
     osg::Vec3f Actor::getRotationVector(const MWWorld::Ptr& ptr) const
     {
         MWMechanics::Movement &movement = getMovementSettings(ptr);

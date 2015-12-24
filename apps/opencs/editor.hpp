@@ -17,15 +17,16 @@
 
 #include <components/files/multidircollection.hpp>
 
-#include "model/settings/usersettings.hpp"
 #include "model/doc/documentmanager.hpp"
+
+#include "model/prefs/state.hpp"
 
 #include "view/doc/viewmanager.hpp"
 #include "view/doc/startup.hpp"
 #include "view/doc/filedialog.hpp"
 #include "view/doc/newgame.hpp"
 
-#include "view/settings/dialog.hpp"
+#include "view/prefs/dialogue.hpp"
 
 #include "view/tools/merge.hpp"
 
@@ -49,12 +50,12 @@ namespace CS
             std::auto_ptr<VFS::Manager> mVFS;
 
             Files::ConfigurationManager mCfgMgr;
-            CSMSettings::UserSettings mUserSettings;
+            CSMPrefs::State mSettingsState;
             CSMDoc::DocumentManager mDocumentManager;
             CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
             CSVDoc::NewGameDialogue mNewGame;
-            CSVSettings::Dialog mSettings;
+            CSVPrefs::Dialogue mSettings;
             CSVDoc::FileDialog mFileDialog;
             boost::filesystem::path mLocal;
             boost::filesystem::path mResources;

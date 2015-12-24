@@ -20,7 +20,7 @@ namespace MWRender
             MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
             for (; it != esmStore.get<ESM::Land>().end(); ++it)
             {
-                ESM::Land* land = const_cast<ESM::Land*>(&*it); // TODO: fix store interface
+                const ESM::Land* land = &*it;
                 land->loadData(ESM::Land::DATA_VCLR|ESM::Land::DATA_VHGT|ESM::Land::DATA_VNML|ESM::Land::DATA_VTEX);
             }
         }
@@ -69,7 +69,7 @@ namespace MWRender
     {
         const MWWorld::ESMStore &esmStore =
             MWBase::Environment::get().getWorld()->getStore();
-        return esmStore.get<ESM::LandTexture>().find(index, plugin);
+        return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }
 
 }

@@ -106,8 +106,8 @@ struct Land
         static void transposeTextureData(const uint16_t *in, uint16_t *out);
     };
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank() {}
 

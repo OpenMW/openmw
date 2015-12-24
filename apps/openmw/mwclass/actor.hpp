@@ -28,9 +28,6 @@ namespace MWClass
 
         virtual void block(const MWWorld::Ptr &ptr) const;
 
-        virtual bool hasToolTip(const MWWorld::Ptr& ptr) const;
-        ///< @return true if this object has a tooltip when focused (default implementation: false)
-
         virtual osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const;
         ///< Return desired rotations, as euler angles.
 

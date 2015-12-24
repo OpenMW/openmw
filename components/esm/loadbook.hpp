@@ -28,8 +28,8 @@ struct Book
     std::string mName, mModel, mIcon, mScript, mEnchant, mText;
     std::string mId;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

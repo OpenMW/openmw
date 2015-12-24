@@ -394,7 +394,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        writer.writeHNString("NAME", "player");
+        context.mPlayerBase.mId = "player";
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

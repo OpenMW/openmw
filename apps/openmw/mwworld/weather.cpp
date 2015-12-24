@@ -31,47 +31,104 @@ namespace
 {
     static const int invalidWeatherID = -1;
 
+    // linear interpolate between x and y based on factor.
     float lerp (float x, float y, float factor)
     {
         return x * (1-factor) + y * factor;
     }
-
+    // linear interpolate between x and y based on factor.
     osg::Vec4f lerp (const osg::Vec4f& x, const osg::Vec4f& y, float factor)
     {
         return x * (1-factor) + y * factor;
     }
 }
 
+template <typename T>
+T TimeOfDayInterpolator<T>::getValue(const float gameHour, const TimeOfDaySettings& timeSettings) const
+{
+    // TODO: use pre/post sunset/sunrise time values in [Weather] section
+
+    // night
+    if (gameHour <= timeSettings.mNightEnd || gameHour >= timeSettings.mNightStart + 1)
+        return mNightValue;
+    // sunrise
+    else if (gameHour >= timeSettings.mNightEnd && gameHour <= timeSettings.mDayStart + 1)
+    {
+        if (gameHour <= timeSettings.mSunriseTime)
+        {
+            // fade in
+            float advance = timeSettings.mSunriseTime - gameHour;
+            float factor = advance / 0.5f;
+            return lerp(mSunriseValue, mNightValue, factor);
+        }
+        else
+        {
+            // fade out
+            float advance = gameHour - timeSettings.mSunriseTime;
+            float factor = advance / 3.f;
+            return lerp(mSunriseValue, mDayValue, factor);
+        }
+    }
+    // day
+    else if (gameHour >= timeSettings.mDayStart + 1 && gameHour <= timeSettings.mDayEnd - 1)
+        return mDayValue;
+    // sunset
+    else if (gameHour >= timeSettings.mDayEnd - 1 && gameHour <= timeSettings.mNightStart + 1)
+    {
+        if (gameHour <= timeSettings.mDayEnd + 1)
+        {
+            // fade in
+            float advance = (timeSettings.mDayEnd + 1) - gameHour;
+            float factor = (advance / 2);
+            return lerp(mSunsetValue, mDayValue, factor);
+        }
+        else
+        {
+            // fade out
+            float advance = gameHour - (timeSettings.mDayEnd + 1);
+            float factor = advance / 2.f;
+            return lerp(mSunsetValue, mNightValue, factor);
+        }
+    }
+    // shut up compiler
+    return T();
+}
+
+
+
+template class TimeOfDayInterpolator<float>;
+template class TimeOfDayInterpolator<osg::Vec4f>;
+
 Weather::Weather(const std::string& name,
                  const MWWorld::Fallback& fallback,
                  float stormWindSpeed,
                  float rainSpeed,
-                 const std::string& ambientLoopSoundID,
                  const std::string& particleEffect)
     : mCloudTexture(fallback.getFallbackString("Weather_" + name + "_Cloud_Texture"))
-    , mSkySunriseColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"))
-    , mSkyDayColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Day_Color"))
-    , mSkySunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Sunset_Color"))
-    , mSkyNightColor(fallback.getFallbackColour("Weather_" + name + "_Sky_Night_Color"))
-    , mFogSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunrise_Color"))
-    , mFogDayColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Day_Color"))
-    , mFogSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunset_Color"))
-    , mFogNightColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Night_Color"))
-    , mAmbientSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunrise_Color"))
-    , mAmbientDayColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Day_Color"))
-    , mAmbientSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunset_Color"))
-    , mAmbientNightColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Night_Color"))
-    , mSunSunriseColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunrise_Color"))
-    , mSunDayColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Day_Color"))
-    , mSunSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunset_Color"))
-    , mSunNightColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Night_Color"))
-    , mLandFogDayDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"))
-    , mLandFogNightDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
+    , mSkyColor(fallback.getFallbackColour("Weather_" + name +"_Sky_Sunrise_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sky_Day_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sky_Sunset_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sky_Night_Color"))
+    , mFogColor(fallback.getFallbackColour("Weather_" + name + "_Fog_Sunrise_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Fog_Day_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Fog_Sunset_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Fog_Night_Color"))
+    , mAmbientColor(fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunrise_Color"),
+                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Day_Color"),
+                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Sunset_Color"),
+                    fallback.getFallbackColour("Weather_" + name + "_Ambient_Night_Color"))
+    , mSunColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Sunrise_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sun_Day_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sun_Sunset_Color"),
+                fallback.getFallbackColour("Weather_" + name + "_Sun_Night_Color"))
+    , mLandFogDepth(fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Day_Depth"),
+                    fallback.getFallbackFloat("Weather_" + name + "_Land_Fog_Night_Depth"))
     , mSunDiscSunsetColor(fallback.getFallbackColour("Weather_" + name + "_Sun_Disc_Sunset_Color"))
     , mWindSpeed(fallback.getFallbackFloat("Weather_" + name + "_Wind_Speed"))
     , mCloudSpeed(fallback.getFallbackFloat("Weather_" + name + "_Cloud_Speed"))
     , mGlareView(fallback.getFallbackFloat("Weather_" + name + "_Glare_View"))
-    , mAmbientLoopSoundID(ambientLoopSoundID)
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
     , mRainFrequency(fallback.getFallbackFloat("Weather_" + name + "_Rain_Entrance_Speed"))
@@ -89,6 +146,21 @@ Weather::Weather(const std::string& name,
     mThunderSoundID[1] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_1");
     mThunderSoundID[2] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_2");
     mThunderSoundID[3] = fallback.getFallbackString("Weather_" + name + "_Thunder_Sound_ID_3");
+
+    // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both sounds at the same time.
+
+    if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing Using_Precip has no effect
+    {
+        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Rain_Loop_Sound_ID");
+        if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
+            mAmbientLoopSoundID = "rain";
+    }
+    else
+        mAmbientLoopSoundID = fallback.getFallbackString("Weather_" + name + "_Ambient_Loop_Sound_ID");
+
+    if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
+        mAmbientLoopSoundID.clear();
+
     /*
     Unhandled:
     Rain Diameter=600 ?
@@ -432,12 +504,13 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mSunriseDuration(fallback.getFallbackFloat("Weather_Sunrise_Duration"))
     , mSunsetDuration(fallback.getFallbackFloat("Weather_Sunset_Duration"))
     , mSunPreSunsetTime(fallback.getFallbackFloat("Weather_Sun_Pre-Sunset_Time"))
-    , mNightStart(mSunsetTime + mSunsetDuration)
-    , mNightEnd(mSunriseTime - 0.5f)
-    , mDayStart(mSunriseTime + mSunriseDuration)
-    , mDayEnd(mSunsetTime)
+    , mNightFade(0, 0, 0, 1)
     , mHoursBetweenWeatherChanges(fallback.getFallbackFloat("Weather_Hours_Between_Weather_Changes"))
     , mRainSpeed(fallback.getFallbackFloat("Weather_Precip_Gravity"))
+    , mUnderwaterFog(fallback.getFallbackFloat("Water_UnderwaterSunriseFog"),
+                    fallback.getFallbackFloat("Water_UnderwaterDayFog"),
+                    fallback.getFallbackFloat("Water_UnderwaterSunsetFog"),
+                    fallback.getFallbackFloat("Water_UnderwaterNightFog"))
     , mWeatherSettings()
     , mMasser("Masser", fallback)
     , mSecunda("Secunda", fallback)
@@ -457,17 +530,23 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWo
     , mAmbientSound()
     , mPlayingSoundID()
 {
+    mTimeSettings.mNightStart = mSunsetTime + mSunsetDuration;
+    mTimeSettings.mNightEnd = mSunriseTime - 0.5f;
+    mTimeSettings.mDayStart = mSunriseTime + mSunriseDuration;
+    mTimeSettings.mDayEnd = mSunsetTime;
+    mTimeSettings.mSunriseTime = mSunriseTime;
+
     mWeatherSettings.reserve(10);
     addWeather("Clear", fallback); // 0
     addWeather("Cloudy", fallback); // 1
     addWeather("Foggy", fallback); // 2
     addWeather("Overcast", fallback); // 3
-    addWeather("Rain", fallback, "rain"); // 4
-    addWeather("Thunderstorm", fallback, "rain heavy"); // 5
-    addWeather("Ashstorm", fallback, "ashstorm", "meshes\\ashcloud.nif"); // 6
-    addWeather("Blight", fallback, "blight", "meshes\\blightcloud.nif"); // 7
-    addWeather("Snow", fallback, "", "meshes\\snow.nif"); // 8
-    addWeather("Blizzard", fallback, "BM Blizzard", "meshes\\blizzard.nif"); // 9
+    addWeather("Rain", fallback); // 4
+    addWeather("Thunderstorm", fallback); // 5
+    addWeather("Ashstorm", fallback, "meshes\\ashcloud.nif"); // 6
+    addWeather("Blight", fallback, "meshes\\blightcloud.nif"); // 7
+    addWeather("Snow", fallback, "meshes\\snow.nif"); // 8
+    addWeather("Blizzard", fallback, "meshes\\blizzard.nif"); // 9
 
     Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
     for(; it != store.get<ESM::Region>().end(); ++it)
@@ -544,11 +623,11 @@ void WeatherManager::playerTeleported()
 
 void WeatherManager::update(float duration, bool paused)
 {
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     MWBase::World& world = *MWBase::Environment::get().getWorld();
     TimeStamp time = world.getTimeStamp();
 
-    if(!paused)
+    if(!paused || mFastForward)
     {
         // Add new transitions when either the player's current external region changes.
         std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
@@ -589,7 +668,7 @@ void WeatherManager::update(float duration, bool paused)
     }
 
     // disable sun during night
-    if (time.getHour() >= mNightStart || time.getHour() <= mSunriseTime)
+    if (time.getHour() >= mTimeSettings.mNightStart || time.getHour() <= mSunriseTime)
         mRendering.getSkyManager()->sunDisable();
     else
         mRendering.getSkyManager()->sunEnable();
@@ -600,10 +679,10 @@ void WeatherManager::update(float duration, bool paused)
     {
         // Shift times into a 24-hour window beginning at mSunriseTime...
         float adjustedHour = time.getHour();
-        float adjustedNightStart = mNightStart;
+        float adjustedNightStart = mTimeSettings.mNightStart;
         if ( time.getHour() < mSunriseTime )
             adjustedHour += 24.f;
-        if ( mNightStart < mSunriseTime )
+        if ( mTimeSettings.mNightStart < mSunriseTime )
             adjustedNightStart += 24.f;
 
         const bool is_night = adjustedHour >= adjustedNightStart;
@@ -614,7 +693,7 @@ void WeatherManager::update(float duration, bool paused)
         if ( !is_night ) {
             theta = M_PI * (adjustedHour - mSunriseTime) / dayDuration;
         } else {
-            theta = M_PI * (adjustedHour - adjustedNightStart) / nightDuration;
+            theta = M_PI * (1.f - (adjustedHour - adjustedNightStart) / nightDuration);
         }
 
         osg::Vec3f final(
@@ -623,6 +702,8 @@ void WeatherManager::update(float duration, bool paused)
             static_cast<float>(sin(theta)));
         mRendering.setSunDirection( final * -1 );
     }
+
+    float underwaterFog = mUnderwaterFog.getValue(time.getHour(), mTimeSettings);
 
     float peakHour = mSunriseTime + (mSunsetTime - mSunriseTime) / 2;
     if (time.getHour() < mSunriseTime || time.getHour() > mSunsetTime)
@@ -635,7 +716,7 @@ void WeatherManager::update(float duration, bool paused)
     mRendering.getSkyManager()->setMasserState(mMasser.calculateState(time));
     mRendering.getSkyManager()->setSecundaState(mSecunda.calculateState(time));
 
-    mRendering.configureFog(mResult.mFogDepth, mResult.mFogColor);
+    mRendering.configureFog(mResult.mFogDepth, underwaterFog, mResult.mFogColor);
     mRendering.setAmbientColour(mResult.mAmbientColor);
     mRendering.setSunColour(mResult.mSunColor);
 
@@ -657,11 +738,9 @@ void WeatherManager::update(float duration, bool paused)
 void WeatherManager::stopSounds()
 {
     if (mAmbientSound.get())
-    {
         MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
-        mAmbientSound.reset();
-        mPlayingSoundID.clear();
-    }
+    mAmbientSound.reset();
+    mPlayingSoundID.clear();
 }
 
 float WeatherManager::getWindSpeed() const
@@ -697,7 +776,7 @@ bool WeatherManager::isDark() const
     TimeStamp time = MWBase::Environment::get().getWorld()->getTimeStamp();
     bool exterior = (MWBase::Environment::get().getWorld()->isCellExterior()
                      || MWBase::Environment::get().getWorld()->isCellQuasiExterior());
-    return exterior && (time.getHour() < mSunriseTime || time.getHour() > mNightStart - 1);
+    return exterior && (time.getHour() < mSunriseTime || time.getHour() > mTimeSettings.mNightStart - 1);
 }
 
 void WeatherManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
@@ -784,12 +863,11 @@ void WeatherManager::clear()
 
 inline void WeatherManager::addWeather(const std::string& name,
                                        const MWWorld::Fallback& fallback,
-                                       const std::string& ambientLoopSoundID,
                                        const std::string& particleEffect)
 {
     static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();
 
-    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, ambientLoopSoundID, particleEffect);
+    Weather weather(name, fallback, fStromWindSpeed, mRainSpeed, particleEffect);
 
     mWeatherSettings.push_back(weather);
 }
@@ -807,7 +885,7 @@ inline void WeatherManager::importRegions()
 inline void WeatherManager::regionalWeatherChanged(const std::string& regionID, RegionWeather& region)
 {
     // If the region is current, then add a weather transition for it.
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     if(player.isInCell())
     {
         std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
@@ -975,81 +1053,14 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mParticleEffect = current.mParticleEffect;
     mResult.mRainEffect = current.mRainEffect;
 
-    mResult.mNight = (gameHour < mSunriseTime || gameHour > mNightStart - 1);
+    mResult.mNight = (gameHour < mSunriseTime || gameHour > mTimeSettings.mNightStart - 1);
 
-    mResult.mFogDepth = mResult.mNight ? current.mLandFogNightDepth : current.mLandFogDayDepth;
-
-    // TODO: use pre/post sunset/sunrise time values in [Weather] section
-    // night
-    if (gameHour <= mNightEnd || gameHour >= mNightStart + 1)
-    {
-        mResult.mFogColor = current.mFogNightColor;
-        mResult.mAmbientColor = current.mAmbientNightColor;
-        mResult.mSunColor = current.mSunNightColor;
-        mResult.mSkyColor = current.mSkyNightColor;
-        mResult.mNightFade = 1.f;
-    }
-
-    // sunrise
-    else if (gameHour >= mNightEnd && gameHour <= mDayStart + 1)
-    {
-        if (gameHour <= mSunriseTime)
-        {
-            // fade in
-            float advance = mSunriseTime - gameHour;
-            float factor = advance / 0.5f;
-            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogNightColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientNightColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunNightColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyNightColor, factor);
-            mResult.mNightFade = factor;
-        }
-        else //if (gameHour >= 6)
-        {
-            // fade out
-            float advance = gameHour - mSunriseTime;
-            float factor = advance / 3.f;
-            mResult.mFogColor = lerp(current.mFogSunriseColor, current.mFogDayColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunriseColor, current.mAmbientDayColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunriseColor, current.mSunDayColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunriseColor, current.mSkyDayColor, factor);
-        }
-    }
-
-    // day
-    else if (gameHour >= mDayStart + 1 && gameHour <= mDayEnd - 1)
-    {
-        mResult.mFogColor = current.mFogDayColor;
-        mResult.mAmbientColor = current.mAmbientDayColor;
-        mResult.mSunColor = current.mSunDayColor;
-        mResult.mSkyColor = current.mSkyDayColor;
-    }
-
-    // sunset
-    else if (gameHour >= mDayEnd - 1 && gameHour <= mNightStart + 1)
-    {
-        if (gameHour <= mDayEnd + 1)
-        {
-            // fade in
-            float advance = (mDayEnd + 1) - gameHour;
-            float factor = (advance / 2);
-            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogDayColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientDayColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunDayColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyDayColor, factor);
-        }
-        else //if (gameHour >= 19)
-        {
-            // fade out
-            float advance = gameHour - (mDayEnd + 1);
-            float factor = advance / 2.f;
-            mResult.mFogColor = lerp(current.mFogSunsetColor, current.mFogNightColor, factor);
-            mResult.mAmbientColor = lerp(current.mAmbientSunsetColor, current.mAmbientNightColor, factor);
-            mResult.mSunColor = lerp(current.mSunSunsetColor, current.mSunNightColor, factor);
-            mResult.mSkyColor = lerp(current.mSkySunsetColor, current.mSkyNightColor, factor);
-            mResult.mNightFade = factor;
-        }
-    }
+    mResult.mFogDepth = current.mLandFogDepth.getValue(gameHour, mTimeSettings);
+    mResult.mFogColor = current.mFogColor.getValue(gameHour, mTimeSettings);
+    mResult.mAmbientColor = current.mAmbientColor.getValue(gameHour, mTimeSettings);
+    mResult.mSunColor = current.mSunColor.getValue(gameHour, mTimeSettings);
+    mResult.mSkyColor = current.mSkyColor.getValue(gameHour, mTimeSettings);
+    mResult.mNightFade = mNightFade.getValue(gameHour, mTimeSettings);
 
     if (gameHour >= mSunsetTime - mSunPreSunsetTime)
     {

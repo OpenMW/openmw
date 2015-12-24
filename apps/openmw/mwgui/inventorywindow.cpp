@@ -167,13 +167,15 @@ namespace MWGui
         MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
                             static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
 
+        bool needUpdate = (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight());
+
         mMainWidget->setPosition(pos);
         mMainWidget->setSize(size);
 
-        if (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight())
-            updatePreviewSize();
-
         adjustPanes();
+
+        if (needUpdate)
+            updatePreviewSize();
     }
 
     SortFilterItemModel* InventoryWindow::getSortFilterModel()
@@ -471,16 +473,18 @@ namespace MWGui
             MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
         }
 
-        if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
+        mSkippedToEquip = MWWorld::Ptr();
+        if (ptr.getRefData().getCount()) // make sure the item is still there, the script might have removed it
         {
-            boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
+            if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
+            {
+                boost::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr);
 
-            action->execute (player);
-
-            mSkippedToEquip = MWWorld::Ptr();
+                action->execute (player);
+            }
+            else
+                mSkippedToEquip = ptr;
         }
-        else
-            mSkippedToEquip = ptr;
 
         if (isVisible())
         {

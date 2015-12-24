@@ -67,7 +67,7 @@ namespace MWGui
     };
 
 
-    HUD::HUD(CustomMarkerCollection &customMarkers, bool showFps, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
+    HUD::HUD(CustomMarkerCollection &customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : Layout("openmw_hud.layout")
         , LocalMapBase(customMarkers, localMapRender)
         , mHealth(NULL)
@@ -85,8 +85,6 @@ namespace MWGui
         , mCellNameBox(NULL)
         , mDrowningFrame(NULL)
         , mDrowningFlash(NULL)
-        , mFpsBox(NULL)
-        , mFpsCounter(NULL)
         , mHealthManaStaminaBaseLeft(0)
         , mWeapBoxBaseLeft(0)
         , mSpellBoxBaseLeft(0)
@@ -161,8 +159,6 @@ namespace MWGui
 
         getWidget(mCrosshair, "Crosshair");
 
-        setFpsVisible(showFps);
-
         LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
@@ -179,28 +175,6 @@ namespace MWGui
         mMainWidget->eventMouseButtonClick.clear();
 
         delete mSpellIcons;
-    }
-
-    void HUD::setFpsVisible(const bool visible)
-    {
-        mFpsCounter = 0;
-
-        MyGUI::Widget* fps;
-        getWidget(fps, "FPSBox");
-        fps->setVisible(false);
-
-        if (visible)
-        {
-            getWidget(mFpsBox, "FPSBox");
-            //mFpsBox->setVisible(true);
-            getWidget(mFpsCounter, "FPSCounter");
-        }
-    }
-
-    void HUD::setFPS(float fps)
-    {
-        if (mFpsCounter)
-            mFpsCounter->setCaption(MyGUI::utility::toString((int)fps));
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -222,7 +196,7 @@ namespace MWGui
             mMagicka->setProgressRange (modified);
             mMagicka->setProgressPosition (current);
             getWidget(w, "MagickaFrame");
-            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {

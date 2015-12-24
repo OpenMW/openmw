@@ -17,14 +17,14 @@ namespace MWWorld
     {
             std::list<std::pair<std::string, Ptr> > mScripts;
             std::list<std::pair<std::string, Ptr> >::iterator mIter;
-            MWWorld::Ptr mIgnore;
+            MWWorld::ConstPtr mIgnore;
             const MWWorld::ESMStore& mStore;
 
         public:
 
             LocalScripts (const MWWorld::ESMStore& store);
 
-            void setIgnore (const Ptr& ptr);
+            void setIgnore (const ConstPtr& ptr);
             ///< Mark a single reference for ignoring during iteration over local scripts (will revoke
             /// previous ignores).
 
@@ -52,7 +52,7 @@ namespace MWWorld
             void remove (RefData *ref);
 
             void remove (const Ptr& ptr);
-            ///< Remove script for given reference (ignored if reference does not have a scirpt listed).
+            ///< Remove script for given reference (ignored if reference does not have a script listed).
     };
 }
 

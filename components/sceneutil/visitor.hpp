@@ -3,12 +3,12 @@
 
 #include <osg/NodeVisitor>
 
-#include <components/misc/stringops.hpp>
-
 // Commonly used scene graph visitors
 namespace SceneUtil
 {
 
+    // Find a Group by name, case-insensitive
+    // If not found, mFoundNode will be NULL
     class FindByNameVisitor : public osg::NodeVisitor
     {
     public:
@@ -19,18 +19,23 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::Group& group)
-        {
-            if (Misc::StringUtils::ciEqual(group.getName(), mNameToFind))
-            {
-                mFoundNode = &group;
-                return;
-            }
-            traverse(group);
-        }
+        virtual void apply(osg::Group& group);
 
         std::string mNameToFind;
         osg::Group* mFoundNode;
+    };
+
+    // Disable freezeOnCull for all visited particlesystems
+    class DisableFreezeOnCullVisitor : public osg::NodeVisitor
+    {
+    public:
+        DisableFreezeOnCullVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Geode &geode);
+        virtual void apply(osg::Drawable& drw);
     };
 
 }

@@ -4,8 +4,8 @@
 
 #include <osg/Group>
 #include <osg/Geode>
-#include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleProcessor>
@@ -13,6 +13,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -54,11 +55,19 @@ namespace
             for (std::vector<osgParticle::ParticleSystem*>::iterator it = partsysVector.begin(); it != partsysVector.end(); ++it)
                 geode.removeDrawable(*it);
         }
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
+                mToRemove.push_back(partsys);
+        }
+#endif
 
         void remove()
         {
             for (std::vector<osg::ref_ptr<osg::Node> >::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
             {
+                // FIXME: a Drawable might have more than one parent
                 osg::Node* node = *it;
                 if (node->getNumParents())
                     node->getParent(0)->removeChild(node);
@@ -107,7 +116,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     else
         cellnode = found->second;
 
-    osg::ref_ptr<osg::PositionAttitudeTransform> insert (new osg::PositionAttitudeTransform);
+    osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert (new SceneUtil::PositionAttitudeTransform);
     cellnode->addChild(insert);
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
@@ -115,6 +124,11 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     const float *f = ptr.getRefData().getPosition().pos;
 
     insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
+
+    const float scale = ptr.getCellRef().getScale();
+    osg::Vec3f scaleVec(scale, scale, scale);
+    ptr.getClass().adjustScale(ptr, scaleVec, true);
+    insert->setScale(scaleVec);
 
     ptr.getRefData().setBaseNode(insert);
 }
@@ -241,6 +255,15 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 }
 
 Animation* Objects::getAnimation(const MWWorld::Ptr &ptr)
+{
+    PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
+    if(iter != mObjects.end())
+        return iter->second;
+
+    return NULL;
+}
+
+const Animation* Objects::getAnimation(const MWWorld::ConstPtr &ptr) const
 {
     PtrAnimationMap::const_iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())

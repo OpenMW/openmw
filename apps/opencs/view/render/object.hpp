@@ -46,6 +46,8 @@ namespace CSVRender
             ObjectTag (Object* object);
 
             Object* mObject;
+
+            virtual QString getToolTip (bool hideBasics) const;
     };
 
 

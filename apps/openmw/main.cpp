@@ -23,7 +23,7 @@
 #endif
 
 
-#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+#if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
     #define USE_CRASH_CATCHER 1
 #else
     #define USE_CRASH_CATCHER 0
@@ -210,6 +210,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     cfgMgr.readConfiguration(variables, desc);
 
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+    std::cout << v.describe() << std::endl;
+
     engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
@@ -321,6 +324,10 @@ private:
 
 int main(int argc, char**argv)
 {
+#if defined(__APPLE__)
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();

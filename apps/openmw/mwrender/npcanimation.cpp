@@ -5,6 +5,7 @@
 #include <osg/Depth>
 
 #include <osgUtil/RenderBin>
+#include <osgUtil/CullVisitor>
 
 #include <components/misc/rng.hpp>
 
@@ -32,6 +33,7 @@
 #include "camera.hpp"
 #include "rotatecontroller.hpp"
 #include "renderbin.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -273,14 +275,18 @@ NpcAnimation::~NpcAnimation()
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem, bool disableListener, bool disableSounds, ViewMode viewMode)
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
+                           bool disableListener, bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
   : Animation(ptr, parentNode, resourceSystem),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
-    mSoundsDisabled(disableSounds)
+    mFirstPersonFieldOfView(firstPersonFieldOfView),
+    mSoundsDisabled(disableSounds),
+    mAccurateAiming(false),
+    mAimingFactor(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
@@ -331,6 +337,37 @@ public:
     }
 
     osg::ref_ptr<osg::Depth> mDepth;
+};
+
+/// Overrides Field of View to given value for rendering the subgraph.
+/// Must be added as cull callback.
+class OverrideFieldOfViewCallback : public osg::NodeCallback
+{
+public:
+    OverrideFieldOfViewCallback(float fov)
+        : mFov(fov)
+    {
+    }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+        osg::RefMatrix* projectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
+        float fov, aspect, zNear, zFar;
+        if (projectionMatrix->getPerspective(fov, aspect, zNear, zFar))
+        {
+            fov = mFov;
+            projectionMatrix->makePerspective(fov, aspect, zNear, zFar);
+            cv->pushProjectionMatrix(projectionMatrix);
+            traverse(node, nv);
+            cv->popProjectionMatrix();
+        }
+        else
+            traverse(node, nv);
+    }
+
+private:
+    float mFov;
 };
 
 void NpcAnimation::setRenderBin()
@@ -441,6 +478,8 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
+        mObjectRoot->setNodeMask(Mask_FirstPerson);
+        mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
         if(isWerewolf)
             addAnimSource(smodel);
         else
@@ -724,7 +763,14 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
 
     if (mFirstPersonNeckController)
     {
-        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0], osg::Vec3f(-1,0,0)));
+        if (mAccurateAiming)
+            mAimingFactor = 1.f;
+        else
+            mAimingFactor = std::max(0.f, mAimingFactor - timepassed * 0.5f);
+
+        float rotateFactor = 0.75f + 0.25f * mAimingFactor;
+
+        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0] * rotateFactor, osg::Vec3f(-1,0,0)));
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
 
@@ -1068,6 +1114,11 @@ void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
 {
     Animation::updatePtr(updated);
     mHeadAnimationTime->updatePtr(updated);
+}
+
+void NpcAnimation::setAccurateAiming(bool enabled)
+{
+    mAccurateAiming = enabled;
 }
 
 }

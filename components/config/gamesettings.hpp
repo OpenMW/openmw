@@ -72,6 +72,8 @@ namespace Config
         void setContentList(const QStringList& fileNames);
         QStringList getContentList() const;
 
+        void clear();
+
     private:
         Files::ConfigurationManager &mCfgMgr;
 

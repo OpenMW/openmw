@@ -145,7 +145,7 @@ namespace MWScript
         // selected), store the ID of that reference store it so it can be inherited by
         // targeted scripts started from this one.
         if (targetId.empty() && !reference.isEmpty())
-            mTargetId = reference.getClass().getId (reference);
+            mTargetId = reference.getCellRef().getRefId();
     }
 
     int InterpreterContext::getLocalShort (int index) const
@@ -601,9 +601,9 @@ namespace MWScript
         return mTargetId;
     }
 
-    void InterpreterContext::updatePtr(const MWWorld::Ptr& updated)
+    void InterpreterContext::updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)
     {
-        if (!mReference.isEmpty())
+        if (!mReference.isEmpty() && base == mReference)
             mReference = updated;
     }
 }

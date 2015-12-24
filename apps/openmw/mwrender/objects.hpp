@@ -57,7 +57,7 @@ public:
 };
 
 class Objects{
-    typedef std::map<MWWorld::Ptr,Animation*> PtrAnimationMap;
+    typedef std::map<MWWorld::ConstPtr,Animation*> PtrAnimationMap;
 
     typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
     CellMap mCellSceneNodes;
@@ -81,6 +81,7 @@ public:
     void insertCreature (const MWWorld::Ptr& ptr, const std::string& model, bool weaponsShields);
 
     Animation* getAnimation(const MWWorld::Ptr &ptr);
+    const Animation* getAnimation(const MWWorld::ConstPtr &ptr) const;
 
     bool removeObject (const MWWorld::Ptr& ptr);
     ///< \return found?

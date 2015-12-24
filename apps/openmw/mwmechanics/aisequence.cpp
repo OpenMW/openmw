@@ -72,7 +72,7 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     
     targetActor = combat->getTarget();
 
-    return true;
+    return !targetActor.isEmpty();
 }
 
 std::list<AiPackage*>::const_iterator AiSequence::begin() const

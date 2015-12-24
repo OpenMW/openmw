@@ -169,12 +169,6 @@ namespace OMW
             /// Initialise and enter main loop.
             void go();
 
-            /// Activate the focussed object.
-            void activate();
-
-            /// Write screenshot to file.
-            void screenshot();
-
             /// Compile all scripts (excludign dialogue scripts) at startup?
             void setCompileAll (bool all);
 

@@ -4,6 +4,7 @@
 #include <string>
 
 #include <osg/ref_ptr>
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/effectlist.hpp>
 
@@ -35,6 +36,7 @@ namespace Resource
 namespace MWRender
 {
     class EffectAnimationTime;
+    class RenderingManager;
 }
 
 namespace MWWorld
@@ -44,14 +46,14 @@ namespace MWWorld
     {
     public:
         ProjectileManager (osg::Group* parent, Resource::ResourceSystem* resourceSystem,
-                MWPhysics::PhysicsSystem* physics);
+                MWRender::RenderingManager* rendering, MWPhysics::PhysicsSystem* physics);
 
         /// If caster is an actor, the actor's facing orientation is used. Otherwise fallbackDirection is used.
         void launchMagicBolt (const std::string& model, const std::string &sound, const std::string &spellId,
                                      float speed, bool stack, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
 
-        void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+        void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                        const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
         void update(float dt);
@@ -66,6 +68,7 @@ namespace MWWorld
     private:
         osg::ref_ptr<osg::Group> mParent;
         Resource::ResourceSystem* mResourceSystem;
+        MWRender::RenderingManager* mRendering;
         MWPhysics::PhysicsSystem* mPhysics;
 
         struct State
@@ -117,8 +120,11 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient);
+        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient, bool rotate);
         void update (State& state, float duration);
+
+        void operator=(const ProjectileManager&);
+        ProjectileManager(const ProjectileManager&);
     };
 
 }

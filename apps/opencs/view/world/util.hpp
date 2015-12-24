@@ -18,6 +18,11 @@ namespace CSMWorld
     class CommandDispatcher;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVWorld
 {
     ///< \brief Getting the data out of an editor widget
@@ -138,10 +143,9 @@ namespace CSVWorld
 
             virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const;
 
-        public slots:
-
-            virtual void updateUserSetting
-                            (const QString &name, const QStringList &list) {}
+            /// \attention This is not a slot. For ordering reasons this function needs to be
+            /// called manually from the parent object's settingChanged function.
+            virtual void settingChanged (const CSMPrefs::Setting *setting);
     };
 }
 

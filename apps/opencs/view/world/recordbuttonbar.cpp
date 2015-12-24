@@ -6,7 +6,7 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "../world/tablebottombox.hpp"
 
@@ -32,7 +32,7 @@ void CSVWorld::RecordButtonBar::updatePrevNextButtons()
         mPrevButton->setDisabled (true);
         mNextButton->setDisabled (true);
     }
-    else if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")=="true")
+    else if (CSMPrefs::get()["General Input"]["cycle"].isTrue())
     {
         mPrevButton->setDisabled (false);
         mNextButton->setDisabled (false);
@@ -131,6 +131,9 @@ CSVWorld::RecordButtonBar::RecordButtonBar (const CSMWorld::UniversalId& id,
     connect (&mTable, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (rowNumberChanged (const QModelIndex&, int, int)));
 
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+
     updateModificationButtons();
     updatePrevNextButtons();
 }
@@ -141,16 +144,16 @@ void CSVWorld::RecordButtonBar::setEditLock (bool locked)
     updateModificationButtons();
 }
 
-void CSVWorld::RecordButtonBar::updateUserSetting (const QString& name, const QStringList& value)
-{
-    if (name=="general-input/cycle")
-        updatePrevNextButtons();
-}
-
 void CSVWorld::RecordButtonBar::universalIdChanged (const CSMWorld::UniversalId& id)
 {
     mId = id;
     updatePrevNextButtons();
+}
+
+void CSVWorld::RecordButtonBar::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="General Input/cycle")
+        updatePrevNextButtons();
 }
 
 void CSVWorld::RecordButtonBar::cloneRequest()
@@ -173,8 +176,7 @@ void CSVWorld::RecordButtonBar::nextId()
 
     if (newRow >= mTable.rowCount())
     {
-        if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")
-            =="true")
+        if (CSMPrefs::get()["General Input"]["cycle"].isTrue())
             newRow = 0;
         else
             return;
@@ -189,8 +191,7 @@ void CSVWorld::RecordButtonBar::prevId()
 
     if (newRow < 0)
     {
-        if (CSMSettings::UserSettings::instance().settingValue ("general-input/cycle")
-            =="true")
+        if (CSMPrefs::get()["General Input"]["cycle"].isTrue())
             newRow = mTable.rowCount()-1;
         else
             return;

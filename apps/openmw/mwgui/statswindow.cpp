@@ -159,7 +159,7 @@ namespace MWGui
         else if (id == "MBar")
         {
             getWidget(w, "Magicka");
-            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {

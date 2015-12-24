@@ -28,6 +28,11 @@ namespace MyGUI
     class ImageBox;
 }
 
+namespace MWWorld
+{
+    class ESMStore;
+}
+
 namespace Compiler
 {
     class Extensions;
@@ -119,6 +124,9 @@ namespace MWGui
                   Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription);
     virtual ~WindowManager();
 
+    /// Set the ESMStore to use for retrieving of GUI-related strings.
+    void setStore (const MWWorld::ESMStore& store);
+
     void initUI();
     void renderWorldMap();
 
@@ -179,8 +187,6 @@ namespace MWGui
     virtual void updateSpellWindow();
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
-
-    virtual void wmUpdateFps(float fps);
 
     ///< Set value for the given ID.
     virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
@@ -374,6 +380,7 @@ namespace MWGui
     void writeFog(MWWorld::CellStore* cell);
 
   private:
+    const MWWorld::ESMStore* mStore;
     Resource::ResourceSystem* mResourceSystem;
 
     osgMyGUI::Platform* mGuiPlatform;
@@ -485,8 +492,6 @@ namespace MWGui
     void updateVisible(); // Update visibility of all windows based on mode, shown and allowed settings
 
     void updateMap();
-
-    float mFPS;
 
     std::map<std::string, std::string> mFallbackMap;
     

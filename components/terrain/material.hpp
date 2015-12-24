@@ -19,7 +19,7 @@ namespace Terrain
     public:
         FixedFunctionTechnique(
                 const std::vector<osg::ref_ptr<osg::Texture2D> >& layers,
-                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps);
+                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
     protected:
         virtual void define_passes() {}
@@ -30,7 +30,7 @@ namespace Terrain
     public:
         Effect(
                 const std::vector<osg::ref_ptr<osg::Texture2D> >& layers,
-                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps);
+                const std::vector<osg::ref_ptr<osg::Texture2D> >& blendmaps, int blendmapScale, float layerTileSize);
 
         virtual bool define_techniques();
 
@@ -50,6 +50,8 @@ namespace Terrain
     private:
         std::vector<osg::ref_ptr<osg::Texture2D> > mLayers;
         std::vector<osg::ref_ptr<osg::Texture2D> > mBlendmaps;
+        int mBlendmapScale;
+        float mLayerTileSize;
     };
 
 }

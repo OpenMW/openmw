@@ -43,9 +43,6 @@ namespace CSVWorld
 
             virtual void setEditLock (bool locked);
 
-            virtual void updateUserSetting
-                                (const QString& name, const QStringList &list);
-
             virtual void setStatusBar (bool show);
 
             virtual void useHint (const std::string& hint);

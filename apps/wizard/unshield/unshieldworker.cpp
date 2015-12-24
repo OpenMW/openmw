@@ -45,9 +45,7 @@ Wizard::UnshieldWorker::~UnshieldWorker()
 
 void Wizard::UnshieldWorker::stopWorker()
 {
-    mMutex.lock();
     mStopped = true;
-    mMutex.unlock();
 }
 
 void Wizard::UnshieldWorker::setInstallComponent(Wizard::Component component, bool install)

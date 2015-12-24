@@ -59,8 +59,7 @@ struct DialInfo
         QS_None = 0,
         QS_Name = 1,
         QS_Finished = 2,
-        QS_Restart = 3,
-        QS_Deleted
+        QS_Restart = 3
     };
 
     // Rules for when to include this item in the final list of options
@@ -106,8 +105,14 @@ struct DialInfo
         REC_DELE = 0x454c4544
     };
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    ///< Loads all sub-records of Info record
+    void loadId(ESMReader &esm);
+    ///< Loads only Id of Info record (INAM sub-record)
+    void loadData(ESMReader &esm, bool &isDeleted);
+    ///< Loads all sub-records of Info record, except INAM sub-record
+
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank();
     ///< Set record to default state (does not touch the ID).

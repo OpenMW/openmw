@@ -86,6 +86,10 @@ bool CSMWorld::ColumnBase::isId (Display display)
         Display_InfoCondVar,
         Display_InfoCondComp,
 
+        Display_EffectSkill,
+        Display_EffectAttribute,
+        Display_IngredEffectId,
+
         Display_None
     };
 

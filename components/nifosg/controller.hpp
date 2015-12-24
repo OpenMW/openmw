@@ -42,37 +42,117 @@ namespace osgAnimation
 namespace NifOsg
 {
 
+    // interpolation of keyframes
+    template <typename MapT, typename InterpolationFunc>
     class ValueInterpolator
     {
-    protected:
-        template <typename T>
-        T interpKey (const std::map< float, Nif::KeyT<T> >& keys, float time, T defaultValue = T()) const
+    public:
+        typedef typename MapT::ValueType ValueT;
+
+        ValueInterpolator()
+            : mDefaultVal(ValueT())
         {
-            if (keys.size() == 0)
-                return defaultValue;
+        }
+
+        ValueInterpolator(boost::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
+            : mKeys(keys)
+            , mDefaultVal(defaultVal)
+        {
+            if (keys)
+            {
+                mLastLowKey = mKeys->mKeys.end();
+                mLastHighKey = mKeys->mKeys.end();
+            }
+        }
+
+        ValueT interpKey(float time) const
+        {
+            if (empty())
+                return mDefaultVal;
+
+            const typename MapT::MapType & keys = mKeys->mKeys;
 
             if(time <= keys.begin()->first)
                 return keys.begin()->second.mValue;
 
-            typename std::map< float, Nif::KeyT<T> >::const_iterator it = keys.lower_bound(time);
+            // retrieve the current position in the map, optimized for the most common case
+            // where time moves linearly along the keyframe track
+            typename MapT::MapType::const_iterator it = mLastHighKey;
+            if (mLastHighKey != keys.end())
+            {
+                if (time > mLastHighKey->first)
+                {
+                    // try if we're there by incrementing one
+                    ++mLastLowKey;
+                    ++mLastHighKey;
+                    it = mLastHighKey;
+                }
+                if (mLastHighKey == keys.end() || (time < mLastLowKey->first || time > mLastHighKey->first))
+                    it = keys.lower_bound(time); // still not there, reorient by performing lower_bound check on the whole map
+            }
+            else
+                it = keys.lower_bound(time);
+
+            // now do the actual interpolation
             if (it != keys.end())
             {
                 float aTime = it->first;
-                const Nif::KeyT<T>* aKey = &it->second;
+                const typename MapT::KeyType* aKey = &it->second;
+
+                // cache for next time
+                mLastHighKey = it;
 
                 assert (it != keys.begin()); // Shouldn't happen, was checked at beginning of this function
 
-                typename std::map< float, Nif::KeyT<T> >::const_iterator last = --it;
+                typename MapT::MapType::const_iterator last = --it;
+                mLastLowKey = last;
                 float aLastTime = last->first;
-                const Nif::KeyT<T>* aLastKey = &last->second;
+                const typename MapT::KeyType* aLastKey = &last->second;
 
                 float a = (time - aLastTime) / (aTime - aLastTime);
-                return aLastKey->mValue + ((aKey->mValue - aLastKey->mValue) * a);
+
+                return InterpolationFunc()(aLastKey->mValue, aKey->mValue, a);
             }
             else
                 return keys.rbegin()->second.mValue;
         }
+
+        bool empty() const
+        {
+            return !mKeys || mKeys->mKeys.empty();
+        }
+
+    private:
+        mutable typename MapT::MapType::const_iterator mLastLowKey;
+        mutable typename MapT::MapType::const_iterator mLastHighKey;
+
+        boost::shared_ptr<const MapT> mKeys;
+
+        ValueT mDefaultVal;
     };
+
+    struct LerpFunc
+    {
+        template <typename ValueType>
+        inline ValueType operator()(const ValueType& a, const ValueType& b, float fraction)
+        {
+            return a + ((b - a) * fraction);
+        }
+    };
+
+    struct QuaternionSlerpFunc
+    {
+        inline osg::Quat operator()(const osg::Quat& a, const osg::Quat& b, float fraction)
+        {
+            osg::Quat result;
+            result.slerp(fraction, a, b);
+            return result;
+        }
+    };
+
+    typedef ValueInterpolator<Nif::QuaternionKeyMap, QuaternionSlerpFunc> QuaternionInterpolator;
+    typedef ValueInterpolator<Nif::FloatKeyMap, LerpFunc> FloatInterpolator;
+    typedef ValueInterpolator<Nif::Vector3KeyMap, LerpFunc> Vec3Interpolator;
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {
@@ -97,7 +177,8 @@ namespace NifOsg
         virtual float getMaximum() const;
     };
 
-    class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller, public ValueInterpolator
+    /// Must be set on an osgAnimation::MorphGeometry.
+    class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
     {
     public:
         GeomMorpherController(const Nif::NiMorphData* data);
@@ -109,10 +190,10 @@ namespace NifOsg
         virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
 
     private:
-        std::vector<Nif::FloatKeyMapPtr> mKeyFrames;
+        std::vector<FloatInterpolator> mKeyFrames;
     };
 
-    class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller, public ValueInterpolator
+    class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller
     {
     public:
         KeyframeController(const Nif::NiKeyframeData *data);
@@ -126,27 +207,23 @@ namespace NifOsg
         virtual void operator() (osg::Node*, osg::NodeVisitor*);
 
     private:
-        Nif::QuaternionKeyMapPtr mRotations;
+        QuaternionInterpolator mRotations;
 
-        Nif::FloatKeyMapPtr mXRotations;
-        Nif::FloatKeyMapPtr mYRotations;
-        Nif::FloatKeyMapPtr mZRotations;
+        FloatInterpolator mXRotations;
+        FloatInterpolator mYRotations;
+        FloatInterpolator mZRotations;
 
-        Nif::Vector3KeyMapPtr mTranslations;
-        Nif::FloatKeyMapPtr mScales;
-
-        using ValueInterpolator::interpKey;
-
-        osg::Quat interpKey(const Nif::QuaternionKeyMap::MapType &keys, float time);
+        Vec3Interpolator mTranslations;
+        FloatInterpolator mScales;
 
         osg::Quat getXYZRotation(float time) const;
     };
 
-    class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
+    class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
         UVController();
-        UVController(const UVController&,const osg::CopyOp& = osg::CopyOp::SHALLOW_COPY);
+        UVController(const UVController&,const osg::CopyOp&);
         UVController(const Nif::NiUVData *data, std::set<int> textureUnits);
 
         META_Object(NifOsg,UVController)
@@ -155,10 +232,10 @@ namespace NifOsg
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
 
     private:
-        Nif::FloatKeyMapPtr mUTrans;
-        Nif::FloatKeyMapPtr mVTrans;
-        Nif::FloatKeyMapPtr mUScale;
-        Nif::FloatKeyMapPtr mVScale;
+        FloatInterpolator mUTrans;
+        FloatInterpolator mVTrans;
+        FloatInterpolator mUScale;
+        FloatInterpolator mVScale;
         std::set<int> mTextureUnits;
     };
 
@@ -179,10 +256,10 @@ namespace NifOsg
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
     };
 
-    class AlphaController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
+    class AlphaController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:
-        Nif::FloatKeyMapPtr mData;
+        FloatInterpolator mData;
 
     public:
         AlphaController(const Nif::NiFloatData *data);
@@ -196,10 +273,10 @@ namespace NifOsg
         META_Object(NifOsg, AlphaController)
     };
 
-    class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller, public ValueInterpolator
+    class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:
-        Nif::Vector3KeyMapPtr mData;
+        Vec3Interpolator mData;
 
     public:
         MaterialColorController(const Nif::NiPosData *data);

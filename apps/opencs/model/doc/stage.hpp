@@ -23,11 +23,7 @@ namespace CSMDoc
 
             virtual void perform (int stage, Messages& messages) = 0;
             ///< Messages resulting from this stage will be appended to \a messages.
-
-            /// Default-implementation: ignore
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
     };
 }
 
 #endif
-
