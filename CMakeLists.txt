@@ -99,8 +99,8 @@ if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
 
-# We probably support older versions than this.
-cmake_minimum_required(VERSION 2.6)
+# To make Qt5 happy and allow linking QtMain on Windows. 
+cmake_minimum_required(VERSION 2.8.11)
 
 # Sound setup
 unset(FFMPEG_LIBRARIES CACHE)
