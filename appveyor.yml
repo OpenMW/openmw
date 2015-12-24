@@ -6,17 +6,9 @@ branches:
 
 platform:
     - Win32
-    - x64
+#    - x64
 
 configuration: Debug
-
-#environment:
-#    matrix:
-#        - STEP: misc
-#        - STEP: components # misc builds this too
-# Build takes too long for these, ignore for now
-#        - STEP: openmw
-#        - STEP: opencs
 
 matrix:
     fast_finish: true
