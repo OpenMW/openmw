@@ -15,8 +15,8 @@ matrix:
 
 os: unstable
 
-shallow_clone: true
-#clone_depth: 1
+#shallow_clone: true
+clone_depth: 1
 
 cache:
     - C:\projects\openmw\deps\Bullet-2.83.5-win32.7z
