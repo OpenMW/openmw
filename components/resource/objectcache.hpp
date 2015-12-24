@@ -19,7 +19,7 @@
 
 #include <osg/Version>
 
-#if OSG_VERSION_GREATER_OR_EQUAL(3,4,0)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
 #include <osgDB/ObjectCache>
 #else
 
