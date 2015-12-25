@@ -159,9 +159,8 @@ namespace MWSound
         max = std::max(min, max);
 
         Sound_Buffer *sfx = &*mSoundBuffers->insert(mSoundBuffers->end(),
-            Sound_Buffer("Sound/"+sound->mSound, volume, min, max)
+            Sound_Buffer(mVFS->findFirstOf("Sound/"+sound->mSound), volume, min, max)
         );
-        mVFS->normalizeFilename(sfx->mResourceName);
 
         mBufferNameMap.insert(std::make_pair(soundId, sfx));
 
@@ -336,8 +335,7 @@ namespace MWSound
 
     void SoundManager::streamMusic(const std::string& filename)
     {
-        std::string name = "Music/"+filename;
-        mVFS->normalizeFilename(name);
+        std::string name = mVFS->findFirstOf("Music/"+filename);
         streamMusicFull(name);
     }
 
@@ -405,12 +403,10 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = "Sound/"+filename;
-
+            std::string voicefile = mVFS->findFirstOf("Sound/"+filename);
             Sound_Loudness *loudness;
-            mVFS->normalizeFilename(voicefile);
-            DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
+            DecoderPtr decoder = loadVoice(voicefile, &loudness);
             if(!loudness->isReady())
                 mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
             else
@@ -456,12 +452,10 @@ namespace MWSound
             return;
         try
         {
-            std::string voicefile = "Sound/"+filename;
-
+            std::string voicefile = mVFS->findFirstOf("Sound/"+filename);
             Sound_Loudness *loudness;
-            mVFS->normalizeFilename(voicefile);
-            DecoderPtr decoder = loadVoice(voicefile, &loudness);
 
+            DecoderPtr decoder = loadVoice(voicefile, &loudness);
             if(!loudness->isReady())
                 mPendingSaySounds[MWWorld::ConstPtr()] = std::make_pair(decoder, loudness);
             else

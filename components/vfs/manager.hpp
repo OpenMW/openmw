@@ -49,14 +49,6 @@ namespace VFS
         /// @note Throws an exception if the file can not be found.
         Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
 
-        /// Opens a file ignoring the extension, obeying archive priority.
-        /// @note Throws an exception if no such file can be found.
-        Files::IStreamPtr getFirstOf(std::string name) const;
-
-        /// Opens a file ignoring the extension, obeying archive priority (name is already normalized).
-        /// @note Throws an exception if no such file can be found.
-        Files::IStreamPtr getFirstOfNormalized(const std::string &normalizedName) const;
-
         /// Finds the highest priority resource of a given a resource name, ignoring the extension.
         /// @note Throws an exception if no such file can be found.
         const std::string &findFirstOf(std::string name) const;

@@ -100,17 +100,6 @@ namespace VFS
         normalize_path(name, mStrict);
     }
 
-    Files::IStreamPtr Manager::getFirstOf(std::string name) const
-    {
-        normalize_path(name, mStrict);
-        return getFirstOfEntry(name).second->open();
-    }
-
-    Files::IStreamPtr Manager::getFirstOfNormalized(const std::string &normalizedName) const
-    {
-        return getFirstOfEntry(normalizedName).second->open();
-    }
-
     const std::string& Manager::findFirstOf(std::string name) const
     {
         normalize_path(name, mStrict);

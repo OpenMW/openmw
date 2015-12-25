@@ -184,8 +184,7 @@ void FFmpeg_Decoder::open(const std::string &fname)
 {
     close();
 
-    /* Allow using alternate extensions for the sound being opened. */
-    mDataStream = mResourceMgr->getFirstOfNormalized(fname);
+    mDataStream = mResourceMgr->getNormalized(fname);
 
     if((mFormatCtx=avformat_alloc_context()) == NULL)
         fail("Failed to allocate context");
