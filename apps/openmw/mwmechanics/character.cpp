@@ -520,6 +520,8 @@ void getWeaponGroup(WeaponType weaptype, std::string &group)
     const WeaponInfo *info = std::find_if(sWeaponTypeList, sWeaponTypeListEnd, FindWeaponType(weaptype));
     if(info != sWeaponTypeListEnd)
         group = info->longgroup;
+    else
+        group.clear();
 }
 
 
@@ -1092,11 +1094,14 @@ bool CharacterController::updateWeaponState()
         std::string weapgroup;
         if(weaptype == WeapType_None)
         {
-            getWeaponGroup(mWeaponType, weapgroup);
-            mAnimation->play(weapgroup, priorityWeapon,
-                             MWRender::Animation::BlendMask_All, true,
-                             1.0f, "unequip start", "unequip stop", 0.0f, 0);
-            mUpperBodyState = UpperCharState_UnEquipingWeap;
+            if ((!isWerewolf || mWeaponType != WeapType_Spell))
+            {
+                getWeaponGroup(mWeaponType, weapgroup);
+                mAnimation->play(weapgroup, priorityWeapon,
+                                 MWRender::Animation::BlendMask_All, true,
+                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
+                mUpperBodyState = UpperCharState_UnEquipingWeap;
+            }
         }
         else
         {
