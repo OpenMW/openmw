@@ -407,24 +407,7 @@ namespace MWSound
             Sound_Loudness *loudness;
 
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
-            if(!loudness->isReady())
-                mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
-            else
-            {
-                MWBase::World *world = MWBase::Environment::get().getWorld();
-                const osg::Vec3f pos = world->getActorHeadTransform(ptr).getTrans();
-
-                SaySoundMap::iterator oldIt = mActiveSaySounds.find(ptr);
-                if (oldIt != mActiveSaySounds.end())
-                {
-                    mOutput->finishStream(oldIt->second.first);
-                    mActiveSaySounds.erase(oldIt);
-                }
-
-                MWBase::SoundStreamPtr sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
-
-                mActiveSaySounds.insert(std::make_pair(ptr, std::make_pair(sound, loudness)));
-            }
+            mPendingSaySounds[ptr] = std::make_pair(decoder, loudness);
         }
         catch(std::exception &e)
         {
@@ -456,20 +439,7 @@ namespace MWSound
             Sound_Loudness *loudness;
 
             DecoderPtr decoder = loadVoice(voicefile, &loudness);
-            if(!loudness->isReady())
-                mPendingSaySounds[MWWorld::ConstPtr()] = std::make_pair(decoder, loudness);
-            else
-            {
-                SaySoundMap::iterator oldIt = mActiveSaySounds.find(MWWorld::ConstPtr());
-                if (oldIt != mActiveSaySounds.end())
-                {
-                    mOutput->finishStream(oldIt->second.first);
-                    mActiveSaySounds.erase(oldIt);
-                }
-
-                mActiveSaySounds.insert(std::make_pair(MWWorld::ConstPtr(),
-                                                       std::make_pair(playVoice(decoder, osg::Vec3f(), true), loudness)));
-            }
+            mPendingSaySounds[MWWorld::ConstPtr()] = std::make_pair(decoder, loudness);
         }
         catch(std::exception &e)
         {
