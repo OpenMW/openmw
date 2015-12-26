@@ -149,14 +149,20 @@ namespace MWMechanics
     {
         MWWorld::Ptr mCreature;
         MWWorld::Ptr mActor;
+        bool mTrapped;
     public:
         SoulTrap(MWWorld::Ptr trappedCreature)
-            : mCreature(trappedCreature) {}
+            : mCreature(trappedCreature)
+            , mTrapped(false)
+        {
+        }
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1)
         {
+            if (mTrapped)
+                return;
             if (key.mId != ESM::MagicEffect::Soultrap)
                 return;
             if (magnitude <= 0)
@@ -202,6 +208,8 @@ namespace MWMechanics
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
+
+            mTrapped = true;
 
             if (caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
