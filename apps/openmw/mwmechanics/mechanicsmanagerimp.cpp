@@ -1585,4 +1585,109 @@ namespace MWMechanics
     {
         return mActors.isReadyToBlock(ptr);
     }
+
+    void MechanicsManager::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
+    {
+        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
+
+        // The actor does not have to change state
+        if (npcStats.isWerewolf() == werewolf)
+            return;
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+
+        if (actor == player->getPlayer())
+        {
+            if (werewolf)
+            {
+                player->saveSkillsAttributes();
+                player->setWerewolfSkillsAttributes();
+            }
+            else
+                player->restoreSkillsAttributes();
+        }
+
+        npcStats.setWerewolf(werewolf);
+
+        // This is a bit dangerous. Equipped items other than WerewolfRobe may reference
+        // bones that do not even exist with the werewolf object root.
+        // Therefore, make sure to unequip everything at once, and only fire the change event
+        // (which will rebuild the animation parts) afterwards. unequipAll will do this for us.
+        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
+        invStore.unequipAll(actor);
+
+        if(werewolf)
+        {
+            MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
+
+            inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
+        }
+        else
+        {
+            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
+        }
+
+        if(actor == player->getPlayer())
+        {
+            MWBase::Environment::get().getWorld()->reattachPlayerCamera();
+
+            // Update the GUI only when called on the player
+            MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+
+            if (werewolf)
+            {
+                windowManager->forceHide(MWGui::GW_Inventory);
+                windowManager->forceHide(MWGui::GW_Magic);
+            }
+            else
+            {
+                windowManager->unsetForceHide(MWGui::GW_Inventory);
+                windowManager->unsetForceHide(MWGui::GW_Magic);
+            }
+
+            windowManager->setWerewolfOverlay(werewolf);
+
+            // Witnesses of the player's transformation will make them a globally known werewolf
+            std::vector<MWWorld::Ptr> closeActors;
+            const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            getActorsInRange(actor.getRefData().getPosition().asVec3(), gmst.find("fAlarmRadius")->getFloat(), closeActors);
+
+            bool detected = false, reported = false;
+            for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
+            {
+                if (*it == actor)
+                    continue;
+
+                if (!it->getClass().isNpc())
+                    continue;
+
+                if (MWBase::Environment::get().getWorld()->getLOS(*it, actor) && awarenessCheck(actor, *it))
+                    detected = true;
+                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    reported = true;
+            }
+
+            if (detected)
+            {
+                windowManager->messageBox("#{sWerewolfAlarmMessage}");
+                MWBase::Environment::get().getWorld()->setGlobalInt("pcknownwerewolf", 1);
+
+                if (reported)
+                {
+                    npcStats.setBounty(npcStats.getBounty()+
+                                       gmst.find("iWereWolfBounty")->getInt());
+                    windowManager->messageBox("#{sCrimeMessage}");
+                }
+            }
+        }
+    }
+
+    void MechanicsManager::applyWerewolfAcrobatics(const MWWorld::Ptr &actor)
+    {
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
+
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
+    }
+
 }

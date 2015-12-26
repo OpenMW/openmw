@@ -1096,7 +1096,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->setWerewolf(ptr, set);
+                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
                 }
         };
 
@@ -1108,7 +1108,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->applyWerewolfAcrobatics(ptr);
+                    MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
                 }
         };
 
