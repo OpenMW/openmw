@@ -1607,14 +1607,17 @@ namespace MWMechanics
                 player->restoreSkillsAttributes();
         }
 
-        npcStats.setWerewolf(werewolf);
-
-        // This is a bit dangerous. Equipped items other than WerewolfRobe may reference
-        // bones that do not even exist with the werewolf object root.
-        // Therefore, make sure to unequip everything at once, and only fire the change event
-        // (which will rebuild the animation parts) afterwards. unequipAll will do this for us.
+        // Equipped items other than WerewolfRobe may reference bones that do not even
+        // exist with the werewolf object root, so make sure to unequip all items
+        // *before* we become a werewolf.
         MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
         invStore.unequipAll(actor);
+
+        // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
+        if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
+            npcStats.setDrawState(MWMechanics::DrawState_Nothing);
+
+        npcStats.setWerewolf(werewolf);
 
         if(werewolf)
         {
