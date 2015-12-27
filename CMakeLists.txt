@@ -16,6 +16,11 @@ endif (APPLE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
+if (ANDROID)
+    set (OSG_PLUGINS_DIR ${OSG_PLUGINS_DIR} CACHE STRING "")
+    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
+endif()
+
 # Version
 message(STATUS "Configuring OpenMW...")
 
@@ -50,27 +55,39 @@ include(OpenMWMacros)
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
-option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
+if (ANDROID)
+    set (STATIC_BUILD TRUE)
+else()
+    set (STATIC_BUILD FALSE)
+endif()
+
+option(MYGUI_STATIC "Link static build of Mygui into the binaries" ${STATIC_BUILD})
+option(BOOST_STATIC "Link static build of Boost into the binaries" ${STATIC_BUILD})
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
 option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
+if (ANDROID)
+    set (NEED_BUILD OFF)
+else()
+    set (NEED_BUILD ON)
+endif()
+
 # Apps and tools
 option(BUILD_OPENMW "build OpenMW" ON)
-option(BUILD_BSATOOL "build BSA extractor" ON)
-option(BUILD_ESMTOOL "build ESM inspector" ON)
-option(BUILD_LAUNCHER "build Launcher" ON)
-option(BUILD_MWINIIMPORTER "build MWiniImporter" ON)
-option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ON)
-option(BUILD_OPENCS "build OpenMW Construction Set" ON)
-option(BUILD_WIZARD "build Installation Wizard" ON)
+option(BUILD_BSATOOL "build BSA extractor" ${NEED_BUILD})
+option(BUILD_ESMTOOL "build ESM inspector" ${NEED_BUILD})
+option(BUILD_LAUNCHER "build Launcher" ${NEED_BUILD})
+option(BUILD_MWINIIMPORTER "build MWiniImporter" ${NEED_BUILD})
+option(BUILD_ESSIMPORTER "build ESS (Morrowind save game) importer" ${NEED_BUILD})
+option(BUILD_OPENCS "build OpenMW Construction Set" ${NEED_BUILD})
+option(BUILD_WIZARD "build Installation Wizard" ${NEED_BUILD})
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS "Enable Unittests with Google C++ Unittest" OFF)
 option(BUILD_NIFTEST "build nif file tester" OFF)
-option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
+option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ${NEED_BUILD})
 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
@@ -157,7 +174,6 @@ if (WIN32)
 endif()
 
 if (ANDROID)
-    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
     set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
 endif (ANDROID)
 
