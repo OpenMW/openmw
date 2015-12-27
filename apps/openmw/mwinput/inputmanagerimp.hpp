@@ -213,6 +213,8 @@ namespace MWInput
 
         void updateCursorMode();
 
+        bool checkAllowedToUseItems() const;
+
     private:
         void toggleMainMenu();
         void toggleSpell();

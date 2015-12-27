@@ -13,7 +13,7 @@
 
 #include <osg/Version>
 
-#if OSG_VERSION_LESS_THAN(3,4,0)
+#if OSG_VERSION_LESS_THAN(3,3,3)
 
 #include "objectcache.hpp"
 

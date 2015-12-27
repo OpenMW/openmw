@@ -221,6 +221,13 @@ namespace MWBase
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
             
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
+
+            /// Turn actor into werewolf or normal form.
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
+
+            /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
+            /// It only applies to the current form the NPC is in.
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
     };
 }
 

@@ -560,10 +560,6 @@ namespace MWWorld
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const;
 
-            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
-
-            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
-
             virtual bool getGodModeState();
 
             virtual bool toggleGodMode();

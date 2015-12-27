@@ -456,13 +456,6 @@ namespace MWBase
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const = 0;
 
-            /// Turn actor into werewolf or normal form.
-            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
-
-            /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
-            /// It only applies to the current form the NPC is in.
-            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
-
             virtual bool getGodModeState() = 0;
 
             virtual bool toggleGodMode() = 0;
