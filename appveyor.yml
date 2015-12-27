@@ -2,6 +2,8 @@ version: "{build}"
 
 branches:
     only:
+        - master
+        - /openmw-.*$/
         - appveyor
 
 platform:
@@ -13,9 +15,11 @@ configuration: Debug
 matrix:
     fast_finish: true
 
+# For the Qt, Boost, CMake, etc installs
 os: unstable
 
-#shallow_clone: true
+# We want the git revision for versioning,
+# so shallow clones don't work.
 clone_depth: 1
 
 cache:
@@ -41,3 +45,10 @@ build_script:
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 test: off
+
+#notifications:
+#    - provider: Email
+#    to:
+#        -  
+#    on_build_failure: true
+#    on_build_status_changed: true
