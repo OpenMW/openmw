@@ -23,10 +23,10 @@ opencs_units (model/world
 
 
 opencs_units_noqt (model/world
-    universalid record commands columnbase scriptcontext cell refidcollection
+    universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager
+    idcompletionmanager metadata
     )
 
 opencs_hdrs_noqt (model/world
@@ -35,13 +35,18 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel
+    tools reportmodel mergeoperation 
     )
 
 opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
-    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck
+    startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
+    mergestages
+    )
+
+opencs_hdrs_noqt (model/tools
+    mergestate
     )
 
 
@@ -62,30 +67,30 @@ opencs_hdrs_noqt (view/doc
 
 opencs_units (view/world
     table tablesubview scriptsubview util regionmapsubview tablebottombox creator genericcreator
-    cellcreator referenceablecreator referencecreator scenesubview
+    cellcreator referenceablecreator startscriptcreator referencecreator scenesubview
     infocreator scriptedit dialoguesubview previewsubview regionmap dragrecordtable nestedtable
-    dialoguespinbox
+    dialoguespinbox recordbuttonbar tableeditidaction scripterrortable extendedcommandconfigurator
     )
 
 opencs_units_noqt (view/world
     subviews enumdelegate vartypedelegate recordstatusdelegate idtypedelegate datadisplaydelegate
-    scripthighlighter idvalidator dialoguecreator physicssystem idcompletiondelegate
-    colordelegate
+    scripthighlighter idvalidator dialoguecreator idcompletiondelegate
+    colordelegate dragdroputils
     )
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2 completerpopup coloreditor colorpickerpopup
+    scenetooltoggle2 completerpopup coloreditor colorpickerpopup droplineedit
     )
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode
+    previewwidget editmode instancemode
     )
 
 opencs_units_noqt (view/render
-    navigation navigation1st navigationfree navigationorbit lighting lightingday lightingnight
-    lightingbright object cell terrainstorage textoverlay overlaymask overlaysystem mousestate
+    lighting lightingday lightingnight
+    lightingbright object cell terrainstorage tagbase cellarrow
     )
 
 opencs_hdrs_noqt (view/render
@@ -94,38 +99,23 @@ opencs_hdrs_noqt (view/render
 
 
 opencs_units (view/tools
-    reportsubview reporttable searchsubview searchbox
+    reportsubview reporttable searchsubview searchbox merge
     )
 
 opencs_units_noqt (view/tools
     subviews
     )
 
-opencs_units (view/settings
-    settingwindow
-    dialog
-    page
-    view
-    booleanview
-    textview
-    listview
-    rangeview
-    resizeablestackedwidget
-    spinbox
+opencs_units (view/prefs
+    dialogue pagebase page
     )
 
-opencs_units_noqt (view/settings
-    frame
+opencs_units (model/prefs
+    state setting intsetting doublesetting boolsetting enumsetting coloursetting
     )
 
-opencs_units (model/settings
-    usersettings
-    setting
-    connector
-    )
-
-opencs_hdrs_noqt (model/settings
-    support
+opencs_units_noqt (model/prefs
+    category
     )
 
 opencs_units_noqt (model/filter
@@ -192,6 +182,7 @@ if(APPLE)
         MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmw.opencs"
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${OPENMW_VERSION}
         MACOSX_BUNDLE_BUNDLE_VERSION ${OPENMW_VERSION}
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/files/mac/openmw-cs-Info.plist.in"
         )
 
     set_source_files_properties(${OPENCS_MAC_ICON} PROPERTIES
@@ -199,16 +190,16 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OENGINE_LIBRARY}
-    ${OGRE_LIBRARIES}
-    ${OGRE_Overlay_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
-    ${SHINY_LIBRARIES}
+    ${OSG_LIBRARIES}
+    ${OPENTHREADS_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGVIEWER_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${OSGFX_LIBRARIES}
+    ${OSGQT_LIBRARIES}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_WAVE_LIBRARY}
-    ${BULLET_LIBRARIES}
     components
 )
 
@@ -216,14 +207,14 @@ if (DESIRED_QT_VERSION MATCHES 4)
     target_link_libraries(openmw-cs
     ${QT_QTGUI_LIBRARY}
     ${QT_QTCORE_LIBRARY}
-    ${QT_QTNETWORK_LIBRARY})
+    ${QT_QTNETWORK_LIBRARY}
+    ${QT_QTOPENGL_LIBRARY})
 
     if (WIN32)
         target_link_libraries(openmw-cs ${QT_QTMAIN_LIBRARY})
     endif()
-
 else()
-    qt5_use_modules(openmw-cs Widgets Core Network)
+    qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
     if (WIN32)
         target_link_libraries(Qt5::WinMain)
     endif()

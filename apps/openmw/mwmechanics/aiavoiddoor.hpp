@@ -16,11 +16,11 @@ namespace MWMechanics
     {
         public:
             /// Avoid door until the door is fully open
-            AiAvoidDoor(const MWWorld::Ptr& doorPtr);
+            AiAvoidDoor(const MWWorld::ConstPtr& doorPtr);
 
             virtual AiAvoidDoor *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -28,7 +28,7 @@ namespace MWMechanics
 
         private:
             float mDuration;
-            MWWorld::Ptr mDoorPtr;
+            MWWorld::ConstPtr mDoorPtr;
             ESM::Position mLastPos;
             float mAdjAngle;
     };

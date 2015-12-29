@@ -1,4 +1,3 @@
-
 #include "selectwrapper.hpp"
 
 #include <cctype>
@@ -264,10 +263,6 @@ bool MWDialogue::SelectWrapper::isNpcOnly() const
     {
         Function_NotFaction, Function_NotClass, Function_NotRace,
         Function_SameGender, Function_SameRace, Function_SameFaction,
-        Function_PcSkill,
-        Function_PcExpelled,
-        Function_PcVampire,
-        Function_PcCrimeLevel,
         Function_RankRequirement,
         Function_Reputation, Function_FactionRankDiff,
         Function_Werewolf, Function_WerewolfKills,

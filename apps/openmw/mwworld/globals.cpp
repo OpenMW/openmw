@@ -1,4 +1,3 @@
-
 #include "globals.hpp"
 
 #include <stdexcept>
@@ -14,7 +13,7 @@ namespace MWWorld
 {
     Globals::Collection::const_iterator Globals::find (const std::string& name) const
     {
-        Collection::const_iterator iter = mVariables.find (name);
+        Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mVariables.end())
             throw std::runtime_error ("unknown global variable: " + name);
@@ -24,7 +23,7 @@ namespace MWWorld
 
     Globals::Collection::iterator Globals::find (const std::string& name)
     {
-        Collection::iterator iter = mVariables.find (name);
+        Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mVariables.end())
             throw std::runtime_error ("unknown global variable: " + name);
@@ -41,28 +40,28 @@ namespace MWWorld
         for (MWWorld::Store<ESM::Global>::iterator iter = globals.begin(); iter!=globals.end();
             ++iter)
         {
-            mVariables.insert (std::make_pair (iter->mId, iter->mValue));
+            mVariables.insert (std::make_pair (Misc::StringUtils::lowerCase (iter->mId), *iter));
         }
     }
 
     const ESM::Variant& Globals::operator[] (const std::string& name) const
     {
-        return find (name)->second;
+        return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
 
     ESM::Variant& Globals::operator[] (const std::string& name)
     {
-        return find (name)->second;
+        return find (Misc::StringUtils::lowerCase (name))->second.mValue;
     }
 
     char Globals::getType (const std::string& name) const
     {
-        Collection::const_iterator iter = mVariables.find (name);
+        Collection::const_iterator iter = mVariables.find (Misc::StringUtils::lowerCase (name));
 
         if (iter==mVariables.end())
             return ' ';
 
-        switch (iter->second.getType())
+        switch (iter->second.mValue.getType())
         {
             case ESM::VT_Short: return 's';
             case ESM::VT_Long: return 'l';
@@ -82,8 +81,7 @@ namespace MWWorld
         for (Collection::const_iterator iter (mVariables.begin()); iter!=mVariables.end(); ++iter)
         {
             writer.startRecord (ESM::REC_GLOB);
-            writer.writeHNString ("NAME", iter->first);
-            iter->second.write (writer, ESM::Variant::Format_Global);
+            iter->second.save (writer);
             writer.endRecord (ESM::REC_GLOB);
         }
     }
@@ -92,14 +90,17 @@ namespace MWWorld
     {
         if (type==ESM::REC_GLOB)
         {
-            std::string id = reader.getHNString ("NAME");
+            ESM::Global global;
+            bool isDeleted = false;
 
-            Collection::iterator iter = mVariables.find (Misc::StringUtils::lowerCase (id));
+            // This readRecord() method is used when reading a saved game.
+            // Deleted globals can't appear there, so isDeleted will be ignored here.
+            global.load(reader, isDeleted);
+            Misc::StringUtils::lowerCaseInPlace(global.mId);
 
+            Collection::iterator iter = mVariables.find (global.mId);
             if (iter!=mVariables.end())
-                iter->second.read (reader, ESM::Variant::Format_Global);
-            else
-                reader.skipRecord();
+                iter->second = global;
 
             return true;
         }

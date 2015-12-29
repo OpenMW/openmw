@@ -10,11 +10,6 @@
 #include "objects.hpp"
 #include "actors.hpp"
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWWorld
 {
     class CellStore;
@@ -125,6 +120,11 @@ namespace MWMechanics
                                       OffenseType type, int arg=0, bool victimAware=false);
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+
+            /// Notify that actor was killed, add a murder bounty if applicable
+            /// @note No-op for non-player attackers
+            virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
+
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
@@ -137,7 +137,9 @@ namespace MWMechanics
 
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr);
 
-            virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+            /// Attempt to play an animation group
+            /// @return Success or error
+            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
             virtual void skipAnimation(const MWWorld::Ptr& ptr);
             virtual bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string &groupName);
 
@@ -145,9 +147,10 @@ namespace MWMechanics
             /// paused we may want to do it manually (after equipping permanent enchantment)
             virtual void updateMagicEffects (const MWWorld::Ptr& ptr);
 
-            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects);
-            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects);
+            virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects);
+            virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects);
 
+            virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
 
@@ -180,13 +183,18 @@ namespace MWMechanics
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid);
+            
+            /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
+
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
 
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
                                       OffenseType type, int arg=0);
 
-            /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
-            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
+
     };
 }
 

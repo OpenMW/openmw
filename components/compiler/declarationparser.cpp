@@ -1,4 +1,3 @@
-
 #include "declarationparser.hpp"
 
 #include <components/misc/stringops.hpp>

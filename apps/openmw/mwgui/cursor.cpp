@@ -5,8 +5,6 @@
 #include <MyGUI_RotatingSkin.h>
 #include <MyGUI_Gui.h>
 
-#include <OgreMath.h>
-
 namespace MWGui
 {
 

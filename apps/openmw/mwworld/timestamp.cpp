@@ -96,7 +96,7 @@ namespace MWWorld
         if (left.getHour()<right.getHour())
         {
             hours = 24-right.getHour()+left.getHour();
-            ++days;
+            --days;
         }
         else
         {

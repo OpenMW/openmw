@@ -1,6 +1,6 @@
 #include "security.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -31,7 +31,7 @@ namespace MWMechanics
     void Security::pickLock(const MWWorld::Ptr &lock, const MWWorld::Ptr &lockpick,
                             std::string& resultMessage, std::string& resultSound)
     {
-        if (!(lock.getCellRef().getLockLevel() > 0)) //If it's unlocked back out immediately
+        if (!(lock.getCellRef().getLockLevel() > 0) || !lock.getClass().canLock(lock)) //If it's unlocked back out immediately
             return;
 
         int lockStrength = lock.getCellRef().getLockLevel();
@@ -50,7 +50,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
-            if (OEngine::Misc::Rng::roll0to99() <= x)
+            if (Misc::Rng::roll0to99() <= x)
             {
                 lock.getClass().unlock(lock);
                 resultMessage = "#{sLockSuccess}";
@@ -91,7 +91,7 @@ namespace MWMechanics
         else
         {
             MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
-            if (OEngine::Misc::Rng::roll0to99() <= x)
+            if (Misc::Rng::roll0to99() <= x)
             {
                 trap.getCellRef().setTrap("");
 

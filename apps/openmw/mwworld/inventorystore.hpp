@@ -87,7 +87,6 @@ namespace MWWorld
                 float mMultiplier;
             };
 
-            // TODO: store in savegame
             typedef std::map<std::string, std::vector<EffectParams> > TEffectMagnitudes;
             TEffectMagnitudes mPermanentMagicEffectMagnitudes;
 
@@ -142,7 +141,7 @@ namespace MWWorld
             void equip (int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
             ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
-            bool isEquipped(const MWWorld::Ptr& item);
+            bool isEquipped(const MWWorld::ConstPtr& item);
             ///< Utility function, returns true if the given item is equipped in any slot
 
             void setSelectedEnchantItem(const ContainerStoreIterator& iterator);
@@ -168,7 +167,7 @@ namespace MWWorld
             ///< \attention This function is internal to the world model and should not be called from
             /// outside.
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
             virtual int remove(const Ptr& item, int count, const Ptr& actor);
@@ -192,6 +191,8 @@ namespace MWWorld
             void setListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 
+            InventoryStoreListener* getListener();
+
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
             void rechargeItems (float duration);
@@ -206,7 +207,7 @@ namespace MWWorld
             virtual void clear();
             ///< Empty container.
 
-            virtual void writeState (ESM::InventoryState& state);
+            virtual void writeState (ESM::InventoryState& state) const;
 
             virtual void readState (const ESM::InventoryState& state);
     };

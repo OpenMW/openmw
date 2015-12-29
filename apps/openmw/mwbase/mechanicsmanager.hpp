@@ -6,9 +6,9 @@
 #include <list>
 #include <stdint.h>
 
-namespace Ogre
+namespace osg
 {
-    class Vector3;
+    class Vec3f;
 }
 
 namespace ESM
@@ -23,6 +23,7 @@ namespace MWWorld
 {
     class Ptr;
     class CellStore;
+    class CellRef;
 }
 
 namespace Loading
@@ -128,6 +129,11 @@ namespace MWBase
                                       OffenseType type, int arg=0, bool victimAware=false) = 0;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
+
+            /// Notify that actor was killed, add a murder bounty if applicable
+            /// @note No-op for non-player attackers
+            virtual void actorKilled (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
+
             /// Utility to check if taking this item is illegal and calling commitCrime if so
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
@@ -154,12 +160,13 @@ namespace MWBase
             virtual void forceStateUpdate(const MWWorld::Ptr &ptr) = 0;
             ///< Forces an object to refresh its animation state.
 
-            virtual void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
+            virtual bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number=1) = 0;
             ///< Run animation for a MW-reference. Calls to this function for references that are currently not
             /// in the scene should be ignored.
             ///
             /// \param mode 0 normal, 1 immediate start, 2 immediate loop
             /// \param count How many times the animation should be run
+            /// \return Success or error
 
             virtual void skipAnimation(const MWWorld::Ptr& ptr) = 0;
             ///< Skip the animation for the given MW-reference for one frame. Calls to this function for
@@ -174,11 +181,12 @@ namespace MWBase
             virtual bool toggleAI() = 0;
             virtual bool isAIActive() = 0;
 
-            virtual void getObjectsInRange (const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
-            virtual void getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
+            virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
+            virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
 
-            ///return the list of actors which are following the given actor
-            /**ie AiFollow is active and the target is the actor**/
+            ///Returns the list of actors which are siding with the given actor in fights
+            /**ie AiFollow or AiEscort is active and the target is the actor **/
+            virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) = 0;
 
@@ -211,6 +219,15 @@ namespace MWBase
 
             /// Has the player stolen this item from the given owner?
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
+            
+            virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
+
+            /// Turn actor into werewolf or normal form.
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
+
+            /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
+            /// It only applies to the current form the NPC is in.
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
     };
 }
 

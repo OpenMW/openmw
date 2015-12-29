@@ -37,7 +37,7 @@ namespace Compiler
             float mPutbackFloat;
             std::string mPutbackName;
             TokenLoc mPutbackLoc;
-            bool mNameStartingWithDigit;
+            bool mStrictKeywords;
 
         public:
 
@@ -117,16 +117,18 @@ namespace Compiler
             ///< put back a float token
 
             void putbackName (const std::string& name, const TokenLoc& loc);
-            ///< put back a name toekn
+            ///< put back a name token
 
             void putbackKeyword (int keyword, const TokenLoc& loc);
             ///< put back a keyword token
 
             void listKeywords (std::vector<std::string>& keywords);
-            ///< Append all known keywords to \a kaywords.
+            ///< Append all known keywords to \a keywords.
 
-            /// For the next token allow names to start with a digit.
-            void allowNameStartingwithDigit();
+            /// Do not accept keywords in quotation marks anymore.
+            ///
+            /// \attention This mode lasts only until the next newline is reached.
+            void enableStrictKeywords();
     };
 }
 

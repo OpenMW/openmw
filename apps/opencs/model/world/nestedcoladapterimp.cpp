@@ -606,7 +606,7 @@ namespace CSMWorld
         funcMap["09"] = "PC Fatigue";
         funcMap["10"] = "PC Strength";
         funcMap["11"] = "PC Block";
-        funcMap["12"] = "PC Armoror";
+        funcMap["12"] = "PC Armorer";
         funcMap["13"] = "PC Medium Armor";
         funcMap["14"] = "PC Heavy Armor";
         funcMap["15"] = "PC Blunt Weapon";
@@ -906,7 +906,7 @@ namespace CSMWorld
 
     NestedTableWrapperBase* RaceAttributeAdapter::table(const Record<ESM::Race>& record) const
     {
-        std::vector<typename ESM::Race::RADTstruct> wrap;
+        std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);
@@ -922,7 +922,7 @@ namespace CSMWorld
 
         switch (subColIndex)
         {
-            case 0: return QString(ESM::Attribute::sAttributeNames[subRowIndex].c_str());
+            case 0: return subRowIndex;
             case 1: return race.mData.mAttributeValues[subRowIndex].mMale;
             case 2: return race.mData.mAttributeValues[subRowIndex].mFemale;
             default: throw std::runtime_error("Race Attribute subcolumn index out of range");
@@ -983,7 +983,7 @@ namespace CSMWorld
 
     NestedTableWrapperBase* RaceSkillsBonusAdapter::table(const Record<ESM::Race>& record) const
     {
-        std::vector<typename ESM::Race::RADTstruct> wrap;
+        std::vector<ESM::Race::RADTstruct> wrap;
         wrap.push_back(record.get().mData);
         // deleted by dtor of NestedTableStoring
         return new NestedTableWrapper<std::vector<ESM::Race::RADTstruct> >(wrap);

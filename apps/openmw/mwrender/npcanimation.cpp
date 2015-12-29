@@ -1,34 +1,39 @@
 #include "npcanimation.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
-#include <OgreParticleSystem.h>
-#include <OgreSubEntity.h>
-#include <OgreSkeleton.h>
-#include <OgreSkeletonInstance.h>
-#include <OgreSceneNode.h>
-#include <OgreBone.h>
-#include <OgreTechnique.h>
+#include <osg/UserDataContainer>
+#include <osg/MatrixTransform>
+#include <osg/Depth>
 
-#include <extern/shiny/Main/Factory.hpp>
+#include <osgUtil/RenderBin>
+#include <osgUtil/CullVisitor>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/attach.hpp>
+#include <components/sceneutil/visitor.hpp>
+
+#include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
-#include "renderconst.hpp"
 #include "camera.hpp"
+#include "rotatecontroller.hpp"
+#include "renderbin.hpp"
+#include "vismask.hpp"
 
 namespace
 {
@@ -69,31 +74,94 @@ std::string getVampireHead(const std::string& race, bool female)
     return "meshes\\" + bodyPart->mModel;
 }
 
-bool isSkinned (NifOgre::ObjectScenePtr scene)
-{
-    if (scene->mSkelBase == NULL)
-        return false;
-    for(size_t j = 0; j < scene->mEntities.size(); j++)
-    {
-        Ogre::Entity *ent = scene->mEntities[j];
-        if(scene->mSkelBase != ent && ent->hasSkeleton())
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
 }
 
 
 namespace MWRender
 {
 
+class HeadAnimationTime : public SceneUtil::ControllerSource
+{
+private:
+    MWWorld::Ptr mReference;
+    float mTalkStart;
+    float mTalkStop;
+    float mBlinkStart;
+    float mBlinkStop;
+
+    float mBlinkTimer;
+
+    bool mEnabled;
+
+    float mValue;
+private:
+    void resetBlinkTimer();
+public:
+    HeadAnimationTime(MWWorld::Ptr reference);
+
+    void updatePtr(const MWWorld::Ptr& updated);
+
+    void update(float dt);
+
+    void setEnabled(bool enabled);
+
+    void setTalkStart(float value);
+    void setTalkStop(float value);
+    void setBlinkStart(float value);
+    void setBlinkStop(float value);
+
+    virtual float getValue(osg::NodeVisitor* nv);
+};
+
+// --------------------------------------------------------------------------------
+
+/// Subclass RotateController to add a Z-offset for sneaking in first person mode.
+/// @note We use inheritance instead of adding another controller, so that we do not have to compute the worldOrient twice.
+/// @note Must be set on a MatrixTransform.
+class NeckController : public RotateController
+{
+public:
+    NeckController(osg::Node* relativeTo)
+        : RotateController(relativeTo)
+    {
+    }
+
+    void setOffset(osg::Vec3f offset)
+    {
+        mOffset = offset;
+    }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
+        osg::Matrix matrix = transform->getMatrix();
+
+        osg::Quat worldOrient = getWorldOrientation(node);
+        osg::Quat orient = worldOrient * mRotate * worldOrient.inverse() * matrix.getRotate();
+
+        matrix.setRotate(orient);
+        matrix.setTrans(matrix.getTrans() + worldOrient.inverse() * mOffset);
+
+        transform->setMatrix(matrix);
+
+        traverse(node,nv);
+    }
+
+private:
+    osg::Vec3f mOffset;
+};
+
+// --------------------------------------------------------------------------------------------------------------
+
 HeadAnimationTime::HeadAnimationTime(MWWorld::Ptr reference)
     : mReference(reference), mTalkStart(0), mTalkStop(0), mBlinkStart(0), mBlinkStop(0), mEnabled(true), mValue(0)
 {
     resetBlinkTimer();
+}
+
+void HeadAnimationTime::updatePtr(const MWWorld::Ptr &updated)
+{
+    mReference = updated;
 }
 
 void HeadAnimationTime::setEnabled(bool enabled)
@@ -103,7 +171,7 @@ void HeadAnimationTime::setEnabled(bool enabled)
 
 void HeadAnimationTime::resetBlinkTimer()
 {
-    mBlinkTimer = -(2.0f + OEngine::Misc::Rng::rollDice(6));
+    mBlinkTimer = -(2.0f + Misc::Rng::rollDice(6));
 }
 
 void HeadAnimationTime::update(float dt)
@@ -129,13 +197,14 @@ void HeadAnimationTime::update(float dt)
     }
     else
     {
+        // FIXME: would be nice to hold on to the SoundPtr so we don't have to retrieve it every frame
         mValue = mTalkStart +
             (mTalkStop - mTalkStart) *
             std::min(1.f, MWBase::Environment::get().getSoundManager()->getSaySoundLoudness(mReference)*2); // Rescale a bit (most voices are not very loud)
     }
 }
 
-float HeadAnimationTime::getValue() const
+float HeadAnimationTime::getValue(osg::NodeVisitor*)
 {
     return mValue;
 }
@@ -159,6 +228,8 @@ void HeadAnimationTime::setBlinkStop(float value)
 {
     mBlinkStop = value;
 }
+
+// ----------------------------------------------------
 
 static NpcAnimation::PartBoneMap createPartListMap()
 {
@@ -200,29 +271,27 @@ NpcAnimation::~NpcAnimation()
             // No need to getInventoryStore() to reset, if none exists
             // This is to avoid triggering the listener via ensureCustomData()->autoEquip()->fireEquipmentChanged()
             // all from within this destructor. ouch!
-           && mPtr.getRefData().getCustomData())
+           && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getListener() == this)
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
 }
 
-
-NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, Ogre::SceneNode* node, int visibilityFlags, bool disableListener, bool disableSounds, ViewMode viewMode)
-  : Animation(ptr, node),
+NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,
+                           bool disableListener, bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
+  : Animation(ptr, parentNode, resourceSystem),
     mListenerDisabled(disableListener),
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
     mNpcType(Type_Normal),
-    mVisibilityFlags(visibilityFlags),
-    mFirstPersonOffset(0.f, 0.f, 0.f),
-    mAlpha(1.f),
+    mFirstPersonFieldOfView(firstPersonFieldOfView),
     mSoundsDisabled(disableSounds),
-    mHeadYaw(0.f),
-    mHeadPitch(0.f)
+    mAccurateAiming(false),
+    mAimingFactor(0.f)
 {
     mNpc = mPtr.get<ESM::NPC>()->mBase;
 
-    mHeadAnimationTime = Ogre::SharedPtr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
-    mWeaponAnimationTime = Ogre::SharedPtr<WeaponAnimationTime>(new WeaponAnimationTime(this));
+    mHeadAnimationTime = boost::shared_ptr<HeadAnimationTime>(new HeadAnimationTime(mPtr));
+    mWeaponAnimationTime = boost::shared_ptr<WeaponAnimationTime>(new WeaponAnimationTime(this));
 
     for(size_t i = 0;i < ESM::PRT_Count;i++)
     {
@@ -244,6 +313,81 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
 
     mViewMode = viewMode;
     rebuild();
+
+    setRenderBin();
+}
+
+/// @brief A RenderBin callback to clear the depth buffer before rendering.
+class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
+{
+public:
+    DepthClearCallback()
+    {
+        mDepth = new osg::Depth;
+        mDepth->setWriteMask(true);
+    }
+
+    virtual void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)
+    {
+        renderInfo.getState()->applyAttribute(mDepth);
+
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        bin->drawImplementation(renderInfo, previous);
+    }
+
+    osg::ref_ptr<osg::Depth> mDepth;
+};
+
+/// Overrides Field of View to given value for rendering the subgraph.
+/// Must be added as cull callback.
+class OverrideFieldOfViewCallback : public osg::NodeCallback
+{
+public:
+    OverrideFieldOfViewCallback(float fov)
+        : mFov(fov)
+    {
+    }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+        osg::RefMatrix* projectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
+        float fov, aspect, zNear, zFar;
+        if (projectionMatrix->getPerspective(fov, aspect, zNear, zFar))
+        {
+            fov = mFov;
+            projectionMatrix->makePerspective(fov, aspect, zNear, zFar);
+            cv->pushProjectionMatrix(projectionMatrix);
+            traverse(node, nv);
+            cv->popProjectionMatrix();
+        }
+        else
+            traverse(node, nv);
+    }
+
+private:
+    float mFov;
+};
+
+void NpcAnimation::setRenderBin()
+{
+    if (mViewMode == VM_FirstPerson)
+    {
+        static bool prototypeAdded = false;
+        if (!prototypeAdded)
+        {
+            osg::ref_ptr<osgUtil::RenderBin> depthClearBin (new osgUtil::RenderBin);
+            depthClearBin->setDrawCallback(new DepthClearCallback);
+            osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
+            prototypeAdded = true;
+        }
+
+        osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
+        stateset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+    }
+    else
+        Animation::setRenderBin();
 }
 
 void NpcAnimation::rebuild()
@@ -251,6 +395,21 @@ void NpcAnimation::rebuild()
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
+}
+
+int NpcAnimation::getSlot(const osg::NodePath &path) const
+{
+    for (int i=0; i<ESM::PRT_Count; ++i)
+    {
+        PartHolderPtr part = mObjectParts[i];
+        if (!part.get())
+            continue;
+        if (std::find(path.begin(), path.end(), part->getNode().get()) != path.end())
+        {
+            return mPartslots[i];
+        }
+    }
+    return -1;
 }
 
 void NpcAnimation::updateNpcBase()
@@ -300,8 +459,9 @@ void NpcAnimation::updateNpcBase()
                          (!isWerewolf ? !isBeast ? "meshes\\base_anim.1st.nif"
                                                  : "meshes\\base_animkna.1st.nif"
                                       : "meshes\\wolf\\skin.1st.nif");
-    smodel = Misc::ResourceHelpers::correctActorModelPath(smodel);
-    setObjectRoot(smodel, true);
+    smodel = Misc::ResourceHelpers::correctActorModelPath(smodel, mResourceSystem->getVFS());
+
+    setObjectRoot(smodel, true, true, false);
 
     if(mViewMode != VM_FirstPerson)
     {
@@ -318,13 +478,14 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
+        mObjectRoot->setNodeMask(Mask_FirstPerson);
+        mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
         if(isWerewolf)
             addAnimSource(smodel);
         else
         {
-            /* A bit counter-intuitive, but unlike third-person anims, it seems
-             * beast races get both base_anim.1st.nif and base_animkna.1st.nif.
-             */
+            // A bit counter-intuitive, but unlike third-person anims, it seems
+            // beast races get both base_anim.1st.nif and base_animkna.1st.nif.
             addAnimSource("meshes\\xbase_anim.1st.nif");
             if(isBeast)
                 addAnimSource("meshes\\xbase_animkna.1st.nif");
@@ -342,10 +503,9 @@ void NpcAnimation::updateNpcBase()
 
 void NpcAnimation::updateParts()
 {
-    if (!mSkelBase)
+    if (!mObjectRoot.get())
         return;
 
-    mAlpha = 1.f;
     const MWWorld::Class &cls = mPtr.getClass();
 
     NpcType curType = Type_Normal;
@@ -400,7 +560,7 @@ void NpcAnimation::updateParts()
 
         int prio = 1;
         bool enchantedGlow = !store->getClass().getEnchantment(*store).empty();
-        Ogre::Vector3 glowColor = getEnchantmentColor(*store);
+        osg::Vec4f glowColor = getEnchantmentColor(*store);
         if(store->getTypeName() == typeid(ESM::Clothing).name())
         {
             prio = ((slotlist[i].mBasePriority+1)<<1) + 0;
@@ -452,7 +612,7 @@ void NpcAnimation::updateParts()
             const ESM::Light *light = part.get<ESM::Light>()->mBase;
             addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft,
                                        1, "meshes\\"+light->mModel);
-            addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], light);
+            addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
         }
     }
 
@@ -546,7 +706,7 @@ void NpcAnimation::updateParts()
                 continue;
             }
 
-            if (!mNpc->isMale() != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            if ((!mNpc->isMale()) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
             {
                 // Allow opposite gender's parts as fallback if parts for our gender are missing
                 BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
@@ -584,98 +744,37 @@ void NpcAnimation::updateParts()
         attachArrow();
 }
 
-void NpcAnimation::addFirstPersonOffset(const Ogre::Vector3 &offset)
+PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const std::string& bonename, const std::string& bonefilter, bool enchantedGlow, osg::Vec4f* glowColor)
 {
-    mFirstPersonOffset += offset;
+    osg::ref_ptr<osg::Node> instance = mResourceSystem->getSceneManager()->createInstance(model);
+    osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, bonename);
+    mResourceSystem->getSceneManager()->notifyAttached(attached);
+    if (enchantedGlow)
+        addGlow(attached, *glowColor);
+
+    return PartHolderPtr(new PartHolder(attached));
 }
 
-class SetObjectGroup {
-    int mGroup;
-
-public:
-    SetObjectGroup(int group) : mGroup(group) { }
-
-    void operator()(Ogre::MovableObject *obj) const
-    {
-        obj->getUserObjectBindings().setUserAny(Ogre::Any(mGroup));
-    }
-};
-
-NifOgre::ObjectScenePtr NpcAnimation::insertBoundedPart(const std::string &model, int group, const std::string &bonename, const std::string &bonefilter, bool enchantedGlow, Ogre::Vector3* glowColor)
-{
-    NifOgre::ObjectScenePtr objects = NifOgre::Loader::createObjects(mSkelBase, bonename, bonefilter, mInsert, model);
-    setRenderProperties(objects, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
-                        enchantedGlow, glowColor);
-
-    std::for_each(objects->mEntities.begin(), objects->mEntities.end(), SetObjectGroup(group));
-    std::for_each(objects->mParticles.begin(), objects->mParticles.end(), SetObjectGroup(group));
-
-    if(objects->mSkelBase)
-    {
-        Ogre::AnimationStateSet *aset = objects->mSkelBase->getAllAnimationStates();
-        Ogre::AnimationStateIterator asiter = aset->getAnimationStateIterator();
-        while(asiter.hasMoreElements())
-        {
-            Ogre::AnimationState *state = asiter.getNext();
-            state->setEnabled(false);
-            state->setLoop(false);
-        }
-        Ogre::SkeletonInstance *skelinst = objects->mSkelBase->getSkeleton();
-        Ogre::Skeleton::BoneIterator boneiter = skelinst->getBoneIterator();
-        while(boneiter.hasMoreElements())
-            boneiter.getNext()->setManuallyControlled(true);
-    }
-
-    return objects;
-}
-
-Ogre::Vector3 NpcAnimation::runAnimation(float timepassed)
+osg::Vec3f NpcAnimation::runAnimation(float timepassed)
 {    
-    Ogre::Vector3 ret = Animation::runAnimation(timepassed);
+    osg::Vec3f ret = Animation::runAnimation(timepassed);
 
     mHeadAnimationTime->update(timepassed);
 
-    if (mSkelBase)
+    if (mFirstPersonNeckController)
     {
-        Ogre::SkeletonInstance *baseinst = mSkelBase->getSkeleton();
-        if(mViewMode == VM_FirstPerson)
-        {
-            float pitch = mPtr.getRefData().getPosition().rot[0];
-            Ogre::Node *node = baseinst->getBone("Bip01 Neck");
-            node->pitch(Ogre::Radian(-pitch), Ogre::Node::TS_WORLD);
-
-            // This has to be done before this function ends;
-            // updateSkeletonInstance, below, touches the hands.
-            node->translate(mFirstPersonOffset, Ogre::Node::TS_WORLD);
-        }
+        if (mAccurateAiming)
+            mAimingFactor = 1.f;
         else
-        {
-            // In third person mode we may still need pitch for ranged weapon targeting
-            pitchSkeleton(mPtr.getRefData().getPosition().rot[0], baseinst);
+            mAimingFactor = std::max(0.f, mAimingFactor - timepassed * 0.5f);
 
-            Ogre::Node* node = baseinst->getBone("Bip01 Head");
-            if (node)
-                node->rotate(Ogre::Quaternion(mHeadYaw, Ogre::Vector3::UNIT_Z) * Ogre::Quaternion(mHeadPitch, Ogre::Vector3::UNIT_X), Ogre::Node::TS_WORLD);
-        }
+        float rotateFactor = 0.75f + 0.25f * mAimingFactor;
+
+        mFirstPersonNeckController->setRotate(osg::Quat(mPtr.getRefData().getPosition().rot[0] * rotateFactor, osg::Vec3f(-1,0,0)));
+        mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
-    mFirstPersonOffset = 0.f; // reset the X, Y, Z offset for the next frame.
 
-    for(size_t i = 0;i < ESM::PRT_Count;i++)
-    {
-        if (mObjectParts[i].isNull())
-            continue;
-        std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[i]->mControllers.begin());
-        for(;ctrl != mObjectParts[i]->mControllers.end();++ctrl)
-            ctrl->update();
-
-        if (!isSkinned(mObjectParts[i]))
-            continue;
-
-        if (mSkelBase)
-            updateSkeletonInstance(mSkelBase->getSkeleton(), mObjectParts[i]->mSkelBase->getSkeleton());
-
-        mObjectParts[i]->mSkelBase->getAllAnimationStates()->_notifyDirty();
-    }
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
 
     return ret;
 }
@@ -685,7 +784,7 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartPriorities[type] = 0;
     mPartslots[type] = -1;
 
-    mObjectParts[type].setNull();
+    mObjectParts[type].reset();
     if (!mSoundIds[type].empty() && !mSoundsDisabled)
     {
         MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mSoundIds[type]);
@@ -712,7 +811,7 @@ void NpcAnimation::removePartGroup(int group)
     }
 }
 
-bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, Ogre::Vector3* glowColor)
+bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int group, int priority, const std::string &mesh, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     if(priority <= mPartPriorities[type])
         return false;
@@ -725,7 +824,7 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         const std::string& bonename = sPartList.at(type);
         // PRT_Hair seems to be the only type that breaks consistency and uses a filter that's different from the attachment bone
         const std::string bonefilter = (type == ESM::PRT_Hair) ? "hair" : bonename;
-        mObjectParts[type] = insertBoundedPart(mesh, group, bonename, bonefilter, enchantedGlow, glowColor);
+        mObjectParts[type] = insertBoundedPart(mesh, bonename, bonefilter, enchantedGlow, glowColor);
     }
     catch (std::exception& e)
     {
@@ -747,63 +846,49 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             }
         }
     }
-    if(mObjectParts[type]->mSkelBase)
+
+    boost::shared_ptr<SceneUtil::ControllerSource> src;
+    if (type == ESM::PRT_Head)
     {
-        Ogre::SkeletonInstance *skel = mObjectParts[type]->mSkelBase->getSkeleton();
-        if(mObjectParts[type]->mSkelBase->isParentTagPoint())
+        src = mHeadAnimationTime;
+
+        osg::Node* node = mObjectParts[type]->getNode();
+        if (node->getUserDataContainer())
         {
-            Ogre::Node *root = mObjectParts[type]->mSkelBase->getParentNode();
-            if(skel->hasBone("BoneOffset"))
+            for (unsigned int i=0; i<node->getUserDataContainer()->getNumUserObjects(); ++i)
             {
-                Ogre::Bone *offset = skel->getBone("BoneOffset");
-
-                root->translate(offset->getPosition());
-
-                // It appears that the BoneOffset rotation is completely bogus, at least for light models.
-                //root->rotate(offset->getOrientation());
-                root->pitch(Ogre::Degree(-90.0f));
-
-                root->scale(offset->getScale());
-                root->setInitialState();
-            }
-        }
-
-        if (isSkinned(mObjectParts[type]))
-            updateSkeletonInstance(mSkelBase->getSkeleton(), skel);
-    }
-
-    std::vector<Ogre::Controller<Ogre::Real> >::iterator ctrl(mObjectParts[type]->mControllers.begin());
-    for(;ctrl != mObjectParts[type]->mControllers.end();++ctrl)
-    {
-        if(ctrl->getSource().isNull())
-        {
-            ctrl->setSource(mNullAnimationTimePtr);
-
-            if (type == ESM::PRT_Head)
-            {
-                ctrl->setSource(mHeadAnimationTime);
-                const NifOgre::TextKeyMap& keys = mObjectParts[type]->mTextKeys;
-                for (NifOgre::TextKeyMap::const_iterator it = keys.begin(); it != keys.end(); ++it)
+                osg::Object* obj = node->getUserDataContainer()->getUserObject(i);
+                if (NifOsg::TextKeyMapHolder* keys = dynamic_cast<NifOsg::TextKeyMapHolder*>(obj))
                 {
-                    if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
-                        mHeadAnimationTime->setTalkStart(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
-                        mHeadAnimationTime->setTalkStop(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
-                        mHeadAnimationTime->setBlinkStart(it->first);
-                    if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
-                        mHeadAnimationTime->setBlinkStop(it->first);
+                    for (NifOsg::TextKeyMap::const_iterator it = keys->mTextKeys.begin(); it != keys->mTextKeys.end(); ++it)
+                    {
+                        if (Misc::StringUtils::ciEqual(it->second, "talk: start"))
+                            mHeadAnimationTime->setTalkStart(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "talk: stop"))
+                            mHeadAnimationTime->setTalkStop(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "blink: start"))
+                            mHeadAnimationTime->setBlinkStart(it->first);
+                        if (Misc::StringUtils::ciEqual(it->second, "blink: stop"))
+                            mHeadAnimationTime->setBlinkStop(it->first);
+                    }
+
+                    break;
                 }
             }
-            else if (type == ESM::PRT_Weapon)
-                ctrl->setSource(mWeaponAnimationTime);
         }
     }
+    else if (type == ESM::PRT_Weapon)
+        src = mWeaponAnimationTime;
+    else
+        src.reset(new NullAnimationTime);
+
+    SceneUtil::AssignControllerSourcesVisitor assignVisitor(src);
+    mObjectParts[type]->getNode()->accept(assignVisitor);
 
     return true;
 }
 
-void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts, bool enchantedGlow, Ogre::Vector3* glowColor)
+void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
     const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
@@ -851,6 +936,30 @@ void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::
     }
 }
 
+void NpcAnimation::addControllers()
+{
+    Animation::addControllers();
+
+    mFirstPersonNeckController = NULL;
+    WeaponAnimation::deleteControllers();
+
+    if (mViewMode == VM_FirstPerson)
+    {
+        NodeMap::iterator found = mNodeMap.find("bip01 neck");
+        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+        {
+            osg::Node* node = found->second;
+            mFirstPersonNeckController = new NeckController(mObjectRoot.get());
+            node->addUpdateCallback(mFirstPersonNeckController);
+            mActiveControllers.insert(std::make_pair(node, mFirstPersonNeckController));
+        }
+    }
+    else if (mViewMode == VM_Normal)
+    {
+        WeaponAnimation::addControllers(mNodeMap, mActiveControllers, mObjectRoot.get());
+    }
+}
+
 void NpcAnimation::showWeapons(bool showWeapon)
 {
     mShowWeapons = showWeapon;
@@ -860,7 +969,7 @@ void NpcAnimation::showWeapons(bool showWeapon)
         MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
         if(weapon != inv.end())
         {
-            Ogre::Vector3 glowColor = getEnchantmentColor(*weapon);
+            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
             std::string mesh = weapon->getClass().getModel(*weapon);
             addOrReplaceIndividualPart(ESM::PRT_Weapon, MWWorld::InventoryStore::Slot_CarriedRight, 1,
                                        mesh, !weapon->getClass().getEnchantment(*weapon).empty(), &glowColor);
@@ -873,17 +982,16 @@ void NpcAnimation::showWeapons(bool showWeapon)
                 if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
                     attachArrow();
                 else
-                    mAmmunition.setNull();
+                    mAmmunition.reset();
             }
             else
-                mAmmunition.setNull();
+                mAmmunition.reset();
         }
     }
     else
     {
         removeIndividualPart(ESM::PRT_Weapon);
     }
-    mAlpha = 1.f;
 }
 
 void NpcAnimation::showCarriedLeft(bool show)
@@ -893,27 +1001,17 @@ void NpcAnimation::showCarriedLeft(bool show)
     MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
     if(show && iter != inv.end())
     {
-        Ogre::Vector3 glowColor = getEnchantmentColor(*iter);
+        osg::Vec4f glowColor = getEnchantmentColor(*iter);
         std::string mesh = iter->getClass().getModel(*iter);
         if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                                    mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
             if (iter->getTypeName() == typeid(ESM::Light).name())
-                addExtraLight(mInsert->getCreator(), mObjectParts[ESM::PRT_Shield], iter->get<ESM::Light>()->mBase);
+                addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
-}
-
-void NpcAnimation::configureAddedObject(NifOgre::ObjectScenePtr object, MWWorld::Ptr ptr, int slot)
-{
-    Ogre::Vector3 glowColor = getEnchantmentColor(ptr);
-    setRenderProperties(object, (mViewMode == VM_FirstPerson) ? RV_FirstPerson : mVisibilityFlags, RQG_Main, RQG_Alpha, 0,
-                        !ptr.getClass().getEnchantment(ptr).empty(), &glowColor);
-
-    std::for_each(object->mEntities.begin(), object->mEntities.end(), SetObjectGroup(slot));
-    std::for_each(object->mParticles.begin(), object->mParticles.end(), SetObjectGroup(slot));
 }
 
 void NpcAnimation::attachArrow()
@@ -921,9 +1019,34 @@ void NpcAnimation::attachArrow()
     WeaponAnimation::attachArrow(mPtr);
 }
 
-void NpcAnimation::releaseArrow()
+void NpcAnimation::releaseArrow(float attackStrength)
 {
-    WeaponAnimation::releaseArrow(mPtr);
+    WeaponAnimation::releaseArrow(mPtr, attackStrength);
+}
+
+osg::Group* NpcAnimation::getArrowBone()
+{
+    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
+    if (!part)
+        return NULL;
+
+    SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+    part->getNode()->accept(findVisitor);
+
+    return findVisitor.mFoundNode;
+}
+
+osg::Node* NpcAnimation::getWeaponNode()
+{
+    PartHolderPtr part = mObjectParts[ESM::PRT_Weapon];
+    if (!part)
+        return NULL;
+    return part->getNode();
+}
+
+Resource::ResourceSystem* NpcAnimation::getResourceSystem()
+{
+    return mResourceSystem;
 }
 
 void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, bool isNew, bool playSound)
@@ -954,73 +1077,14 @@ void NpcAnimation::permanentEffectAdded(const ESM::MagicEffect *magicEffect, boo
     }
 }
 
-void NpcAnimation::setAlpha(float alpha)
-{
-    if (alpha == mAlpha)
-        return;
-    mAlpha = alpha;
-
-    for (int i=0; i<ESM::PRT_Count; ++i)
-    {
-        if (mObjectParts[i].isNull())
-            continue;
-
-        for (unsigned int j=0; j<mObjectParts[i]->mEntities.size(); ++j)
-        {
-            Ogre::Entity* ent = mObjectParts[i]->mEntities[j];
-            if (ent != mObjectParts[i]->mSkelBase)
-                applyAlpha(alpha, ent, mObjectParts[i]);
-        }
-    }
-}
-
 void NpcAnimation::enableHeadAnimation(bool enable)
 {
     mHeadAnimationTime->setEnabled(enable);
 }
 
-void NpcAnimation::preRender(Ogre::Camera *camera)
+void NpcAnimation::setWeaponGroup(const std::string &group)
 {
-    Animation::preRender(camera);
-    for (int i=0; i<ESM::PRT_Count; ++i)
-    {
-        if (mObjectParts[i].isNull())
-            continue;
-        mObjectParts[i]->rotateBillboardNodes(camera);
-    }
-}
-
-void NpcAnimation::applyAlpha(float alpha, Ogre::Entity *ent, NifOgre::ObjectScenePtr scene)
-{
-    sh::Factory::getInstance()._ensureMaterial(ent->getSubEntity(0)->getMaterial()->getName(), "Default");
-    ent->getSubEntity(0)->setRenderQueueGroup(alpha != 1.f || ent->getSubEntity(0)->getMaterial()->isTransparent()
-            ? RQG_Alpha : RQG_Main);
-
-
-    Ogre::MaterialPtr mat = scene->mMaterialControllerMgr.getWritableMaterial(ent);
-    if (mAlpha == 1.f)
-    {
-        // Don't bother remembering what the original values were. Just remove the techniques and let the factory restore them.
-        mat->removeAllTechniques();
-        sh::Factory::getInstance()._ensureMaterial(mat->getName(), "Default");
-        return;
-    }
-
-    Ogre::Material::TechniqueIterator techs = mat->getTechniqueIterator();
-    while(techs.hasMoreElements())
-    {
-        Ogre::Technique *tech = techs.getNext();
-        Ogre::Technique::PassIterator passes = tech->getPassIterator();
-        while(passes.hasMoreElements())
-        {
-            Ogre::Pass *pass = passes.getNext();
-            pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-            Ogre::ColourValue diffuse = pass->getDiffuse();
-            diffuse.a = alpha;
-            pass->setDiffuse(diffuse);
-            pass->setVertexColourTracking(pass->getVertexColourTracking() &~Ogre::TVC_DIFFUSE);
-        }
-    }
+    mWeaponAnimationTime->setGroup(group);
 }
 
 void NpcAnimation::equipmentChanged()
@@ -1034,31 +1098,27 @@ void NpcAnimation::setVampire(bool vampire)
         return;
     if ((mNpcType == Type_Vampire) != vampire)
     {
-        if (mPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (mPtr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWorld()->reattachPlayerCamera();
         else
             rebuild();
     }
 }
 
-void NpcAnimation::setHeadPitch(Ogre::Radian pitch)
+void NpcAnimation::setFirstPersonOffset(const osg::Vec3f &offset)
 {
-    mHeadPitch = pitch;
+    mFirstPersonOffset = offset;
 }
 
-void NpcAnimation::setHeadYaw(Ogre::Radian yaw)
+void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
 {
-    mHeadYaw = yaw;
+    Animation::updatePtr(updated);
+    mHeadAnimationTime->updatePtr(updated);
 }
 
-Ogre::Radian NpcAnimation::getHeadPitch() const
+void NpcAnimation::setAccurateAiming(bool enabled)
 {
-    return mHeadPitch;
-}
-
-Ogre::Radian NpcAnimation::getHeadYaw() const
-{
-    return mHeadYaw;
+    mAccurateAiming = enabled;
 }
 
 }

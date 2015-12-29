@@ -15,7 +15,7 @@
 #include <QScrollBar>
 
 #include "../../model/doc/document.hpp"
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "../../model/world/idtable.hpp"
 
@@ -66,9 +66,17 @@ void CSVDoc::View::setupFileMenu()
     connect (mVerify, SIGNAL (triggered()), this, SLOT (verify()));
     file->addAction (mVerify);
 
+    mMerge = new QAction (tr ("Merge"), this);
+    connect (mMerge, SIGNAL (triggered()), this, SLOT (merge()));
+    file->addAction (mMerge);
+
     QAction *loadErrors = new QAction (tr ("Load Error Log"), this);
     connect (loadErrors, SIGNAL (triggered()), this, SLOT (loadErrorLog()));
     file->addAction (loadErrors);
+
+    QAction *meta = new QAction (tr ("Meta Data"), this);
+    connect (meta, SIGNAL (triggered()), this, SLOT (addMetaDataSubView()));
+    file->addAction (meta);
 
     QAction *close = new QAction (tr ("&Close"), this);
     connect (close, SIGNAL (triggered()), this, SLOT (close()));
@@ -113,10 +121,9 @@ void CSVDoc::View::setupViewMenu()
     mShowStatusBar = new QAction (tr ("Show Status Bar"), this);
     mShowStatusBar->setCheckable (true);
     connect (mShowStatusBar, SIGNAL (toggled (bool)), this, SLOT (toggleShowStatusBar (bool)));
-    std::string showStatusBar =
-        CSMSettings::UserSettings::instance().settingValue("window/show-statusbar").toStdString();
-    if(showStatusBar == "true")
-        mShowStatusBar->setChecked(true);
+
+    mShowStatusBar->setChecked (CSMPrefs::get()["Windows"]["show-statusbar"].isTrue());
+
     view->addAction (mShowStatusBar);
 
     QAction *filters = new QAction (tr ("Filters"), this);
@@ -325,9 +332,9 @@ void CSVDoc::View::updateTitle()
     if (mViewTotal>1)
         stream << " [" << (mViewIndex+1) << "/" << mViewTotal << "]";
 
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
-    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+    bool hideTitle = windows["hide-subview"].isTrue() &&
         mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
 
     if (hideTitle)
@@ -338,19 +345,18 @@ void CSVDoc::View::updateTitle()
 
 void CSVDoc::View::updateSubViewIndicies(SubView *view)
 {
+    CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
+
     if(view && mSubViews.contains(view))
     {
         mSubViews.removeOne(view);
 
         // adjust (reduce) the scroll area (even floating), except when it is "Scrollbar Only"
-        CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-        if(settings.settingValue ("window/mainwindow-scrollbar") == "Grow then Scroll")
+        if (windows["mainwindow-scrollbar"].toString() == "Grow then Scroll")
             updateScrollbar();
     }
 
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-
-    bool hideTitle = userSettings.setting ("window/hide-subview", QString ("false"))=="true" &&
+    bool hideTitle = windows["hide-subview"].isTrue() &&
         mSubViews.size()==1 && !mSubViews.at (0)->isFloating();
 
     updateTitle();
@@ -389,27 +395,25 @@ void CSVDoc::View::updateActions()
 
     mGlobalDebugProfileMenu->updateActions (running);
     mStopDebug->setEnabled (running);
+
+    mMerge->setEnabled (mDocument->getContentFiles().size()>1 &&
+        !(mDocument->getState() & CSMDoc::State_Merging));
 }
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
       mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false)
 {
-    int width = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-width").toInt();
+    CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
-    int height = CSMSettings::UserSettings::instance().settingValue
-                                    ("window/default-height").toInt();
-
-    width = std::max(width, 300);
-    height = std::max(height, 300);
+    int width = std::max (windows["default-width"].toInt(), 300);
+    int height = std::max (windows["default-height"].toInt(), 300);
 
     resize (width, height);
 
     mSubViewWindow.setDockOptions (QMainWindow::AllowNestedDocks);
 
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    if(settings.settingValue ("window/mainwindow-scrollbar") == "Grow Only")
+    if (windows["mainwindow-scrollbar"].toString() == "Grow Only")
     {
         setCentralWidget (&mSubViewWindow);
     }
@@ -424,6 +428,8 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mOperations = new Operations;
     addDockWidget (Qt::BottomDockWidgetArea, mOperations);
 
+    setContextMenuPolicy(Qt::NoContextMenu);
+
     updateTitle();
 
     setupUi();
@@ -436,6 +442,9 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     mSubViewFactory.add (CSMWorld::UniversalId::Type_RunLog, new SubViewFactory<RunLogSubView>);
 
     connect (mOperations, SIGNAL (abortOperation (int)), this, SLOT (abortOperation (int)));
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
 }
 
 CSVDoc::View::~View()
@@ -467,6 +476,7 @@ void CSVDoc::View::updateDocumentState()
     static const int operations[] =
     {
         CSMDoc::State_Saving, CSMDoc::State_Verifying, CSMDoc::State_Searching,
+        CSMDoc::State_Merging,
         -1 // end marker
     };
 
@@ -489,14 +499,12 @@ void CSVDoc::View::updateProgress (int current, int max, int type, int threads)
 
 void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::string& hint)
 {
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
     bool isReferenceable = id.getClass() == CSMWorld::UniversalId::Class_RefRecord;
 
     // User setting to reuse sub views (on a per top level view basis)
-    bool reuse =
-        userSettings.setting ("window/reuse", QString("true")) == "true" ? true : false;
-    if(reuse)
+    if (windows["reuse"].isTrue())
     {
         foreach(SubView *sb, mSubViews)
         {
@@ -524,8 +532,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     // If the sub view limit setting is one, the sub view title bar is hidden and the
     // text in the main title bar is adjusted accordingly
-    int maxSubView = userSettings.setting("window/max-subviews", QString("256")).toInt();
-    if(mSubViews.size() >= maxSubView) // create a new top level view
+    if(mSubViews.size() >= windows["max-subviews"].toInt()) // create a new top level view
     {
         mViewManager.addView(mDocument, id, hint);
 
@@ -545,8 +552,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     view->setParent(this);
     mSubViews.append(view); // only after assert
 
-    int minWidth = userSettings.setting ("window/minimum-width", QString("325")).toInt();
-    view->setMinimumWidth(minWidth);
+    int minWidth = windows["minimum-width"].toInt();
+    view->setMinimumWidth (minWidth);
 
     view->setStatusBar (mShowStatusBar->isChecked());
 
@@ -561,13 +568,11 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //   should become visible)
     // - Move the scroll bar to the newly added subview
     //
-    CSMSettings::UserSettings &settings = CSMSettings::UserSettings::instance();
-    QString mainwinScroll = settings.settingValue ("window/mainwindow-scrollbar");
-    mScrollbarOnly = mainwinScroll.isEmpty() || mainwinScroll == "Scrollbar Only";
+    mScrollbarOnly = windows["mainwindow-scrollbar"].toString() == "Scrollbar Only";
 
     QDesktopWidget *dw = QApplication::desktop();
     QRect rect;
-    if(settings.settingValue ("window/grow-limit") == "true")
+    if (windows["grow-limit"].isTrue())
         rect = dw->screenGeometry(this);
     else
         rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
@@ -620,6 +625,45 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 
         QObject::disconnect(mScroll->horizontalScrollBar(),
             SIGNAL(rangeChanged(int,int)), this, SLOT(moveScrollBarToEnd(int,int)));
+    }
+}
+
+void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="Windows/hide-subview")
+        updateSubViewIndicies (0);
+    else if (*setting=="Windows/mainwindow-scrollbar")
+    {
+        if (setting->toString()!="Grow Only")
+        {
+            if (mScroll)
+            {
+                if (setting->toString()=="Scrollbar Only")
+                {
+                    mScrollbarOnly = true;
+                    mSubViewWindow.setMinimumWidth(0);
+                }
+                else if (mScrollbarOnly)
+                {
+                    mScrollbarOnly = false;
+                    updateScrollbar();
+                }
+            }
+            else
+            {
+                mScroll = new QScrollArea(this);
+                mScroll->setWidgetResizable(true);
+                mScroll->setWidget(&mSubViewWindow);
+                setCentralWidget(mScroll);
+            }
+        }
+        else  if (mScroll)
+        {
+            mScroll->takeWidget();
+            setCentralWidget (&mSubViewWindow);
+            mScroll->deleteLater();
+            mScroll = 0;
+        }
     }
 }
 
@@ -813,6 +857,11 @@ void CSVDoc::View::addSearchSubView()
     addSubView (mDocument->newSearch());
 }
 
+void CSVDoc::View::addMetaDataSubView()
+{
+    addSubView (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_MetaData, "sys::meta"));
+}
+
 void CSVDoc::View::abortOperation (int type)
 {
     mDocument->abortOperation (type);
@@ -839,59 +888,6 @@ void CSVDoc::View::resizeViewHeight (int height)
 {
     if (height >= 0)
         resize (geometry().width(), height);
-}
-
-void CSVDoc::View::updateUserSetting (const QString &name, const QStringList &list)
-{
-    if (name=="window/hide-subview")
-        updateSubViewIndicies (0);
-
-    foreach (SubView *subView, mSubViews)
-    {
-        subView->updateUserSetting (name, list);
-    }
-
-    if (name=="window/mainwindow-scrollbar")
-    {
-        if(list.at(0) != "Grow Only")
-        {
-            if (mScroll)
-            {
-                if (list.at(0).isEmpty() || list.at(0) == "Scrollbar Only")
-                {
-                    mScrollbarOnly = true;
-                    mSubViewWindow.setMinimumWidth(0);
-                }
-                else
-                {
-                    if(!mScrollbarOnly)
-                        return;
-
-                    mScrollbarOnly = false;
-                    updateScrollbar();
-                }
-            }
-            else
-            {
-                mScroll = new QScrollArea(this);
-                mScroll->setWidgetResizable(true);
-                mScroll->setWidget(&mSubViewWindow);
-                setCentralWidget(mScroll);
-            }
-        }
-        else
-        {
-            if (mScroll)
-            {
-                mScroll->takeWidget();
-                setCentralWidget (&mSubViewWindow);
-                mScroll->deleteLater();
-                mScroll = 0;
-            }
-            else
-                return;
-        }
-    }
 }
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
@@ -925,10 +921,9 @@ void CSVDoc::View::stop()
 
 void CSVDoc::View::closeRequest (SubView *subView)
 {
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
+    CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
-    if (mSubViews.size()>1 || mViewTotal<=1 ||
-        userSettings.setting ("window/hide-subview", QString ("false"))!="true")
+    if (mSubViews.size()>1 || mViewTotal<=1 || !windows["hide-subview"].isTrue())
     {
         subView->deleteLater();
         mSubViews.removeOne (subView);
@@ -958,4 +953,9 @@ void CSVDoc::View::updateScrollbar()
         mSubViewWindow.setMinimumWidth(newWidth);
     else
         mSubViewWindow.setMinimumWidth(0);
+}
+
+void CSVDoc::View::merge()
+{
+    emit mergeDocument (mDocument);
 }

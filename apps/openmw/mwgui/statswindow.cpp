@@ -15,6 +15,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 
@@ -158,7 +159,7 @@ namespace MWGui
         else if (id == "MBar")
         {
             getWidget(w, "Magicka");
-            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
@@ -234,7 +235,7 @@ namespace MWGui
 
         NoDrop::onFrame(dt);
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
 
         // level progress
@@ -383,7 +384,7 @@ namespace MWGui
             int base = stat.getBase();
             int modified = stat.getModified();
 
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
 
@@ -493,7 +494,7 @@ namespace MWGui
 
         if (!mFactions.empty())
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr player = MWMechanics::getPlayer();
             const MWMechanics::NpcStats &PCstats = player.getClass().getNpcStats(player);
             const std::set<std::string> &expelled = PCstats.getExpelled();
 

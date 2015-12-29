@@ -1,8 +1,6 @@
-
 #include "referencecreator.hpp"
 
 #include <QLabel>
-#include <QLineEdit>
 
 #include "../../model/doc/document.hpp"
 
@@ -11,6 +9,8 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idcompletionmanager.hpp"
+
+#include "../widget/droplineedit.hpp"
 
 std::string CSVWorld::ReferenceCreator::getId() const
 {
@@ -80,7 +80,7 @@ CSVWorld::ReferenceCreator::ReferenceCreator (CSMWorld::Data& data, QUndoStack& 
     QLabel *label = new QLabel ("Cell", this);
     insertBeforeButtons (label, false);
 
-    mCell = new QLineEdit (this);
+    mCell = new CSVWidget::DropLineEdit(CSMWorld::ColumnBase::Display_Cell, this);
     mCell->setCompleter(completionManager.getCompleter(CSMWorld::ColumnBase::Display_Cell).get());
     insertBeforeButtons (mCell, true);
 

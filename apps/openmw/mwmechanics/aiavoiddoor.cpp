@@ -1,24 +1,23 @@
 #include "aiavoiddoor.hpp"
-#include <iostream>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "mechanicsmanagerimp.hpp"
+#include "actorutil.hpp"
 
-#include <OgreMath.h>
 
 #include "steering.hpp"
 
-MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::Ptr& doorPtr)
+MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::ConstPtr& doorPtr)
 : AiPackage(), mDuration(1), mDoorPtr(doorPtr), mAdjAngle(0)
 {
 
 }
 
-bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
 
     ESM::Position pos = actor.getRefData().getPosition();
@@ -55,7 +54,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& stat
     actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     // Turn away from the door and move when turn completed
-    if (zTurn(actor, Ogre::Radian(std::atan2(x,y) + mAdjAngle), Ogre::Degree(5)))
+    if (zTurn(actor, std::atan2(x,y) + mAdjAngle, osg::DegreesToRadians(5.f)))
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     else
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
@@ -63,9 +62,9 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, AiState& stat
 
     // Make all nearby actors also avoid the door
     std::vector<MWWorld::Ptr> actors;
-    MWBase::Environment::get().getMechanicsManager()->getActorsInRange(Ogre::Vector3(pos.pos[0],pos.pos[1],pos.pos[2]),100,actors);
+    MWBase::Environment::get().getMechanicsManager()->getActorsInRange(pos.asVec3(),100,actors);
     for(std::vector<MWWorld::Ptr>::iterator it = actors.begin(); it != actors.end(); ++it) {
-        if(*it != MWBase::Environment::get().getWorld()->getPlayerPtr()) { //Not the player
+        if(*it != getPlayer()) { //Not the player
             MWMechanics::AiSequence& seq = it->getClass().getCreatureStats(*it).getAiSequence();
             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) { //Only add it once
                 seq.stack(MWMechanics::AiAvoidDoor(mDoorPtr),*it);

@@ -1,130 +1,139 @@
 #include "localmap.hpp"
 
-#include <OgreMaterialManager.h>
-#include <OgreHardwarePixelBuffer.h>
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
-#include <OgreCamera.h>
-#include <OgreTextureManager.h>
-#include <OgreRenderTexture.h>
-#include <OgreViewport.h>
+#include <iostream>
+#include <stdint.h>
+
+#include <osg/Fog>
+#include <osg/LightModel>
+#include <osg/Texture2D>
+#include <osg/ComputeBoundsVisitor>
+
+#include <osgDB/ReadFile>
+
+#include <osgViewer/Viewer>
 
 #include <components/esm/fogstate.hpp>
+#include <components/esm/loadcell.hpp>
+#include <components/settings/settings.hpp>
+#include <components/sceneutil/visitor.hpp>
+#include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
-#include "renderconst.hpp"
-#include "renderingmanager.hpp"
+#include "vismask.hpp"
 
-using namespace MWRender;
-using namespace Ogre;
+namespace
+{
 
-LocalMap::LocalMap(OEngine::Render::OgreRenderer* rend, MWRender::RenderingManager* rendering)
-    : mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
+    class CameraLocalUpdateCallback : public osg::NodeCallback
+    {
+    public:
+        CameraLocalUpdateCallback(MWRender::LocalMap* parent)
+            : mRendered(false)
+            , mParent(parent)
+        {
+        }
+
+        virtual void operator()(osg::Node* node, osg::NodeVisitor*)
+        {
+            if (mRendered)
+                node->setNodeMask(0);
+
+            if (!mRendered)
+            {
+                mRendered = true;
+                mParent->markForRemoval(static_cast<osg::Camera*>(node));
+            }
+
+            // Note, we intentionally do not traverse children here. The map camera's scene data is the same as the master camera's,
+            // so it has been updated already.
+            //traverse(node, nv);
+        }
+
+    private:
+        bool mRendered;
+        MWRender::LocalMap* mParent;
+    };
+
+    float square(float val)
+    {
+        return val*val;
+    }
+
+}
+
+namespace MWRender
+{
+
+LocalMap::LocalMap(osgViewer::Viewer* viewer)
+    : mViewer(viewer)
+    , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
+    , mMapWorldSize(8192.f)
     , mAngle(0.f)
     , mInterior(false)
 {
-    mRendering = rend;
-    mRenderingManager = rendering;
+    mRoot = mViewer->getSceneData()->asGroup();
 
-    mCameraPosNode = mRendering->getScene()->getRootSceneNode()->createChildSceneNode();
-    mCameraRotNode = mCameraPosNode->createChildSceneNode();
-    mCameraNode = mCameraRotNode->createChildSceneNode();
-
-    mCellCamera = mRendering->getScene()->createCamera("CellCamera");
-    mCellCamera->setProjectionType(PT_ORTHOGRAPHIC);
-
-    mCameraNode->attachObject(mCellCamera);
-
-    mLight = mRendering->getScene()->createLight();
-    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3(0.3f, 0.3f, -0.7f));
-    mLight->setVisible (false);
-    mLight->setDiffuseColour (ColourValue(0.7f,0.7f,0.7f));
-
-    mRenderTexture = TextureManager::getSingleton().createManual(
-                    "localmap/rtt",
-                    ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    TEX_TYPE_2D,
-                    mMapResolution, mMapResolution,
-                    0,
-                    PF_R8G8B8,
-                    TU_RENDERTARGET);
-
-    mRenderTarget = mRenderTexture->getBuffer()->getRenderTarget();
-    mRenderTarget->setAutoUpdated(false);
-    Viewport* vp = mRenderTarget->addViewport(mCellCamera);
-    vp->setOverlaysEnabled(false);
-    vp->setShadowsEnabled(false);
-    vp->setBackgroundColour(ColourValue(0, 0, 0));
-    vp->setVisibilityMask(RV_Map);
-    vp->setMaterialScheme("local_map");
+    SceneUtil::FindByNameVisitor find("Scene Root");
+    mRoot->accept(find);
+    mSceneRoot = find.mFoundNode;
+    if (!mSceneRoot)
+        throw std::runtime_error("no scene root found");
 }
 
 LocalMap::~LocalMap()
 {
+    for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
+        mRoot->removeChild(*it);
+    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
+        mRoot->removeChild(*it);
 }
 
-const Ogre::Vector2 LocalMap::rotatePoint(const Ogre::Vector2& p, const Ogre::Vector2& c, const float angle)
+const osg::Vec2f LocalMap::rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle)
 {
-    return Vector2( Math::Cos(angle) * (p.x - c.x) - Math::Sin(angle) * (p.y - c.y) + c.x,
-                    Math::Sin(angle) * (p.x - c.x) + Math::Cos(angle) * (p.y - c.y) + c.y);
-}
-
-std::string LocalMap::coordStr(const int x, const int y)
-{
-    return StringConverter::toString(x) + "_" + StringConverter::toString(y);
+    return osg::Vec2f( std::cos(angle) * (point.x() - center.x()) - std::sin(angle) * (point.y() - center.y()) + center.x(),
+                    std::sin(angle) * (point.x() - center.x()) + std::cos(angle) * (point.y() - center.y()) + center.y());
 }
 
 void LocalMap::clear()
 {
-    // Not actually removing the Textures here. That doesnt appear to work properly. It seems MyGUI still keeps some pointers.
-    mBuffers.clear();
+    mSegments.clear();
 }
 
 void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 {
     if (!mInterior)
     {
-        std::string textureName = "Cell_"+coordStr(cell->getCell()->getGridX(), cell->getCell()->getGridY())+"_fog";
-        std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
-        fog->mFogTextures.push_back(ESM::FogTexture());
+        const MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
 
-        TexturePtr tex = TextureManager::getSingleton().getByName(textureName);
-        if (tex.isNull())
-            return;
+        if (segment.mFogOfWarImage && segment.mHasFogState)
+        {
+            std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
+            fog->mFogTextures.push_back(ESM::FogTexture());
 
-        Ogre::Image image;
-        tex->load();
-        tex->convertToImage(image);
+            segment.saveFogOfWar(fog->mFogTextures.back());
 
-        Ogre::DataStreamPtr encoded = image.encode("tga");
-        fog->mFogTextures.back().mImageData.resize(encoded->size());
-        encoded->read(&fog->mFogTextures.back().mImageData[0], encoded->size());
-
-        cell->setFog(fog.release());
+            cell->setFog(fog.release());
+        }
     }
     else
     {
-        Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
-        Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().y);
-        Vector2 length = max-min;
-        const int segsX = static_cast<int>(std::ceil(length.x / sSize));
-        const int segsY = static_cast<int>(std::ceil(length.y / sSize));
-
-        mInteriorName = cell->getCell()->mName;
+        // FIXME: segmenting code duplicated from requestMap
+        osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
+        osg::Vec2f max(mBounds.xMax(), mBounds.yMax());
+        osg::Vec2f length = max-min;
+        const int segsX = static_cast<int>(std::ceil(length.x() / mMapWorldSize));
+        const int segsY = static_cast<int>(std::ceil(length.y() / mMapWorldSize));
 
         std::auto_ptr<ESM::FogState> fog (new ESM::FogState());
 
-        fog->mBounds.mMinX = mBounds.getMinimum().x;
-        fog->mBounds.mMaxX = mBounds.getMaximum().x;
-        fog->mBounds.mMinY = mBounds.getMinimum().y;
-        fog->mBounds.mMaxY = mBounds.getMaximum().y;
+        fog->mBounds.mMinX = mBounds.xMin();
+        fog->mBounds.mMaxX = mBounds.xMax();
+        fog->mBounds.mMinY = mBounds.yMin();
+        fog->mBounds.mMaxY = mBounds.yMax();
         fog->mNorthMarkerAngle = mAngle;
 
         fog->mFogTextures.reserve(segsX*segsY);
@@ -133,21 +142,13 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
         {
             for (int y=0; y<segsY; ++y)
             {
-                std::string textureName = cell->getCell()->mName + "_" + coordStr(x,y) + "_fog";
-
-                TexturePtr tex = TextureManager::getSingleton().getByName(textureName);
-                if (tex.isNull())
-                    return;
-
-                Ogre::Image image;
-                tex->load();
-                tex->convertToImage(image);
+                const MapSegment& segment = mSegments[std::make_pair(x,y)];
 
                 fog->mFogTextures.push_back(ESM::FogTexture());
 
-                Ogre::DataStreamPtr encoded = image.encode("tga");
-                fog->mFogTextures.back().mImageData.resize(encoded->size());
-                encoded->read(&fog->mFogTextures.back().mImageData[0], encoded->size());
+                // saving even if !segment.mHasFogState so we don't mess up the segmenting
+                // plus, older openmw versions can't deal with empty images
+                segment.saveFogOfWar(fog->mFogTextures.back());
 
                 fog->mFogTextures.back().mX = x;
                 fog->mFogTextures.back().mY = y;
@@ -158,40 +159,179 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
     }
 }
 
-void LocalMap::requestMap(MWWorld::CellStore* cell, float zMin, float zMax)
+osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax)
+{
+    osg::ref_ptr<osg::Camera> camera (new osg::Camera);
+
+    camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
+    camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+    camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
+    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+    camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
+    camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
+    camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+
+    camera->setCullMask(Mask_Scene|Mask_SimpleWater|Mask_Terrain);
+    camera->setNodeMask(Mask_RenderToTexture);
+
+    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+    stateset->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+    stateset->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
+    lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
+    stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+    osg::ref_ptr<osg::Light> light = new osg::Light;
+    light->setPosition(osg::Vec4(-0.3f, -0.3f, 0.7f, 0.f));
+    light->setDiffuse(osg::Vec4(0.7f, 0.7f, 0.7f, 1.f));
+    light->setAmbient(osg::Vec4(0,0,0,1));
+    light->setSpecular(osg::Vec4(0,0,0,0));
+    light->setLightNum(0);
+    light->setConstantAttenuation(1.f);
+    light->setLinearAttenuation(0.f);
+    light->setQuadraticAttenuation(0.f);
+
+    osg::ref_ptr<osg::LightSource> lightSource = new osg::LightSource;
+    lightSource->setLight(light);
+
+    lightSource->setStateSetModes(*stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+    camera->addChild(lightSource);
+    camera->setStateSet(stateset);
+    camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
+    camera->setViewport(0, 0, mMapResolution, mMapResolution);
+    camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
+
+    return camera;
+}
+
+void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y)
+{
+    osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
+    texture->setTextureSize(mMapResolution, mMapResolution);
+    texture->setInternalFormat(GL_RGB);
+    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+    camera->attach(osg::Camera::COLOR_BUFFER, texture);
+
+    camera->addChild(mSceneRoot);
+    mRoot->addChild(camera);
+    mActiveCameras.push_back(camera);
+
+    MapSegment& segment = mSegments[std::make_pair(x, y)];
+    segment.mMapTexture = texture;
+}
+
+void LocalMap::requestMap(std::set<MWWorld::CellStore*> cells)
+{
+    for (std::set<MWWorld::CellStore*>::iterator it = cells.begin(); it != cells.end(); ++it)
+    {
+        MWWorld::CellStore* cell = *it;
+        if (cell->isExterior())
+            requestExteriorMap(cell);
+        else
+            requestInteriorMap(cell);
+    }
+}
+
+void LocalMap::removeCell(MWWorld::CellStore *cell)
+{
+    saveFogOfWar(cell);
+
+    if (cell->isExterior())
+        mSegments.erase(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
+    else
+        mSegments.clear();
+}
+
+osg::ref_ptr<osg::Texture2D> LocalMap::getMapTexture(int x, int y)
+{
+    SegmentMap::iterator found = mSegments.find(std::make_pair(x, y));
+    if (found == mSegments.end())
+        return osg::ref_ptr<osg::Texture2D>();
+    else
+        return found->second.mMapTexture;
+}
+
+osg::ref_ptr<osg::Texture2D> LocalMap::getFogOfWarTexture(int x, int y)
+{
+    SegmentMap::iterator found = mSegments.find(std::make_pair(x, y));
+    if (found == mSegments.end())
+        return osg::ref_ptr<osg::Texture2D>();
+    else
+        return found->second.mFogOfWarTexture;
+}
+
+void LocalMap::markForRemoval(osg::Camera *cam)
+{
+    CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), cam);
+    if (found == mActiveCameras.end())
+    {
+        std::cerr << "trying to remove an inactive camera" << std::endl;
+        return;
+    }
+    mActiveCameras.erase(found);
+    mCamerasPendingRemoval.push_back(cam);
+}
+
+void LocalMap::cleanupCameras()
+{
+    if (mCamerasPendingRemoval.empty())
+        return;
+
+    for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
+    {
+        (*it)->removeChildren(0, (*it)->getNumChildren());
+        (*it)->setGraphicsContext(NULL);
+        mRoot->removeChild(*it);
+    }
+
+    mCamerasPendingRemoval.clear();
+}
+
+void LocalMap::requestExteriorMap(MWWorld::CellStore* cell)
 {
     mInterior = false;
-
-    mCameraRotNode->setOrientation(Quaternion::IDENTITY);
-    mCellCamera->setOrientation(Quaternion(Ogre::Math::Cos(Ogre::Degree(0)/2.f), 0, 0, -Ogre::Math::Sin(Ogre::Degree(0)/2.f)));
 
     int x = cell->getCell()->getGridX();
     int y = cell->getCell()->getGridY();
 
-    std::string name = "Cell_"+coordStr(x, y);
+    osg::BoundingSphere bound = mViewer->getSceneData()->getBound();
+    float zmin = bound.center().z() - bound.radius();
+    float zmax = bound.center().z() + bound.radius();
 
-    mCameraPosNode->setPosition(Vector3(0,0,0));
+    osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(x*mMapWorldSize + mMapWorldSize/2.f, y*mMapWorldSize + mMapWorldSize/2.f, mMapWorldSize, mMapWorldSize,
+                                                                osg::Vec3d(0,1,0), zmin, zmax);
+    setupRenderToTexture(camera, cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
-    // Note: using force=true for exterior cell maps.
-    // They must be updated even if they were visited before, because the set of surrounding active cells might be different
-    // (and objects in a different cell can "bleed" into another cell's map if they cross the border)
-    render((x+0.5f)*sSize, (y+0.5f)*sSize, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), name, true);
-
-    if (mBuffers.find(name) == mBuffers.end())
+    MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
+    if (!segment.mFogOfWarImage)
     {
         if (cell->getFog())
-            loadFogOfWar(name, cell->getFog()->mFogTextures.back());
+            segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
         else
-            createFogOfWar(name);
+            segment.initFogOfWar();
     }
 }
 
-void LocalMap::requestMap(MWWorld::CellStore* cell,
-                            AxisAlignedBox bounds)
+void LocalMap::requestInteriorMap(MWWorld::CellStore* cell)
 {
+    osg::ComputeBoundsVisitor computeBoundsVisitor;
+    computeBoundsVisitor.setTraversalMask(Mask_Scene|Mask_Terrain);
+    mSceneRoot->accept(computeBoundsVisitor);
+
+    osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
+
     // If we're in an empty cell, bail out
     // The operations in this function are only valid for finite bounds
-    if (bounds.isNull ())
+    if (!bounds.valid() || bounds.radius2() == 0.0)
         return;
 
     mInterior = true;
@@ -199,41 +339,35 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     mBounds = bounds;
 
     // Get the cell's NorthMarker rotation. This is used to rotate the entire map.
-    const Vector2& north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
-    Radian angle = Ogre::Math::ATan2 (north.x, north.y);
-    mAngle = angle.valueRadians();
+    osg::Vec2f north = MWBase::Environment::get().getWorld()->getNorthVector(cell);
+
+    mAngle = std::atan2(north.x(), north.y());
 
     // Rotate the cell and merge the rotated corners to the bounding box
-    Vector2 _center(bounds.getCenter().x, bounds.getCenter().y);
-    Vector3 _c1 = bounds.getCorner(AxisAlignedBox::FAR_LEFT_BOTTOM);
-    Vector3 _c2 = bounds.getCorner(AxisAlignedBox::FAR_RIGHT_BOTTOM);
-    Vector3 _c3 = bounds.getCorner(AxisAlignedBox::FAR_LEFT_TOP);
-    Vector3 _c4 = bounds.getCorner(AxisAlignedBox::FAR_RIGHT_TOP);
+    osg::Vec2f origCenter(bounds.center().x(), bounds.center().y());
+    osg::Vec3f origCorners[8];
+    for (int i=0; i<8; ++i)
+        origCorners[i] = mBounds.corner(i);
 
-    Vector2 c1(_c1.x, _c1.y);
-    Vector2 c2(_c2.x, _c2.y);
-    Vector2 c3(_c3.x, _c3.y);
-    Vector2 c4(_c4.x, _c4.y);
-    c1 = rotatePoint(c1, _center, mAngle);
-    c2 = rotatePoint(c2, _center, mAngle);
-    c3 = rotatePoint(c3, _center, mAngle);
-    c4 = rotatePoint(c4, _center, mAngle);
-    mBounds.merge(Vector3(c1.x, c1.y, 0));
-    mBounds.merge(Vector3(c2.x, c2.y, 0));
-    mBounds.merge(Vector3(c3.x, c3.y, 0));
-    mBounds.merge(Vector3(c4.x, c4.y, 0));
+    for (int i=0; i<8; ++i)
+    {
+        osg::Vec3f corner = origCorners[i];
+        osg::Vec2f corner2d (corner.x(), corner.y());
+        corner2d = rotatePoint(corner2d, origCenter, mAngle);
+        mBounds.expandBy(osg::Vec3f(corner2d.x(), corner2d.y(), 0));
+    }
 
     // Do NOT change padding! This will break older savegames.
     // If the padding really needs to be changed, then it must be saved in the ESM::FogState and
     // assume the old (500) value as default for older savegames.
-    const Ogre::Real padding = 500.0f;
+    const float padding = 500.0f;
 
     // Apply a little padding
-    mBounds.setMinimum (mBounds.getMinimum() - Vector3(padding,padding,0));
-    mBounds.setMaximum (mBounds.getMaximum() + Vector3(padding,padding,0));
+    mBounds.set(mBounds._min - osg::Vec3f(padding,padding,0.f),
+                mBounds._max + osg::Vec3f(padding,padding,0.f));
 
-    float zMin = mBounds.getMinimum().z;
-    float zMax = mBounds.getMaximum().z;
+    float zMin = mBounds.zMin();
+    float zMax = mBounds.zMax();
 
     // If there is fog state in the CellStore (e.g. when it came from a savegame) we need to do some checks
     // to see if this state is still valid.
@@ -245,15 +379,15 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
     {
         ESM::FogState* fog = cell->getFog();
 
-        Ogre::Vector3 newMin (fog->mBounds.mMinX, fog->mBounds.mMinY, zMin);
-        Ogre::Vector3 newMax (fog->mBounds.mMaxX, fog->mBounds.mMaxY, zMax);
+        osg::Vec3f newMin (fog->mBounds.mMinX, fog->mBounds.mMinY, zMin);
+        osg::Vec3f newMax (fog->mBounds.mMaxX, fog->mBounds.mMaxY, zMax);
 
-        Ogre::Vector3 minDiff = newMin - mBounds.getMinimum();
-        Ogre::Vector3 maxDiff = newMax - mBounds.getMaximum();
+        osg::Vec3f minDiff = newMin - mBounds._min;
+        osg::Vec3f maxDiff = newMax - mBounds._max;
 
-        if (std::abs(minDiff.x) > 500 || std::abs(minDiff.y) > 500
-            || std::abs(maxDiff.x) > 500 || std::abs(maxDiff.y) > 500
-                || std::abs(mAngle - fog->mNorthMarkerAngle) > Ogre::Degree(5).valueRadians())
+        if (std::abs(minDiff.x()) > padding || std::abs(minDiff.y()) > padding
+            || std::abs(maxDiff.x()) > padding || std::abs(maxDiff.y()) > padding
+                || std::abs(mAngle - fog->mNorthMarkerAngle) > osg::DegreesToRadians(5.f))
         {
             // Nuke it
             cell->setFog(NULL);
@@ -261,208 +395,93 @@ void LocalMap::requestMap(MWWorld::CellStore* cell,
         else
         {
             // Looks sane, use it
-            mBounds = Ogre::AxisAlignedBox(newMin, newMax);
+            mBounds = osg::BoundingBox(newMin, newMax);
             mAngle = fog->mNorthMarkerAngle;
         }
     }
 
-    Vector2 center(mBounds.getCenter().x, mBounds.getCenter().y);
+    osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
+    osg::Vec2f max(mBounds.xMax(), mBounds.yMax());
 
-    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
-    Vector2 max(mBounds.getMaximum().x, mBounds.getMaximum().y);
+    osg::Vec2f length = max-min;
 
-    Vector2 length = max-min;
-
-    mCellCamera->setOrientation(Quaternion::IDENTITY);
-    mCameraRotNode->setOrientation(Quaternion(Math::Cos(mAngle/2.f), 0, 0, -Math::Sin(mAngle/2.f)));
-
-    mCameraPosNode->setPosition(Vector3(center.x, center.y, 0));
+    osg::Vec2f center(bounds.center().x(), bounds.center().y());
 
     // divide into segments
-    const int segsX = static_cast<int>(std::ceil(length.x / sSize));
-    const int segsY = static_cast<int>(std::ceil(length.y / sSize));
+    const int segsX = static_cast<int>(std::ceil(length.x() / mMapWorldSize));
+    const int segsY = static_cast<int>(std::ceil(length.y() / mMapWorldSize));
 
-    mInteriorName = cell->getCell()->mName;
-
-    int i=0;
+    int i = 0;
     for (int x=0; x<segsX; ++x)
     {
         for (int y=0; y<segsY; ++y)
         {
-            Vector2 start = min + Vector2(static_cast<Ogre::Real>(sSize*x), static_cast<Ogre::Real>(sSize*y));
-            Vector2 newcenter = start + sSize/2;
+            osg::Vec2f start = min + osg::Vec2f(mMapWorldSize*x, mMapWorldSize*y);
+            osg::Vec2f newcenter = start + osg::Vec2f(mMapWorldSize/2.f, mMapWorldSize/2.f);
 
-            std::string texturePrefix = cell->getCell()->mName + "_" + coordStr(x,y);
+            osg::Quat cameraOrient (mAngle, osg::Vec3d(0,0,-1));
+            osg::Vec2f a = newcenter - center;
+            osg::Vec3f rotatedCenter = cameraOrient * (osg::Vec3f(a.x(), a.y(), 0));
 
-            render(newcenter.x - center.x, newcenter.y - center.y, zMin, zMax, static_cast<float>(sSize), static_cast<float>(sSize), texturePrefix);
+            osg::Vec2f pos = osg::Vec2f(rotatedCenter.x(), rotatedCenter.y()) + center;
 
-            if (!cell->getFog())
-                createFogOfWar(texturePrefix);
-            else
+            osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(pos.x(), pos.y(),
+                                                                        mMapWorldSize, mMapWorldSize,
+                                                                        osg::Vec3f(north.x(), north.y(), 0.f), zMin, zMax);
+
+            setupRenderToTexture(camera, x, y);
+
+            MapSegment& segment = mSegments[std::make_pair(x,y)];
+            if (!segment.mFogOfWarImage)
             {
-                ESM::FogState* fog = cell->getFog();
+                if (!cell->getFog())
+                    segment.initFogOfWar();
+                else
+                {
+                    ESM::FogState* fog = cell->getFog();
 
-                // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
-                if (i >= int(fog->mFogTextures.size()))
-                    throw std::runtime_error("fog texture count mismatch");
+                    // We are using the same bounds and angle as we were using when the textures were originally made. Segments should come out the same.
+                    if (i >= int(fog->mFogTextures.size()))
+                    {
+                        std::cout << "Warning: fog texture count mismatch" << std::endl;
+                        break;
+                    }
 
-                ESM::FogTexture& esm = fog->mFogTextures[i];
-                loadFogOfWar(texturePrefix, esm);
+                    segment.loadFogOfWar(fog->mFogTextures[i]);
+                }
             }
             ++i;
         }
     }
 }
 
-void LocalMap::createFogOfWar(const std::string& texturePrefix)
+void LocalMap::worldToInteriorMapPosition (osg::Vec2f pos, float& nX, float& nY, int& x, int& y)
 {
-    const std::string texName = texturePrefix + "_fog";
-    TexturePtr tex = createFogOfWarTexture(texName);
+    pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), mAngle);
 
-    // create a buffer to use for dynamic operations
-    std::vector<uint32> buffer;
+    osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
 
-    // initialize to (0, 0, 0, 1)
-    buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
+    x = static_cast<int>(std::ceil((pos.x() - min.x()) / mMapWorldSize) - 1);
+    y = static_cast<int>(std::ceil((pos.y() - min.y()) / mMapWorldSize) - 1);
 
-    // upload to the texture
-    tex->load();
-    memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
-    tex->getBuffer()->unlock();
-
-    mBuffers[texturePrefix] = buffer;
+    nX = (pos.x() - min.x() - mMapWorldSize*x)/mMapWorldSize;
+    nY = 1.0f-(pos.y() - min.y() - mMapWorldSize*y)/mMapWorldSize;
 }
 
-Ogre::TexturePtr LocalMap::createFogOfWarTexture(const std::string &texName)
+osg::Vec2f LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
 {
-    TexturePtr tex = TextureManager::getSingleton().getByName(texName);
-    if (tex.isNull())
-    {
-        tex = TextureManager::getSingleton().createManual(
-                        texName,
-                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                        TEX_TYPE_2D,
-                        sFogOfWarResolution, sFogOfWarResolution,
-                        0,
-                        PF_A8R8G8B8,
-                        TU_DYNAMIC_WRITE_ONLY,
-                    this // ManualResourceLoader required if the texture contents are lost (due to lost devices nonsense that can occur with D3D)
-                    );
-    }
+    osg::Vec2f min(mBounds.xMin(), mBounds.yMin());
+    osg::Vec2f pos (mMapWorldSize * (nX + x) + min.x(),
+                    mMapWorldSize * (1.0f-nY + y) + min.y());
 
-    return tex;
-}
-
-void LocalMap::loadFogOfWar (const std::string& texturePrefix, ESM::FogTexture& esm)
-{
-    std::vector<char>& data = esm.mImageData;
-    Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(&data[0], data.size()));
-    Ogre::Image image;
-    image.load(stream, "tga");
-
-    if (int(image.getWidth()) != sFogOfWarResolution || int(image.getHeight()) != sFogOfWarResolution)
-        throw std::runtime_error("fog texture size mismatch");
-
-    std::string texName = texturePrefix + "_fog";
-
-    Ogre::TexturePtr tex = createFogOfWarTexture(texName);
-
-    tex->unload();
-    tex->loadImage(image);
-
-    // create a buffer to use for dynamic operations
-    std::vector<uint32> buffer;
-    buffer.resize(sFogOfWarResolution*sFogOfWarResolution);
-    memcpy(&buffer[0], image.getData(), image.getSize());
-
-    mBuffers[texturePrefix] = buffer;
-}
-
-void LocalMap::render(const float x, const float y,
-                    const float zlow, const float zhigh,
-                    const float xw, const float yw, const std::string& texture, bool force)
-{
-    mCellCamera->setFarClipDistance( (zhigh-zlow) + 2000 );
-    mCellCamera->setNearClipDistance(50);
-
-    mCellCamera->setOrthoWindow(xw, yw);
-    mCameraNode->setPosition(Vector3(x, y, zhigh+1000));
-
-    // disable fog (only necessary for fixed function, the shader based
-    // materials already do this through local_map material configuration)
-    float oldFogStart = mRendering->getScene()->getFogStart();
-    float oldFogEnd = mRendering->getScene()->getFogEnd();
-    Ogre::ColourValue oldFogColour = mRendering->getScene()->getFogColour();
-    mRendering->getScene()->setFog(FOG_NONE);
-
-    // set up lighting
-    Ogre::ColourValue oldAmbient = mRendering->getScene()->getAmbientLight();
-    mRendering->getScene()->setAmbientLight(Ogre::ColourValue(0.3f, 0.3f, 0.3f));
-    mRenderingManager->disableLights(true);
-    mLight->setVisible(true);
-
-    TexturePtr tex;
-    // try loading from memory
-    tex = TextureManager::getSingleton().getByName(texture);
-    if (tex.isNull())
-    {
-        // render
-        mRenderTarget->update();
-
-        // create a new texture and blit to it
-        Ogre::TexturePtr tex = TextureManager::getSingleton().createManual(
-                        texture,
-                        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                        TEX_TYPE_2D,
-                        mMapResolution, mMapResolution,
-                        0,
-                        PF_R8G8B8);
-        tex->getBuffer()->blit(mRenderTexture->getBuffer());
-    }
-    else if (force)
-    {
-        mRenderTarget->update();
-        tex->getBuffer()->blit(mRenderTexture->getBuffer());
-    }
-
-    mRenderingManager->enableLights(true);
-    mLight->setVisible(false);
-
-    // re-enable fog
-    mRendering->getScene()->setFog(FOG_LINEAR, oldFogColour, 0, oldFogStart, oldFogEnd);
-    mRendering->getScene()->setAmbientLight(oldAmbient);
-}
-
-void LocalMap::worldToInteriorMapPosition (Ogre::Vector2 pos, float& nX, float& nY, int& x, int& y)
-{
-    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), mAngle);
-
-    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
-
-    x = static_cast<int>(std::ceil((pos.x - min.x) / sSize) - 1);
-    y = static_cast<int>(std::ceil((pos.y - min.y) / sSize) - 1);
-
-    nX = (pos.x - min.x - sSize*x)/sSize;
-    nY = 1.0f-(pos.y - min.y - sSize*y)/sSize;
-}
-
-Ogre::Vector2 LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int y)
-{
-    Vector2 min(mBounds.getMinimum().x, mBounds.getMinimum().y);
-    Ogre::Vector2 pos;
-
-    pos.x = sSize * (nX + x) + min.x;
-    pos.y = sSize * (1.0f-nY + y) + min.y;
-
-    pos = rotatePoint(pos, Vector2(mBounds.getCenter().x, mBounds.getCenter().y), -mAngle);
+    pos = rotatePoint(pos, osg::Vec2f(mBounds.center().x(), mBounds.center().y()), -mAngle);
     return pos;
 }
 
 bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
-    std::string texName = (interior ? mInteriorName + "_" : "Cell_") + coordStr(x, y);
-
-    if (mBuffers.find(texName) == mBuffers.end())
+    const MapSegment& segment = mSegments[std::make_pair(x, y)];
+    if (!segment.mFogOfWarImage)
         return false;
 
     nX = std::max(0.f, std::min(1.f, nX));
@@ -471,82 +490,44 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interi
     int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
     int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
 
-    Ogre::uint32 clr = mBuffers[texName][texV * sFogOfWarResolution + texU];
-    uint8 alpha = (clr >> 24);
+    uint32_t clr = ((const uint32_t*)segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
+    uint8_t alpha = (clr >> 24);
     return alpha < 200;
 }
 
-void LocalMap::loadResource(Ogre::Resource* resource)
+osg::Group* LocalMap::getRoot()
 {
-    std::string resourceName = resource->getName();
-    size_t pos = resourceName.find("_fog");
-    if (pos != std::string::npos)
-        resourceName = resourceName.substr(0, pos);
-    if (mBuffers.find(resourceName) == mBuffers.end())
-    {
-        // create a buffer to use for dynamic operations
-        std::vector<uint32> buffer;
-
-        // initialize to (0, 0, 0, 1)
-        buffer.resize(sFogOfWarResolution*sFogOfWarResolution, 0xFF000000);
-        mBuffers[resourceName] = buffer;
-    }
-
-    std::vector<uint32>& buffer = mBuffers[resourceName];
-
-    Ogre::Texture* tex = static_cast<Ogre::Texture*>(resource);
-    tex->createInternalResources();
-    memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &buffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
-    tex->getBuffer()->unlock();
+    return mRoot;
 }
 
-void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaternion& orientation)
+void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orientation,
+                             float& u, float& v, int& x, int& y, osg::Vec3f& direction)
 {
-    if (sFogOfWarSkip != 0)
-    {
-        static int count=0;
-        if (++count % sFogOfWarSkip != 0)
-            return;
-    }
-
     // retrieve the x,y grid coordinates the player is in
-    int x,y;
-    float u,v;
-
-    Vector2 pos(position.x, position.y);
+    osg::Vec2f pos(position.x(), position.y());
 
     if (mInterior)
+    {
         worldToInteriorMapPosition(pos, u,v, x,y);
 
-    Vector3 playerdirection = mCameraRotNode->convertWorldToLocalOrientation(orientation).yAxis();
-
-    if (!mInterior)
-    {
-        x = static_cast<int>(std::ceil(pos.x / sSize) - 1);
-        y = static_cast<int>(std::ceil(pos.y / sSize) - 1);
-    }
-    else
-        MWBase::Environment::get().getWindowManager()->setActiveMap(x,y,mInterior);
-
-    // convert from world coordinates to texture UV coordinates
-    std::string texBaseName;
-    if (!mInterior)
-    {
-        u = std::abs((pos.x - (sSize*x))/sSize);
-        v = 1.0f-std::abs((pos.y - (sSize*y))/sSize);
-        texBaseName = "Cell_";
+        osg::Quat cameraOrient (mAngle, osg::Vec3(0,0,-1));
+        direction = orientation * cameraOrient.inverse() * osg::Vec3f(0,1,0);
     }
     else
     {
-        texBaseName = mInteriorName + "_";
-    }
+        direction = orientation * osg::Vec3f(0,1,0);
 
-    MWBase::Environment::get().getWindowManager()->setPlayerPos(x, y, u, v);
-    MWBase::Environment::get().getWindowManager()->setPlayerDir(playerdirection.x, playerdirection.y);
+        x = static_cast<int>(std::ceil(pos.x() / mMapWorldSize) - 1);
+        y = static_cast<int>(std::ceil(pos.y() / mMapWorldSize) - 1);
+
+        // convert from world coordinates to texture UV coordinates
+        u = std::abs((pos.x() - (mMapWorldSize*x))/mMapWorldSize);
+        v = 1.0f-std::abs((pos.y() - (mMapWorldSize*y))/mMapWorldSize);
+    }
 
     // explore radius (squared)
     const float exploreRadius = (mInterior ? 0.1f : 0.3f) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
-    const float sqrExploreRadius = Math::Sqr(exploreRadius);
+    const float sqrExploreRadius = square(exploreRadius);
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
     // change the affected fog of war textures (in a 3x3 grid around the player)
@@ -554,7 +535,6 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
     {
         for (int my = -1; my<2; ++my)
         {
-
             // is this texture affected at all?
             bool affected = false;
             if (mx == 0 && my == 0) // the player is always in the center of the 3x3 grid
@@ -569,42 +549,140 @@ void LocalMap::updatePlayer (const Ogre::Vector3& position, const Ogre::Quaterni
             if (!affected)
                 continue;
 
-            std::string texName = texBaseName + coordStr(x+mx,y+my*-1);
+            int texX = x + mx;
+            int texY = y + my*-1;
 
-            TexturePtr tex = TextureManager::getSingleton().getByName(texName+"_fog");
-            if (!tex.isNull())
+            MapSegment& segment = mSegments[std::make_pair(texX, texY)];
+
+            if (!segment.mFogOfWarImage || !segment.mMapTexture)
+                continue;
+
+            unsigned char* data = segment.mFogOfWarImage->data();
+            for (int texV = 0; texV<sFogOfWarResolution; ++texV)
             {
-                std::map <std::string, std::vector<Ogre::uint32> >::iterator anIter;
-
-                // get its buffer
-                anIter = mBuffers.find(texName);
-                if (anIter == mBuffers.end()) return;
-
-                std::vector<Ogre::uint32>& aBuffer = (*anIter).second;
-                int i=0;
-                for (int texV = 0; texV<sFogOfWarResolution; ++texV)
+                for (int texU = 0; texU<sFogOfWarResolution; ++texU)
                 {
-                    for (int texU = 0; texU<sFogOfWarResolution; ++texU)
-                    {
-                        float sqrDist = Math::Sqr((texU + mx*(sFogOfWarResolution-1)) - u*(sFogOfWarResolution-1))
-                                + Math::Sqr((texV + my*(sFogOfWarResolution-1)) - v*(sFogOfWarResolution-1));
-                        uint32 clr = aBuffer[i];
-                        uint8 alpha = (clr >> 24);
-                        alpha = std::min( alpha, (uint8) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                        aBuffer[i] = (uint32) (alpha << 24);
+                    float sqrDist = square((texU + mx*(sFogOfWarResolution-1)) - u*(sFogOfWarResolution-1))
+                            + square((texV + my*(sFogOfWarResolution-1)) - v*(sFogOfWarResolution-1));
 
-                        ++i;
-                    }
+                    uint32_t clr = *(uint32_t*)data;
+                    uint8_t alpha = (clr >> 24);
+
+                    alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
+                    *(uint32_t*)data = (uint32_t) (alpha << 24);
+
+                    data += 4;
                 }
-
-                tex->load();
-
-                // copy to the texture
-                // NOTE: Could be optimized later. We actually only need to update the region that changed.
-                // Not a big deal at the moment, the FoW is only 32x32 anyway.
-                memcpy(tex->getBuffer()->lock(HardwareBuffer::HBL_DISCARD), &aBuffer[0], sFogOfWarResolution*sFogOfWarResolution*4);
-                tex->getBuffer()->unlock();
             }
+
+            segment.mHasFogState = true;
+            segment.mFogOfWarImage->dirty();
         }
     }
+}
+
+LocalMap::MapSegment::MapSegment()
+    : mHasFogState(false)
+{
+}
+
+LocalMap::MapSegment::~MapSegment()
+{
+
+}
+
+void LocalMap::MapSegment::createFogOfWarTexture()
+{
+    if (mFogOfWarTexture)
+        return;
+    mFogOfWarTexture = new osg::Texture2D;
+    // TODO: synchronize access? for now, the worst that could happen is the draw thread jumping a frame ahead.
+    //mFogOfWarTexture->setDataVariance(osg::Object::DYNAMIC);
+    mFogOfWarTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+    mFogOfWarTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+    mFogOfWarTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    mFogOfWarTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+    mFogOfWarTexture->setUnRefImageDataAfterApply(false);
+}
+
+void LocalMap::MapSegment::initFogOfWar()
+{
+    mFogOfWarImage = new osg::Image;
+    // Assign a PixelBufferObject for asynchronous transfer of data to the GPU
+    mFogOfWarImage->setPixelBufferObject(new osg::PixelBufferObject);
+    mFogOfWarImage->allocateImage(sFogOfWarResolution, sFogOfWarResolution, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    assert(mFogOfWarImage->isDataContiguous());
+    std::vector<uint32_t> data;
+    data.resize(sFogOfWarResolution*sFogOfWarResolution, 0xff000000);
+
+    memcpy(mFogOfWarImage->data(), &data[0], data.size()*4);
+
+    createFogOfWarTexture();
+    mFogOfWarTexture->setImage(mFogOfWarImage);
+}
+
+void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
+{
+    const std::vector<char>& data = esm.mImageData;
+    if (!data.size())
+    {
+        initFogOfWar();
+        return;
+    }
+
+    // TODO: deprecate tga and use raw data instead
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    if (!readerwriter)
+    {
+        std::cerr << "Unable to load fog, can't find a tga ReaderWriter" << std::endl;
+        return;
+    }
+
+    Files::IMemStream in(&data[0], data.size());
+
+    osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
+    if (!result.success())
+    {
+        std::cerr << "Failed to read fog: " << result.message() << " code " << result.status() << std::endl;
+        return;
+    }
+
+    mFogOfWarImage = result.getImage();
+    mFogOfWarImage->flipVertical();
+    mFogOfWarImage->dirty();
+
+    createFogOfWarTexture();
+    mFogOfWarTexture->setImage(mFogOfWarImage);
+    mHasFogState = true;
+}
+
+void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
+{
+    if (!mFogOfWarImage)
+        return;
+
+    std::ostringstream ostream;
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    if (!readerwriter)
+    {
+        std::cerr << "Unable to write fog, can't find a tga ReaderWriter" << std::endl;
+        return;
+    }
+
+    // extra flips are unfortunate, but required for compatibility with older versions
+    mFogOfWarImage->flipVertical();
+    osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
+    if (!result.success())
+    {
+        std::cerr << "Unable to write fog: " << result.message() << " code " << result.status() << std::endl;
+        return;
+    }
+    mFogOfWarImage->flipVertical();
+
+    std::string data = ostream.str();
+    fog.mImageData = std::vector<char>(data.begin(), data.end());
+}
+
 }

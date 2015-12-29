@@ -1,5 +1,7 @@
 #include "convertplayer.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace ESSImport
 {
 
@@ -18,7 +20,7 @@ namespace ESSImport
         for (int i=0; i<8; ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
         for (int i=0; i<27; ++i)
-            out.mObject.mNpcStats.mSkills[i].mRegular.mProgress = pcdt.mPNAM.mSkillProgress[i];
+            out.mObject.mNpcStats.mSkills[i].mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 
         if (pcdt.mPNAM.mDrawState & PCDT::DrawState_Weapon)

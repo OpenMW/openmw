@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWWORLD_ESMSTORE_H
 #define OPENMW_MWWORLD_ESMSTORE_H
 
+#include <sstream>
 #include <stdexcept>
 
 #include <components/esm/records.hpp>

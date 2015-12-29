@@ -30,9 +30,9 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
 
     // check the number of pathgrid points
     if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
-        messages.push_back (std::make_pair (id, pathgrid.mId + " has less points than expected"));
+        messages.add (id, pathgrid.mId + " has less points than expected", "", CSMDoc::Message::Severity_Error);
     else if (pathgrid.mData.mS2 > static_cast<int>(pathgrid.mPoints.size()))
-        messages.push_back (std::make_pair (id, pathgrid.mId + " has more points than expected"));
+        messages.add (id, pathgrid.mId + " has more points than expected", "", CSMDoc::Message::Severity_Error);
 
     std::vector<CSMTools::Point> pointList(pathgrid.mPoints.size());
     std::vector<int> duplList;
@@ -51,7 +51,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                     std::ostringstream ss;
                     ss << "has a duplicate edge between points" << pathgrid.mEdges[i].mV0
                         << " and " << pathgrid.mEdges[i].mV1;
-                    messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+                    messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
                     break;
                 }
             }
@@ -64,7 +64,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         {
             std::ostringstream ss;
             ss << " has an edge connecting a non-existent point " << pathgrid.mEdges[i].mV0;
-            messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
         }
     }
 
@@ -75,13 +75,13 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         {
             std::ostringstream ss;
             ss << " has has less edges than expected for point " << i;
-            messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
         }
         else if (pathgrid.mPoints[i].mConnectionNum < pointList[i].mConnectionNum)
         {
             std::ostringstream ss;
             ss << " has has more edges than expected for point " << i;
-            messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
         }
 
         // check that edges are bidirectional
@@ -101,7 +101,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
             {
                 std::ostringstream ss;
                 ss << " has a missing edge between points " << i << " and " << pointList[i].mOtherIndex[j];
-                messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+                messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Error);
             }
         }
 
@@ -124,7 +124,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                         << ") x=" << pathgrid.mPoints[i].mX
                         << ", y=" << pathgrid.mPoints[i].mY
                         << ", z=" << pathgrid.mPoints[i].mZ;
-                    messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+                    messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Warning);
 
                     duplList.push_back(i);
                     break;
@@ -143,7 +143,7 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
                 << ") x=" << pathgrid.mPoints[i].mX
                 << ", y=" << pathgrid.mPoints[i].mY
                 << ", z=" << pathgrid.mPoints[i].mZ;
-            messages.push_back (std::make_pair (id, pathgrid.mId + ss.str()));
+            messages.add (id, pathgrid.mId + ss.str(), "", CSMDoc::Message::Severity_Warning);
         }
     }
 

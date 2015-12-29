@@ -1,10 +1,13 @@
-
 #include "mechanicsmanagerimp.hpp"
-#include "npcstats.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <limits.h>
 
+#include <components/misc/rng.hpp>
+
+#include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -20,22 +23,20 @@
 #include "../mwmechanics/aicombat.hpp"
 #include "../mwmechanics/aipursue.hpp"
 
-#include <OgreSceneNode.h>
-
 #include "spellcasting.hpp"
 #include "autocalcspell.hpp"
-
-#include <limits.h>
+#include "npcstats.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
 
     float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2)
     {
-        Ogre::Vector3 pos1 (actor1.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (actor2.getRefData().getPosition().pos);
+        osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
 
-        float d = pos1.distance(pos2);
+        float d = (pos1 - pos2).length();
 
         static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->getInt();
@@ -83,7 +84,7 @@ namespace MWMechanics
 {
     void MechanicsManager::buildPlayer()
     {
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr ptr = getPlayer();
 
         MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
         MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats (ptr);
@@ -361,7 +362,7 @@ namespace MWMechanics
     {
         // Uses ingame time, but scaled to real time
         duration /= MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         player.getClass().getInventoryStore(player).rechargeItems(duration);
     }
 
@@ -489,7 +490,7 @@ namespace MWMechanics
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            MWWorld::Ptr ptr = getPlayer();
             mActors.removeActor(ptr);
             mActors.addActor(ptr, true);
         }
@@ -586,7 +587,7 @@ namespace MWMechanics
         float x = static_cast<float>(npcSkill.getBaseDisposition());
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         MWWorld::LiveCellRef<ESM::NPC>* player = playerPtr.get<ESM::NPC>();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
@@ -603,7 +604,7 @@ namespace MWMechanics
         int rank = 0;
         std::string npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
-        Misc::StringUtils::toLower(npcFaction);
+        Misc::StringUtils::lowerCaseInPlace(npcFaction);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -663,7 +664,7 @@ namespace MWMechanics
 
         const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         // I suppose the temporary disposition change _has_ to be considered here,
@@ -707,7 +708,7 @@ namespace MWMechanics
 
         MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
 
-        MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr playerPtr = getPlayer();
         const MWMechanics::NpcStats &playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         float npcRating1, npcRating2, npcRating3;
@@ -737,7 +738,7 @@ namespace MWMechanics
         float x = 0;
         float y = 0;
 
-        int roll = OEngine::Misc::Rng::roll0to99();
+        int roll = Misc::Rng::roll0to99();
 
         if (type == PT_Admire)
         {
@@ -843,12 +844,12 @@ namespace MWMechanics
             mActors.forceStateUpdate(ptr);
     }
 
-    void MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+    bool MechanicsManager::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
     {
         if(ptr.getClass().isActor())
-            mActors.playAnimationGroup(ptr, groupName, mode, number);
+            return mActors.playAnimationGroup(ptr, groupName, mode, number);
         else
-            mObjects.playAnimationGroup(ptr, groupName, mode, number);
+            return mObjects.playAnimationGroup(ptr, groupName, mode, number);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {
@@ -926,7 +927,7 @@ namespace MWMechanics
             return true;
         }
 
-        if(MWBase::Environment::get().getWorld()->getPlayer().isInCombat()) {
+        if(MWMechanics::isPlayerInCombat()) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage2}");
             return true;
         }
@@ -982,7 +983,7 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            StolenItemsMap::iterator stolenIt = mStolenItems.find(Misc::StringUtils::lowerCase(it->getClass().getId(*it)));
+            StolenItemsMap::iterator stolenIt = mStolenItems.find(Misc::StringUtils::lowerCase(it->getCellRef().getRefId()));
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
@@ -1010,7 +1011,7 @@ namespace MWMechanics
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
                                      int count)
     {
-        if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr != getPlayer())
             return;
 
         MWWorld::Ptr victim;
@@ -1041,12 +1042,25 @@ namespace MWMechanics
             owner.first = ownerCellRef->getFaction();
             owner.second = true;
         }
-        Misc::StringUtils::toLower(owner.first);
+        Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
-            mStolenItems[Misc::StringUtils::lowerCase(item.getClass().getId(item))][owner] += count;
+            mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
 
         commitCrime(ptr, victim, OT_Theft, item.getClass().getValue(item) * count);
+    }
+
+
+    void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
+    {
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
+        for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
+        {
+            if (out.insert(*it).second)
+            {
+                getFollowers(*it, out);
+            }
+        }
     }
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr &player, const MWWorld::Ptr &victim, OffenseType type, int arg, bool victimAware)
@@ -1054,21 +1068,25 @@ namespace MWMechanics
         // NOTE: victim may be empty
 
         // Only player can commit crime
-        if (player != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (player != getPlayer())
             return false;
 
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
+
+        // get the player's followers / allies (works recursively) that will not report crimes
+        std::set<MWWorld::Ptr> playerFollowers;
+        getFollowers(player, playerFollowers);
 
         // Did anyone see it?
         bool crimeSeen = false;
@@ -1085,17 +1103,20 @@ namespace MWMechanics
                     // TODO: Add mod support for stealth executions!
                     || (type == OT_Murder && *it != victim))
             {
-                if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
-                else if (type == OT_Trespassing)
-                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
-
                 // Crime reporting only applies to NPCs
                 if (!it->getClass().isNpc())
                     continue;
 
                 if (it->getClass().getCreatureStats(*it).getAiSequence().isInCombat(victim))
                     continue;
+
+                if (playerFollowers.find(*it) != playerFollowers.end())
+                    continue;
+
+                if (type == OT_Theft || type == OT_Pickpocket)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "thief");
+                else if (type == OT_Trespassing)
+                    MWBase::Environment::get().getDialogueManager()->say(*it, "intruder");
 
                 crimeSeen = true;
             }
@@ -1150,13 +1171,13 @@ namespace MWMechanics
 
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
 
-        Ogre::Vector3 from = Ogre::Vector3(player.getRefData().getPosition().pos);
+        osg::Vec3f from (player.getRefData().getPosition().asVec3());
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
 
         // victim should be considered even beyond alarm radius
-        if (!victim.isEmpty() && from.squaredDistance(Ogre::Vector3(victim.getRefData().getPosition().pos)) > radius*radius)
+        if (!victim.isEmpty() && (from - victim.getRefData().getPosition().asVec3()).length2() > radius*radius)
             neighbors.push_back(victim);
 
         int id = MWBase::Environment::get().getWorld()->getPlayer().getNewCrimeId();
@@ -1286,15 +1307,16 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &ptr, const MWWorld::Ptr &attacker)
     {
-        if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (ptr == getPlayer())
             return false;
 
-        std::list<MWWorld::Ptr> followers = getActorsFollowing(attacker);
+        std::list<MWWorld::Ptr> followers = getActorsSidingWith(attacker);
+        MWMechanics::CreatureStats& targetStats = ptr.getClass().getCreatureStats(ptr);
         if (std::find(followers.begin(), followers.end(), ptr) != followers.end())
         {
-            ptr.getClass().getCreatureStats(ptr).friendlyHit();
+            targetStats.friendlyHit();
 
-            if (ptr.getClass().getCreatureStats(ptr).getFriendlyHits() < 4)
+            if (targetStats.getFriendlyHits() < 4)
             {
                 MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
                 return false;
@@ -1302,7 +1324,7 @@ namespace MWMechanics
         }
 
         // Attacking an NPC that is already in combat with any other NPC is not a crime
-        AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        AiSequence& seq = targetStats.getAiSequence();
         bool isFightingNpc = false;
         for (std::list<AiPackage*>::const_iterator it = seq.begin(); it != seq.end(); ++it)
         {
@@ -1314,13 +1336,13 @@ namespace MWMechanics
             }
         }
 
-        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker)
+        if (ptr.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
                 && !isAggressive(ptr, attacker) && !isFightingNpc)
             commitCrime(attacker, ptr, MWBase::MechanicsManager::OT_Assault);
 
         if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(ptr)
-                                    || attacker == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                && !ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(attacker))
+                                    || attacker == getPlayer())
+                && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
@@ -1328,6 +1350,27 @@ namespace MWMechanics
         }
 
         return true;
+    }
+
+    void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
+    {
+        if (attacker.isEmpty() || attacker != getPlayer())
+            return;
+
+        if (victim == attacker)
+            return; // known to happen
+
+        if (!victim.getClass().isNpc())
+            return; // TODO: implement animal rights
+
+        const MWMechanics::NpcStats& victimStats = victim.getClass().getNpcStats(victim);
+
+        // Simple check for who attacked first: if the player attacked first, a crimeId should be set
+        // Doesn't handle possible edge case where no one reported the assault, but in such a case,
+        // for bystanders it is not possible to tell who attacked first, anyway.
+        if (victimStats.getCrimeId() != -1)
+            commitCrime(attacker, victim, MWBase::MechanicsManager::OT_Murder);
+
     }
 
     bool MechanicsManager::awarenessCheck(const MWWorld::Ptr &ptr, const MWWorld::Ptr &observer)
@@ -1367,9 +1410,9 @@ namespace MWMechanics
         static float fSneakDistBase = store.find("fSneakDistanceBase")->getFloat();
         static float fSneakDistMult = store.find("fSneakDistanceMultiplier")->getFloat();
 
-        Ogre::Vector3 pos1 (ptr.getRefData().getPosition().pos);
-        Ogre::Vector3 pos2 (observer.getRefData().getPosition().pos);
-        float distTerm = fSneakDistBase + fSneakDistMult * pos1.distance(pos2);
+        osg::Vec3f pos1 (ptr.getRefData().getPosition().asVec3());
+        osg::Vec3f pos2 (observer.getRefData().getPosition().asVec3());
+        float distTerm = fSneakDistBase + fSneakDistMult * (pos1 - pos2).length();
 
         float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
@@ -1386,16 +1429,21 @@ namespace MWMechanics
         static float fSneakNoViewMult = store.find("fSneakNoViewMult")->getFloat();
         static float fSneakViewMult = store.find("fSneakViewMult")->getFloat();
         float y = 0;
-        Ogre::Vector3 vec = pos1 - pos2;
-        Ogre::Radian angle = observer.getRefData().getBaseNode()->getOrientation().yAxis().angleBetween(vec);
-        if (angle < Ogre::Degree(90))
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
-        else
-            y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        osg::Vec3f vec = pos1 - pos2;
+        if (observer.getRefData().getBaseNode())
+        {
+            osg::Vec3f observerDir = (observer.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
+
+            float angleRadians = std::acos(observerDir * vec / (observerDir.length() * vec.length()));
+            if (angleRadians < osg::DegreesToRadians(90.f))
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakNoViewMult;
+            else
+                y = obsTerm * observerStats.getFatigueTerm() * fSneakViewMult;
+        }
 
         float target = x - y;
 
-        return (OEngine::Misc::Rng::roll0to99() >= target);
+        return (Misc::Rng::roll0to99() >= target);
     }
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
@@ -1403,7 +1451,7 @@ namespace MWMechanics
         if (ptr.getClass().getCreatureStats(ptr).getAiSequence().isInCombat(target))
             return;
         ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
-        if (target == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (target == getPlayer())
         {
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
@@ -1428,15 +1476,20 @@ namespace MWMechanics
             MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
-    void MechanicsManager::getObjectsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
         mObjects.getObjectsInRange(position, radius, objects);
     }
 
-    void MechanicsManager::getActorsInRange(const Ogre::Vector3 &position, float radius, std::vector<MWWorld::Ptr> &objects)
+    void MechanicsManager::getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
     {
         mActors.getObjectsInRange(position, radius, objects);
+    }
+
+    std::list<MWWorld::Ptr> MechanicsManager::getActorsSidingWith(const MWWorld::Ptr& actor)
+    {
+        return mActors.getActorsSidingWith(actor);
     }
 
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFollowing(const MWWorld::Ptr& actor)
@@ -1500,7 +1553,7 @@ namespace MWMechanics
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
             if (target.getClass().getNpcStats(target).isWerewolf() ||
-                    (target == MWBase::Environment::get().getWorld()->getPlayerPtr() &&
+                    (target == getPlayer() &&
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
                 const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
@@ -1513,7 +1566,7 @@ namespace MWMechanics
 
     void MechanicsManager::keepPlayerAlive()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         CreatureStats& stats = player.getClass().getCreatureStats(player);
         if (stats.isDead())
         {
@@ -1532,4 +1585,112 @@ namespace MWMechanics
     {
         return mActors.isReadyToBlock(ptr);
     }
+
+    void MechanicsManager::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
+    {
+        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
+
+        // The actor does not have to change state
+        if (npcStats.isWerewolf() == werewolf)
+            return;
+
+        MWWorld::Player* player = &MWBase::Environment::get().getWorld()->getPlayer();
+
+        if (actor == player->getPlayer())
+        {
+            if (werewolf)
+            {
+                player->saveSkillsAttributes();
+                player->setWerewolfSkillsAttributes();
+            }
+            else
+                player->restoreSkillsAttributes();
+        }
+
+        // Equipped items other than WerewolfRobe may reference bones that do not even
+        // exist with the werewolf object root, so make sure to unequip all items
+        // *before* we become a werewolf.
+        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
+        invStore.unequipAll(actor);
+
+        // Werewolfs can not cast spells, so we need to unset the prepared spell if there is one.
+        if (npcStats.getDrawState() == MWMechanics::DrawState_Spell)
+            npcStats.setDrawState(MWMechanics::DrawState_Nothing);
+
+        npcStats.setWerewolf(werewolf);
+
+        if(werewolf)
+        {
+            MWWorld::InventoryStore &inv = actor.getClass().getInventoryStore(actor);
+
+            inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
+        }
+        else
+        {
+            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
+        }
+
+        if(actor == player->getPlayer())
+        {
+            MWBase::Environment::get().getWorld()->reattachPlayerCamera();
+
+            // Update the GUI only when called on the player
+            MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+
+            if (werewolf)
+            {
+                windowManager->forceHide(MWGui::GW_Inventory);
+                windowManager->forceHide(MWGui::GW_Magic);
+            }
+            else
+            {
+                windowManager->unsetForceHide(MWGui::GW_Inventory);
+                windowManager->unsetForceHide(MWGui::GW_Magic);
+            }
+
+            windowManager->setWerewolfOverlay(werewolf);
+
+            // Witnesses of the player's transformation will make them a globally known werewolf
+            std::vector<MWWorld::Ptr> closeActors;
+            const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            getActorsInRange(actor.getRefData().getPosition().asVec3(), gmst.find("fAlarmRadius")->getFloat(), closeActors);
+
+            bool detected = false, reported = false;
+            for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
+            {
+                if (*it == actor)
+                    continue;
+
+                if (!it->getClass().isNpc())
+                    continue;
+
+                if (MWBase::Environment::get().getWorld()->getLOS(*it, actor) && awarenessCheck(actor, *it))
+                    detected = true;
+                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
+                    reported = true;
+            }
+
+            if (detected)
+            {
+                windowManager->messageBox("#{sWerewolfAlarmMessage}");
+                MWBase::Environment::get().getWorld()->setGlobalInt("pcknownwerewolf", 1);
+
+                if (reported)
+                {
+                    npcStats.setBounty(npcStats.getBounty()+
+                                       gmst.find("iWereWolfBounty")->getInt());
+                    windowManager->messageBox("#{sCrimeMessage}");
+                }
+            }
+        }
+    }
+
+    void MechanicsManager::applyWerewolfAcrobatics(const MWWorld::Ptr &actor)
+    {
+        const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+        MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
+
+        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
+    }
+
 }

@@ -1,11 +1,13 @@
 #ifndef GAME_MWMECHANICS_CHARACTER_HPP
 #define GAME_MWMECHANICS_CHARACTER_HPP
 
-#include <OgreVector3.h>
+#include <deque>
 
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
+
+#include "../mwrender/animation.hpp"
 
 namespace MWWorld
 {
@@ -26,10 +28,14 @@ class CreatureStats;
 
 enum Priority {
     Priority_Default,
+    Priority_WeaponLowerBody,
+    Priority_SneakIdleLowerBody,
+    Priority_SwimIdle,
     Priority_Jump,
     Priority_Movement,
     Priority_Hit,
     Priority_Weapon,
+    Priority_Block,
     Priority_Knockdown,
     Priority_Torch,
     Priority_Storm,
@@ -134,7 +140,7 @@ enum JumpingState {
     JumpState_Landing
 };
 
-class CharacterController
+class CharacterController : public MWRender::Animation::TextKeyListener
 {
     MWWorld::Ptr mPtr;
     MWRender::Animation *mAnimation;
@@ -147,7 +153,8 @@ class CharacterController
 
     CharacterState mMovementState;
     std::string mCurrentMovement;
-    float mMovementSpeed;
+    float mMovementAnimSpeed;
+    bool mAdjustMovementAnimSpeed;
     bool mHasMovedInXY;
     bool mMovementAnimationControlled;
 
@@ -165,26 +172,31 @@ class CharacterController
     WeaponType mWeaponType;
     std::string mCurrentWeapon;
 
+    float mAttackStrength;
+
     bool mSkipAnim;
 
     // counted for skill increase
     float mSecondsOfSwimming;
     float mSecondsOfRunning;
 
-    MWWorld::Ptr mHeadTrackTarget;
+    MWWorld::ConstPtr mHeadTrackTarget;
 
     float mTurnAnimationThreshold; // how long to continue playing turning animation after actor stopped turning
 
     std::string mAttackType; // slash, chop or thrust
+
+    bool mAttackingOrSpell;
+
     void determineAttackType();
 
-    void refreshCurrentAnims(CharacterState idle, CharacterState movement, bool force=false);
+    void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);
 
     void clearAnimQueue();
 
     bool updateWeaponState();
     bool updateCreatureState();
-    void updateIdleStormState();
+    void updateIdleStormState(bool inwater);
 
     void updateHeadTracking(float duration);
 
@@ -205,6 +217,9 @@ public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
 
+    virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
+                       const std::multimap<float, std::string>& map);
+
     // Be careful when to call this, see comment in Actors
     void updateContinuousVfx();
 
@@ -212,7 +227,7 @@ public:
 
     void update(float duration);
 
-    void playGroup(const std::string &groupname, int mode, int count);
+    bool playGroup(const std::string &groupname, int mode, int count);
     void skipAnim();
     bool isAnimPlaying(const std::string &groupName);
 
@@ -227,12 +242,22 @@ public:
     
     bool isReadyToBlock() const;
     bool isKnockedOut() const;
+    bool isSneaking() const;
+
+    void setAttackingOrSpell(bool attackingOrSpell);
+
+    bool readyToPrepareAttack() const;
+    bool readyToStartAttack() const;
+
+    float getAttackStrength() const;
+
+    /// @see Animation::setActive
+    void setActive(bool active);
 
     /// Make this character turn its head towards \a target. To turn off head tracking, pass an empty Ptr.
-    void setHeadTrackTarget(const MWWorld::Ptr& target);
+    void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 };
 
-    void getWeaponGroup(WeaponType weaptype, std::string &group);
     MWWorld::ContainerStoreIterator getActiveWeapon(CreatureStats &stats, MWWorld::InventoryStore &inv, WeaponType *weaptype);
 }
 

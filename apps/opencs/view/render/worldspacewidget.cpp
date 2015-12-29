@@ -1,11 +1,7 @@
-
 #include "worldspacewidget.hpp"
 
 #include <algorithm>
-
-#include <OgreSceneNode.h>
-#include <OgreSceneManager.h>
-#include <OgreEntity.h>
+#include <iostream>
 
 #include <QEvent>
 #include <QDragEnterEvent>
@@ -13,22 +9,32 @@
 #include <QDropEvent>
 #include <QMouseEvent>
 #include <QKeyEvent>
+#include <QApplication>
+#include <QToolTip>
+
+#include <osgGA/TrackballManipulator>
+#include <osgGA/FirstPersonManipulator>
+
+#include <osgUtil/LineSegmentIntersector>
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/idtable.hpp"
+
+#include "../../model/prefs/state.hpp"
 
 #include "../widget/scenetoolmode.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
-#include "../world/physicssystem.hpp"
-
+#include "object.hpp"
 #include "elements.hpp"
 #include "editmode.hpp"
+#include "instancemode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-: SceneWidget (parent), mSceneElements(0), mRun(0), mDocument(document), mPhysics(boost::shared_ptr<CSVWorld::PhysicsSystem>()), mMouse(0),
-  mInteractionMask (0)
+: SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
+  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false),
+  mToolTipPos (-1, -1)
 {
     setAcceptDrops(true);
 
@@ -60,32 +66,51 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     connect (debugProfiles, SIGNAL (rowsAboutToBeRemoved (const QModelIndex&, int, int)),
         this, SLOT (debugProfileAboutToBeRemoved (const QModelIndex&, int, int)));
 
-    mPhysics = document.getPhysics(); // create physics if one doesn't exist
-    mPhysics->addSceneManager(getSceneManager(), this);
-    mMouse = new MouseState(this);
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["3D Scene Input"].update();
+    CSMPrefs::get()["Tooltips"].update();
+
+    mToolTipDelayTimer.setSingleShot (true);
+    connect (&mToolTipDelayTimer, SIGNAL (timeout()), this, SLOT (showToolTip()));
 }
 
 CSVRender::WorldspaceWidget::~WorldspaceWidget ()
 {
-    delete mMouse;
-    mPhysics->removeSceneManager(getSceneManager());
+}
+
+void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (storeMappingSetting (setting))
+        return;
+
+    if (*setting=="3D Scene Input/drag-factor")
+        mDragFactor = setting->toDouble();
+    else if (*setting=="3D Scene Input/drag-wheel-factor")
+        mDragWheelFactor = setting->toDouble();
+    else if (*setting=="3D Scene Input/drag-shift-factor")
+        mDragShiftFactor = setting->toDouble();
+    else if (*setting=="Tooltips/scene-delay")
+        mToolTipDelay = setting->toInt();
+    else if (*setting=="Tooltips/scene")
+        mShowToolTips = setting->isTrue();
 }
 
 void CSVRender::WorldspaceWidget::selectNavigationMode (const std::string& mode)
 {
     if (mode=="1st")
-        setNavigation (&m1st);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="free")
-        setNavigation (&mFree);
+        mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
     else if (mode=="orbit")
-        setNavigation (&mOrbit);
+        mView->setCameraManipulator(new osgGA::OrbitManipulator);
 }
 
 void CSVRender::WorldspaceWidget::useViewHint (const std::string& hint) {}
 
 void CSVRender::WorldspaceWidget::selectDefaultNavigationMode()
 {
-    setNavigation (&m1st);
+    mView->setCameraManipulator(new osgGA::FirstPersonManipulator);
 }
 
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
@@ -184,11 +209,14 @@ CSVWidget::SceneToolRun *CSVRender::WorldspaceWidget::makeRunTool (
 CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeEditModeSelector (
     CSVWidget::SceneToolbar *parent)
 {
-    CSVWidget::SceneToolMode *tool = new CSVWidget::SceneToolMode (parent, "Edit Mode");
+    mEditMode = new CSVWidget::SceneToolMode (parent, "Edit Mode");
 
-    addEditModeSelectorButtons (tool);
+    addEditModeSelectorButtons (mEditMode);
 
-    return tool;
+    connect (mEditMode, SIGNAL (modeChanged (const std::string&)),
+        this, SLOT (editModeChanged (const std::string&)));
+
+    return mEditMode;
 }
 
 CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType (
@@ -260,6 +288,11 @@ unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
     return mInteractionMask & getVisibilityMask();
 }
 
+void CSVRender::WorldspaceWidget::setEditLock (bool locked)
+{
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (locked);
+}
+
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
@@ -271,9 +304,7 @@ void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
 {
     /// \todo replace EditMode with suitable subclasses
-    tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Instance editing"),
-        "object");
+    tool->addButton (new InstanceMode (this, tool), "object");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
         "pathgrid");
@@ -286,12 +317,136 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
 
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
-    event->accept();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
+
+    if (mime->fromDocument (mDocument))
+    {
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            // These drops are handled through the subview object.
+            event->accept();
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragEnterEvent (event);
+    }
 }
 
 void CSVRender::WorldspaceWidget::dragMoveEvent(QDragMoveEvent *event)
 {
-    event->accept();
+    const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
+    if (!mime) // May happen when non-records (e.g. plain text) are dragged and dropped
+        return;
+
+    if (mime->fromDocument (mDocument))
+    {
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            // These drops are handled through the subview object.
+            event->accept();
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dragMoveEvent (event);
+    }
+}
+
+bool CSVRender::WorldspaceWidget::storeMappingSetting (const CSMPrefs::Setting *setting)
+{
+    if (setting->getParent()->getKey()!="3D Scene Input")
+        return false;
+
+    static const char * const sMappingSettings[] =
+    {
+        "p-navi", "s-navi",
+        "p-edit", "s-edit",
+        "p-select", "s-select",
+        0
+    };
+
+    for (int i=0; sMappingSettings[i]; ++i)
+        if (setting->getKey()==sMappingSettings[i])
+        {
+            QString value = QString::fromUtf8 (setting->toString().c_str());
+
+            Qt::MouseButton button = Qt::NoButton;
+
+            if (value.endsWith ("Left Mouse-Button"))
+                button = Qt::LeftButton;
+            else if (value.endsWith ("Right Mouse-Button"))
+                button = Qt::RightButton;
+            else if (value.endsWith ("Middle Mouse-Button"))
+                button = Qt::MiddleButton;
+            else
+                return false;
+
+            bool ctrl = value.startsWith ("Ctrl-");
+
+            mButtonMapping[std::make_pair (button, ctrl)] = sMappingSettings[i];
+            return true;
+        }
+
+    return false;
+}
+
+osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (const QPoint& localPos)
+{
+    // (0,0) is considered the lower left corner of an OpenGL window
+    int x = localPos.x();
+    int y = height() - localPos.y();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, x, y));
+
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    visitor.setTraversalMask(getInteractionMask() << 1);
+
+    mView->getCamera()->accept(visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
+    {
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+
+        // reject back-facing polygons
+        osg::Vec3f normal = intersection.getWorldIntersectNormal();
+        normal = osg::Matrix::transform3x3(normal, mView->getCamera()->getViewMatrix());
+        if (normal.z() < 0)
+            continue;
+
+        for (std::vector<osg::Node*>::iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
+        {
+            osg::Node* node = *it;
+            if (osg::ref_ptr<CSVRender::TagBase> tag = dynamic_cast<CSVRender::TagBase *>(node->getUserData()))
+                return tag;
+        }
+
+// ignoring terrain for now
+        // must be terrain, report coordinates
+//        std::cout << "Terrain hit at " << intersection.getWorldIntersectPoint().x() << " " << intersection.getWorldIntersectPoint().y() << std::endl;
+//        return;
+    }
+
+    return osg::ref_ptr<CSVRender::TagBase>();
+}
+
+std::string CSVRender::WorldspaceWidget::mapButton (QMouseEvent *event)
+{
+    std::pair<Qt::MouseButton, bool> phyiscal (
+        event->button(), event->modifiers() & Qt::ControlModifier);
+
+    std::map<std::pair<Qt::MouseButton, bool>, std::string>::const_iterator iter =
+        mButtonMapping.find (phyiscal);
+
+    if (iter!=mButtonMapping.end())
+        return iter->second;
+
+    return "";
 }
 
 void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
@@ -302,8 +457,15 @@ void CSVRender::WorldspaceWidget::dropEvent (QDropEvent* event)
 
     if (mime->fromDocument (mDocument))
     {
-        emit dataDropped(mime->getData());
-    } //not handling drops from different documents at the moment
+        if (mime->holdsType (CSMWorld::UniversalId::Type_Cell) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_Cell_Missing) ||
+            mime->holdsType (CSMWorld::UniversalId::Type_DebugProfile))
+        {
+            emit dataDropped(mime->getData());
+        }
+        else
+            dynamic_cast<EditMode&> (*mEditMode->getCurrent()).dropEvent (event);
+    }
 }
 
 void CSVRender::WorldspaceWidget::runRequest (const std::string& profile)
@@ -358,6 +520,26 @@ void CSVRender::WorldspaceWidget::debugProfileAboutToBeRemoved (const QModelInde
     }
 }
 
+void CSVRender::WorldspaceWidget::editModeChanged (const std::string& id)
+{
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).setEditLock (mLocked);
+    mDragging = false;
+}
+
+void CSVRender::WorldspaceWidget::showToolTip()
+{
+    if (mShowToolTips)
+    {
+        QPoint pos = QCursor::pos();
+
+        if (osg::ref_ptr<TagBase> tag = mousePick (mapFromGlobal (pos)))
+        {
+            bool hideBasics = CSMPrefs::get()["Tooltips"]["scene-hide-basic"].isTrue();
+            QToolTip::showText (pos, tag->getToolTip (hideBasics), this);
+        }
+    }
+}
+
 void CSVRender::WorldspaceWidget::elementSelectionChanged()
 {
     setVisibilityMask (getVisibilityMask());
@@ -371,57 +553,162 @@ void CSVRender::WorldspaceWidget::updateOverlay()
 
 void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
-    if(event->buttons() & Qt::RightButton)
+    if (!mDragging)
     {
-        mMouse->mouseMoveEvent(event);
+        if (mDragMode.empty())
+        {
+            if (event->globalPos()!=mToolTipPos)
+            {
+                mToolTipPos = event->globalPos();
+
+                if (mShowToolTips)
+                    mToolTipDelayTimer.start (mToolTipDelay);
+            }
+        }
+        else if (mDragMode=="p-navi" || mDragMode=="s-navi")
+        {
+
+        }
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" || mDragMode=="p-select" || mDragMode=="s-select")
+        {
+            osg::ref_ptr<TagBase> tag = mousePick (event->pos());
+
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            if (mDragMode=="p-edit")
+                mDragging = editMode.primaryEditStartDrag (tag);
+            else if (mDragMode=="s-edit")
+                mDragging = editMode.secondaryEditStartDrag (tag);
+            else if (mDragMode=="p-select")
+                mDragging = editMode.primarySelectStartDrag (tag);
+            else if (mDragMode=="s-select")
+                mDragging = editMode.secondarySelectStartDrag (tag);
+
+            if (mDragging)
+            {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+                mDragX = event->localPos().x();
+                mDragY = height() - event->localPos().y();
+#else
+                mDragX = event->posF().x();
+                mDragY = height() - event->posF().y();
+#endif
+            }
+        }
     }
-    SceneWidget::mouseMoveEvent(event);
+    else
+    {
+        int diffX = event->x() - mDragX;
+        int diffY = (height() - event->y()) - mDragY;
+
+        mDragX = event->x();
+        mDragY = height() - event->y();
+
+        double factor = mDragFactor;
+
+        if (event->modifiers() & Qt::ShiftModifier)
+            factor *= mDragShiftFactor;
+
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.drag (diffX, diffY, factor);
+    }
 }
 
 void CSVRender::WorldspaceWidget::mousePressEvent (QMouseEvent *event)
 {
-    if(event->buttons() & Qt::RightButton)
-    {
-        mMouse->mousePressEvent(event);
-    }
-    //SceneWidget::mousePressEvent(event);
+    std::string button = mapButton (event);
+
+    if (!mDragging)
+        mDragMode = button;
 }
 
 void CSVRender::WorldspaceWidget::mouseReleaseEvent (QMouseEvent *event)
 {
-    if(event->button() == Qt::RightButton)
+    std::string button = mapButton (event);
+
+    if (mDragging)
     {
-        if(!getViewport())
+        if (mDragMode=="p-navi" || mDragMode=="s-navi")
         {
-            SceneWidget::mouseReleaseEvent(event);
-            return;
+
         }
-        mMouse->mouseReleaseEvent(event);
+        else if (mDragMode=="p-edit" || mDragMode=="s-edit" ||
+            mDragMode=="p-select" || mDragMode=="s-select")
+        {
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            editMode.dragCompleted();
+            mDragging = false;
+        }
     }
-    SceneWidget::mouseReleaseEvent(event);
+    else
+    {
+        if (button=="p-navi" || button=="s-navi")
+        {
+
+        }
+        else if (button=="p-edit" || button=="s-edit" ||
+            button=="p-select" || button=="s-select")
+        {
+            osg::ref_ptr<TagBase> tag = mousePick (event->pos());
+
+            handleMouseClick (tag, button, event->modifiers() & Qt::ShiftModifier);
+        }
+    }
+
+    mDragMode.clear();
 }
 
 void CSVRender::WorldspaceWidget::mouseDoubleClickEvent (QMouseEvent *event)
 {
     if(event->button() == Qt::RightButton)
     {
-        mMouse->mouseDoubleClickEvent(event);
+        //mMouse->mouseDoubleClickEvent(event);
     }
-    //SceneWidget::mouseDoubleClickEvent(event);
 }
 
 void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
 {
-    if(!mMouse->wheelEvent(event))
-        SceneWidget::wheelEvent(event);
+    if (mDragging)
+    {
+        double factor = mDragWheelFactor;
+
+        if (event->modifiers() & Qt::ShiftModifier)
+            factor *= mDragShiftFactor;
+
+        EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+        editMode.dragWheel (event->delta(), factor);
+    }
 }
 
 void CSVRender::WorldspaceWidget::keyPressEvent (QKeyEvent *event)
 {
     if(event->key() == Qt::Key_Escape)
     {
-        mMouse->cancelDrag();
+        if (mDragging)
+        {
+            EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+            editMode.dragAborted();
+            mDragging = false;
+        }
     }
     else
-        SceneWidget::keyPressEvent(event);
+        RenderWidget::keyPressEvent(event);
+}
+
+void CSVRender::WorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
+{
+    EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
+
+    if (button=="p-edit")
+        editMode.primaryEditPressed (tag);
+    else if (button=="s-edit")
+        editMode.secondaryEditPressed (tag);
+    else if (button=="p-select")
+        editMode.primarySelectPressed (tag);
+    else if (button=="s-select")
+        editMode.secondarySelectPressed (tag);
 }

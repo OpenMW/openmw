@@ -1,7 +1,11 @@
-
 #include "aipackage.hpp"
 
 #include <cmath>
+
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadland.hpp>
+#include <components/esm/loadmgef.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
@@ -10,16 +14,31 @@
 #include "movement.hpp"
 #include "../mwworld/action.hpp"
 
-#include <OgreMath.h>
-
 #include "steering.hpp"
+#include "actorutil.hpp"
+#include "coordinateconverter.hpp"
 
 MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
-    mTimer(0.26f), mStuckTimer(0), //mTimer starts at .26 to force initial pathbuild
+    mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mShortcutProhibited(false), mShortcutFailPos()
 {
+}
+
+MWWorld::Ptr MWMechanics::AiPackage::getTarget()
+{
+    return MWWorld::Ptr();
+}
+
+bool MWMechanics::AiPackage::sideWithTarget() const
+{
+    return false;
+}
+
+bool MWMechanics::AiPackage::followTargetThroughDoors() const
+{
+    return false;
 }
 
 
@@ -27,57 +46,39 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 {
     //Update various Timers
     mTimer += duration; //Update timer
-    mStuckTimer += duration;   //Update stuck timer
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
 
     /// Stops the actor when it gets too close to a unloaded cell
-    const ESM::Cell *cell = actor.getCell()->getCell();
+    //... At current time, this test is unnecessary. AI shuts down when actor is more than 7168
+    //... units from player, and exterior cells are 8192 units long and wide.
+    //... But AI processing distance may increase in the future.
+    if (isNearInactiveCell(pos))
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        Movement &movement = actor.getClass().getMovementSettings(actor);
-
-        //Ensure pursuer doesn't leave loaded cells
-        if(cell->mData.mX != player.getCell()->getCell()->mData.mX)
-        {
-            int sideX = PathFinder::sgn(cell->mData.mX - player.getCell()->getCell()->mData.mX);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideX * (pos.pos[0] - cell->mData.mX*ESM::Land::REAL_SIZE) > sideX * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
-        if(cell->mData.mY != player.getCell()->getCell()->mData.mY)
-        {
-            int sideY = PathFinder::sgn(cell->mData.mY - player.getCell()->getCell()->mData.mY);
-            //check if actor is near the border of an inactive cell. If so, stop walking.
-            if(sideY * (pos.pos[1] - cell->mData.mY*ESM::Land::REAL_SIZE) > sideY * (ESM::Land::REAL_SIZE/2.0f - 200.0f))
-            {
-                movement.mPosition[1] = 0;
-                return false;
-            }
-        }
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        return false;
     }
-
-    //Start position
-    ESM::Pathgrid::Point start = pos.pos;
 
     //***********************
     /// Checks if you can't get to the end position at all, adds end position to end of path
     /// Rebuilds path every [AI_REACTION_TIME] seconds, in case the target has moved
     //***********************
 
-    bool isStuck = distance(start, mStuckPos.pos[0], mStuckPos.pos[1], mStuckPos.pos[2]) < actor.getClass().getSpeed(actor)*0.05 
-        && distance(dest, start) > 20;
+    ESM::Pathgrid::Point start = pos.pos;
 
     float distToNextWaypoint = distance(start, dest);
-
     bool isDestReached = (distToNextWaypoint <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
-        bool needPathRecalc = doesPathNeedRecalc(dest, cell);
+        osg::Vec3f& lastActorPos = mLastActorPos;
+        bool isStuck = distance(start, lastActorPos.x(), lastActorPos.y(), lastActorPos.z()) < actor.getClass().getSpeed(actor)*mTimer
+            && distance(dest, start) > 20;
+
+        lastActorPos = pos.asVec3();
+
+        const ESM::Cell *cell = actor.getCell()->getCell();
+        bool needPathRecalc = doesPathNeedRecalc(dest, cell); //Only rebuild path if dest point has changed
 
         bool isWayClear = true;
 
@@ -133,46 +134,46 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
         actor.getClass().getMovementSettings(actor).mPosition[2] = 0;
 
         // turn to destination point
-        zTurn(actor, Ogre::Degree(getZAngleToPoint(start, dest)));
-        smoothTurn(actor, Ogre::Degree(getXAngleToPoint(start, dest)), 0);
+        zTurn(actor, getZAngleToPoint(start, dest));
+        smoothTurn(actor, getXAngleToPoint(start, dest), 0);
         return true;
     }
-    else if(mStuckTimer>0.5) //Every half second see if we need to take action to avoid something
+    else
     {
-/// TODO (tluppi#1#): Use ObstacleCheck here. Not working for some reason
-        //if(mObstacleCheck.check(actor, duration)) {
-        if (isStuck) { //Actually stuck, and far enough away from destination to care
-            // first check if we're walking into a door
-            MWWorld::Ptr door = getNearbyDoor(actor);
-            if(door != MWWorld::Ptr()) // NOTE: checks interior cells only
-            {
-                if(!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty() && door.getClass().getDoorState(door) == 0) { //Open the door if untrapped
-                    MWBase::Environment::get().getWorld()->activateDoor(door, 1);
-                }
-            }
-            else // probably walking into another NPC
-            {
-                actor.getClass().getMovementSettings(actor).mPosition[0] = 1;
-                actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
-                // change the angle a bit, too
-                zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0] + 1, pos.pos[1])));
-            }
-        }
-        else { //Not stuck, so reset things
-            mStuckTimer = 0;
-            mStuckPos = pos;
-            actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward
-        }
-    }
-    else {
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; //Just run forward the rest of the time
+        evadeObstacles(actor, duration, pos);
     }
 
     // turn to next path point by X,Z axes
-    zTurn(actor, Ogre::Degree(mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1])));
-    smoothTurn(actor, Ogre::Degree(mPathFinder.getXAngleToNext(pos.pos[0], pos.pos[1], pos.pos[2])), 0);
+    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+    smoothTurn(actor, mPathFinder.getXAngleToNext(pos.pos[0], pos.pos[1], pos.pos[2]), 0);
 
     return false;
+}
+
+void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos)
+{
+    zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
+
+    MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
+    if (mObstacleCheck.check(actor, duration))
+    {
+        // first check if we're walking into a door
+        MWWorld::Ptr door = getNearbyDoor(actor);
+        if (door != MWWorld::Ptr()) // NOTE: checks interior cells only
+        {
+            if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
+                    && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0) {
+                MWBase::Environment::get().getWorld()->activateDoor(door, 1);
+            }
+        }
+        else // probably walking into another NPC
+        {
+            mObstacleCheck.takeEvasiveAction(movement);
+        }
+    }
+    else { //Not stuck, so reset things
+        movement.mPosition[1] = 1; //Just run forward
+    }
 }
 
 bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor, bool *destInLOS)
@@ -188,7 +189,7 @@ bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint
     bool isPathClear = actorCanMoveByZ;
 
     if (!isPathClear
-        && (!mShortcutProhibited || (PathFinder::MakeOgreVector3(mShortcutFailPos) - PathFinder::MakeOgreVector3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
+        && (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
     {
         // take the direct path only if there aren't any obstacles
         isPathClear = !MWBase::Environment::get().getWorld()->castRay(
@@ -223,12 +224,12 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point&
         return true;
 
     float actorSpeed = actor.getClass().getSpeed(actor);
-    float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / MAX_VEL_ANGULAR.valueRadians() * 2; // *2 - for reliability
-    Ogre::Real distToTarget = Ogre::Vector3(static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), 0).length();
+    float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
+    osg::Vec3f::value_type distToTarget = osg::Vec3f(static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), 0).length();
 
     float offsetXY = distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2;
 
-    bool isClear = checkWayIsClear(PathFinder::MakeOgreVector3(startPoint), PathFinder::MakeOgreVector3(endPoint), offsetXY);
+    bool isClear = checkWayIsClear(PathFinder::MakeOsgVec3(startPoint), PathFinder::MakeOsgVec3(endPoint), offsetXY);
 
     // update shortcut prohibit state
     if (isClear)
@@ -258,4 +259,35 @@ bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const
         mPrevDest = dest;
 
     return needRecalc;
+}
+
+bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)
+{
+    const MagicEffects& magicEffects(target.getClass().getCreatureStats(target).getMagicEffects());
+    return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+        || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+}
+
+bool MWMechanics::AiPackage::isNearInactiveCell(const ESM::Position& actorPos)
+{
+    const ESM::Cell* playerCell(getPlayer().getCell()->getCell());
+    if (playerCell->isExterior())
+    {
+        // get actor's distance from origin of center cell
+        osg::Vec3f actorOffset(actorPos.asVec3());
+        CoordinateConverter(playerCell).toLocal(actorOffset);
+
+        // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
+        // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
+        // While AI Process distance is 7168, AI shuts down actors before they reach edges of 3 x 3 grid.
+        const float distanceFromEdge = 200.0;
+        float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
+        float maxThreshold = (2.0f * ESM::Land::REAL_SIZE) - distanceFromEdge;
+        return (actorOffset[0] < minThreshold) || (maxThreshold < actorOffset[0])
+            || (actorOffset[1] < minThreshold) || (maxThreshold < actorOffset[1]);
+    }
+    else
+    {
+        return false;
+    }
 }

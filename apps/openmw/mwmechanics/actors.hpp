@@ -10,11 +10,6 @@
 #include "movement.hpp"
 #include "../mwbase/world.hpp"
 
-namespace Ogre
-{
-    class Vector3;
-}
-
 namespace MWWorld
 {
     class Ptr;
@@ -110,14 +105,15 @@ namespace MWMechanics
 
         void forceStateUpdate(const MWWorld::Ptr &ptr);
 
-        void playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
+        bool playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number);
         void skipAnimation(const MWWorld::Ptr& ptr);
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName);
 
-            void getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out);
+            void getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
 
-            ///Returns the list of actors which are following the given actor
-            /**ie AiFollow is active and the target is the actor **/
+            ///Returns the list of actors which are siding with the given actor in fights
+            /**ie AiFollow or AiEscort is active and the target is the actor **/
+            std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
             /// Get the list of AiFollow::mFollowIndex for all actors following this target

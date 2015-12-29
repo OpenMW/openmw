@@ -4,10 +4,11 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <locale>
 #include <cctype>
 
 #include <boost/filesystem/path.hpp>
+
+#include <components/misc/stringops.hpp>
 
 namespace Files
 {
@@ -25,12 +26,11 @@ namespace Files
                 return left<right;
 
             std::size_t min = std::min (left.length(), right.length());
-            std::locale loc;
 
             for (std::size_t i=0; i<min; ++i)
             {
-                char l = std::tolower (left[i], loc);
-                char r = std::tolower (right[i], loc);
+                char l = Misc::StringUtils::toLower (left[i]);
+                char r = Misc::StringUtils::toLower (right[i]);
 
                 if (l<r)
                     return true;

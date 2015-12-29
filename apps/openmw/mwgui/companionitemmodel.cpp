@@ -1,6 +1,5 @@
 #include "companionitemmodel.hpp"
 
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 
 namespace

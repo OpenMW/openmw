@@ -7,8 +7,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <components/misc/resourcehelpers.hpp>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -16,9 +14,6 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "controllers.hpp"
-
-#undef min
-#undef max
 
 namespace MWGui
 {
@@ -474,7 +469,7 @@ namespace MWGui
             mTextWidget->setCaptionWithReplacing(spellLine);
             mRequestedWidth = mTextWidget->getTextSize().width + 24;
 
-            mImageWidget->setImageTexture(Misc::ResourceHelpers::correctIconPath(magicEffect->mIcon));
+            mImageWidget->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(magicEffect->mIcon));
         }
 
         MWSpellEffect::~MWSpellEffect()
@@ -544,6 +539,9 @@ namespace MWGui
             , mRepeatStepTime(0.1f)
             , mIsIncreasing(true)
         {
+#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,2)
+            ScrollBar::setRepeatEnabled(false);
+#endif
         }
 
         MWScrollBar::~MWScrollBar()
@@ -607,7 +605,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
@@ -623,7 +621,7 @@ namespace MWGui
             controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
             controller->setEnabled(mEnableRepeat);
             controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-			MyGUI::ControllerManager::getInstance().addItem(this, controller);
+            MyGUI::ControllerManager::getInstance().addItem(this, controller);
         }
 
         void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)

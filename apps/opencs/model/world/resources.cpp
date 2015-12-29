@@ -1,65 +1,52 @@
-
 #include "resources.hpp"
 
 #include <sstream>
 #include <stdexcept>
 #include <algorithm>
 
-#include <OgreResourceGroupManager.h>
+#include <components/vfs/manager.hpp>
 
 #include <components/misc/stringops.hpp>
 
-CSMWorld::Resources::Resources (const std::string& baseDirectory, UniversalId::Type type,
+CSMWorld::Resources::Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
     const char * const *extensions)
 : mBaseDirectory (baseDirectory), mType (type)
 {
     int baseSize = mBaseDirectory.size();
 
-    Ogre::StringVector resourcesGroups =
-        Ogre::ResourceGroupManager::getSingleton().getResourceGroups();
-
-    for (Ogre::StringVector::iterator iter (resourcesGroups.begin());
-        iter!=resourcesGroups.end(); ++iter)
+    const std::map<std::string, VFS::File*>& index = vfs->getIndex();
+    for (std::map<std::string, VFS::File*>::const_iterator it = index.begin(); it != index.end(); ++it)
     {
-        if (*iter=="General" || *iter=="Internal" || *iter=="Autodetect")
+        std::string filepath = it->first;
+        if (static_cast<int> (filepath.size())<baseSize+1 ||
+            filepath.substr (0, baseSize)!=mBaseDirectory ||
+            (filepath[baseSize]!='/' && filepath[baseSize]!='\\'))
             continue;
 
-        Ogre::StringVectorPtr resources =
-            Ogre::ResourceGroupManager::getSingleton().listResourceNames (*iter);
-
-        for (Ogre::StringVector::const_iterator iter (resources->begin());
-            iter!=resources->end(); ++iter)
+        if (extensions)
         {
-            if (static_cast<int> (iter->size())<baseSize+1 ||
-                iter->substr (0, baseSize)!=mBaseDirectory ||
-                ((*iter)[baseSize]!='/' && (*iter)[baseSize]!='\\'))
+            std::string::size_type index = filepath.find_last_of ('.');
+
+            if (index==std::string::npos)
                 continue;
 
-            if (extensions)
-            {
-                std::string::size_type index = iter->find_last_of ('.');
+            std::string extension = filepath.substr (index+1);
 
-                if (index==std::string::npos)
-                    continue;
+            int i = 0;
 
-                std::string extension = iter->substr (index+1);
+            for (; extensions[i]; ++i)
+                if (extensions[i]==extension)
+                    break;
 
-                int i = 0;
-
-                for (; extensions[i]; ++i)
-                    if (extensions[i]==extension)
-                        break;
-
-                if (!extensions[i])
-                    continue;
-            }
-
-            std::string file = iter->substr (baseSize+1);
-            mFiles.push_back (file);
-            std::replace (file.begin(), file.end(), '\\', '/');
-            mIndex.insert (std::make_pair (
-                Misc::StringUtils::lowerCase (file), static_cast<int> (mFiles.size())-1));
+            if (!extensions[i])
+                continue;
         }
+
+        std::string file = filepath.substr (baseSize+1);
+        mFiles.push_back (file);
+        std::replace (file.begin(), file.end(), '\\', '/');
+        mIndex.insert (std::make_pair (
+            Misc::StringUtils::lowerCase (file), static_cast<int> (mFiles.size())-1));
     }
 }
 

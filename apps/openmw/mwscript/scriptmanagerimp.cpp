@@ -1,4 +1,3 @@
-
 #include "scriptmanagerimp.hpp"
 
 #include <cassert>
@@ -171,7 +170,7 @@ namespace MWScript
                 return iter->second;
         }
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name2))
+        if (const ESM::Script *script = mStore.get<ESM::Script>().search (name2))
         {
             if (mVerbose)
                 std::cout

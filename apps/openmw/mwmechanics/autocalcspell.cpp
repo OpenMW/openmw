@@ -1,6 +1,7 @@
 #include "autocalcspell.hpp"
 
 #include <climits>
+#include <limits>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -181,7 +182,7 @@ namespace MWMechanics
 
     void calcWeakestSchool (const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm)
     {
-        float minChance = FLT_MAX;
+        float minChance = std::numeric_limits<float>::max();
 
         const ESM::EffectList& effects = spell->mEffects;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = effects.mList.begin(); it != effects.mList.end(); ++it)

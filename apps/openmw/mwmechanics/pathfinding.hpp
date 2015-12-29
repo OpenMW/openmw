@@ -5,9 +5,6 @@
 #include <components/esm/loadpgrd.hpp>
 #include <list>
 
-#include <OgreMath.h>
-#include <OgreVector3.h>
-
 namespace MWWorld
 {
     class CellStore;
@@ -15,10 +12,10 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    float distance(ESM::Pathgrid::Point point, float x, float y, float z);
-    float distance(ESM::Pathgrid::Point a, ESM::Pathgrid::Point b);
-    float getZAngleToDir(const Ogre::Vector3& dir);
-    float getXAngleToDir(const Ogre::Vector3& dir, float dirLen = 0.0f);
+    float distance(const ESM::Pathgrid::Point& point, float x, float y, float);
+    float distance(const ESM::Pathgrid::Point& a, const ESM::Pathgrid::Point& b);
+    float getZAngleToDir(const osg::Vec3f& dir);
+    float getXAngleToDir(const osg::Vec3f& dir);
     float getZAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
     float getXAngleToPoint(const ESM::Pathgrid::Point &origin, const ESM::Pathgrid::Point &dest);
 
@@ -31,16 +28,18 @@ namespace MWMechanics
 
     // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
     // magnitude of pits/obstacles is defined by PATHFIND_Z_REACH
-    bool checkWayIsClear(const Ogre::Vector3& from, const Ogre::Vector3& to, float offsetXY);
+    bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY);
 
     class PathFinder
     {
         public:
             PathFinder();
 
-            static float sgn(Ogre::Radian a)
+            static const int PathTolerance = 32;
+
+            static float sgn(float val)
             {
-                if(a.valueRadians() > 0)
+                if(val > 0)
                     return 1.0;
                 return -1.0;
             }
@@ -57,9 +56,10 @@ namespace MWMechanics
             void buildPath(const ESM::Pathgrid::Point &startPoint, const ESM::Pathgrid::Point &endPoint,
                            const MWWorld::CellStore* cell);
 
-            bool checkPathCompleted(float x, float y, float tolerance=32.f);
+            bool checkPathCompleted(float x, float y, float tolerance = PathTolerance);
             ///< \Returns true if we are within \a tolerance units of the last path point.
 
+            /// In radians
             float getZAngleToNext(float x, float y) const;
 
             float getXAngleToNext(float x, float y, float z) const;
@@ -94,8 +94,8 @@ namespace MWMechanics
                 mPath.push_back(point);
             }
 
-            /// utility function to convert a Ogre::Vector3 to a Pathgrid::Point
-            static ESM::Pathgrid::Point MakePathgridPoint(const Ogre::Vector3& v)
+            /// utility function to convert a osg::Vec3f to a Pathgrid::Point
+            static ESM::Pathgrid::Point MakePathgridPoint(const osg::Vec3f& v)
             {
                 return ESM::Pathgrid::Point(static_cast<int>(v[0]), static_cast<int>(v[1]), static_cast<int>(v[2]));
             }
@@ -106,14 +106,12 @@ namespace MWMechanics
                 return ESM::Pathgrid::Point(static_cast<int>(p.pos[0]), static_cast<int>(p.pos[1]), static_cast<int>(p.pos[2]));
             }
 
-            /// utility function to convert a Pathgrid::Point to a Ogre::Vector3
-            static Ogre::Vector3 MakeOgreVector3(const ESM::Pathgrid::Point& p)
+            static osg::Vec3f MakeOsgVec3(const ESM::Pathgrid::Point& p)
             {
-                return Ogre::Vector3(static_cast<Ogre::Real>(p.mX), static_cast<Ogre::Real>(p.mY), static_cast<Ogre::Real>(p.mZ));
+                return osg::Vec3f(static_cast<float>(p.mX), static_cast<float>(p.mY), static_cast<float>(p.mZ));
             }
 
         private:
-
             std::list<ESM::Pathgrid::Point> mPath;
 
             const ESM::Pathgrid *mPathgrid;

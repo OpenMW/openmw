@@ -117,8 +117,11 @@ namespace MWGui
 
     bool MessageBoxManager::createInteractiveMessageBox (const std::string& message, const std::vector<std::string>& buttons)
     {
-        if(mInterMessageBoxe != NULL) {
-            throw std::runtime_error("There is a message box already");
+        if (mInterMessageBoxe != NULL)
+        {
+            std::cerr << "Warning: replacing an interactive message box that was not answered yet" << std::endl;
+            delete mInterMessageBoxe;
+            mInterMessageBoxe = NULL;
         }
 
         mInterMessageBoxe = new InteractiveMessageBox(*this, message, buttons);
@@ -195,7 +198,6 @@ namespace MWGui
     InteractiveMessageBox::InteractiveMessageBox(MessageBoxManager& parMessageBoxManager, const std::string& message, const std::vector<std::string>& buttons)
         : WindowModal("openmw_interactive_messagebox.layout")
       , mMessageBoxManager(parMessageBoxManager)
-      , mTextButtonPadding(0)
       , mButtonPressed(-1)
     {
         WindowModal::open();

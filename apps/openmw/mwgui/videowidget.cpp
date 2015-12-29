@@ -1,8 +1,13 @@
 #include "videowidget.hpp"
 
-#include <extern/ogre-ffmpeg-videoplayer/videoplayer.hpp>
+#include <extern/osg-ffmpeg-videoplayer/videoplayer.hpp>
 
 #include <MyGUI_RenderManager.h>
+
+#include <osg/Texture2D>
+
+#include <components/vfs/manager.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
 
 #include "../mwsound/movieaudiofactory.hpp"
 
@@ -10,17 +15,42 @@ namespace MWGui
 {
 
 VideoWidget::VideoWidget()
+    : mVFS(NULL)
 {
     mPlayer.reset(new Video::VideoPlayer());
     setNeedKeyFocus(true);
 }
 
+void VideoWidget::setVFS(const VFS::Manager *vfs)
+{
+    mVFS = vfs;
+}
+
 void VideoWidget::playVideo(const std::string &video)
 {
     mPlayer->setAudioFactory(new MWSound::MovieAudioFactory());
-    mPlayer->playVideo(video);
 
-    setImageTexture(mPlayer->getTextureName());
+    Files::IStreamPtr videoStream;
+    try
+    {
+        videoStream = mVFS->get(video);
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Failed to open video: " << e.what() << std::endl;
+        return;
+    }
+
+    mPlayer->playVideo(videoStream, video);
+
+    osg::ref_ptr<osg::Texture2D> texture = mPlayer->getVideoTexture();
+    if (!texture)
+        return;
+
+    mTexture.reset(new osgMyGUI::OSGTexture(texture));
+
+    setRenderItemTexture(mTexture.get());
+    getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 }
 
 int VideoWidget::getVideoWidth()

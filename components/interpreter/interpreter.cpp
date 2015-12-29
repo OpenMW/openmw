@@ -1,8 +1,6 @@
-
 #include "interpreter.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -134,7 +132,34 @@ namespace Interpreter
         throw std::runtime_error (error.str());
     }
 
-    Interpreter::Interpreter()
+    void Interpreter::begin()
+    {
+        if (mRunning)
+        {
+            mCallstack.push (mRuntime);
+            mRuntime.clear();
+        }
+        else
+        {
+            mRunning = true;
+        }
+    }
+
+    void Interpreter::end()
+    {
+        if (mCallstack.empty())
+        {
+            mRuntime.clear();
+            mRunning = false;
+        }
+        else
+        {
+            mRuntime = mCallstack.top();
+            mCallstack.pop();
+        }
+    }
+
+    Interpreter::Interpreter() : mRunning (false)
     {}
 
     Interpreter::~Interpreter()
@@ -204,19 +229,29 @@ namespace Interpreter
     {
         assert (codeSize>=4);
 
-        mRuntime.configure (code, codeSize, context);
+        begin();
 
-        int opcodes = static_cast<int> (code[0]);
-
-        const Type_Code *codeBlock = code + 4;
-
-        while (mRuntime.getPC()>=0 && mRuntime.getPC()<opcodes)
+        try
         {
-            Type_Code code = codeBlock[mRuntime.getPC()];
-            mRuntime.setPC (mRuntime.getPC()+1);
-            execute (code);
+            mRuntime.configure (code, codeSize, context);
+
+            int opcodes = static_cast<int> (code[0]);
+
+            const Type_Code *codeBlock = code + 4;
+
+            while (mRuntime.getPC()>=0 && mRuntime.getPC()<opcodes)
+            {
+                Type_Code code = codeBlock[mRuntime.getPC()];
+                mRuntime.setPC (mRuntime.getPC()+1);
+                execute (code);
+            }
+        }
+        catch (...)
+        {
+            end();
+            throw;
         }
 
-        mRuntime.clear();
+        end();
     }
 }

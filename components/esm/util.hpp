@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
 
-#include <OgreVector3.h>
-#include <OgreQuaternion.h>
+#include <osg/Vec3f>
+#include <osg/Quat>
 
 namespace ESM
 {
@@ -14,17 +14,18 @@ struct Quaternion
     float mValues[4];
 
     Quaternion() {}
-    Quaternion (Ogre::Quaternion q)
+
+    Quaternion(const osg::Quat& q)
     {
-        mValues[0] = q.w;
-        mValues[1] = q.x;
-        mValues[2] = q.y;
-        mValues[3] = q.z;
+        mValues[0] = q.w();
+        mValues[1] = q.x();
+        mValues[2] = q.y();
+        mValues[3] = q.z();
     }
 
-    operator Ogre::Quaternion () const
+    operator osg::Quat () const
     {
-        return Ogre::Quaternion(mValues[0], mValues[1], mValues[2], mValues[3]);
+        return osg::Quat(mValues[1], mValues[2], mValues[3], mValues[0]);
     }
 };
 
@@ -33,16 +34,17 @@ struct Vector3
     float mValues[3];
 
     Vector3() {}
-    Vector3 (Ogre::Vector3 v)
+
+    Vector3(const osg::Vec3f& v)
     {
-        mValues[0] = v.x;
-        mValues[1] = v.y;
-        mValues[2] = v.z;
+        mValues[0] = v.x();
+        mValues[1] = v.y();
+        mValues[2] = v.z();
     }
 
-    operator Ogre::Vector3 () const
+    operator osg::Vec3f () const
     {
-        return Ogre::Vector3(&mValues[0]);
+        return osg::Vec3f(mValues[0], mValues[1], mValues[2]);
     }
 };
 

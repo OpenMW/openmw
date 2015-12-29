@@ -1,4 +1,3 @@
-
 #include "operation.hpp"
 
 #include <string>
@@ -7,7 +6,6 @@
 #include <QTimer>
 
 #include "../world/universalid.hpp"
-#include "../settings/usersettings.hpp"
 
 #include "state.hpp"
 #include "stage.hpp"
@@ -24,9 +22,6 @@ void CSMDoc::Operation::prepareStages()
     {
         iter->second = iter->first->setup();
         mTotalSteps += iter->second;
-
-        for (std::map<QString, QStringList>::const_iterator iter2 (mSettings.begin()); iter2!=mSettings.end(); ++iter2)
-            iter->first->updateUserSetting (iter2->first, iter2->second);
     }
 }
 
@@ -48,7 +43,7 @@ CSMDoc::Operation::~Operation()
 void CSMDoc::Operation::run()
 {
     mTimer->stop();
-    
+
     if (!mConnected)
     {
         connect (mTimer, SIGNAL (timeout()), this, SLOT (executeStage()));
@@ -63,14 +58,6 @@ void CSMDoc::Operation::run()
 void CSMDoc::Operation::appendStage (Stage *stage)
 {
     mStages.push_back (std::make_pair (stage, 0));
-}
-
-void CSMDoc::Operation::configureSettings (const std::vector<QString>& settings)
-{
-    for (std::vector<QString>::const_iterator iter (settings.begin()); iter!=settings.end(); ++iter)
-    {
-        mSettings.insert (std::make_pair (*iter, CSMSettings::UserSettings::instance().definitions (*iter)));
-    }
 }
 
 void CSMDoc::Operation::setDefaultSeverity (Message::Severity severity)
@@ -102,14 +89,6 @@ void CSMDoc::Operation::abort()
         mCurrentStage = mStages.end();
 }
 
-void CSMDoc::Operation::updateUserSetting (const QString& name, const QStringList& value)
-{
-    std::map<QString, QStringList>::iterator iter = mSettings.find (name);
-
-    if (iter!=mSettings.end())
-        iter->second = value;
-}
-
 void CSMDoc::Operation::executeStage()
 {
     if (!mPrepared)
@@ -117,7 +96,7 @@ void CSMDoc::Operation::executeStage()
         prepareStages();
         mPrepared = true;
     }
-    
+
     Messages messages (mDefaultSeverity);
 
     while (mCurrentStage!=mStages.end())

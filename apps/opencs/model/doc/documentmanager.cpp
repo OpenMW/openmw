@@ -1,4 +1,3 @@
-
 #include "documentmanager.hpp"
 
 #include <algorithm>
@@ -13,7 +12,7 @@
 #include "document.hpp"
 
 CSMDoc::DocumentManager::DocumentManager (const Files::ConfigurationManager& configuration)
-: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252)
+: mConfiguration (configuration), mEncoding (ToUTF8::WINDOWS_1252), mVFS(NULL)
 {
     boost::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
@@ -57,9 +56,23 @@ bool CSMDoc::DocumentManager::isEmpty()
 void CSMDoc::DocumentManager::addDocument (const std::vector<boost::filesystem::path>& files, const boost::filesystem::path& savePath,
     bool new_)
 {
-    Document *document = new Document (mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+    Document *document = makeDocument (files, savePath, new_);
+    insertDocument (document);
+}
 
+CSMDoc::Document *CSMDoc::DocumentManager::makeDocument (
+    const std::vector< boost::filesystem::path >& files,
+    const boost::filesystem::path& savePath, bool new_)
+{
+    return new Document (mVFS, mConfiguration, files, new_, savePath, mResDir, mEncoding, mResourcesManager, mBlacklistedScripts);
+}
+
+void CSMDoc::DocumentManager::insertDocument (CSMDoc::Document *document)
+{
     mDocuments.push_back (document);
+
+    connect (document, SIGNAL (mergeDone (CSMDoc::Document*)),
+        this, SLOT (insertDocument (CSMDoc::Document*)));
 
     emit loadRequest (document);
 
@@ -72,6 +85,8 @@ void CSMDoc::DocumentManager::removeDocument (CSMDoc::Document *document)
 
     if (iter==mDocuments.end())
         throw std::runtime_error ("removing invalid document");
+
+    emit documentAboutToBeRemoved (document);
 
     mDocuments.erase (iter);
     document->deleteLater();
@@ -95,11 +110,6 @@ void CSMDoc::DocumentManager::setBlacklistedScripts (const std::vector<std::stri
     mBlacklistedScripts = scriptIds;
 }
 
-void CSMDoc::DocumentManager::listResources()
-{
-    mResourcesManager.listResources();
-}
-
 void CSMDoc::DocumentManager::documentLoaded (Document *document)
 {
     emit documentAdded (document);
@@ -112,4 +122,10 @@ void CSMDoc::DocumentManager::documentNotLoaded (Document *document, const std::
 
     if (error.empty()) // do not remove the document yet, if we have an error
         removeDocument (document);
+}
+
+void CSMDoc::DocumentManager::setVFS(const VFS::Manager *vfs)
+{
+    mResourcesManager.setVFS(vfs);
+    mVFS = vfs;
 }

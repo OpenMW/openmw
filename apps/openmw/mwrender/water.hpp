@@ -1,183 +1,108 @@
-#ifndef GAME_MWRENDER_WATER_H
-#define GAME_MWRENDER_WATER_H
+#ifndef OPENMW_MWRENDER_WATER_H
+#define OPENMW_MWRENDER_WATER_H
 
-#include <OgrePlane.h>
-#include <OgreRenderQueue.h>
-#include <OgreRenderQueueListener.h>
-#include <OgreRenderTargetListener.h>
-#include <OgreMaterial.h>
-#include <OgreTexture.h>
-#include <OgreVector2.h>
+#include <memory>
 
-#include <components/esm/loadcell.hpp>
+#include <osg/ref_ptr>
+#include <osg/Vec3f>
+
 #include <components/settings/settings.hpp>
 
-#include <extern/shiny/Main/MaterialInstance.hpp>
-
-
-#include "renderconst.hpp"
-
-#include "../mwworld/ptr.hpp"
-
-namespace Ogre
+namespace osg
 {
-    class Camera;
-    class SceneManager;
-    class SceneNode;
-    class Entity;
-    class Vector3;
-    class Rectangle2D;
-    struct RenderTargetEvent;
+    class Group;
+    class PositionAttitudeTransform;
+    class Geode;
+    class Node;
+}
+
+namespace osgUtil
+{
+    class IncrementalCompileOperation;
+}
+
+namespace Resource
+{
+    class ResourceSystem;
 }
 
 namespace MWWorld
 {
     class Fallback;
+    class CellStore;
+    class Ptr;
 }
 
-namespace MWRender {
+namespace MWRender
+{
 
-    class SkyManager;
-    class RenderingManager;
-    class RippleSimulation;
     class Refraction;
-
-    class Reflection
-    {
-    public:
-        Reflection(Ogre::SceneManager* sceneManager)
-            : mCamera(NULL)
-            , mParentCamera(NULL)
-            , mSceneMgr(sceneManager)
-            , mIsUnderwater(false)
-            {}
-        virtual ~Reflection() {}
-
-        virtual void setHeight (float height) {}
-        virtual void setParentCamera (Ogre::Camera* parent) { mParentCamera = parent; }
-        void setUnderwater(bool underwater) { mIsUnderwater = underwater; }
-        virtual void setActive (bool active) {}
-        virtual void setViewportBackground(Ogre::ColourValue colour) {}
-        virtual void update() {}
-        virtual void setVisibilityMask (int flags) {}
-
-    protected:
-        Ogre::Camera* mCamera;
-        Ogre::Camera* mParentCamera;
-        Ogre::TexturePtr mTexture;
-        Ogre::SceneManager* mSceneMgr;
-        bool mIsUnderwater;
-    };
-
-    class CubeReflection : public Reflection
-    {
-    public:
-        CubeReflection(Ogre::SceneManager* sceneManager);
-        virtual ~CubeReflection();
-
-        virtual void update();
-    protected:
-        Ogre::RenderTarget* mRenderTargets[6];
-    };
-
-    class PlaneReflection : public Reflection, public Ogre::RenderQueueListener, public Ogre::RenderTargetListener
-    {
-    public:
-        PlaneReflection(Ogre::SceneManager* sceneManager, SkyManager* sky);
-        virtual ~PlaneReflection();
-
-        virtual void setHeight (float height);
-        virtual void setActive (bool active);
-        virtual void setVisibilityMask (int flags);
-
-        void preRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-        void postRenderTargetUpdate(const Ogre::RenderTargetEvent& evt);
-
-        void renderQueueStarted (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &skipThisInvocation);
-        void renderQueueEnded (Ogre::uint8 queueGroupId, const Ogre::String &invocation, bool &repeatThisInvocation);
-
-        virtual void setViewportBackground(Ogre::ColourValue colour);
-
-    protected:
-        Ogre::RenderTarget* mRenderTarget;
-        SkyManager* mSky;
-        Ogre::Plane mWaterPlane;
-        Ogre::Plane mErrorPlane;
-        Ogre::Plane mErrorPlaneUnderwater;
-        bool mRenderActive;
-    };
+    class Reflection;
+    class RippleSimulation;
 
     /// Water rendering
-    class Water : public sh::MaterialInstanceListener
+    class Water
     {
         static const int CELL_SIZE = 8192;
-        Ogre::Camera *mCamera;
-        Ogre::SceneManager *mSceneMgr;
 
-        Ogre::Plane mWaterPlane;
+        osg::ref_ptr<osg::Group> mParent;
+        osg::ref_ptr<osg::Group> mSceneRoot;
+        osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
+        osg::ref_ptr<osg::Geode> mWaterGeode;
+        Resource::ResourceSystem* mResourceSystem;
+        const MWWorld::Fallback* mFallback;
+        osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
-        Ogre::SceneNode *mWaterNode;
-        Ogre::Entity *mWater;
+        std::auto_ptr<RippleSimulation> mSimulation;
 
-        bool mIsUnderwater;
-        bool mActive;
+        osg::ref_ptr<Refraction> mRefraction;
+        osg::ref_ptr<Reflection> mReflection;
+
+        const std::string mResourcePath;
+
+        bool mEnabled;
         bool mToggled;
         float mTop;
 
-        float mWaterTimer;
-
-
-        Ogre::Vector3 getSceneNodeCoordinates(int gridX, int gridY);
-
-    protected:
-        void applyRTT();
-        void applyVisibilityMask();
-
+        osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
 
-        RenderingManager* mRendering;
-        SkyManager* mSky;
+        void createSimpleWaterStateSet(osg::Node* node, float alpha);
 
-        Ogre::MaterialPtr mMaterial;
+        /// @param reflection the reflection camera (required)
+        /// @param refraction the refraction camera (optional)
+        void createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction);
 
-        bool mUnderwaterEffect;
-        int mVisibilityFlags;
-
-        Reflection* mReflection;
-        Refraction* mRefraction;
-        RippleSimulation* mSimulation;
-
-        Ogre::Vector2 mPlayer;
+        void updateWaterMaterial();
 
     public:
-        Water (Ogre::Camera *camera, RenderingManager* rend, const MWWorld::Fallback* fallback);
+        Water(osg::Group* parent, osg::Group* sceneRoot,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback,
+              const std::string& resourcePath);
         ~Water();
 
-        void clearRipples();
-
-        void setActive(bool active);
+        void setEnabled(bool enabled);
 
         bool toggle();
-        void update(float dt, Ogre::Vector3 player);
-        void frameStarted(float dt);
+
+        bool isUnderwater(const osg::Vec3f& pos) const;
 
         /// adds an emitter, position will be tracked automatically using its scene node
         void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
         void removeEmitter (const MWWorld::Ptr& ptr);
         void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        void emitRipple(const osg::Vec3f& pos);
 
-        void setViewportBackground(const Ogre::ColourValue& bg);
+        void removeCell(const MWWorld::CellStore* store); ///< remove all emitters in this cell
 
-        void processChangedSettings(const Settings::CategorySettingVector& settings);
+        void clearRipples();
 
-        /// Updates underwater state accordingly
-        void updateUnderwater(bool underwater);
-        void changeCell(const ESM::Cell* cell);
+        void changeCell(const MWWorld::CellStore* store);
         void setHeight(const float height);
 
-        virtual void requestedConfiguration (sh::MaterialInstance* m, const std::string& configuration);
-        virtual void createdConfiguration (sh::MaterialInstance* m, const std::string& configuration);
+        void update(float dt);
 
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 
 }

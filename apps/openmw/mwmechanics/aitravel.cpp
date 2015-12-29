@@ -1,8 +1,7 @@
 #include "aitravel.hpp"
 
-#include <OgreVector3.h>
-
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -14,18 +13,6 @@
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
-namespace
-{
-
-bool isWithinMaxRange(const Ogre::Vector3& pos1, const Ogre::Vector3& pos2)
-{
-    // Maximum travel distance for vanilla compatibility.
-    // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
-    // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
-    return (pos1.squaredDistance(pos2) <= 7168*7168);
-}
-
-}
 
 namespace MWMechanics
 {
@@ -49,14 +36,14 @@ namespace MWMechanics
         return new AiTravel(*this);
     }
 
-    bool AiTravel::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+    bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         ESM::Position pos = actor.getRefData().getPosition();
 
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
-        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(pos.pos)))
+        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), pos.asVec3()))
             return false;
 
         if (pathTo(actor, ESM::Pathgrid::Point(static_cast<int>(mX), static_cast<int>(mY), static_cast<int>(mZ)), duration))
@@ -86,7 +73,7 @@ namespace MWMechanics
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
-        if (!isWithinMaxRange(Ogre::Vector3(mX, mY, mZ), Ogre::Vector3(actor.getRefData().getPosition().pos)))
+        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
             return;
         // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
         // that is the user's responsibility

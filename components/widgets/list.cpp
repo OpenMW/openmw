@@ -70,7 +70,7 @@ namespace Gui
                 button->setCaption((*it));
                 button->getSubWidgetText()->setWordWrap(true);
                 button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
-                button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheel);
+                button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheelMoved);
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWList::onItemSelected);
 
                 int height = button->getTextSize().height;
@@ -135,7 +135,7 @@ namespace Gui
         mItems.clear();
     }
 
-    void MWList::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void MWList::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
     {
         //NB view offset is negative
         if (mScrollView->getViewOffset().top + _rel*0.3f > 0)

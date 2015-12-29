@@ -6,7 +6,7 @@
 #include <MyGUI_ImageBox.h>
 
 #include <components/esm/loadmgef.hpp>
-#include <components/misc/resourcehelpers.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,6 +17,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 
@@ -44,7 +45,7 @@ namespace MWGui
     {
         // TODO: Tracking add/remove/expire would be better than force updating every frame
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
 
@@ -134,6 +135,24 @@ namespace MWGui
                             MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", "") );
                     }
                 }
+                if (effectIt->mRemainingTime > -1 &&
+                        Settings::Manager::getBool("show effect duration","Game")) {
+                    sourcesDescription += " #{sDuration}: ";
+                    float duration = effectIt->mRemainingTime;
+                    if (duration > 3600) {
+                        int hour = duration / 3600;
+                        duration -= hour*3600;
+                        sourcesDescription += MWGui::ToolTips::toString(hour) + "h";
+                    }
+                    if (duration > 60) {
+                        int minute = duration / 60;
+                        duration -= minute*60;
+                        sourcesDescription += MWGui::ToolTips::toString(minute) + "m";
+                    }
+                    if (duration > 0.1) {
+                        sourcesDescription += MWGui::ToolTips::toString(duration) + "s";
+                    }
+                }
             }
 
             if (remainingDuration > 0.f)
@@ -145,7 +164,7 @@ namespace MWGui
                         ("ImageBox", MyGUI::IntCoord(w,2,16,16), MyGUI::Align::Default);
                     mWidgetMap[it->first] = image;
 
-                    image->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
+                    image->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
                     std::string name = ESM::MagicEffect::effectIdToString (it->first);
 

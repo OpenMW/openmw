@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include <OgreColourValue.h>
+#include <osg/Vec4f>
 
 namespace MWWorld
 {
@@ -17,7 +17,7 @@ namespace MWWorld
             float getFallbackFloat(const std::string& fall) const;
             int getFallbackInt(const std::string& fall) const;
             bool getFallbackBool(const std::string& fall) const;
-            Ogre::ColourValue getFallbackColour(const std::string& fall) const;
+            osg::Vec4f getFallbackColour(const std::string& fall) const;
     };
 }
 #endif

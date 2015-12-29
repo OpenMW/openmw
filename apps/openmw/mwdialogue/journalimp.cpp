@@ -1,4 +1,3 @@
-
 #include "journalimp.hpp"
 
 #include <iterator>

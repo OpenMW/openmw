@@ -4,9 +4,9 @@
 
 #include <cstring>
 
-#include <windows.h>
 #include <shlobj.h>
 #include <shlwapi.h>
+#include <WinReg.h>
 
 #include <boost/locale.hpp>
 namespace bconv = boost::locale::conv;

@@ -1,4 +1,3 @@
-
 #include "quest.hpp"
 
 #include <components/esm/queststate.hpp>

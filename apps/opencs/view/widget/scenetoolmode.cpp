@@ -1,4 +1,3 @@
-
 #include "scenetoolmode.hpp"
 
 #include <QHBoxLayout>
@@ -70,6 +69,11 @@ void CSVWidget::SceneToolMode::addButton (ModeButton *button, const std::string&
         adjustToolTip (button);
         mCurrent->activate (mToolbar);
     }
+}
+
+CSVWidget::ModeButton *CSVWidget::SceneToolMode::getCurrent()
+{
+    return mCurrent;
 }
 
 void CSVWidget::SceneToolMode::selected()

@@ -1,14 +1,16 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-#include "../mwrender/renderingmanager.hpp"
+//#include "../mwrender/renderingmanager.hpp"
 
 #include "ptr.hpp"
 #include "globals.hpp"
 
-namespace Ogre
+#include <set>
+
+namespace osg
 {
-    class Vector3;
+    class Vec3f;
 }
 
 namespace ESM
@@ -26,20 +28,19 @@ namespace Loading
     class Listener;
 }
 
-namespace Render
-{
-    class OgreRenderer;
-}
-
 namespace MWRender
 {
     class SkyManager;
-    class CellRender;
+    class RenderingManager;
+}
+
+namespace MWPhysics
+{
+    class PhysicsSystem;
 }
 
 namespace MWWorld
 {
-    class PhysicsSystem;
     class Player;
     class CellStore;
 
@@ -51,11 +52,10 @@ namespace MWWorld
 
         private:
 
-            //OEngine::Render::OgreRenderer& mRenderer;
             CellStore* mCurrentCell; // the cell the player is in
             CellStoreCollection mActiveCells;
             bool mCellChanged;
-            PhysicsSystem *mPhysics;
+            MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
             bool mNeedMapUpdate;
@@ -69,7 +69,7 @@ namespace MWWorld
 
         public:
 
-            Scene (MWRender::RenderingManager& rendering, PhysicsSystem *physics);
+            Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics);
 
             ~Scene();
 
@@ -77,7 +77,7 @@ namespace MWWorld
 
             void loadCell (CellStore *cell, Loading::Listener* loadingListener);
 
-            void playerMoved (const Ogre::Vector3& pos);
+            void playerMoved (const osg::Vec3f& pos);
 
             void changePlayerCell (CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
 
@@ -107,13 +107,10 @@ namespace MWWorld
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
 
-            void updateObjectLocalRotation (const Ptr& ptr);
-
-            void updateObjectRotation (const Ptr& ptr);
+            void updateObjectRotation (const Ptr& ptr, bool inverseRotationOrder);
+            void updateObjectScale(const Ptr& ptr);
 
             bool isCellActive(const CellStore &cell);
-
-            Ptr searchPtrViaHandle (const std::string& handle);
 
             Ptr searchPtrViaActorId (int actorId);
     };

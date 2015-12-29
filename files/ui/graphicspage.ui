@@ -6,30 +6,11 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>332</width>
-    <height>297</height>
+    <width>437</width>
+    <height>343</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QGroupBox" name="rendererGroup">
-     <property name="title">
-      <string>Render System</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="0" column="0">
-       <widget class="QLabel" name="rendererLabel">
-        <property name="text">
-         <string>Rendering Subsystem:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="rendererComboBox"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item>
     <widget class="QGroupBox" name="displayGroup">
      <property name="title">
@@ -82,7 +63,33 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QComboBox" name="antiAliasingComboBox"/>
+       <widget class="QComboBox" name="antiAliasingComboBox">
+        <item>
+         <property name="text">
+          <string>0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>16</string>
+         </property>
+        </item>
+       </widget>
       </item>
       <item row="4" column="1">
        <widget class="QComboBox" name="screenComboBox"/>

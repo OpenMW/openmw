@@ -1,4 +1,3 @@
-
 #include "statemanagerimp.hpp"
 
 #include <components/esm/esmwriter.hpp>
@@ -6,11 +5,15 @@
 #include <components/esm/cellid.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
 
-#include <OgreImage.h>
+#include <osg/Image>
+
+#include <osgDB/Registry>
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -33,6 +36,7 @@
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -137,11 +141,28 @@ void MWState::StateManager::newGame (bool bypass)
     if (!bypass)
         MWBase::Environment::get().getWindowManager()->setNewGame (true);
 
-    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
+    try
+    {
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
 
-    MWBase::Environment::get().getWorld()->startNewGame (bypass);
+        MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
-    mState = State_Running;
+        mState = State_Running;
+    }
+    catch (std::exception& e)
+    {
+        std::stringstream error;
+        error << "Failed to start new game: " << e.what();
+
+        std::cerr << error.str() << std::endl;
+        cleanup (true);
+
+        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+
+        std::vector<std::string> buttons;
+        buttons.push_back("#{sOk}");
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
+    }
 }
 
 void MWState::StateManager::endGame()
@@ -179,19 +200,16 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 
-        int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
-        Ogre::Image screenshot;
-        world.screenshot(screenshot, screenshotW, screenshotH);
-        Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
-        profile.mScreenshot.resize(encoded->size());
-        encoded->read(&profile.mScreenshot[0], encoded->size());
+        writeScreenshot(profile.mScreenshot);
 
         if (!slot)
             slot = getCurrentCharacter()->createSlot (profile);
         else
             slot = getCurrentCharacter()->updateSlot (slot, profile);
 
-        boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
+        // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
+        // existing save file we are overwriting.
+        std::stringstream stream;
 
         ESM::ESMWriter writer;
 
@@ -202,7 +220,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             ++iter)
             writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
 
-        writer.setFormat (ESM::Header::CurrentFormat);
+        writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
         // all unused
         writer.setVersion(0);
@@ -224,7 +242,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         // Using only Cells for progress information, since they typically have the largest records by far
         listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
-        listener.setLabel("#{sNotifyMessage4}");
+        listener.setLabel("#{sNotifyMessage4}", true);
 
         Loading::ScopedLoad load(&listener);
 
@@ -246,7 +264,14 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.close();
 
         if (stream.fail())
-            throw std::runtime_error("Write operation failed");
+            throw std::runtime_error("Write operation failed (memory stream)");
+
+        // All good, write to file
+        boost::filesystem::ofstream filestream (slot->mPath, std::ios::binary);
+        filestream << stream.rdbuf();
+
+        if (filestream.fail())
+            throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::Manager::setString ("character", "Saves",
             slot->mPath.parent_path().filename().string());
@@ -311,8 +336,6 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     // have to peek into the save file to get the player name
     ESM::ESMReader reader;
     reader.open (filepath);
-    if (reader.getFormat()>ESM::Header::CurrentFormat)
-        return; // format is too new -> ignore
     if (reader.getRecName()!=ESM::REC_SAVE)
         return; // invalid save file -> ignore
     reader.getRecHeader();
@@ -333,6 +356,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
 
         ESM::ESMReader reader;
         reader.open (filepath);
+
+        if (reader.getFormat() > ESM::SavedGame::sCurrentFormat)
+            throw std::runtime_error("This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade to the newest OpenMW version to load this file.");
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap (reader);
 
@@ -456,9 +482,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
             MWBase::Environment::get().getWorld()->togglePOV();
 
-        MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::ConstPtr ptr = MWMechanics::getPlayer();
 
-        ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
+        const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
@@ -503,7 +529,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);
@@ -569,4 +595,32 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
             return false;
     }
     return true;
+}
+
+void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
+{
+    int screenshotW = 259*2, screenshotH = 133*2; // *2 to get some nice antialiasing
+
+    osg::ref_ptr<osg::Image> screenshot (new osg::Image);
+
+    MWBase::Environment::get().getWorld()->screenshot(screenshot.get(), screenshotW, screenshotH);
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+    if (!readerwriter)
+    {
+        std::cerr << "Unable to write screenshot, can't find a jpg ReaderWriter" << std::endl;
+        return;
+    }
+
+    std::ostringstream ostream;
+    osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*screenshot, ostream);
+    if (!result.success())
+    {
+        std::cerr << "Unable to write screenshot: " << result.message() << " code " << result.status() << std::endl;
+        return;
+    }
+
+    std::string data = ostream.str();
+    imageData = std::vector<char>(data.begin(), data.end());
+
 }

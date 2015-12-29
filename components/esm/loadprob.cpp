@@ -8,15 +8,21 @@ namespace ESM
 {
     unsigned int Probe::sRecordId = REC_PROB;
 
-    void Probe::load(ESMReader &esm)
+    void Probe::load(ESMReader &esm, bool &isDeleted)
     {
-        bool hasData = true;
+        isDeleted = false;
+
+        bool hasName = false;
+        bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -33,16 +39,32 @@ namespace ESM
                 case ESM::FourCC<'I','T','E','X'>::value:
                     mIcon = esm.getHString();
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
             esm.fail("Missing PBDT subrecord");
     }
 
-    void Probe::save(ESMWriter &esm) const
+    void Probe::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
 

@@ -1,4 +1,3 @@
-
 #include "searchoperation.hpp"
 
 #include "../doc/state.hpp"

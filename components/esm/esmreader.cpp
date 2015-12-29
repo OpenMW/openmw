@@ -1,7 +1,6 @@
 #include "esmreader.hpp"
-#include <stdexcept>
 
-#include "../files/constrainedfiledatastream.hpp"
+#include <stdexcept>
 
 namespace ESM
 {
@@ -16,7 +15,7 @@ using namespace Misc;
 ESM_Context ESMReader::getContext()
 {
     // Update the file position before returning
-    mCtx.filePos = mEsm->tell();
+    mCtx.filePos = mEsm->tellg();
     return mCtx;
 }
 
@@ -26,6 +25,7 @@ ESMReader::ESMReader()
     , mBuffer(50*1024)
     , mGlobalReaderList(NULL)
     , mEncoder(NULL)
+    , mFileSize(0)
 {
 }
 
@@ -44,12 +44,12 @@ void ESMReader::restoreContext(const ESM_Context &rc)
     mCtx = rc;
 
     // Make sure we seek to the right place
-    mEsm->seek(mCtx.filePos);
+    mEsm->seekg(mCtx.filePos);
 }
 
 void ESMReader::close()
 {
-    mEsm.setNull();
+    mEsm.reset();
     mCtx.filename.clear();
     mCtx.leftFile = 0;
     mCtx.leftRec = 0;
@@ -59,15 +59,22 @@ void ESMReader::close()
     mCtx.subName.val = 0;
 }
 
-void ESMReader::openRaw(Ogre::DataStreamPtr _esm, const std::string &name)
+void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)
 {
     close();
     mEsm = _esm;
     mCtx.filename = name;
-    mCtx.leftFile = mEsm->size();
+    mEsm->seekg(0, mEsm->end);
+    mCtx.leftFile = mFileSize = mEsm->tellg();
+    mEsm->seekg(0, mEsm->beg);
 }
 
-void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
+void ESMReader::openRaw(const std::string& filename)
+{
+    openRaw(Files::openConstrainedFileStream(filename.c_str()), filename);
+}
+
+void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
 {
     openRaw(_esm, name);
 
@@ -81,12 +88,7 @@ void ESMReader::open(Ogre::DataStreamPtr _esm, const std::string &name)
 
 void ESMReader::open(const std::string &file)
 {
-    open (openConstrainedFileDataStream (file.c_str ()), file);
-}
-
-void ESMReader::openRaw(const std::string &file)
-{
-    openRaw (openConstrainedFileDataStream (file.c_str ()), file);
+    open (Files::openConstrainedFileStream (file.c_str ()), file);
 }
 
 int64_t ESMReader::getHNLong(const char *name)
@@ -172,6 +174,22 @@ bool ESMReader::isNextSub(const char* name)
 
     // If subCached is false, then subName == name.
     return !mCtx.subCached;
+}
+
+bool ESMReader::peekNextSub(const char *name)
+{
+    if (!mCtx.leftRec)
+        return false;
+
+    getSubName();
+
+    mCtx.subCached = true;
+    return mCtx.subName == name;
+}
+
+void ESMReader::cacheSubName()
+{
+    mCtx.subCached = true;
 }
 
 // Read subrecord name. This gets called a LOT, so I've optimized it
@@ -263,6 +281,7 @@ void ESMReader::skipRecord()
 {
     skip(mCtx.leftRec);
     mCtx.leftRec = 0;
+    mCtx.subCached = false;
 }
 
 void ESMReader::getRecHeader(uint32_t &flags)
@@ -296,9 +315,7 @@ void ESMReader::getExact(void*x, int size)
 {
     try
     {
-        int t = mEsm->read(x, size);
-        if (t != size)
-            fail("Read error");
+        mEsm->read((char*)x, size);
     }
     catch (std::exception& e)
     {
@@ -340,14 +357,24 @@ void ESMReader::fail(const std::string &msg)
     ss << "\n  File: " << mCtx.filename;
     ss << "\n  Record: " << mCtx.recName.toString();
     ss << "\n  Subrecord: " << mCtx.subName.toString();
-    if (!mEsm.isNull())
-        ss << "\n  Offset: 0x" << hex << mEsm->tell();
+    if (mEsm.get())
+        ss << "\n  Offset: 0x" << hex << mEsm->tellg();
     throw std::runtime_error(ss.str());
 }
 
 void ESMReader::setEncoder(ToUTF8::Utf8Encoder* encoder)
 {
     mEncoder = encoder;
+}
+
+size_t ESMReader::getFileOffset()
+{
+    return mEsm->tellg();
+}
+
+void ESMReader::skip(int bytes)
+{
+    mEsm->seekg(getFileOffset()+bytes);
 }
 
 }

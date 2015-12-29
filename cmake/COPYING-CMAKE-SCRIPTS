@@ -1,7 +1,7 @@
 The following files are derived from the Thermite project
 (http://www.thermite3d.org) and are covered under the license below.
 
-FindMYGUI.cmake, FindOGRE.cmake, FindOIS.cmake, FindBullet.cmake
+FindMYGUI.cmake, FindBullet.cmake
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

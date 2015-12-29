@@ -1,7 +1,7 @@
 #ifndef OPENMW_MWSOUND_MOVIEAUDIOFACTORY_H
 #define OPENMW_MWSOUND_MOVIEAUDIOFACTORY_H
 
-#include <extern/ogre-ffmpeg-videoplayer/audiofactory.hpp>
+#include <extern/osg-ffmpeg-videoplayer/audiofactory.hpp>
 
 namespace MWSound
 {

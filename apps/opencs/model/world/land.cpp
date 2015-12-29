@@ -4,25 +4,12 @@
 
 namespace CSMWorld
 {
-
-    Land::Land()
+    void Land::load(ESM::ESMReader &esm, bool &isDeleted)
     {
-        mLand.reset(new ESM::Land());
-    }
-
-    void Land::load(ESM::ESMReader &esm)
-    {
-        mLand->load(esm);
+        ESM::Land::load(esm, isDeleted);
 
         std::ostringstream stream;
-        stream << "#" << mLand->mX << " " << mLand->mY;
-
+        stream << "#" << mX << " " << mY;
         mId = stream.str();
     }
-
-    void Land::blank()
-    {
-        /// \todo
-    }
-
 }

@@ -40,14 +40,12 @@ namespace MWMechanics
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
         bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
         unsigned int mMovementFlags;
-        float mAttackStrength; // Note only some creatures attack with weapons
 
         float mFallHeight;
 
@@ -77,10 +75,6 @@ namespace MWMechanics
         std::vector<int> mSummonGraveyard;
 
     protected:
-        // These two are only set by NpcStats, but they are declared in CreatureStats to prevent using virtual methods.
-        bool mIsWerewolf;
-        AttributeValue mWerewolfAttributes[8];
-
         int mLevel;
 
     public:
@@ -88,10 +82,6 @@ namespace MWMechanics
 
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);
-
-        /// When attacking, stores how strong the attack should be (0 = weakest, 1 = strongest)
-        float getAttackStrength() const;
-        void setAttackStrength(float value);
 
         bool needToRecalcDynamicStats();
         void setNeedRecalcDynamicStats(bool val);
@@ -164,6 +154,8 @@ namespace MWMechanics
 
         float getFatigueTerm() const;
         ///< Return effective fatigue
+
+        bool isParalyzed() const;
 
         bool isDead() const;
 

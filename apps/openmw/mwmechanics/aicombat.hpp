@@ -8,8 +8,6 @@
 #include "movement.hpp"
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
-
 #include "../mwworld/cellstore.hpp" // for Doors
 
 #include "../mwbase/world.hpp"
@@ -28,6 +26,8 @@ namespace MWMechanics
 {
     class Action;
 
+    struct AiCombatStorage;
+
     /// \brief Causes the actor to fight another actor
     class AiCombat : public AiPackage
     {
@@ -42,7 +42,7 @@ namespace MWMechanics
 
             virtual AiCombat *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
 
@@ -60,8 +60,14 @@ namespace MWMechanics
 
             int mTargetActorId;
 
-
             void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
+            bool reactionTimeActions(const MWWorld::Ptr& actor, CharacterController& characterController,
+                AiCombatStorage& storage, MWWorld::Ptr target);
+
+            /// Transfer desired movement (from AiCombatStorage) to Actor
+            void updateActorsMovement(const MWWorld::Ptr& actor, float duration, MWMechanics::Movement& movement);
+            void rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
+                MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement);
     };
     
     

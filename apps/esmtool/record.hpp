@@ -32,13 +32,7 @@ namespace EsmTool
 
         virtual ~RecordBase() {}
 
-        const std::string &getId() const {
-            return mId;
-        }
-
-        void setId(const std::string &id) { 
-            mId = id;
-        }
+        virtual std::string getId() const = 0;
 
         uint32_t getFlags() const {
             return mFlags;
@@ -53,7 +47,7 @@ namespace EsmTool
         }
 
         void setPrintPlain(bool plain) {
-        	mPrintPlain = plain;
+            mPrintPlain = plain;
         }
 
         virtual void load(ESM::ESMReader &esm) = 0;
@@ -73,22 +67,37 @@ namespace EsmTool
     class Record : public RecordBase
     {
         T mData;
+        bool mIsDeleted;
 
     public:
+        Record()
+            : mIsDeleted(false)
+        {}
+
+        std::string getId() const {
+            return mData.mId;
+        }
+
         T &get() {
             return mData;
         }
 
         void save(ESM::ESMWriter &esm) {
-            mData.save(esm);
+            mData.save(esm, mIsDeleted);
         }
 
         void load(ESM::ESMReader &esm) {
-            mData.load(esm);
+            mData.load(esm, mIsDeleted);
         }
 
         void print();
     };
+    
+    template<> std::string Record<ESM::Cell>::getId() const;
+    template<> std::string Record<ESM::Land>::getId() const;
+    template<> std::string Record<ESM::MagicEffect>::getId() const;
+    template<> std::string Record<ESM::Pathgrid>::getId() const;
+    template<> std::string Record<ESM::Skill>::getId() const;
 
     template<> void Record<ESM::Activator>::print();
     template<> void Record<ESM::Potion>::print();

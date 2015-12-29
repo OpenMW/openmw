@@ -1,10 +1,8 @@
-
 #include "infocreator.hpp"
 
 #include <algorithm>
 
 #include <QLabel>
-#include <QLineEdit>
 #include <QUuid>
 
 #include <components/misc/stringops.hpp>
@@ -16,6 +14,8 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idcompletionmanager.hpp"
+
+#include "../widget/droplineedit.hpp"
 
 std::string CSVWorld::InfoCreator::getId() const
 {
@@ -48,12 +48,12 @@ CSVWorld::InfoCreator::InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     QLabel *label = new QLabel ("Topic", this);
     insertBeforeButtons (label, false);
 
-    mTopic = new QLineEdit (this);
     CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Topic;
     if (getCollectionId().getType() == CSMWorld::UniversalId::Type_JournalInfos)
     {
         displayType = CSMWorld::ColumnBase::Display_Journal;
     }
+    mTopic = new CSVWidget::DropLineEdit(displayType, this);
     mTopic->setCompleter(completionManager.getCompleter(displayType).get());
     insertBeforeButtons (mTopic, true);
 

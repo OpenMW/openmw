@@ -1,4 +1,3 @@
-
 #include "idtablebase.hpp"
 
 CSMWorld::IdTableBase::IdTableBase (unsigned int features) : mFeatures (features) {}

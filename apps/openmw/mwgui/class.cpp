@@ -11,9 +11,6 @@
 
 #include "tooltips.hpp"
 
-#undef min
-#undef max
-
 namespace
 {
 

@@ -1,8 +1,7 @@
-
 #ifndef MWGUI_TOOLTIPS_H
 #define MWGUI_TOOLTIPS_H
 
-#include <openengine/gui/layout.hpp>
+#include "layout.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "widgets.hpp"
@@ -45,7 +44,7 @@ namespace MWGui
         bool wordWrap;
     };
 
-    class ToolTips : public OEngine::GUI::Layout
+    class ToolTips : public Layout
     {
     public:
         ToolTips();
@@ -59,7 +58,7 @@ namespace MWGui
 
         void setDelay(float delay);
 
-        void setFocusObject(const MWWorld::Ptr& focus);
+        void setFocusObject(const MWWorld::ConstPtr& focus);
         void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y);
         ///< set the screen-space position of the tooltip for focused object
 
@@ -87,17 +86,21 @@ namespace MWGui
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);
-
+        
+        bool checkOwned();
+        /// Returns True if taking mFocusObject would be crime
+ 
     private:
         MyGUI::Widget* mDynamicToolTipBox;
 
-        MWWorld::Ptr mFocusObject;
+        MWWorld::ConstPtr mFocusObject;
 
-        MyGUI::IntSize getToolTipViaPtr (bool image=true);
+        MyGUI::IntSize getToolTipViaPtr (int count, bool image=true);
         ///< @return requested tooltip size
 
-        MyGUI::IntSize createToolTip(const ToolTipInfo& info);
+        MyGUI::IntSize createToolTip(const ToolTipInfo& info, bool isFocusObject);
         ///< @return requested tooltip size
+        /// @param isFocusObject Is the object this tooltips originates from mFocusObject?
 
         float mFocusToolTipX;
         float mFocusToolTipY;
@@ -107,7 +110,7 @@ namespace MWGui
 
         static std::string sSchoolNames[6];
 
-	int mHorizontalScrollIndex;
+        int mHorizontalScrollIndex;
 
 
         float mDelay;
@@ -119,6 +122,8 @@ namespace MWGui
         bool mEnabled;
 
         bool mFullHelp;
+        
+        int mShowOwned;
     };
 }
 #endif

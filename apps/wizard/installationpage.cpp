@@ -29,12 +29,6 @@ Wizard::InstallationPage::InstallationPage(QWidget *parent) :
             mThread, SLOT(quit()));
 
     connect(mUnshield, SIGNAL(finished()),
-            mUnshield, SLOT(deleteLater()));
-
-    connect(mUnshield, SIGNAL(finished()),
-            mThread, SLOT(deleteLater()));;
-
-    connect(mUnshield, SIGNAL(finished()),
             this, SLOT(installationFinished()), Qt::QueuedConnection);
 
     connect(mUnshield, SIGNAL(error(QString, QString)),
@@ -60,6 +54,7 @@ Wizard::InstallationPage::~InstallationPage()
 {
     if (mThread->isRunning()) {
         mUnshield->stopWorker();
+        mThread->quit();
         mThread->wait();
     }
 

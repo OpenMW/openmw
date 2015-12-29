@@ -7,30 +7,26 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <OgreVector3.h>
+#include <osg/ref_ptr>
 
 #ifndef Q_MOC_RUN
 #include <components/terrain/terraingrid.hpp>
 #endif
 
 #include "object.hpp"
+#include "cellarrow.hpp"
 
 class QModelIndex;
 
-namespace Ogre
+namespace osg
 {
-    class SceneManager;
-    class SceneNode;
+    class Group;
 }
 
 namespace CSMWorld
 {
     class Data;
-}
-
-namespace CSVWorld
-{
-    class PhysicsSystem;
+    class CellCoordinates;
 }
 
 namespace CSVRender
@@ -39,13 +35,12 @@ namespace CSVRender
     {
             CSMWorld::Data& mData;
             std::string mId;
-            Ogre::SceneNode *mCellNode;
+            osg::ref_ptr<osg::Group> mCellNode;
             std::map<std::string, Object *> mObjects;
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
-            Ogre::SceneManager *mSceneMgr;
-            int mX;
-            int mY;
+            CSMWorld::CellCoordinates mCoordinates;
+            std::auto_ptr<CellArrow> mCellArrows[4];
+            bool mDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -59,8 +54,19 @@ namespace CSVRender
 
         public:
 
-            Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager, const std::string& id,
-                boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin = Ogre::Vector3 (0, 0, 0));
+            enum Selection
+            {
+                Selection_Clear,
+                Selection_All,
+                Selection_Invert
+            };
+
+        public:
+
+            /// \note Deleted covers both cells that are deleted and cells that don't exist in
+            /// the first place.
+            Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+                bool deleted = false);
 
             ~Cell();
 
@@ -85,7 +91,14 @@ namespace CSVRender
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
 
-            float getTerrainHeightAt(const Ogre::Vector3 &pos) const;
+            void setSelection (int elementMask, Selection mode);
+
+            void setCellArrows (int mask);
+
+            /// Returns 0, 0 in case of an unpaged cell.
+            CSMWorld::CellCoordinates getCoordinates() const;
+
+            bool isDeleted() const;
     };
 }
 

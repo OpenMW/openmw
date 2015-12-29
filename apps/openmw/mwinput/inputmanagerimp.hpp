@@ -3,19 +3,17 @@
 
 #include "../mwgui/mode.hpp"
 
+#include <osg/ref_ptr>
+
+#include <extern/oics/ICSChannelListener.h>
+#include <extern/oics/ICSInputControlSystem.h>
+
 #include <components/settings/settings.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/sdlutil/events.hpp>
 
 #include "../mwbase/inputmanager.hpp"
-#include <extern/sdl4ogre/sdlinputwrapper.hpp>
 
-namespace OEngine
-{
-    namespace Render
-    {
-        class OgreRenderer;
-    }
-}
 
 namespace MWWorld
 {
@@ -25,11 +23,6 @@ namespace MWWorld
 namespace MWBase
 {
     class WindowManager;
-}
-
-namespace OMW
-{
-    class Engine;
 }
 
 namespace ICS
@@ -47,8 +40,19 @@ namespace Files
     struct ConfigurationManager;
 }
 
-#include <extern/oics/ICSChannelListener.h>
-#include <extern/oics/ICSInputControlSystem.h>
+namespace SDLUtil
+{
+    class InputWrapper;
+    class VideoWrapper;
+}
+
+namespace osgViewer
+{
+    class Viewer;
+    class ScreenCaptureHandler;
+}
+
+struct SDL_Window;
 
 namespace MWInput
 {
@@ -58,20 +62,24 @@ namespace MWInput
     */
     class InputManager :
             public MWBase::InputManager,
-            public SFO::KeyListener,
-            public SFO::MouseListener,
-            public SFO::WindowListener,
-            public SFO::ControllerListener,
+            public SDLUtil::KeyListener,
+            public SDLUtil::MouseListener,
+            public SDLUtil::WindowListener,
+            public SDLUtil::ControllerListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
     public:
-        InputManager(OEngine::Render::OgreRenderer &_ogre,
-            OMW::Engine& engine,
+        InputManager(
+            SDL_Window* window,
+            osg::ref_ptr<osgViewer::Viewer> viewer,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab);
 
         virtual ~InputManager();
+
+        virtual bool isWindowVisible();
 
         /// Clear all savegame-specific data
         virtual void clear();
@@ -108,7 +116,7 @@ namespace MWInput
 
         virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
-        virtual void mouseMoved( const SFO::MouseMotionEvent &arg );
+        virtual void mouseMoved( const SDLUtil::MouseMotionEvent &arg );
 
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
@@ -142,15 +150,18 @@ namespace MWInput
         void clearAllControllerBindings (ICS::Control* control);
 
     private:
+        SDL_Window* mWindow;
+        bool mWindowVisible;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;
+        osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
+
         bool mJoystickLastUsed;
-        OEngine::Render::OgreRenderer &mOgre;
         MWWorld::Player* mPlayer;
-        OMW::Engine& mEngine;
 
         ICS::InputControlSystem* mInputBinder;
 
-
-        SFO::InputWrapper* mInputManager;
+        SDLUtil::InputWrapper* mInputManager;
+        SDLUtil::VideoWrapper* mVideoWrapper;
 
         std::string mUserFile;
 
@@ -163,7 +174,6 @@ namespace MWInput
         bool mControlsDisabled;
 
         float mCameraSensitivity;
-        float mUISensitivity;
         float mCameraYMultiplier;
         float mPreviewPOVDelay;
         float mTimeIdle;
@@ -175,8 +185,8 @@ namespace MWInput
 
         float mOverencumberedMessageDelay;
 
-        float mMouseX;
-        float mMouseY;
+        float mGuiCursorX;
+        float mGuiCursorY;
         int mMouseWheel;
         bool mUserFileExists;
         bool mAlwaysRunActive;
@@ -186,8 +196,11 @@ namespace MWInput
 
         std::map<std::string, bool> mControlSwitch;
 
+        float mInvUiScalingFactor;
+
     private:
-        void adjustMouseRegion(int width, int height);
+        void convertMousePosForMyGUI(int& x, int& y);
+
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
 
         virtual std::string sdlControllerAxisToString(int axis);
@@ -199,6 +212,8 @@ namespace MWInput
         void setPlayerControlsEnabled(bool enabled);
 
         void updateCursorMode();
+
+        bool checkAllowedToUseItems() const;
 
     private:
         void toggleMainMenu();

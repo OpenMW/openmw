@@ -1,13 +1,14 @@
 #include "aiescort.hpp"
 
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -63,7 +64,7 @@ namespace MWMechanics
         return new AiEscort(*this);
     }
 
-    bool AiEscort::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+    bool AiEscort::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         // If AiEscort has ran for as long or longer then the duration specified
         // and the duration is not infinite, the package is complete.
@@ -73,6 +74,12 @@ namespace MWMechanics
             if (duration <= 0)
                 return true;
         }
+
+        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
+            return false;
+
+        if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
+            return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
         actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
@@ -113,6 +120,11 @@ namespace MWMechanics
     int AiEscort::getTypeId() const
     {
         return TypeIdEscort;
+    }
+
+    MWWorld::Ptr AiEscort::getTarget()
+    {
+        return MWBase::Environment::get().getWorld()->getPtr(mActorId, false);
     }
 
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const

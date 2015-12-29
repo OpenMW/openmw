@@ -36,9 +36,7 @@ namespace MWGui
     class ScreenFader : public WindowBase
     {
     public:
-        ScreenFader(const std::string & texturePath);
-
-        void setTexture(const std::string & texturePath);
+        ScreenFader(const std::string & texturePath, const std::string& layout = "openmw_screen_fader.layout", const MyGUI::FloatCoord& texCoordOverride = MyGUI::FloatCoord(0,0,1,1));
 
         void update(float dt);
 

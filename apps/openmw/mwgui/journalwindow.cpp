@@ -61,6 +61,7 @@ namespace
         DisplayStateStack mStates;
         Book mTopicIndexBook;
         bool mQuestMode;
+        bool mOptionsMode;
         bool mAllQuests;
 
         template <typename T>
@@ -95,7 +96,7 @@ namespace
             return getWidget <MWGui::BookPage> (name);
         }
 
-        JournalWindowImpl (MWGui::JournalViewModel::Ptr Model)
+        JournalWindowImpl (MWGui::JournalViewModel::Ptr Model, bool questList)
             : WindowBase("openmw_journal.layout"), JournalBooks (Model)
         {
             mMainWidget->setVisible(false);
@@ -141,17 +142,17 @@ namespace
                 getPage (RightTopicIndex)->adviseLinkClicked (callback);
             }
 
-            adjustButton(OptionsBTN, true);
             adjustButton(PrevPageBTN);
             adjustButton(NextPageBTN);
             adjustButton(CloseBTN);
             adjustButton(CancelBTN);
-            adjustButton(ShowAllBTN, true);
-            adjustButton(ShowActiveBTN, true);
             adjustButton(JournalBTN);
 
             Gui::ImageButton* optionsButton = getWidget<Gui::ImageButton>(OptionsBTN);
-            if (optionsButton->getWidth() == 0)
+            Gui::ImageButton* showActiveButton = getWidget<Gui::ImageButton>(ShowActiveBTN);
+            Gui::ImageButton* showAllButton = getWidget<Gui::ImageButton>(ShowAllBTN);
+            Gui::ImageButton* questsButton = getWidget<Gui::ImageButton>(QuestsBTN);
+            if (!questList)
             {
                 // If tribunal is not installed (-> no options button), we still want the Topics button available,
                 // so place it where the options button would have been
@@ -161,6 +162,23 @@ namespace
                 topicsButton->setPosition(optionsButton->getPosition());
                 topicsButton->eventMouseButtonClick.clear();
                 topicsButton->eventMouseButtonClick += MyGUI::newDelegate(this, &JournalWindowImpl::notifyOptions);
+
+                optionsButton->setVisible(false);
+                showActiveButton->setVisible(false);
+                showAllButton->setVisible(false);
+                questsButton->setVisible(false);
+            }
+            else
+            {
+                optionsButton->setImage("textures/tx_menubook_options.dds");
+                showActiveButton->setImage("textures/tx_menubook_quests_active.dds");
+                showAllButton->setImage("textures/tx_menubook_quests_all.dds");
+                questsButton->setImage("textures/tx_menubook_quests.dds");
+
+                adjustButton(ShowAllBTN);
+                adjustButton(ShowActiveBTN);
+                adjustButton(OptionsBTN);
+                adjustButton(QuestsBTN);
             }
 
             Gui::ImageButton* nextButton = getWidget<Gui::ImageButton>(NextPageBTN);
@@ -172,7 +190,6 @@ namespace
             }
 
             adjustButton(TopicsBTN);
-            adjustButton(QuestsBTN, true);
             int width = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width + getWidget<MyGUI::Widget>(QuestsBTN)->getSize().width;
             int topicsWidth = getWidget<MyGUI::Widget>(TopicsBTN)->getSize().width;
             int pageWidth = getWidget<MyGUI::Widget>(RightBookPage)->getSize().width;
@@ -182,14 +199,15 @@ namespace
 
             mQuestMode = false;
             mAllQuests = false;
+            mOptionsMode = false;
         }
 
-        void adjustButton (char const * name, bool optional = false)
+        void adjustButton (char const * name)
         {
             Gui::ImageButton* button = getWidget<Gui::ImageButton>(name);
 
-            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize(!optional);
-            button->setSize(button->getRequestedSize(!optional));
+            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
+            button->setSize(button->getRequestedSize());
 
             if (button->getAlign().isRight())
                 button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
@@ -244,6 +262,7 @@ namespace
 
         void setBookMode ()
         {
+            mOptionsMode = false;
             setVisible (OptionsBTN, true);
             setVisible (OptionsOverlay, false);
 
@@ -253,6 +272,8 @@ namespace
 
         void setOptionsMode ()
         {
+            mOptionsMode = true;
+
             setVisible (OptionsBTN, false);
             setVisible (OptionsOverlay, true);
 
@@ -351,6 +372,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyTopicSelected (const std::string& topic, int id)
@@ -378,6 +401,8 @@ namespace
             setVisible (OptionsOverlay, false);
             setVisible (OptionsBTN, true);
             setVisible (JournalBTN, true);
+
+            mOptionsMode = false;
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -508,6 +533,8 @@ namespace
 
         void notifyNextPage(MyGUI::Widget* _sender)
         {
+            if (mOptionsMode)
+                return;
             if (!mStates.empty ())
             {
                 unsigned int  & page = mStates.top ().mPage;
@@ -523,6 +550,8 @@ namespace
 
         void notifyPrevPage(MyGUI::Widget* _sender)
         {
+            if (mOptionsMode)
+                return;
             if (!mStates.empty ())
             {
                 unsigned int & page = mStates.top ().mPage;
@@ -538,7 +567,7 @@ namespace
 }
 
 // glue the implementation to the interface
-MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model)
+MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model, bool questList)
 {
-    return new JournalWindowImpl (Model);
+    return new JournalWindowImpl (Model, questList);
 }

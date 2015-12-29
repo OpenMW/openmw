@@ -1,7 +1,11 @@
 #include "importer.hpp"
+
+#include <iomanip>
+
 #include <boost/shared_ptr.hpp>
 
-#include <OgreRoot.h>
+#include <osgDB/ReadFile>
+#include <osg/ImageUtils>
 
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
@@ -32,13 +36,48 @@ namespace
 
     void writeScreenshot(const ESM::Header& fileHeader, ESM::SavedGame& out)
     {
-        Ogre::Image screenshot;
-        std::vector<unsigned char> screenshotData = fileHeader.mSCRS; // MemoryDataStream doesn't work with const data :(
-        Ogre::DataStreamPtr screenshotStream (new Ogre::MemoryDataStream(&screenshotData[0], screenshotData.size()));
-        screenshot.loadRawData(screenshotStream, 128, 128, 1, Ogre::PF_BYTE_BGRA);
-        Ogre::DataStreamPtr encoded = screenshot.encode("jpg");
-        out.mScreenshot.resize(encoded->size());
-        encoded->read(&out.mScreenshot[0], encoded->size());
+        if (fileHeader.mSCRS.size() != 128*128*4)
+        {
+            std::cerr << "unexpected screenshot size " << std::endl;
+            return;
+        }
+
+        osg::ref_ptr<osg::Image> image (new osg::Image);
+        image->allocateImage(128, 128, 1, GL_RGB, GL_UNSIGNED_BYTE);
+
+        // need to convert pixel format from BGRA to RGB as the jpg readerwriter doesn't support it otherwise
+        std::vector<unsigned char>::const_iterator it = fileHeader.mSCRS.begin();
+        for (int y=0; y<128; ++y)
+        {
+            for (int x=0; x<128; ++x)
+            {
+                *(image->data(x,y)+2) = *it++;
+                *(image->data(x,y)+1) = *it++;
+                *image->data(x,y) = *it++;
+                it++; // skip alpha
+            }
+        }
+
+        image->flipVertical();
+
+        std::stringstream ostream;
+
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("jpg");
+        if (!readerwriter)
+        {
+            std::cerr << "can't write screenshot: no jpg readerwriter found" << std::endl;
+            return;
+        }
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image, ostream);
+        if (!result.success())
+        {
+            std::cerr << "can't write screenshot: " << result.message() << " code " << result.status() << std::endl;
+            return;
+        }
+
+        std::string data = ostream.str();
+        out.mScreenshot = std::vector<char>(data.begin(), data.end());
     }
 
 }
@@ -127,7 +166,9 @@ namespace ESSImport
 
             if (i >= file2.mRecords.size())
             {
+                std::ios::fmtflags f(std::cout.flags());
                 std::cout << "Record in file1 not present in file2: (1) 0x" << std::hex << rec.mFileOffset << std::endl;
+                std::cout.flags(f);
                 return;
             }
 
@@ -135,7 +176,9 @@ namespace ESSImport
 
             if (rec.mName != rec2.mName)
             {
+                std::ios::fmtflags f(std::cout.flags());
                 std::cout << "Different record name at (2) 0x" << std::hex << rec2.mFileOffset << std::endl;
+                std::cout.flags(f);
                 return; // TODO: try to recover
             }
 
@@ -146,7 +189,9 @@ namespace ESSImport
 
                 if (j >= rec2.mSubrecords.size())
                 {
+                    std::ios::fmtflags f(std::cout.flags());
                     std::cout << "Subrecord in file1 not present in file2: (1) 0x" << std::hex << sub.mFileOffset << std::endl;
+                    std::cout.flags(f);
                     return;
                 }
 
@@ -154,8 +199,10 @@ namespace ESSImport
 
                 if (sub.mName != sub2.mName)
                 {
+                    std::ios::fmtflags f(std::cout.flags());
                     std::cout << "Different subrecord name (" << rec.mName << "." << sub.mName << " vs. " << sub2.mName << ") at (1) 0x" << std::hex << sub.mFileOffset
                               << " (2) 0x" << sub2.mFileOffset << std::endl;
+                    std::cout.flags(f);
                     break; // TODO: try to recover
                 }
 
@@ -163,6 +210,8 @@ namespace ESSImport
                 {
                     if (blacklist.find(std::make_pair(rec.mName, sub.mName)) != blacklist.end())
                         continue;
+
+                    std::ios::fmtflags f(std::cout.flags());
 
                     std::cout << "Different subrecord data for " << rec.mName << "." << sub.mName << " at (1) 0x" << std::hex << sub.mFileOffset
                               << " (2) 0x" << sub2.mFileOffset << std::endl;
@@ -196,6 +245,7 @@ namespace ESSImport
                             std::cout << "\033[0m";
                     }
                     std::cout << std::endl;
+                    std::cout.flags(f);
                 }
             }
         }
@@ -203,10 +253,6 @@ namespace ESSImport
 
     void Importer::run()
     {
-        // construct Ogre::Root to gain access to image codecs
-        Ogre::LogManager logman;
-        Ogre::Root root;
-
         ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding));
         ESM::ESMReader esm;
         esm.open(mEssFile);
@@ -284,7 +330,11 @@ namespace ESSImport
             else
             {
                 if (unknownRecords.insert(n.val).second)
+                {
+                    std::ios::fmtflags f(std::cerr.flags());
                     std::cerr << "unknown record " << n.toString() << " (0x" << std::hex << esm.getFileOffset() << ")" << std::endl;
+                    std::cerr.flags(f);
+                }
 
                 esm.skipRecord();
             }
@@ -292,7 +342,7 @@ namespace ESSImport
 
         ESM::ESMWriter writer;
 
-        writer.setFormat (ESM::Header::CurrentFormat);
+        writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
         std::ofstream stream(mOutFile.c_str(), std::ios::binary);
         // all unused
@@ -344,7 +394,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        writer.writeHNString("NAME", "player");
+        context.mPlayerBase.mId = "player";
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

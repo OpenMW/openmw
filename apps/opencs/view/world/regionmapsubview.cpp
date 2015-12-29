@@ -1,4 +1,3 @@
-
 #include "regionmapsubview.hpp"
 
 #include "regionmap.hpp"

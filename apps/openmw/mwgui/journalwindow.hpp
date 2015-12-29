@@ -12,7 +12,7 @@ namespace MWGui
     struct JournalWindow
     {
         /// construct a new instance of the one JournalWindow implementation
-        static JournalWindow * create (boost::shared_ptr <JournalViewModel> Model);
+        static JournalWindow * create (boost::shared_ptr <JournalViewModel> Model, bool questList);
 
         /// destroy this instance of the JournalWindow implementation
         virtual ~JournalWindow () {};

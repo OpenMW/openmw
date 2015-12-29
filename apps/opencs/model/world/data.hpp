@@ -29,6 +29,8 @@
 #include <components/esm/debugprofile.hpp>
 #include <components/esm/filter.hpp>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "../doc/stage.hpp"
@@ -44,11 +46,17 @@
 #include "infocollection.hpp"
 #include "nestedinfocollection.hpp"
 #include "pathgrid.hpp"
+#include "metadata.hpp"
 #ifndef Q_MOC_RUN
 #include "subcellcollection.hpp"
 #endif
 
 class QAbstractItemModel;
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace ESM
 {
@@ -94,17 +102,18 @@ namespace CSMWorld
             RefIdCollection mReferenceables;
             RefCollection mRefs;
             IdCollection<ESM::Filter> mFilters;
+            Collection<MetaData> mMetaData;
             const ResourcesManager& mResourcesManager;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
-            std::string mAuthor;
-            std::string mDescription;
             ESM::ESMReader *mReader;
             const ESM::Dialogue *mDialogue; // last loaded dialogue
             bool mBase;
             bool mProject;
             std::map<std::string, std::map<ESM::RefNum, std::string> > mRefLoadCache;
             int mReaderIndex;
+
+            boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
             std::vector<boost::shared_ptr<ESM::ESMReader> > mReaders;
 
@@ -126,6 +135,12 @@ namespace CSMWorld
             Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
+
+            const VFS::Manager* getVFS() const;
+
+            boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
+
+            boost::shared_ptr<const Resource::ResourceSystem> getResourceSystem() const;
 
             const IdCollection<ESM::Global>& getGlobals() const;
 
@@ -217,7 +232,11 @@ namespace CSMWorld
 
             const IdCollection<CSMWorld::Land>& getLand() const;
 
+            IdCollection<CSMWorld::Land>& getLand();
+
             const IdCollection<CSMWorld::LandTexture>& getLandTextures() const;
+
+            IdCollection<CSMWorld::LandTexture>& getLandTextures();
 
             const IdCollection<ESM::SoundGenerator>& getSoundGens() const;
 
@@ -237,6 +256,10 @@ namespace CSMWorld
 
             /// Throws an exception, if \a id does not match a resources list.
             const Resources& getResources (const UniversalId& id) const;
+
+            const MetaData& getMetaData() const;
+
+            void setMetaData (const MetaData& metaData);
 
             QAbstractItemModel *getTableModel (const UniversalId& id);
             ///< If no table model is available for \a id, an exception is thrown.
@@ -266,14 +289,6 @@ namespace CSMWorld
 
             int count (RecordBase::State state) const;
             ///< Return number of top-level records with the given \a state.
-
-            void setDescription (const std::string& description);
-
-            std::string getDescription() const;
-
-            void setAuthor (const std::string& author);
-
-            std::string getAuthor() const;
 
         signals:
 

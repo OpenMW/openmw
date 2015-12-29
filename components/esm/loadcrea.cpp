@@ -1,5 +1,7 @@
 #include "loadcrea.hpp"
 
+#include <iostream>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 #include "defs.hpp"
@@ -8,8 +10,10 @@ namespace ESM {
 
     unsigned int Creature::sRecordId = REC_CREA;
 
-    void Creature::load(ESMReader &esm)
+    void Creature::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mAiPackage.mList.clear();
@@ -19,14 +23,19 @@ namespace ESM {
 
         mScale = 1.f;
         mHasAI = false;
+
+        bool hasName = false;
         bool hasNpdt = false;
         bool hasFlags = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -72,18 +81,40 @@ namespace ESM {
                 case AI_CNDT:
                     mAiPackage.add(esm);
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                case ESM::FourCC<'I','N','D','X'>::value:
+                    // seems to occur only in .ESS files, unsure of purpose
+                    int index;
+                    esm.getHT(index);
+                    std::cerr << "Creature::load: Unhandled INDX " << index << std::endl;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasNpdt)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasNpdt && !isDeleted)
             esm.fail("Missing NPDT subrecord");
-        if (!hasFlags)
+        if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Creature::save(ESMWriter &esm) const
+    void Creature::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("CNAM", mOriginal);
         esm.writeHNOCString("FNAM", mName);
@@ -96,7 +127,12 @@ namespace ESM {
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mHasAI) {
+        if (mAiData.mHello != 0
+            || mAiData.mFight != 0
+            || mAiData.mFlee != 0
+            || mAiData.mAlarm != 0
+            || mAiData.mServices != 0)
+        {
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
         mTransport.save(esm);
@@ -115,7 +151,7 @@ namespace ESM {
         for (int i=0; i<6; ++i) mData.mAttack[i] = 0;
         mData.mGold = 0;
         mFlags = 0;
-        mScale = 0;
+        mScale = 1.f;
         mModel.clear();
         mName.clear();
         mScript.clear();

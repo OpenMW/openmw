@@ -28,8 +28,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "../files/constrainedfiledatastream.hpp"
-
 using namespace std;
 using namespace Bsa;
 
@@ -168,7 +166,7 @@ void BSAFile::open(const string &file)
     readHeader();
 }
 
-Ogre::DataStreamPtr BSAFile::getFile(const char *file)
+Files::IStreamPtr BSAFile::getFile(const char *file)
 {
     assert(file);
     int i = getIndex(file);
@@ -176,5 +174,11 @@ Ogre::DataStreamPtr BSAFile::getFile(const char *file)
         fail("File not found: " + string(file));
 
     const FileStruct &fs = files[i];
-	return openConstrainedFileDataStream (filename.c_str (), fs.offset, fs.fileSize);
+
+    return Files::openConstrainedFileStream (filename.c_str (), fs.offset, fs.fileSize);
+}
+
+Files::IStreamPtr BSAFile::getFile(const FileStruct *file)
+{
+    return Files::openConstrainedFileStream (filename.c_str (), file->offset, file->fileSize);
 }

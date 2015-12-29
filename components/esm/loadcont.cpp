@@ -24,17 +24,24 @@ namespace ESM
 
     unsigned int Container::sRecordId = REC_CONT;
 
-    void Container::load(ESMReader &esm)
+    void Container::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mInventory.mList.clear();
+
+        bool hasName = false;
         bool hasWeight = false;
         bool hasFlags = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -59,18 +66,34 @@ namespace ESM
                 case ESM::FourCC<'N','P','C','O'>::value:
                     mInventory.add(esm);
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasWeight)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasWeight && !isDeleted)
             esm.fail("Missing CNDT subrecord");
-        if (!hasFlags)
+        if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
 
-    void Container::save(ESMWriter &esm) const
+    void Container::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CNDT", mWeight, 4);

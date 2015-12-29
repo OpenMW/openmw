@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <utility>
 
 #include <components/esm/loadalch.hpp>
 #include <components/esm/loadappa.hpp>
@@ -68,9 +69,9 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::string, int> mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <refId, count>
-            /// This is used to remove the spawned item(s) if the levelled item is restocked.
+            std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
+            ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
+            /// This is used to restock levelled items(s) if the old item was sold.
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
@@ -85,7 +86,7 @@ namespace MWWorld
             void storeState (const LiveCellRef<T>& ref, ESM::ObjectState& state) const;
 
             template<typename T>
-            void storeStates (CellRefList<T>& collection,
+            void storeStates (const CellRefList<T>& collection,
                 ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
@@ -141,14 +142,14 @@ namespace MWWorld
             int count (const std::string& id);
 
         protected:
-            ContainerStoreIterator addNewStack (const Ptr& ptr, int count);
+            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
 
         public:
 
-            virtual bool stacks (const Ptr& ptr1, const Ptr& ptr2);
+            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2);
             ///< @return true if the two specified objects can stack with each other
 
             void fill (const ESM::InventoryList& items, const std::string& owner);
@@ -162,14 +163,13 @@ namespace MWWorld
             float getWeight() const;
             ///< Return total weight of the items contained in *this.
 
-            static int getType (const Ptr& ptr);
+            static int getType (const ConstPtr& ptr);
             ///< This function throws an exception, if ptr does not point to an object, that can be
             /// put into a container.
 
             Ptr search (const std::string& id);
 
-            /// \todo make this method const once const-correct ContainerStoreIterators are available
-            virtual void writeState (ESM::InventoryState& state);
+            virtual void writeState (ESM::InventoryState& state) const;
 
             virtual void readState (const ESM::InventoryState& state);
 

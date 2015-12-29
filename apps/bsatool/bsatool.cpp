@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <exception>
 
@@ -237,12 +238,14 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     }
 
     // Get a stream for the file to extract
-    Ogre::DataStreamPtr data = bsa.getFile(archivePath.c_str());
+    Files::IStreamPtr stream = bsa.getFile(archivePath.c_str());
+
     bfs::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
     std::cout << "Extracting " << info.extractfile << " to " << target << std::endl;
-    out.write(data->getAsString().c_str(), data->size());
+
+    out << stream->rdbuf();
     out.close();
 
     return 0;
@@ -276,12 +279,12 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
 
         // Get a stream for the file to extract
         // (inefficient because getFile iter on the list again)
-        Ogre::DataStreamPtr data = bsa.getFile(archivePath);
+        Files::IStreamPtr data = bsa.getFile(archivePath);
         bfs::ofstream out(target, std::ios::binary);
 
         // Write the file to disk
         std::cout << "Extracting " << target << std::endl;
-        out.write(data->getAsString().c_str(), data->size());
+        out << data->rdbuf();
         out.close();
     }
 

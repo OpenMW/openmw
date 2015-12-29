@@ -45,14 +45,12 @@ namespace ESM
         bool mTalkedTo;
         bool mAlarmed;
         bool mAttacked;
-        bool mAttackingOrSpell;
         bool mKnockdown;
         bool mKnockdownOneFrame;
         bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
         unsigned int mMovementFlags;
-        float mAttackStrength;
         float mFallHeight;
         std::string mLastHitObject;
         std::string mLastHitAttemptObject;

@@ -1,4 +1,3 @@
-
 #include "util.hpp"
 
 #include <stdexcept>
@@ -13,11 +12,15 @@
 #include <QCheckBox>
 #include <QPlainTextEdit>
 #include <QEvent>
+#include <QItemEditorFactory>
 
 #include "../../model/world/commands.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
+
 #include "../widget/coloreditor.hpp"
+#include "../widget/droplineedit.hpp"
+
 #include "dialoguespinbox.hpp"
 #include "scriptedit.hpp"
 
@@ -163,14 +166,14 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
     const QModelIndex& index) const
 {
     CSMWorld::ColumnBase::Display display = getDisplayTypeFromIndex(index);
-    
+
     // This createEditor() method is called implicitly from tables.
     // For boolean values in tables use the default editor (combobox).
     // Checkboxes is looking ugly in the table view.
     // TODO: Find a better solution?
     if (display == CSMWorld::ColumnBase::Display_Boolean)
     {
-        return QStyledItemDelegate::createEditor(parent, option, index);
+        return QItemEditorFactory::defaultFactory()->createEditor(QVariant::Bool, parent);
     }
     // For tables the pop-up of the color editor should appear immediately after the editor creation
     // (the third parameter of ColorEditor's constructor)
@@ -229,32 +232,34 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return edit;
         }
 
+        case CSMWorld::ColumnBase::Display_LongString256:
+        {
+            /// \todo implement size limit. QPlainTextEdit does not support a size limit.
+            QPlainTextEdit *edit = new QPlainTextEdit(parent);
+            edit->setUndoRedoEnabled (false);
+            return edit;
+        }
+
         case CSMWorld::ColumnBase::Display_Boolean:
 
             return new QCheckBox(parent);
 
-        case CSMWorld::ColumnBase::Display_String:
-        case CSMWorld::ColumnBase::Display_Skill:
-        case CSMWorld::ColumnBase::Display_Script:
-        case CSMWorld::ColumnBase::Display_Race:
-        case CSMWorld::ColumnBase::Display_Region:
-        case CSMWorld::ColumnBase::Display_Class:
-        case CSMWorld::ColumnBase::Display_Faction:
-        case CSMWorld::ColumnBase::Display_Miscellaneous:
-        case CSMWorld::ColumnBase::Display_Sound:
-        case CSMWorld::ColumnBase::Display_Mesh:
-        case CSMWorld::ColumnBase::Display_Icon:
-        case CSMWorld::ColumnBase::Display_Music:
-        case CSMWorld::ColumnBase::Display_SoundRes:
-        case CSMWorld::ColumnBase::Display_Texture:
-        case CSMWorld::ColumnBase::Display_Video:
-        case CSMWorld::ColumnBase::Display_GlobalVariable:
-
-            return new DropLineEdit(parent);
-
         case CSMWorld::ColumnBase::Display_ScriptLines:
 
             return new ScriptEdit (mDocument, ScriptHighlighter::Mode_Console, parent);
+
+        case CSMWorld::ColumnBase::Display_String:
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+
+            return new CSVWidget::DropLineEdit(display, parent);
+
+        case CSMWorld::ColumnBase::Display_String32:
+        {
+        // For other Display types (that represent record IDs) with drop support IdCompletionDelegate is used
+            CSVWidget::DropLineEdit *widget = new CSVWidget::DropLineEdit(display, parent);
+            widget->setMaxLength (32);
+            return widget;
+        }
 
         default:
 
@@ -325,28 +330,4 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
 
 }
 
-CSVWorld::DropLineEdit::DropLineEdit(QWidget* parent) :
-QLineEdit(parent)
-{
-    setAcceptDrops(true);
-}
-
-void CSVWorld::DropLineEdit::dragEnterEvent(QDragEnterEvent *event)
-{
-    event->acceptProposedAction();
-}
-
-void CSVWorld::DropLineEdit::dragMoveEvent(QDragMoveEvent *event)
-{
-    event->accept();
-}
-
-void CSVWorld::DropLineEdit::dropEvent(QDropEvent *event)
-{
-    const CSMWorld::TableMimeData* data(dynamic_cast<const CSMWorld::TableMimeData*>(event->mimeData()));
-    if (!data) // May happen when non-records (e.g. plain text) are dragged and dropped
-        return;
-
-    emit tableMimeDataDropped(data->getData(), data->getDocumentPtr());
-    //WIP
-}
+void CSVWorld::CommandDelegate::settingChanged (const CSMPrefs::Setting *setting) {}

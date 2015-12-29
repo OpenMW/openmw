@@ -8,6 +8,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 
 namespace MWWorld
 {
@@ -30,6 +31,12 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     listener->setProgressRange(1000);
 
     ESM::Dialogue *dialogue = 0;
+
+    // Land texture loading needs to use a separate internal store for each plugin.
+    // We set the number of plugins here to avoid continual resizes during loading,
+    // and so we can properly verify if valid plugin indices are being passed to the
+    // LandTexture Store retrieval methods.
+    mLandTextures.resize(esm.getGlobalReaderList()->size());
 
     /// \todo Move this to somewhere else. ESMReader?
     // Cache parent esX files by tracking their indices in the global list of
@@ -95,33 +102,17 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 throw std::runtime_error(error.str());
             }
         } else {
-            // Load it
-            std::string id = esm.getHNOString("NAME");
-            // ... unless it got deleted! This means that the following record
-            //  has been deleted, and trying to load it using standard assumptions
-            //  on the structure will (probably) fail.
-            if (esm.isNextSub("DELE")) {
-              esm.skipRecord();
-              it->second->eraseStatic(id);
-              continue;
-            }
-            it->second->load(esm, id);
-
-            // DELE can also occur after the usual subrecords
-            if (esm.isNextSub("DELE")) {
-              esm.skipRecord();
-              it->second->eraseStatic(id);
-              continue;
+            RecordId id = it->second->load(esm);
+            if (id.mIsDeleted)
+            {
+                it->second->eraseStatic(id.mId);
+                continue;
             }
 
             if (n.val==ESM::REC_DIAL) {
-                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id));
+                dialogue = const_cast<ESM::Dialogue*>(mDialogs.find(id.mId));
             } else {
                 dialogue = 0;
-            }
-            // Insert the reference into the global lookup
-            if (!id.empty() && isCacheableRecord(n.val)) {
-                mIds[Misc::StringUtils::lowerCase (id)] = n.val;
             }
         }
         listener->setProgress(static_cast<size_t>(esm.getFileOffset() / (float)esm.getFileSize() * 1000));
@@ -130,9 +121,20 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
 
 void ESMStore::setUp()
 {
-    std::map<int, StoreBase *>::iterator it = mStores.begin();
-    for (; it != mStores.end(); ++it) {
-        it->second->setUp();
+    mIds.clear();
+
+    std::map<int, StoreBase *>::iterator storeIt = mStores.begin();
+    for (; storeIt != mStores.end(); ++storeIt) {
+        storeIt->second->setUp();
+
+        if (isCacheableRecord(storeIt->first))
+        {
+            std::vector<std::string> identifiers;
+            storeIt->second->listIdentifier(identifiers);
+
+            for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
+                mIds[*record] = storeIt->first;
+        }
     }
     mSkills.setUp();
     mMagicEffects.setUp();
@@ -194,19 +196,13 @@ void ESMStore::setUp()
             case ESM::REC_LEVC:
 
                 {
-                    std::string id = reader.getHNString ("NAME");
-                    mStores[type]->read (reader, id);
-
-                    // FIXME: there might be stale dynamic IDs in mIds from an earlier savegame
-                    // that really should be cleared instead of just overwritten
-
-                    mIds[id] = type;
+                    mStores[type]->read (reader);
                 }
 
                 if (type==ESM::REC_NPC_)
                 {
                     // NPC record will always be last and we know that there can be only one
-                    // dynamic NPC record (player) -> We are done here with dynamic record laoding
+                    // dynamic NPC record (player) -> We are done here with dynamic record loading
                     setUp();
 
                     const ESM::NPC *player = mNpcs.find ("player");

@@ -26,14 +26,6 @@ namespace MyGUI
     class UString;
 }
 
-namespace OEngine
-{
-    namespace GUI
-    {
-        class Layout;
-    }
-}
-
 namespace ESM
 {
     struct Class;
@@ -58,6 +50,8 @@ namespace MWWorld
 
 namespace MWGui
 {
+    class Layout;
+
     class Console;
     class SpellWindow;
     class TradeWindow;
@@ -154,11 +148,12 @@ namespace MWBase
             virtual MWGui::ConfirmationDialog* getConfirmationDialog() = 0;
             virtual MWGui::TradeWindow* getTradeWindow() = 0;
 
+            /// Make the player use an item, while updating GUI state accordingly
+            virtual void useItem(const MWWorld::Ptr& item) = 0;
+
             virtual void updateSpellWindow() = 0;
 
             virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
-
-            virtual void wmUpdateFps(float fps, unsigned int triangleCount, unsigned int batchCount) = 0;
 
             /// Set value for the given ID.
             virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;
@@ -183,12 +178,6 @@ namespace MWBase
 
             virtual void changeCell(MWWorld::CellStore* cell) = 0;
             ///< change the active cell
-
-            virtual void setPlayerPos(int cellX, int cellY, const float x, const float y) = 0;
-            ///< set player position in map space
-
-            virtual void setPlayerDir(const float x, const float y) = 0;
-            ///< set player view direction in map space
 
             virtual void setFocusObject(const MWWorld::Ptr& focus) = 0;
             virtual void setFocusObjectScreenCoords(float min_x, float min_y, float max_x, float max_y) = 0;
@@ -241,7 +230,7 @@ namespace MWBase
             virtual void addVisitedLocation(const std::string& name, int x, int y) = 0;
 
             /// Hides dialog and schedules dialog to be deleted.
-            virtual void removeDialog(OEngine::GUI::Layout* dialog) = 0;
+            virtual void removeDialog(MWGui::Layout* dialog) = 0;
 
             ///Gracefully attempts to exit the topmost GUI mode
             /** No guarentee of actually closing the window **/
@@ -303,8 +292,6 @@ namespace MWBase
 
             virtual void showSoulgemDialog (MWWorld::Ptr item) = 0;
 
-            virtual void frameStarted(float dt) = 0;
-
             virtual void changePointer (const std::string& name) = 0;
 
             virtual void setEnemy (const MWWorld::Ptr& enemy) = 0;
@@ -361,6 +348,15 @@ namespace MWBase
             virtual void cycleSpell(bool next) = 0;
             /// Cycle to next or previous weapon
             virtual void cycleWeapon(bool next) = 0;
+
+            // In WindowManager for now since there isn't a VFS singleton
+            virtual std::string correctIconPath(const std::string& path) = 0;
+            virtual std::string correctBookartPath(const std::string& path, int width, int height) = 0;
+            virtual std::string correctTexturePath(const std::string& path) = 0;
+
+            virtual void requestMap(std::set<MWWorld::CellStore*> cells) = 0;
+            virtual void removeCell(MWWorld::CellStore* cell) = 0;
+            virtual void writeFog(MWWorld::CellStore* cell) = 0;
     };
 }
 

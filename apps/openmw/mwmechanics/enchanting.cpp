@@ -1,6 +1,6 @@
 #include "enchanting.hpp"
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -11,6 +11,7 @@
 #include "creaturestats.hpp"
 #include "npcstats.hpp"
 #include "spellcasting.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {
@@ -54,7 +55,7 @@ namespace MWMechanics
 
     bool Enchanting::create()
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         ESM::Enchantment enchantment;
         enchantment.mData.mCharge = getGemCharge();
@@ -70,7 +71,7 @@ namespace MWMechanics
 
         if(mSelfEnchanting)
         {
-            if(getEnchantChance() <= (OEngine::Misc::Rng::roll0to99()))
+            if(getEnchantChance() <= (Misc::Rng::roll0to99()))
                 return false;
 
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
@@ -217,7 +218,7 @@ namespace MWMechanics
     int Enchanting::getEffectiveCastCost() const
     {
         int baseCost = getBaseCastCost();
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         return getEffectiveEnchantmentCastCost(static_cast<float>(baseCost), player);
     }
 
@@ -291,7 +292,7 @@ namespace MWMechanics
 
     void Enchanting::payForEnchantment() const
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);

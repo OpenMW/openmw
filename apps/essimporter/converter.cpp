@@ -2,8 +2,7 @@
 
 #include <stdexcept>
 
-#include <OgreImage.h>
-#include <OgreColourValue.h>
+#include <osgDB/WriteFile>
 
 #include <components/esm/creaturestate.hpp>
 #include <components/esm/containerstate.hpp>
@@ -15,12 +14,14 @@
 namespace
 {
 
-    void convertImage(char* data, int size, int width, int height, Ogre::PixelFormat pf, const std::string& out)
+    void convertImage(char* data, int size, int width, int height, GLenum pf, const std::string& out)
     {
-        Ogre::Image screenshot;
-        Ogre::DataStreamPtr stream (new Ogre::MemoryDataStream(data, size));
-        screenshot.loadRawData(stream, width, height, 1, pf);
-        screenshot.save(out);
+        osg::ref_ptr<osg::Image> image (new osg::Image);
+        image->allocateImage(width, height, 1, pf, GL_UNSIGNED_BYTE);
+        memcpy(image->data(), data, size);
+        image->flipVertical();
+
+        osgDB::writeImageFile(*image, out);
     }
 
 
@@ -71,17 +72,20 @@ namespace ESSImport
         data.resize(esm.getSubSize());
         esm.getExact(&data[0], data.size());
 
-        Ogre::DataStreamPtr stream (new Ogre::MemoryDataStream(&data[0], data.size()));
-        mGlobalMapImage.loadRawData(stream, maph.size, maph.size, 1, Ogre::PF_BYTE_RGB);
+        mGlobalMapImage = new osg::Image;
+        mGlobalMapImage->allocateImage(maph.size, maph.size, 1, GL_RGB, GL_UNSIGNED_BYTE);
+        memcpy(mGlobalMapImage->data(), &data[0], data.size());
+
         // to match openmw size
-        mGlobalMapImage.resize(maph.size*2, maph.size*2, Ogre::Image::FILTER_BILINEAR);
+        // FIXME: filtering?
+        mGlobalMapImage->scaleImage(maph.size*2, maph.size*2, 1, GL_UNSIGNED_BYTE);
     }
 
     void ConvertFMAP::write(ESM::ESMWriter &esm)
     {
-        int numcells = mGlobalMapImage.getWidth() / 18; // NB truncating, doesn't divide perfectly
+        int numcells = mGlobalMapImage->s() / 18; // NB truncating, doesn't divide perfectly
                                                        // with the 512x512 map the game has by default
-        int cellSize = mGlobalMapImage.getWidth()/numcells;
+        int cellSize = mGlobalMapImage->s()/numcells;
 
         // Note the upper left corner of the (0,0) cell should be at (width/2, height/2)
 
@@ -90,12 +94,14 @@ namespace ESSImport
         mContext->mGlobalMapState.mBounds.mMinY = -(numcells-1)/2;
         mContext->mGlobalMapState.mBounds.mMaxY = numcells/2;
 
-        Ogre::Image image2;
-        std::vector<Ogre::uint8> data;
+        osg::ref_ptr<osg::Image> image2 (new osg::Image);
         int width = cellSize*numcells;
         int height = cellSize*numcells;
+        std::vector<unsigned char> data;
         data.resize(width*height*4, 0);
-        image2.loadDynamicImage(&data[0], width, height, Ogre::PF_BYTE_RGBA);
+
+        image2->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+        memcpy(image2->data(), &data[0], data.size());
 
         for (std::set<std::pair<int, int> >::const_iterator it = mContext->mExploredCells.begin(); it != mContext->mExploredCells.end(); ++it)
         {
@@ -108,8 +114,8 @@ namespace ESSImport
                 continue;
             }
 
-            int imageLeftSrc = mGlobalMapImage.getWidth()/2;
-            int imageTopSrc = mGlobalMapImage.getHeight()/2;
+            int imageLeftSrc = mGlobalMapImage->s()/2;
+            int imageTopSrc = mGlobalMapImage->t()/2;
             imageLeftSrc += it->first * cellSize;
             imageTopSrc -= it->second * cellSize;
             int imageLeftDst = width/2;
@@ -118,13 +124,31 @@ namespace ESSImport
             imageTopDst -= it->second * cellSize;
             for (int x=0; x<cellSize; ++x)
                 for (int y=0; y<cellSize; ++y)
-                    image2.setColourAt(mGlobalMapImage.getColourAt(imageLeftSrc+x, imageTopSrc+y, 0)
-                                       , imageLeftDst+x, imageTopDst+y, 0);
+                {
+                    unsigned int col = *(unsigned int*)mGlobalMapImage->data(imageLeftSrc+x, imageTopSrc+y, 0);
+                    *(unsigned int*)image2->data(imageLeftDst+x, imageTopDst+y, 0) = col;
+                }
         }
 
-        Ogre::DataStreamPtr encoded = image2.encode("png");
-        mContext->mGlobalMapState.mImageData.resize(encoded->size());
-        encoded->read(&mContext->mGlobalMapState.mImageData[0], encoded->size());
+        std::stringstream ostream;
+        osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
+        if (!readerwriter)
+        {
+            std::cerr << "can't write global map image, no png readerwriter found" << std::endl;
+            return;
+        }
+
+        image2->flipVertical();
+
+        osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*image2, ostream);
+        if (!result.success())
+        {
+            std::cerr << "can't write global map image: " << result.message() << " code " << result.status() << std::endl;
+            return;
+        }
+
+        std::string outData = ostream.str();
+        mContext->mGlobalMapState.mImageData = std::vector<char>(outData.begin(), outData.end());
 
         esm.startRecord(ESM::REC_GMAP);
         mContext->mGlobalMapState.save(esm);
@@ -134,9 +158,9 @@ namespace ESSImport
     void ConvertCell::read(ESM::ESMReader &esm)
     {
         ESM::Cell cell;
-        std::string id = esm.getHNString("NAME");
-        cell.mName = id;
-        cell.load(esm, false);
+        bool isDeleted = false;
+
+        cell.load(esm, isDeleted, false);
 
         // I wonder what 0x40 does?
         if (cell.isExterior() && cell.mData.mFlags & 0x20)
@@ -145,7 +169,7 @@ namespace ESSImport
         }
 
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
-        if (id == mContext->mPlayerCellName)
+        if (cell.mName == mContext->mPlayerCellName)
         {
             mContext->mPlayer.mCellId = cell.getCellId();
         }
@@ -194,7 +218,7 @@ namespace ESSImport
                 std::ostringstream filename;
                 filename << "fog_" << cell.mData.mX << "_" << cell.mData.mY << ".tga";
 
-                convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size()*4, 16, 16, Ogre::PF_BYTE_RGBA, filename.str());
+                convertImage((char*)&newcell.mFogOfWar[0], newcell.mFogOfWar.size()*4, 16, 16, GL_RGBA, filename.str());
             }
         }
 
@@ -253,7 +277,7 @@ namespace ESSImport
         if (cell.isExterior())
             mExtCells[std::make_pair(cell.mData.mX, cell.mData.mY)] = newcell;
         else
-            mIntCells[id] = newcell;
+            mIntCells[cell.mName] = newcell;
     }
 
     void ConvertCell::writeCell(const Cell &cell, ESM::ESMWriter& esm)

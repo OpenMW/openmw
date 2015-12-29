@@ -1,32 +1,42 @@
 #include "obstacle.hpp"
 
-#include <OgreVector3.h>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
+#include "movement.hpp"
+
 namespace MWMechanics
 {
     // NOTE: determined empirically but probably need further tweaking
-    static const float DIST_SAME_SPOT = 1.8f;
-    static const float DURATION_SAME_SPOT = 1.0f;
+    static const float DIST_SAME_SPOT = 0.5f;
+    static const float DURATION_SAME_SPOT = 1.5f;
     static const float DURATION_TO_EVADE = 0.4f;
+
+    const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] =
+    {
+        { 1.0f, 0.0f },     // move to side
+        { 1.0f, -1.0f },    // move to side and backwards
+        { -1.0f, 0.0f },    // move to other side
+        { -1.0f, -1.0f }    // move to side and backwards
+    };
 
     // Proximity check function for interior doors.  Given that most interior cells
     // do not have many doors performance shouldn't be too much of an issue.
     //
     // Limitation: there can be false detections, and does not test whether the
     // actor is facing the door.
-    bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    bool proximityToDoor(const MWWorld::Ptr& actor, float minSqr)
     {
-        if(getNearbyDoor(actor, minSqr, closed)!=MWWorld::Ptr())
+        if(getNearbyDoor(actor, minSqr)!=MWWorld::Ptr())
             return true;
         else
             return false;
     }
 
-    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr, bool closed)
+    MWWorld::Ptr getNearbyDoor(const MWWorld::Ptr& actor, float minSqr)
     {
         MWWorld::CellStore *cell = actor.getCell();
 
@@ -34,10 +44,10 @@ namespace MWMechanics
             return MWWorld::Ptr(); // check interior cells only
 
         // Check all the doors in this cell
-        MWWorld::CellRefList<ESM::Door>& doors = cell->get<ESM::Door>();
-        MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
-        MWWorld::CellRefList<ESM::Door>::List::iterator it = refList.begin();
-        Ogre::Vector3 pos(actor.getRefData().getPosition().pos);
+        const MWWorld::CellRefList<ESM::Door>& doors = cell->getReadOnlyDoors();
+        const MWWorld::CellRefList<ESM::Door>::List& refList = doors.mList;
+        MWWorld::CellRefList<ESM::Door>::List::const_iterator it = refList.begin();
+        osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
 
         /// TODO: How to check whether the actor is facing a door? Below code is for
         ///       the player, perhaps it can be adapted.
@@ -49,13 +59,13 @@ namespace MWMechanics
         ///       opposite of the code in World::activateDoor() ::confused::
         for (; it != refList.end(); ++it)
         {
-            MWWorld::LiveCellRef<ESM::Door>& ref = *it;
-            if(pos.squaredDistance(Ogre::Vector3(ref.mData.getPosition().pos)) < minSqr)
-                if((closed && ref.mData.getLocalRotation().rot[2] == 0) ||
-                   (!closed && ref.mData.getLocalRotation().rot[2] >= 1))
-                {
-                    return MWWorld::Ptr(&ref, actor.getCell()); // found, stop searching
-                }
+            const MWWorld::LiveCellRef<ESM::Door>& ref = *it;
+            if((pos - ref.mData.getPosition().asVec3()).length2() < minSqr
+                    && ref.mData.getPosition().rot[2] == ref.mRef.getPosition().rot[2])
+            {
+                // FIXME cast
+                return MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell()); // found, stop searching
+            }
         }
         return MWWorld::Ptr(); // none found
     }
@@ -67,6 +77,7 @@ namespace MWMechanics
       , mStuckDuration(0)
       , mEvadeDuration(0)
       , mDistSameSpot(-1) // avoid calculating it each time
+      , mEvadeDirectionIndex(0)
     {
     }
 
@@ -103,20 +114,23 @@ namespace MWMechanics
      * t = how long before considered stuck
      * u = how long to move sideways
      *
-     * DIST_SAME_SPOT is calibrated for movement speed of around 150.
-     * A rat has walking speed of around 30, so we need to adjust for
-     * that.
      */
     bool ObstacleCheck::check(const MWWorld::Ptr& actor, float duration)
     {
         const MWWorld::Class& cls = actor.getClass();
         ESM::Position pos = actor.getRefData().getPosition();
 
-        if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * (cls.getSpeed(actor) / 150);
+        // actors can move at most 60 fps (the physics framerate).
+        // the max() can be removed if we implement physics interpolation.
+        float movementDuration = std::max(1/60.f, duration);
 
-        bool samePosition = (std::abs(pos.pos[0] - mPrevX) < mDistSameSpot) &&
-                            (std::abs(pos.pos[1] - mPrevY) < mDistSameSpot);
+        if(mDistSameSpot == -1)
+            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
+
+        float distSameSpot = mDistSameSpot * movementDuration;
+
+        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
+
         // update position
         mPrevX = pos.pos[0];
         mPrevY = pos.pos[1];
@@ -149,6 +163,7 @@ namespace MWMechanics
                     {
                         mStuckDuration = 0;
                         mWalkState = State_Evade;
+                        chooseEvasionDirection();
                     }
                 }
             }
@@ -169,4 +184,21 @@ namespace MWMechanics
         }
         return false; // no obstacles to evade (yet)
     }
+
+    void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement)
+    {
+        actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
+        actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
+    }
+
+    void ObstacleCheck::chooseEvasionDirection()
+    {
+        // change direction if attempt didn't work
+        ++mEvadeDirectionIndex;
+        if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
+        {
+            mEvadeDirectionIndex = 0;
+        }
+    }
+
 }

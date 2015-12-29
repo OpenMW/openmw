@@ -1,10 +1,11 @@
 #include "defines.hpp"
 
-#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <iostream>
+
+#include <components/misc/stringops.hpp>
 
 namespace Interpreter{
 
@@ -34,8 +35,7 @@ namespace Interpreter{
             if(text[i] == eschar)
             {
                 retval << text.substr(start, i - start);
-                std::string temp = text.substr(i+1, 100);
-                transform(temp.begin(), temp.end(), temp.begin(), ::tolower);
+                std::string temp = Misc::StringUtils::lowerCase(text.substr(i+1, 100));
                 
                 bool found = false;
                 try

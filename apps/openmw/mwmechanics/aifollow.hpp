@@ -32,10 +32,12 @@ namespace MWMechanics
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
             MWWorld::Ptr getTarget();
+            virtual bool sideWithTarget() const { return true; }
+            virtual bool followTargetThroughDoors() const { return true; }
 
             virtual AiFollow *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
 

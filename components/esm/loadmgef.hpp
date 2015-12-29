@@ -31,9 +31,9 @@ struct MagicEffect
         CastTouch = 0x80, // Allows range - cast on touch.
         CastTarget = 0x100, // Allows range - cast on target.
         UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
-        NonRecastable = 0x4000,	// Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
+        NonRecastable = 0x4000, // Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
-        CasterLinked = 0x20000,	// Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
+        CasterLinked = 0x20000, // Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
 
         // Originally modifiable flags
         AllowSpellmaking = 0x200, // Can be used for spellmaking
@@ -96,8 +96,8 @@ struct MagicEffect
     // sMagicCreature04ID/05ID.
     int mIndex;
 
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
      /// Set record to default state (does not touch the ID/index).
     void blank();

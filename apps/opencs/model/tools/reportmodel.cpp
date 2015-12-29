@@ -1,4 +1,3 @@
-
 #include "reportmodel.hpp"
 
 #include <stdexcept>
@@ -13,7 +12,7 @@ CSMTools::ReportModel::ReportModel (bool fieldColumn, bool severityColumn)
 
     if (severityColumn)
         mColumnSeverity = index++;
-    
+
     if (fieldColumn)
         mColumnField = index++;
 
@@ -46,7 +45,7 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
         case Column_Type:
 
             return static_cast<int> (mRows.at (index.row()).mId.getType());
-        
+
         case Column_Id:
         {
             CSMWorld::UniversalId id = mRows.at (index.row()).mId;
@@ -56,7 +55,7 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
             return QString ("-");
         }
-        
+
         case Column_Hint:
 
             return QString::fromUtf8 (mRows.at (index.row()).mHint.c_str());
@@ -85,16 +84,10 @@ QVariant CSMTools::ReportModel::data (const QModelIndex & index, int role) const
 
     if (index.column()==mColumnSeverity)
     {
-        switch (mRows.at (index.row()).mSeverity)
-        {
-            case CSMDoc::Message::Severity_Info: return "Information";
-            case CSMDoc::Message::Severity_Warning: return "Warning";
-            case CSMDoc::Message::Severity_Error: return "Error";
-            case CSMDoc::Message::Severity_SeriousError: return "Serious Error";
-            case CSMDoc::Message::Severity_Default: break;
-        }
+        return QString::fromUtf8 (
+            CSMDoc::Message::toString (mRows.at (index.row()).mSeverity).c_str());
     }
-    
+
     return QVariant();
 }
 
@@ -144,7 +137,7 @@ bool CSMTools::ReportModel::removeRows (int row, int count, const QModelIndex& p
 void CSMTools::ReportModel::add (const CSMDoc::Message& message)
 {
     beginInsertRows (QModelIndex(), mRows.size(), mRows.size());
-    
+
     mRows.push_back (message);
 
     endInsertRows();

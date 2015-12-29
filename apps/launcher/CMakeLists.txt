@@ -7,8 +7,6 @@ set(LAUNCHER
     textslotmsgbox.cpp
     settingspage.cpp
 
-    settings/graphicssettings.cpp
-
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
@@ -23,8 +21,6 @@ set(LAUNCHER_HEADER
     playpage.hpp
     textslotmsgbox.hpp
     settingspage.hpp
-
-    settings/graphicssettings.hpp
 
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
@@ -92,8 +88,6 @@ add_executable(openmw-launcher
 )
 
 target_link_libraries(openmw-launcher
-    ${OGRE_LIBRARIES}
-    ${OGRE_STATIC_PLUGINS}
     ${SDL2_LIBRARY_ONLY}
     components
 )

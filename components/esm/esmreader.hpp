@@ -7,7 +7,7 @@
 #include <vector>
 #include <sstream>
 
-#include <OgreDataStream.h>
+#include <components/files/constrainedfilestream.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -63,20 +63,18 @@ public:
 
   /// Raw opening. Opens the file and sets everything up but doesn't
   /// parse the header.
-  void openRaw(Ogre::DataStreamPtr _esm, const std::string &name);
+  void openRaw(Files::IStreamPtr _esm, const std::string &name);
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(Ogre::DataStreamPtr _esm, const std::string &name);
+  void open(Files::IStreamPtr _esm, const std::string &name);
 
   void open(const std::string &file);
 
-  void openRaw(const std::string &file);
+  void openRaw(const std::string &filename);
 
-  /// Get the file size. Make sure that the file has been opened!
-  size_t getFileSize() { return mEsm->size(); }
   /// Get the current position in the file. Make sure that the file has been opened!
-  size_t getFileOffset() { return mEsm->tell(); }
+  size_t getFileOffset();
 
   // This is a quick hack for multiple esm/esp files. Each plugin introduces its own
   //  terrain palette, but ESMReader does not pass a reference to the correct plugin
@@ -185,6 +183,11 @@ public:
    */
   bool isNextSub(const char* name);
 
+  bool peekNextSub(const char* name);
+
+  // Store the current subrecord name for the next call of getSubName()
+  void cacheSubName();
+
   // Read subrecord name. This gets called a LOT, so I've optimized it
   // slightly.
   void getSubName();
@@ -252,8 +255,7 @@ public:
   // them from native encoding to UTF8 in the process.
   std::string getString(int size);
 
-  void skip(int bytes) { mEsm->seek(mEsm->tell()+bytes); }
-  uint64_t getOffset() { return mEsm->tell(); }
+  void skip(int bytes);
 
   /// Used for error handling
   void fail(const std::string &msg);
@@ -264,8 +266,10 @@ public:
   /// Get record flags of last record
   unsigned int getRecordFlags() { return mRecordFlags; }
 
+  size_t getFileSize() const { return mFileSize; }
+
 private:
-  Ogre::DataStreamPtr mEsm;
+  Files::IStreamPtr mEsm;
 
   ESM_Context mCtx;
 
@@ -280,6 +284,9 @@ private:
 
   std::vector<ESMReader> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
+
+  size_t mFileSize;
+
 };
 }
 #endif

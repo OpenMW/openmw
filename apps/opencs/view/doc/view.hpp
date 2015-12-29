@@ -22,6 +22,11 @@ namespace CSMWorld
     class UniversalId;
 }
 
+namespace CSMPrefs
+{
+    class Setting;
+}
+
 namespace CSVDoc
 {
     class ViewManager;
@@ -43,6 +48,7 @@ namespace CSVDoc
             QAction *mVerify;
             QAction *mShowStatusBar;
             QAction *mStopDebug;
+            QAction *mMerge;
             std::vector<QAction *> mEditingActions;
             Operations *mOperations;
             SubViewFactoryManager mSubViewFactory;
@@ -82,8 +88,6 @@ namespace CSVDoc
 
             void exitApplication();
 
-            void loadUserSettings();
-
             /// User preference function
             void resizeViewWidth (int width);
 
@@ -114,9 +118,6 @@ namespace CSVDoc
 
             Operations *getOperations() const;
 
-            /// Function called by view manager when user preferences are updated
-            void updateEditorSetting (const QString &, const QString &);
-
         signals:
 
             void newGameRequest();
@@ -129,6 +130,8 @@ namespace CSVDoc
 
             void editSettingsRequest();
 
+            void mergeDocument (CSMDoc::Document *document);
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id, const std::string& hint = "");
@@ -137,14 +140,14 @@ namespace CSVDoc
 
             void abortOperation (int type);
 
-            void updateUserSetting (const QString &, const QStringList &);
-
             void updateTitle();
 
             // called when subviews are added or removed
             void updateSubViewIndicies (SubView *view = 0);
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void newView();
 
@@ -224,6 +227,8 @@ namespace CSVDoc
 
             void addSearchSubView();
 
+            void addMetaDataSubView();
+
             void toggleShowStatusBar (bool show);
 
             void loadErrorLog();
@@ -235,6 +240,8 @@ namespace CSVDoc
             void closeRequest (SubView *subView);
 
             void moveScrollBarToEnd(int min, int max);
+
+            void merge();
     };
 }
 

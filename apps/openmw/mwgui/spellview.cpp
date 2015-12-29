@@ -289,7 +289,7 @@ namespace MWGui
 
         widget->setUserString(sSpellModelIndex, MyGUI::utility::toString(index));
 
-        widget->eventMouseWheel += MyGUI::newDelegate(this, &SpellView::onMouseWheel);
+        widget->eventMouseWheel += MyGUI::newDelegate(this, &SpellView::onMouseWheelMoved);
         widget->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellView::onSpellSelected);
     }
 
@@ -303,7 +303,7 @@ namespace MWGui
         eventSpellClicked(getSpellModelIndex(_sender));
     }
 
-    void SpellView::onMouseWheel(MyGUI::Widget* _sender, int _rel)
+    void SpellView::onMouseWheelMoved(MyGUI::Widget* _sender, int _rel)
     {
         if (mScrollView->getViewOffset().top + _rel*0.3f > 0)
             mScrollView->setViewOffset(MyGUI::IntPoint(0, 0));

@@ -1,4 +1,3 @@
-
 #include "armor.hpp"
 
 #include <components/esm/loadarmo.hpp>
@@ -15,21 +14,18 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/physicssystem.hpp"
+#include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/containerstore.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
 namespace MWClass
 {
-    std::string Armor::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Armor>()->mBase->mId;
-    }
 
     void Armor::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -38,17 +34,14 @@ namespace MWClass
         }
     }
 
-    void Armor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Armor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
-        if(!model.empty())
-            physics.addObject(ptr, model, true);
+        // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Armor::getModel(const MWWorld::Ptr &ptr) const
+    std::string Armor::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -57,10 +50,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Armor::getName (const MWWorld::Ptr& ptr) const
+    std::string Armor::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mName;
     }
@@ -71,31 +63,28 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    bool Armor::hasItemHealth (const MWWorld::Ptr& ptr) const
+    bool Armor::hasItemHealth (const MWWorld::ConstPtr& ptr) const
     {
         return true;
     }
 
-    int Armor::getItemMaxHealth (const MWWorld::Ptr& ptr) const
+    int Armor::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mHealth;
     }
 
-    std::string Armor::getScript (const MWWorld::Ptr& ptr) const
+    std::string Armor::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mScript;
     }
 
-    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Armor::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         std::vector<int> slots_;
 
@@ -126,10 +115,9 @@ namespace MWClass
         return std::make_pair (slots_, false);
     }
 
-    int Armor::getEquipmentSkill (const MWWorld::Ptr& ptr) const
+    int Armor::getEquipmentSkill (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         std::string typeGmst;
 
@@ -171,10 +159,9 @@ namespace MWClass
             return ESM::Skill::HeavyArmor;
     }
 
-    int Armor::getValue (const MWWorld::Ptr& ptr) const
+    int Armor::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mValue;
     }
@@ -186,7 +173,7 @@ namespace MWClass
         registerClass (typeid (ESM::Armor).name(), instance);
     }
 
-    std::string Armor::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
@@ -197,7 +184,7 @@ namespace MWClass
             return std::string("Item Armor Heavy Up");
     }
 
-    std::string Armor::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Armor::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
         if (es == ESM::Skill::LightArmor)
@@ -208,29 +195,26 @@ namespace MWClass
             return std::string("Item Armor Heavy Down");
     }
 
-    std::string Armor::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Armor::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mIcon;
     }
 
-    bool Armor::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Armor::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Armor::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -246,7 +230,7 @@ namespace MWClass
             typeText = "#{sHeavy}";
 
         text += "\n#{sArmorRating}: " + MWGui::ToolTips::toString(getEffectiveArmorRating(ptr,
-            MWBase::Environment::get().getWorld()->getPlayerPtr()));
+            MWMechanics::getPlayer()));
 
         int remainingHealth = getItemHealth(ptr);
         text += "\n#{sCondition}: " + MWGui::ToolTips::toString(remainingHealth) + "/"
@@ -269,18 +253,16 @@ namespace MWClass
         return info;
     }
 
-    std::string Armor::getEnchantment (const MWWorld::Ptr& ptr) const
+    std::string Armor::getEnchantment (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mEnchant;
     }
 
-    std::string Armor::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Armor::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         ESM::Armor newItem = *ref->mBase;
         newItem.mId="";
@@ -291,9 +273,9 @@ namespace MWClass
         return record->mId;
     }
 
-    int Armor::getEffectiveArmorRating(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor) const
+    int Armor::getEffectiveArmorRating(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         int armorSkillType = getEquipmentSkill(ptr);
         int armorSkill = actor.getClass().getSkill(actor, armorSkillType);
@@ -307,7 +289,7 @@ namespace MWClass
             return ref->mBase->mData.mArmor * armorSkill / iBaseArmorSkill;
     }
 
-    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Armor::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
         MWWorld::InventoryStore& invStore = npc.getClass().getInventoryStore(npc);
 
@@ -377,33 +359,29 @@ namespace MWClass
         return action;
     }
 
-    MWWorld::Ptr
-    Armor::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Armor::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Armor>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    int Armor::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Armor::getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-                ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mData.mEnchant;
     }
 
-    bool Armor::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Armor::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Armor)
                 || ((npcServices & ESM::NPC::MagicItems) && !getEnchantment(item).empty());
     }
 
-    float Armor::getWeight(const MWWorld::Ptr &ptr) const
+    float Armor::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Armor> *ref =
-            ptr.get<ESM::Armor>();
+        const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
         return ref->mBase->mData.mWeight;
     }
 }

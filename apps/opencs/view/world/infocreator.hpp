@@ -3,12 +3,15 @@
 
 #include "genericcreator.hpp"
 
-class QLineEdit;
-
 namespace CSMWorld
 {
     class InfoCollection;
     class IdCompletionManager;
+}
+
+namespace CSVWidget
+{
+    class DropLineEdit;
 }
 
 namespace CSVWorld
@@ -17,7 +20,7 @@ namespace CSVWorld
     {
             Q_OBJECT
 
-            QLineEdit *mTopic;
+            CSVWidget::DropLineEdit *mTopic;
 
             virtual std::string getId() const;
 

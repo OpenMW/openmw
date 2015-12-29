@@ -5,29 +5,48 @@
 #include <stdexcept>
 #include <string>
 #include <typeinfo>
+#include <map>
+
 #include <boost/shared_ptr.hpp>
 
 #include "livecellref.hpp"
 #include "cellreflist.hpp"
 
-#include <components/esm/fogstate.hpp>
-#include <components/esm/records.hpp>
+#include <components/esm/loadacti.hpp>
+#include <components/esm/loadalch.hpp>
+#include <components/esm/loadappa.hpp>
+#include <components/esm/loadarmo.hpp>
+#include <components/esm/loadbook.hpp>
+#include <components/esm/loadclot.hpp>
+#include <components/esm/loadcont.hpp>
+#include <components/esm/loadcrea.hpp>
+#include <components/esm/loaddoor.hpp>
+#include <components/esm/loadingr.hpp>
+#include <components/esm/loadlevlist.hpp>
+#include <components/esm/loadligh.hpp>
+#include <components/esm/loadlock.hpp>
+#include <components/esm/loadprob.hpp>
+#include <components/esm/loadrepa.hpp>
+#include <components/esm/loadstat.hpp>
+#include <components/esm/loadweap.hpp>
+#include <components/esm/loadnpc.hpp>
+#include <components/esm/loadmisc.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
 #include "timestamp.hpp"
+#include "ptr.hpp"
 
 namespace ESM
 {
     struct CellState;
     struct FogState;
+    struct CellId;
 }
 
 namespace MWWorld
 {
-    class Ptr;
     class ESMStore;
-
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -40,6 +59,9 @@ namespace MWWorld
             };
 
         private:
+
+            const MWWorld::ESMStore& mStore;
+            std::vector<ESM::ESMReader>& mReader;
 
             // Even though fog actually belongs to the player and not cells,
             // it makes sense to store it here since we need it once for each cell.
@@ -54,6 +76,7 @@ namespace MWWorld
 
             MWWorld::TimeStamp mLastRespawn;
 
+            // List of refs owned by this cell
             CellRefList<ESM::Activator>         mActivators;
             CellRefList<ESM::Potion>            mPotions;
             CellRefList<ESM::Apparatus>         mAppas;
@@ -75,9 +98,104 @@ namespace MWWorld
             CellRefList<ESM::Static>            mStatics;
             CellRefList<ESM::Weapon>            mWeapons;
 
+            typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
+            // References owned by a different cell that have been moved here.
+            // <reference, cell the reference originally came from>
+            MovedRefTracker mMovedHere;
+            // References owned by this cell that have been moved to another cell.
+            // <reference, cell the reference was moved to>
+            MovedRefTracker mMovedToAnotherCell;
+
+            // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from mMovedToAnotherCell
+            std::vector<LiveCellRefBase*> mMergedRefs;
+
+            /// Moves object from the given cell to this cell.
+            void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
+
+            /// Repopulate mMergedRefs.
+            void updateMergedRefs();
+
+            // helper function for forEachInternal
+            template<class Visitor, class List>
+            bool forEachImp (Visitor& visitor, List& list)
+            {
+                for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
+                    ++iter)
+                {
+                    if (!isAccessible(iter->mData, iter->mRef))
+                        continue;
+                    if (!visitor (MWWorld::Ptr(&*iter, this)))
+                        return false;
+                }
+                return true;
+            }
+
+            // listing only objects owned by this cell. Internal use only, you probably want to use forEach() so that moved objects are accounted for.
+            template<class Visitor>
+            bool forEachInternal (Visitor& visitor)
+            {
+                return
+                    forEachImp (visitor, mActivators) &&
+                    forEachImp (visitor, mPotions) &&
+                    forEachImp (visitor, mAppas) &&
+                    forEachImp (visitor, mArmors) &&
+                    forEachImp (visitor, mBooks) &&
+                    forEachImp (visitor, mClothes) &&
+                    forEachImp (visitor, mContainers) &&
+                    forEachImp (visitor, mDoors) &&
+                    forEachImp (visitor, mIngreds) &&
+                    forEachImp (visitor, mItemLists) &&
+                    forEachImp (visitor, mLights) &&
+                    forEachImp (visitor, mLockpicks) &&
+                    forEachImp (visitor, mMiscItems) &&
+                    forEachImp (visitor, mProbes) &&
+                    forEachImp (visitor, mRepairs) &&
+                    forEachImp (visitor, mStatics) &&
+                    forEachImp (visitor, mWeapons) &&
+                    forEachImp (visitor, mCreatures) &&
+                    forEachImp (visitor, mNpcs) &&
+                    forEachImp (visitor, mCreatureLists);
+            }
+
+            /// @note If you get a linker error here, this means the given type can not be stored in a cell. The supported types are
+            /// defined at the bottom of this file.
+            template <class T>
+            CellRefList<T>& get();
+
         public:
 
-            CellStore (const ESM::Cell *cell_);
+            /// Should this reference be accessible to the outside world (i.e. to scripts / game logic)?
+            /// Determined based on the deletion flags. By default, objects deleted by content files are never accessible;
+            /// objects deleted by setCount(0) are still accessible *if* they came from a content file (needed for vanilla
+            /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
+            static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
+            {
+                return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            }
+
+            /// Moves object from this cell to the given cell.
+            /// @note automatically updates given cell by calling cellToMoveTo->moveFrom(...)
+            /// @note throws exception if cellToMoveTo == this
+            /// @return updated MWWorld::Ptr with the new CellStore pointer set.
+            MWWorld::Ptr moveTo(const MWWorld::Ptr& object, MWWorld::CellStore* cellToMoveTo);
+
+            /// Make a copy of the given object and insert it into this cell.
+            /// @note If you get a linker error here, this means the given type can not be inserted into a cell.
+            /// The supported types are defined at the bottom of this file.
+            template <typename T>
+            LiveCellRefBase* insert(const LiveCellRef<T>* ref)
+            {
+                mHasState = true;
+                CellRefList<T>& list = get<T>();
+                LiveCellRefBase* ret = &list.insert(*ref);
+                updateMergedRefs();
+                return ret;
+            }
+
+            /// @param readerList The readers to use for loading of the cell on-demand.
+            CellStore (const ESM::Cell *cell_,
+                       const MWWorld::ESMStore& store,
+                       std::vector<ESM::ESMReader>& readerList);
 
             const ESM::Cell *getCell() const;
 
@@ -89,13 +207,17 @@ namespace MWWorld
             bool hasId (const std::string& id) const;
             ///< May return true for deleted IDs when in preload state. Will return false, if cell is
             /// unloaded.
+            /// @note Will not account for moved references which may exist in Loaded state. Use search() instead if the cell is loaded.
 
             Ptr search (const std::string& id);
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
+            /// @note Triggers CellStore hasState flag.
 
-            Ptr searchViaHandle (const std::string& handle);
-            ///< Will return an empty Ptr if cell is not loaded.
+            ConstPtr searchConst (const std::string& id) const;
+            ///< Will return an empty Ptr if cell is not loaded. Does not check references in
+            /// containers.
+            /// @note Does not trigger CellStore hasState flag.
 
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
@@ -112,55 +234,102 @@ namespace MWWorld
             int count() const;
             ///< Return total number of references, including deleted ones.
 
-            void load (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void load ();
             ///< Load references from content file.
 
-            void preload (const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void preload ();
             ///< Build ID list from content file.
 
-            /// Call functor (ref) for each reference. functor must return a bool. Returning
+            /// Call visitor (MWWorld::Ptr) for each reference. visitor must return a bool. Returning
+            /// false will abort the iteration.
+            /// \note Prefer using forEachConst when possible.
+            /// \attention This function also lists deleted (count 0) objects!
+            /// \return Iteration completed?
+            template<class Visitor>
+            bool forEach (Visitor& visitor)
+            {
+                if (mState != State_Loaded)
+                    return false;
+
+                mHasState = true;
+
+                for (unsigned int i=0; i<mMergedRefs.size(); ++i)
+                {
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                        continue;
+
+                    if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
+                        return false;
+                }
+                return true;
+            }
+
+            /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
             /// false will abort the iteration.
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
-            ///
-            /// \note Creatures and NPCs are handled last.
-            template<class Functor>
-            bool forEach (Functor& functor)
+            template<class Visitor>
+            bool forEachConst (Visitor& visitor) const
             {
-                mHasState = true;
+                if (mState != State_Loaded)
+                    return false;
 
-                return
-                    forEachImp (functor, mActivators) &&
-                    forEachImp (functor, mPotions) &&
-                    forEachImp (functor, mAppas) &&
-                    forEachImp (functor, mArmors) &&
-                    forEachImp (functor, mBooks) &&
-                    forEachImp (functor, mClothes) &&
-                    forEachImp (functor, mContainers) &&
-                    forEachImp (functor, mDoors) &&
-                    forEachImp (functor, mIngreds) &&
-                    forEachImp (functor, mItemLists) &&
-                    forEachImp (functor, mLights) &&
-                    forEachImp (functor, mLockpicks) &&
-                    forEachImp (functor, mMiscItems) &&
-                    forEachImp (functor, mProbes) &&
-                    forEachImp (functor, mRepairs) &&
-                    forEachImp (functor, mStatics) &&
-                    forEachImp (functor, mWeapons) &&
-                    forEachImp (functor, mCreatures) &&
-                    forEachImp (functor, mNpcs) &&
-                    forEachImp (functor, mCreatureLists);
+                for (unsigned int i=0; i<mMergedRefs.size(); ++i)
+                {
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                        continue;
+
+                    if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                        return false;
+                }
+                return true;
             }
 
-            template<class Functor>
-            bool forEachContainer (Functor& functor)
+
+            /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
+            /// false will abort the iteration.
+            /// \attention This function also lists deleted (count 0) objects!
+            /// \return Iteration completed?
+            template <class T, class Visitor>
+            bool forEachType(Visitor& visitor)
             {
+                if (mState != State_Loaded)
+                    return false;
+
                 mHasState = true;
 
-                return
-                    forEachImp (functor, mContainers) &&
-                    forEachImp (functor, mCreatures) &&
-                    forEachImp (functor, mNpcs);
+                CellRefList<T>& list = get<T>();
+
+                for (typename CellRefList<T>::List::iterator it (list.mList.begin()); it!=list.mList.end(); ++it)
+                {
+                    LiveCellRefBase* base = &*it;
+                    if (mMovedToAnotherCell.find(base) != mMovedToAnotherCell.end())
+                        continue;
+                    if (!isAccessible(base->mData, base->mRef))
+                        continue;
+                    if (!visitor(MWWorld::Ptr(base, this)))
+                        return false;
+                }
+
+                for (MovedRefTracker::const_iterator it = mMovedHere.begin(); it != mMovedHere.end(); ++it)
+                {
+                    LiveCellRefBase* base = it->first;
+                    if (dynamic_cast<LiveCellRef<T>*>(base))
+                        if (!visitor(MWWorld::Ptr(base, this)))
+                            return false;
+                }
+                return true;
+            }
+
+            // NOTE: does not account for moved references
+            // Should be phased out when we have const version of forEach
+            inline const CellRefList<ESM::Door>& getReadOnlyDoors() const
+            {
+                return mDoors;
+            }
+            inline const CellRefList<ESM::Static>& getReadOnlyStatics() const
+            {
+                return mStatics;
             }
 
             bool isExterior() const;
@@ -177,20 +346,18 @@ namespace MWWorld
 
             void writeReferences (ESM::ESMWriter& writer) const;
 
-            void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap);
+            struct GetCellStoreCallback
+            {
+            public:
+                ///@note must return NULL if the cell is not found
+                virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+            };
+
+            /// @param callback to use for retrieving of additional CellStore objects by ID (required for resolving moved references)
+            void readReferences (ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback);
 
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
-
-            template <class T>
-            CellRefList<T>& get() {
-                throw std::runtime_error ("Storage for type " + std::string(typeid(T).name())+ " does not exist in cells");
-            }
-
-            template <class T>
-            const CellRefList<T>& getReadOnly() {
-                throw std::runtime_error ("Read Only CellRefList access not available for type " + std::string(typeid(T).name()) );
-            }
 
             bool isPointConnected(const int start, const int end) const;
 
@@ -198,26 +365,12 @@ namespace MWWorld
 
         private:
 
-            template<class Functor, class List>
-            bool forEachImp (Functor& functor, List& list)
-            {
-                for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
-                    ++iter)
-                {
-                    if (iter->mData.isDeletedByContentFile())
-                        continue;
-                    if (!functor (MWWorld::Ptr(&*iter, this)))
-                        return false;
-                }
-                return true;
-            }
-
             /// Run through references and store IDs
-            void listRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void listRefs();
 
-            void loadRefs(const MWWorld::ESMStore &store, std::vector<ESM::ESMReader> &esm);
+            void loadRefs();
 
-            void loadRef (ESM::CellRef& ref, bool deleted, const ESMStore& store);
+            void loadRef (ESM::CellRef& ref, bool deleted);
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
@@ -363,12 +516,6 @@ namespace MWWorld
     {
         mHasState = true;
         return mWeapons;
-    }
-
-    template<>
-    inline const CellRefList<ESM::Door>& CellStore::getReadOnly<ESM::Door>()
-    {
-        return mDoors;
     }
 
     bool operator== (const CellStore& left, const CellStore& right);

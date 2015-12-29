@@ -101,6 +101,11 @@ namespace Config
             return true;
         }
 
+        void clear()
+        {
+            mSettings.clear();
+        }
+
     private:
         Map mSettings;
 

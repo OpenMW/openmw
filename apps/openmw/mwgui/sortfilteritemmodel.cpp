@@ -71,7 +71,6 @@ namespace MWGui
     SortFilterItemModel::SortFilterItemModel(ItemModel *sourceModel)
         : mCategory(Category_All)
         , mFilter(0)
-        , mShowEquipped(true)
         , mSortByType(true)
     {
         mSourceModel = sourceModel;
@@ -90,9 +89,6 @@ namespace MWGui
     bool SortFilterItemModel::filterAccepts (const ItemStack& item)
     {
         MWWorld::Ptr base = item.mBase;
-
-        if (item.mType == ItemStack::Type_Equipped && !mShowEquipped)
-            return false;
 
         int category = 0;
         if (base.getTypeName() == typeid(ESM::Armor).name()

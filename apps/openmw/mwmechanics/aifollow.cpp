@@ -1,8 +1,7 @@
 #include "aifollow.hpp"
 
-#include <iostream>
-
 #include <components/esm/aisequence.hpp>
+#include <components/esm/loadcell.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -11,9 +10,6 @@
 #include "../mwworld/cellstore.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
-
-#include <OgreMath.h>
-#include <OgreVector3.h>
 
 #include "steering.hpp"
 
@@ -24,8 +20,9 @@ namespace MWMechanics
 struct AiFollowStorage : AiTemporaryBase
 {
     float mTimer;
+    bool mMoving;
 
-    AiFollowStorage() : mTimer(0.f) {}
+    AiFollowStorage() : mTimer(0.f), mMoving(false) {}
 };
 
 int AiFollow::mFollowIndexCounter = 0;
@@ -57,7 +54,7 @@ AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
 
 }
 
-bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duration)
+bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     MWWorld::Ptr target = getTarget();
 
@@ -68,15 +65,16 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
 
+    AiFollowStorage& storage = state.get<AiFollowStorage>();
+
     // AiFollow requires the target to be in range and within sight for the initial activation
     if (!mActive)
     {
-        AiFollowStorage& storage = state.get<AiFollowStorage>();
         storage.mTimer -= duration;
 
         if (storage.mTimer < 0)
         {
-            if (Ogre::Vector3(actor.getRefData().getPosition().pos).squaredDistance(Ogre::Vector3(target.getRefData().getPosition().pos))
+            if ((actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length2()
                     < 500*500
                     && MWBase::Environment::get().getWorld()->getLOS(actor, target))
                 mActive = true;
@@ -129,13 +127,20 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, AiState& state, float duratio
 
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
+    float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
+    //const float threshold = 10;
 
-    pathTo(actor, dest, duration, followDistance); //Go to the destination
+    //if (storage.mMoving)  //Stop when you get close
+    //    storage.mMoving = (dist > followDistance);
+    //else
+    //    storage.mMoving = (dist > followDistance + threshold);
+
+    storage.mMoving = !pathTo(actor, dest, duration, followDistance); // Go to the destination
 
     //Check if you're far away
-    if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]) > 450)
+    if(dist > 450)
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
-    else if(distance(dest, pos.pos[0], pos.pos[1], pos.pos[2])  < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
+    else if(dist  < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
         actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
 
     return false;

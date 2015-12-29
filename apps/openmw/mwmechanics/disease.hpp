@@ -1,7 +1,7 @@
 #ifndef OPENMW_MECHANICS_DISEASE_H
 #define OPENMW_MECHANICS_DISEASE_H
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -9,8 +9,10 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwmechanics/spells.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "spells.hpp"
+#include "creaturestats.hpp"
+#include "actorutil.hpp"
+
 
 namespace MWMechanics
 {
@@ -20,7 +22,7 @@ namespace MWMechanics
     /// @param carrier The disease carrier.
     inline void diseaseContact (MWWorld::Ptr actor, MWWorld::Ptr carrier)
     {
-        if (!carrier.getClass().isActor() || actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+        if (!carrier.getClass().isActor() || actor != getPlayer())
             return;
 
         float fDiseaseXferChance =
@@ -32,8 +34,7 @@ namespace MWMechanics
         Spells& spells = carrier.getClass().getCreatureStats(carrier).getSpells();
         for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(it->first);
-
+            const ESM::Spell* spell = it->first;
             if (actor.getClass().getCreatureStats(actor).getSpells().hasSpell(spell->mId))
                 continue;
 
@@ -51,7 +52,7 @@ namespace MWMechanics
                 continue;
 
             int x = static_cast<int>(fDiseaseXferChance * 100 * resist);
-            if (OEngine::Misc::Rng::rollDice(10000) < x)
+            if (Misc::Rng::rollDice(10000) < x)
             {
                 // Contracted disease!
                 actor.getClass().getCreatureStats(actor).getSpells().add(it->first);

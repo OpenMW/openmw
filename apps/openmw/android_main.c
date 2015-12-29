@@ -1,4 +1,3 @@
-#include "../../SDL_internal.h"
 
 #ifdef __ANDROID__
 #include "SDL_main.h"
@@ -16,22 +15,22 @@ extern const char **argvData;
 void releaseArgv();
 
 int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls,
-		jobject obj) {
+        jobject obj) {
 
-	SDL_Android_Init(env, cls);
+    SDL_Android_Init(env, cls);
 
-	SDL_SetMainReady();
+    SDL_SetMainReady();
 
-	/* Run the application code! */
+    /* Run the application code! */
 
-	int status;
+    int status;
 
-	status = main(argcData+1, argvData);
-	releaseArgv();
-	/* Do not issue an exit or the whole application will terminate instead of just the SDL thread */
-	/* exit(status); */
+    status = main(argcData+1, argvData);
+    releaseArgv();
+    /* Do not issue an exit or the whole application will terminate instead of just the SDL thread */
+    /* exit(status); */
 
-	return status;
+    return status;
 }
 
 #endif /* __ANDROID__ */

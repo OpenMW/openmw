@@ -1,7 +1,5 @@
 #include "hud.hpp"
 
-#include <OgreMath.h>
-
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_Button.h>
@@ -9,11 +7,9 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ScrollView.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -22,6 +18,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "inventorywindow.hpp"
 #include "spellicons.hpp"
@@ -70,9 +67,9 @@ namespace MWGui
     };
 
 
-    HUD::HUD(CustomMarkerCollection &customMarkers, int fpsLevel, DragAndDrop* dragAndDrop)
+    HUD::HUD(CustomMarkerCollection &customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : Layout("openmw_hud.layout")
-        , LocalMapBase(customMarkers)
+        , LocalMapBase(customMarkers, localMapRender)
         , mHealth(NULL)
         , mMagicka(NULL)
         , mStamina(NULL)
@@ -88,10 +85,6 @@ namespace MWGui
         , mCellNameBox(NULL)
         , mDrowningFrame(NULL)
         , mDrowningFlash(NULL)
-        , mFpsBox(NULL)
-        , mFpsCounter(NULL)
-        , mTriangleCounter(NULL)
-        , mBatchCounter(NULL)
         , mHealthManaStaminaBaseLeft(0)
         , mWeapBoxBaseLeft(0)
         , mSpellBoxBaseLeft(0)
@@ -166,11 +159,6 @@ namespace MWGui
 
         getWidget(mCrosshair, "Crosshair");
 
-        setFpsLevel(fpsLevel);
-
-        getWidget(mTriangleCounter, "TriangleCounter");
-        getWidget(mBatchCounter, "BatchCounter");
-
         LocalMapBase::init(mMinimap, mCompass, Settings::Manager::getInt("local map hud widget size", "Map"));
 
         mMainWidget->eventMouseButtonClick += MyGUI::newDelegate(this, &HUD::onWorldClicked);
@@ -187,46 +175,6 @@ namespace MWGui
         mMainWidget->eventMouseButtonClick.clear();
 
         delete mSpellIcons;
-    }
-
-    void HUD::setFpsLevel(int level)
-    {
-        mFpsCounter = 0;
-
-        MyGUI::Widget* fps;
-        getWidget(fps, "FPSBoxAdv");
-        fps->setVisible(false);
-        getWidget(fps, "FPSBox");
-        fps->setVisible(false);
-
-        if (level == 2)
-        {
-            getWidget(mFpsBox, "FPSBoxAdv");
-            mFpsBox->setVisible(true);
-            getWidget(mFpsCounter, "FPSCounterAdv");
-        }
-        else if (level == 1)
-        {
-            getWidget(mFpsBox, "FPSBox");
-            mFpsBox->setVisible(true);
-            getWidget(mFpsCounter, "FPSCounter");
-        }
-    }
-
-    void HUD::setFPS(float fps)
-    {
-        if (mFpsCounter)
-            mFpsCounter->setCaption(MyGUI::utility::toString((int)fps));
-    }
-
-    void HUD::setTriangleCount(unsigned int count)
-    {
-        mTriangleCounter->setCaption(MyGUI::utility::toString(count));
-    }
-
-    void HUD::setBatchCount(unsigned int count)
-    {
-        mBatchCounter->setCaption(MyGUI::utility::toString(count));
     }
 
     void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -248,7 +196,7 @@ namespace MWGui
             mMagicka->setProgressRange (modified);
             mMagicka->setProgressPosition (current);
             getWidget(w, "MagickaFrame");
-            w->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+            w->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
         }
         else if (id == "FBar")
         {
@@ -286,7 +234,7 @@ namespace MWGui
         {
             // drop item into the gameworld
             MWBase::Environment::get().getWorld()->breakInvisibility(
-                        MWBase::Environment::get().getWorld()->getPlayerPtr());
+                        MWMechanics::getPlayer());
 
             MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
             MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
@@ -365,7 +313,7 @@ namespace MWGui
 
     void HUD::onWeaponClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -377,7 +325,7 @@ namespace MWGui
 
     void HUD::onMagicClicked(MyGUI::Widget* _sender)
     {
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = MWMechanics::getPlayer();
         if (player.getClass().getNpcStats(player).isWerewolf())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
@@ -418,7 +366,7 @@ namespace MWGui
         }
 
         if (mIsDrowning)
-            mDrowningFlashTheta += dt * Ogre::Math::TWO_PI;
+            mDrowningFlashTheta += dt * osg::PI*2;
     }
 
     void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
@@ -448,7 +396,7 @@ namespace MWGui
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos+1, "b_");
-        icon = Misc::ResourceHelpers::correctIconPath(icon);
+        icon = MWBase::Environment::get().getWindowManager()->correctIconPath(icon);
 
         mSpellImage->setItem(MWWorld::Ptr());
         mSpellImage->setIcon(icon);
@@ -544,7 +492,19 @@ namespace MWGui
     {
         mCrosshair->setVisible (visible);
     }
-
+    
+    void HUD::setCrosshairOwned(bool owned)
+    {
+        if(owned)
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair_Owned");
+        }
+        else
+        {
+            mCrosshair->changeWidgetSkin("HUD_Crosshair");
+        }
+    }
+    
     void HUD::setHmsVisible(bool visible)
     {
         mHealth->setVisible(visible);

@@ -1,4 +1,3 @@
-
 #include "genericcreator.hpp"
 
 #include <memory>
@@ -46,6 +45,16 @@ void CSVWorld::GenericCreator::insertBeforeButtons (QWidget *widget, bool stretc
 std::string CSVWorld::GenericCreator::getId() const
 {
     return mId->text().toUtf8().constData();
+}
+
+std::string CSVWorld::GenericCreator::getIdValidatorResult() const
+{
+    std::string errors;
+
+    if (!mId->hasAcceptableInput())
+        errors = mValidator->getError();
+
+    return errors;
 }
 
 void CSVWorld::GenericCreator::configureCreateCommand (CSMWorld::CreateCommand& command) const {}
@@ -161,6 +170,8 @@ CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undo
     connect (mCreate, SIGNAL (clicked (bool)), this, SLOT (create()));
 
     connect (mId, SIGNAL (textChanged (const QString&)), this, SLOT (textChanged (const QString&)));
+
+    connect (&mData, SIGNAL (idListChanged()), this, SLOT (dataIdListChanged()));
 }
 
 void CSVWorld::GenericCreator::setEditLock (bool locked)
@@ -290,4 +301,13 @@ void CSVWorld::GenericCreator::scopeChanged (int index)
 {
     update();
     updateNamespace();
+}
+
+void CSVWorld::GenericCreator::dataIdListChanged()
+{
+    // If the original ID of cloned record was removed, cancel the creator
+    if (mCloneMode && !mData.hasId(mClonedId))
+    {
+        emit done();
+    }
 }

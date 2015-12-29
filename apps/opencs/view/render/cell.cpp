@@ -1,8 +1,6 @@
-
 #include "cell.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
+#include <osg/Group>
 
 #include <components/misc/stringops.hpp>
 #include <components/esm/loadland.hpp>
@@ -11,7 +9,7 @@
 #include "../../model/world/columns.hpp"
 #include "../../model/world/data.hpp"
 #include "../../model/world/refcollection.hpp"
-#include "../world/physicssystem.hpp"
+#include "../../model/world/cellcoordinates.hpp"
 
 #include "elements.hpp"
 #include "terrainstorage.hpp"
@@ -34,7 +32,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
     bool modified = false;
 
     const CSMWorld::RefCollection& collection = mData.getReferences();
-    
+
     for (int i=start; i<=end; ++i)
     {
         std::string cell = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mCell);
@@ -45,7 +43,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
         {
             std::string id = Misc::StringUtils::lowerCase (collection.getRecord (i).get().mId);
 
-            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false, mPhysics)));
+            mObjects.insert (std::make_pair (id, new Object (mData, mCellNode, id, false)));
             modified = true;
         }
     }
@@ -53,52 +51,50 @@ bool CSVRender::Cell::addObjects (int start, int end)
     return modified;
 }
 
-CSVRender::Cell::Cell (CSMWorld::Data& data, Ogre::SceneManager *sceneManager,
-    const std::string& id, boost::shared_ptr<CSVWorld::PhysicsSystem> physics, const Ogre::Vector3& origin)
-: mData (data), mId (Misc::StringUtils::lowerCase (id)), mPhysics(physics), mSceneMgr(sceneManager), mX(0), mY(0)
+CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::string& id,
+    bool deleted)
+: mData (data), mId (Misc::StringUtils::lowerCase (id)), mDeleted (deleted)
 {
-    mCellNode = sceneManager->getRootSceneNode()->createChildSceneNode();
-    mCellNode->setPosition (origin);
+    std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
 
-    CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
-        *mData.getTableModel (CSMWorld::UniversalId::Type_References));
+    if (result.second)
+        mCoordinates = result.first;
 
-    int rows = references.rowCount();
+    mCellNode = new osg::Group;
+    rootNode->addChild(mCellNode);
 
-    addObjects (0, rows-1);
-
-    const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
-    int landIndex = land.searchId(mId);
-    if (landIndex != -1)
+    if (!mDeleted)
     {
-        const ESM::Land* esmLand = land.getRecord(mId).get().mLand.get();
-        if(esmLand && esmLand->mDataTypes&ESM::Land::DATA_VHGT)
-        {
-            mTerrain.reset(new Terrain::TerrainGrid(sceneManager, new TerrainStorage(mData), Element_Terrain, true,
-                                                    Terrain::Align_XY));
-            mTerrain->loadCell(esmLand->mX,
-                               esmLand->mY);
+        CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
+            *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
-            float verts = ESM::Land::LAND_SIZE;
-            float worldsize = ESM::Land::REAL_SIZE;
-            mX = esmLand->mX;
-            mY = esmLand->mY;
-            mPhysics->addHeightField(sceneManager,
-                    esmLand->mLandData->mHeights, mX, mY, 0, worldsize / (verts-1), verts);
+        int rows = references.rowCount();
+
+        addObjects (0, rows-1);
+
+        const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
+        int landIndex = land.searchId(mId);
+        if (landIndex != -1)
+        {
+            const ESM::Land& esmLand = land.getRecord(mId).get();
+
+            if (esmLand.getLandData (ESM::Land::DATA_VHGT))
+            {
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
+                mTerrain->loadCell(esmLand.mX,
+                                   esmLand.mY);
+            }
         }
     }
 }
 
 CSVRender::Cell::~Cell()
 {
-    if (mTerrain.get())
-        mPhysics->removeHeightField(mSceneMgr, mX, mY);
-
     for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
         iter!=mObjects.end(); ++iter)
         delete iter->second;
 
-    mCellNode->getCreator()->destroySceneNode (mCellNode);
+    mCellNode->getParent(0)->removeChild(mCellNode);
 }
 
 bool CSVRender::Cell::referenceableDataChanged (const QModelIndex& topLeft,
@@ -133,6 +129,9 @@ bool CSVRender::Cell::referenceableAboutToBeRemoved (const QModelIndex& parent, 
 bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
+    if (mDeleted)
+        return false;
+
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
         *mData.getTableModel (CSMWorld::UniversalId::Type_References));
 
@@ -186,7 +185,7 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
         mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false, mPhysics)));
+            iter->first, new Object (mData, mCellNode, iter->first, false)));
 
         modified = true;
     }
@@ -198,6 +197,9 @@ bool CSVRender::Cell::referenceAboutToBeRemoved (const QModelIndex& parent, int 
     int end)
 {
     if (parent.isValid())
+        return false;
+
+    if (mDeleted)
         return false;
 
     CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
@@ -220,13 +222,57 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     if (parent.isValid())
         return false;
 
+    if (mDeleted)
+        return false;
+
     return addObjects (start, end);
 }
 
-float CSVRender::Cell::getTerrainHeightAt(const Ogre::Vector3 &pos) const
+void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
-    if(mTerrain.get() != NULL)
-        return mTerrain->getHeightAt(pos);
-    else
-        return -std::numeric_limits<float>::max();
+    if (elementMask & Element_Reference)
+    {
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+        {
+            bool selected = false;
+
+            switch (mode)
+            {
+                case Selection_Clear: selected = false; break;
+                case Selection_All: selected = true; break;
+                case Selection_Invert: selected = !iter->second->getSelected(); break;
+            }
+
+            iter->second->setSelected (selected);
+        }
+    }
+}
+
+void CSVRender::Cell::setCellArrows (int mask)
+{
+    for (int i=0; i<4; ++i)
+    {
+        CellArrow::Direction direction = static_cast<CellArrow::Direction> (1<<i);
+
+        bool enable = mask & direction;
+
+        if (enable!=(mCellArrows[i].get()!=0))
+        {
+            if (enable)
+                mCellArrows[i].reset (new CellArrow (mCellNode, direction, mCoordinates));
+            else
+                mCellArrows[i].reset (0);
+        }
+    }
+}
+
+CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
+{
+    return mCoordinates;
+}
+
+bool CSVRender::Cell::isDeleted() const
+{
+    return mDeleted;
 }

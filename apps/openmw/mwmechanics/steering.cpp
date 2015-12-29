@@ -10,37 +10,39 @@
 namespace MWMechanics
 {
 
-bool smoothTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, int axis, Ogre::Degree epsilon)
+bool smoothTurn(const MWWorld::Ptr& actor, float targetAngleRadians, int axis, float epsilonRadians)
 {
-    Ogre::Radian currentAngle (actor.getRefData().getPosition().rot[axis]);
-    Ogre::Radian diff (targetAngle - currentAngle);
-    if (diff >= Ogre::Degree(180))
+    float currentAngle (actor.getRefData().getPosition().rot[axis]);
+    float diff (targetAngleRadians - currentAngle);
+    if (std::abs(diff) >= osg::DegreesToRadians(180.f))
     {
-        // Turning the other way would be a better idea
-        diff = diff-Ogre::Degree(360);
+        if (diff >= 0)
+        {
+            diff = diff - osg::DegreesToRadians(360.f);
+        }
+        else
+        {
+            diff = osg::DegreesToRadians(360.f) + diff;
+        }
     }
-    else if (diff <= Ogre::Degree(-180))
-    {
-        diff = Ogre::Degree(360)-diff;
-    }
-    Ogre::Radian absDiff = Ogre::Math::Abs(diff);
+    float absDiff = std::abs(diff);
 
     // The turning animation actually moves you slightly, so the angle will be wrong again.
     // Use epsilon to prevent jerkiness.
-    if (absDiff < epsilon)
+    if (absDiff < epsilonRadians)
         return true;
 
-    Ogre::Radian limit = MAX_VEL_ANGULAR * MWBase::Environment::get().getFrameDuration();
+    float limit = MAX_VEL_ANGULAR_RADIANS * MWBase::Environment::get().getFrameDuration();
     if (absDiff > limit)
-        diff = Ogre::Math::Sign(diff) * limit;
+        diff = osg::sign(diff) * limit;
 
-    actor.getClass().getMovementSettings(actor).mRotation[axis] = diff.valueRadians();
+    actor.getClass().getMovementSettings(actor).mRotation[axis] = diff;
     return false;
 }
 
-bool zTurn(const MWWorld::Ptr& actor, Ogre::Radian targetAngle, Ogre::Degree epsilon)
+bool zTurn(const MWWorld::Ptr& actor, float targetAngleRadians, float epsilonRadians)
 {
-    return smoothTurn(actor, targetAngle, 2, epsilon);
+    return smoothTurn(actor, targetAngleRadians, 2, epsilonRadians);
 }
 
 }

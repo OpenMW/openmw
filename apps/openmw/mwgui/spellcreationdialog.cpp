@@ -3,7 +3,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 
-#include <components/misc/resourcehelpers.hpp>
 #include <components/esm/records.hpp>
 #include <components/widgets/list.hpp>
 
@@ -20,6 +19,7 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"
@@ -180,7 +180,7 @@ namespace MWGui
 
     void EditEffectDialog::setMagicEffect (const ESM::MagicEffect *effect)
     {
-        mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(effect->mIcon));
+        mEffectImage->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(effect->mIcon));
 
         mEffectName->setCaptionWithReplacing("#{"+ESM::MagicEffect::effectIdToString  (effect->mIndex)+"}");
 
@@ -377,7 +377,7 @@ namespace MWGui
             return;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
@@ -475,7 +475,7 @@ namespace MWGui
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 
-        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWBase::Environment::get().getWorld()->getPlayerPtr());
+        float chance = MWMechanics::getSpellSuccessChance(&mSpell, MWMechanics::getPlayer());
         mSuccessChance->setCaption(MyGUI::utility::toString(int(chance)));
     }
 
@@ -508,7 +508,7 @@ namespace MWGui
     {
         // get the list of magic effects that are known to the player
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
 
@@ -516,8 +516,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (it->first);
+            const ESM::Spell* spell = it->first;
 
             // only normal spells count
             if (spell->mData.mType != ESM::Spell::ST_Spell)

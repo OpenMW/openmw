@@ -1,35 +1,16 @@
-/*
- * Copyright (c) 2015 scrawl <scrawl@baseoftrash.de>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 #include "buffercache.hpp"
 
-#include <OgreHardwareBufferManager.h>
+#include <cassert>
+
+#include <osg/PrimitiveSet>
 
 #include "defs.hpp"
 
 namespace
 {
 
-template <typename IndexType>
-Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigned int verts, Ogre::HardwareIndexBuffer::IndexType type)
+template <typename IndexArrayType>
+osg::ref_ptr<IndexArrayType> createIndexBuffer(unsigned int flags, unsigned int verts)
 {
     // LOD level n means every 2^n-th vertex is kept
     size_t lodLevel = (flags >> (4*4));
@@ -42,8 +23,9 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
 
     size_t increment = 1 << lodLevel;
     assert(increment < verts);
-    std::vector<IndexType> indices;
-    indices.reserve((verts-1)*(verts-1)*2*3 / increment);
+
+    osg::ref_ptr<IndexArrayType> indices (new IndexArrayType(osg::PrimitiveSet::TRIANGLES));
+    indices->reserve((verts-1)*(verts-1)*2*3 / increment);
 
     size_t rowStart = 0, colStart = 0, rowEnd = verts-1, colEnd = verts-1;
     // If any edge needs stitching we'll skip all edges at this point,
@@ -62,23 +44,23 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
             // diamond pattern
             if ((row + col%2) % 2 == 1)
             {
-                indices.push_back(verts*(col+increment)+row);
-                indices.push_back(verts*(col+increment)+row+increment);
-                indices.push_back(verts*col+row+increment);
+                indices->push_back(verts*(col+increment)+row);
+                indices->push_back(verts*(col+increment)+row+increment);
+                indices->push_back(verts*col+row+increment);
 
-                indices.push_back(verts*col+row);
-                indices.push_back(verts*(col+increment)+row);
-                indices.push_back(verts*(col)+row+increment);
+                indices->push_back(verts*col+row);
+                indices->push_back(verts*(col+increment)+row);
+                indices->push_back(verts*(col)+row+increment);
             }
             else
             {
-                indices.push_back(verts*col+row);
-                indices.push_back(verts*(col+increment)+row+increment);
-                indices.push_back(verts*col+row+increment);
+                indices->push_back(verts*col+row);
+                indices->push_back(verts*(col+increment)+row+increment);
+                indices->push_back(verts*col+row+increment);
 
-                indices.push_back(verts*col+row);
-                indices.push_back(verts*(col+increment)+row);
-                indices.push_back(verts*(col+increment)+row+increment);
+                indices->push_back(verts*col+row);
+                indices->push_back(verts*(col+increment)+row);
+                indices->push_back(verts*(col+increment)+row+increment);
             }
         }
     }
@@ -94,22 +76,22 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
         size_t outerStep = 1 << (lodDeltas[Terrain::South] + lodLevel);
         for (size_t col = 0; col < verts-1; col += outerStep)
         {
-            indices.push_back(verts*col+row);
-            indices.push_back(verts*(col+outerStep)+row);
+            indices->push_back(verts*col+row);
+            indices->push_back(verts*(col+outerStep)+row);
             // Make sure not to touch the right edge
             if (col+outerStep == verts-1)
-                indices.push_back(verts*(col+outerStep-innerStep)+row+innerStep);
+                indices->push_back(verts*(col+outerStep-innerStep)+row+innerStep);
             else
-                indices.push_back(verts*(col+outerStep)+row+innerStep);
+                indices->push_back(verts*(col+outerStep)+row+innerStep);
 
             for (size_t i = 0; i < outerStep; i += innerStep)
             {
                 // Make sure not to touch the left or right edges
                 if (col+i == 0 || col+i == verts-1-innerStep)
                     continue;
-                indices.push_back(verts*(col)+row);
-                indices.push_back(verts*(col+i+innerStep)+row+innerStep);
-                indices.push_back(verts*(col+i)+row+innerStep);
+                indices->push_back(verts*(col)+row);
+                indices->push_back(verts*(col+i+innerStep)+row+innerStep);
+                indices->push_back(verts*(col+i)+row+innerStep);
             }
         }
 
@@ -118,22 +100,22 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
         outerStep = size_t(1) << (lodDeltas[Terrain::North] + lodLevel);
         for (size_t col = 0; col < verts-1; col += outerStep)
         {
-            indices.push_back(verts*(col+outerStep)+row);
-            indices.push_back(verts*col+row);
+            indices->push_back(verts*(col+outerStep)+row);
+            indices->push_back(verts*col+row);
             // Make sure not to touch the left edge
             if (col == 0)
-                indices.push_back(verts*(col+innerStep)+row-innerStep);
+                indices->push_back(verts*(col+innerStep)+row-innerStep);
             else
-                indices.push_back(verts*col+row-innerStep);
+                indices->push_back(verts*col+row-innerStep);
 
             for (size_t i = 0; i < outerStep; i += innerStep)
             {
                 // Make sure not to touch the left or right edges
                 if (col+i == 0 || col+i == verts-1-innerStep)
                     continue;
-                indices.push_back(verts*(col+i)+row-innerStep);
-                indices.push_back(verts*(col+i+innerStep)+row-innerStep);
-                indices.push_back(verts*(col+outerStep)+row);
+                indices->push_back(verts*(col+i)+row-innerStep);
+                indices->push_back(verts*(col+i+innerStep)+row-innerStep);
+                indices->push_back(verts*(col+outerStep)+row);
             }
         }
 
@@ -142,22 +124,22 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
         outerStep = size_t(1) << (lodDeltas[Terrain::West] + lodLevel);
         for (size_t row = 0; row < verts-1; row += outerStep)
         {
-            indices.push_back(verts*col+row+outerStep);
-            indices.push_back(verts*col+row);
+            indices->push_back(verts*col+row+outerStep);
+            indices->push_back(verts*col+row);
             // Make sure not to touch the top edge
             if (row+outerStep == verts-1)
-                indices.push_back(verts*(col+innerStep)+row+outerStep-innerStep);
+                indices->push_back(verts*(col+innerStep)+row+outerStep-innerStep);
             else
-                indices.push_back(verts*(col+innerStep)+row+outerStep);
+                indices->push_back(verts*(col+innerStep)+row+outerStep);
 
             for (size_t i = 0; i < outerStep; i += innerStep)
             {
                 // Make sure not to touch the top or bottom edges
                 if (row+i == 0 || row+i == verts-1-innerStep)
                     continue;
-                indices.push_back(verts*col+row);
-                indices.push_back(verts*(col+innerStep)+row+i);
-                indices.push_back(verts*(col+innerStep)+row+i+innerStep);
+                indices->push_back(verts*col+row);
+                indices->push_back(verts*(col+innerStep)+row+i);
+                indices->push_back(verts*(col+innerStep)+row+i+innerStep);
             }
         }
 
@@ -166,31 +148,27 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
         outerStep = size_t(1) << (lodDeltas[Terrain::East] + lodLevel);
         for (size_t row = 0; row < verts-1; row += outerStep)
         {
-            indices.push_back(verts*col+row);
-            indices.push_back(verts*col+row+outerStep);
+            indices->push_back(verts*col+row);
+            indices->push_back(verts*col+row+outerStep);
             // Make sure not to touch the bottom edge
             if (row == 0)
-                indices.push_back(verts*(col-innerStep)+row+innerStep);
+                indices->push_back(verts*(col-innerStep)+row+innerStep);
             else
-                indices.push_back(verts*(col-innerStep)+row);
+                indices->push_back(verts*(col-innerStep)+row);
 
             for (size_t i = 0; i < outerStep; i += innerStep)
             {
                 // Make sure not to touch the top or bottom edges
                 if (row+i == 0 || row+i == verts-1-innerStep)
                     continue;
-                indices.push_back(verts*col+row+outerStep);
-                indices.push_back(verts*(col-innerStep)+row+i+innerStep);
-                indices.push_back(verts*(col-innerStep)+row+i);
+                indices->push_back(verts*col+row+outerStep);
+                indices->push_back(verts*(col-innerStep)+row+i+innerStep);
+                indices->push_back(verts*(col-innerStep)+row+i);
             }
         }
     }
 
-    Ogre::HardwareBufferManager* mgr = Ogre::HardwareBufferManager::getSingletonPtr();
-    Ogre::HardwareIndexBufferSharedPtr buffer = mgr->createIndexBuffer(type,
-                                                                       indices.size(), Ogre::HardwareBuffer::HBU_STATIC);
-    buffer->writeData(0, buffer->getSizeInBytes(), &indices[0], true);
-    return buffer;
+    return indices;
 }
 
 }
@@ -198,7 +176,7 @@ Ogre::HardwareIndexBufferSharedPtr createIndexBuffer(unsigned int flags, unsigne
 namespace Terrain
 {
 
-    Ogre::HardwareVertexBufferSharedPtr BufferCache::getUVBuffer()
+    osg::ref_ptr<osg::Vec2Array> BufferCache::getUVBuffer()
     {
         if (mUvBufferMap.find(mNumVerts) != mUvBufferMap.end())
         {
@@ -207,30 +185,26 @@ namespace Terrain
 
         int vertexCount = mNumVerts * mNumVerts;
 
-        std::vector<float> uvs;
-        uvs.reserve(vertexCount*2);
+        osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array);
+        uvs->reserve(vertexCount);
 
         for (unsigned int col = 0; col < mNumVerts; ++col)
         {
             for (unsigned int row = 0; row < mNumVerts; ++row)
             {
-                uvs.push_back(col / static_cast<float>(mNumVerts-1)); // U
-                uvs.push_back(row / static_cast<float>(mNumVerts-1)); // V
+                uvs->push_back(osg::Vec2f(col / static_cast<float>(mNumVerts-1),
+                                          row / static_cast<float>(mNumVerts-1)));
             }
         }
 
-        Ogre::HardwareBufferManager* mgr = Ogre::HardwareBufferManager::getSingletonPtr();
-        Ogre::HardwareVertexBufferSharedPtr buffer = mgr->createVertexBuffer(
-                    Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2),
-                                                vertexCount, Ogre::HardwareBuffer::HBU_STATIC);
+        // Assign a VBO here to enable state sharing between different Geometries.
+        uvs->setVertexBufferObject(new osg::VertexBufferObject);
 
-        buffer->writeData(0, buffer->getSizeInBytes(), &uvs[0], true);
-
-        mUvBufferMap[mNumVerts] = buffer;
-        return buffer;
+        mUvBufferMap[mNumVerts] = uvs;
+        return uvs;
     }
 
-    Ogre::HardwareIndexBufferSharedPtr BufferCache::getIndexBuffer(unsigned int flags)
+    osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int flags)
     {
         unsigned int verts = mNumVerts;
 
@@ -239,11 +213,15 @@ namespace Terrain
             return mIndexBufferMap[flags];
         }
 
-        Ogre::HardwareIndexBufferSharedPtr buffer;
+        osg::ref_ptr<osg::DrawElements> buffer;
+
         if (verts*verts > (0xffffu))
-            buffer = createIndexBuffer<unsigned int>(flags, verts, Ogre::HardwareIndexBuffer::IT_32BIT);
+            buffer = createIndexBuffer<osg::DrawElementsUShort>(flags, verts);
         else
-            buffer = createIndexBuffer<unsigned short>(flags, verts, Ogre::HardwareIndexBuffer::IT_16BIT);
+            buffer = createIndexBuffer<osg::DrawElementsUInt>(flags, verts);
+
+        // Assign a EBO here to enable state sharing between different Geometries.
+        buffer->setElementBufferObject(new osg::ElementBufferObject);
 
         mIndexBufferMap[flags] = buffer;
         return buffer;

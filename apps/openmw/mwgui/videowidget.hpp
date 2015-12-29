@@ -1,11 +1,16 @@
 #ifndef OPENMW_MWGUI_VIDEOWIDGET_H
 #define OPENMW_MWGUI_VIDEOWIDGET_H
 
-#include <MyGUI_ImageBox.h>
+#include <MyGUI_Widget.h>
 
 namespace Video
 {
     class VideoPlayer;
+}
+
+namespace VFS
+{
+    class Manager;
 }
 
 namespace MWGui
@@ -14,12 +19,15 @@ namespace MWGui
     /**
      * Widget that plays a video.
      */
-    class VideoWidget : public MyGUI::ImageBox
+    class VideoWidget : public MyGUI::Widget
     {
     public:
         MYGUI_RTTI_DERIVED(VideoWidget)
 
         VideoWidget();
+
+        /// Set the VFS (virtual file system) to find the videos on.
+        void setVFS(const VFS::Manager* vfs);
 
         void playVideo (const std::string& video);
 
@@ -42,6 +50,8 @@ namespace MWGui
         void autoResize (bool stretch);
 
     private:
+        const VFS::Manager* mVFS;
+        std::auto_ptr<MyGUI::ITexture> mTexture;
         std::auto_ptr<Video::VideoPlayer> mPlayer;
     };
 

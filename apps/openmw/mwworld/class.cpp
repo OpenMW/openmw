@@ -1,9 +1,6 @@
-
 #include "class.hpp"
 
 #include <stdexcept>
-
-#include <OgreVector3.h>
 
 #include <components/esm/defs.hpp>
 
@@ -33,17 +30,12 @@ namespace MWWorld
 
     Class::~Class() {}
 
-    std::string Class::getId (const Ptr& ptr) const
-    {
-        throw std::runtime_error ("class does not support ID retrieval");
-    }
-
     void Class::insertObjectRendering (const Ptr& ptr, const std::string& mesh, MWRender::RenderingInterface& renderingInterface) const
     {
 
     }
 
-    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWWorld::PhysicsSystem& physics) const
+    void Class::insertObject(const Ptr& ptr, const std::string& mesh, MWPhysics::PhysicsSystem& physics) const
     {
 
     }
@@ -58,12 +50,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not represent an actor");
     }
 
-    bool Class::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Class::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return false;
     }
 
-    int Class::getServices(const Ptr &actor) const
+    int Class::getServices(const ConstPtr &actor) const
     {
         throw std::runtime_error ("class does not have services");
     }
@@ -78,12 +70,12 @@ namespace MWWorld
         throw std::runtime_error ("class does not have NPC stats");
     }
 
-    bool Class::hasItemHealth (const Ptr& ptr) const
+    bool Class::hasItemHealth (const ConstPtr& ptr) const
     {
         return false;
     }
 
-    int Class::getItemHealth(const Ptr &ptr) const
+    int Class::getItemHealth(const ConstPtr &ptr) const
     {
         if (ptr.getCellRef().getCharge() == -1)
             return getItemMaxHealth(ptr);
@@ -91,12 +83,12 @@ namespace MWWorld
             return ptr.getCellRef().getCharge();
     }
 
-    int Class::getItemMaxHealth (const Ptr& ptr) const
+    int Class::getItemMaxHealth (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have item health");
     }
 
-    void Class::hit(const Ptr& ptr, int type) const
+    void Class::hit(const Ptr& ptr, float attackStrength, int type) const
     {
         throw std::runtime_error("class cannot hit");
     }
@@ -109,11 +101,6 @@ namespace MWWorld
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, bool successful) const
     {
         throw std::runtime_error("class cannot be hit");
-    }
-
-    void Class::setActorHealth(const Ptr& ptr, float health, const Ptr& attacker) const
-    {
-        throw std::runtime_error("class does not have actor health");
     }
 
     boost::shared_ptr<Action> Class::activate (const Ptr& ptr, const Ptr& actor) const
@@ -151,17 +138,22 @@ namespace MWWorld
         throw std::runtime_error ("class does not support unlocking");
     }
 
+    bool Class::canLock(const ConstPtr &ptr) const
+    {
+        return false;
+    }
+
     void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const
     {
         throw std::runtime_error ("class does not support time-based uses");
     }
 
-    float Class::getRemainingUsageTime (const Ptr& ptr) const
+    float Class::getRemainingUsageTime (const ConstPtr& ptr) const
     {
         return -1;
     }
 
-    std::string Class::getScript (const Ptr& ptr) const
+    std::string Class::getScript (const ConstPtr& ptr) const
     {
         return "";
     }
@@ -176,7 +168,7 @@ namespace MWWorld
         return 0;
     }
 
-    int Class::getEnchantmentPoints (const MWWorld::Ptr& ptr) const
+    int Class::getEnchantmentPoints (const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not support enchanting");
     }
@@ -186,27 +178,22 @@ namespace MWWorld
         throw std::runtime_error ("movement settings not supported by class");
     }
 
-    Ogre::Vector3 Class::getMovementVector (const Ptr& ptr) const
+    osg::Vec3f Class::getRotationVector (const Ptr& ptr) const
     {
-        return Ogre::Vector3 (0, 0, 0);
+        return osg::Vec3f (0, 0, 0);
     }
 
-    Ogre::Vector3 Class::getRotationVector (const Ptr& ptr) const
-    {
-        return Ogre::Vector3 (0, 0, 0);
-    }
-
-    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const Ptr& ptr) const
+    std::pair<std::vector<int>, bool> Class::getEquipmentSlots (const ConstPtr& ptr) const
     {
         return std::make_pair (std::vector<int>(), false);
     }
 
-    int Class::getEquipmentSkill (const Ptr& ptr) const
+    int Class::getEquipmentSkill (const ConstPtr& ptr) const
     {
         return -1;
     }
 
-    int Class::getValue (const Ptr& ptr) const
+    int Class::getValue (const ConstPtr& ptr) const
     {
         throw std::logic_error ("value not supported by this class");
     }
@@ -216,7 +203,7 @@ namespace MWWorld
         throw std::runtime_error ("capacity not supported by this class");
     }
 
-    float Class::getWeight(const Ptr &ptr) const
+    float Class::getWeight(const ConstPtr &ptr) const
     {
         throw std::runtime_error ("weight not supported by this class");
     }
@@ -226,7 +213,7 @@ namespace MWWorld
         throw std::runtime_error ("encumbrance not supported by class");
     }
 
-    bool Class::isEssential (const MWWorld::Ptr& ptr) const
+    bool Class::isEssential (const MWWorld::ConstPtr& ptr) const
     {
         return false;
     }
@@ -249,7 +236,7 @@ namespace MWWorld
         return *iter->second;
     }
 
-    bool Class::isPersistent(const Ptr &ptr) const
+    bool Class::isPersistent(const ConstPtr &ptr) const
     {
         throw std::runtime_error ("class does not support persistence");
     }
@@ -260,12 +247,12 @@ namespace MWWorld
         sClasses.insert(std::make_pair(key, instance));
     }
 
-    std::string Class::getUpSoundId (const Ptr& ptr) const
+    std::string Class::getUpSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an up sound");
     }
 
-    std::string Class::getDownSoundId (const Ptr& ptr) const
+    std::string Class::getDownSoundId (const ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have an down sound");
     }
@@ -275,41 +262,41 @@ namespace MWWorld
         throw std::runtime_error("class does not support soundgen look up");
     }
 
-    std::string Class::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Class::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error ("class does not have any inventory icon");
     }
 
-    MWGui::ToolTipInfo Class::getToolTipInfo (const Ptr& ptr) const
+    MWGui::ToolTipInfo Class::getToolTipInfo (const ConstPtr& ptr, int count) const
     {
         throw std::runtime_error ("class does not have a tool tip");
     }
 
-    bool Class::hasToolTip (const Ptr& ptr) const
+    bool Class::hasToolTip (const ConstPtr& ptr) const
     {
         return false;
     }
 
-    std::string Class::getEnchantment (const Ptr& ptr) const
+    std::string Class::getEnchantment (const ConstPtr& ptr) const
     {
         return "";
     }
 
-    void Class::adjustScale(const MWWorld::Ptr& ptr,float& scale) const
+    void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const
     {
     }
 
-    std::string Class::getModel(const MWWorld::Ptr &ptr) const
+    std::string Class::getModel(const MWWorld::ConstPtr &ptr) const
     {
         return "";
     }
 
-    std::string Class::applyEnchantment(const MWWorld::Ptr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    std::string Class::applyEnchantment(const MWWorld::ConstPtr &ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
     {
         throw std::runtime_error ("class can't be enchanted");
     }
 
-    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::Ptr &ptr, const MWWorld::Ptr &npc) const
+    std::pair<int, std::string> Class::canBeEquipped(const MWWorld::ConstPtr &ptr, const MWWorld::Ptr &npc) const
     {
         return std::make_pair (1, "");
     }
@@ -341,44 +328,45 @@ namespace MWWorld
     }
 
     MWWorld::Ptr
-    Class::copyToCellImpl(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCellImpl(const ConstPtr &ptr, CellStore &cell) const
     {
-        throw std::runtime_error("unable to move class to cell");
+        throw std::runtime_error("unable to copy class to cell");
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const Ptr &ptr, CellStore &cell) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, int count) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
+        newPtr.getRefData().setCount(count);
         return newPtr;
     }
 
     MWWorld::Ptr
-    Class::copyToCell(const Ptr &ptr, CellStore &cell, const ESM::Position &pos) const
+    Class::copyToCell(const ConstPtr &ptr, CellStore &cell, const ESM::Position &pos, int count) const
     {
-        Ptr newPtr = copyToCell(ptr, cell);
+        Ptr newPtr = copyToCell(ptr, cell, count);
         newPtr.getRefData().setPosition(pos);
 
         return newPtr;
     }
 
-    bool Class::isBipedal(const Ptr &ptr) const
+    bool Class::isBipedal(const ConstPtr &ptr) const
     {
         return false;
     }
 
-    bool Class::canFly(const Ptr &ptr) const
+    bool Class::canFly(const ConstPtr &ptr) const
     {
         return false;
     }
 
-    bool Class::canSwim(const Ptr &ptr) const
+    bool Class::canSwim(const ConstPtr &ptr) const
     {
         return false;
     }
 
-    bool Class::canWalk(const Ptr &ptr) const
+    bool Class::canWalk(const ConstPtr &ptr) const
     {
         return false;
     }
@@ -398,26 +386,26 @@ namespace MWWorld
         throw std::runtime_error("class does not support skills");
     }
 
-    int Class::getBloodTexture (const MWWorld::Ptr& ptr) const
+    int Class::getBloodTexture (const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error("class does not support gore");
     }
 
     void Class::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const {}
 
-    void Class::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const {}
+    void Class::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const {}
 
-    int Class::getBaseGold(const MWWorld::Ptr& ptr) const
+    int Class::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
         throw std::runtime_error("class does not support base gold");
     }
 
-    bool Class::isClass(const MWWorld::Ptr& ptr, const std::string &className) const
+    bool Class::isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const
     {
         return false;
     }
 
-    int Class::getDoorState (const MWWorld::Ptr &ptr) const
+    int Class::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
         throw std::runtime_error("this is not a door");
     }
@@ -436,26 +424,26 @@ namespace MWWorld
         return getEncumbrance(ptr) / capacity;
     }
 
-    std::string Class::getSound(const MWWorld::Ptr&) const
+    std::string Class::getSound(const MWWorld::ConstPtr&) const
     {
       return std::string();
     }
 
-    int Class::getBaseFightRating(const Ptr &ptr) const
+    int Class::getBaseFightRating(const ConstPtr &ptr) const
     {
         throw std::runtime_error("class does not support fight rating");
     }
 
-    std::string Class::getPrimaryFaction (const MWWorld::Ptr& ptr) const
+    std::string Class::getPrimaryFaction (const MWWorld::ConstPtr& ptr) const
     {
         return std::string();
     }
-    int Class::getPrimaryFactionRank (const MWWorld::Ptr& ptr) const
+    int Class::getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const
     {
         return -1;
     }
 
-    int Class::getEffectiveArmorRating(const Ptr &ptr, const Ptr &actor) const
+    int Class::getEffectiveArmorRating(const ConstPtr &armor, const Ptr &actor) const
     {
         throw std::runtime_error("class does not support armor ratings");
     }

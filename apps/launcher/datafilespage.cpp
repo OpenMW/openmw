@@ -75,7 +75,7 @@ bool Launcher::DataFilesPage::loadSettings()
     QStringList profiles = mLauncherSettings.getContentLists();
     QString currentProfile = mLauncherSettings.getCurrentContentListName();
 
-    qDebug() << "current profile is: " << currentProfile;
+    qDebug() << "The current profile is: " << currentProfile;
 
     foreach (const QString &item, profiles)
         addProfile (item, false);

@@ -1,14 +1,14 @@
-
 #include "alchemy.hpp"
 
 #include <cassert>
 #include <cstdlib>
+#include <cmath>
 
 #include <algorithm>
 #include <stdexcept>
 #include <map>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadappa.hpp>
@@ -44,6 +44,8 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
         {
             const MWWorld::LiveCellRef<ESM::Ingredient> *ingredient = iter->get<ESM::Ingredient>();
 
+            std::set<EffectKey> seenEffects;
+
             for (int i=0; i<4; ++i)
                 if (ingredient->mBase->mData.mEffectID[i]!=-1)
                 {
@@ -51,7 +53,8 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
                         ingredient->mBase->mData.mEffectID[i], ingredient->mBase->mData.mSkills[i]!=-1 ?
                         ingredient->mBase->mData.mSkills[i] : ingredient->mBase->mData.mAttributes[i]);
 
-                    ++effects[key];
+                    if (seenEffects.insert(key).second)
+                        ++effects[key];
                 }
         }
     }
@@ -296,7 +299,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
 
     newRecord.mName = name;
 
-    int index = OEngine::Misc::Rng::rollDice(6);
+    int index = Misc::Rng::rollDice(6);
     assert (index>=0 && index<6);
 
     static const char *meshes[] = { "standard", "bargain", "cheap", "fresh", "exclusive", "quality" };
@@ -418,8 +421,8 @@ int MWMechanics::Alchemy::addIngredient (const MWWorld::Ptr& ingredient)
         return -1;
 
     for (TIngredientsIterator iter (mIngredients.begin()); iter!=mIngredients.end(); ++iter)
-        if (!iter->isEmpty() && Misc::StringUtils::ciEqual(ingredient.getClass().getId(ingredient),
-                                                           iter->getClass().getId(*iter)))
+        if (!iter->isEmpty() && Misc::StringUtils::ciEqual(ingredient.getCellRef().getRefId(),
+                                                           iter->getCellRef().getRefId()))
             return -1;
 
     mIngredients[slot] = ingredient;
@@ -460,7 +463,10 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_NoName;
 
     if (listEffects().empty())
+    {
+        removeIngredients();
         return Result_NoEffects;
+    }
 
     if (beginEffects() == endEffects())
     {
@@ -469,7 +475,7 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create (const std::string& na
         return Result_RandomFailure;
     }
 
-    if (getAlchemyFactor() < OEngine::Misc::Rng::roll0to99())
+    if (getAlchemyFactor() < Misc::Rng::roll0to99())
     {
         removeIngredients();
         return Result_RandomFailure;

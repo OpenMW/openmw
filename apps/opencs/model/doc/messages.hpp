@@ -21,18 +21,20 @@ namespace CSMDoc
                                        // reporting it correctly
             Severity_Default = 4
         };
-        
+
         CSMWorld::UniversalId mId;
         std::string mMessage;
         std::string mHint;
         Severity mSeverity;
 
         Message();
-        
+
         Message (const CSMWorld::UniversalId& id, const std::string& message,
             const std::string& hint, Severity severity);
+
+        static std::string toString (Severity severity);
     };
-            
+
     class Messages
     {
         public:

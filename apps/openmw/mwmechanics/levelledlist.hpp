@@ -1,7 +1,9 @@
 #ifndef OPENMW_MECHANICS_LEVELLEDLIST_H
 #define OPENMW_MECHANICS_LEVELLEDLIST_H
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
+
+#include <iostream>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -9,7 +11,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwmechanics/creaturestats.hpp"
+#include "creaturestats.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {
@@ -19,12 +22,12 @@ namespace MWMechanics
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
-        const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const MWWorld::Ptr& player = getPlayer();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
         failChance += levItem->mChanceNone;
 
-        if (OEngine::Misc::Rng::roll0to99() < failChance)
+        if (Misc::Rng::roll0to99() < failChance)
             return std::string();
 
         std::vector<std::string> candidates;
@@ -53,7 +56,7 @@ namespace MWMechanics
         }
         if (candidates.empty())
             return std::string();
-        std::string item = candidates[OEngine::Misc::Rng::rollDice(candidates.size())];
+        std::string item = candidates[Misc::Rng::rollDice(candidates.size())];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(Misc::StringUtils::lowerCase(item)))

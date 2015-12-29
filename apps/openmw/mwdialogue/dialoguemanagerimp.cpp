@@ -1,4 +1,3 @@
-
 #include "dialoguemanagerimp.hpp"
 
 #include <cctype>
@@ -10,6 +9,7 @@
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadinfo.hpp>
 #include <components/esm/dialoguestate.hpp>
+#include <components/esm/esmwriter.hpp>
 
 #include <components/compiler/exception.hpp>
 #include <components/compiler/errorhandler.hpp>
@@ -41,6 +41,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "filter.hpp"
 #include "hypertextparser.hpp"
@@ -55,8 +56,6 @@ namespace MWDialogue
       , mTalkedTo(false)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f)
-      , mScriptVerbose (scriptVerbose)
-
     {
         mChoice = -1;
         mIsInChoice = false;
@@ -115,6 +114,8 @@ namespace MWDialogue
 
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
+        updateGlobals();
+
         // Dialogue with dead actor (e.g. through script) should not be allowed.
         if (actor.getClass().getCreatureStats(actor).isDead())
             return;
@@ -140,9 +141,6 @@ namespace MWDialogue
 
         win->startDialogue(actor, actor.getClass().getName (actor), resetHistory);
 
-        //setup the list of topics known by the actor. Topics who are also on the knownTopics list will be added to the GUI
-        updateTopics();
-
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
@@ -166,12 +164,19 @@ namespace MWDialogue
                         // TODO play sound
                     }
 
+                    // first topics update so that parseText knows the keywords to highlight
+                    updateTopics();
+
                     parseText (info->mResponse);
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
                     win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript (info->mResultScript);
                     mLastTopic = Misc::StringUtils::lowerCase(it->mId);
+
+                    // update topics again to accomodate changes resulting from executeScript
+                    updateTopics();
+
                     return;
                 }
             }
@@ -295,15 +300,18 @@ namespace MWDialogue
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(),mActor);
             win->addResponse (Interpreter::fixDefinesDialog(info->mResponse, interpreterContext), title);
 
-            // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
-            // in which case it should not be added to the journal.
-            for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
-                iter!=dialogue.mInfo.end(); ++iter)
+            if (dialogue.mType == ESM::Dialogue::Topic)
             {
-                if (iter->mId == info->mId)
+                // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info refusal group,
+                // in which case it should not be added to the journal.
+                for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
+                    iter!=dialogue.mInfo.end(); ++iter)
                 {
-                    MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
-                    break;
+                    if (iter->mId == info->mId)
+                    {
+                        MWBase::Environment::get().getJournal()->addTopic (topic, info->mId, mActor);
+                        break;
+                    }
                 }
             }
 
@@ -325,6 +333,8 @@ namespace MWDialogue
 
     void DialogueManager::updateTopics()
     {
+        updateGlobals();
+
         std::list<std::string> keywordList;
         int choice = mChoice;
         mChoice = -1;
@@ -411,8 +421,6 @@ namespace MWDialogue
         win->setKeywords(keywordList);
 
         mChoice = choice;
-
-        updateGlobals();
     }
 
     void DialogueManager::keywordSelected (const std::string& keyword)
@@ -421,7 +429,6 @@ namespace MWDialogue
         {
             if(mDialogueMap.find(keyword) != mDialogueMap.end())
             {
-                ESM::Dialogue ndialogue = mDialogueMap[keyword];
                 if (mDialogueMap[keyword].mType == ESM::Dialogue::Topic)
                 {
                     executeTopic (keyword);
@@ -534,7 +541,7 @@ namespace MWDialogue
         else if (curDisp + mTemporaryDispositionChange > 100)
             mTemporaryDispositionChange = 100 - curDisp;
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Speechcraft, success ? 0 : 1);
 
         if (success)

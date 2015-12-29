@@ -1,4 +1,3 @@
-
 #include "notnode.hpp"
 
 CSMFilter::NotNode::NotNode (boost::shared_ptr<Node> child) : UnaryNode (child, "not") {}

@@ -3,8 +3,9 @@ project(OpenMW)
 # If the user doesn't supply a CMAKE_BUILD_TYPE via command line, choose one for them.
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
-        "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+        "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel."
         FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS None Debug Release RelWithDebInfo MinSizeRel)
 ENDIF()
 
 if (APPLE)
@@ -19,7 +20,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 message(STATUS "Configuring OpenMW...")
 
 set(OPENMW_VERSION_MAJOR 0)
-set(OPENMW_VERSION_MINOR 36)
+set(OPENMW_VERSION_MINOR 37)
 set(OPENMW_VERSION_RELEASE 0)
 
 set(OPENMW_VERSION_COMMITHASH "")
@@ -45,24 +46,20 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 # Macros
 include(OpenMWMacros)
 
-if (ANDROID)
-    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
-endif (ANDROID)
-
 # doxygen main page
 
 configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_DIR}/docs/mainpage.hpp")
 
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" FALSE)
-option(OGRE_STATIC  "Link static build of Ogre and Ogre Plugins into the binaries" FALSE)
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
-
-set(CUSTOM_OGRE_PLUGIN_DIR "" CACHE PATH "Specify a custom directory for Ogre plugins (autodetected by default)")
+option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
+option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 
 # Apps and tools
+option(BUILD_OPENMW "build OpenMW" ON)
 option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
@@ -78,13 +75,33 @@ option(BUILD_MYGUI_PLUGIN "build MyGUI plugin for OpenMW resources, to use with 
 # OS X deployment
 option(OPENMW_OSX_DEPLOYMENT OFF)
 
-# Location of morrowind data files
+if (MSVC)
+    option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
+    option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
+endif()
+
+# Set up common paths
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
     set(OPENMW_RESOURCE_FILES "./resources" CACHE PATH "location of OpenMW resources files")
 elseif(UNIX)
-    set(MORROWIND_DATA_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/data/" CACHE PATH "location of Morrowind data files")
-    set(OPENMW_RESOURCE_FILES "${CMAKE_INSTALL_PREFIX}/share/games/openmw/resources/" CACHE PATH "location of OpenMW resources files")
+    # Paths
+    SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
+    SET(LIBDIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Where to install libraries")
+    SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
+    SET(GLOBAL_DATA_PATH "${DATAROOTDIR}/games/" CACHE PATH "Set data path prefix")
+    SET(DATADIR "${GLOBAL_DATA_PATH}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
+    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
+    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
+    IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr")
+        SET(GLOBAL_CONFIG_PATH "/etc/" CACHE PATH "Set config dir prefix")
+    ELSE()
+        SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/etc/" CACHE PATH "Set config dir prefix")
+    ENDIF()
+    SET(SYSCONFDIR "${GLOBAL_CONFIG_PATH}/openmw" CACHE PATH "Set config dir")
+
+    set(MORROWIND_DATA_FILES "${DATADIR}/data" CACHE PATH "location of Morrowind data files")
+    set(OPENMW_RESOURCE_FILES "${DATADIR}/resources" CACHE PATH "location of OpenMW resources files")
 else()
     set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
     set(OPENMW_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
@@ -102,24 +119,13 @@ unset(FFMPEG_LIBRARIES CACHE)
 
 find_package(FFmpeg REQUIRED)
 
-set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY})
+set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWSCALE_LIBRARY} ${SWRESAMPLE_LIBRARIES})
 
-if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND )
+if ( NOT AVCODEC_FOUND OR NOT AVFORMAT_FOUND OR NOT AVUTIL_FOUND OR NOT SWSCALE_FOUND OR NOT SWRESAMPLE_FOUND)
     message(FATAL_ERROR "FFmpeg component required, but not found!")
 endif()
-set(SOUND_INPUT_INCLUDES ${FFMPEG_INCLUDE_DIRS})
-if( SWRESAMPLE_FOUND )
-    add_definitions(-DHAVE_LIBSWRESAMPLE)
-    set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${SWRESAMPLE_LIBRARIES})
-else()
-    if( AVRESAMPLE_FOUND )
-        set (FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES} ${AVRESAMPLE_LIBRARIES})
-    else()
-        message(FATAL_ERROR "Install either libswresample (FFmpeg) or libavresample (Libav).")
-    endif()
-endif()
-
-set(SOUND_INPUT_LIBRARY ${FFMPEG_LIBRARIES})
+# Required for building the FFmpeg headers
+add_definitions(-D__STDC_CONSTANT_MACROS)
 
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
@@ -140,32 +146,49 @@ endif()
 if (WIN32)
     if(NOT MINGW)
     set(Boost_USE_STATIC_LIBS   ON)
-    set(PLATFORM_INCLUDE_DIR "platform")
     add_definitions(-DBOOST_ALL_NO_LIB)
     endif(NOT MINGW)
 
     # Suppress WinMain(), provided by SDL
     add_definitions(-DSDL_MAIN_HANDLED)
-else (WIN32)
-    set(PLATFORM_INCLUDE_DIR "")
-endif (WIN32)
-if (MSVC10)
-    set(PLATFORM_INCLUDE_DIR "")
+
+    # Get rid of useless crud from windows.h
+    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
-# Dependencies
+if (ANDROID)
+    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
+    set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
+endif (ANDROID)
 
-set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
-message(STATUS "Using Qt${DESIRED_QT_VERSION}")
+option(OPENGL_ES "enable opengl es support" FALSE )
 
-if (DESIRED_QT_VERSION MATCHES 4)
-    find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork)
+if (OPENGL_ES)
+    add_definitions(-DOPENGL_ES)
+endif(OPENGL_ES)
+
+if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
+   set(USE_QT FALSE)
 else()
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Core REQUIRED)
-    find_package(Qt5Network REQUIRED)
+   set(USE_QT TRUE)
+endif()
+ 
+# Dependencies
+if (USE_QT)
+    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
+    message(STATUS "Using Qt${DESIRED_QT_VERSION}")
+
+    if (DESIRED_QT_VERSION MATCHES 4)
+        find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
+    else()
+        find_package(Qt5Widgets REQUIRED)
+        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Network REQUIRED)
+        find_package(Qt5OpenGL REQUIRED)
     # Instruct CMake to run moc automatically when needed.
     #set(CMAKE_AUTOMOC ON)
+    endif()
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
@@ -188,7 +211,7 @@ if (HAVE_UNORDERED_MAP)
 endif ()
 
 
-set(BOOST_COMPONENTS system filesystem program_options thread wave)
+set(BOOST_COMPONENTS system filesystem program_options thread)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
 endif(WIN32)
@@ -197,9 +220,70 @@ IF(BOOST_STATIC)
     set(Boost_USE_STATIC_LIBS   ON)
 endif()
 
-find_package(OGRE REQUIRED)
-if (${OGRE_VERSION} VERSION_LESS "1.9")
-    message(FATAL_ERROR "OpenMW requires Ogre 1.9 or later, please install the latest stable version from http://ogre3d.org")
+if (USE_QT)
+    set (OSG_QT osgQt)
+endif()
+
+find_package(OpenSceneGraph 3.2.0 REQUIRED osgDB osgViewer osgText osgGA osgAnimation osgParticle ${OSG_QT} osgUtil osgFX)
+
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+
+if(OSG_STATIC)
+   macro(use_static_osg_plugin_library PLUGIN_NAME)
+      set(PLUGIN_NAME_DBG ${PLUGIN_NAME}d ${PLUGIN_NAME}D ${PLUGIN_NAME}_d ${PLUGIN_NAME}_D ${PLUGIN_NAME}_debug ${PLUGIN_NAME})
+
+      # For now, users wishing to do a static build will need to pass the path to where the plugins reside
+      # More clever logic would need to deduce the path, probably installed under <OpenSceneGraph>/lib/osgPlugins-<X.X.X>
+      find_library(${PLUGIN_NAME}_LIBRARY_REL NAMES ${PLUGIN_NAME} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      find_library(${PLUGIN_NAME}_LIBRARY_DBG NAMES ${PLUGIN_NAME_DBG} HINTS ${OSG_PLUGIN_LIB_SEARCH_PATH})
+      make_library_set(${PLUGIN_NAME}_LIBRARY)
+
+      if("${${PLUGIN_NAME}_LIBRARY}" STREQUAL "")
+         message(FATAL_ERROR "Unable to find static OpenSceneGraph plugin: ${PLUGIN_NAME}")
+      endif()
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${PLUGIN_NAME}_LIBRARY})
+   endmacro()
+
+   macro(use_static_osg_plugin_dep DEPENDENCY)
+      find_package(${DEPENDENCY} REQUIRED)
+
+      set(OPENSCENEGRAPH_LIBRARIES ${OPENSCENEGRAPH_LIBRARIES} ${${DEPENDENCY}_LIBRARIES})
+   endmacro()
+
+   add_definitions(-DOSG_LIBRARY_STATIC)
+
+   set(PLUGIN_LIST
+       osgdb_png # depends on libpng, zlib
+       osgdb_tga
+       osgdb_dds
+       osgdb_jpeg # depends on libjpeg
+       )
+
+   foreach(PLUGIN ${PLUGIN_LIST})
+      use_static_osg_plugin_library(${PLUGIN})
+   endforeach()
+
+   # OSG static plugins need to linked against their respective dependencies
+   set(PLUGIN_DEPS_LIST
+       PNG # needed by osgdb_png
+       ZLIB # needed by osgdb_png
+       JPEG # needed by osgdb_jpeg
+       )
+
+   foreach(DEPENDENCY ${PLUGIN_DEPS_LIST})
+      use_static_osg_plugin_dep(${DEPENDENCY})
+   endforeach()
+endif()
+
+if(QT_STATIC)
+   if(WIN32)
+      if(DESIRED_QT_VERSION MATCHES 4)
+         # QtCore needs WSAAsyncSelect from Ws2_32.lib
+         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
+         message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
+      endif()
+   endif()
 endif()
 
 find_package(MyGUI REQUIRED)
@@ -212,88 +296,23 @@ find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet REQUIRED)
 
-set(OGRE_PLUGIN_INCLUDE_DIRS "")
-set(OGRE_STATIC_PLUGINS "")
-
-macro(add_static_ogre_plugin PLUGIN)
-    if(OGRE_${PLUGIN}_FOUND)
-        # strip RenderSystem_ or Plugin_ prefix from plugin name
-        string(REPLACE "RenderSystem_" "" PLUGIN_TEMP ${PLUGIN})
-        string(REPLACE "Plugin_" "" PLUGIN_NAME ${PLUGIN_TEMP})
-        add_definitions(-DENABLE_PLUGIN_${PLUGIN_NAME})
-
-        list(APPEND OGRE_PLUGIN_INCLUDE_DIRS ${OGRE_${PLUGIN}_INCLUDE_DIRS})
-        list(APPEND OGRE_STATIC_PLUGINS ${OGRE_${PLUGIN}_LIBRARIES})
-    endif(OGRE_${PLUGIN}_FOUND)
-endmacro(add_static_ogre_plugin)
-
-if(OGRE_STATIC)
-    # set up OGRE_PLUGIN_INCLUDE_DIRS and OGRE_STATIC_PLUGINS
-    add_static_ogre_plugin(Plugin_OctreeSceneManager)
-    add_static_ogre_plugin(Plugin_ParticleFX)
-    find_package(Cg)
-    if(Cg_FOUND)
-        add_static_ogre_plugin(Plugin_CgProgramManager)
-        list(APPEND OGRE_STATIC_PLUGINS ${Cg_LIBRARIES})
-    endif(Cg_FOUND)
-
-if (ANDROID)
-    add_static_ogre_plugin(RenderSystem_GLES2)
-else ()
-    add_static_ogre_plugin(RenderSystem_GL)
-endif ()
-
-    if(WIN32)
-        add_static_ogre_plugin(RenderSystem_Direct3D9)
-    endif(WIN32)
-endif(OGRE_STATIC)
-
-include_directories("." ${LIBS_DIR}
+include_directories("."
     SYSTEM
-    ${OGRE_INCLUDE_DIR} ${OGRE_INCLUDE_DIR}/Ogre ${OGRE_INCLUDE_DIR}/OGRE ${OGRE_INCLUDE_DIRS} ${OGRE_PLUGIN_INCLUDE_DIRS}
-    ${OGRE_INCLUDE_DIR}/Overlay ${OGRE_Overlay_INCLUDE_DIR}
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
-    ${PLATFORM_INCLUDE_DIR}
     ${MYGUI_INCLUDE_DIRS}
-    ${MYGUI_PLATFORM_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${OGRE_LIB_DIR} ${MYGUI_LIB_DIR})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${MYGUI_LIB_DIR})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)
 endif (MYGUI_STATIC)
 
 if (APPLE)
-    # List used Ogre plugins
-    SET(USED_OGRE_PLUGINS ${OGRE_RenderSystem_GL_LIBRARY_REL}
-                          ${OGRE_Plugin_ParticleFX_LIBRARY_REL})
-
-    # Actually we must use OGRE_Plugin_CgProgramManager_FOUND but it's
-    # not reliable and equals TRUE even if there's no Ogre Cg plugin
-    if (Cg_FOUND)
-        set(USED_OGRE_PLUGINS ${USED_OGRE_PLUGINS}
-                              ${OGRE_Plugin_CgProgramManager_LIBRARY_REL})
-    endif ()
-
-    if (${OGRE_PLUGIN_DIR_REL}})
-        set(OGRE_PLUGINS_REL_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGIN_DIR_DBG})
-        set(OGRE_PLUGINS_DBG_FOUND TRUE)
-    endif ()
-
-    if (${OGRE_PLUGINS_REL_FOUND})
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else ()
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_DBG})
-    endif ()
-
-    configure_file(${OpenMW_SOURCE_DIR}/files/mac/Info.plist
+    configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw-Info.plist.in
         "${APP_BUNDLE_DIR}/Contents/Info.plist")
 
     configure_file(${OpenMW_SOURCE_DIR}/files/mac/openmw.icns
@@ -303,36 +322,17 @@ endif (APPLE)
 # Set up DEBUG define
 set_directory_properties(PROPERTIES COMPILE_DEFINITIONS_DEBUG DEBUG=1)
 
-# Set up Ogre plugin folder & debug suffix
-if (APPLE)
-    # Ogre on OS X doesn't use "_d" suffix (see Ogre's CMakeLists.txt)
-    add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="")
-else ()
-    add_definitions(-DOGRE_PLUGIN_DEBUG_SUFFIX="_d")
-endif()
-
-if (APPLE AND OPENMW_OSX_DEPLOYMENT)
-    # make it empty so plugin loading code can check this and try to find plugins inside app bundle
-    add_definitions(-DOGRE_PLUGIN_DIR="")
-else()
-    if (CUSTOM_OGRE_PLUGIN_DIR STREQUAL "")
-        set(OGRE_PLUGIN_DIR ${OGRE_PLUGIN_DIR_REL})
-    else()
-        set(OGRE_PLUGIN_DIR ${CUSTOM_OGRE_PLUGIN_DIR})
-    endif()
-
-    add_definitions(-DOGRE_PLUGIN_DIR="${OGRE_PLUGIN_DIR}")
-endif()
-
-
 add_subdirectory(files/)
-add_subdirectory(files/mygui)
 
 # Specify build paths
 
 if (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${APP_BUNDLE_DIR}/Contents/MacOS")
+
+    if (OPENMW_OSX_DEPLOYMENT)
+        SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    endif()
 else (APPLE)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${OpenMW_BINARY_DIR}")
@@ -343,17 +343,14 @@ endif (APPLE)
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/transparency-overrides.cfg
-    "${OpenMW_BINARY_DIR}/transparency-overrides.cfg")
-
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg.local
     "${OpenMW_BINARY_DIR}/openmw.cfg")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/openmw.cfg
     "${OpenMW_BINARY_DIR}/openmw.cfg.install")
 
-configure_file(${OpenMW_SOURCE_DIR}/files/opencs.ini
-    "${OpenMW_BINARY_DIR}/opencs.ini")
+configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.cfg
+    "${OpenMW_BINARY_DIR}/openmw-cs.cfg")
 
 configure_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
     "${OpenMW_BINARY_DIR}/resources/defaultfilters" COPYONLY)
@@ -364,6 +361,8 @@ configure_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop
         "${OpenMW_BINARY_DIR}/openmw.desktop")
+    configure_file(${OpenMW_SOURCE_DIR}/files/openmw.appdata.xml
+        "${OpenMW_BINARY_DIR}/openmw.appdata.xml")
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw-cs.desktop
         "${OpenMW_BINARY_DIR}/openmw-cs.desktop")
 endif()
@@ -387,31 +386,23 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU AND "${GCC_VERSION}" VERSION_GREATER 4.6 OR "${GCC_VERSION}" VERSION_EQUAL 4.6)
 elseif (MSVC)
     # Enable link-time code generation globally for all linking
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
-    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-    set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
-    set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+    if (OPENMW_LTO_BUILD)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+        set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
+    endif()
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
 IF(NOT WIN32 AND NOT APPLE)
-    # Linux building
-    # Paths
-    SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
-    SET(LIBDIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE PATH "Where to install libraries")
-    SET(DATAROOTDIR "${CMAKE_INSTALL_PREFIX}/share" CACHE PATH "Sets the root of data directories to a non-default location")
-    SET(GLOBAL_DATA_PATH "${DATAROOTDIR}/games/" CACHE PATH "Set data path prefix")
-    SET(DATADIR "${GLOBAL_DATA_PATH}/openmw" CACHE PATH "Sets the openmw data directories to a non-default location")
-    SET(ICONDIR "${DATAROOTDIR}/pixmaps" CACHE PATH "Set icon dir")
-    SET(LICDIR "${DATAROOTDIR}/licenses/openmw" CACHE PATH "Sets the openmw license directory to a non-default location.")
-    IF("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr")
-        SET(GLOBAL_CONFIG_PATH "/etc/" CACHE PATH "Set config dir prefix")
-    ELSE()
-        SET(GLOBAL_CONFIG_PATH "${CMAKE_INSTALL_PREFIX}/etc/" CACHE PATH "Set config dir prefix")
-    ENDIF()
-    SET(SYSCONFDIR "${GLOBAL_CONFIG_PATH}/openmw" CACHE PATH "Set config dir")
+    # Linux installation
 
     # Install binaries
-    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    IF(BUILD_OPENMW)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_OPENMW)
     IF(BUILD_LAUNCHER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-launcher" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_LAUNCHER)
@@ -421,6 +412,9 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_ESMTOOL)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/esmtool" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_ESMTOOL)
+    IF(BUILD_NIFTEST)
+        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
+    ENDIF(BUILD_NIFTEST)
     IF(BUILD_MWINIIMPORTER)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-iniimporter" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_MWINIIMPORTER)
@@ -430,23 +424,20 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-cs" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_OPENCS)
-    IF(BUILD_NIFTEST)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/niftest" DESTINATION "${BINDIR}" )
-    ENDIF(BUILD_NIFTEST)
     IF(BUILD_WIZARD)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-wizard" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_WIZARD)
-    if(BUILD_MYGUI_PLUGIN)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
-    ENDIF(BUILD_MYGUI_PLUGIN)
+    #if(BUILD_MYGUI_PLUGIN)
+    #    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
+    #ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
     INSTALL(FILES "docs/license/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
-    INSTALL(FILES "extern/shiny/License.txt" DESTINATION "${LICDIR}" RENAME "Shiny License.txt" )
 
     # Install icon and desktop file
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/launcher/images/openmw.png" DESTINATION "${ICONDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.appdata.xml" DESTINATION "${DATAROOTDIR}/appdata" COMPONENT "openmw")
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.desktop" DESTINATION "${DATAROOTDIR}/applications" COMPONENT "opencs")
         INSTALL(FILES "${OpenMW_SOURCE_DIR}/files/opencs/openmw-cs.png" DESTINATION "${ICONDIR}" COMPONENT "opencs")
@@ -454,12 +445,12 @@ IF(NOT WIN32 AND NOT APPLE)
 
     # Install global configuration files
     INSTALL(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
 
     # Install resources
@@ -477,7 +468,6 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
-        "${OpenMW_BINARY_DIR}/transparency-overrides.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
@@ -493,7 +483,7 @@ if(WIN32)
     ENDIF(BUILD_ESSIMPORTER)
     IF(BUILD_OPENCS)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-cs.exe" DESTINATION ".")
-        INSTALL(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION ".")
+        INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION ".")
     ENDIF(BUILD_OPENCS)
     IF(BUILD_WIZARD)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/openmw-wizard.exe" DESTINATION ".")
@@ -503,6 +493,8 @@ if(WIN32)
     ENDIF(BUILD_MYGUI_PLUGIN)
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION ".")
+    FILE(GLOB plugin_dir "${OpenMW_BINARY_DIR}/Release/osgPlugins-*")
+    INSTALL(DIRECTORY ${plugin_dir} DESTINATION ".")
 
     SET(CPACK_GENERATOR "NSIS")
     SET(CPACK_PACKAGE_NAME "OpenMW")
@@ -563,31 +555,22 @@ if(WIN32)
     include(CPack)
 endif(WIN32)
 
-# Libs
-include_directories(libs)
-add_subdirectory(libs/openengine)
-
 # Extern
-add_subdirectory (extern/shiny)
-add_subdirectory (extern/ogre-ffmpeg-videoplayer)
+add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
-add_subdirectory (extern/sdl4ogre)
 
 # Components
 add_subdirectory (components)
 
 # Plugins
-if (BUILD_MYGUI_PLUGIN)
-    add_subdirectory(plugins/mygui_resource_plugin)
-endif()
-
-#Testing
-if (BUILD_NIFTEST)
-  add_subdirectory(components/nif/tests/)
-endif(BUILD_NIFTEST)
+#if (BUILD_MYGUI_PLUGIN)
+#    add_subdirectory(plugins/mygui_resource_plugin)
+#endif()
 
 # Apps and tools
-add_subdirectory( apps/openmw )
+if (BUILD_OPENMW)
+    add_subdirectory( apps/openmw )
+endif()
 
 if (BUILD_BSATOOL)
   add_subdirectory( apps/bsatool )
@@ -617,6 +600,10 @@ if (BUILD_WIZARD)
    add_subdirectory(apps/wizard)
 endif()
 
+if (BUILD_NIFTEST)
+    add_subdirectory(apps/niftest)
+endif(BUILD_NIFTEST)
+
 # UnitTests
 if (BUILD_UNITTESTS)
   add_subdirectory( apps/openmw_test_suite )
@@ -624,9 +611,9 @@ endif()
 
 if (WIN32)
   if (MSVC)
-    if (MULTITHREADED_BUILD)
+    if (OPENMW_MP_BUILD)
         set( MT_BUILD "/MP")
-    endif (MULTITHREADED_BUILD)
+    endif()
 
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
         string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
@@ -634,20 +621,22 @@ if (WIN32)
         set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "$(ProjectDir)$(Configuration)" )
     endforeach( OUTPUTCONFIG )
 
-    if (USE_DEBUG_CONSOLE)
+    if (USE_DEBUG_CONSOLE AND BUILD_OPENMW)
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
       set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-    else()
+    elseif (BUILD_OPENMW)
       # Turn off debug console, debug output will be written to visual studio output instead
       set_target_properties(openmw PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
       set_target_properties(openmw PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:WINDOWS")
     endif()
 
-    # Release builds use the debug console
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
-    set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
-    set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+    if (BUILD_OPENMW)
+        # Release builds use the debug console
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:CONSOLE")
+        set_target_properties(openmw PROPERTIES COMPILE_DEFINITIONS_RELEASE "_CONSOLE")
+        set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:CONSOLE")
+    endif()
 
     # Play a bit with the warning levels
 
@@ -656,8 +645,8 @@ if (WIN32)
     set(WARNINGS_DISABLE
         # Warnings that aren't enabled normally and don't need to be enabled
         # They're unneeded and sometimes completely retarded warnings that /Wall enables
-        # Not going to bother commenting them as they tend to warn on every standard library files
-        4061 4263 4264 4266 4350 4371 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
+        # Not going to bother commenting them as they tend to warn on every standard library file
+        4061 4263 4264 4266 4350 4371 4435 4514 4548 4571 4610 4619 4623 4625 4626 4628 4640 4668 4710 4711 4820 4826 4917 4946
 
         # Warnings that are thrown on standard libraries and not OpenMW
         4347 # Non-template function with same name and parameter count as template function
@@ -669,12 +658,6 @@ if (WIN32)
         4987 # nonstandard extension used (triggered by setjmp.h)
         4996 # Function was declared deprecated
 
-        # cause by ogre extensivly
-        4193 # #pragma warning(pop) : no matching '#pragma warning(push)'
-        4251 # class 'XXXX' needs to have dll-interface to be used by clients of class 'YYYY'
-        4275 # non dll-interface struct 'XXXX' used as base for dll-interface class 'YYYY'
-        4315 # undocumented, 'this' pointer for member might not be aligned (OgreMemoryStlAllocator.h)
-
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
 
@@ -685,6 +668,7 @@ if (WIN32)
         4127 # Conditional expression is constant
         4242 # Storing value in a variable of a smaller type, possible loss of data
         4244 # Storing value of one type in variable of another (size_t in int, for example)
+        4245 # Signed/unsigned mismatch
         4267 # Conversion from 'size_t' to 'int', possible loss of data
         4305 # Truncating value (double to float, for example)
         4309 # Variable overflow, trying to store 128 in a signed char for example
@@ -700,21 +684,42 @@ if (WIN32)
         set(WARNINGS "${WARNINGS} /wd${d}")
     endforeach(d)
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNINGS} ${MT_BUILD}")
-
-    # boost::wave has a few issues with signed / unsigned conversions, so we suppress those here
-    set(SHINY_WARNINGS "${WARNINGS} /wd4245")
-    set_target_properties(shiny PROPERTIES COMPILE_FLAGS "${SHINY_WARNINGS} ${MT_BUILD}")
-
+    set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     # oics uses tinyxml, which has an initialized but unused variable
-    set(OICS_WARNINGS "${WARNINGS} /wd4189")
-    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${OICS_WARNINGS} ${MT_BUILD}")
+    set_target_properties(oics PROPERTIES COMPILE_FLAGS "${WARNINGS} /wd4189 ${MT_BUILD}")
+    set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+
+    if (BUILD_BSATOOL)
+        set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_ESMTOOL)
+        set_target_properties(esmtool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_ESSIMPORTER)
+        set_target_properties(openmw-essimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_LAUNCHER)
+        set_target_properties(openmw-launcher PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_MWINIIMPORTER)
+        set_target_properties(openmw-iniimporter PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
 
     if (BUILD_OPENCS)
-        # QT triggers an informational warning that the object layout may differ when compiled with /vd2
-        set(OPENCS_WARNINGS "${WARNINGS} ${MT_BUILD} /wd4435")
-        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS ${OPENCS_WARNINGS})
-    endif (BUILD_OPENCS)
+        set_target_properties(openmw-cs PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_OPENMW)
+        set_target_properties(openmw PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
+
+    if (BUILD_WIZARD)
+        set_target_properties(openmw-wizard PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    endif()
   endif(MSVC)
 
   # TODO: At some point release builds should not use the console but rather write to a log file
@@ -724,6 +729,18 @@ endif()
 
 # Apple bundling
 if (APPLE)
+    get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
+    get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
+    get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
+    get_filename_component(QT_COCOA_PLUGIN_NAME "${QT_COCOA_PLUGIN_PATH}" NAME)
+    configure_file("${QT_COCOA_PLUGIN_PATH}" "${APP_BUNDLE_DIR}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}" COPYONLY)
+
+    if (BUILD_OPENCS)
+      get_property(OPENCS_BUNDLE_NAME_TMP TARGET openmw-cs PROPERTY OUTPUT_NAME)
+      set(OPENCS_BUNDLE_NAME "${OPENCS_BUNDLE_NAME_TMP}.app")
+      configure_file("${QT_COCOA_PLUGIN_PATH}" "${OPENCS_BUNDLE_NAME}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}" COPYONLY)
+    endif ()
+
     set(INSTALL_SUBDIR OpenMW)
 
     install(DIRECTORY "${APP_BUNDLE_DIR}" USE_SOURCE_PERMISSIONS DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
@@ -731,8 +748,7 @@ if (APPLE)
     install(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" RENAME "openmw.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/settings-default.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
     install(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/transparency-overrides.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
-    install(FILES "${OpenMW_BINARY_DIR}/opencs.ini" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
+    install(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${INSTALL_SUBDIR}" COMPONENT Runtime)
 
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_PACKAGE_VERSION ${OPENMW_VERSION})
@@ -740,27 +756,35 @@ if (APPLE)
     set(CPACK_PACKAGE_VERSION_MINOR ${OPENMW_VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${OPENMW_VERSION_RELEASE})
 
-    set(OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
-
-    set(OPENCS_BUNDLE_NAME "OpenMW-CS.app")
-    set(OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
-
-    set(ABSOLUTE_PLUGINS "")
-
-    foreach (PLUGIN ${USED_OGRE_PLUGINS})
-        get_filename_component(PLUGIN_ABS ${PLUGIN} REALPATH)
-        set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
-    endforeach ()
+    set(INSTALLED_OPENMW_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}")
+    set(INSTALLED_OPENCS_APP "\${CMAKE_INSTALL_PREFIX}/${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}")
 
     install(CODE "
         set(BU_CHMOD_BUNDLE_ITEMS ON)
+        set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
         include(BundleUtilities)
+        cmake_minimum_required(VERSION 3.1)
     " COMPONENT Runtime)
+
+    set(ABSOLUTE_PLUGINS "")
+    set(USED_OSG_PLUGINS
+                        osgdb_dds
+                        osgdb_jpeg
+                        osgdb_png
+                        osgdb_tga
+                      )
+
+    foreach (PLUGIN_NAME ${USED_OSG_PLUGINS})
+      set(PLUGIN_ABS "${OSG_PLUGIN_LIB_SEARCH_PATH}/${PLUGIN_NAME}.so")
+      set(ABSOLUTE_PLUGINS ${PLUGIN_ABS} ${ABSOLUTE_PLUGINS})
+    endforeach ()
+
+    get_filename_component(OSG_PLUGIN_PREFIX_DIR "${OSG_PLUGIN_LIB_SEARCH_PATH}" NAME)
 
     # installs used plugins in bundle at given path (bundle_path must be relative to ${CMAKE_INSTALL_PREFIX})
     # and returns list of install paths for all installed plugins
     function (install_plugins_for_bundle bundle_path plugins_var)
-        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/Frameworks")
+        set(RELATIVE_PLUGIN_INSTALL_BASE "${bundle_path}/Contents/PlugIns/${OSG_PLUGIN_PREFIX_DIR}")
 
         set(PLUGINS "")
         set(PLUGIN_INSTALL_BASE "\${CMAKE_INSTALL_PREFIX}/${RELATIVE_PLUGIN_INSTALL_BASE}")
@@ -769,11 +793,11 @@ if (APPLE)
             get_filename_component(PLUGIN_RELATIVE ${PLUGIN} NAME)
             get_filename_component(PLUGIN_RELATIVE_WE ${PLUGIN} NAME_WE)
 
-            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}/${PLUGIN_RELATIVE_WE}")
+            set(PLUGIN_DYLIB_IN_BUNDLE "${PLUGIN_INSTALL_BASE}/${PLUGIN_RELATIVE}")
             set(PLUGINS ${PLUGINS} "${PLUGIN_DYLIB_IN_BUNDLE}")
 
             install(CODE "
-                copy_resolved_framework_into_bundle(\"${PLUGIN}/${PLUGIN_RELATIVE_WE}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
+                copy_resolved_item_into_bundle(\"${PLUGIN}\" \"${PLUGIN_DYLIB_IN_BUNDLE}\")
             " COMPONENT Runtime)
         endforeach ()
 
@@ -783,53 +807,22 @@ if (APPLE)
     install_plugins_for_bundle("${INSTALL_SUBDIR}/${APP_BUNDLE_NAME}" PLUGINS)
     install_plugins_for_bundle("${INSTALL_SUBDIR}/${OPENCS_BUNDLE_NAME}" OPENCS_PLUGINS)
 
-    #For now, search unresolved dependencies only in default system paths, so if you put unresolveable (i.e. with @executable_path in id name) lib or framework somewhere else, it would fail
-    set(DIRS "")
+    set(PLUGINS ${PLUGINS} "${INSTALLED_OPENMW_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
+    set(OPENCS_PLUGINS ${OPENCS_PLUGINS} "${INSTALLED_OPENCS_APP}/Contents/MacOS/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}")
 
-    # Overriding item resolving during installation, it needed if
-    # some library already has been "fixed up", i.e. its id name contains @executable_path,
-    # but library is not embedded in bundle. For example, it's Ogre.framework from Ogre SDK.
-    # Current implementation of GetPrerequsities/BundleUtilities doesn't handle that case.
-    #
-    # Current limitations:
-    #   1. Handles only frameworks, not simple libs
-    INSTALL(CODE "
-        cmake_policy(SET CMP0009 OLD)
-        set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES})
-        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-        set(CMAKE_SYSTEM_FRAMEWORK_PATH ${CMAKE_SYSTEM_FRAMEWORK_PATH})
-
-        set(OPENMW_RESOLVED_ITEMS \"\")
-
-        function(gp_resolve_item_override context item exepath dirs resolved_item_var resolved_var)
-            if(item MATCHES \"@executable_path\" AND NOT \${\${resolved_var}})
-                if (item MATCHES \"Frameworks\") # if it is a framework
-                    # get last segment of path
-                    get_filename_component(fname \"\${item}\" NAME_WE)
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} \${CMAKE_SYSTEM_FRAMEWORK_PATH})
-                    if (ri)
-                        string(REGEX REPLACE \"^.*/Frameworks/.*\\\\.framework\" \"\" item_part \${item})
-                        set(ri \"\${ri}\${item_part}\")
-                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
-                        set(\${resolved_var} 1 PARENT_SCOPE)
-                    endif()
-                else()
-                    # code path for standard (non-framework) libs (ogre & qt pugins)
-                    get_filename_component(fname \"\${item}\" NAME_WE)
-                    string(REGEX REPLACE \"^lib\" \"\" fname \${fname})
-                    find_library(ri NAMES \${fname} PATHS \${exepath} \${dirs} /usr/lib /usr/local/lib)
-                    if (ri)
-                        set(\${resolved_item_var} \${ri} PARENT_SCOPE)
-                        set(\${resolved_var} 1 PARENT_SCOPE)
-                    endif ()
-                endif()
+    install(CODE "
+        function(gp_item_default_embedded_path_override item  default_embedded_path_var)
+            if (\${item} MATCHES ${OSG_PLUGIN_PREFIX_DIR})
+              set(path \"@executable_path/../PlugIns/${OSG_PLUGIN_PREFIX_DIR}\")
+              set(\${default_embedded_path_var} \"\${path}\" PARENT_SCOPE)
             endif()
-        endfunction(gp_resolve_item_override)
+        endfunction()
 
-        fixup_bundle(\"${OPENMW_APP}\" \"${PLUGINS}\" \"${DIRS}\")
-        fixup_bundle(\"${OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"${DIRS}\")
+        cmake_policy(SET CMP0009 OLD)
+        fixup_bundle(\"${INSTALLED_OPENMW_APP}\" \"${PLUGINS}\" \"\")
+        fixup_bundle(\"${INSTALLED_OPENCS_APP}\" \"${OPENCS_PLUGINS}\" \"\")
         " COMPONENT Runtime)
-        include(CPack)
+    include(CPack)
 endif (APPLE)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'

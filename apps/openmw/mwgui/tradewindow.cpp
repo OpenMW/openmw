@@ -4,7 +4,7 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -15,12 +15,12 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/dialoguemanager.hpp"
 
-#include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "inventorywindow.hpp"
 #include "itemview.hpp"
@@ -195,7 +195,7 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sQuanityMenuMessage02}";
-            dialog->open(object.getClass().getName(object), message, count);
+            dialog->openCountDialog(object.getClass().getName(object), message, count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::sellItem);
             mItemToSell = mSortModel->mapToSource(index);
@@ -283,7 +283,7 @@ namespace MWGui
             return;
         }
 
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         // check if the player can afford this
@@ -368,7 +368,7 @@ namespace MWGui
             else
                 x += abs(int(npcTerm - pcTerm));
 
-            int roll = OEngine::Misc::Rng::rollDice(100) + 1;
+            int roll = Misc::Rng::rollDice(100) + 1;
             if(roll > x || (mCurrentMerchantOffer < 0) != (mCurrentBalance < 0)) //trade refused
             {
                 MWBase::Environment::get().getWindowManager()->
@@ -491,7 +491,7 @@ namespace MWGui
 
     void TradeWindow::updateLabels()
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));

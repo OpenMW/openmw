@@ -5,7 +5,6 @@
 
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
-#include <QLineEdit>
 
 #include "../../model/world/columnbase.hpp"
 #include "../../model/doc/document.hpp"
@@ -17,6 +16,11 @@ namespace CSMWorld
     class TableMimeData;
     class UniversalId;
     class CommandDispatcher;
+}
+
+namespace CSMPrefs
+{
+    class Setting;
 }
 
 namespace CSVWorld
@@ -91,24 +95,6 @@ namespace CSVWorld
 
     };
 
-    class DropLineEdit : public QLineEdit
-    {
-        Q_OBJECT
-
-        public:
-            DropLineEdit(QWidget *parent);
-
-        private:
-            void dragEnterEvent(QDragEnterEvent *event);
-
-            void dragMoveEvent(QDragMoveEvent *event);
-
-            void dropEvent(QDropEvent *event);
-
-        signals:
-            void tableMimeDataDropped(const std::vector<CSMWorld::UniversalId>& data, const CSMDoc::Document* document);
-    };
-
     ///< \brief Use commands instead of manipulating the model directly
     class CommandDelegate : public QStyledItemDelegate
     {
@@ -157,10 +143,9 @@ namespace CSVWorld
 
             virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const;
 
-        public slots:
-
-            virtual void updateUserSetting
-                            (const QString &name, const QStringList &list) {}
+            /// \attention This is not a slot. For ordering reasons this function needs to be
+            /// called manually from the parent object's settingChanged function.
+            virtual void settingChanged (const CSMPrefs::Setting *setting);
     };
 }
 

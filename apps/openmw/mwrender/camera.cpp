@@ -1,9 +1,8 @@
 #include "camera.hpp"
 
-#include <OgreSceneNode.h>
-#include <OgreCamera.h>
-#include <OgreSceneManager.h>
-#include <OgreTagPoint.h>
+#include <osg/Camera>
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -13,12 +12,39 @@
 
 #include "npcanimation.hpp"
 
+namespace
+{
+
+class UpdateRenderCameraCallback : public osg::NodeCallback
+{
+public:
+    UpdateRenderCameraCallback(MWRender::Camera* cam)
+        : mCamera(cam)
+    {
+    }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osg::Camera* cam = static_cast<osg::Camera*>(node);
+
+        // traverse first to update animations, in case the camera is attached to an animated node
+        traverse(node, nv);
+
+        mCamera->updateCamera(cam);
+    }
+
+private:
+    MWRender::Camera* mCamera;
+};
+
+}
+
 namespace MWRender
 {
-    Camera::Camera (Ogre::Camera *camera)
-    : mCamera(camera),
-      mCameraNode(NULL),
-      mCameraPosNode(NULL),
+
+    Camera::Camera (osg::Camera* camera)
+    : mHeightScale(1.f),
+      mCamera(camera),
       mAnimation(NULL),
       mFirstPersonView(true),
       mPreviewMode(false),
@@ -27,10 +53,11 @@ namespace MWRender
       mFurthest(800.f),
       mIsNearest(false),
       mHeight(124.f),
-      mCameraDistance(192.f),
+      mMaxCameraDistance(192.f),
       mDistanceAdjusted(false),
       mVanityToggleQueued(false),
-      mViewModeToggleQueued(false)
+      mViewModeToggleQueued(false),
+      mCameraDistance(0.f)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -41,10 +68,53 @@ namespace MWRender
         mMainCam.pitch = 0.f;
         mMainCam.yaw = 0.f;
         mMainCam.offset = 400.f;
+
+        mUpdateCallback = new UpdateRenderCameraCallback(this);
+        mCamera->addUpdateCallback(mUpdateCallback);
     }
 
     Camera::~Camera()
     {
+        mCamera->removeUpdateCallback(mUpdateCallback);
+    }
+
+    MWWorld::Ptr Camera::getTrackingPtr() const
+    {
+        return mTrackingPtr;
+    }
+
+    osg::Vec3d Camera::getFocalPoint()
+    {
+        const osg::Node* trackNode = mTrackingNode;
+        if (!trackNode)
+            return osg::Vec3d();
+        osg::MatrixList mats = trackNode->getWorldMatrices();
+        if (!mats.size())
+            return osg::Vec3d();
+        const osg::Matrix& worldMat = mats[0];
+
+        osg::Vec3d position = worldMat.getTrans();
+        if (!isFirstPerson())
+            position.z() += mHeight * mHeightScale;
+        return position;
+    }
+
+    void Camera::updateCamera(osg::Camera *cam)
+    {
+        if (mTrackingPtr.isEmpty())
+            return;
+
+        osg::Vec3d position = getFocalPoint();
+
+        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
+
+        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
+        position += offset;
+
+        osg::Vec3d forward = orient * osg::Vec3d(0,1,0);
+        osg::Vec3d up = orient * osg::Vec3d(0,0,1);
+
+        cam->setViewMatrixAsLookAt(position, position + forward, up);
     }
 
     void Camera::reset()
@@ -55,68 +125,20 @@ namespace MWRender
             toggleViewMode();
     }
 
-    void Camera::rotateCamera(const Ogre::Vector3 &rot, bool adjust)
+    void Camera::rotateCamera(float pitch, float yaw, bool adjust)
     {
-        if (adjust) {
-            setYaw(getYaw() + rot.z);
-            setPitch(getPitch() + rot.x);
-        } else {
-            setYaw(rot.z);
-            setPitch(rot.x);
+        if (adjust)
+        {
+            pitch += getPitch();
+            yaw += getYaw();
         }
-
-        Ogre::Quaternion xr(Ogre::Radian(getPitch() + Ogre::Math::HALF_PI), Ogre::Vector3::UNIT_X);
-        Ogre::Quaternion orient = xr;
-        if (mVanity.enabled || mPreviewMode) {
-            Ogre::Quaternion zr(Ogre::Radian(getYaw()), Ogre::Vector3::UNIT_Z);
-            orient = zr * xr;
-        }
-
-        if (isFirstPerson())
-            mCamera->getParentNode()->setOrientation(orient);
-        else
-            mCameraNode->setOrientation(orient);
+        setYaw(yaw);
+        setPitch(pitch);
     }
 
-    const std::string &Camera::getHandle() const
-    {
-        return mTrackingPtr.getRefData().getHandle();
-    }
-
-    Ogre::SceneNode* Camera::attachTo(const MWWorld::Ptr &ptr)
+    void Camera::attachTo(const MWWorld::Ptr &ptr)
     {
         mTrackingPtr = ptr;
-        Ogre::SceneNode *node = mTrackingPtr.getRefData().getBaseNode()->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, mHeight));
-        node->setInheritScale(false);
-        Ogre::SceneNode *posNode = node->createChildSceneNode();
-        posNode->setInheritScale(false);
-        if(mCameraNode)
-        {
-            node->setOrientation(mCameraNode->getOrientation());
-            posNode->setPosition(mCameraPosNode->getPosition());
-            mCameraNode->getCreator()->destroySceneNode(mCameraNode);
-            mCameraNode->getCreator()->destroySceneNode(mCameraPosNode);
-        }
-        mCameraNode = node;
-        mCameraPosNode = posNode;
-
-        if (!isFirstPerson())
-        {
-            mCamera->detachFromParent();
-            mCameraPosNode->attachObject(mCamera);
-        }
-
-        return mCameraPosNode;
-    }
-
-    void Camera::setPosition(const Ogre::Vector3& position)
-    {
-        mCameraPosNode->setPosition(position);
-    }
-
-    void Camera::setPosition(float x, float y, float z)
-    {
-        setPosition(Ogre::Vector3(x,y,z));
     }
 
     void Camera::update(float duration, bool paused)
@@ -147,9 +169,7 @@ namespace MWRender
 
         if(mVanity.enabled)
         {
-            Ogre::Vector3 rot(0.f, 0.f, 0.f);
-            rot.z = Ogre::Degree(3.f * duration).valueRadians();
-            rotateCamera(rot, true);
+            rotateCamera(0.f, osg::DegreesToRadians(3.f * duration), true);
         }
     }
 
@@ -169,9 +189,9 @@ namespace MWRender
         processViewChange();
 
         if (mFirstPersonView) {
-            setPosition(0.f, 0.f, 0.f);
+            mCameraDistance = 0.f;
         } else {
-            setPosition(0.f, 0.f, mCameraDistance);
+            mCameraDistance = mMaxCameraDistance;
         }
     }
     
@@ -202,18 +222,15 @@ namespace MWRender
         processViewChange();
 
         float offset = mPreviewCam.offset;
-        Ogre::Vector3 rot(0.f, 0.f, 0.f);
+
         if (mVanity.enabled) {
-            rot.x = Ogre::Degree(-30.f).valueRadians();
-            mMainCam.offset = mCameraPosNode->getPosition().z;
+            setPitch(osg::DegreesToRadians(-30.f));
+            mMainCam.offset = mCameraDistance;
         } else {
-            rot.x = getPitch();
             offset = mMainCam.offset;
         }
-        rot.z = getYaw();
 
-        setPosition(0.f, 0.f, offset);
-        rotateCamera(rot, false);
+        mCameraDistance = offset;
 
         return true;
     }
@@ -229,7 +246,7 @@ namespace MWRender
         mPreviewMode = enable;
         processViewChange();
 
-        float offset = mCameraPosNode->getPosition().z;
+        float offset = mCameraDistance;
         if (mPreviewMode) {
             mMainCam.offset = offset;
             offset = mPreviewCam.offset;
@@ -238,13 +255,12 @@ namespace MWRender
             offset = mMainCam.offset;
         }
 
-        setPosition(0.f, 0.f, offset);
+        mCameraDistance = offset;
     }
 
     void Camera::setSneakOffset(float offset)
     {
-        if(mAnimation)
-            mAnimation->addFirstPersonOffset(Ogre::Vector3(0.f, 0.f, -offset));
+        mAnimation->setFirstPersonOffset(osg::Vec3f(0,0,-offset));
     }
 
     float Camera::getYaw()
@@ -256,10 +272,10 @@ namespace MWRender
 
     void Camera::setYaw(float angle)
     {
-        if (angle > Ogre::Math::PI) {
-            angle -= Ogre::Math::TWO_PI;
-        } else if (angle < -Ogre::Math::PI) {
-            angle += Ogre::Math::TWO_PI;
+        if (angle > osg::PI) {
+            angle -= osg::PI*2;
+        } else if (angle < -osg::PI) {
+            angle += osg::PI*2;
         }
         if (mVanity.enabled || mPreviewMode) {
             mPreviewCam.yaw = angle;
@@ -279,7 +295,7 @@ namespace MWRender
     void Camera::setPitch(float angle)
     {
         const float epsilon = 0.000001f;
-        float limit = Ogre::Math::HALF_PI - epsilon;
+        float limit = osg::PI_2 - epsilon;
         if(mPreviewMode)
             limit /= 2;
 
@@ -297,7 +313,7 @@ namespace MWRender
 
     float Camera::getCameraDistance() const
     {
-        return mCameraPosNode->getPosition().z;
+        return mCameraDistance;
     }
 
     void Camera::setCameraDistance(float dist, bool adjust, bool override)
@@ -307,25 +323,24 @@ namespace MWRender
 
         mIsNearest = false;
 
-        Ogre::Vector3 v(0.f, 0.f, dist);
-        if (adjust) {
-            v += mCameraPosNode->getPosition();
-        }
-        if (v.z >= mFurthest) {
-            v.z = mFurthest;
-        } else if (!override && v.z < 10.f) {
-            v.z = 10.f;
-        } else if (override && v.z <= mNearest) {
-            v.z = mNearest;
+        if (adjust)
+            dist += mCameraDistance;
+
+        if (dist >= mFurthest) {
+            dist = mFurthest;
+        } else if (!override && dist < 10.f) {
+            dist = 10.f;
+        } else if (override && dist <= mNearest) {
+            dist = mNearest;
             mIsNearest = true;
         }
-        setPosition(v);
+        mCameraDistance = dist;
 
         if (override) {
             if (mVanity.enabled || mPreviewMode) {
-                mPreviewCam.offset = v.z;
+                mPreviewCam.offset = mCameraDistance;
             } else if (!mFirstPersonView) {
-                mCameraDistance = v.z;
+                mMaxCameraDistance = mCameraDistance;
             }
         } else {
             mDistanceAdjusted = true;
@@ -336,9 +351,9 @@ namespace MWRender
     {
         if (mDistanceAdjusted) {
             if (mVanity.enabled || mPreviewMode) {
-                setPosition(0, 0, mPreviewCam.offset);
+                mCameraDistance = mPreviewCam.offset;
             } else if (!mFirstPersonView) {
-                setPosition(0, 0, mCameraDistance);
+                mCameraDistance = mMaxCameraDistance;
             }
         }
         mDistanceAdjusted = false;
@@ -346,13 +361,6 @@ namespace MWRender
 
     void Camera::setAnimation(NpcAnimation *anim)
     {
-        // If we're switching to a new NpcAnimation, ensure the old one is
-        // using a normal view mode
-        if(mAnimation && mAnimation != anim)
-        {
-            mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            mAnimation->detachObjectFromBone(mCamera);
-        }
         mAnimation = anim;
 
         processViewChange();
@@ -360,29 +368,35 @@ namespace MWRender
 
     void Camera::processViewChange()
     {
-        mAnimation->detachObjectFromBone(mCamera);
-        mCamera->detachFromParent();
-
         if(isFirstPerson())
         {
             mAnimation->setViewMode(NpcAnimation::VM_FirstPerson);
-            Ogre::TagPoint *tag = mAnimation->attachObjectToBone("Head", mCamera);
-            tag->setInheritOrientation(false);
+            mTrackingNode = mAnimation->getNode("Camera");
+            if (!mTrackingNode)
+                mTrackingNode = mAnimation->getNode("Head");
+            mHeightScale = 1.f;
         }
         else
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            mCameraPosNode->attachObject(mCamera);
+            SceneUtil::PositionAttitudeTransform* transform = mTrackingPtr.getRefData().getBaseNode();
+            mTrackingNode = transform;
+            if (transform)
+                mHeightScale = transform->getScale().z();
+            else
+                mHeightScale = 1.f;
         }
-        rotateCamera(Ogre::Vector3(getPitch(), 0.f, getYaw()), false);
+        rotateCamera(getPitch(), getYaw(), false);
     }
 
-    void Camera::getPosition(Ogre::Vector3 &focal, Ogre::Vector3 &camera)
+    void Camera::getPosition(osg::Vec3f &focal, osg::Vec3f &camera)
     {
-        mCamera->getParentSceneNode()->needUpdate(true);
+        focal = getFocalPoint();
 
-        camera = mCamera->getRealPosition();
-        focal = mCameraNode->_getDerivedPosition();
+        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
+
+        osg::Vec3d offset = orient * osg::Vec3d(0, -mCameraDistance, 0);
+        camera = focal + offset;
     }
 
     void Camera::togglePlayerLooking(bool enable)

@@ -10,6 +10,8 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
+
 #include "../mwworld/actiontake.hpp"
 
 #include "formatting.hpp"
@@ -48,7 +50,7 @@ namespace MWGui
         center();
     }
 
-    void ScrollWindow::open (MWWorld::Ptr scroll, bool showTakeButton)
+    void ScrollWindow::openScroll (MWWorld::Ptr scroll, bool showTakeButton)
     {
         // no 3d sounds because the object could be in a container.
         MWBase::Environment::get().getSoundManager()->playSound ("scroll", 1.0, 1.0);
@@ -103,7 +105,7 @@ namespace MWGui
         MWBase::Environment::get().getSoundManager()->playSound("Item Book Up", 1.0, 1.0);
 
         MWWorld::ActionTake take(mScroll);
-        take.execute (MWBase::Environment::get().getWorld()->getPlayerPtr());
+        take.execute (MWMechanics::getPlayer());
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }

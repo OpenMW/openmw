@@ -1,25 +1,18 @@
 #include "mainmenu.hpp"
 
-#include <OgreResourceGroupManager.h>
-
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_RenderManager.h>
 
-#include <components/version/version.hpp>
-
 #include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwbase/journal.hpp"
-#include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/statemanager.hpp"
-
-#include "../mwstate/character.hpp"
 
 #include "savegamedialog.hpp"
 #include "confirmationdialog.hpp"
@@ -29,31 +22,19 @@
 namespace MWGui
 {
 
-    MainMenu::MainMenu(int w, int h)
-        : OEngine::GUI::Layout("openmw_mainmenu.layout")
-        , mWidth (w), mHeight (h), mButtonBox(0)
+    MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
+        : Layout("openmw_mainmenu.layout")
+        , mWidth (w), mHeight (h)
+        , mVFS(vfs), mButtonBox(0)
         , mBackground(NULL)
         , mVideoBackground(NULL)
         , mVideo(NULL)
         , mSaveGameDialog(NULL)
     {
         getWidget(mVersionText, "VersionText");
-        std::stringstream sstream;
-        sstream << "OpenMW Version: " << OPENMW_VERSION;
+        mVersionText->setCaption(versionDescription);
 
-        // adding info about git hash if available
-        std::string rev = OPENMW_VERSION_COMMITHASH;
-        std::string tag = OPENMW_VERSION_TAGHASH;
-        if (!rev.empty() && !tag.empty())
-        {
-                rev = rev.substr(0,10);
-                sstream << "\nRevision: " <<  rev;
-        }
-
-        std::string output = sstream.str();
-        mVersionText->setCaption(output);
-
-        mHasAnimatedMenu = (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup("video\\menu_background.bik"));
+        mHasAnimatedMenu = mVFS->exists("video/menu_background.bik");
 
         updateMenu();
     }
@@ -80,7 +61,7 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu) &&
             MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame);
 
-        OEngine::GUI::Layout::setVisible (visible);
+        Layout::setVisible (visible);
     }
 
     void MainMenu::onNewGameConfirmed()
@@ -112,7 +93,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sMessage2}");
+                dialog->askForConfirmation("#{sMessage2}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onExitConfirmed);
                 dialog->eventCancelClicked.clear();
@@ -125,7 +106,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->open("#{sNotifyMessage54}");
+                dialog->askForConfirmation("#{sNotifyMessage54}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onNewGameConfirmed);
                 dialog->eventCancelClicked.clear();
@@ -170,10 +151,11 @@ namespace MWGui
                 // Use black background to correct aspect ratio
                 mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Default, "Menu");
-                mVideoBackground->setImageTexture("black.png");
+                mVideoBackground->setImageTexture("black");
 
                 mVideo = mVideoBackground->createWidget<VideoWidget>("ImageBox", 0,0,1,1,
                     MyGUI::Align::Stretch, "Menu");
+                mVideo->setVFS(mVFS);
 
                 mVideo->playVideo("video\\menu_background.bik");
             }

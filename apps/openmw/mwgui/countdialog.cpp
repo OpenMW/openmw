@@ -29,7 +29,7 @@ namespace MWGui
         mItemEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &CountDialog::onEnterKeyPressed);
     }
 
-    void CountDialog::open(const std::string& item, const std::string& message, const int maxCount)
+    void CountDialog::openCountDialog(const std::string& item, const std::string& message, const int maxCount)
     {
         setVisible(true);
 

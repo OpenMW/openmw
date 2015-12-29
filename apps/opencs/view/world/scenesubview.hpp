@@ -27,6 +27,7 @@ namespace CSVRender
 namespace CSVWidget
 {
     class SceneToolbar;
+    class SceneToolMode;
 }
 
 namespace CSVWorld
@@ -51,8 +52,6 @@ namespace CSVWorld
             SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
             virtual void setEditLock (bool locked);
-
-            virtual void updateEditorSetting (const QString& key, const QString& value);
 
             virtual void setStatusBar (bool show);
 
@@ -83,14 +82,6 @@ namespace CSVWorld
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
-
-        public slots:
-
-            void updateUserSetting (const QString &, const QStringList &);
-
-        signals:
-
-            void updateSceneUserSetting (const QString &, const QStringList &);
     };
 }
 

@@ -3,16 +3,24 @@ OpenMW
 
 [![Build Status](https://img.shields.io/travis/OpenMW/openmw.svg)](https://travis-ci.org/OpenMW/openmw) [![Coverity Scan Build Status](https://scan.coverity.com/projects/3740/badge.svg)](https://scan.coverity.com/projects/3740)
 
-OpenMW is an attempt at recreating the engine for the popular role-playing game
-Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
+OpenMW is a recreation of the engine for the popular role-playing game Morrowind by Bethesda Softworks. You need to own and install the original game for OpenMW to work.
 
-* Version: 0.36.0
+OpenMW also comes with OpenMW-CS, a replacement for Morrowind's TES Construction Set.
+
+* Version: 0.37.0
 * License: GPL (see docs/license/GPL3.txt for more information)
 * Website: http://www.openmw.org
 * IRC: #openmw on irc.freenode.net
 
 Font Licenses:
 * DejaVuLGCSansMono.ttf: custom (see docs/license/DejaVu Font License.txt for more information)
+
+Current Status
+--------------
+
+The main quests in Morrowind, Tribunal and Bloodmoon are all completable. Some issues with side quests are to be expected (but rare). Check the [bug tracker](https://bugs.openmw.org/versions/21) for a list of issues we need to resolve before the "1.0" release. Even before the "1.0" release however, OpenMW boasts some new [features](https://wiki.openmw.org/index.php?title=Features), such as improved graphics and user interfaces. 
+
+Pre-existing modifications created for the original Morrowind engine can be hit-and-miss. The OpenMW script compiler performs more thorough error-checking than Morrowind does, meaning that a mod created for Morrowind may not necessarily run in OpenMW. Some mods also rely on quirky behaviour or engine bugs in order to work. We are considering such compatibility issues on a case-by-case basis - in some cases adding a workaround to OpenMW may be feasible, in other cases fixing the mod will be the only option. If you know of any mods that work or don't work, feel free to add them to the [Mod status](https://wiki.openmw.org/index.php?title=Mod_status) wiki page.
 
 Getting Started
 ---------------

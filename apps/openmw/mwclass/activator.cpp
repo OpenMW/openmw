@@ -1,4 +1,3 @@
-
 #include "activator.hpp"
 
 #include <components/esm/loadacti.hpp>
@@ -11,12 +10,13 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/physicssystem.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/nullaction.hpp"
 
-#include "../mwrender/actors.hpp"
+#include "../mwphysics/physicssystem.hpp"
+
+#include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -26,31 +26,24 @@
 
 namespace MWClass
 {
-    std::string Activator::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Activator>()->mBase->mId;
-    }
 
     void Activator::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
-            MWRender::Actors& actors = renderingInterface.getActors();
-            actors.insertActivator(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model, true);
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWWorld::PhysicsSystem& physics) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
             physics.addObject(ptr, model);
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Activator::getModel(const MWWorld::Ptr &ptr) const
+    std::string Activator::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -59,17 +52,16 @@ namespace MWClass
         return "";
     }
 
-    std::string Activator::getName (const MWWorld::Ptr& ptr) const
+    std::string Activator::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return ref->mBase->mName;
     }
 
-    std::string Activator::getScript (const MWWorld::Ptr& ptr) const
+    std::string Activator::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
+        const MWWorld::LiveCellRef<ESM::Activator> *ref =
             ptr.get<ESM::Activator>();
 
         return ref->mBase->mScript;
@@ -82,21 +74,19 @@ namespace MWClass
         registerClass (typeid (ESM::Activator).name(), instance);
     }
 
-    bool Activator::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Activator::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -125,12 +115,10 @@ namespace MWClass
     }
 
 
-    MWWorld::Ptr
-    Activator::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Activator::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Activator> *ref =
-            ptr.get<ESM::Activator>();
+        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Activator>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 }

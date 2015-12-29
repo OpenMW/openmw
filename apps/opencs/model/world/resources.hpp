@@ -7,6 +7,11 @@
 
 #include "universalid.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace CSMWorld
 {
     class Resources
@@ -19,7 +24,7 @@ namespace CSMWorld
         public:
 
             /// \param type Type of resources in this table.
-            Resources (const std::string& baseDirectory, UniversalId::Type type,
+            Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
                 const char * const *extensions = 0);
 
             int getSize() const;

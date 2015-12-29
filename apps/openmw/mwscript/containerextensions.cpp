@@ -1,4 +1,3 @@
-
 #include "containerextensions.hpp"
 
 #include <stdexcept>
@@ -24,8 +23,9 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/inventorystore.hpp"
+
+#include "../mwmechanics/actorutil.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -55,6 +55,12 @@ namespace MWScript
                     // no-op
                     if (count == 0)
                         return;
+
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
 
                     MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
 
@@ -91,6 +97,12 @@ namespace MWScript
                     std::string item = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+                    
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     runtime.push (store.count(item));
@@ -119,6 +131,12 @@ namespace MWScript
                     if (count == 0)
                         return;
 
+                    if(::Misc::StringUtils::ciEqual(item, "gold_005")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_010")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_025")
+                            || ::Misc::StringUtils::ciEqual(item, "gold_100"))
+                        item = "gold_001";
+                        
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
@@ -130,7 +148,7 @@ namespace MWScript
 
                     // Spawn a messagebox (only for items removed from player's inventory)
                     if ((numRemoved > 0)
-                        && (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr()))
+                        && (ptr == MWMechanics::getPlayer()))
                     {
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
@@ -172,11 +190,13 @@ namespace MWScript
                     if (it == invStore.end())
                         throw std::runtime_error("Item to equip not found");
 
-                    MWWorld::ActionEquip action (*it);
-                    action.execute(ptr);
-
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr() && !ptr.getClass().getScript(ptr).empty())
-                        ptr.getRefData().getLocals().setVarByInt(ptr.getClass().getScript(ptr), "onpcequip", 1);
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        MWBase::Environment::get().getWindowManager()->useItem(*it);
+                    else
+                    {
+                        boost::shared_ptr<MWWorld::Action> action = it->getClass().use(*it);
+                        action->execute(ptr);
+                    }
                 }
         };
 

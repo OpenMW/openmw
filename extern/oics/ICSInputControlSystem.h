@@ -32,8 +32,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "ICSControl.h"
 #include "ICSChannel.h"
 
-#include "../sdl4ogre/events.h"
-
 #include "boost/lexical_cast.hpp"
 
 #define ICS_LOG(text) if(mLog) mLog->logMessage( ("ICS: " + std::string(text)).c_str() );
@@ -51,11 +49,8 @@ namespace ICS
 		virtual void logMessage(const char* text) = 0;
 	};
 
-	class DllExport InputControlSystem :
-		public SFO::MouseListener,
-		public SFO::KeyListener,
-        public SFO::ControllerListener
-	{
+    class DllExport InputControlSystem
+    {
 
 	public:
 
@@ -107,7 +102,7 @@ namespace ICS
 		JoystickInstanceMap& getJoystickInstanceMap(){ return mJoystickInstanceMap; };
 
 		// MouseListener
-        void mouseMoved(const SFO::MouseMotionEvent &evt);
+        void mouseMoved(const SDL_MouseMotionEvent &evt);
         void mousePressed(const SDL_MouseButtonEvent &evt, Uint8);
         void mouseReleased(const SDL_MouseButtonEvent &evt, Uint8);
 

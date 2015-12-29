@@ -1,4 +1,3 @@
-
 #include "inventorystate.hpp"
 
 #include "esmreader.hpp"
@@ -32,13 +31,20 @@ void ESM::InventoryState::load (ESMReader &esm)
 
         ++index;
     }
-
+    //Next item is Levelled item
     while (esm.isNextSub("LEVM"))
     {
+        //Get its name
         std::string id = esm.getHString();
         int count;
+        std::string parentGroup = "";
+        //Then get its count
         esm.getHNT (count, "COUN");
-        mLevelledItemMap[id] = count;
+        //Old save formats don't have information about parent group; check for that
+        if(esm.isNextSub("LGRP"))
+            //Newest saves contain parent group
+            parentGroup = esm.getHString();
+        mLevelledItemMap[std::make_pair(id, parentGroup)] = count;
     }
 
     while (esm.isNextSub("MAGI"))
@@ -80,10 +86,11 @@ void ESM::InventoryState::save (ESMWriter &esm) const
         iter->save (esm, true);
     }
 
-    for (std::map<std::string, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
+    for (std::map<std::pair<std::string, std::string>, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
     {
-        esm.writeHNString ("LEVM", it->first);
+        esm.writeHNString ("LEVM", it->first.first);
         esm.writeHNT ("COUN", it->second);
+        esm.writeHNString("LGRP", it->first.second);
     }
 
     for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin(); it != mPermanentMagicEffectMagnitudes.end(); ++it)

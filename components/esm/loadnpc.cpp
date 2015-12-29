@@ -8,24 +8,30 @@ namespace ESM
 {
     unsigned int NPC::sRecordId = REC_NPC_;
 
-    void NPC::load(ESMReader &esm)
+    void NPC::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mPersistent = (esm.getRecordFlags() & 0x0400) != 0;
 
         mSpells.mList.clear();
         mInventory.mList.clear();
         mTransport.mList.clear();
         mAiPackage.mList.clear();
+        mHasAI = false;
 
+        bool hasName = false;
         bool hasNpdt = false;
         bool hasFlags = false;
-        mHasAI = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -92,17 +98,33 @@ namespace ESM
                 case AI_CNDT:
                     mAiPackage.add(esm);
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasNpdt)
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasNpdt && !isDeleted)
             esm.fail("Missing NPDT subrecord");
-        if (!hasFlags)
+        if (!hasFlags && !isDeleted)
             esm.fail("Missing FLAG subrecord");
     }
-    void NPC::save(ESMWriter &esm) const
+    void NPC::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNOCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNCString("RNAM", mRace);
@@ -121,7 +143,12 @@ namespace ESM
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mHasAI) {
+        if (mAiData.mHello != 0
+            || mAiData.mFight != 0
+            || mAiData.mFlee != 0
+            || mAiData.mAlarm != 0
+            || mAiData.mServices != 0)
+        {
             esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         }
 

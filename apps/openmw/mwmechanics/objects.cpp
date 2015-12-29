@@ -1,6 +1,6 @@
 #include "objects.hpp"
 
-#include <OgreVector3.h>
+#include <iostream>
 
 #include "movement.hpp"
 
@@ -79,11 +79,18 @@ void Objects::update(float duration, bool paused)
     }
 }
 
-void Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
+bool Objects::playAnimationGroup(const MWWorld::Ptr& ptr, const std::string& groupName, int mode, int number)
 {
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
-        iter->second->playGroup(groupName, mode, number);
+    {
+        return iter->second->playGroup(groupName, mode, number);
+    }
+    else
+    {
+        std::cerr<< "Error in Objects::playAnimationGroup:  Unable to find " << ptr.getCellRef().getRefId() << std::endl;
+        return false;
+    }
 }
 void Objects::skipAnimation(const MWWorld::Ptr& ptr)
 {
@@ -92,11 +99,11 @@ void Objects::skipAnimation(const MWWorld::Ptr& ptr)
         iter->second->skipAnim();
 }
 
-void Objects::getObjectsInRange(const Ogre::Vector3& position, float radius, std::vector<MWWorld::Ptr>& out)
+void Objects::getObjectsInRange(const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out)
 {
     for (PtrControllerMap::iterator iter = mObjects.begin(); iter != mObjects.end(); ++iter)
     {
-        if (Ogre::Vector3(iter->first.getRefData().getPosition().pos).squaredDistance(position) <= radius*radius)
+        if ((position - iter->first.getRefData().getPosition().asVec3()).length2() <= radius*radius)
             out.push_back(iter->first);
     }
 }

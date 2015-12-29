@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include <components/esm/creaturestats.hpp>
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -16,11 +18,11 @@ namespace MWMechanics
 
     CreatureStats::CreatureStats()
         : mDrawState (DrawState_Nothing), mDead (false), mDied (false), mMurdered(false), mFriendlyHits (0),
-          mTalkedTo (false), mAlarmed (false), mAttacked (false), mAttackingOrSpell(false),
+          mTalkedTo (false), mAlarmed (false), mAttacked (false),
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
-          mHitRecovery(false), mBlock(false), mMovementFlags(0), mAttackStrength(0.f),
+          mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1),
-          mDeathAnimation(0), mIsWerewolf(false), mLevel (0)
+          mDeathAnimation(0), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
@@ -46,8 +48,10 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        return gmst.find ("fFatigueBase")->getFloat()
-            - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
+        static const float fFatigueBase = gmst.find("fFatigueBase")->getFloat();
+        static const float fFatigueMult = gmst.find("fFatigueMult")->getFloat();
+
+        return fFatigueBase - fFatigueMult * (1-normalised);
     }
 
     const AttributeValue &CreatureStats::getAttribute(int index) const
@@ -55,7 +59,7 @@ namespace MWMechanics
         if (index < 0 || index > 7) {
             throw std::runtime_error("attribute index is out of range");
         }
-        return (!mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index]);
+        return mAttributes[index];
     }
 
     const DynamicStat<float> &CreatureStats::getHealth() const
@@ -86,11 +90,6 @@ namespace MWMechanics
     const MagicEffects &CreatureStats::getMagicEffects() const
     {
         return mMagicEffects;
-    }
-
-    bool CreatureStats::getAttackingOrSpell() const
-    {
-        return mAttackingOrSpell;
     }
 
     int CreatureStats::getLevel() const
@@ -139,14 +138,11 @@ namespace MWMechanics
             throw std::runtime_error("attribute index is out of range");
         }
 
-        const AttributeValue& currentValue = !mIsWerewolf ? mAttributes[index] : mWerewolfAttributes[index];
+        const AttributeValue& currentValue = mAttributes[index];
 
         if (value != currentValue)
         {
-            if(!mIsWerewolf)
-                mAttributes[index] = value;
-            else
-                mWerewolfAttributes[index] = value;
+            mAttributes[index] = value;
 
             if (index == ESM::Attribute::Intelligence)
                 mRecalcMagicka = true;
@@ -215,11 +211,6 @@ namespace MWMechanics
         mMagicEffects.setModifiers(effects);
     }
 
-    void CreatureStats::setAttackingOrSpell(bool attackingOrSpell)
-    {
-        mAttackingOrSpell = attackingOrSpell;
-    }
-
     void CreatureStats::setAiSetting (AiSetting index, Stat<int> value)
     {
         mAiSettings[index] = value;
@@ -230,6 +221,11 @@ namespace MWMechanics
         Stat<int> stat = getAiSetting(index);
         stat.setBase(base);
         setAiSetting(index, stat);
+    }
+
+    bool CreatureStats::isParalyzed() const
+    {
+        return mMagicEffects.get(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
     bool CreatureStats::isDead() const
@@ -271,9 +267,11 @@ namespace MWMechanics
     {
         if (mDead)
         {
+            if (mDynamic[0].getModified() < 1)
+                mDynamic[0].setModified(1, 0);
+
             mDynamic[0].setCurrent(mDynamic[0].getModified());
-            if (mDynamic[0].getCurrent()>=1)
-                mDead = false;
+            mDead = false;
         }
     }
 
@@ -469,16 +467,6 @@ namespace MWMechanics
         mDrawState = state;
     }
 
-    float CreatureStats::getAttackStrength() const
-    {
-        return mAttackStrength;
-    }
-
-    void CreatureStats::setAttackStrength(float value)
-    {
-        mAttackStrength = value;
-    }
-
     void CreatureStats::writeState (ESM::CreatureStats& state) const
     {
         for (int i=0; i<ESM::Attribute::Length; ++i)
@@ -500,7 +488,6 @@ namespace MWMechanics
         state.mTalkedTo = mTalkedTo;
         state.mAlarmed = mAlarmed;
         state.mAttacked = mAttacked;
-        state.mAttackingOrSpell = mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         state.mKnockdown = mKnockdown;
         state.mKnockdownOneFrame = mKnockdownOneFrame;
@@ -508,7 +495,6 @@ namespace MWMechanics
         state.mHitRecovery = mHitRecovery;
         state.mBlock = mBlock;
         state.mMovementFlags = mMovementFlags;
-        state.mAttackStrength = mAttackStrength;
         state.mFallHeight = mFallHeight; // TODO: vertical velocity (move from PhysicActor to CreatureStats?)
         state.mLastHitObject = mLastHitObject;
         state.mLastHitAttemptObject = mLastHitAttemptObject;
@@ -548,7 +534,6 @@ namespace MWMechanics
         mTalkedTo = state.mTalkedTo;
         mAlarmed = state.mAlarmed;
         mAttacked = state.mAttacked;
-        mAttackingOrSpell = state.mAttackingOrSpell;
         // TODO: rewrite. does this really need 3 separate bools?
         mKnockdown = state.mKnockdown;
         mKnockdownOneFrame = state.mKnockdownOneFrame;
@@ -556,7 +541,6 @@ namespace MWMechanics
         mHitRecovery = state.mHitRecovery;
         mBlock = state.mBlock;
         mMovementFlags = state.mMovementFlags;
-        mAttackStrength = state.mAttackStrength;
         mFallHeight = state.mFallHeight;
         mLastHitObject = state.mLastHitObject;
         mLastHitAttemptObject = state.mLastHitAttemptObject;

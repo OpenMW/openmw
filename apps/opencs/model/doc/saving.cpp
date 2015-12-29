@@ -1,4 +1,3 @@
-
 #include "saving.hpp"
 
 #include "../world/data.hpp"
@@ -81,21 +80,24 @@ CSMDoc::Saving::Saving (Document& document, const boost::filesystem::path& proje
     appendStage (new WriteCollectionStage<CSMWorld::IdCollection<ESM::StartScript> >
         (mDocument.getData().getStartScripts(), mState));
 
-    appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
-
-    appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
-
     appendStage (new WriteRefIdCollectionStage (mDocument, mState));
 
     appendStage (new CollectionReferencesStage (mDocument, mState));
 
     appendStage (new WriteCellCollectionStage (mDocument, mState));
 
+    // Dialogue can reference objects and cells so must be written after these records for vanilla-compatible files
+
+    appendStage (new WriteDialogueCollectionStage (mDocument, mState, false));
+
+    appendStage (new WriteDialogueCollectionStage (mDocument, mState, true));
+
     appendStage (new WritePathgridCollectionStage (mDocument, mState));
 
-    appendStage (new WriteLandCollectionStage (mDocument, mState));
-
     appendStage (new WriteLandTextureCollectionStage (mDocument, mState));
+
+    // references Land Textures
+    appendStage (new WriteLandCollectionStage (mDocument, mState));
 
     // close file and clean up
     appendStage (new CloseSaveStage (mState));

@@ -1,53 +1,63 @@
-
 #include "object.hpp"
 
-#include <OgreSceneManager.h>
-#include <OgreSceneNode.h>
-#include <OgreEntity.h>
+#include <stdexcept>
+#include <iostream>
+
+#include <osg/Group>
+#include <osg/PositionAttitudeTransform>
+
+#include <osg/ShapeDrawable>
+#include <osg/Shape>
+#include <osg/Geode>
+
+#include <osgFX/Scribe>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/ref.hpp"
 #include "../../model/world/refidcollection.hpp"
 
-#include "../world/physicssystem.hpp"
+#include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/clone.hpp>
 
 #include "elements.hpp"
 
-void CSVRender::Object::clearSceneNode (Ogre::SceneNode *node)
+namespace
 {
-    for (Ogre::SceneNode::ObjectIterator iter = node->getAttachedObjectIterator();
-        iter.hasMoreElements(); )
+
+    osg::ref_ptr<osg::Geode> createErrorCube()
     {
-        Ogre::MovableObject* object = dynamic_cast<Ogre::MovableObject*> (iter.getNext());
-        node->getCreator()->destroyMovableObject (object);
+        osg::ref_ptr<osg::Box> shape(new osg::Box(osg::Vec3f(0,0,0), 50.f));
+        osg::ref_ptr<osg::ShapeDrawable> shapedrawable(new osg::ShapeDrawable);
+        shapedrawable->setShape(shape);
+
+        osg::ref_ptr<osg::Geode> geode (new osg::Geode);
+        geode->addDrawable(shapedrawable);
+        return geode;
     }
 
-    for (Ogre::SceneNode::ChildNodeIterator iter = node->getChildIterator();
-        iter.hasMoreElements(); )
-    {
-        Ogre::SceneNode* childNode = dynamic_cast<Ogre::SceneNode*> (iter.getNext());
-        clearSceneNode (childNode);
-        node->getCreator()->destroySceneNode (childNode);
-   }
 }
+
+
+CSVRender::ObjectTag::ObjectTag (Object* object)
+: TagBase (Element_Reference), mObject (object)
+{}
+
+QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
+{
+    return QString::fromUtf8 (mObject->getReferenceableId().c_str());
+}
+
 
 void CSVRender::Object::clear()
 {
-    mObject.setNull();
-
-    if (mBase)
-        clearSceneNode (mBase);
 }
 
 void CSVRender::Object::update()
 {
-    if(!mObject.isNull())
-        mPhysics->removePhysicsObject(mBase->getName());
-
     clear();
 
     std::string model;
-    int error = 0; // 1 referemceanöe does not exist, 2 referenceable does not specify a mesh
+    int error = 0; // 1 referenceable does not exist, 2 referenceable does not specify a mesh
 
     const CSMWorld::RefIdCollection& referenceables = mData.getReferenceables();
 
@@ -67,39 +77,29 @@ void CSVRender::Object::update()
             error = 2;
     }
 
+    mBaseNode->removeChildren(0, mBaseNode->getNumChildren());
+
     if (error)
     {
-        Ogre::Entity* entity = mBase->getCreator()->createEntity (Ogre::SceneManager::PT_CUBE);
-        entity->setMaterialName("BaseWhite"); /// \todo adjust material according to error
-        entity->setVisibilityFlags (Element_Reference);
-
-        mBase->attachObject (entity);
+        mBaseNode->addChild(createErrorCube());
     }
     else
     {
-        mObject = NifOgre::Loader::createObjects (mBase, "Meshes\\" + model);
-        mObject->setVisibilityFlags (Element_Reference);
-
-        if (mPhysics && !mReferenceId.empty())
+        try
         {
-            const CSMWorld::CellRef& reference = getReference();
+            std::string path = "meshes\\" + model;
 
-            // position
-            Ogre::Vector3 position;
-            if (!mForceBaseToZero)
-                position = Ogre::Vector3(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]);
-
-            // orientation
-            Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
-            Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-            Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-            mPhysics->addObject("meshes\\" + model, mBase->getName(), mReferenceId, reference.mScale, position, xr*yr*zr);
+            mResourceSystem->getSceneManager()->createInstance(path, mBaseNode);
+        }
+        catch (std::exception& e)
+        {
+            // TODO: use error marker mesh
+            std::cerr << e.what() << std::endl;
         }
     }
 }
 
-void CSVRender::Object::adjust()
+void CSVRender::Object::adjustTransform()
 {
     if (mReferenceId.empty())
         return;
@@ -107,21 +107,15 @@ void CSVRender::Object::adjust()
     const CSMWorld::CellRef& reference = getReference();
 
     // position
-    if (!mForceBaseToZero)
-        mBase->setPosition (Ogre::Vector3 (
-            reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
+    mBaseNode->setPosition(mForceBaseToZero ? osg::Vec3() : osg::Vec3f(reference.mPos.pos[0], reference.mPos.pos[1], reference.mPos.pos[2]));
 
     // orientation
-    Ogre::Quaternion xr (Ogre::Radian (-reference.mPos.rot[0]), Ogre::Vector3::UNIT_X);
+    osg::Quat xr (-reference.mPos.rot[0], osg::Vec3f(1,0,0));
+    osg::Quat yr (-reference.mPos.rot[1], osg::Vec3f(0,1,0));
+    osg::Quat zr (-reference.mPos.rot[2], osg::Vec3f(0,0,1));
+    mBaseNode->setAttitude(zr*yr*xr);
 
-    Ogre::Quaternion yr (Ogre::Radian (-reference.mPos.rot[1]), Ogre::Vector3::UNIT_Y);
-
-    Ogre::Quaternion zr (Ogre::Radian (-reference.mPos.rot[2]), Ogre::Vector3::UNIT_Z);
-
-    mBase->setOrientation (xr*yr*zr);
-
-    // scale
-    mBase->setScale (reference.mScale, reference.mScale, reference.mScale);
+    mBaseNode->setScale(osg::Vec3(reference.mScale, reference.mScale, reference.mScale));
 }
 
 const CSMWorld::CellRef& CSVRender::Object::getReference() const
@@ -132,12 +126,20 @@ const CSMWorld::CellRef& CSVRender::Object::getReference() const
     return mData.getReferences().getRecord (mReferenceId).get();
 }
 
-CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode,
-    const std::string& id, bool referenceable, boost::shared_ptr<CSVWorld::PhysicsSystem> physics,
-    bool forceBaseToZero)
-: mData (data), mBase (0), mForceBaseToZero (forceBaseToZero), mPhysics(physics)
+CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
+    const std::string& id, bool referenceable, bool forceBaseToZero)
+: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero)
 {
-    mBase = cellNode->createChildSceneNode();
+    mBaseNode = new osg::PositionAttitudeTransform;
+    mOutline = new osgFX::Scribe;
+    mOutline->addChild(mBaseNode);
+
+    mBaseNode->setUserData(new ObjectTag(this));
+
+    parentNode->addChild(mBaseNode);
+
+    // 0x1 reserved for separating cull and update visitors
+    mBaseNode->setNodeMask(Element_Reference<<1);
 
     if (referenceable)
     {
@@ -149,21 +151,32 @@ CSVRender::Object::Object (const CSMWorld::Data& data, Ogre::SceneNode *cellNode
         mReferenceableId = getReference().mRefID;
     }
 
+    adjustTransform();
     update();
-    adjust();
 }
 
 CSVRender::Object::~Object()
 {
     clear();
 
-    if (mBase)
-    {
-        if(mPhysics) // preview may not have physics enabled
-            mPhysics->removeObject(mBase->getName());
+    mParentNode->removeChild(mBaseNode);
+}
 
-        mBase->getCreator()->destroySceneNode (mBase);
-    }
+void CSVRender::Object::setSelected(bool selected)
+{
+    mSelected = selected;
+
+    mParentNode->removeChild(mOutline);
+    mParentNode->removeChild(mBaseNode);
+    if (selected)
+        mParentNode->addChild(mOutline);
+    else
+        mParentNode->addChild(mBaseNode);
+}
+
+bool CSVRender::Object::getSelected() const
+{
+    return mSelected;
 }
 
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
@@ -175,8 +188,8 @@ bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
 
     if (index!=-1 && index>=topLeft.row() && index<=bottomRight.row())
     {
+        adjustTransform();
         update();
-        adjust();
         return true;
     }
 
@@ -195,8 +208,8 @@ bool CSVRender::Object::referenceableAboutToBeRemoved (const QModelIndex& parent
         // Deletion of referenceable-type objects is handled outside of Object.
         if (!mReferenceId.empty())
         {
+            adjustTransform();
             update();
-            adjust();
             return true;
         }
     }
@@ -219,6 +232,8 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
         int columnIndex =
             references.findColumnIndex (CSMWorld::Columns::ColumnId_ReferenceableId);
 
+        adjustTransform();
+
         if (columnIndex>=topLeft.column() && columnIndex<=bottomRight.row())
         {
             mReferenceableId =
@@ -226,8 +241,6 @@ bool CSVRender::Object::referenceDataChanged (const QModelIndex& topLeft,
 
             update();
         }
-
-        adjust();
 
         return true;
     }

@@ -1,30 +1,34 @@
-
 #include "lightingbright.hpp"
 
-#include <OgreSceneManager.h>
+#include <osg/LightSource>
 
-CSVRender::LightingBright::LightingBright() : mSceneManager (0), mLight (0) {}
+CSVRender::LightingBright::LightingBright() {}
 
-void CSVRender::LightingBright::activate (Ogre::SceneManager *sceneManager,
-    const Ogre::ColourValue *defaultAmbient)
+void CSVRender::LightingBright::activate (osg::Group* rootNode)
 {
-    mSceneManager = sceneManager;
+    mRootNode = rootNode;
 
-    mSceneManager->setAmbientLight (Ogre::ColourValue (1.0, 1.0, 1.0, 1));
+    mLightSource = (new osg::LightSource);
 
-    mLight = mSceneManager->createLight();
-    mLight->setType (Ogre::Light::LT_DIRECTIONAL);
-    mLight->setDirection (Ogre::Vector3 (0, 0, -1));
-    mLight->setDiffuseColour (Ogre::ColourValue (1.0, 1.0, 1.0));
+    osg::ref_ptr<osg::Light> light (new osg::Light);
+    light->setAmbient(osg::Vec4f(0.f, 0.f, 0.f, 1.f));
+    light->setPosition(osg::Vec4f(0.f, 0.f, 1.f, 0.f));
+    light->setDiffuse(osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+    light->setSpecular(osg::Vec4f(0.f, 0.f, 0.f, 0.f));
+    light->setConstantAttenuation(1.f);
+
+    mLightSource->setLight(light);
+
+    mRootNode->addChild(mLightSource);
 }
 
 void CSVRender::LightingBright::deactivate()
 {
-    if (mLight)
-    {
-        mSceneManager->destroyLight (mLight);
-        mLight = 0;
-    }
+    if (mRootNode && mLightSource.get())
+        mRootNode->removeChild(mLightSource);
 }
 
-void CSVRender::LightingBright::setDefaultAmbient (const Ogre::ColourValue& colour) {}
+osg::Vec4f CSVRender::LightingBright::getAmbientColour(osg::Vec4f* /*defaultAmbient*/)
+{
+    return osg::Vec4f(1.f, 1.f, 1.f, 1.f);
+}

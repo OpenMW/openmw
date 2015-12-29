@@ -35,7 +35,6 @@ struct Land
     ESM_Context mContext;
 
     int mDataTypes;
-    int mDataLoaded;
 
     enum
     {
@@ -77,35 +76,45 @@ struct Land
 
     struct LandData
     {
+        // Initial reference height for the first vertex, only needed for filling mHeights
         float mHeightOffset;
+        // Height in world space for each vertex
         float mHeights[LAND_NUM_VERTS];
+
+        // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
         VNML mNormals[LAND_NUM_VERTS * 3];
+
+        // 2D array of texture indices. An index can be used to look up an ESM::LandTexture,
+        // but to do so you must subtract 1 from the index first!
+        // An index of 0 indicates the default texture.
         uint16_t mTextures[LAND_NUM_TEXTURES];
 
-        char mColours[3 * LAND_NUM_VERTS];
+        // 24-bit RGB color for each vertex
+        unsigned char mColours[3 * LAND_NUM_VERTS];
+
+        // DataTypes available in this LandData, accessing data that is not available is an undefined operation
         int mDataTypes;
 
         // low-LOD heightmap (used for rendering the global map)
         signed char mWnam[81];
 
+        // ???
         short mUnk1;
         uint8_t mUnk2;
 
-        void save(ESMWriter &esm);
-        static void transposeTextureData(uint16_t *in, uint16_t *out);
+        void save(ESMWriter &esm) const;
+        static void transposeTextureData(const uint16_t *in, uint16_t *out);
     };
 
-    LandData *mLandData;
-
-    void load(ESMReader &esm);
-    void save(ESMWriter &esm) const;
+    void load(ESMReader &esm, bool &isDeleted);
+    void save(ESMWriter &esm, bool isDeleted = false) const;
 
     void blank() {}
 
     /**
      * Actually loads data
      */
-    void loadData(int flags);
+    void loadData(int flags) const;
 
     /**
      * Frees memory allocated for land data
@@ -116,14 +125,41 @@ struct Land
     /// @note We only check data types that *can* be loaded (present in mDataTypes)
     bool isDataLoaded(int flags) const;
 
+        Land (const Land& land);
+
+        Land& operator= (Land land);
+
+        void swap (Land& land);
+
+        /// Return land data with at least the data types specified in \a flags loaded (if they
+        /// are available). Will return a 0-pointer if there is no data for any of the
+        /// specified types.
+        const LandData *getLandData (int flags) const;
+
+        /// Return land data without loading first anything. Can return a 0-pointer.
+        const LandData *getLandData() const;
+
+        /// Return land data without loading first anything. Can return a 0-pointer.
+        LandData *getLandData();
+
+        /// \attention Must not be called on objects that aren't fully loaded.
+        ///
+        /// \note Added data fields will be uninitialised
+        void add (int flags);
+
+        /// \attention Must not be called on objects that aren't fully loaded.
+        void remove (int flags);
+
     private:
-        Land(const Land& land);
-        Land& operator=(const Land& land);
 
         /// Loads data and marks it as loaded
         /// \return true if data is actually loaded from file, false otherwise
         /// including the case when data is already loaded
-        bool condLoad(int flags, int dataFlag, void *ptr, unsigned int size);
+        bool condLoad(int flags, int dataFlag, void *ptr, unsigned int size) const;
+
+        mutable int mDataLoaded;
+
+        mutable LandData *mLandData;
 };
 
 }

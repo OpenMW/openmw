@@ -1,4 +1,3 @@
-
 #include "magiceffects.hpp"
 
 #include <cstdlib>

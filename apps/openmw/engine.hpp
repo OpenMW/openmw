@@ -1,18 +1,27 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <OgreFrameListener.h>
-
 #include <components/compiler/extensions.hpp>
 #include <components/files/collections.hpp>
 #include <components/translation/translation.hpp>
 #include <components/settings/settings.hpp>
-#include <components/nifcache/nifcache.hpp>
+
+#include <osgViewer/Viewer>
 
 
 #include "mwbase/environment.hpp"
 
 #include "mwworld/ptr.hpp"
+
+namespace Resource
+{
+    class ResourceSystem;
+}
+
+namespace VFS
+{
+    class Manager;
+}
 
 namespace Compiler
 {
@@ -39,36 +48,34 @@ namespace MWGui
     class WindowManager;
 }
 
-namespace OEngine
-{
-  namespace GUI
-  {
-    class MyGUIManager;
-  }
-
-  namespace Render
-  {
-    class OgreRenderer;
-  }
-}
-
 namespace Files
 {
     struct ConfigurationManager;
 }
 
+namespace osgViewer
+{
+    class ScreenCaptureHandler;
+}
+
+struct SDL_Window;
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
-    class Engine : private Ogre::FrameListener
+    class Engine
     {
+            SDL_Window* mWindow;
+            std::auto_ptr<VFS::Manager> mVFS;
+            std::auto_ptr<Resource::ResourceSystem> mResourceSystem;
             MWBase::Environment mEnvironment;
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
             std::vector<std::string> mArchives;
             boost::filesystem::path mResDir;
-            OEngine::Render::OgreRenderer *mOgre;
+            osg::ref_ptr<osgViewer::Viewer> mViewer;
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
             bool mVerboseScripts;
@@ -98,29 +105,24 @@ namespace OMW
             bool mScriptBlacklistUse;
             bool mNewGame;
 
-            Nif::Cache mNifCache;
+            osg::Timer_t mStartTick;
 
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);
 
-            /// add resources directory
-            /// \note This function works recursively.
-            void addResourcesDirectory (const boost::filesystem::path& path);
-
-            /// add a .zip resource
-            void addZipResource (const boost::filesystem::path& path);
-
             void executeLocalScripts();
 
-            virtual bool frameRenderingQueued (const Ogre::FrameEvent& evt);
-            virtual bool frameStarted (const Ogre::FrameEvent& evt);
+            void frame (float dt);
 
             /// Load settings from various files, returns the path to the user settings file
             std::string loadSettings (Settings::Manager & settings);
 
             /// Prepare engine for game play
             void prepareEngine (Settings::Manager & settings);
+
+            void createWindow(Settings::Manager& settings);
+            void setWindowIcon();
 
         public:
             Engine(Files::ConfigurationManager& configurationManager);
@@ -166,12 +168,6 @@ namespace OMW
 
             /// Initialise and enter main loop.
             void go();
-
-            /// Activate the focussed object.
-            void activate();
-
-            /// Write screenshot to file.
-            void screenshot();
 
             /// Compile all scripts (excludign dialogue scripts) at startup?
             void setCompileAll (bool all);

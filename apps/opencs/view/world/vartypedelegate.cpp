@@ -1,4 +1,3 @@
-
 #include "vartypedelegate.hpp"
 
 #include <QUndoStack>

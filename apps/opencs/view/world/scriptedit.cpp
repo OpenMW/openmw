@@ -12,8 +12,7 @@
 
 #include "../../model/world/universalid.hpp"
 #include "../../model/world/tablemimedata.hpp"
-#include "../../model/settings/usersettings.hpp"
-
+#include "../../model/prefs/state.hpp"
 
 CSVWorld::ScriptEdit::ChangeLock::ChangeLock (ScriptEdit& edit) : mEdit (edit)
 {
@@ -92,31 +91,24 @@ CSVWorld::ScriptEdit::ScriptEdit (const CSMDoc::Document& document, ScriptHighli
 
     connect (&mUpdateTimer, SIGNAL (timeout()), this, SLOT (updateHighlighting()));
 
-    CSMSettings::UserSettings &userSettings = CSMSettings::UserSettings::instance();
-    connect (&userSettings, SIGNAL (userSettingUpdated(const QString &, const QStringList &)),
-             this, SLOT (updateUserSetting (const QString &, const QStringList &)));
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    {
+        ChangeLock lock (*this);
+        CSMPrefs::get()["Scripts"].update();
+    }
 
     mUpdateTimer.setSingleShot (true);
 
     // TODO: provide a font selector dialogue
     mMonoFont.setStyleHint(QFont::TypeWriter);
 
-    if (userSettings.setting("script-editor/mono-font", "true") == "true")
-        setFont(mMonoFont);
-
     mLineNumberArea = new LineNumberArea(this);
     updateLineNumberAreaWidth(0);
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-
-    showLineNum(userSettings.settingValue("script-editor/show-linenum") == "true");
-}
-
-void CSVWorld::ScriptEdit::updateUserSetting (const QString &name, const QStringList &list)
-{
-    if (mHighlighter->updateUserSetting (name, list))
-        updateHighlighting();
+    updateHighlighting();
 }
 
 void CSVWorld::ScriptEdit::showLineNum(bool show)
@@ -202,6 +194,16 @@ bool CSVWorld::ScriptEdit::stringNeedsQuote (const std::string& id) const
     return !(string.contains(mWhiteListQoutes));
 }
 
+void CSVWorld::ScriptEdit::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (mHighlighter->settingChanged (setting))
+        updateHighlighting();
+    else if (*setting=="Scripts/mono-font")
+        setFont (setting->isTrue() ? mMonoFont : mDefaultFont);
+    else if (*setting=="Scripts/show-linenum")
+        showLineNum (setting->isTrue());
+}
+
 void CSVWorld::ScriptEdit::idListChanged()
 {
     mHighlighter->invalidateIds();
@@ -276,11 +278,11 @@ void CSVWorld::ScriptEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     if(textCursor().hasSelection())
     {
         QString str = textCursor().selection().toPlainText();
-        int selectedLines = str.count("\n")+1;
+        int offset = str.count("\n");
         if(textCursor().position() < textCursor().anchor())
-            endBlock += selectedLines;
+            endBlock += offset;
         else
-            startBlock -= selectedLines;
+            startBlock -= offset;
     }
     painter.setBackgroundMode(Qt::OpaqueMode);
     QFont font = painter.font();

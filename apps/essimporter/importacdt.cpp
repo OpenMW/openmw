@@ -10,7 +10,21 @@ namespace ESSImport
     void ActorData::load(ESM::ESMReader &esm)
     {
         if (esm.isNextSub("ACTN"))
+        {
+            /*
+            Activation flags:
+            ActivationFlag_UseEnabled  = 1
+            ActivationFlag_OnActivate  = 2
+            ActivationFlag_OnDeath  = 10h
+            ActivationFlag_OnKnockout  = 20h
+            ActivationFlag_OnMurder  = 40h
+            ActivationFlag_DoorOpening  = 100h
+            ActivationFlag_DoorClosing  = 200h
+            ActivationFlag_DoorJammedOpening  = 400h
+            ActivationFlag_DoorJammedClosing  = 800h
+            */
             esm.skipHSub();
+        }
 
         if (esm.isNextSub("STPR"))
             esm.skipHSub();
@@ -18,7 +32,8 @@ namespace ESSImport
         if (esm.isNextSub("MNAM"))
            esm.skipHSub();
 
-        ESM::CellRef::loadData(esm);
+        bool isDeleted = false;
+        ESM::CellRef::loadData(esm, isDeleted);
 
         mHasACDT = false;
         if (esm.isNextSub("ACDT"))

@@ -2,21 +2,25 @@
 #define OPENCS_VIEW_SCENEWIDGET_H
 
 #include <QWidget>
+#include <QTimer>
 
-#include <OgreColourValue.h>
+#include <boost/shared_ptr.hpp>
 
 #include "lightingday.hpp"
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-namespace Ogre
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
+
+namespace Resource
 {
-    class Camera;
-    class SceneManager;
-    class RenderWindow;
-    class Viewport;
-    class OverlaySystem;
-    class RenderTargetListener;
+    class ResourceSystem;
+}
+
+namespace osg
+{
+    class Group;
 }
 
 namespace CSVWidget
@@ -27,114 +31,91 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-    class Navigation;
     class Lighting;
 
-    class SceneWidget : public QWidget
+    class RenderWidget : public QWidget
     {
         Q_OBJECT
 
-        public:
+    public:
+        RenderWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+        virtual ~RenderWidget();
 
-            SceneWidget(QWidget *parent);
-            virtual ~SceneWidget();
+        void flagAsModified();
 
-            QPaintEngine* paintEngine() const;
+        void setVisibilityMask(int mask);
 
-            CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
-            ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
-            /// is the responsibility of the calling function.
+        bool eventFilter(QObject *, QEvent *);
 
-            virtual void setVisibilityMask (unsigned int mask);
+    protected:
 
-            virtual void updateScene();
+        osg::ref_ptr<osgViewer::View> mView;
 
-        protected:
+        osg::Group* mRootNode;
 
-            void setNavigation (Navigation *navigation);
-            ///< \attention The ownership of \a navigation is not transferred to *this.
+        QTimer mTimer;
+    };
 
-            void addRenderTargetListener(Ogre::RenderTargetListener *listener);
+    // Extension of RenderWidget to support lighting mode selection & toolbar
+    class SceneWidget : public RenderWidget
+    {
+        Q_OBJECT
+    public:
+        SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent = 0, Qt::WindowFlags f = 0);
+        virtual ~SceneWidget();
 
-            void removeRenderTargetListener(Ogre::RenderTargetListener *listener);
+        CSVWidget::SceneToolMode *makeLightingSelector (CSVWidget::SceneToolbar *parent);
+        ///< \attention The created tool is not added to the toolbar (via addTool). Doing that
+        /// is the responsibility of the calling function.
 
-            Ogre::Viewport *getViewport();
+        void setDefaultAmbient (const osg::Vec4f& colour);
+        ///< \note The actual ambient colour may differ based on lighting settings.
 
-            Ogre::SceneManager *getSceneManager();
+    protected:
+        void setLighting (Lighting *lighting);
+        ///< \attention The ownership of \a lighting is not transferred to *this.
 
-            Ogre::Camera *getCamera();
+        void setAmbient(const osg::Vec4f& ambient);
 
-            void flagAsModified();
+        boost::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 
-            void setDefaultAmbient (const Ogre::ColourValue& colour);
-            ///< \note The actual ambient colour may differ based on lighting settings.
+        Lighting* mLighting;
 
-            virtual void updateOverlay();
+        osg::Vec4f mDefaultAmbient;
+        bool mHasDefaultAmbient;
+        LightingDay mLightingDay;
+        LightingNight mLightingNight;
+        LightingBright mLightingBright;
 
-            virtual void mouseReleaseEvent (QMouseEvent *event);
+    private slots:
 
-            virtual void mouseMoveEvent (QMouseEvent *event);
-
-            void wheelEvent (QWheelEvent *event);
-
-            void keyPressEvent (QKeyEvent *event);
-
-        private:
-            void paintEvent(QPaintEvent* e);
-            void resizeEvent(QResizeEvent* e);
-            bool event(QEvent* e);
-
-            void keyReleaseEvent (QKeyEvent *event);
-
-            void focusOutEvent (QFocusEvent *event);
-
-            void leaveEvent (QEvent *event);
-
-            void updateOgreWindow();
-
-            void setLighting (Lighting *lighting);
-            ///< \attention The ownership of \a lighting is not transferred to *this.
-
-            Ogre::Camera*       mCamera;
-            Ogre::SceneManager* mSceneMgr;
-            Ogre::RenderWindow* mWindow;
-            Ogre::Viewport *mViewport;
-            Ogre::OverlaySystem *mOverlaySystem;
-
-            Navigation *mNavigation;
-            Lighting *mLighting;
-            bool mUpdate;
-            bool mKeyForward;
-            bool mKeyBackward;
-            bool mKeyLeft;
-            bool mKeyRight;
-            bool mKeyRollLeft;
-            bool mKeyRollRight;
-            bool mFast;
-            bool mDragging;
-            bool mMod1;
-            QPoint mOldPos;
-            int mFastFactor;
-            Ogre::ColourValue mDefaultAmbient;
-            bool mHasDefaultAmbient;
-            LightingDay mLightingDay;
-            LightingNight mLightingNight;
-            LightingBright mLightingBright;
-
-        public slots:
-
-            void updateUserSetting (const QString &key, const QStringList &list);
-
-        private slots:
-
-            void update();
-
-            void selectLightingMode (const std::string& mode);
+        void selectLightingMode (const std::string& mode);
 
         signals:
 
-            void focusToolbarRequest();
+             void focusToolbarRequest();
     };
+
+
+    // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with multiple views
+    class CompositeViewer : public QObject, public osgViewer::CompositeViewer
+    {
+        Q_OBJECT
+    public:
+        CompositeViewer();
+
+        static CompositeViewer& get();
+
+        QTimer mTimer;
+
+    private:
+        osg::Timer mFrameTimer;
+        double mSimulationTime;
+
+    public slots:
+        void update();
+    };
+
 }
 
 #endif

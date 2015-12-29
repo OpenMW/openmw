@@ -1,4 +1,3 @@
-
 #include "commanddispatcher.hpp"
 
 #include <algorithm>
@@ -94,7 +93,7 @@ void CSMWorld::CommandDispatcher::setEditLock (bool locked)
 void CSMWorld::CommandDispatcher::setSelection (const std::vector<std::string>& selection)
 {
     mSelection = selection;
-    std::for_each (mSelection.begin(), mSelection.end(), Misc::StringUtils::toLower);
+    std::for_each (mSelection.begin(), mSelection.end(), Misc::StringUtils::lowerCaseInPlace);
     std::sort (mSelection.begin(), mSelection.end());
 }
 

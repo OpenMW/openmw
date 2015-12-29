@@ -7,6 +7,9 @@
 #include "cellid.hpp"
 #include "defs.hpp"
 
+#include "loadskil.hpp"
+#include "attr.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -27,6 +30,9 @@ namespace ESM
         
         int mCurrentCrimeId;
         int mPaidCrimeId;
+
+        StatState<int> mSaveAttributes[ESM::Attribute::Length];
+        StatState<int> mSaveSkills[ESM::Skill::Length];
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

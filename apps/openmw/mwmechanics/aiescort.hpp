@@ -33,9 +33,12 @@ namespace MWMechanics
 
             virtual AiEscort *clone() const;
 
-            virtual bool execute (const MWWorld::Ptr& actor, AiState& state, float duration);
+            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
 
             virtual int getTypeId() const;
+
+            MWWorld::Ptr getTarget();
+            virtual bool sideWithTarget() const { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 

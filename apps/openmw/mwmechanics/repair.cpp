@@ -2,7 +2,7 @@
 
 #include <boost/format.hpp>
 
-#include <openengine/misc/rng.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -14,15 +14,16 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/npcstats.hpp"
+#include "creaturestats.hpp"
+#include "npcstats.hpp"
+#include "actorutil.hpp"
 
 namespace MWMechanics
 {
 
 void Repair::repair(const MWWorld::Ptr &itemToRepair)
 {
-    MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+    MWWorld::Ptr player = getPlayer();
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mTool.get<ESM::Repair>();
 
@@ -48,7 +49,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
     float x = (0.1f * pcStrength + 0.1f * pcLuck + armorerSkill) * fatigueTerm;
 
-    int roll = OEngine::Misc::Rng::roll0to99();
+    int roll = Misc::Rng::roll0to99();
     if (roll <= x)
     {
         int y = static_cast<int>(fRepairAmountMult * toolQuality * roll);
@@ -82,7 +83,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     // tool used up?
     if (mTool.getCellRef().getCharge() == 0)
     {
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        MWWorld::Ptr player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         store.remove(mTool, 1, player);

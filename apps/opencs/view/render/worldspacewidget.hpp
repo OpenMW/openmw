@@ -1,16 +1,22 @@
 #ifndef OPENCS_VIEW_WORLDSPACEWIDGET_H
 #define OPENCS_VIEW_WORLDSPACEWIDGET_H
 
+#include <map>
+
 #include <boost/shared_ptr.hpp>
 
-#include "scenewidget.hpp"
-#include "mousestate.hpp"
+#include <QTimer>
 
-#include "navigation1st.hpp"
-#include "navigationfree.hpp"
-#include "navigationorbit.hpp"
-#include <apps/opencs/model/doc/document.hpp>
-#include <apps/opencs/model/world/tablemimedata.hpp>
+#include "../../model/doc/document.hpp"
+#include "../../model/world/tablemimedata.hpp"
+
+#include "scenewidget.hpp"
+#include "elements.hpp"
+
+namespace CSMPrefs
+{
+    class Setting;
+}
 
 namespace CSMWorld
 {
@@ -25,26 +31,33 @@ namespace CSVWidget
     class SceneToolRun;
 }
 
-namespace CSVWorld
-{
-    class PhysicsSystem;
-}
-
 namespace CSVRender
 {
+    class TagBase;
+    class CellArrow;
+
     class WorldspaceWidget : public SceneWidget
     {
             Q_OBJECT
 
-            CSVRender::Navigation1st m1st;
-            CSVRender::NavigationFree mFree;
-            CSVRender::NavigationOrbit mOrbit;
             CSVWidget::SceneToolToggle2 *mSceneElements;
             CSVWidget::SceneToolRun *mRun;
             CSMDoc::Document& mDocument;
-            boost::shared_ptr<CSVWorld::PhysicsSystem> mPhysics;
-            MouseState *mMouse;
             unsigned int mInteractionMask;
+            std::map<std::pair<Qt::MouseButton, bool>, std::string> mButtonMapping;
+            CSVWidget::SceneToolMode *mEditMode;
+            bool mLocked;
+            std::string mDragMode;
+            bool mDragging;
+            int mDragX;
+            int mDragY;
+            double mDragFactor;
+            double mDragWheelFactor;
+            double mDragShiftFactor;
+            QTimer mToolTipDelayTimer;
+            QPoint mToolTipPos;
+            bool mShowToolTips;
+            int mToolTipDelay;
 
         public:
 
@@ -107,13 +120,18 @@ namespace CSVRender
             /// marked for interaction.
             unsigned int getInteractionMask() const;
 
+            virtual void setEditLock (bool locked);
+
+            CSMDoc::Document& getDocument();
+
+            /// \param elementMask Elements to be affected by the clear operation
+            virtual void clearSelection (int elementMask) = 0;
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
-
-            CSMDoc::Document& getDocument();
 
             virtual void updateOverlay();
 
@@ -124,6 +142,9 @@ namespace CSVRender
             virtual void wheelEvent (QWheelEvent *event);
             virtual void keyPressEvent (QKeyEvent *event);
 
+            virtual void handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button,
+                bool shift);
+
         private:
 
             void dragEnterEvent(QDragEnterEvent *event);
@@ -132,9 +153,18 @@ namespace CSVRender
 
             void dragMoveEvent(QDragMoveEvent *event);
 
+            /// \return Is \a key a button mapping setting? (ignored otherwise)
+            bool storeMappingSetting (const CSMPrefs::Setting *setting);
+
+            osg::ref_ptr<TagBase> mousePick (const QPoint& localPos);
+
+            std::string mapButton (QMouseEvent *event);
+
             virtual std::string getStartupInstruction() = 0;
 
         private slots:
+
+            void settingChanged (const CSMPrefs::Setting *setting);
 
             void selectNavigationMode (const std::string& mode);
 
@@ -158,6 +188,9 @@ namespace CSVRender
 
             void debugProfileAboutToBeRemoved (const QModelIndex& parent, int start, int end);
 
+            void editModeChanged (const std::string& id);
+
+            void showToolTip();
 
         protected slots:
 

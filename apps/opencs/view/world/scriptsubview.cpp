@@ -4,7 +4,8 @@
 
 #include <QStatusBar>
 #include <QStackedLayout>
-#include <QLabel>
+#include <QSplitter>
+#include <QTimer>
 
 #include "../../model/doc/document.hpp"
 #include "../../model/world/universalid.hpp"
@@ -12,48 +13,124 @@
 #include "../../model/world/columnbase.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
-#include "../../model/settings/usersettings.hpp"
+#include "../../model/prefs/state.hpp"
 
 #include "scriptedit.hpp"
+#include "recordbuttonbar.hpp"
+#include "tablebottombox.hpp"
+#include "genericcreator.hpp"
+#include "scripterrortable.hpp"
+
+void CSVWorld::ScriptSubView::addButtonBar()
+{
+    if (mButtons)
+        return;
+
+    mButtons = new RecordButtonBar (getUniversalId(), *mModel, mBottom, &mCommandDispatcher, this);
+
+    mLayout.insertWidget (1, mButtons);
+
+    connect (mButtons, SIGNAL (switchToRow (int)), this, SLOT (switchToRow (int)));
+
+    connect (this, SIGNAL (universalIdChanged (const CSMWorld::UniversalId&)),
+        mButtons, SLOT (universalIdChanged (const CSMWorld::UniversalId&)));
+}
+
+void CSVWorld::ScriptSubView::recompile()
+{
+    if (!mCompileDelay->isActive() && !isDeleted())
+        mCompileDelay->start (CSMPrefs::get()["Scripts"]["compile-delay"].toInt());
+}
+
+bool CSVWorld::ScriptSubView::isDeleted() const
+{
+    return mModel->data (mModel->getModelIndex (getUniversalId().getId(), mStateColumn)).toInt()
+        ==CSMWorld::RecordBase::State_Deleted;
+}
+
+void CSVWorld::ScriptSubView::updateDeletedState()
+{
+    if (isDeleted())
+    {
+        mErrors->clear();
+        adjustSplitter();
+        mEditor->setEnabled (false);
+    }
+    else
+    {
+        mEditor->setEnabled (true);
+        recompile();
+    }
+}
+
+void CSVWorld::ScriptSubView::adjustSplitter()
+{
+    QList<int> sizes;
+
+    if (mErrors->rowCount())
+    {
+        if (mErrors->height())
+            return; // keep old height if the error panel was already open
+
+        sizes << (mMain->height()-mErrorHeight-mMain->handleWidth()) << mErrorHeight;
+    }
+    else
+    {
+        if (mErrors->height())
+            mErrorHeight = mErrors->height();
+
+        sizes << 1 << 0;
+    }
+
+    mMain->setSizes (sizes);
+}
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mStatus(0)
+: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
+  mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
+  mErrorHeight (CSMPrefs::get()["Scripts"]["error-height"].toInt())
 {
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->setContentsMargins (QMargins (0, 0, 0, 0));
+    std::vector<std::string> selection (1, id.getId());
+    mCommandDispatcher.setSelection (selection);
 
-    mBottom = new QWidget(this);
-    QStackedLayout *bottmLayout = new QStackedLayout(mBottom);
-    bottmLayout->setContentsMargins (0, 0, 0, 0);
-    QStatusBar *statusBar = new QStatusBar(mBottom);
-    mStatus = new QLabel(mBottom);
-    statusBar->addWidget (mStatus);
-    bottmLayout->addWidget (statusBar);
-    mBottom->setLayout (bottmLayout);
+    mMain = new QSplitter (this);
+    mMain->setOrientation (Qt::Vertical);
+    mLayout.addWidget (mMain, 2);
 
-    layout->addWidget (mBottom, 0);
-    layout->insertWidget (0, mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this), 2);
+    mEditor = new ScriptEdit (mDocument, ScriptHighlighter::Mode_General, this);
+    mMain->addWidget (mEditor);
+    mMain->setCollapsible (0, false);
 
-    QWidget *widget = new QWidget;
-    widget->setLayout (layout);
+    mErrors = new ScriptErrorTable (document, this);
+    mMain->addWidget (mErrors);
+
+    QList<int> sizes;
+    sizes << 1 << 0;
+    mMain->setSizes (sizes);
+
+    QWidget *widget = new QWidget (this);;
+    widget->setLayout (&mLayout);
     setWidget (widget);
 
     mModel = &dynamic_cast<CSMWorld::IdTable&> (
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_Scripts));
 
-    for (int i=0; i<mModel->columnCount(); ++i)
-        if (mModel->headerData (i, Qt::Horizontal, CSMWorld::ColumnBase::Role_Display)==
-            CSMWorld::ColumnBase::Display_ScriptFile)
-        {
-            mColumn = i;
-            break;
-        }
+    mColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_ScriptText);
+    mIdColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    mStateColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
 
-    if (mColumn==-1)
-        throw std::logic_error ("Can't find script column");
+    QString source = mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString();
 
-    mEditor->setPlainText (mModel->data (mModel->getModelIndex (id.getId(), mColumn)).toString());
+    mEditor->setPlainText (source);
+    // bottom box and buttons
+    mBottom = new TableBottomBox (CreatorFactory<GenericCreator>(), document, id, this);
 
+    connect (mBottom, SIGNAL (requestFocus (const std::string&)),
+        this, SLOT (switchToId (const std::string&)));
+
+    mLayout.addWidget (mBottom);
+
+    // signals
     connect (mEditor, SIGNAL (textChanged()), this, SLOT (textChanged()));
 
     connect (mModel, SIGNAL (dataChanged (const QModelIndex&, const QModelIndex&)),
@@ -64,35 +141,65 @@ CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc:
 
     updateStatusBar();
     connect(mEditor, SIGNAL(cursorPositionChanged()), this, SLOT(updateStatusBar()));
+
+    mErrors->update (source.toUtf8().constData());
+
+    connect (mErrors, SIGNAL (highlightError (int, int)),
+        this, SLOT (highlightError (int, int)));
+
+    mCompileDelay = new QTimer (this);
+    mCompileDelay->setSingleShot (true);
+    connect (mCompileDelay, SIGNAL (timeout()), this, SLOT (updateRequest()));
+
+    updateDeletedState();
+
+    connect (&CSMPrefs::State::get(), SIGNAL (settingChanged (const CSMPrefs::Setting *)),
+        this, SLOT (settingChanged (const CSMPrefs::Setting *)));
+    CSMPrefs::get()["Scripts"].update();
 }
 
-void CSVWorld::ScriptSubView::updateUserSetting (const QString& name, const QStringList& value)
+void CSVWorld::ScriptSubView::setStatusBar (bool show)
 {
-    if (name == "script-editor/show-linenum")
+    mBottom->setStatusBar (show);
+}
+
+void CSVWorld::ScriptSubView::settingChanged (const CSMPrefs::Setting *setting)
+{
+    if (*setting=="Scripts/toolbar")
     {
-        std::string showLinenum = value.at(0).toStdString();
-        mEditor->showLineNum(showLinenum == "true");
-        mBottom->setVisible(showLinenum == "true");
+        if (setting->isTrue())
+        {
+            addButtonBar();
+        }
+        else if (mButtons)
+        {
+            mLayout.removeWidget (mButtons);
+            delete mButtons;
+            mButtons = 0;
+        }
     }
-    else if (name == "script-editor/mono-font")
+    else if (*setting=="Scripts/compile-delay")
     {
-        mEditor->setMonoFont(value.at(0).toStdString() == "true");
+        mCompileDelay->setInterval (setting->toInt());
     }
+    else  if (*setting=="Scripts/warnings")
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::updateStatusBar ()
 {
-    std::ostringstream stream;
-
-    stream << "(" << mEditor->textCursor().blockNumber() + 1 << ", "
-        << mEditor->textCursor().columnNumber() + 1 << ")";
-
-    mStatus->setText (QString::fromUtf8 (stream.str().c_str()));
+    mBottom->positionChanged (mEditor->textCursor().blockNumber() + 1,
+        mEditor->textCursor().columnNumber() + 1);
 }
 
 void CSVWorld::ScriptSubView::setEditLock (bool locked)
 {
     mEditor->setReadOnly (locked);
+
+    if (mButtons)
+        mButtons->setEditLock (locked);
+
+    mCommandDispatcher.setEditLock (locked);
 }
 
 void CSVWorld::ScriptSubView::useHint (const std::string& hint)
@@ -100,26 +207,41 @@ void CSVWorld::ScriptSubView::useHint (const std::string& hint)
     if (hint.empty())
         return;
 
-    if (hint[0]=='l')
-    {
-        std::istringstream stream (hint.c_str()+1);
-
-        char ignore;
-        int line;
-        int column;
-
-        if (stream >> ignore >> line >> column)
+    unsigned line = 0, column = 0;
+    char c;
+    std::istringstream stream (hint.c_str()+1);
+    switch(hint[0]){
+        case 'R':
+        case 'r':
         {
-            QTextCursor cursor = mEditor->textCursor();
+            QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
+            QString source = mModel->data (index).toString();
+            unsigned pos, dummy;
+            if (!(stream >> c >> dummy >> pos) )
+                return;
 
-            cursor.movePosition (QTextCursor::Start);
-            if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
-                cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
-
-            mEditor->setFocus();
-            mEditor->setTextCursor (cursor);
+            for (unsigned i = 0; i <= pos; ++i){
+                if (source[i] == '\n'){
+                    ++line;
+                    column = i+1;
+                }
+            }
+            column = pos - column;
+            break;
         }
+        case 'l':
+            if (!(stream >> c >> line >> column))
+                    return;
     }
+
+    QTextCursor cursor = mEditor->textCursor();
+
+    cursor.movePosition (QTextCursor::Start);
+    if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+        cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+
+    mEditor->setFocus();
+    mEditor->setTextCursor (cursor);
 }
 
 void CSVWorld::ScriptSubView::textChanged()
@@ -129,8 +251,12 @@ void CSVWorld::ScriptSubView::textChanged()
 
     ScriptEdit::ChangeLock lock (*mEditor);
 
+    QString source = mEditor->toPlainText();
+
     mDocument.getUndoStack().push (new CSMWorld::ModifyCommand (*mModel,
-        mModel->getModelIndex (getUniversalId().getId(), mColumn), mEditor->toPlainText()));
+        mModel->getModelIndex (getUniversalId().getId(), mColumn), source));
+
+    recompile();
 }
 
 void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -140,22 +266,96 @@ void CSVWorld::ScriptSubView::dataChanged (const QModelIndex& topLeft, const QMo
 
     ScriptEdit::ChangeLock lock (*mEditor);
 
+    bool updateRequired = false;
+
+    for (int i=topLeft.row(); i<=bottomRight.row(); ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
-    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row() &&
-        index.column()>=topLeft.column() && index.column()<=bottomRight.column())
+    if (index.row()>=topLeft.row() && index.row()<=bottomRight.row())
     {
-        QTextCursor cursor = mEditor->textCursor();
-        mEditor->setPlainText (mModel->data (index).toString());
-        mEditor->setTextCursor (cursor);
+        if (mStateColumn>=topLeft.column() && mStateColumn<=bottomRight.column())
+            updateDeletedState();
+
+        if (mColumn>=topLeft.column() && mColumn<=bottomRight.column())
+        {
+            QString source = mModel->data (index).toString();
+
+            QTextCursor cursor = mEditor->textCursor();
+            mEditor->setPlainText (source);
+            mEditor->setTextCursor (cursor);
+
+            updateRequired = true;
+        }
     }
+
+    if (updateRequired)
+        recompile();
 }
 
 void CSVWorld::ScriptSubView::rowsAboutToBeRemoved (const QModelIndex& parent, int start, int end)
 {
+    bool updateRequired = false;
+
+    for (int i=start; i<=end; ++i)
+    {
+        std::string id = mModel->data (mModel->index (i, mIdColumn)).toString().toUtf8().constData();
+        if (mErrors->clearLocals (id))
+            updateRequired = true;
+    }
+
+    if (updateRequired)
+        recompile();
+
     QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
 
     if (!parent.isValid() && index.row()>=start && index.row()<=end)
         emit closeRequest();
 }
 
+void CSVWorld::ScriptSubView::switchToRow (int row)
+{
+    int idColumn = mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
+    std::string id = mModel->data (mModel->index (row, idColumn)).toString().toUtf8().constData();
+    setUniversalId (CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Script, id));
+
+    mEditor->setPlainText (mModel->data (mModel->index (row, mColumn)).toString());
+
+    std::vector<std::string> selection (1, id);
+    mCommandDispatcher.setSelection (selection);
+
+    updateDeletedState();
+}
+
+void CSVWorld::ScriptSubView::switchToId (const std::string& id)
+{
+    switchToRow (mModel->getModelIndex (id, 0).row());
+}
+
+void CSVWorld::ScriptSubView::highlightError (int line, int column)
+{
+    QTextCursor cursor = mEditor->textCursor();
+
+    cursor.movePosition (QTextCursor::Start);
+    if (cursor.movePosition (QTextCursor::Down, QTextCursor::MoveAnchor, line))
+        cursor.movePosition (QTextCursor::Right, QTextCursor::MoveAnchor, column);
+
+    mEditor->setFocus();
+    mEditor->setTextCursor (cursor);
+}
+
+void CSVWorld::ScriptSubView::updateRequest()
+{
+    QModelIndex index = mModel->getModelIndex (getUniversalId().getId(), mColumn);
+
+    QString source = mModel->data (index).toString();
+
+    mErrors->update (source.toUtf8().constData());
+
+    adjustSplitter();
+}

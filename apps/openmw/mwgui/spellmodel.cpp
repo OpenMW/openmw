@@ -1,5 +1,7 @@
 #include "spellmodel.hpp"
 
+#include <iostream>
+
 #include <boost/lexical_cast.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -50,7 +52,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
         {
-            const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(it->first);
+            const ESM::Spell* spell = it->first;
             if (spell->mData.mType != ESM::Spell::ST_Power && spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
 
@@ -65,9 +67,9 @@ namespace MWGui
             }
             else
                 newSpell.mType = Spell::Type_Power;
-            newSpell.mId = it->first;
+            newSpell.mId = spell->mId;
 
-            newSpell.mSelected = (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == it->first);
+            newSpell.mSelected = (MWBase::Environment::get().getWindowManager()->getSelectedSpell() == spell->mId);
             newSpell.mActive = true;
             mSpells.push_back(newSpell);
         }
@@ -79,14 +81,19 @@ namespace MWGui
             const std::string enchantId = item.getClass().getEnchantment(item);
             if (enchantId.empty())
                 continue;
-            const ESM::Enchantment* enchant =
-                esmStore.get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
+            const ESM::Enchantment* enchant = esmStore.get<ESM::Enchantment>().search(enchantId);
+            if (!enchant)
+            {
+                std::cerr << "Can't find enchantment '" << enchantId << "' on item " << item.getCellRef().getRefId() << std::endl;
+                continue;
+            }
+
             if (enchant->mData.mType != ESM::Enchantment::WhenUsed && enchant->mData.mType != ESM::Enchantment::CastOnce)
                 continue;
 
             Spell newSpell;
             newSpell.mItem = item;
-            newSpell.mId = item.getClass().getId(item);
+            newSpell.mId = item.getCellRef().getRefId();
             newSpell.mName = item.getClass().getName(item);
             newSpell.mType = Spell::Type_EnchantedItem;
             newSpell.mSelected = invStore.getSelectedEnchantItem() == it;

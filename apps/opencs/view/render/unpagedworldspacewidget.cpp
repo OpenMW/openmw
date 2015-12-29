@@ -1,12 +1,12 @@
-
 #include "unpagedworldspacewidget.hpp"
 
 #include <sstream>
 
-#include <OgreColourValue.h>
-#include <OgreCamera.h>
+#include <osgGA/TrackballManipulator>
 
 #include <QEvent>
+
+#include <components/sceneutil/util.hpp>
 
 #include "../../model/doc/document.hpp"
 
@@ -24,8 +24,8 @@ void CSVRender::UnpagedWorldspaceWidget::update()
     const CSMWorld::Record<CSMWorld::Cell>& record =
         dynamic_cast<const CSMWorld::Record<CSMWorld::Cell>&> (mCellsModel->getRecord (mCellId));
 
-    Ogre::ColourValue colour;
-    colour.setAsABGR (record.get().mAmbi.mAmbient);
+    osg::Vec4f colour = SceneUtil::colourFromRGB(record.get().mAmbi.mAmbient);
+
     setDefaultAmbient (colour);
 
     /// \todo deal with mSunlight and mFog/mForDensity
@@ -49,7 +49,9 @@ CSVRender::UnpagedWorldspaceWidget::UnpagedWorldspaceWidget (const std::string& 
 
     update();
 
-    mCell.reset (new Cell (document.getData(), getSceneManager(), mCellId, document.getPhysics()));
+    mCell.reset (new Cell (document.getData(), mRootNode, mCellId));
+
+    mView->setCameraManipulator(new osgGA::TrackballManipulator);
 }
 
 void CSVRender::UnpagedWorldspaceWidget::cellDataChanged (const QModelIndex& topLeft,
@@ -91,12 +93,19 @@ bool CSVRender::UnpagedWorldspaceWidget::handleDrop (const std::vector<CSMWorld:
         return false;
 
     mCellId = data.begin()->getId();
-    mCell.reset (new Cell (getDocument().getData(), getSceneManager(), mCellId, getDocument().getPhysics()));
+
+    mCell.reset (new Cell (getDocument().getData(), mRootNode, mCellId));
 
     update();
     emit cellChanged(*data.begin());
 
     return true;
+}
+
+void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_Clear);
+    flagAsModified();
 }
 
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
@@ -163,13 +172,15 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()
 {
-    Ogre::Vector3 position = getCamera()->getPosition();
+    osg::Vec3d eye, center, up;
+    mView->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+    osg::Vec3d position = eye;
 
     std::ostringstream stream;
 
     stream
         << "player->positionCell "
-        << position.x << ", " << position.y << ", " << position.z
+        << position.x() << ", " << position.y() << ", " << position.z()
         << ", 0, \"" << mCellId << "\"";
 
     return stream.str();

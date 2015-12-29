@@ -1,8 +1,10 @@
 #include "resourcehelpers.hpp"
 
+#include <sstream>
+
 #include <components/misc/stringops.hpp>
 
-#include <OgreResourceGroupManager.h>
+#include <components/vfs/manager.hpp>
 
 namespace
 {
@@ -29,8 +31,8 @@ namespace
 
 bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
 {
-    Ogre::String::size_type pos = path.rfind('.');
-    if(pos != Ogre::String::npos && path.compare(pos, path.length() - pos, ".dds") != 0)
+    std::string::size_type pos = path.rfind('.');
+    if(pos != std::string::npos && path.compare(pos, path.length() - pos, ".dds") != 0)
     {
         path.replace(pos, path.length(), ".dds");
         return true;
@@ -38,7 +40,7 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
     return false;
 }
 
-std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath)
+std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
@@ -49,7 +51,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
     std::string prefix2 = topLevelDirectory + '/';
 
     std::string correctedPath = resPath;
-    Misc::StringUtils::toLower(correctedPath);
+    Misc::StringUtils::lowerCaseInPlace(correctedPath);
 
     // Apparently, leading separators are allowed
     while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))
@@ -64,65 +66,65 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
     // since we know all (GOTY edition or less) textures end
     // in .dds, we change the extension
     bool changedToDds = changeExtensionToDds(correctedPath);
-    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(correctedPath))
+    if (vfs->exists(correctedPath))
         return correctedPath;
     // if it turns out that the above wasn't true in all cases (not for vanilla, but maybe mods)
     // verify, and revert if false (this call succeeds quickly, but fails slowly)
-    if (changedToDds && Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(origExt))
+    if (changedToDds && vfs->exists(origExt))
         return origExt;
 
     // fall back to a resource in the top level directory if it exists
     std::string fallback = topLevelDirectory + "\\" + getBasename(correctedPath);
-    if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(fallback))
+    if (vfs->exists(fallback))
         return fallback;
 
     if (changedToDds)
     {
         fallback = topLevelDirectory + "\\" + getBasename(origExt);
-        if (Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(fallback))
+        if (vfs->exists(fallback))
             return fallback;
     }
 
     return correctedPath;
 }
 
-std::string Misc::ResourceHelpers::correctTexturePath(const std::string &resPath)
+std::string Misc::ResourceHelpers::correctTexturePath(const std::string &resPath, const VFS::Manager* vfs)
 {
     static const std::string dir = "textures";
-    return correctResourcePath(dir, resPath);
+    return correctResourcePath(dir, resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctIconPath(const std::string &resPath)
+std::string Misc::ResourceHelpers::correctIconPath(const std::string &resPath, const VFS::Manager* vfs)
 {
     static const std::string dir = "icons";
-    return correctResourcePath(dir, resPath);
+    return correctResourcePath(dir, resPath, vfs);
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath)
+std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath, const VFS::Manager* vfs)
 {
     static const std::string dir = "bookart";
-    std::string image = correctResourcePath(dir, resPath);
+    std::string image = correctResourcePath(dir, resPath, vfs);
 
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath, int width, int height)
+std::string Misc::ResourceHelpers::correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs)
 {
-    std::string image = correctBookartPath(resPath);
+    std::string image = correctBookartPath(resPath, vfs);
 
     // Apparently a bug with some morrowind versions, they reference the image without the size suffix.
     // So if the image isn't found, try appending the size.
-    if (!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(image))
+    if (!vfs->exists(image))
     {
         std::stringstream str;
         str << image.substr(0, image.rfind('.')) << "_" << width << "_" << height << image.substr(image.rfind('.'));
-        image = Misc::ResourceHelpers::correctBookartPath(str.str());
+        image = Misc::ResourceHelpers::correctBookartPath(str.str(), vfs);
     }
 
     return image;
 }
 
-std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resPath)
+std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs)
 {
     std::string mdlname = resPath;
     std::string::size_type p = mdlname.rfind('\\');
@@ -132,7 +134,7 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string &resP
         mdlname.insert(mdlname.begin()+p+1, 'x');
     else
         mdlname.insert(mdlname.begin(), 'x');
-    if(!Ogre::ResourceGroupManager::getSingleton().resourceExistsInAnyGroup(mdlname))
+    if(!vfs->exists(mdlname))
     {
         return resPath;
     }

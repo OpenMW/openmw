@@ -1,10 +1,10 @@
 #include "inputmanagerimp.hpp"
 
-#include <OgreRoot.h>
-#include <OgreRenderWindow.h>
 #include <cmath>
 
 #include <boost/lexical_cast.hpp>
+
+#include <osgViewer/ViewerEventHandlers>
 
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
@@ -14,15 +14,14 @@
 
 #include <SDL_version.h>
 
-#include <openengine/ogre/renderer.hpp>
-
-#include "../engine.hpp"
+#include <components/sdlutil/sdlinputwrapper.hpp>
+#include <components/sdlutil/sdlvideowrapper.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/environment.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -30,89 +29,30 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-
-#include "../mwdialogue/dialoguemanagerimp.hpp"
-
-#include <iostream>
-
-using namespace ICS;
-
-namespace
-{
-    std::vector<unsigned long> utf8ToUnicode(const std::string& utf8)
-    {
-        std::vector<unsigned long> unicode;
-        size_t i = 0;
-        while (i < utf8.size())
-        {
-            unsigned long uni;
-            size_t todo;
-            unsigned char ch = utf8[i++];
-            if (ch <= 0x7F)
-            {
-                uni = ch;
-                todo = 0;
-            }
-            else if (ch <= 0xBF)
-            {
-                throw std::logic_error("not a UTF-8 string");
-            }
-            else if (ch <= 0xDF)
-            {
-                uni = ch&0x1F;
-                todo = 1;
-            }
-            else if (ch <= 0xEF)
-            {
-                uni = ch&0x0F;
-                todo = 2;
-            }
-            else if (ch <= 0xF7)
-            {
-                uni = ch&0x07;
-                todo = 3;
-            }
-            else
-            {
-                throw std::logic_error("not a UTF-8 string");
-            }
-            for (size_t j = 0; j < todo; ++j)
-            {
-                if (i == utf8.size())
-                    throw std::logic_error("not a UTF-8 string");
-                unsigned char ch = utf8[i++];
-                if (ch < 0x80 || ch > 0xBF)
-                    throw std::logic_error("not a UTF-8 string");
-                uni <<= 6;
-                uni += ch & 0x3F;
-            }
-            if (uni >= 0xD800 && uni <= 0xDFFF)
-                throw std::logic_error("not a UTF-8 string");
-            if (uni > 0x10FFFF)
-                throw std::logic_error("not a UTF-8 string");
-            unicode.push_back(uni);
-        }
-        return unicode;
-    }
-}
+#include "../mwmechanics/actorutil.hpp"
 
 namespace MWInput
 {
-    InputManager::InputManager(OEngine::Render::OgreRenderer &ogre,
-            OMW::Engine& engine,
+    InputManager::InputManager(
+            SDL_Window* window,
+            osg::ref_ptr<osgViewer::Viewer> viewer,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab)
-        : mJoystickLastUsed(false)
-        , mOgre(ogre)
+        : mWindow(window)
+        , mWindowVisible(true)
+        , mViewer(viewer)
+        , mScreenCaptureHandler(screenCaptureHandler)
+        , mJoystickLastUsed(false)
         , mPlayer(NULL)
-        , mEngine(engine)
+        , mInputManager(NULL)
+        , mVideoWrapper(NULL)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mUISensitivity (Settings::Manager::getFloat("ui sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
@@ -120,28 +60,29 @@ namespace MWInput
         , mGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
-        , mMouseX(ogre.getWindow()->getWidth ()/2.f)
-        , mMouseY(ogre.getWindow()->getHeight ()/2.f)
+        , mGuiCursorX(0)
+        , mGuiCursorY(0)
         , mMouseWheel(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
         , mSneaking(false)
         , mAttemptJump(false)
+        , mInvUiScalingFactor(1.f)
         , mFakeDeviceID(1)
     {
-
-        Ogre::RenderWindow* window = ogre.getWindow ();
-
-        mInputManager = new SFO::InputWrapper(mOgre.getSDLWindow(), mOgre.getWindow(), grab);
+        mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setControllerEventCallback(this);
 
+        mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
+        mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
+                                        Settings::Manager::getFloat("contrast", "Video"));
+
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, NULL, A_Last);
-        adjustMouseRegion (window->getWidth(), window->getHeight());
 
         loadKeyDefaults();
         loadControllerDefaults();
@@ -159,9 +100,9 @@ namespace MWInput
         mControlSwitch["playerviewswitch"]    = true;
         mControlSwitch["vanitymode"]          = true;
 
-        		/* Joystick Init */
+        /* Joystick Init */
 
-		//Load controller mappings
+        // Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
         if(controllerBindingsFile!="")
         {
@@ -169,21 +110,32 @@ namespace MWInput
         }
 #endif
 
-		//Open all presently connected sticks
-		int numSticks = SDL_NumJoysticks();
-		for(int i = 0; i < numSticks; i++)
-		{
+        // Open all presently connected sticks
+        int numSticks = SDL_NumJoysticks();
+        for(int i = 0; i < numSticks; i++)
+        {
             if(SDL_IsGameController(i))
             {
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
                 controllerAdded(mFakeDeviceID, evt);
+                std::cout << "Detected game controller: " << SDL_GameControllerNameForIndex(i) << std::endl;
             }
             else
             {
-                //ICS_LOG(std::string("Unusable controller plugged in: ")+SDL_JoystickNameForIndex(i));
+                std::cout << "Detected unusable controller: " << SDL_JoystickNameForIndex(i) << std::endl;
             }
-		}
+        }
+
+        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+        if (uiScale != 0.f)
+            mInvUiScalingFactor = 1.f / uiScale;
+
+        int w,h;
+        SDL_GetWindowSize(window, &w, &h);
+
+        mGuiCursorX = mInvUiScalingFactor * w / 2.f;
+        mGuiCursorY = mInvUiScalingFactor * h / 2.f;
     }
 
     void InputManager::clear()
@@ -200,6 +152,13 @@ namespace MWInput
         delete mInputBinder;
 
         delete mInputManager;
+
+        delete mVideoWrapper;
+    }
+
+    bool InputManager::isWindowVisible()
+    {
+        return mWindowVisible;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -250,7 +209,7 @@ namespace MWInput
         if (mControlSwitch["playercontrols"])
         {
             if (action == A_Use)
-                mPlayer->getPlayer().getClass().getCreatureStats(mPlayer->getPlayer()).setAttackingOrSpell(currentValue != 0);
+                mPlayer->setAttackingOrSpell(currentValue != 0);
             else if (action == A_Jump)
                 mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
         }
@@ -343,16 +302,20 @@ namespace MWInput
                 quickLoad();
                 break;
             case A_CycleSpellLeft:
-                MWBase::Environment::get().getWindowManager()->cycleSpell(false);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleSpell(false);
                 break;
             case A_CycleSpellRight:
-                MWBase::Environment::get().getWindowManager()->cycleSpell(true);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleSpell(true);
                 break;
             case A_CycleWeaponLeft:
-                MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
                 break;
             case A_CycleWeaponRight:
-                MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
                 break;
             case A_Sneak:
                 if (mSneakToggles)
@@ -383,8 +346,20 @@ namespace MWInput
         //cursor is
         if( !is_relative && was_relative != is_relative )
         {
-            mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+            mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
         }
+    }
+
+    bool InputManager::checkAllowedToUseItems() const
+    {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        if (player.getClass().getNpcStats(player).isWerewolf())
+        {
+            // Cannot use items or spells while in werewolf form
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return false;
+        }
+        return true;
     }
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
@@ -395,7 +370,7 @@ namespace MWInput
 
         mInputManager->capture(disableEvents);
         // inject some fake mouse movement to force updating MyGUI's widget states
-        MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+        MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
 
         if (mControlsDisabled)
         {
@@ -417,17 +392,20 @@ namespace MWInput
                 float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
                 const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
+                xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+                yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
+
                 // We keep track of our own mouse position, so that moving the mouse while in
                 // game mode does not move the position of the GUI cursor
-                mMouseX += xAxis * dt * 1500.0f;
-                mMouseY += yAxis * dt * 1500.0f;
+                mGuiCursorX += xAxis * dt * 1500.0f * mInvUiScalingFactor;
+                mGuiCursorY += yAxis * dt * 1500.0f * mInvUiScalingFactor;
                 mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
 
-                mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
-                mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width)));
+                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height)));
 
-                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mMouseX), static_cast<int>(mMouseY), mMouseWheel);
-                mInputManager->warpMouse(static_cast<int>(mMouseX), static_cast<int>(mMouseY));
+                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+                mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
             }
             if (mMouseLookEnabled)
             {
@@ -613,6 +591,8 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
+        bool changeRes = false;
+
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
@@ -622,12 +602,30 @@ namespace MWInput
             if (it->first == "Input" && it->second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
 
-            if (it->first == "Input" && it->second == "ui sensitivity")
-                mUISensitivity = Settings::Manager::getFloat("ui sensitivity", "Input");
-
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
+            if (it->first == "Video" && (
+                    it->second == "resolution x"
+                    || it->second == "resolution y"
+                    || it->second == "fullscreen"
+                    || it->second == "window border"))
+                changeRes = true;
+
+            if (it->first == "Video" && it->second == "vsync")
+                mVideoWrapper->setSyncToVBlank(Settings::Manager::getBool("vsync", "Video"));
+
+            if (it->first == "Video" && (it->second == "gamma" || it->second == "contrast"))
+                mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
+                                                Settings::Manager::getFloat("contrast", "Video"));
+        }
+
+        if (changeRes)
+        {
+            mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
+                                        Settings::Manager::getInt("resolution y", "Video"),
+                                        Settings::Manager::getBool("fullscreen", "Video"),
+                                        Settings::Manager::getBool("window border", "Video"));
         }
     }
 
@@ -658,11 +656,6 @@ namespace MWInput
         mControlSwitch[sw] = value;
     }
 
-    void InputManager::adjustMouseRegion(int width, int height)
-    {
-        mInputBinder->adjustMouseRegion(width, height);
-    }
-
     void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
     {
         // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
@@ -689,9 +682,9 @@ namespace MWInput
 
     void InputManager::textInput(const SDL_TextInputEvent &arg)
     {
-        const char* text = &arg.text[0];
-        std::vector<unsigned long> unicode = utf8ToUnicode(std::string(text));
-        for (std::vector<unsigned long>::iterator it = unicode.begin(); it != unicode.end(); ++it)
+        MyGUI::UString ustring(&arg.text[0]);
+        MyGUI::UString::utf32string utf32string = ustring.asUTF32();
+        for (MyGUI::UString::utf32string::const_iterator it = utf32string.begin(); it != utf32string.end(); ++it)
             MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
     }
 
@@ -712,7 +705,7 @@ namespace MWInput
         if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
             if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
@@ -739,7 +732,7 @@ namespace MWInput
             mInputBinder->mouseReleased (arg, id);
         } else {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI(id)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
@@ -748,7 +741,7 @@ namespace MWInput
         }
     }
 
-    void InputManager::mouseMoved(const SFO::MouseMotionEvent &arg )
+    void InputManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
 
@@ -757,19 +750,14 @@ namespace MWInput
 
         if (mGuiCursorEnabled)
         {
-            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            mMouseX = static_cast<float>(arg.x);
-            mMouseY = static_cast<float>(arg.y);
-
-            mMouseX = std::max(0.f, std::min(mMouseX, float(viewSize.width)));
-            mMouseY = std::max(0.f, std::min(mMouseY, float(viewSize.height)));
+            mGuiCursorX = static_cast<float>(arg.x) * mInvUiScalingFactor;
+            mGuiCursorY = static_cast<float>(arg.y) * mInvUiScalingFactor;
 
             mMouseWheel = int(arg.z);
 
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mMouseX), int(mMouseY), mMouseWheel);
+            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
         }
 
         if (mMouseLookEnabled && !mControlsDisabled)
@@ -811,7 +799,7 @@ namespace MWInput
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             if(!mInputBinder->detectingBindingState())
             {
-                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mMouseX), static_cast<int>(mMouseY), 
+                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY),
                     sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
                 if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
                 {
@@ -843,7 +831,7 @@ namespace MWInput
         else if(arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mMouseX), static_cast<int>(mMouseY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
+            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
 
             if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
@@ -853,7 +841,7 @@ namespace MWInput
         else
             mInputBinder->buttonReleased(deviceID, arg);
 
-        //to escape initial movie
+        ///to escape initial movie
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
     }
@@ -880,12 +868,15 @@ namespace MWInput
 
     void InputManager::windowVisibilityChange(bool visible)
     {
-            //TODO: Pause game?
+        mWindowVisible = visible;
     }
 
     void InputManager::windowResized(int x, int y)
     {
-        mOgre.windowResized(x,y);
+        Settings::Manager::setInt("resolution x", "Video", x);
+        Settings::Manager::setInt("resolution y", "Video", y);
+
+        MWBase::Environment::get().getWindowManager()->windowResized(x, y);
     }
 
     void InputManager::windowClosed()
@@ -925,6 +916,9 @@ namespace MWInput
 
         // Not allowed before the magic window is accessible
         if (!mControlSwitch["playermagic"] || !mControlSwitch["playercontrols"])
+            return;
+
+        if (!checkAllowedToUseItems())
             return;
 
         // Not allowed if no spell selected
@@ -973,7 +967,8 @@ namespace MWInput
 
     void InputManager::screenshot()
     {
-        mEngine.screenshot();
+        mScreenCaptureHandler->setFramesToCapture(1);
+        mScreenCaptureHandler->captureNextFrame(*mViewer);
 
         MWBase::Environment::get().getWindowManager()->messageBox ("Screenshot saved");
     }
@@ -1040,13 +1035,8 @@ namespace MWInput
     {
         if (!mControlSwitch["playercontrols"])
             return;
-        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        if (player.getClass().getNpcStats(player).isWerewolf())
-        {
-            // Cannot use items or spells while in werewolf form
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+        if (!checkAllowedToUseItems())
             return;
-        }
 
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWindowManager()->activateQuickKey (index);
@@ -1057,13 +1047,8 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
         {
-            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            if (player.getClass().getNpcStats(player).isWerewolf())
-            {
-                // Cannot use items or spells while in werewolf form
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            if (!checkAllowedToUseItems())
                 return;
-            }
 
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
 
@@ -1079,7 +1064,7 @@ namespace MWInput
     void InputManager::activate()
     {
         if (mControlSwitch["playercontrols"])
-            mEngine.activate();
+            mPlayer->activate();
     }
 
     void InputManager::toggleAutoMove()

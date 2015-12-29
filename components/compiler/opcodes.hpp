@@ -228,8 +228,8 @@ namespace Compiler
         const int opcodeGetLockedExplicit = 0x20001c8;
         const int opcodeGetEffect = 0x20001cf;
         const int opcodeGetEffectExplicit = 0x20001d0;
-        const int opcodeBetaComment = 0x2000247;
-        const int opcodeBetaCommentExplicit = 0x2000248;
+        const int opcodeBetaComment = 0x2002d;
+        const int opcodeBetaCommentExplicit = 0x2002e;
         const int opcodeAddSoulGem = 0x20001f3;
         const int opcodeAddSoulGemExplicit = 0x20001f4;
         const int opcodeRemoveSoulGem = 0x20027;

@@ -5,7 +5,7 @@
 CSVWorld::IdTypeDelegate::IdTypeDelegate
     (const ValueList &values, const IconList &icons, CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent)
     : DataDisplayDelegate (values, icons, dispatcher, document,
-                           "records", "type-format",
+                           "Records", "type-format",
                            parent)
 {}
 

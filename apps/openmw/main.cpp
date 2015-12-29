@@ -14,22 +14,25 @@
 
 #if defined(_WIN32)
 // For OutputDebugString
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
+    #define USE_CRASH_CATCHER 1
+#else
+    #define USE_CRASH_CATCHER 0
+#endif
+
+#if USE_CRASH_CATCHER
 #include <csignal>
 extern int cc_install_handlers(int argc, char **argv, int num_signals, int *sigs, const char *logfile, int (*user_info)(char*, char*));
 extern int is_debugger_attached(void);
-#endif
-
-// for Ogre::macBundlePath
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-#include <OSX/macUtils.h>
 #endif
 
 #include <boost/version.hpp>
@@ -196,20 +199,19 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         return false;
     }
 
-    std::cout << "OpenMW version " << OPENMW_VERSION;
-    std::string rev = OPENMW_VERSION_COMMITHASH;
-    std::string tag = OPENMW_VERSION_TAGHASH;
-    if (!rev.empty() && !tag.empty())
-    {
-        rev = rev.substr(0, 10);
-        std::cout << " (revision " << rev << ")";
-    }
-    std::cout << std::endl;
-
     if (variables.count ("version"))
+    {
+        cfgMgr.readConfiguration(variables, desc, true);
+
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+        std::cout << v.describe() << std::endl;
         return false;
+    }
 
     cfgMgr.readConfiguration(variables, desc);
+
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+    std::cout << v.describe() << std::endl;
 
     engine.setGrabMouse(!variables.count("no-grab"));
 
@@ -322,6 +324,10 @@ private:
 
 int main(int argc, char**argv)
 {
+#if defined(__APPLE__)
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
@@ -362,7 +368,7 @@ int main(int argc, char**argv)
 #endif
 
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if USE_CRASH_CATCHER
         // Unix crash catcher
         if ((argc == 2 && strcmp(argv[1], "--cc-handle-crash") == 0) || !is_debugger_attached())
         {
@@ -374,10 +380,10 @@ int main(int argc, char**argv)
             std::cout << "Running in a debugger, not installing crash catcher" << std::endl;
 #endif
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_APPLE
-        // set current dir to bundle path
-        boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
-        boost::filesystem::current_path(bundlePath);
+#ifdef __APPLE__
+        // FIXME: set current dir to bundle path
+        //boost::filesystem::path bundlePath = boost::filesystem::path(Ogre::macBundlePath()).parent_path();
+        //boost::filesystem::current_path(bundlePath);
 #endif
 
         engine.reset(new OMW::Engine(cfgMgr));
@@ -389,7 +395,7 @@ int main(int argc, char**argv)
     }
     catch (std::exception &e)
     {
-#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX || OGRE_PLATFORM == OGRE_PLATFORM_APPLE
+#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
         if (!isatty(fileno(stdin)))
 #endif
             SDL_ShowSimpleMessageBox(0, "OpenMW: Fatal error", e.what(), NULL);

@@ -5,7 +5,7 @@ CMakeCache.txt
 cmake_install.cmake
 Makefile
 makefile
-build
+build*
 prebuilt
 
 ## doxygen
@@ -41,7 +41,6 @@ resources
 
 ## generated objects
 apps/openmw/config.hpp
-components/version/version.hpp
 docs/mainpage.hpp
 moc_*.cxx
 *.cxx_parameters

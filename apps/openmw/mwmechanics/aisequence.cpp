@@ -1,5 +1,6 @@
-
 #include "aisequence.hpp"
+
+#include <limits>
 
 #include "aipackage.hpp"
 #include "aistate.hpp"
@@ -11,12 +12,10 @@
 #include "aiactivate.hpp"
 #include "aicombat.hpp"
 #include "aipursue.hpp"
+#include "actorutil.hpp"
 
 #include <components/esm/aisequence.hpp>
 
-#include "../mwworld/class.hpp"
-#include "creaturestats.hpp"
-#include "npcstats.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -73,7 +72,7 @@ bool AiSequence::getCombatTarget(MWWorld::Ptr &targetActor) const
     
     targetActor = combat->getTarget();
 
-    return true;
+    return !targetActor.isEmpty();
 }
 
 std::list<AiPackage*>::const_iterator AiSequence::begin() const
@@ -150,9 +149,9 @@ bool AiSequence::isPackageDone() const
     return mDone;
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
-    if(actor != MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if(actor != getPlayer())
     {
         if (!mPackages.empty())
         {
@@ -165,7 +164,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                 std::list<AiPackage *>::iterator itActualCombat;
 
                 float nearestDist = std::numeric_limits<float>::max();
-                Ogre::Vector3 vActorPos = Ogre::Vector3(actor.getRefData().getPosition().pos);
+                osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
 
                 for(std::list<AiPackage *>::iterator it = mPackages.begin(); it != mPackages.end();)
                 {
@@ -183,7 +182,12 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                     {
                         const ESM::Position &targetPos = target.getRefData().getPosition();
 
-                        float distTo = (Ogre::Vector3(targetPos.pos) - vActorPos).length();
+                        float distTo = (targetPos.asVec3() - vActorPos).length();
+
+                        // Small threshold for changing target
+                        if (it == mPackages.begin())
+                            distTo = std::max(0.f, distTo - 50.f);
+
                         if (distTo < nearestDist)
                         {
                             nearestDist = distTo;
@@ -211,7 +215,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, AiState& state,float durati
                 }
             }
 
-            if (package->execute (actor,state,duration))
+            if (package->execute (actor,characterController,state,duration))
             {
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)
@@ -239,7 +243,7 @@ void AiSequence::clear()
 
 void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
 {
-    if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+    if (actor == getPlayer())
         throw std::runtime_error("Can't add AI packages to player");
 
     if (package.getTypeId() == AiPackage::TypeIdCombat || package.getTypeId() == AiPackage::TypeIdPursue)
@@ -258,7 +262,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor)
                 return; // already in combat with this actor
             }
             else if ((*iter)->getTypeId() == AiPackage::TypeIdWander)
-                static_cast<AiWander*>(*iter)->setReturnPosition(Ogre::Vector3(actor.getRefData().getPosition().pos));
+                static_cast<AiWander*>(*iter)->setReturnPosition(actor.getRefData().getPosition().asVec3());
         }
     }
 

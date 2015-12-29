@@ -9,19 +9,19 @@ namespace Nif
 uint8_t NIFStream::read_byte()
 {
     uint8_t byte;
-    if(inp->read(&byte, 1) != 1) return 0;
+    inp->read((char*)&byte, 1);
     return byte;
 }
 uint16_t NIFStream::read_le16()
 {
     uint8_t buffer[2];
-    if(inp->read(buffer, 2) != 2) return 0;
+    inp->read((char*)buffer, 2);
     return buffer[0] | (buffer[1]<<8);
 }
 uint32_t NIFStream::read_le32()
 {
     uint8_t buffer[4];
-    if(inp->read(buffer, 4) != 4) return 0;
+    inp->read((char*)buffer, 4);
     return buffer[0] | (buffer[1]<<8) | (buffer[2]<<16) | (buffer[3]<<24);
 }
 float NIFStream::read_le32f()
@@ -34,43 +34,45 @@ float NIFStream::read_le32f()
 }
 
 //Public functions
-Ogre::Vector2 NIFStream::getVector2()
+osg::Vec2f NIFStream::getVector2()
 {
-    float a[2];
+    osg::Vec2f vec;
     for(size_t i = 0;i < 2;i++)
-        a[i] = getFloat();
-    return Ogre::Vector2(a);
+        vec._v[i] = getFloat();
+    return vec;
 }
-Ogre::Vector3 NIFStream::getVector3()
+osg::Vec3f NIFStream::getVector3()
 {
-    float a[3];
+    osg::Vec3f vec;
     for(size_t i = 0;i < 3;i++)
-        a[i] = getFloat();
-    return Ogre::Vector3(a);
+        vec._v[i] = getFloat();
+    return vec;
 }
-Ogre::Vector4 NIFStream::getVector4()
+osg::Vec4f NIFStream::getVector4()
 {
-    float a[4];
+    osg::Vec4f vec;
     for(size_t i = 0;i < 4;i++)
-        a[i] = getFloat();
-    return Ogre::Vector4(a);
+        vec._v[i] = getFloat();
+    return vec;
 }
-Ogre::Matrix3 NIFStream::getMatrix3()
+Matrix3 NIFStream::getMatrix3()
 {
-    Ogre::Real a[3][3];
+    Matrix3 mat;
     for(size_t i = 0;i < 3;i++)
     {
         for(size_t j = 0;j < 3;j++)
-            a[i][j] = Ogre::Real(getFloat());
+            mat.mValues[i][j] = getFloat();
     }
-    return Ogre::Matrix3(a);
+    return mat;
 }
-Ogre::Quaternion NIFStream::getQuaternion()
+osg::Quat NIFStream::getQuaternion()
 {
-    float a[4];
-    for(size_t i = 0;i < 4;i++)
-        a[i] = getFloat();
-    return Ogre::Quaternion(a);
+    osg::Quat quat;
+    quat.w() = getFloat();
+    quat.x() = getFloat();
+    quat.y() = getFloat();
+    quat.z() = getFloat();
+    return quat;
 }
 Transformation NIFStream::getTrafo()
 {
@@ -83,16 +85,9 @@ Transformation NIFStream::getTrafo()
 
 std::string NIFStream::getString(size_t length)
 {
-    //Make sure we're not reading in too large of a string
-    unsigned int fileSize = inp->size();
-    if(fileSize != 0 && fileSize < length)
-        file->fail("Attempted to read a string with " + Ogre::StringConverter::toString(length) + " characters , but file is only "+Ogre::StringConverter::toString(fileSize)+ " bytes!");
-
     std::vector<char> str (length+1, 0);
 
-    if(inp->read(&str[0], length) != length)
-        throw std::runtime_error (":  String length in NIF file "+ file->getFilename() +" does not match!  Expected length:  "
-            + Ogre::StringConverter::toString(length));
+    inp->read(&str[0], length);
 
     return &str[0];
 }
@@ -103,14 +98,16 @@ std::string NIFStream::getString()
 }
 std::string NIFStream::getVersionString()
 {
-    return inp->getLine();
+    std::string result;
+    std::getline(*inp, result);
+    return result;
 }
 
-void NIFStream::getShorts(std::vector<short> &vec, size_t size)
+void NIFStream::getUShorts(osg::VectorGLushort* vec, size_t size)
 {
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getShort();
+    vec->reserve(size);
+    for(size_t i = 0;i < size;i++)
+        vec->push_back(getUShort());
 }
 void NIFStream::getFloats(std::vector<float> &vec, size_t size)
 {
@@ -118,25 +115,25 @@ void NIFStream::getFloats(std::vector<float> &vec, size_t size)
     for(size_t i = 0;i < vec.size();i++)
         vec[i] = getFloat();
 }
-void NIFStream::getVector2s(std::vector<Ogre::Vector2> &vec, size_t size)
+void NIFStream::getVector2s(osg::Vec2Array* vec, size_t size)
 {
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector2();
+    vec->reserve(size);
+    for(size_t i = 0;i < size;i++)
+        vec->push_back(getVector2());
 }
-void NIFStream::getVector3s(std::vector<Ogre::Vector3> &vec, size_t size)
+void NIFStream::getVector3s(osg::Vec3Array* vec, size_t size)
 {
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector3();
+    vec->reserve(size);
+    for(size_t i = 0;i < size;i++)
+        vec->push_back(getVector3());
 }
-void NIFStream::getVector4s(std::vector<Ogre::Vector4> &vec, size_t size)
+void NIFStream::getVector4s(osg::Vec4Array* vec, size_t size)
 {
-    vec.resize(size);
-    for(size_t i = 0;i < vec.size();i++)
-        vec[i] = getVector4();
+    vec->reserve(size);
+    for(size_t i = 0;i < size;i++)
+        vec->push_back(getVector4());
 }
-void NIFStream::getQuaternions(std::vector<Ogre::Quaternion> &quat, size_t size)
+void NIFStream::getQuaternions(std::vector<osg::Quat> &quat, size_t size)
 {
     quat.resize(size);
     for(size_t i = 0;i < quat.size();i++)

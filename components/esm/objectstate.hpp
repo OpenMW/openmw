@@ -24,12 +24,13 @@ namespace ESM
         unsigned char mEnabled;
         int mCount;
         ESM::Position mPosition;
-        float mLocalRotation[3];
 
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;
 
-        ObjectState() : mHasCustomState(true)
+        unsigned int mVersion;
+
+        ObjectState() : mHasCustomState(true), mVersion(0)
         {}
 
         /// @note Does not load the CellRef ID, it should already be loaded before calling this method

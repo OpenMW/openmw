@@ -1,4 +1,3 @@
-
 #include "regionmap.hpp"
 
 #include <cmath>
@@ -169,7 +168,7 @@ void CSMWorld::RegionMap::updateRegions (const std::vector<std::string>& regions
 {
     std::vector<std::string> regions2 (regions);
 
-    std::for_each (regions2.begin(), regions2.end(), &Misc::StringUtils::lowerCase);
+    std::for_each (regions2.begin(), regions2.end(), Misc::StringUtils::lowerCaseInPlace);
     std::sort (regions2.begin(), regions2.end());
 
     for (std::map<CellCoordinates, CellDescription>::const_iterator iter (mMap.begin());

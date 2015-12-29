@@ -60,10 +60,14 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     loadConfig(mFixedPath.getUserConfigPath(), variables, description);
     boost::program_options::notify(variables);
 
-    loadConfig(mFixedPath.getLocalPath(), variables, description);
+    // read either local or global config depending on type of installation
+    bool loaded = loadConfig(mFixedPath.getLocalPath(), variables, description);
     boost::program_options::notify(variables);
-    loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
-    boost::program_options::notify(variables);
+    if (!loaded)
+    {
+        loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
+        boost::program_options::notify(variables);
+    }
 
     mSilent = silent;
 }
@@ -126,7 +130,7 @@ void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool cre
         boost::bind(&boost::filesystem::path::empty, _1)), dataDirs.end());
 }
 
-void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
+bool ConfigurationManager::loadConfig(const boost::filesystem::path& path,
     boost::program_options::variables_map& variables,
     boost::program_options::options_description& description)
 {
@@ -145,13 +149,16 @@ void ConfigurationManager::loadConfig(const boost::filesystem::path& path,
 
             if (!mSilent)
                 std::cout << "done." << std::endl;
+            return true;
         }
         else
         {
             if (!mSilent)
                 std::cout << "failed." << std::endl;
+            return false;
         }
     }
+    return false;
 }
 
 const boost::filesystem::path& ConfigurationManager::getGlobalPath() const

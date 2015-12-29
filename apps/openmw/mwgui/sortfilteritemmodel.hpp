@@ -24,7 +24,6 @@ namespace MWGui
 
         void setCategory (int category);
         void setFilter (int filter);
-        void setShowEquipped (bool show) { mShowEquipped = show; }
 
         /// Use ItemStack::Type for sorting?
         void setSortByType(bool sort) { mSortByType = sort; }
@@ -49,7 +48,6 @@ namespace MWGui
 
         int mCategory;
         int mFilter;
-        bool mShowEquipped;
         bool mSortByType;
     };
 
