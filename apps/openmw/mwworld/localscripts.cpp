@@ -61,7 +61,10 @@ namespace
 
 }
 
-MWWorld::LocalScripts::LocalScripts (const MWWorld::ESMStore& store) : mStore (store) {}
+MWWorld::LocalScripts::LocalScripts (const MWWorld::ESMStore& store) : mStore (store)
+{
+    mIter = mScripts.end();
+}
 
 void MWWorld::LocalScripts::setIgnore (const ConstPtr& ptr)
 {
