@@ -7,6 +7,8 @@
 #include <osgDB/Registry>
 #include <osgDB/ObjectWrapper>
 
+#include <BulletCollision/CollisionShapes/btCompoundShape.h>
+
 #include <components/files/configurationmanager.hpp>
 #include <components/files/collections.hpp>
 #include <components/vfs/manager.hpp>
@@ -15,6 +17,8 @@
 #include <components/resource/texturemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
+#include <components/resource/bulletshapemanager.hpp>
+#include <components/resource/bulletshape.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/nifosg/nifloader.hpp>
 
@@ -31,6 +35,8 @@ bool extensionIs(std::string path, std::string ext) {
     if (Misc::StringUtils::ciEqual(pext, ext)) return true;
     return false;
 }
+
+typedef std::map<int, int> AnimMap;
 
 int main(int argc, char **argv) {
     namespace bpo = boost::program_options;
@@ -128,6 +134,10 @@ int main(int argc, char **argv) {
 
     Resource::SceneManager* sceneManager = mResourceSystem->getSceneManager();
     Resource::KeyframeManager* keyframeManager = mResourceSystem->getKeyframeManager();
+    Resource::BulletShapeManager* shapeManager =
+        new Resource::BulletShapeManager(mResourceSystem->getVFS(),
+                                         mResourceSystem->getSceneManager(),
+                                         mResourceSystem->getNifFileManager());
 
     osgDB::Registry* reg = osgDB::Registry::instance();
     osgDB::ReaderWriter* writer = reg->getReaderWriterForExtension(format);
@@ -173,6 +183,9 @@ int main(int argc, char **argv) {
         }
     }
 
+    bool make_osgb = false;
+    bool make_bullet = true;
+
     // The number of bytes written to std::cerr (or -1 if it's a console stream).  The
     // idea was to check how many bytes we've written as a way to check whether there were
     // problems loading the NIF file or any of it's dependencies.  This approch is a
@@ -183,76 +196,161 @@ int main(int argc, char **argv) {
     std::streampos error_position;
     BOOST_FOREACH(const std::string fpath, nif_files) {
 
-        // KF files need a little special renaming attention to avoid conflicts with
-        // OSG conversions of NIF files with the same basename.
-        bool kf_file = false;
-        std::string fstr;
-        if (extensionIs(fpath, ".kf")) {
-            fstr = fpath.substr(0, fpath.size() - 3) + "_kf";
-            kf_file = true;
-        }
-        else {
-            if (extensionIs(fpath, ".nif")) {
-                fstr = fpath.substr(0, fpath.size() - 4);
+        if (make_osgb) {
+            // KF files need a little special renaming attention to avoid conflicts with
+            // OSG conversions of NIF files with the same basename.
+            bool kf_file = false;
+            std::string fstr;
+            if (extensionIs(fpath, ".kf")) {
+                fstr = fpath.substr(0, fpath.size() - 3) + "_kf";
+                kf_file = true;
             }
             else {
-                fstr = fpath;
+                if (extensionIs(fpath, ".nif")) {
+                    fstr = fpath.substr(0, fpath.size() - 4);
+                }
+                else {
+                    fstr = fpath;
+                }
+                kf_file = false;
             }
-            kf_file = false;
+            fstr += ".";
+            fstr += format;
+
+            // Build the output path.
+            boost::filesystem::path outpath = outdir / boost::filesystem::path(fstr);
+
+            // Report all conversions unless the user requested that we be quiet.  This also
+            // has to go to std::cerr, or it will not be interleaved with the otehr failures
+            // in any intelligble way.
+            if (!quiet)
+                std::cerr << "Converting: '" << fpath << "' -> '" << outpath.string() << "'." << std::endl;
+
+            // Create any directories that are required.
+            boost::filesystem::create_directories(outpath.parent_path());
+
+            error_position = std::cerr.tellp();
+
+            // Load kf files differently.  Assume that all other files (regardless of
+            // extension) are NIF files.
+            osg::ref_ptr<const osg::Object> object;
+            if (kf_file) {
+                osg::ref_ptr<const NifOsg::KeyframeHolder> kfh = keyframeManager->get(fpath);
+                object = kfh;
+            }
+            else {
+                osg::ref_ptr<const osg::Node> node = sceneManager->getTemplate(fpath);
+                object = node;
+            }
+
+            if (!object) {
+                std::cerr << "Complete failure loading: '" << fpath << "'." << std::endl;
+                // If there's no osg::Object, there's nothing to export.
+                continue;
+            }
+            if (error_position != std::cerr.tellp()) {
+                std::cerr << "Partial failure loading: '" << fpath << "'." << std::endl;
+                // We should still try exporting the object because we'll be able to export
+                // whatever was loaded successfully.
+            }
+
+            // The osgDB::ReaderWriter will also occasionally report errors to std::cerr
+            // without actually failing.  Detect that as well.
+            error_position = std::cerr.tellp();
+            osgDB::ReaderWriter::WriteResult result =
+                writer->writeObject(*object, outpath.string(), options);
+            if (!result.success()) {
+                std::cerr << "Complete failure converting: '" << fpath << "': "
+                          << result.message() << " code " << result.status() << std::endl;
+                // Don't warn twice (if we also wrote to std::cerr).
+                continue;
+            }
+            if (error_position != std::cerr.tellp()) {
+                std::cerr << "Partial failure converting: '" << fpath << "'." << std::endl;
+            }
         }
-        fstr += ".";
-        fstr += format;
 
-        // Build the output path.
-        boost::filesystem::path outpath = outdir / boost::filesystem::path(fstr);
+        // ============================================================================
+        // Bullet serialization!
+        // ============================================================================
 
-        // Report all conversions unless the user requested that we be quiet.  This also
-        // has to go to std::cerr, or it will not be interleaved with the otehr failures
-        // in any intelligble way.
-        if (!quiet)
-            std::cerr << "Converting: '" << fpath << "' -> '" << outpath.string() << "'." << std::endl;
+        if (make_bullet) {
+            if (extensionIs(fpath, ".kf") || fpath.size() < 4) {
+                continue;
+            }
 
-        // Create any directories that are required.
-        boost::filesystem::create_directories(outpath.parent_path());
+            std::string fstr;
+            if (extensionIs(fpath, ".nif")) {
+                fstr = fpath.substr(0, fpath.size() - 4) + ".bullet";
+            }
+            // Build the output path.
+            boost::filesystem::path outpath = outdir / boost::filesystem::path(fstr);
 
-        error_position = std::cerr.tellp();
+            osg::ref_ptr<Resource::BulletShapeInstance> shape = shapeManager->createInstance(fpath);
+            if (!shape) {
+                std::cerr << "Failed to load shape: " << fpath << std::endl;
+                continue;
+            }
+            std::cerr << "Successfully loaded bullet shape from: " << fpath << std::endl;
 
-        // Load kf files differently.  Assume that all other files (regardless of
-        // extension) are NIF files.
-        osg::ref_ptr<const osg::Object> object;
-        if (kf_file) {
-            osg::ref_ptr<const NifOsg::KeyframeHolder> kfh = keyframeManager->get(fpath);
-            object = kfh;
-        }
-        else {
-            osg::ref_ptr<const osg::Node> node = sceneManager->getTemplate(fpath);
-            object = node;
-        }
+            osg::Vec3f& cbhe = shape->mCollisionBoxHalfExtents;
+            if (cbhe != osg::Vec3f()) {
+                std::cerr << "  Bullet shape collision box half extents: x="
+                          <<  cbhe.x() << " y=" << cbhe.y() << " z=" << cbhe.z() << std::endl;
+            }
+            osg::Vec3f& cbt = shape->mCollisionBoxTranslate;
+            if (cbt != osg::Vec3f()) {
+                std::cerr << "  Bullet shape collision box translate: x="
+                          <<  cbt.x() << " y=" << cbt.y() << " z=" << cbt.z() << std::endl;
+            }
 
-        if (!object) {
-            std::cerr << "Complete failure loading: '" << fpath << "'." << std::endl;
-            // If there's no osg::Object, there's nothing to export.
-            continue;
-        }
-        if (error_position != std::cerr.tellp()) {
-            std::cerr << "Partial failure loading: '" << fpath << "'." << std::endl;
-            // We should still try exporting the object because we'll be able to export
-            // whatever was loaded successfully.
-        }
+            if (shape->mAnimatedShapes.size() > 0) {
+                std::cerr << "  Bullet shape animated size=" << shape->mAnimatedShapes.size() << " map={ ";
+                BOOST_FOREACH(const AnimMap::value_type& pair, shape->mAnimatedShapes) {
+                    std::cerr << pair.first << "=" << pair.second << " ";
+                }
+                std::cerr << "}" << std::endl;
+            }
 
-        // The osgDB::ReaderWriter will also occasionally report errors to std::cerr
-        // without actually failing.  Detect that as well.
-        error_position = std::cerr.tellp();
-        osgDB::ReaderWriter::WriteResult result =
-            writer->writeObject(*object, outpath.string(), options);
-        if (!result.success()) {
-            std::cerr << "Complete failure converting: '" << fpath << "': "
-                      << result.message() << " code " << result.status() << std::endl;
-            // Don't warn twice (if we also wrote to std::cerr).
-            continue;
-        }
-        if (error_position != std::cerr.tellp()) {
-            std::cerr << "Partial failure converting: '" << fpath << "'." << std::endl;
+            btCollisionShape* bts = shape->getCollisionShape();
+            if (!bts) {
+                std::cerr << "  Shape had no btCollision shape!" << std::endl;
+                continue;
+            }
+
+            std::cerr << "  Serializing shape to: " << outpath << std::endl;
+            btDefaultSerializer serializer;
+
+            serializer.startSerialization();
+            bts->serializeSingleShape(&serializer);
+            serializer.finishSerialization();
+
+            // Create any directories that are required.
+            boost::filesystem::create_directories(outpath.parent_path());
+
+            FILE* file = fopen(outpath.string().c_str(), "wb");
+            fwrite(serializer.getBufferPointer(), serializer.getCurrentBufferSize(), 1, file);
+            fclose(file);
+
+            btVector3 bscenter;
+            btScalar bsradius;
+            bts->getBoundingSphere(bscenter, bsradius);
+            std::cerr << "  Bullet bounding sphere: x=" << bscenter.x() << " y=" << bscenter.y()
+                      << " z=" << bscenter.z() << " r=" << bsradius << std::endl;
+
+            std::cerr << "  Bullet shape: compound=" << bts->isCompound()
+                      << " polyhedral=" << bts->isPolyhedral()
+                      << " convex=" << bts->isConvex()
+                      << " concave=" << bts->isConvex()
+                      << " type=" << bts->getShapeType() << std::endl;
+
+            if (bts->isCompound()) {
+                btCompoundShape *comp = static_cast<btCompoundShape*>(bts);
+                for(int i = 0; i < comp->getNumChildShapes(); ++i) {
+                    btCollisionShape *child = comp->getChildShape(i);
+                    std::cerr << "    Child: compound=" << child->isCompound() << " type=" << child->getShapeType() << std::endl;
+                }
+            }
         }
     }
 }
