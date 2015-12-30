@@ -63,7 +63,7 @@ namespace
 
 MWWorld::LocalScripts::LocalScripts (const MWWorld::ESMStore& store) : mStore (store) {}
 
-void MWWorld::LocalScripts::setIgnore (const Ptr& ptr)
+void MWWorld::LocalScripts::setIgnore (const ConstPtr& ptr)
 {
     mIgnore = ptr;
 }

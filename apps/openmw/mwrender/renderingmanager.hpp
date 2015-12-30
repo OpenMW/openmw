@@ -136,7 +136,7 @@ namespace MWRender
         void update(float dt, bool paused);
 
         Animation* getAnimation(const MWWorld::Ptr& ptr);
-        Animation* getPlayerAnimation();
+        const Animation* getAnimation(const MWWorld::ConstPtr& ptr) const;
 
         void addWaterRippleEmitter(const MWWorld::Ptr& ptr);
         void removeWaterRippleEmitter(const MWWorld::Ptr& ptr);

@@ -114,6 +114,7 @@ namespace MWMechanics
             ///Returns the list of actors which are siding with the given actor in fights
             /**ie AiFollow or AiEscort is active and the target is the actor **/
             std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
+            std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
 
             /// Get the list of AiFollow::mFollowIndex for all actors following this target
             std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);

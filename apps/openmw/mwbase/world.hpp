@@ -178,7 +178,7 @@ namespace MWBase
             virtual MWWorld::Ptr searchPtrViaActorId (int actorId) = 0;
             ///< Search is limited to the active cells.
 
-            virtual MWWorld::Ptr findContainer (const MWWorld::Ptr& ptr) = 0;
+            virtual MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr) = 0;
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
 
@@ -248,7 +248,7 @@ namespace MWBase
             /// Returns a pointer to the object the provided object would hit (if within the
             /// specified distance), and the point where the hit occurs. This will attempt to
             /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
-            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::Ptr &ptr, float distance) = 0;
+            virtual std::pair<MWWorld::Ptr,osg::Vec3f> getHitContact(const MWWorld::ConstPtr &ptr, float distance) = 0;
 
             virtual void adjustPosition (const MWWorld::Ptr& ptr, bool force) = 0;
             ///< Adjust position after load to be on ground. Must be called after model load.
@@ -271,7 +271,7 @@ namespace MWBase
 
             virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
 
-            virtual MWWorld::Ptr safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
+            virtual MWWorld::Ptr safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< place an object in a "safe" location (ie not in the void, etc).
 
             virtual void indexToPosition (int cellX, int cellY, float &x, float &y, bool centre = false)
@@ -347,14 +347,14 @@ namespace MWBase
 
             virtual void update (float duration, bool paused) = 0;
 
-            virtual MWWorld::Ptr placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount) = 0;
+            virtual MWWorld::Ptr placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
             ///< copy and place an object into the gameworld at the specified cursor position
             /// @param object
             /// @param cursor X (relative 0-1)
             /// @param cursor Y (relative 0-1)
             /// @param number of objects to place
 
-            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount) = 0;
+            virtual MWWorld::Ptr dropObjectOnGround (const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object, int amount) = 0;
             ///< copy and place an object into the gameworld at the given actor's position
             /// @param actor giving the dropped object position
             /// @param object
@@ -367,14 +367,14 @@ namespace MWBase
 
             virtual bool isFlying(const MWWorld::Ptr &ptr) const = 0;
             virtual bool isSlowFalling(const MWWorld::Ptr &ptr) const = 0;
-            virtual bool isSwimming(const MWWorld::Ptr &object) const = 0;
-            virtual bool isWading(const MWWorld::Ptr &object) const = 0;
+            virtual bool isSwimming(const MWWorld::ConstPtr &object) const = 0;
+            virtual bool isWading(const MWWorld::ConstPtr &object) const = 0;
             ///Is the head of the creature underwater?
-            virtual bool isSubmerged(const MWWorld::Ptr &object) const = 0;
+            virtual bool isSubmerged(const MWWorld::ConstPtr &object) const = 0;
             virtual bool isUnderwater(const MWWorld::CellStore* cell, const osg::Vec3f &pos) const = 0;
             virtual bool isOnGround(const MWWorld::Ptr &ptr) const = 0;
 
-            virtual osg::Matrixf getActorHeadTransform(const MWWorld::Ptr& actor) const = 0;
+            virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual void togglePOV() = 0;
             virtual bool isFirstPerson() const = 0;
@@ -396,25 +396,25 @@ namespace MWBase
             /// @note throws an exception when invoked on a teleport door
             virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
 
-            virtual bool getPlayerStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if the player is standing on \a object
-            virtual bool getActorStandingOn (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is standing on \a object
-            virtual bool getPlayerCollidingWith(const MWWorld::Ptr& object) = 0; ///< @return true if the player is colliding with \a object
-            virtual bool getActorCollidingWith (const MWWorld::Ptr& object) = 0; ///< @return true if any actor is colliding with \a object
-            virtual void hurtStandingActors (const MWWorld::Ptr& object, float dmgPerSecond) = 0;
+            virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
+            virtual bool getActorStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is standing on \a object
+            virtual bool getPlayerCollidingWith(const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is colliding with \a object
+            virtual bool getActorCollidingWith (const MWWorld::ConstPtr& object) = 0; ///< @return true if any actor is colliding with \a object
+            virtual void hurtStandingActors (const MWWorld::ConstPtr& object, float dmgPerSecond) = 0;
             ///< Apply a health difference to any actors standing on \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
-            virtual void hurtCollidingActors (const MWWorld::Ptr& object, float dmgPerSecond) = 0;
+            virtual void hurtCollidingActors (const MWWorld::ConstPtr& object, float dmgPerSecond) = 0;
             ///< Apply a health difference to any actors colliding with \a object.
             /// To hurt actors, healthPerSecond should be a positive value. For a negative value, actors will be healed.
 
             virtual float getWindSpeed() = 0;
 
-            virtual void getContainersOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            virtual void getContainersOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all containers in active cells owned by this Npc
-            virtual void getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out) = 0;
+            virtual void getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out) = 0;
             ///< get all items in active cells owned by this Npc
 
-            virtual bool getLOS(const MWWorld::Ptr& actor,const MWWorld::Ptr& targetActor) = 0;
+            virtual bool getLOS(const MWWorld::ConstPtr& actor,const MWWorld::ConstPtr& targetActor) = 0;
             ///< get Line of Sight (morrowind stupid implementation)
 
             virtual float getDistToNearestRayHit(const osg::Vec3f& from, const osg::Vec3f& dir, float maxDist) = 0;
@@ -430,6 +430,7 @@ namespace MWBase
 
             /// \todo Probably shouldn't be here
             virtual MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) = 0;
+            virtual const MWRender::Animation* getAnimation(const MWWorld::ConstPtr &ptr) const = 0;
             virtual void reattachPlayerCamera() = 0;
 
             /// \todo this does not belong here
@@ -455,13 +456,6 @@ namespace MWBase
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const = 0;
 
-            /// Turn actor into werewolf or normal form.
-            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
-
-            /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
-            /// It only applies to the current form the NPC is in.
-            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
-
             virtual bool getGodModeState() = 0;
 
             virtual bool toggleGodMode() = 0;
@@ -481,7 +475,7 @@ namespace MWBase
             virtual void launchMagicBolt (const std::string& model, const std::string& sound, const std::string& spellId,
                                           float speed, bool stack, const ESM::EffectList& effects,
                                            const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection) = 0;
-            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+            virtual void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                            const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength) = 0;
 
             virtual const std::vector<std::string>& getContentFiles() const = 0;
@@ -541,14 +535,14 @@ namespace MWBase
             /// Resets all actors in the current active cells to their original location within that cell.
             virtual void resetActors() = 0;
 
-            virtual bool isWalkingOnWater (const MWWorld::Ptr& actor) = 0;
+            virtual bool isWalkingOnWater (const MWWorld::ConstPtr& actor) = 0;
 
             /// Return a vector aiming the actor's weapon towards a target.
             /// @note The length of the vector is the distance between actor and target.
-            virtual osg::Vec3f aimToTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
+            virtual osg::Vec3f aimToTarget(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             /// Return the distance between actor's weapon and target's collision box.
-            virtual float getHitDistance(const MWWorld::Ptr& actor, const MWWorld::Ptr& target) = 0;
+            virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
     };

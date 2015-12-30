@@ -32,7 +32,7 @@
 
 namespace
 {
-    std::string getDialogueActorFaction(MWWorld::Ptr actor)
+    std::string getDialogueActorFaction(MWWorld::ConstPtr actor)
     {
         std::string factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
@@ -530,7 +530,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -562,7 +562,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -601,7 +601,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr actor = R()(runtime, false);
+                    MWWorld::ConstPtr actor = R()(runtime, false);
 
                     std::string factionID = "";
 
@@ -633,7 +633,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0)
@@ -739,7 +739,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionId;
 
@@ -771,7 +771,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
@@ -805,7 +805,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
@@ -867,7 +867,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = R()(runtime);
+                    MWWorld::ConstPtr ptr = R()(runtime);
 
                     std::string race = runtime.getStringLiteral(runtime[0].mInteger);
                     ::Misc::StringUtils::lowerCaseInPlace(race);
@@ -899,7 +899,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -931,7 +931,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -958,7 +958,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false);
+                    MWWorld::ConstPtr ptr = R()(runtime, false);
 
                     std::string factionID = "";
                     if(arg0 >0 )
@@ -1096,7 +1096,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->setWerewolf(ptr, set);
+                    MWBase::Environment::get().getMechanicsManager()->setWerewolf(ptr, set);
                 }
         };
 
@@ -1108,7 +1108,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = R()(runtime);
-                    MWBase::Environment::get().getWorld()->applyWerewolfAcrobatics(ptr);
+                    MWBase::Environment::get().getMechanicsManager()->applyWerewolfAcrobatics(ptr);
                 }
         };
 

@@ -75,6 +75,9 @@ namespace MWWorld
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
 
+            /// Return base node (can be a null pointer).
+            const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
+
             /// Set base node (can be a null pointer).
             void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
 
@@ -115,6 +118,8 @@ namespace MWWorld
 
             CustomData *getCustomData();
             ///< May return a 0-pointer. The ownership of the return data object is not transferred.
+
+            const CustomData *getCustomData() const;
 
             bool hasChanged() const;
             ///< Has this RefData changed since it was originally loaded?

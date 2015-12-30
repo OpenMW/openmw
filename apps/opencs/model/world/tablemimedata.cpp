@@ -179,7 +179,7 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::Univers
         }
     }
 
-    throw std::runtime_error ("TableMimeData object does not hold object of the seeked type");
+    throw std::runtime_error ("TableMimeData object does not hold object of the sought type");
 }
 
 CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnBase::Display type) const
@@ -201,7 +201,7 @@ CSMWorld::UniversalId CSMWorld::TableMimeData::returnMatching (CSMWorld::ColumnB
         }
     }
 
-    throw std::runtime_error ("TableMimeData object does not hold object of the seeked type");
+    throw std::runtime_error ("TableMimeData object does not hold object of the sought type");
 }
 
 bool CSMWorld::TableMimeData::fromDocument (const CSMDoc::Document& document) const

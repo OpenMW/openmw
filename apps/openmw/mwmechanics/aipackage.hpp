@@ -75,6 +75,9 @@ namespace MWMechanics
             /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
             virtual bool sideWithTarget() const;
 
+            /// Return true if the actor should follow the target through teleport doors (default false)
+            virtual bool followTargetThroughDoors() const;
+
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
         protected:

@@ -122,7 +122,7 @@ namespace MWWorld
                 for (typename List::List::iterator iter (list.mList.begin()); iter!=list.mList.end();
                     ++iter)
                 {
-                    if (iter->mData.isDeletedByContentFile())
+                    if (!isAccessible(iter->mData, iter->mRef))
                         continue;
                     if (!visitor (MWWorld::Ptr(&*iter, this)))
                         return false;
@@ -164,6 +164,15 @@ namespace MWWorld
 
         public:
 
+            /// Should this reference be accessible to the outside world (i.e. to scripts / game logic)?
+            /// Determined based on the deletion flags. By default, objects deleted by content files are never accessible;
+            /// objects deleted by setCount(0) are still accessible *if* they came from a content file (needed for vanilla
+            /// scripting compatibility, and the fact that objects may be "un-deleted" in the original game).
+            static bool isAccessible(const MWWorld::RefData& refdata, const MWWorld::CellRef& cref)
+            {
+                return !refdata.isDeletedByContentFile() && (cref.hasContentFile() || refdata.getCount() > 0);
+            }
+
             /// Moves object from this cell to the given cell.
             /// @note automatically updates given cell by calling cellToMoveTo->moveFrom(...)
             /// @note throws exception if cellToMoveTo == this
@@ -203,6 +212,12 @@ namespace MWWorld
             Ptr search (const std::string& id);
             ///< Will return an empty Ptr if cell is not loaded. Does not check references in
             /// containers.
+            /// @note Triggers CellStore hasState flag.
+
+            ConstPtr searchConst (const std::string& id) const;
+            ///< Will return an empty Ptr if cell is not loaded. Does not check references in
+            /// containers.
+            /// @note Does not trigger CellStore hasState flag.
 
             Ptr searchViaActorId (int id);
             ///< Will return an empty Ptr if cell is not loaded.
@@ -225,8 +240,9 @@ namespace MWWorld
             void preload ();
             ///< Build ID list from content file.
 
-            /// Call visitor (ref) for each reference. visitor must return a bool. Returning
+            /// Call visitor (MWWorld::Ptr) for each reference. visitor must return a bool. Returning
             /// false will abort the iteration.
+            /// \note Prefer using forEachConst when possible.
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
             template<class Visitor>
@@ -239,7 +255,7 @@ namespace MWWorld
 
                 for (unsigned int i=0; i<mMergedRefs.size(); ++i)
                 {
-                    if (mMergedRefs[i]->mData.isDeletedByContentFile())
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
                         continue;
 
                     if (!visitor(MWWorld::Ptr(mMergedRefs[i], this)))
@@ -247,6 +263,28 @@ namespace MWWorld
                 }
                 return true;
             }
+
+            /// Call visitor (MWWorld::ConstPtr) for each reference. visitor must return a bool. Returning
+            /// false will abort the iteration.
+            /// \attention This function also lists deleted (count 0) objects!
+            /// \return Iteration completed?
+            template<class Visitor>
+            bool forEachConst (Visitor& visitor) const
+            {
+                if (mState != State_Loaded)
+                    return false;
+
+                for (unsigned int i=0; i<mMergedRefs.size(); ++i)
+                {
+                    if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
+                        continue;
+
+                    if (!visitor(MWWorld::ConstPtr(mMergedRefs[i], this)))
+                        return false;
+                }
+                return true;
+            }
+
 
             /// Call visitor (ref) for each reference of given type. visitor must return a bool. Returning
             /// false will abort the iteration.
@@ -267,7 +305,7 @@ namespace MWWorld
                     LiveCellRefBase* base = &*it;
                     if (mMovedToAnotherCell.find(base) != mMovedToAnotherCell.end())
                         continue;
-                    if (base->mData.isDeletedByContentFile())
+                    if (!isAccessible(base->mData, base->mRef))
                         continue;
                     if (!visitor(MWWorld::Ptr(base, this)))
                         return false;
@@ -282,9 +320,6 @@ namespace MWWorld
                 }
                 return true;
             }
-
-            /// \todo add const version of forEach
-
 
             // NOTE: does not account for moved references
             // Should be phased out when we have const version of forEach

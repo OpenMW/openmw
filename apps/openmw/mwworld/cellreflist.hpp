@@ -24,17 +24,6 @@ namespace MWWorld
         /// all methods are known.
         void load (ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
 
-        LiveRef *find (const std::string& name)
-        {
-            for (typename List::iterator iter (mList.begin()); iter!=mList.end(); ++iter)
-                if (!iter->mData.isDeletedByContentFile()
-                        && (iter->mRef.hasContentFile() || iter->mData.getCount() > 0)
-                        && iter->mRef.getRefId() == name)
-                    return &*iter;
-
-            return 0;
-        }
-
         LiveRef &insert (const LiveRef &item)
         {
             mList.push_back(item);

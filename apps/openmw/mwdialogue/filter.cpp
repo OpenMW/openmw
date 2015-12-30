@@ -28,7 +28,7 @@ bool MWDialogue::Filter::testActor (const ESM::DialInfo& info) const
     // actor id
     if (!info.mActor.empty())
     {
-        if ( !Misc::StringUtils::ciEqual(info.mActor, mActor.getClass().getId (mActor)))
+        if ( !Misc::StringUtils::ciEqual(info.mActor, mActor.getCellRef().getRefId()))
             return false;
     }
     else if (isCreature)
@@ -438,7 +438,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_NotId:
 
-            return !Misc::StringUtils::ciEqual(mActor.getClass().getId (mActor), select.getName());
+            return !Misc::StringUtils::ciEqual(mActor.getCellRef().getRefId(), select.getName());
 
         case SelectWrapper::Function_NotFaction:
 

@@ -1051,6 +1051,11 @@ namespace MWScript
                     msg << "RefNum: " << ptr.getCellRef().getRefNum().mIndex << std::endl;
                 }
 
+                if (ptr.getRefData().isDeletedByContentFile())
+                    msg << "[Deleted by content file]" << std::endl;
+                if (!ptr.getRefData().getCount())
+                    msg << "[Deleted]" << std::endl;
+
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
 
                 if (ptr.isInCell())

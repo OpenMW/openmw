@@ -115,7 +115,7 @@ namespace MWGui
                     tooltipSize = createToolTip(info, true);
                 }
                 else
-                    tooltipSize = getToolTipViaPtr(true);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), true);
 
                 MyGUI::IntPoint tooltipPosition = MyGUI::InputManager::getInstance().getMousePosition();
                 position(tooltipPosition, tooltipSize, viewSize);
@@ -183,17 +183,13 @@ namespace MWGui
                 else if (type == "ItemPtr")
                 {
                     mFocusObject = *focus->getUserData<MWWorld::Ptr>();
-                    tooltipSize = getToolTipViaPtr(false);
+                    tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
                 }
                 else if (type == "ItemModelIndex")
                 {
                     std::pair<ItemModel::ModelIndex, ItemModel*> pair = *focus->getUserData<std::pair<ItemModel::ModelIndex, ItemModel*> >();
                     mFocusObject = pair.second->getItem(pair.first).mBase;
-                    // HACK: To get the correct count for multiple item stack sources
-                    int oldCount = mFocusObject.getRefData().getCount();
-                    mFocusObject.getRefData().setCount(pair.second->getItem(pair.first).mCount);
-                    tooltipSize = getToolTipViaPtr(false);
-                    mFocusObject.getRefData().setCount(oldCount);
+                    tooltipSize = getToolTipViaPtr(pair.second->getItem(pair.first).mCount, false);
                 }
                 else if (type == "ToolTipInfo")
                 {
@@ -207,7 +203,7 @@ namespace MWGui
 
                     mFocusObject = item;
                     if (!mFocusObject.isEmpty ())
-                        tooltipSize = getToolTipViaPtr(false);
+                        tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount(), false);
                 }
                 else if (type == "Spell")
                 {
@@ -294,7 +290,7 @@ namespace MWGui
         {
             if (!mFocusObject.isEmpty())
             {
-                MyGUI::IntSize tooltipSize = getToolTipViaPtr();
+                MyGUI::IntSize tooltipSize = getToolTipViaPtr(mFocusObject.getRefData().getCount());
 
                 setCoord(viewSize.width/2 - tooltipSize.width/2,
                         std::max(0, int(mFocusToolTipY*viewSize.height - tooltipSize.height)),
@@ -321,12 +317,12 @@ namespace MWGui
         }
     }
 
-    void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
+    void ToolTips::setFocusObject(const MWWorld::ConstPtr& focus)
     {
         mFocusObject = focus;
     }
 
-    MyGUI::IntSize ToolTips::getToolTipViaPtr (bool image)
+    MyGUI::IntSize ToolTips::getToolTipViaPtr (int count, bool image)
     {
         // this the maximum width of the tooltip before it starts word-wrapping
         setCoord(0, 0, 300, 300);
@@ -342,7 +338,7 @@ namespace MWGui
         {
             mDynamicToolTipBox->setVisible(true);
 
-            ToolTipInfo info = object.getToolTipInfo(mFocusObject);
+            ToolTipInfo info = object.getToolTipInfo(mFocusObject, count);
             if (!image)
                 info.icon = "";
             tooltipSize = createToolTip(info, true);

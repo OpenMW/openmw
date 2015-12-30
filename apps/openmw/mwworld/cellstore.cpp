@@ -244,7 +244,7 @@ namespace MWWorld
         // on a save/load, so do a simple copy & delete for these objects.
         if (!object.getCellRef().getRefNum().hasContentFile())
         {
-            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo);
+            MWWorld::Ptr copied = object.getClass().copyToCell(object, *cellToMoveTo, object.getRefData().getCount());
             object.getRefData().setCount(0);
             object.getRefData().setBaseNode(NULL);
             return copied;
@@ -346,15 +346,15 @@ namespace MWWorld
         if (mState==State_Preloaded)
             return std::binary_search (mIds.begin(), mIds.end(), id);
 
-        /// \todo address const-issues
-        return const_cast<CellStore *> (this)->search (id).isEmpty();
+        return searchConst (id).isEmpty();
     }
 
+    template <typename PtrType>
     struct SearchVisitor
     {
-        MWWorld::Ptr mFound;
+        PtrType mFound;
         std::string mIdToFind;
-        bool operator()(const MWWorld::Ptr& ptr)
+        bool operator()(const PtrType& ptr)
         {
             if (ptr.getCellRef().getRefId() == mIdToFind)
             {
@@ -367,13 +367,17 @@ namespace MWWorld
 
     Ptr CellStore::search (const std::string& id)
     {
-        bool oldState = mHasState;
-
-        SearchVisitor searchVisitor;
+        SearchVisitor<MWWorld::Ptr> searchVisitor;
         searchVisitor.mIdToFind = id;
         forEach(searchVisitor);
+        return searchVisitor.mFound;
+    }
 
-        mHasState = oldState;
+    ConstPtr CellStore::searchConst (const std::string& id) const
+    {
+        SearchVisitor<MWWorld::ConstPtr> searchVisitor;
+        searchVisitor.mIdToFind = id;
+        forEachConst(searchVisitor);
         return searchVisitor.mFound;
     }
 

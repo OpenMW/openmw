@@ -302,16 +302,20 @@ namespace MWInput
                 quickLoad();
                 break;
             case A_CycleSpellLeft:
-                MWBase::Environment::get().getWindowManager()->cycleSpell(false);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleSpell(false);
                 break;
             case A_CycleSpellRight:
-                MWBase::Environment::get().getWindowManager()->cycleSpell(true);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleSpell(true);
                 break;
             case A_CycleWeaponLeft:
-                MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
                 break;
             case A_CycleWeaponRight:
-                MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
+                if (checkAllowedToUseItems())
+                    MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
                 break;
             case A_Sneak:
                 if (mSneakToggles)
@@ -344,6 +348,18 @@ namespace MWInput
         {
             mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
         }
+    }
+
+    bool InputManager::checkAllowedToUseItems() const
+    {
+        MWWorld::Ptr player = MWMechanics::getPlayer();
+        if (player.getClass().getNpcStats(player).isWerewolf())
+        {
+            // Cannot use items or spells while in werewolf form
+            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            return false;
+        }
+        return true;
     }
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
@@ -902,6 +918,9 @@ namespace MWInput
         if (!mControlSwitch["playermagic"] || !mControlSwitch["playercontrols"])
             return;
 
+        if (!checkAllowedToUseItems())
+            return;
+
         // Not allowed if no spell selected
         MWWorld::InventoryStore& inventory = mPlayer->getPlayer().getClass().getInventoryStore(mPlayer->getPlayer());
         if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
@@ -1016,13 +1035,8 @@ namespace MWInput
     {
         if (!mControlSwitch["playercontrols"])
             return;
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        if (player.getClass().getNpcStats(player).isWerewolf())
-        {
-            // Cannot use items or spells while in werewolf form
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+        if (!checkAllowedToUseItems())
             return;
-        }
 
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWindowManager()->activateQuickKey (index);
@@ -1033,13 +1047,8 @@ namespace MWInput
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
                 && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
         {
-            MWWorld::Ptr player = MWMechanics::getPlayer();
-            if (player.getClass().getNpcStats(player).isWerewolf())
-            {
-                // Cannot use items or spells while in werewolf form
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
+            if (!checkAllowedToUseItems())
                 return;
-            }
 
             MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
 

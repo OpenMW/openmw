@@ -81,15 +81,15 @@ namespace MWSound
 
         typedef std::pair<MWBase::SoundPtr,Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
-        typedef std::map<MWWorld::Ptr,SoundBufferRefPairList> SoundMap;
+        typedef std::map<MWWorld::ConstPtr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
         typedef std::pair<MWBase::SoundStreamPtr,Sound_Loudness*> SoundLoudnessPair;
-        typedef std::map<MWWorld::Ptr,SoundLoudnessPair> SaySoundMap;
+        typedef std::map<MWWorld::ConstPtr,SoundLoudnessPair> SaySoundMap;
         SaySoundMap mActiveSaySounds;
 
         typedef std::pair<DecoderPtr,Sound_Loudness*> DecoderLoudnessPair;
-        typedef std::map<MWWorld::Ptr,DecoderLoudnessPair> SayDecoderMap;
+        typedef std::map<MWWorld::ConstPtr,DecoderLoudnessPair> SayDecoderMap;
         SayDecoderMap mPendingSaySounds;
 
         typedef std::vector<MWBase::SoundStreamPtr> TrackList;
@@ -154,7 +154,7 @@ namespace MWSound
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
 
-        virtual void say(const MWWorld::Ptr &reference, const std::string& filename);
+        virtual void say(const MWWorld::ConstPtr &reference, const std::string& filename);
         ///< Make an actor say some text.
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
@@ -162,13 +162,13 @@ namespace MWSound
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        virtual bool sayDone(const MWWorld::Ptr &reference=MWWorld::Ptr()) const;
+        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
         ///< Is actor not speaking?
 
-        virtual void stopSay(const MWWorld::Ptr &reference=MWWorld::Ptr());
+        virtual void stopSay(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr());
         ///< Stop an actor speaking
 
-        virtual float getSaySoundLoudness(const MWWorld::Ptr& reference) const;
+        virtual float getSaySoundLoudness(const MWWorld::ConstPtr& reference) const;
         ///< Check the currently playing say sound for this actor
         /// and get an average loudness value (scale [0,1]) at the current time position.
         /// If the actor is not saying anything, returns 0.
@@ -188,7 +188,7 @@ namespace MWSound
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual MWBase::SoundPtr playSound3D(const MWWorld::Ptr &reference, const std::string& soundId,
+        virtual MWBase::SoundPtr playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
                                              float volume, float pitch, PlayType type=Play_TypeSfx,
                                              PlayMode mode=Play_Normal, float offset=0);
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
@@ -203,10 +203,10 @@ namespace MWSound
         ///< Stop the given sound from playing
         /// @note no-op if \a sound is null
 
-        virtual void stopSound3D(const MWWorld::Ptr &reference, const std::string& soundId);
+        virtual void stopSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId);
         ///< Stop the given object from playing the given sound,
 
-        virtual void stopSound3D(const MWWorld::Ptr &reference);
+        virtual void stopSound3D(const MWWorld::ConstPtr &reference);
         ///< Stop the given object from playing all sounds.
 
         virtual void stopSound(const MWWorld::CellStore *cell);
@@ -215,13 +215,13 @@ namespace MWSound
         virtual void stopSound(const std::string& soundId);
         ///< Stop a non-3d looping sound
 
-        virtual void fadeOutSound3D(const MWWorld::Ptr &reference, const std::string& soundId, float duration);
+        virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration);
         ///< Fade out given sound (that is already playing) of given object
         ///< @param reference Reference to object, whose sound is faded out
         ///< @param soundId ID of the sound to fade out.
         ///< @param duration Time until volume reaches 0.
 
-        virtual bool getSoundPlaying(const MWWorld::Ptr &reference, const std::string& soundId) const;
+        virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
         virtual void pauseSounds(int types=Play_TypeMask);
@@ -234,7 +234,7 @@ namespace MWSound
 
         virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater);
 
-        virtual void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
+        virtual void updatePtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated);
 
         virtual void clear();
     };

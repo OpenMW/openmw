@@ -22,6 +22,10 @@ namespace MWClass
         {
             return *this;
         }
+        virtual const CreatureLevListCustomData& asCreatureLevListCustomData() const
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *CreatureLevListCustomData::clone() const
@@ -29,12 +33,7 @@ namespace MWClass
         return new CreatureLevListCustomData (*this);
     }
 
-    std::string CreatureLevList::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::CreatureLevList>()->mBase->mId;
-    }
-
-    std::string CreatureLevList::getName (const MWWorld::Ptr& ptr) const
+    std::string CreatureLevList::getName (const MWWorld::ConstPtr& ptr) const
     {
         return "";
     }
@@ -104,6 +103,9 @@ namespace MWClass
     void CreatureLevList::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
         const
     {
+        if (!state.mHasCustomState)
+            return;
+
         const ESM::CreatureLevListState& state2 = dynamic_cast<const ESM::CreatureLevListState&> (state);
 
         ensureCustomData(ptr);
@@ -112,13 +114,18 @@ namespace MWClass
         customData.mSpawn = state2.mSpawn;
     }
 
-    void CreatureLevList::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+    void CreatureLevList::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::CreatureLevListState& state2 = dynamic_cast<ESM::CreatureLevListState&> (state);
 
-        ensureCustomData(ptr);
-        CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
+        const CreatureLevListCustomData& customData = ptr.getRefData().getCustomData()->asCreatureLevListCustomData();
         state2.mSpawnActorId = customData.mSpawnActorId;
         state2.mSpawn = customData.mSpawn;
     }

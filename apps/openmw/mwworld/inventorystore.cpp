@@ -410,11 +410,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                     // the items should appear as if they'd always been equipped.
                     mListener->permanentEffectAdded(magicEffect, !mFirstAutoEquip,
                                                         !mFirstAutoEquip && effectIt == enchantment.mEffects.mList.begin());
-
-                    // Apply instant effects
-                    MWMechanics::CastSpell cast(actor, actor);
-                    if (magnitude)
-                        cast.applyInstantEffect(actor, actor, effectIt->mEffectID, magnitude);
                 }
 
                 if (magnitude)
@@ -455,7 +450,7 @@ void MWWorld::InventoryStore::flagAsModified()
     mRechargingItemsUpToDate = false;
 }
 
-bool MWWorld::InventoryStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
     if (!canStack)
@@ -705,7 +700,7 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
         if (*iter==end())
             continue;
 
-        if ((*iter)->getClass().getId(**iter) != sourceId)
+        if ((*iter)->getCellRef().getRefId() != sourceId)
             continue;
 
         std::string enchantmentId = (*iter)->getClass().getEnchantment (**iter);
@@ -747,7 +742,7 @@ void MWWorld::InventoryStore::clear()
     ContainerStore::clear();
 }
 
-bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
+bool MWWorld::InventoryStore::isEquipped(const MWWorld::ConstPtr &item)
 {
     for (int i=0; i < MWWorld::InventoryStore::Slots; ++i)
     {
@@ -757,7 +752,7 @@ bool MWWorld::InventoryStore::isEquipped(const MWWorld::Ptr &item)
     return false;
 }
 
-void MWWorld::InventoryStore::writeState(ESM::InventoryState &state)
+void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
 {
     MWWorld::ContainerStore::writeState(state);
 

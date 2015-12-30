@@ -145,7 +145,7 @@ namespace MWScript
         // selected), store the ID of that reference store it so it can be inherited by
         // targeted scripts started from this one.
         if (targetId.empty() && !reference.isEmpty())
-            mTargetId = reference.getClass().getId (reference);
+            mTargetId = reference.getCellRef().getRefId();
     }
 
     int InterpreterContext::getLocalShort (int index) const

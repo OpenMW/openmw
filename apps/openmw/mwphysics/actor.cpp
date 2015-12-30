@@ -76,7 +76,7 @@ void Actor::updateCollisionMask()
     mCollisionWorld->removeCollisionObject(mCollisionObject.get());
     int collisionMask = CollisionType_World | CollisionType_HeightMap;
     if (mExternalCollisionMode)
-        collisionMask |= CollisionType_Actor | CollisionType_Projectile;
+        collisionMask |= CollisionType_Actor | CollisionType_Projectile | CollisionType_Door;
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
     mCollisionWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);

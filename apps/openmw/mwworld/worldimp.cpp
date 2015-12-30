@@ -691,10 +691,10 @@ namespace MWWorld
 
     struct FindContainerVisitor
     {
-        Ptr mContainedPtr;
+        ConstPtr mContainedPtr;
         Ptr mResult;
 
-        FindContainerVisitor(const Ptr& containedPtr) : mContainedPtr(containedPtr) {}
+        FindContainerVisitor(const ConstPtr& containedPtr) : mContainedPtr(containedPtr) {}
 
         bool operator() (Ptr ptr)
         {
@@ -708,7 +708,7 @@ namespace MWWorld
         }
     };
 
-    Ptr World::findContainer(const Ptr& ptr)
+    Ptr World::findContainer(const ConstPtr& ptr)
     {
         if (ptr.isInCell())
             return Ptr();
@@ -1038,9 +1038,9 @@ namespace MWWorld
         return facedObject;
     }
 
-    osg::Matrixf World::getActorHeadTransform(const MWWorld::Ptr& actor) const
+    osg::Matrixf World::getActorHeadTransform(const MWWorld::ConstPtr& actor) const
     {
-        MWRender::Animation *anim = mRendering->getAnimation(actor);
+        const MWRender::Animation *anim = mRendering->getAnimation(actor);
         if(anim)
         {
             const osg::Node *node = anim->getNode("Head");
@@ -1056,7 +1056,7 @@ namespace MWWorld
     }
 
 
-    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::Ptr &ptr, float distance)
+    std::pair<MWWorld::Ptr,osg::Vec3f> World::getHitContact(const MWWorld::ConstPtr &ptr, float distance)
     {
         const ESM::Position &posdata = ptr.getRefData().getPosition();
 
@@ -1319,9 +1319,9 @@ namespace MWWorld
         rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
     }
 
-    MWWorld::Ptr World::safePlaceObject(const MWWorld::Ptr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
+    MWWorld::Ptr World::safePlaceObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos)
     {
-        return copyObjectToCell(ptr,cell,pos,false);
+        return copyObjectToCell(ptr,cell,pos,ptr.getRefData().getCount(),false);
     }
 
     void World::indexToPosition (int cellX, int cellY, float &x, float &y, bool centre) const
@@ -1380,7 +1380,7 @@ namespace MWWorld
     {
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), MWPhysics::CollisionType_World);
+        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), MWPhysics::CollisionType_World|MWPhysics::CollisionType_Door);
         return result.mHit;
     }
 
@@ -1413,7 +1413,7 @@ namespace MWWorld
                 bool reached = (targetRot == maxRot && it->second) || targetRot == minRot;
 
                 /// \todo should use convexSweepTest here
-                std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Actor, MWPhysics::CollisionType_Actor);
+                std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
                 for (std::vector<MWWorld::Ptr>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
                 {
                     MWWorld::Ptr ptr = *cit;
@@ -1797,7 +1797,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    MWWorld::Ptr World::placeObject (const MWWorld::Ptr& object, float cursorX, float cursorY, int amount)
+    MWWorld::Ptr World::placeObject (const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount)
     {
         const float maxDist = 200.f;
 
@@ -1817,10 +1817,7 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         // copy the object and set its count
-        int origCount = object.getRefData().getCount();
-        object.getRefData().setCount(amount);
-        Ptr dropped = copyObjectToCell(object, cell, pos, true);
-        object.getRefData().setCount(origCount);
+        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
 
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
@@ -1846,7 +1843,7 @@ namespace MWWorld
     }
 
 
-    Ptr World::copyObjectToCell(const Ptr &object, CellStore* cell, ESM::Position pos, bool adjustPos)
+    Ptr World::copyObjectToCell(const ConstPtr &object, CellStore* cell, ESM::Position pos, int count, bool adjustPos)
     {
         if (cell->isExterior())
         {
@@ -1856,7 +1853,7 @@ namespace MWWorld
         }
 
         MWWorld::Ptr dropped =
-            object.getClass().copyToCell(object, *cell, pos);
+            object.getClass().copyToCell(object, *cell, pos, count);
 
         // Reset some position values that could be uninitialized if this item came from a container
         dropped.getCellRef().setPosition(pos);
@@ -1899,7 +1896,7 @@ namespace MWWorld
         return dropped;
     }
 
-    MWWorld::Ptr World::dropObjectOnGround (const Ptr& actor, const Ptr& object, int amount)
+    MWWorld::Ptr World::dropObjectOnGround (const Ptr& actor, const ConstPtr& object, int amount)
     {
         MWWorld::CellStore* cell = actor.getCell();
 
@@ -1920,10 +1917,7 @@ namespace MWWorld
             pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
-        int origCount = object.getRefData().getCount();
-        object.getRefData().setCount(amount);
-        Ptr dropped = copyObjectToCell(object, cell, pos);
-        object.getRefData().setCount(origCount);
+        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
 
         if(actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);
@@ -1971,23 +1965,23 @@ namespace MWWorld
         return false;
     }
 
-    bool World::isSubmerged(const MWWorld::Ptr &object) const
+    bool World::isSubmerged(const MWWorld::ConstPtr &object) const
     {
         return isUnderwater(object, 1.0f/mSwimHeightScale);
     }
 
-    bool World::isSwimming(const MWWorld::Ptr &object) const
+    bool World::isSwimming(const MWWorld::ConstPtr &object) const
     {
         return isUnderwater(object, mSwimHeightScale);
     }
 
-    bool World::isWading(const MWWorld::Ptr &object) const
+    bool World::isWading(const MWWorld::ConstPtr &object) const
     {
         const float kneeDeep = 0.25f;
         return isUnderwater(object, kneeDeep);
     }
 
-    bool World::isUnderwater(const MWWorld::Ptr &object, const float heightRatio) const
+    bool World::isUnderwater(const MWWorld::ConstPtr &object, const float heightRatio) const
     {
         osg::Vec3f pos (object.getRefData().getPosition().asVec3());
 
@@ -2113,8 +2107,11 @@ namespace MWWorld
 
     MWRender::Animation* World::getAnimation(const MWWorld::Ptr &ptr)
     {
-        if (ptr == getPlayerPtr())
-            return mRendering->getPlayerAnimation();
+        return mRendering->getAnimation(ptr);
+    }
+
+    const MWRender::Animation* World::getAnimation(const MWWorld::ConstPtr &ptr) const
+    {
         return mRendering->getAnimation(ptr);
     }
 
@@ -2154,33 +2151,33 @@ namespace MWWorld
             mDoorStates.erase(door);
     }
 
-    bool World::getPlayerStandingOn (const MWWorld::Ptr& object)
+    bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();
         return mPhysics->isActorStandingOn(player, object);
     }
 
-    bool World::getActorStandingOn (const MWWorld::Ptr& object)
+    bool World::getActorStandingOn (const MWWorld::ConstPtr& object)
     {
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsStandingOn(object, actors);
         return !actors.empty();
     }
 
-    bool World::getPlayerCollidingWith (const MWWorld::Ptr& object)
+    bool World::getPlayerCollidingWith (const MWWorld::ConstPtr& object)
     {
         MWWorld::Ptr player = getPlayerPtr();
         return mPhysics->isActorCollidingWith(player, object);
     }
 
-    bool World::getActorCollidingWith (const MWWorld::Ptr& object)
+    bool World::getActorCollidingWith (const MWWorld::ConstPtr& object)
     {
         std::vector<MWWorld::Ptr> actors;
         mPhysics->getActorsCollidingWith(object, actors);
         return !actors.empty();
     }
 
-    void World::hurtStandingActors(const Ptr &object, float healthPerSecond)
+    void World::hurtStandingActors(const ConstPtr &object, float healthPerSecond)
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
@@ -2210,7 +2207,7 @@ namespace MWWorld
         }
     }
 
-    void World::hurtCollidingActors(const Ptr &object, float healthPerSecond)
+    void World::hurtCollidingActors(const ConstPtr &object, float healthPerSecond)
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
@@ -2266,13 +2263,13 @@ namespace MWWorld
 
     struct GetContainersOwnedByVisitor
     {
-        GetContainersOwnedByVisitor(const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+        GetContainersOwnedByVisitor(const MWWorld::ConstPtr& owner, std::vector<MWWorld::Ptr>& out)
             : mOwner(owner)
             , mOut(out)
         {
         }
 
-        MWWorld::Ptr mOwner;
+        MWWorld::ConstPtr mOwner;
         std::vector<MWWorld::Ptr>& mOut;
 
         bool operator()(const MWWorld::Ptr& ptr)
@@ -2287,7 +2284,7 @@ namespace MWWorld
         }
     };
 
-    void World::getContainersOwnedBy (const MWWorld::Ptr& owner, std::vector<MWWorld::Ptr>& out)
+    void World::getContainersOwnedBy (const MWWorld::ConstPtr& owner, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
@@ -2309,7 +2306,7 @@ namespace MWWorld
         }
     };
 
-    void World::getItemsOwnedBy (const MWWorld::Ptr& npc, std::vector<MWWorld::Ptr>& out)
+    void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
         const Scene::CellStoreCollection& collection = mWorldScene->getActiveCells();
         for (Scene::CellStoreCollection::const_iterator cellIt = collection.begin(); cellIt != collection.end(); ++cellIt)
@@ -2323,7 +2320,7 @@ namespace MWWorld
         }
     }
 
-    bool World::getLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor)
+    bool World::getLOS(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& targetActor)
     {
         if (!targetActor.getRefData().isEnabled() || !actor.getRefData().isEnabled())
             return false; // cannot get LOS unless both NPC's are enabled
@@ -2340,7 +2337,7 @@ namespace MWWorld
         to = from + (to * maxDist);
 
         MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(),
-            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap);
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap|MWPhysics::CollisionType_Door);
 
         if (!result.mHit)
             return maxDist;
@@ -2454,111 +2451,6 @@ namespace MWWorld
     void World::reattachPlayerCamera()
     {
         mRendering->rebuildPtr(getPlayerPtr());
-    }
-
-    void World::setWerewolf(const MWWorld::Ptr& actor, bool werewolf)
-    {
-        MWMechanics::NpcStats& npcStats = actor.getClass().getNpcStats(actor);
-
-        // The actor does not have to change state
-        if (npcStats.isWerewolf() == werewolf)
-            return;
-
-        if (actor == getPlayerPtr())
-        {
-            if (werewolf)
-            {
-                mPlayer->saveSkillsAttributes();
-                mPlayer->setWerewolfSkillsAttributes();
-            }
-            else
-                mPlayer->restoreSkillsAttributes();
-        }
-
-        npcStats.setWerewolf(werewolf);
-
-        // This is a bit dangerous. Equipped items other than WerewolfRobe may reference
-        // bones that do not even exist with the werewolf object root.
-        // Therefore, make sure to unequip everything at once, and only fire the change event
-        // (which will rebuild the animation parts) afterwards. unequipAll will do this for us.
-        MWWorld::InventoryStore& invStore = actor.getClass().getInventoryStore(actor);
-        invStore.unequipAll(actor);
-
-        if(werewolf)
-        {
-            InventoryStore &inv = actor.getClass().getInventoryStore(actor);
-
-            inv.equip(InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
-        }
-        else
-        {
-            actor.getClass().getContainerStore(actor).remove("werewolfrobe", 1, actor);
-        }
-
-        // NpcAnimation::updateParts will already rebuild the animation when it detects change of Npc type.
-        // the following is just for reattaching the camera properly.
-        mRendering->rebuildPtr(actor);
-
-        if(actor == getPlayerPtr())
-        {
-            // Update the GUI only when called on the player
-            MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
-
-            if (werewolf)
-            {
-                windowManager->forceHide(MWGui::GW_Inventory);
-                windowManager->forceHide(MWGui::GW_Magic);
-            }
-            else
-            {
-                windowManager->unsetForceHide(MWGui::GW_Inventory);
-                windowManager->unsetForceHide(MWGui::GW_Magic);
-            }
-
-            windowManager->setWerewolfOverlay(werewolf);
-
-            // Witnesses of the player's transformation will make them a globally known werewolf
-            std::vector<MWWorld::Ptr> closeActors;
-            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(actor.getRefData().getPosition().asVec3(),
-                                                                               getStore().get<ESM::GameSetting>().search("fAlarmRadius")->getFloat(),
-                                                                               closeActors);
-
-            bool detected = false, reported = false;
-            for (std::vector<MWWorld::Ptr>::const_iterator it = closeActors.begin(); it != closeActors.end(); ++it)
-            {
-                if (*it == actor)
-                    continue;
-
-                if (!it->getClass().isNpc())
-                    continue;
-
-                if (getLOS(*it, actor) && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(actor, *it))
-                    detected = true;
-                if (it->getClass().getCreatureStats(*it).getAiSetting(MWMechanics::CreatureStats::AI_Alarm).getModified() > 0)
-                    reported = true;
-            }
-
-            if (detected)
-            {
-                windowManager->messageBox("#{sWerewolfAlarmMessage}");
-                setGlobalInt("pcknownwerewolf", 1);
-
-                if (reported)
-                {
-                    npcStats.setBounty(npcStats.getBounty()+
-                                       mStore.get<ESM::GameSetting>().find("iWereWolfBounty")->getInt());
-                    windowManager->messageBox("#{sCrimeMessage}");
-                }
-            }
-        }
-    }
-
-    void World::applyWerewolfAcrobatics(const Ptr &actor)
-    {
-        const Store<ESM::GameSetting> &gmst = getStore().get<ESM::GameSetting>();
-        MWMechanics::NpcStats &stats = actor.getClass().getNpcStats(actor);
-
-        stats.getSkill(ESM::Skill::Acrobatics).setBase(gmst.find("fWerewolfAcrobatics")->getInt());
     }
 
     bool World::getGodModeState()
@@ -2712,7 +2604,7 @@ namespace MWWorld
         }
     }
 
-    void World::launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+    void World::launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                    const osg::Vec3f& worldPos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength)
     {
         mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
@@ -2805,7 +2697,7 @@ namespace MWWorld
         return false;
     }
 
-    MWWorld::Ptr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
+    MWWorld::ConstPtr World::getClosestMarker( const MWWorld::Ptr &ptr, const std::string &id )
     {
         if ( ptr.getCell()->isExterior() ) {
             return getClosestMarkerFromExteriorPosition(mPlayer->getLastKnownExteriorPosition(), id);
@@ -2817,7 +2709,7 @@ namespace MWWorld
         std::set< std::string >checkedCells;
         std::set< std::string >currentCells;
         std::set< std::string >nextCells;
-        MWWorld::Ptr closestMarker;
+        MWWorld::ConstPtr closestMarker;
 
         nextCells.insert( ptr.getCell()->getCell()->mName );
         while ( !nextCells.empty() ) {
@@ -2828,7 +2720,7 @@ namespace MWWorld
                 checkedCells.insert( *i );
                 if ( !next ) continue;
 
-                closestMarker = next->search( id );
+                closestMarker = next->searchConst( id );
                 if ( !closestMarker.isEmpty() )
                 {
                     return closestMarker;
@@ -2861,8 +2753,8 @@ namespace MWWorld
         return MWWorld::Ptr();
     }
 
-    MWWorld::Ptr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
-        MWWorld::Ptr closestMarker;
+    MWWorld::ConstPtr World::getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id ) {
+        MWWorld::ConstPtr closestMarker;
         float closestDistance = std::numeric_limits<float>::max();
 
         std::vector<MWWorld::Ptr> markers;
@@ -2887,7 +2779,7 @@ namespace MWWorld
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
                                           const std::string& id)
     {
-        MWWorld::Ptr closestMarker = getClosestMarker( ptr, id );
+        MWWorld::ConstPtr closestMarker = getClosestMarker( ptr, id );
 
         if ( closestMarker.isEmpty() )
         {
@@ -3047,13 +2939,13 @@ namespace MWWorld
 
     void World::confiscateStolenItems(const Ptr &ptr)
     {
-        MWWorld::Ptr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
+        MWWorld::ConstPtr prisonMarker = getClosestMarker( ptr, "prisonmarker" );
         if ( prisonMarker.isEmpty() )
         {
             std::cerr << "Failed to confiscate items: no closest prison marker found." << std::endl;
             return;
         }
-        std::string prisonName = prisonMarker.mRef->mRef.getDestCell();
+        std::string prisonName = prisonMarker.getCellRef().getDestCell();
         if ( prisonName.empty() )
         {
             std::cerr << "Failed to confiscate items: prison marker not linked to prison interior" << std::endl;
@@ -3285,22 +3177,22 @@ namespace MWWorld
         }
     }
 
-    bool World::isWalkingOnWater(const Ptr &actor)
+    bool World::isWalkingOnWater(const ConstPtr &actor)
     {
-        MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
+        const MWPhysics::Actor* physicActor = mPhysics->getActor(actor);
         if (physicActor && physicActor->isWalkingOnWater())
             return true;
         return false;
     }
 
-    osg::Vec3f World::aimToTarget(const Ptr &actor, const MWWorld::Ptr& target)
+    osg::Vec3f World::aimToTarget(const ConstPtr &actor, const MWWorld::ConstPtr& target)
     {
         osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         osg::Vec3f targetPos = mPhysics->getPosition(target);
         return (targetPos - weaponPos);
     }
 
-    float World::getHitDistance(const Ptr &actor, const Ptr &target)
+    float World::getHitDistance(const ConstPtr &actor, const ConstPtr &target)
     {
         osg::Vec3f weaponPos = getActorHeadTransform(actor).getTrans();
         return mPhysics->getHitDistance(weaponPos, target);

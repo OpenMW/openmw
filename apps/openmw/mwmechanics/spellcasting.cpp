@@ -452,42 +452,18 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-                if (target.getClass().isActor() && hasDuration && effectIt->mDuration > 0)
+                if (!target.getClass().isActor())
                 {
-                    ActiveSpells::ActiveEffect effect;
-                    effect.mEffectId = effectIt->mEffectID;
-                    effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
-                    effect.mDuration = static_cast<float>(effectIt->mDuration);
-                    effect.mMagnitude = magnitude;
-
-                    targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
-
-                    appliedLastingEffects.push_back(effect);
-
-                    // For absorb effects, also apply the effect to the caster - but with a negative
-                    // magnitude, since we're transfering stats from the target to the caster
-                    if (!caster.isEmpty() && caster.getClass().isActor())
-                    {
-                        for (int i=0; i<5; ++i)
-                        {
-                            if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
-                            {
-                                std::vector<ActiveSpells::ActiveEffect> effects;
-                                ActiveSpells::ActiveEffect effect_ = effect;
-                                effect_.mMagnitude *= -1;
-                                effects.push_back(effect_);
-                                // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
-                                caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                            effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
-                            }
-                        }
-                    }
+                    // non-actor objects have no list of active magic effects, so have to apply instantly
+                    if (!applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude))
+                        continue;
                 }
-                else
+                else // target.getClass().isActor() == true
                 {
-                    if (hasDuration && target.getClass().isActor())
+                    bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                    if (hasDuration && effectIt->mDuration == 0)
                     {
+                        // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
                         effectTick(target.getClass().getCreatureStats(target), target, EffectKey(*effectIt), magnitude);
                         bool isDead = target.getClass().getCreatureStats(target).isDead();
@@ -495,8 +471,38 @@ namespace MWMechanics
                         if (!wasDead && isDead)
                             MWBase::Environment::get().getMechanicsManager()->actorKilled(target, caster);
                     }
-                    else if (!applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude))
-                        continue;
+                    else
+                    {
+                        // add to list of active effects, to apply in next frame
+                        ActiveSpells::ActiveEffect effect;
+                        effect.mEffectId = effectIt->mEffectID;
+                        effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
+                        effect.mDuration = static_cast<float>(effectIt->mDuration);
+                        effect.mMagnitude = magnitude;
+
+                        targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
+
+                        appliedLastingEffects.push_back(effect);
+
+                        // For absorb effects, also apply the effect to the caster - but with a negative
+                        // magnitude, since we're transfering stats from the target to the caster
+                        if (!caster.isEmpty() && caster.getClass().isActor())
+                        {
+                            for (int i=0; i<5; ++i)
+                            {
+                                if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
+                                {
+                                    std::vector<ActiveSpells::ActiveEffect> effects;
+                                    ActiveSpells::ActiveEffect effect_ = effect;
+                                    effect_.mMagnitude *= -1;
+                                    effects.push_back(effect_);
+                                    // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
+                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                                effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Re-casting a summon effect will remove the creature from previous castings of that effect.

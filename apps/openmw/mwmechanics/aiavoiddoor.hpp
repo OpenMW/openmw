@@ -16,7 +16,7 @@ namespace MWMechanics
     {
         public:
             /// Avoid door until the door is fully open
-            AiAvoidDoor(const MWWorld::Ptr& doorPtr);
+            AiAvoidDoor(const MWWorld::ConstPtr& doorPtr);
 
             virtual AiAvoidDoor *clone() const;
 
@@ -28,7 +28,7 @@ namespace MWMechanics
 
         private:
             float mDuration;
-            MWWorld::Ptr mDoorPtr;
+            MWWorld::ConstPtr mDoorPtr;
             ESM::Position mLastPos;
             float mAdjAngle;
     };

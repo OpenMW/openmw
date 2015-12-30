@@ -1,5 +1,7 @@
 #include "summoning.hpp"
 
+#include <iostream>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -34,7 +36,7 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
                     "", ptr.getRefData().getPosition().asVec3());
         }
-        else
+        else if (creatureActorId != -1)
         {
             // We didn't find the creature. It's probably in an inactive cell.
             // Add to graveyard so we can delete it when the cell becomes active.
@@ -132,25 +134,34 @@ namespace MWMechanics
                 if (!creatureID.empty())
                 {
                     MWWorld::CellStore* store = mActor.getCell();
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
-                    ref.getPtr().getCellRef().setPosition(ipos);
-
-                    MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
-
-                    // Make the summoned creature follow its master and help in fights
-                    AiFollow package(mActor.getCellRef().getRefId());
-                    summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
-                    int creatureActorId = summonedCreatureStats.getActorId();
-
-                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
-
-                    MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
-                    if (anim)
+                    int creatureActorId = -1;
+                    try
                     {
-                        const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                                .search("VFX_Summon_Start");
-                        if (fx)
-                            anim->addEffect("meshes\\" + fx->mModel, -1, false);
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), creatureID, 1);
+                        ref.getPtr().getCellRef().setPosition(ipos);
+
+                        MWMechanics::CreatureStats& summonedCreatureStats = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
+
+                        // Make the summoned creature follow its master and help in fights
+                        AiFollow package(mActor.getCellRef().getRefId());
+                        summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
+                        creatureActorId = summonedCreatureStats.getActorId();
+
+                        MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->safePlaceObject(ref.getPtr(),store,ipos);
+
+                        MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(placed);
+                        if (anim)
+                        {
+                            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
+                                    .search("VFX_Summon_Start");
+                            if (fx)
+                                anim->addEffect("meshes\\" + fx->mModel, -1, false);
+                        }
+                    }
+                    catch (std::exception& e)
+                    {
+                        std::cerr << "Failed to spawn summoned creature: " << e.what() << std::endl;
+                        // still insert into creatureMap so we don't try to spawn again every frame, that would spam the warning log
                     }
 
                     creatureMap.insert(std::make_pair(*it, creatureActorId));

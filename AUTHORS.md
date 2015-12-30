@@ -13,6 +13,7 @@ Programmers
     Marc Zinnschlag (Zini) - Lead Programmer/Project Manager
 
     Adam Hogan (aurix)
+    Aesylwinn
     Aleksandar Jovanov
     Alex Haddad (rainChu)
     Alex McKibben (WeirdSexy)

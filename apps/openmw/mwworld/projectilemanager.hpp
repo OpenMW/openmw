@@ -53,7 +53,7 @@ namespace MWWorld
                                      float speed, bool stack, const ESM::EffectList& effects,
                                        const MWWorld::Ptr& caster, const std::string& sourceName, const osg::Vec3f& fallbackDirection);
 
-        void launchProjectile (MWWorld::Ptr actor, MWWorld::Ptr projectile,
+        void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                        const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
         void update(float dt);

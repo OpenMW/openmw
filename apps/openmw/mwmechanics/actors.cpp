@@ -149,14 +149,20 @@ namespace MWMechanics
     {
         MWWorld::Ptr mCreature;
         MWWorld::Ptr mActor;
+        bool mTrapped;
     public:
         SoulTrap(MWWorld::Ptr trappedCreature)
-            : mCreature(trappedCreature) {}
+            : mCreature(trappedCreature)
+            , mTrapped(false)
+        {
+        }
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1)
         {
+            if (mTrapped)
+                return;
             if (key.mId != ESM::MagicEffect::Soultrap)
                 return;
             if (magnitude <= 0)
@@ -202,6 +208,8 @@ namespace MWMechanics
             // Set the soul on just one of the gems, not the whole stack
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
+
+            mTrapped = true;
 
             if (caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
@@ -497,7 +505,12 @@ namespace MWMechanics
                 if (it->second.getMagnitude() > 0)
                 {
                     CastSpell cast(ptr, ptr);
-                    cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude());
+                    if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
+                    {
+                        creatureStats.getActiveSpells().purgeEffect(it->first.mId);
+                        if (ptr.getClass().hasInventoryStore(ptr))
+                            ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
+                    }
                 }
             }
         }
@@ -1314,6 +1327,28 @@ namespace MWMechanics
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
                 if ((*it)->sideWithTarget() && (*it)->getTarget() == actor)
+                    list.push_back(iter->first);
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
+            }
+        }
+        return list;
+    }
+
+    std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
+    {
+        std::list<MWWorld::Ptr> list;
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        {
+            const MWWorld::Class &cls = iter->first.getClass();
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            if (stats.isDead())
+                continue;
+
+            // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            {
+                if ((*it)->followTargetThroughDoors() && (*it)->getTarget() == actor)
                     list.push_back(iter->first);
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;

@@ -94,7 +94,7 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
 }
 
 template<typename T>
-void MWWorld::ContainerStore::storeStates (CellRefList<T>& collection,
+void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     ESM::InventoryState& inventory, int& index, bool equipable) const
 {
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
@@ -176,7 +176,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     return retval;
 }
 
-bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
@@ -336,7 +336,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     return addNewStack(ptr, count);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const ConstPtr& ptr, int count)
 {
     ContainerStoreIterator it = begin();
 
@@ -585,7 +585,7 @@ float MWWorld::ContainerStore::getWeight() const
     return mCachedWeight;
 }
 
-int MWWorld::ContainerStore::getType (const Ptr& ptr)
+int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
 {
     if (ptr.isEmpty())
         throw std::runtime_error ("can't put a non-existent object into a container");
@@ -707,7 +707,7 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
-void MWWorld::ContainerStore::writeState (ESM::InventoryState& state)
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 {
     state.mItems.clear();
 

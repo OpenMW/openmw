@@ -32,7 +32,7 @@ namespace
                    MWRender::RenderingManager& rendering)
     {
         std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), rendering.getResourceSystem()->getVFS());
-        std::string id = ptr.getClass().getId(ptr);
+        std::string id = ptr.getCellRef().getRefId();
         if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         ptr.getClass().insertObjectRendering(ptr, model, rendering);

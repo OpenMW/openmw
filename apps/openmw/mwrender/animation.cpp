@@ -538,7 +538,16 @@ namespace MWRender
         }
 
         if (mTextKeyListener)
-            mTextKeyListener->handleTextKey(groupname, key, map);
+        {
+            try
+            {
+                mTextKeyListener->handleTextKey(groupname, key, map);
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "Error handling text key " << evt << ": " << e.what() << std::endl;
+            }
+        }
     }
 
     void Animation::play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,

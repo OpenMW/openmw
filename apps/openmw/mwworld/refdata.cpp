@@ -118,6 +118,11 @@ namespace MWWorld
         return mBaseNode;
     }
 
+    const SceneUtil::PositionAttitudeTransform* RefData::getBaseNode() const
+    {
+        return mBaseNode;
+    }
+
     int RefData::getCount() const
     {
         return mCount;
@@ -166,14 +171,20 @@ namespace MWWorld
 
     void RefData::enable()
     {
-        mChanged = !mEnabled;
-        mEnabled = true;
+        if (!mEnabled)
+        {
+            mChanged = true;
+            mEnabled = true;
+        }
     }
 
     void RefData::disable()
     {
-        mChanged = mEnabled;
-        mEnabled = false;
+        if (mEnabled)
+        {
+            mChanged = true;
+            mEnabled = false;
+        }
     }
 
     void RefData::setPosition(const ESM::Position& pos)
@@ -195,6 +206,11 @@ namespace MWWorld
     }
 
     CustomData *RefData::getCustomData()
+    {
+        return mCustomData;
+    }
+
+    const CustomData *RefData::getCustomData() const
     {
         return mCustomData;
     }

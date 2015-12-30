@@ -13,7 +13,7 @@ namespace
 
     void getFollowers (const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out)
     {
-        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(actor);
+        std::list<MWWorld::Ptr> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor);
         for(std::list<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
         {
             if (out.insert(*it).second)

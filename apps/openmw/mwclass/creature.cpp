@@ -40,7 +40,7 @@
 
 namespace
 {
-    bool isFlagBitSet(const MWWorld::Ptr &ptr, ESM::Creature::Flags bitMask)
+    bool isFlagBitSet(const MWWorld::ConstPtr &ptr, ESM::Creature::Flags bitMask)
     {
         return (ptr.get<ESM::Creature>()->mBase->mFlags & bitMask) != 0;
     }
@@ -59,6 +59,10 @@ namespace MWClass
         virtual MWWorld::CustomData *clone() const;
 
         virtual CreatureCustomData& asCreatureCustomData()
+        {
+            return *this;
+        }
+        virtual const CreatureCustomData& asCreatureCustomData() const
         {
             return *this;
         }
@@ -154,19 +158,11 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, getId(ptr));
+            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             if (hasInventory)
                 getInventoryStore(ptr).autoEquip(ptr);   
         }
-    }
-
-    std::string Creature::getId (const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-
-        return ref->mBase->mId;
     }
 
     void Creature::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -175,11 +171,9 @@ namespace MWClass
         objects.insertCreature(ptr, model, hasInventoryStore(ptr));
     }
 
-    std::string Creature::getModel(const MWWorld::Ptr &ptr) const
+    std::string Creature::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
-        assert (ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -188,10 +182,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Creature::getName (const MWWorld::Ptr& ptr) const
+    std::string Creature::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return ref->mBase->mName;
     }
@@ -338,7 +331,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitAttemptObject(object.getClass().getId(object));
+            getCreatureStats(ptr).setLastHitAttemptObject(object.getCellRef().getRefId());
 
         if(setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
@@ -356,7 +349,7 @@ namespace MWClass
         }
 
         if(!object.isEmpty())
-            getCreatureStats(ptr).setLastHitObject(object.getClass().getId(object));
+            getCreatureStats(ptr).setLastHitObject(object.getCellRef().getRefId());
 
         if (damage > 0.0f && !object.isEmpty())
             MWMechanics::resistNormalWeapon(ptr, attacker, object, damage);
@@ -444,14 +437,14 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
-    std::string Creature::getScript (const MWWorld::Ptr& ptr) const
+    std::string Creature::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return ref->mBase->mScript;
     }
 
-    bool Creature::isEssential (const MWWorld::Ptr& ptr) const
+    bool Creature::isEssential (const MWWorld::ConstPtr& ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Essential);
     }
@@ -521,10 +514,18 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asCreatureCustomData().mMovement;
     }
 
-    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    bool Creature::hasToolTip(const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
+        if (!ptr.getRefData().getCustomData())
+            return true;
+
+        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
+        return !customData.mCreatureStats.getAiSequence().isInCombat() || customData.mCreatureStats.isDead();
+    }
+
+    MWGui::ToolTipInfo Creature::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
+    {
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName;
@@ -549,18 +550,18 @@ namespace MWClass
         return static_cast<float>(stats.getAttribute(0).getModified() * 5);
     }
 
-    int Creature::getServices(const MWWorld::Ptr &actor) const
+    int Creature::getServices(const MWWorld::ConstPtr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
         if (ref->mBase->mHasAI)
             return ref->mBase->mAiData.mServices;
         else
             return 0;
     }
 
-    bool Creature::isPersistent(const MWWorld::Ptr &actor) const
+    bool Creature::isPersistent(const MWWorld::ConstPtr &actor) const
     {
-        MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
         return ref->mBase->mPersistent;
     }
 
@@ -575,7 +576,7 @@ namespace MWClass
 
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
-            const std::string& ourId = (ref->mBase->mOriginal.empty()) ? getId(ptr) : ref->mBase->mOriginal;
+            const std::string& ourId = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
             MWWorld::Store<ESM::SoundGenerator>::iterator sound = store.begin();
             while(sound != store.end())
@@ -594,31 +595,29 @@ namespace MWClass
         return "";
     }
 
-    MWWorld::Ptr
-    Creature::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Creature::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref =
-            ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Creature::isBipedal(const MWWorld::Ptr &ptr) const
+    bool Creature::isBipedal(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Bipedal);
     }
 
-    bool Creature::canFly(const MWWorld::Ptr &ptr) const
+    bool Creature::canFly(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, ESM::Creature::Flies);
     }
 
-    bool Creature::canSwim(const MWWorld::Ptr &ptr) const
+    bool Creature::canSwim(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Swims | ESM::Creature::Bipedal));
     }
 
-    bool Creature::canWalk(const MWWorld::Ptr &ptr) const
+    bool Creature::canWalk(const MWWorld::ConstPtr &ptr) const
     {
         return isFlagBitSet(ptr, static_cast<ESM::Creature::Flags>(ESM::Creature::Walks | ESM::Creature::Bipedal));
     }
@@ -681,7 +680,7 @@ namespace MWClass
         }
     }
 
-    int Creature::getBloodTexture(const MWWorld::Ptr &ptr) const
+    int Creature::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
         int flags = ptr.get<ESM::Creature>()->mBase->mFlags;
 
@@ -724,7 +723,7 @@ namespace MWClass
         customData.mCreatureStats.readState (state2.mCreatureStats);
     }
 
-    void Creature::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state)
+    void Creature::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
         ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
@@ -735,15 +734,13 @@ namespace MWClass
             return;
         }
 
-        ensureCustomData (ptr);
-
-        CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
+        const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->writeState (state2.mInventory);
         customData.mCreatureStats.writeState (state2.mCreatureStats);
     }
 
-    int Creature::getBaseGold(const MWWorld::Ptr& ptr) const
+    int Creature::getBaseGold(const MWWorld::ConstPtr& ptr) const
     {
         return ptr.get<ESM::Creature>()->mBase->mData.mGold;
     }
@@ -776,15 +773,15 @@ namespace MWClass
         store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
-    int Creature::getBaseFightRating(const MWWorld::Ptr &ptr) const
+    int Creature::getBaseFightRating(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         return ref->mBase->mAiData.mFight;
     }
 
-    void Creature::adjustScale(const MWWorld::Ptr &ptr, osg::Vec3f &scale, bool /* rendering */) const
+    void Creature::adjustScale(const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool /* rendering */) const
     {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
     }
 }

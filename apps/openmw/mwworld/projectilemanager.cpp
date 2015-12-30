@@ -161,7 +161,7 @@ namespace MWWorld
         mMagicBolts.push_back(state);
     }
 
-    void ProjectileManager::launchProjectile(Ptr actor, Ptr projectile, const osg::Vec3f &pos, const osg::Quat &orient, Ptr bow, float speed, float attackStrength)
+    void ProjectileManager::launchProjectile(Ptr actor, ConstPtr projectile, const osg::Vec3f &pos, const osg::Quat &orient, Ptr bow, float speed, float attackStrength)
     {
         ProjectileState state;
         state.mActorId = actor.getClass().getCreatureStats(actor).getActorId();

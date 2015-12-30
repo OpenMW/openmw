@@ -114,6 +114,8 @@ namespace MWDialogue
 
     void DialogueManager::startDialogue (const MWWorld::Ptr& actor)
     {
+        updateGlobals();
+
         // Dialogue with dead actor (e.g. through script) should not be allowed.
         if (actor.getClass().getCreatureStats(actor).isDead())
             return;
@@ -331,6 +333,8 @@ namespace MWDialogue
 
     void DialogueManager::updateTopics()
     {
+        updateGlobals();
+
         std::list<std::string> keywordList;
         int choice = mChoice;
         mChoice = -1;
@@ -417,8 +421,6 @@ namespace MWDialogue
         win->setKeywords(keywordList);
 
         mChoice = choice;
-
-        updateGlobals();
     }
 
     void DialogueManager::keywordSelected (const std::string& keyword)

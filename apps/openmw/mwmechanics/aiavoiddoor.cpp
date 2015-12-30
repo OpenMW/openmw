@@ -11,7 +11,7 @@
 
 #include "steering.hpp"
 
-MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::Ptr& doorPtr)
+MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::ConstPtr& doorPtr)
 : AiPackage(), mDuration(1), mDoorPtr(doorPtr), mAdjAngle(0)
 {
 
