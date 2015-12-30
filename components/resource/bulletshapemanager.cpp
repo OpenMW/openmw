@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "bulletshapemanager.hpp"
 
 #include <osg/NodeVisitor>
@@ -5,6 +7,7 @@
 #include <osg/TriangleFunctor>
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
+#include <BulletCollision/CollisionShapes/btBoxShape.h>
 
 #include <components/vfs/manager.hpp>
 
@@ -110,8 +113,7 @@ BulletShapeManager::~BulletShapeManager()
 
 osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
 {
-    std::string normalized = name;
-    mVFS->normalizeFilename(normalized);
+    std::string normalized = mVFS->chooseFilename(name);
 
     osg::ref_ptr<BulletShape> shape;
     Index::iterator it = mIndex.find(normalized);
@@ -136,8 +138,25 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
             NodeToShapeVisitor visitor;
             node->accept(visitor);
             shape = visitor.getShape();
-            if (!shape)
-                return osg::ref_ptr<BulletShapeInstance>();
+            if (!shape) {
+                // If we failed to load the critically important xbase_anim, make a reasonable default.
+                if (normalized.size() > 17 && normalized.substr(0, 17) == "meshes/xbase_anim") {
+                    // Simply a box of the appropriate dimensions from Morrowind.
+                    shape = osg::ref_ptr<BulletShape>(new BulletShape);
+                    btVector3 btv3(29.28, 28.48, 66.5);
+                    btBoxShape* box = new btBoxShape(btv3);
+                    shape->mCollisionShape = box;
+                    shape->mCollisionBoxHalfExtents = osg::Vec3f(29.28, 28.48, 66.5);
+                    shape->mCollisionBoxTranslate = osg::Vec3f(0.0, 0.0, 66.5);
+                    osg::ref_ptr<BulletShapeInstance> instance = shape->makeInstance();
+                    return instance;
+                }
+                else {
+                    // Report that there was a failure to load a collision box.
+                    std::cerr << "Failed to load bullet shape from: " << normalized << std::endl;
+                    return osg::ref_ptr<BulletShapeInstance>();
+                }
+            }
         }
 
         mIndex[normalized] = shape;
