@@ -478,7 +478,7 @@ bool MWDialogue::Filter::getSelectStructBoolean (const SelectWrapper& select) co
 
         case SelectWrapper::Function_SameRace:
 
-            return !Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
+            return Misc::StringUtils::ciEqual(mActor.get<ESM::NPC>()->mBase->mRace, player.get<ESM::NPC>()->mBase->mRace);
 
         case SelectWrapper::Function_SameFaction:
 
