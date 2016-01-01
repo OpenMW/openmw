@@ -155,9 +155,12 @@ bool MWDialogue::Filter::testDisposition (const ESM::DialInfo& info, bool invert
 bool MWDialogue::Filter::testSelectStruct (const SelectWrapper& select) const
 {
     if (select.isNpcOnly() && (mActor.getTypeName() != typeid (ESM::NPC).name()))
-        // If the actor is a creature, we do not test the conditions applicable
-        // only to NPCs.
+        // If the actor is a creature, we pass all conditions only applicable to NPCs.
         return true;
+
+    if (select.getFunction() == SelectWrapper::Function_Choice && mChoice == -1)
+        // If not currently in a choice, we reject all conditions that test against choices.
+        return false;
 
     switch (select.getType())
     {
