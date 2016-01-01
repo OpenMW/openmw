@@ -591,6 +591,7 @@ namespace MWWorld
             case ESM::REC_REPA: mRepairs.load(ref, deleted, store); break;
             case ESM::REC_STAT: mStatics.load(ref, deleted, store); break;
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
+            case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 
             case 0: std::cerr << "Cell reference " + ref.mRefID + " not found!\n"; break;
 
@@ -659,6 +660,7 @@ namespace MWWorld
         writeReferenceCollection<ESM::ObjectState> (writer, mRepairs);
         writeReferenceCollection<ESM::ObjectState> (writer, mStatics);
         writeReferenceCollection<ESM::ObjectState> (writer, mWeapons);
+        writeReferenceCollection<ESM::ObjectState> (writer, mBodyParts);
 
         for (MovedRefTracker::const_iterator it = mMovedToAnotherCell.begin(); it != mMovedToAnotherCell.end(); ++it)
         {
@@ -792,6 +794,11 @@ namespace MWWorld
                 case ESM::REC_WEAP:
 
                     readReferenceCollection<ESM::ObjectState> (reader, mWeapons, cref, contentFileMap);
+                    break;
+
+                case ESM::REC_BODY:
+
+                    readReferenceCollection<ESM::ObjectState> (reader, mBodyParts, cref, contentFileMap);
                     break;
 
                 default:

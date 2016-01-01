@@ -31,6 +31,7 @@
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadnpc.hpp>
 #include <components/esm/loadmisc.hpp>
+#include <components/esm/loadbody.hpp>
 
 #include "../mwmechanics/pathgrid.hpp"  // TODO: maybe belongs in mwworld
 
@@ -97,6 +98,7 @@ namespace MWWorld
             CellRefList<ESM::Repair>            mRepairs;
             CellRefList<ESM::Static>            mStatics;
             CellRefList<ESM::Weapon>            mWeapons;
+            CellRefList<ESM::BodyPart>          mBodyParts;
 
             typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
             // References owned by a different cell that have been moved here.
@@ -152,6 +154,7 @@ namespace MWWorld
                     forEachImp (visitor, mRepairs) &&
                     forEachImp (visitor, mStatics) &&
                     forEachImp (visitor, mWeapons) &&
+                    forEachImp (visitor, mBodyParts) &&
                     forEachImp (visitor, mCreatures) &&
                     forEachImp (visitor, mNpcs) &&
                     forEachImp (visitor, mCreatureLists);
@@ -516,6 +519,13 @@ namespace MWWorld
     {
         mHasState = true;
         return mWeapons;
+    }
+
+    template<>
+    inline CellRefList<ESM::BodyPart>& CellStore::get<ESM::BodyPart>()
+    {
+        mHasState = true;
+        return mBodyParts;
     }
 
     bool operator== (const CellStore& left, const CellStore& right);
