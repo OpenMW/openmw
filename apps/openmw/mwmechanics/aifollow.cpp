@@ -127,21 +127,21 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
 
     //Set the target destination from the actor
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
-    float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
-    //const float threshold = 10;
 
-    //if (storage.mMoving)  //Stop when you get close
-    //    storage.mMoving = (dist > followDistance);
-    //else
-    //    storage.mMoving = (dist > followDistance + threshold);
-
+    const float threshold = 10; // to avoid constant switching between moving/stopping
+    if (!storage.mMoving) followDistance += threshold;
     storage.mMoving = !pathTo(actor, dest, duration, followDistance); // Go to the destination
 
-    //Check if you're far away
-    if(dist > 450)
-        actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
-    else if(dist  < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
-        actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
+    if (storage.mMoving)
+    {
+        //Check if you're far away
+        float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
+
+        if (dist > 450)
+            actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
+        else if (dist < 325) //Have a bit of a dead zone, otherwise npc will constantly flip between running and not when right on the edge of the running threshhold
+            actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, false); //make NPC walk
+    }
 
     return false;
 }

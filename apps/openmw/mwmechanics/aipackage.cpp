@@ -22,6 +22,7 @@ MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() : 
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
+    mIsShortcutting(false),
     mShortcutProhibited(false), mShortcutFailPos()
 {
 }
@@ -41,10 +42,8 @@ bool MWMechanics::AiPackage::followTargetThroughDoors() const
     return false;
 }
 
-
 bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance)
 {
-    //Update various Timers
     mTimer += duration; //Update timer
 
     ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
@@ -59,39 +58,21 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
         return false;
     }
 
-    //***********************
-    /// Checks if you can't get to the end position at all, adds end position to end of path
-    /// Rebuilds path every [AI_REACTION_TIME] seconds, in case the target has moved
-    //***********************
-
+    // handle path building and shortcutting
     ESM::Pathgrid::Point start = pos.pos;
 
-    float distToNextWaypoint = distance(start, dest);
-    bool isDestReached = (distToNextWaypoint <= destTolerance);
+    float distToTarget = distance(start, dest);
+    bool isDestReached = (distToTarget <= destTolerance);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
-        osg::Vec3f& lastActorPos = mLastActorPos;
-        bool isStuck = distance(start, lastActorPos.x(), lastActorPos.y(), lastActorPos.z()) < actor.getClass().getSpeed(actor)*mTimer
-            && distance(dest, start) > 20;
+        bool wasShortcutting = mIsShortcutting;
+        bool destInLOS = false;
+        mIsShortcutting = shortcutPath(start, dest, actor, &destInLOS); // try to shortcut first
 
-        lastActorPos = pos.asVec3();
-
-        const ESM::Cell *cell = actor.getCell()->getCell();
-        bool needPathRecalc = doesPathNeedRecalc(dest, cell); //Only rebuild path if dest point has changed
-
-        bool isWayClear = true;
-
-        if (!needPathRecalc) // TODO: add check if actor is actually shortcutting
+        if (!mIsShortcutting)
         {
-            isWayClear = checkWayIsClearForActor(start, dest, actor); // check if current shortcut is safe to follow
-        }
-
-        if (!isWayClear || needPathRecalc) // Only rebuild path if the target has moved or can't follow current shortcut
-        {
-            bool destInLOS = false;
-
-            if (isStuck || !isWayClear || !shortcutPath(start, dest, actor, &destInLOS))
+            if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell()->getCell())) // only rebuild path if the target has moved
             {
                 mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
@@ -111,28 +92,21 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
                     }
                 }
             }
-        }
 
-        if(!mPathFinder.getPath().empty()) //Path has points in it
-        {
-            ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path
+            if(!mPathFinder.getPath().empty()) //Path has points in it
+            {
+                ESM::Pathgrid::Point lastPos = mPathFinder.getPath().back(); //Get the end of the proposed path
 
-            if(distance(dest, lastPos) > 100) //End of the path is far from the destination
-                mPathFinder.addPointToPath(dest); //Adds the final destination to the path, to try to get to where you want to go
+                if(distance(dest, lastPos) > 100) //End of the path is far from the destination
+                    mPathFinder.addPointToPath(dest); //Adds the final destination to the path, to try to get to where you want to go
+            }
         }
 
         mTimer = 0;
     }
 
-    //************************
-    /// Checks if you aren't moving; attempts to unstick you
-    //************************
     if (isDestReached || mPathFinder.checkPathCompleted(pos.pos[0],pos.pos[1])) //Path finished?
     {
-        actor.getClass().getMovementSettings(actor).mPosition[0] = 0; // stop moving
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-        actor.getClass().getMovementSettings(actor).mPosition[2] = 0;
-
         // turn to destination point
         zTurn(actor, getZAngleToPoint(start, dest));
         smoothTurn(actor, getXAngleToPoint(start, dest), 0);
@@ -140,6 +114,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
     }
     else
     {
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1; // run to target
+        // handle obstacles on the way
         evadeObstacles(actor, duration, pos);
     }
 
@@ -155,24 +131,22 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor, float dur
     zTurn(actor, mPathFinder.getZAngleToNext(pos.pos[0], pos.pos[1]));
 
     MWMechanics::Movement& movement = actor.getClass().getMovementSettings(actor);
-    if (mObstacleCheck.check(actor, duration))
+
+    // check if stuck due to obstacles
+    if (!mObstacleCheck.check(actor, duration)) return;
+
+    // first check if obstacle is a door
+    MWWorld::Ptr door = getNearbyDoor(actor); // NOTE: checks interior cells only
+    if (door != MWWorld::Ptr())
     {
-        // first check if we're walking into a door
-        MWWorld::Ptr door = getNearbyDoor(actor);
-        if (door != MWWorld::Ptr()) // NOTE: checks interior cells only
-        {
-            if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
-                    && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0) {
-                MWBase::Environment::get().getWorld()->activateDoor(door, 1);
-            }
-        }
-        else // probably walking into another NPC
-        {
-            mObstacleCheck.takeEvasiveAction(movement);
+        if (!door.getCellRef().getTeleport() && door.getCellRef().getTrap().empty()
+                && door.getCellRef().getLockLevel() <= 0 && door.getClass().getDoorState(door) == 0) {
+            MWBase::Environment::get().getWorld()->activateDoor(door, 1);
         }
     }
-    else { //Not stuck, so reset things
-        movement.mPosition[1] = 1; //Just run forward
+    else // any other obstacle (NPC, crate, etc.)
+    {
+        mObstacleCheck.takeEvasiveAction(movement);
     }
 }
 
@@ -191,7 +165,7 @@ bool MWMechanics::AiPackage::shortcutPath(const ESM::Pathgrid::Point& startPoint
     if (!isPathClear
         && (!mShortcutProhibited || (PathFinder::MakeOsgVec3(mShortcutFailPos) - PathFinder::MakeOsgVec3(startPoint)).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
     {
-        // take the direct path only if there aren't any obstacles
+        // check if target is clearly visible
         isPathClear = !MWBase::Environment::get().getWorld()->castRay(
             static_cast<float>(startPoint.mX), static_cast<float>(startPoint.mY), static_cast<float>(startPoint.mZ),
             static_cast<float>(endPoint.mX), static_cast<float>(endPoint.mY), static_cast<float>(endPoint.mZ));

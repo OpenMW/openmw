@@ -82,7 +82,7 @@ namespace MWMechanics
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 
         protected:
-            /// Causes the actor to attempt to walk to the specified location
+            /// Handles path building and shortcutting with obstacles avoiding
             /** \return If the actor has arrived at his destination **/
             bool pathTo(const MWWorld::Ptr& actor, const ESM::Pathgrid::Point& dest, float duration, float destTolerance = 0.0f);
 
@@ -108,6 +108,7 @@ namespace MWMechanics
             ESM::Pathgrid::Point mPrevDest;
             osg::Vec3f mLastActorPos;
 
+            bool mIsShortcutting;   // if shortcutting at the moment
             bool mShortcutProhibited; // shortcutting may be prohibited after unsuccessful attempt
             ESM::Pathgrid::Point mShortcutFailPos; // position of last shortcut fail
 
