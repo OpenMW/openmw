@@ -20,9 +20,9 @@ namespace Compiler
         l - Integer <BR>
         s - Short <BR>
         S - String, case preserved <BR>
-        x - Optional, ignored string argument
-        X - Optional, ignored numeric expression
-        z - Optional, ignored string or numeric argument
+        x - Optional, ignored string argument. Emits a parser warning when this argument is supplied. <BR>
+        X - Optional, ignored numeric expression. Emits a parser warning when this argument is supplied. <BR>
+        z - Optional, ignored string or numeric argument. Emits a parser warning when this argument is supplied. <BR>
         j - A piece of junk (either . or a specific keyword)
     **/
     typedef std::string ScriptArgs;
