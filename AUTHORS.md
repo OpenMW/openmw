@@ -56,6 +56,7 @@ Programmers
     Jeffrey Haines (Jyby)
     Jengerer
     Jiří Kuneš (kunesj)
+    Joe Wilkerson (neuralroberts)
     Joel Graff (graffy)
     John Blomberg (fstp)
     Jordan Ayers
