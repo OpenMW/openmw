@@ -9,6 +9,8 @@
 #include "controller.hpp"
 #include "base.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace Nif
 {
 
@@ -118,10 +120,10 @@ struct NiNode : Node
         children.read(nif);
         effects.read(nif);
 
-        // Discard tranformations for the root node, otherwise some meshes
+        // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
         // can be expanded if needed.
-        if (0 == recIndex)
+        if (0 == recIndex && !Misc::StringUtils::ciEqual(name, "bip01"))
         {
             static_cast<Nif::Node*>(this)->trafo = Nif::Transformation::getIdentity();
         }
