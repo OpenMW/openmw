@@ -341,9 +341,9 @@ namespace Compiler
             extensions.registerInstruction ("say", "SS", opcodeSay, opcodeSayExplicit);
             extensions.registerFunction ("saydone", 'l', "", opcodeSayDone, opcodeSayDoneExplicit);
             extensions.registerInstruction ("streammusic", "S", opcodeStreamMusic);
-            extensions.registerInstruction ("playsound", "c", opcodePlaySound);
+            extensions.registerInstruction ("playsound", "cXX", opcodePlaySound);
             extensions.registerInstruction ("playsoundvp", "cff", opcodePlaySoundVP);
-            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D,
+            extensions.registerInstruction ("playsound3d", "cXX", opcodePlaySound3D,
                 opcodePlaySound3DExplicit);
             extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP,
                 opcodePlaySound3DVPExplicit);
