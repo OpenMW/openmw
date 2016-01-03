@@ -305,7 +305,6 @@ namespace MWMechanics
         else
         {
             distantCombat = (rangeAttack > 500);
-            weapRange = 150.f;
         }
 
         

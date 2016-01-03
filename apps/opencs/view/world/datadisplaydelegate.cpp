@@ -140,7 +140,7 @@ void CSVWorld::DataDisplayDelegate::settingChanged (const CSMPrefs::Setting *set
 }
 
 
-void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, QString enumName, QString iconFilename)
+void CSVWorld::DataDisplayDelegateFactory::add (int enumValue, const QString& enumName, const QString& iconFilename)
 {
     mIcons.push_back (std::make_pair(enumValue, QIcon(iconFilename)));
     EnumDelegateFactory::add(enumValue, enumName);
