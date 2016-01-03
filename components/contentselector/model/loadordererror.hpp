@@ -17,12 +17,9 @@ namespace ContentSelectorModel
             ErrorCode_LoadOrder          = 3
         };
 
-        inline LoadOrderError() : mErrorCode(ErrorCode_None) {};
+        inline LoadOrderError() : mErrorCode(ErrorCode_None) {}
         inline LoadOrderError(ErrorCode errorCode, QString fileName)
-        {
-            mErrorCode = errorCode;
-            mFileName = fileName;
-        }
+            : mErrorCode(errorCode), mFileName(fileName) {}
         inline ErrorCode errorCode() const { return mErrorCode; }
         inline QString fileName() const { return mFileName; }
         QString toolTip() const;

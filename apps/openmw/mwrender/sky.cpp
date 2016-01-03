@@ -366,7 +366,7 @@ public:
         for (unsigned int i=0; i<colors->size(); ++i)
         {
             float alpha = 1.f;
-            if (mMeshType == 0) alpha = i%2 ? 0.f : 1.f; // this is a cylinder, so every second vertex belongs to the bottom-most row
+            if (mMeshType == 0) alpha = (i%2) ? 0.f : 1.f; // this is a cylinder, so every second vertex belongs to the bottom-most row
             else if (mMeshType == 1)
             {
                 if (i>= 49 && i <= 64) alpha = 0.f; // bottom-most row

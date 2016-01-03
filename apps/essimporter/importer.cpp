@@ -54,7 +54,7 @@ namespace
                 *(image->data(x,y)+2) = *it++;
                 *(image->data(x,y)+1) = *it++;
                 *image->data(x,y) = *it++;
-                it++; // skip alpha
+                ++it; // skip alpha
             }
         }
 

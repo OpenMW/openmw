@@ -45,13 +45,12 @@ void CSMDoc::Loader::load()
 
     bool done = false;
 
-    const int batchingSize = 50;
-
     try
     {
         if (iter->second.mRecordsLeft)
         {
             Messages messages (Message::Severity_Error);
+            const int batchingSize = 50;
             for (int i=0; i<batchingSize; ++i) // do not flood the system with update signals
                 if (document->getData().continueLoading (messages))
                 {

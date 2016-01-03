@@ -83,7 +83,7 @@ namespace CSVWorld
 
     protected:
 
-       void add (int enumValue,const  QString enumName, const QString iconFilename);
+       void add (int enumValue, const QString& enumName, const QString& iconFilename);
 
     };
 

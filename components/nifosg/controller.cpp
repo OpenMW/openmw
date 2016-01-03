@@ -258,7 +258,7 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
         mat.setTrans(uTrans, vTrans, 0);
 
         // setting once is enough because all other texture units share the same TexMat (see setDefaults).
-        if (mTextureUnits.size())
+        if (!mTextureUnits.empty())
         {
             osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(*mTextureUnits.begin(), osg::StateAttribute::TEXMAT));
             texMat->setMatrix(mat);

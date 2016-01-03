@@ -1,5 +1,6 @@
 #include "importer.hpp"
 
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <map>
@@ -897,8 +898,13 @@ std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename
         boost::filesystem::path resolved = filename;
 #endif
         writeTime = boost::filesystem::last_write_time(resolved);
-        std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
-            ") " << asctime(localtime(&writeTime)) << std::endl;
+
+        // print timestamp
+        const int size=1024;
+        char timeStrBuffer[size];
+        if (std::strftime(timeStrBuffer, size, "%x %X", localtime(&writeTime)) > 0)
+            std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
+                ") " << timeStrBuffer << std::endl;
     }
     else
     {

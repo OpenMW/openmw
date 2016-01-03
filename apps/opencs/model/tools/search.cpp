@@ -120,24 +120,25 @@ QString CSMTools::Search::flatten (const QString& text) const
     return flat;
 }
 
-CSMTools::Search::Search() : mType (Type_None), mPaddingBefore (10), mPaddingAfter (10) {}
+CSMTools::Search::Search() : mType (Type_None), mValue (0), mIdColumn (0), mTypeColumn (0),
+    mPaddingBefore (10), mPaddingAfter (10) {}
 
 CSMTools::Search::Search (Type type, const std::string& value)
-: mType (type), mText (value), mPaddingBefore (10), mPaddingAfter (10)
+: mType (type), mText (value), mValue (0), mIdColumn (0), mTypeColumn (0), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_Text && type!=Type_Id)
         throw std::logic_error ("Invalid search parameter (string)");
 }
 
 CSMTools::Search::Search (Type type, const QRegExp& value)
-: mType (type), mRegExp (value), mPaddingBefore (10), mPaddingAfter (10)
+: mType (type), mRegExp (value), mValue (0), mIdColumn (0), mTypeColumn (0), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_TextRegEx && type!=Type_IdRegEx)
         throw std::logic_error ("Invalid search parameter (RegExp)");
 }
 
 CSMTools::Search::Search (Type type, int value)
-: mType (type), mValue (value), mPaddingBefore (10), mPaddingAfter (10)
+: mType (type), mValue (value), mIdColumn (0), mTypeColumn (0), mPaddingBefore (10), mPaddingAfter (10)
 {
     if (type!=Type_RecordState)
         throw std::logic_error ("invalid search parameter (int)");

@@ -1153,7 +1153,7 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdCol
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subColIndex == 0)
         return subRowIndex;
@@ -1259,7 +1259,7 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
         throw std::runtime_error ("index out of range");
@@ -1337,7 +1337,7 @@ QVariant CSMWorld::CreatureMiscRefIdAdapter::getNestedData (const RefIdColumn *c
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     switch (subColIndex)
     {
