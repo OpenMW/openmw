@@ -41,7 +41,7 @@ namespace MWMechanics
         float mTimerCombatMove;
         bool mReadyToAttack;
         bool mAttack;
-        bool mFollowTarget;
+        float mAttackRange;
         bool mCombatMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
@@ -50,8 +50,8 @@ namespace MWMechanics
         float mStrength;
         bool mForceNoShortcut;
         ESM::Position mShortcutFailPos;
-        osg::Vec3f mLastActorPos;
         MWMechanics::Movement mMovement;
+        bool mAdjustAiming;
         
         AiCombatStorage():
         mAttackCooldown(0),
@@ -59,7 +59,7 @@ namespace MWMechanics
         mTimerCombatMove(0),
         mReadyToAttack(false),
         mAttack(false),
-        mFollowTarget(false),
+        mAttackRange(200),  // default attack range (same as in Creature::Hit)
         mCombatMove(false),
         mLastTargetPos(0,0,0),
         mCell(NULL),
@@ -67,8 +67,9 @@ namespace MWMechanics
         mActionCooldown(0),
         mStrength(),
         mForceNoShortcut(false),
-        mLastActorPos(0,0,0),
-        mMovement(){}    
+        mMovement(),
+        mAdjustAiming(false)
+        {}    
 
         void startCombatMove(bool isNpc, bool isDistantCombat, float distToTarget, float rangeAttack);
         void updateCombatMove(float duration);
@@ -139,6 +140,7 @@ namespace MWMechanics
      * Use the Observer Pattern to co-ordinate attacks, provide intelligence on
      * whether the target was hit, etc.
      */
+
     bool AiCombat::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         // get or create temporary storage
@@ -158,33 +160,33 @@ namespace MWMechanics
             return true;
 
         //Update every frame
+        storage.mReadyToAttack = pathTo(actor, target.getRefData().getPosition().pos, duration, storage.mAttackRange);
+
         storage.updateCombatMove(duration);
-        updateActorsMovement(actor, duration, storage.mMovement);
+        if (storage.mReadyToAttack) updateActorsMovement(actor, duration, storage);
         storage.updateAttack(characterController);
         storage.mActionCooldown -= duration;
-        
+
         float& timerReact = storage.mTimerReact;
-        if(timerReact < AI_REACTION_TIME)
+        if (timerReact < AI_REACTION_TIME)
         {
             timerReact += duration;
-            return false;
         }
         else
         {
             timerReact = 0;
-            return reactionTimeActions(actor, characterController, storage, target);
+            attack(actor, target, storage, characterController);
         }
+
+        return false;
     }
 
-    bool AiCombat::reactionTimeActions(const MWWorld::Ptr& actor, CharacterController& characterController, 
-        AiCombatStorage& storage, MWWorld::Ptr target)
+    void AiCombat::attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController)
     {
-        MWMechanics::Movement& movement = storage.mMovement;
-
         if (isTargetMagicallyHidden(target))
         {
             storage.stopAttack();
-            return false; // TODO: run away instead of doing nothing
+            return; // TODO: run away instead of doing nothing
         }
 
         const MWWorld::CellStore*& currentCell = storage.mCell;
@@ -199,10 +201,9 @@ namespace MWMechanics
 
         float& actionCooldown = storage.mActionCooldown;
         if (actionCooldown > 0)
-            return false;
+            return;
 
-        float rangeAttack = 0;
-        float rangeFollow = 0;
+        float &rangeAttack = storage.mAttackRange;
         boost::shared_ptr<Action>& currentAction = storage.mCurrentAction;
         if (characterController.readyToPrepareAttack())
         {
@@ -210,6 +211,7 @@ namespace MWMechanics
             actionCooldown = currentAction->getActionCooldown();
         }
 
+        float rangeFollow;
         if (currentAction.get())
             currentAction->getCombatRange(rangeAttack, rangeFollow);
 
@@ -243,7 +245,7 @@ namespace MWMechanics
         else //is creature
         {
             weaptype = actorClass.getCreatureStats(actor).getDrawState() == DrawState_Spell ? WeapType_Spell : WeapType_HandToHand;
-            weapRange = 150.0f; //TODO: use true attack range (the same problem in Creature::hit)
+            weapRange = 200; //TODO: use true attack range (the same problem in Creature::hit)
         }
 
         bool distantCombat = false;
@@ -253,54 +255,18 @@ namespace MWMechanics
             if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
             {
                 rangeAttack = 1000;
-                rangeFollow = 0; // not needed in ranged combat
                 distantCombat = true;
             }
             else
             {
                 rangeAttack = weapRange;
-                rangeFollow = 300;
             }
         }
         else
         {
             distantCombat = (rangeAttack > 500);
-            weapRange = 150.f;
+            weapRange = 200;
         }
-
-        
-        bool& readyToAttack = storage.mReadyToAttack;
-        // start new attack
-        storage.startAttackIfReady(actor, characterController, weapon, distantCombat);
-
-        /*
-         * Some notes on meanings of variables:
-         *
-         * rangeAttack:
-         *
-         *  - Distance where attack using the actor's weapon is possible:
-         *    longer for ranged weapons (obviously?) vs. melee weapons
-         *  - Determined by weapon's reach parameter; hardcoded value
-         *    for ranged weapon and for creatures
-         *  - Once within this distance mFollowTarget is triggered
-         *
-         * rangeFollow:
-         *
-         *  - Applies to melee weapons or hand to hand only (or creatures without
-         *    weapons)
-         *  - Distance a little further away than the actor's weapon reach
-         *    i.e. rangeFollow > rangeAttack for melee weapons
-         *  - Hardcoded value (0 for ranged weapons)
-         *  - Once the target gets beyond this distance mFollowTarget is cleared
-         *    and a path to the target needs to be found
-         *
-         * mFollowTarget:
-         *
-         *  - Once triggered, the actor follows the target with LOS shortcut
-         *    (the shortcut really only applies to cells where pathgrids are
-         *    available, since the default path without pathgrids is direct to
-         *    target even if LOS is not achieved)
-         */
 
         ESM::Position pos = actor.getRefData().getPosition();
         osg::Vec3f vActorPos(pos.asVec3());
@@ -309,153 +275,49 @@ namespace MWMechanics
         osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
         float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
         
-        osg::Vec3f& lastActorPos = storage.mLastActorPos;
-        bool& followTarget = storage.mFollowTarget;
-
-        bool isStuck = false;
-        float speed = 0.0f;
-        if(movement.mPosition[1] && (lastActorPos - vActorPos).length() < (speed = actorClass.getSpeed(actor)) * AI_REACTION_TIME / 2)
-            isStuck = true;
-
-        lastActorPos = vActorPos;
-
-        // check if actor can move along z-axis
-        bool canMoveByZ = (actorClass.canSwim(actor) && world->isSwimming(actor))
-            || world->isFlying(actor);
-
         // can't fight if attacker can't go where target is.  E.g. A fish can't attack person on land.
         if (distToTarget >= rangeAttack
                 && !actorClass.isNpc() && !MWMechanics::isEnvironmentCompatible(actor, target))
         {
             // TODO: start fleeing?
             storage.stopAttack();
-            return false;
+            return;
         }
 
-        // for distant combat we should know if target is in LOS even if distToTarget < rangeAttack 
-        bool inLOS = distantCombat ? world->getLOS(actor, target) : true;
-
-        // (within attack dist) || (not quite attack dist while following)
-        if(inLOS && (distToTarget < rangeAttack || (distToTarget <= rangeFollow && followTarget && !isStuck)))
+        if (storage.mReadyToAttack)
         {
-            mPathFinder.clearPath();
-            //Melee and Close-up combat
-            
-            // getXAngleToDir determines vertical angle to target:
-            // if actor can move along z-axis it will control movement dir
-            // if can't - it will control correct aiming.
-            // note: in getZAngleToDir if we preserve dir.z then horizontal angle can be inaccurate
+            storage.startCombatMove(actorClass.isNpc(), distantCombat, distToTarget, rangeAttack);
+            // start new attack
+            storage.startAttackIfReady(actor, characterController, weapon, distantCombat);
+
             if (distantCombat)
             {
+                // rotate actor taking into account target movement direction and projectile speed
                 osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, weaptype,
-                    storage.mStrength);
+                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, weaptype, storage.mStrength);
                 lastTargetPos = vTargetPos;
+
+                MWMechanics::Movement& movement = storage.mMovement;
                 movement.mRotation[0] = getXAngleToDir(vAimDir);
                 movement.mRotation[2] = getZAngleToDir(vAimDir);
             }
-            else
-            {
-                movement.mRotation[0] = getXAngleToDir(vAimDir);
-                movement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
-            }
 
-            // (not quite attack dist while following)
-            if (followTarget && distToTarget > rangeAttack)
-            {
-                //Close-up combat: just run up on target
-                storage.stopCombatMove();
-                movement.mPosition[1] = 1;
-            }
-            else // (within attack dist)
-            {
-                storage.startCombatMove(actorClass.isNpc(), distantCombat, distToTarget, rangeAttack);
-
-                readyToAttack = true;
-                //only once got in melee combat, actor is allowed to use close-up shortcutting
-                followTarget = true;
-            }
+            storage.mAdjustAiming = distantCombat;
         }
-        else // remote pathfinding
-        {
-            bool preferShortcut = false;
-            if (!distantCombat) inLOS = world->getLOS(actor, target);
-
-            // check if shortcut is available
-            bool& forceNoShortcut = storage.mForceNoShortcut;
-            ESM::Position& shortcutFailPos = storage.mShortcutFailPos;
-            
-            if(inLOS && (!isStuck || readyToAttack)
-                && (!forceNoShortcut || (shortcutFailPos.asVec3() - vActorPos).length() >= PATHFIND_SHORTCUT_RETRY_DIST))
-            {
-                if(speed == 0.0f) speed = actorClass.getSpeed(actor);
-                // maximum dist before pit/obstacle for actor to avoid them depending on his speed
-                float maxAvoidDist = AI_REACTION_TIME * speed + speed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
-                preferShortcut = checkWayIsClear(vActorPos, vTargetPos, osg::Vec3f(vAimDir.x(), vAimDir.y(), 0).length() > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2);
-            }
-
-            // don't use pathgrid when actor can move in 3 dimensions
-            if (canMoveByZ)
-            {
-                preferShortcut = true;
-                movement.mRotation[0] = getXAngleToDir(vAimDir);
-            }
-
-            if(preferShortcut)
-            {
-                movement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos));
-                forceNoShortcut = false;
-                shortcutFailPos.pos[0] = shortcutFailPos.pos[1] = shortcutFailPos.pos[2] = 0;
-                mPathFinder.clearPath();
-            }
-            else // if shortcut failed stick to path grid
-            {
-                if(!isStuck && shortcutFailPos.pos[0] == 0.0f && shortcutFailPos.pos[1] == 0.0f && shortcutFailPos.pos[2] == 0.0f)
-                {
-                    forceNoShortcut = true;
-                    shortcutFailPos = pos;
-                }
-
-                followTarget = false;
-
-                buildNewPath(actor, target);
-
-                // should always return a path (even if it's just go straight on target.)
-                assert(mPathFinder.isPathConstructed());
-            }
-
-            if (readyToAttack)
-            {
-                // to stop possible sideway moving after target moved out of attack range
-                storage.stopCombatMove();
-                readyToAttack = false;
-            }
-            movement.mPosition[1] = 1;
-        }
-
-        return false;
     }
 
-    void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, float duration, MWMechanics::Movement& desiredMovement)
+    void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, float duration, AiCombatStorage& storage)
     {
+        // apply combat movement
         MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
-        if (mPathFinder.isPathConstructed())
+        actorMovementSettings.mPosition[0] = storage.mMovement.mPosition[0];
+        actorMovementSettings.mPosition[1] = storage.mMovement.mPosition[1];
+        actorMovementSettings.mPosition[2] = storage.mMovement.mPosition[2];
+
+        if (storage.mAdjustAiming)
         {
-            const ESM::Position& pos = actor.getRefData().getPosition();
-            if (mPathFinder.checkPathCompleted(pos.pos[0], pos.pos[1]))
-            {
-                actorMovementSettings.mPosition[1] = 0;
-            }
-            else
-            {
-                evadeObstacles(actor, duration, pos);
-            }
-        }
-        else
-        {
-            actorMovementSettings = desiredMovement;
-            rotateActorOnAxis(actor, 2, actorMovementSettings, desiredMovement);
-            rotateActorOnAxis(actor, 0, actorMovementSettings, desiredMovement);
+            rotateActorOnAxis(actor, 2, actorMovementSettings, storage.mMovement);
+            rotateActorOnAxis(actor, 0, actorMovementSettings, storage.mMovement);
         }
     }
 
@@ -471,35 +333,6 @@ namespace MWMechanics
                 // actor now facing desired direction, no need to turn any more
                 targetAngleRadians = 0;
             }
-        }
-    }
-
-    bool AiCombat::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
-    {
-        if (!mPathFinder.getPath().empty())
-        {
-            osg::Vec3f currPathTarget(PathFinder::MakeOsgVec3(mPathFinder.getPath().back()));
-            osg::Vec3f newPathTarget = PathFinder::MakeOsgVec3(dest);
-            float dist = (newPathTarget - currPathTarget).length();
-            float targetPosThreshold = (cell->isExterior()) ? 300.0f : 100.0f;
-            return dist > targetPosThreshold;
-        }
-        else
-        {
-            // necessarily construct a new path
-            return true;
-        }
-    }
-
-    void AiCombat::buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
-    {
-        ESM::Pathgrid::Point newPathTarget = PathFinder::MakePathgridPoint(target.getRefData().getPosition());
-
-        //construct new path only if target has moved away more than on [targetPosThreshold]
-        if (doesPathNeedRecalc(newPathTarget, actor.getCell()->getCell()))
-        {
-            ESM::Pathgrid::Point start(PathFinder::MakePathgridPoint(actor.getRefData().getPosition()));
-            mPathFinder.buildSyncedPath(start, newPathTarget, actor.getCell());
         }
     }
 
@@ -542,13 +375,13 @@ namespace MWMechanics
             mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
             mCombatMove = true;
         }
-        // only NPCs are smart enough to use dodge movements
+        // dodge movements (for NPCs only)
         else if (isNpc && (!isDistantCombat || (distToTarget < rangeAttack / 2)))
         {
             //apply sideway movement (kind of dodging) with some probability
             if (Misc::Rng::rollClosedProbability() < 0.25)
             {
-                mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f;
+                mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
                 mTimerCombatMove = 0.05f + 0.15f * Misc::Rng::rollClosedProbability();
                 mCombatMove = true;
             }

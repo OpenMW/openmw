@@ -72,7 +72,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const ESM::Pathgr
 
         if (!mIsShortcutting)
         {
-            if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell()->getCell())) // only rebuild path if the target has moved
+            if (wasShortcutting || doesPathNeedRecalc(dest)) // only rebuild path if the target has moved
             {
                 mPathFinder.buildSyncedPath(start, dest, actor.getCell());
 
@@ -226,13 +226,11 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const ESM::Pathgrid::Point&
     return isClear;
 }
 
-bool MWMechanics::AiPackage::doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell)
+bool MWMechanics::AiPackage::doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest)
 {
-    bool needRecalc = distance(mPrevDest, dest) > 10;
-    if (needRecalc) 
-        mPrevDest = dest;
+    if (mPathFinder.getPath().empty()) return true;
 
-    return needRecalc;
+    return (distance(mPathFinder.getPath().back(), newDest) > 10);
 }
 
 bool MWMechanics::AiPackage::isTargetMagicallyHidden(const MWWorld::Ptr& target)

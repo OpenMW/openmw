@@ -22,7 +22,6 @@ MWMechanics::AiActivate *MWMechanics::AiActivate::clone() const
 }
 bool MWMechanics::AiActivate::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
-    ESM::Position pos = actor.getRefData().getPosition(); //position of the actor
     const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); //The target to follow
 
     actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);

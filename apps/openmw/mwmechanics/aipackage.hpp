@@ -95,7 +95,7 @@ namespace MWMechanics
             /// Check if the way to the destination is clear, taking into account actor speed
             bool checkWayIsClearForActor(const ESM::Pathgrid::Point& startPoint, const ESM::Pathgrid::Point& endPoint, const MWWorld::Ptr& actor);
 
-            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
+            virtual bool doesPathNeedRecalc(const ESM::Pathgrid::Point& newDest);
 
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, const ESM::Position& pos);
 
@@ -105,7 +105,6 @@ namespace MWMechanics
 
             float mTimer;
 
-            ESM::Pathgrid::Point mPrevDest;
             osg::Vec3f mLastActorPos;
 
             bool mIsShortcutting;   // if shortcutting at the moment

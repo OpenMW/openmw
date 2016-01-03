@@ -53,19 +53,14 @@ namespace MWMechanics
 
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
-        protected:
-            virtual bool doesPathNeedRecalc(ESM::Pathgrid::Point dest, const ESM::Cell *cell);
-
         private:
 
             int mTargetActorId;
 
-            void buildNewPath(const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
-            bool reactionTimeActions(const MWWorld::Ptr& actor, CharacterController& characterController,
-                AiCombatStorage& storage, MWWorld::Ptr target);
+            void attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController);
 
             /// Transfer desired movement (from AiCombatStorage) to Actor
-            void updateActorsMovement(const MWWorld::Ptr& actor, float duration, MWMechanics::Movement& movement);
+            void updateActorsMovement(const MWWorld::Ptr& actor, float duration, AiCombatStorage& storage);
             void rotateActorOnAxis(const MWWorld::Ptr& actor, int axis, 
                 MWMechanics::Movement& actorMovementSettings, MWMechanics::Movement& desiredMovement);
     };
