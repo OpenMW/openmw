@@ -804,6 +804,8 @@ namespace Compiler
                     if (optional)
                         ++optionalCount;
                 }
+                else
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='X')
             {
@@ -815,6 +817,8 @@ namespace Compiler
 
                 if (parser.isEmpty())
                     break;
+                else
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='z')
             {
@@ -825,6 +829,8 @@ namespace Compiler
 
                 if (discardParser.isEmpty())
                     break;
+                else
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='j')
             {
