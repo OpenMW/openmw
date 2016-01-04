@@ -60,6 +60,7 @@ option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time"
 
 # Apps and tools
 option(BUILD_OPENMW "build OpenMW" ON)
+option(BUILD_OPENMW_MP "build OpenMW-MP" ON)
 option(BUILD_BSATOOL "build BSA extractor" ON)
 option(BUILD_ESMTOOL "build ESM inspector" ON)
 option(BUILD_LAUNCHER "build Launcher" ON)
@@ -113,6 +114,10 @@ endif()
 
 # We probably support older versions than this.
 cmake_minimum_required(VERSION 2.6)
+
+
+find_package(RakNet REQUIRED)
+include_directories(${RakNet_INCLUDES})
 
 # Sound setup
 unset(FFMPEG_LIBRARIES CACHE)
@@ -568,6 +573,10 @@ add_subdirectory (components)
 #endif()
 
 # Apps and tools
+if (BUILD_OPENMW_MP)
+    add_subdirectory( apps/openmw-mp )
+endif()
+
 if (BUILD_OPENMW)
     add_subdirectory( apps/openmw )
 endif()
