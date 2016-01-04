@@ -352,13 +352,13 @@ public:
     virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
-        osg::RefMatrix* projectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
         float fov, aspect, zNear, zFar;
-        if (projectionMatrix->getPerspective(fov, aspect, zNear, zFar))
+        if (cv->getProjectionMatrix()->getPerspective(fov, aspect, zNear, zFar))
         {
             fov = mFov;
-            projectionMatrix->makePerspective(fov, aspect, zNear, zFar);
-            cv->pushProjectionMatrix(projectionMatrix);
+            osg::RefMatrix* newProjectionMatrix = new osg::RefMatrix(*cv->getProjectionMatrix());
+            newProjectionMatrix->makePerspective(fov, aspect, zNear, zFar);
+            cv->pushProjectionMatrix(newProjectionMatrix);
             traverse(node, nv);
             cv->popProjectionMatrix();
         }
