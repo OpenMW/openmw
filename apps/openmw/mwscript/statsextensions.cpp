@@ -1125,10 +1125,16 @@ namespace MWScript
                         ptr.getClass().getCreatureStats(ptr).resurrect();
                     else if (ptr.getClass().getCreatureStats(ptr).isDead())
                     {
+                        bool wasEnabled = ptr.getRefData().isEnabled();
                         MWBase::Environment::get().getWorld()->undeleteObject(ptr);
-                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
                         MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
+
+                        // HACK: disable/enable object to re-add it to the scene properly (need a new Animation).
+                        MWBase::Environment::get().getWorld()->disable(ptr);
+                        // resets runtime state such as inventory, stats and AI. does not reset position in the world
                         ptr.getRefData().setCustomData(NULL);
+                        if (wasEnabled)
+                            MWBase::Environment::get().getWorld()->enable(ptr);
                     }
                 }
         };
