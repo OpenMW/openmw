@@ -55,6 +55,8 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
+#include "mwmp/Networking.hpp"
+
 namespace
 {
     void checkSDLError(int ret)
@@ -101,6 +103,8 @@ void OMW::Engine::frame(float frametime)
         // sound
         if (mUseSound)
             mEnvironment.getSoundManager()->update(frametime);
+
+        mwmp::Main::Frame(frametime);
 
         // Main menu opened? Then scripts are also paused.
         bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
@@ -645,7 +649,10 @@ void OMW::Engine::go()
     ToUTF8::Utf8Encoder encoder (mEncoding);
     mEncoder = &encoder;
 
+
     prepareEngine (settings);
+    mwmp::Main::Create();
+    mSkipMenu = true;
 
     if (!mSaveGameFile.empty())
     {
@@ -715,6 +722,7 @@ void OMW::Engine::go()
     // Save user settings
     settings.saveUser(settingspath);
 
+    mwmp::Main::Destroy();
     std::cout << "Quitting peacefully." << std::endl;
 }
 

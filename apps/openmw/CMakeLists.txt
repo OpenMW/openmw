@@ -95,6 +95,8 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
+add_openmw_dir (mwmp Networking Player)
+
 # Main executable
 
 if (NOT ANDROID)
