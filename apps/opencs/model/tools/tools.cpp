@@ -29,6 +29,7 @@
 #include "soundgencheck.hpp"
 #include "magiceffectcheck.hpp"
 #include "mergeoperation.hpp"
+#include "gmstcheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -110,6 +111,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                     mData.getReferenceables(),
                                                                     mData.getResources (CSMWorld::UniversalId::Type_Icons),
                                                                     mData.getResources (CSMWorld::UniversalId::Type_Textures)));
+        mVerifierOperation->appendStage (new GMSTCheckStage (mData.getGmsts()));
 
         mVerifier.setOperation (mVerifierOperation);
     }
