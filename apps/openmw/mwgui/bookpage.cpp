@@ -1153,8 +1153,6 @@ public:
 
     void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node)
     {
-        //test ();
-
         mNode = node;
 
         for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
