@@ -645,6 +645,8 @@ namespace MWWorld
 
             /// Return the distance between actor's weapon and target's collision box.
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
+
+            virtual bool isPlayerInJail() const;
     };
 }
 

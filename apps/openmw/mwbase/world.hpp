@@ -545,6 +545,8 @@ namespace MWBase
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
+
+            virtual bool isPlayerInJail() const = 0;
     };
 }
 

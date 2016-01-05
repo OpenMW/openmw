@@ -2996,6 +2996,14 @@ namespace MWWorld
         }
     }
 
+    bool World::isPlayerInJail() const
+    {
+        if (mGoToJail)
+            return true;
+
+        return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    }
+
     void World::spawnRandomCreature(const std::string &creatureList)
     {
         const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
