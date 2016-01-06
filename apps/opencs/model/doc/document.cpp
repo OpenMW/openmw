@@ -2247,6 +2247,7 @@ void CSMDoc::Document::createBase()
 CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
     const std::vector< boost::filesystem::path >& files, bool new_,
     const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+    const Fallback::Map* fallback,
     ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
     const std::vector<std::string>& blacklistedScripts)
 : mVFS(vfs), mSavePath (savePath), mContentFiles (files), mNew (new_), mData (encoding, resourcesManager),
@@ -2255,7 +2256,7 @@ CSMDoc::Document::Document (const VFS::Manager* vfs, const Files::ConfigurationM
   (savePath.filename().string() + ".project")),
   mSavingOperation (*this, mProjectPath, encoding),
   mSaving (&mSavingOperation),
-  mResDir(resDir),
+  mResDir(resDir), mFallbackMap(fallback),
   mRunner (mProjectPath), mDirty (false), mIdCompletionManager(mData)
 {
     if (mContentFiles.empty())
