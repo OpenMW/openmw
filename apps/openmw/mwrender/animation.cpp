@@ -30,8 +30,9 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/util.hpp>
+#include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightcontroller.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
