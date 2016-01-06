@@ -309,8 +309,15 @@ namespace SceneUtil
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
             const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
 
-            // we do the intersections in view space
-            osg::BoundingSphere nodeBound = node->getBound();
+            // get the node bounds in view space
+            // NB do not node->getBound() * modelView, that would apply the node's transformation twice
+            osg::BoundingSphere nodeBound;
+            osg::Group* group = node->asGroup();
+            if (group)
+            {
+                for (unsigned int i=0; i<group->getNumChildren(); ++i)
+                    nodeBound.expandBy(group->getChild(i)->getBound());
+            }
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
