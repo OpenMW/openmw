@@ -138,6 +138,10 @@ add_component_dir (version
     version
     )
 
+add_component_dir (fallback
+    fallback validate
+    )
+
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     )
 

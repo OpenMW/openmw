@@ -33,6 +33,7 @@
 #include <components/resource/texturemanager.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
@@ -41,8 +42,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
-
-#include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
 #include "renderbin.hpp"
@@ -827,7 +826,7 @@ private:
             , mTimeOfDayFade(1.f)
             , mGlareView(1.f)
         {
-            const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
+            const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
             mColor = fallback->getFallbackColour("Weather_Sun_Glare_Fader_Color");
             mSunGlareFaderMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Max");
             mSunGlareFaderAngleMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Angle_Max");
@@ -1161,7 +1160,7 @@ void SkyManager::create()
 
     mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getTextureManager()));
 
-    const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+    const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
     mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
     mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 

@@ -56,7 +56,6 @@ namespace MWMechanics
 
 namespace MWWorld
 {
-    class Fallback;
     class CellStore;
     class Player;
     class LocalScripts;
@@ -65,6 +64,11 @@ namespace MWWorld
     class RefData;
 
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWBase
@@ -119,7 +123,7 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual const MWWorld::Fallback *getFallback () const = 0;
+            virtual const Fallback::Map *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;

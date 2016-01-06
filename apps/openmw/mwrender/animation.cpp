@@ -35,11 +35,12 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
@@ -1113,7 +1114,7 @@ namespace MWRender
         osg::ref_ptr<osg::Light> light (new osg::Light);
         lightSource->setNodeMask(Mask_Lighting);
 
-        const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
+        const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
 
         float radius = esmLight->mData.mRadius;
         lightSource->setRadius(radius);
