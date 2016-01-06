@@ -55,7 +55,9 @@ namespace SceneUtil
         {
             osg::ComputeBoundsVisitor computeBound;
             computeBound.setTraversalMask(~partsysMask);
-            node->accept(computeBound);
+            // We want the bounds of all children of the node, ignoring the node's local transformation
+            // So do a traverse(), not accept()
+            computeBound.traverse(*node);
 
             // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans(new SceneUtil::PositionAttitudeTransform);
