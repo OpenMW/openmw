@@ -93,7 +93,7 @@ void RenderWidget::flagAsModified()
 
 void RenderWidget::setVisibilityMask(int mask)
 {
-    mView->getCamera()->setCullMask(mask);
+    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem);
 }
 
 bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
@@ -166,6 +166,8 @@ SceneWidget::SceneWidget(boost::shared_ptr<Resource::ResourceSystem> resourceSys
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
     setLighting(&mLightingDay);
+
+    mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
 
     /// \todo make shortcut configurable
     QShortcut *focusToolbar = new QShortcut (Qt::Key_T, this, 0, 0, Qt::WidgetWithChildrenShortcut);

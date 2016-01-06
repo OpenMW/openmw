@@ -17,6 +17,9 @@ namespace CSVRender
         Mask_Fog = 0x10,
         Mask_Terrain = 0x20,
 
+        // used within models
+        Mask_ParticleSystem = 0x100,
+
         // control elements
         Mask_CellMarker = 0x10000,
         Mask_CellArrow = 0x20000,
