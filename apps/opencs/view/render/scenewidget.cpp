@@ -14,6 +14,7 @@
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "../widget/scenetoolmode.hpp"
 
@@ -64,7 +65,9 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
     mView->getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
 
-    mRootNode = new osg::Group;
+    SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
+    lightMgr->setStartLight(1);
+    mRootNode = lightMgr;
 
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
