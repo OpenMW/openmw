@@ -17,7 +17,7 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
@@ -166,8 +166,8 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Element_Terrain, "Terrain", "", true);
-    tool->addButton (Element_Fog, "Fog");
+    tool->addButton (CSVWidget::SceneToolToggle2::Button_Terrain, Mask_Terrain, "Terrain", "", true);
+    tool->addButton (CSVWidget::SceneToolToggle2::Button_Fog, Mask_Fog, "Fog");
 }
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()

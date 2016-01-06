@@ -22,7 +22,8 @@ namespace CSVWidget
 
             struct ButtonDesc
             {
-                unsigned int mId;
+                unsigned int mButtonId;
+                unsigned int mMask;
                 QString mName;
                 int mIndex;
             };
@@ -53,15 +54,25 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position);
 
+            /// Visual elements in a scene
+            /// @note do not change the enumeration values, they are used in pre-existing button file names!
+            enum ButtonId
+            {
+                Button_Reference = 0x1,
+                Button_Pathgrid = 0x2,
+                Button_Water = 0x4,
+                Button_Fog = 0x8,
+                Button_Terrain = 0x10
+            };
             /// \attention After the last button has been added, setSelection must be called at
             /// least once to finalise the layout.
-            void addButton (unsigned int id,
+            void addButton (ButtonId buttonId, unsigned int mask,
                 const QString& name, const QString& tooltip = "", bool disabled = false);
 
-            unsigned int getSelection() const;
+            unsigned int getSelectionMask() const;
 
-            /// \param or'ed button IDs. IDs that do not exist will be ignored.
-            void setSelection (unsigned int selection);
+            /// \param or'ed button masks. buttons that do not exist will be ignored.
+            void setSelectionMask (unsigned int selection);
 
         signals:
 

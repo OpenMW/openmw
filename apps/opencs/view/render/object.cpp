@@ -19,7 +19,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/clone.hpp>
 
-#include "elements.hpp"
+#include "mask.hpp"
 
 namespace
 {
@@ -39,7 +39,7 @@ namespace
 
 
 CSVRender::ObjectTag::ObjectTag (Object* object)
-: TagBase (Element_Reference), mObject (object)
+: TagBase (Mask_Reference), mObject (object)
 {}
 
 QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
@@ -138,8 +138,7 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
 
     parentNode->addChild(mBaseNode);
 
-    // 0x1 reserved for separating cull and update visitors
-    mBaseNode->setNodeMask(Element_Reference<<1);
+    mBaseNode->setNodeMask(Mask_Reference);
 
     if (referenceable)
     {

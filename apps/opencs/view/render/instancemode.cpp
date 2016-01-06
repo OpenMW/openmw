@@ -3,12 +3,12 @@
 
 #include "../../model/prefs/state.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
 #include "object.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
+: EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
   parent)
 {
 
@@ -28,7 +28,7 @@ void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
 
 void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
 {
-    getWorldspaceWidget().clearSelection (Element_Reference);
+    getWorldspaceWidget().clearSelection (Mask_Reference);
 
     if (tag)
     {

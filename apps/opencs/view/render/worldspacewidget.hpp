@@ -11,7 +11,7 @@
 #include "../../model/world/tablemimedata.hpp"
 
 #include "scenewidget.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 
 namespace CSMPrefs
 {

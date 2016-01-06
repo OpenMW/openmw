@@ -18,6 +18,7 @@
 #include "../widget/scenetoolmode.hpp"
 
 #include "lighting.hpp"
+#include "mask.hpp"
 
 namespace CSVRender
 {
@@ -73,7 +74,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     // Press S to reveal profiling stats
     mView->addEventHandler(new osgViewer::StatsHandler);
 
-    mView->getCamera()->setCullMask(~(0x1));
+    mView->getCamera()->setCullMask(~(Mask_UpdateVisitor));
 
     viewer.addView(mView);
     viewer.setDone(false);
@@ -92,8 +93,7 @@ void RenderWidget::flagAsModified()
 
 void RenderWidget::setVisibilityMask(int mask)
 {
-    // 0x1 reserved for separating cull and update visitors
-    mView->getCamera()->setCullMask(mask<<1);
+    mView->getCamera()->setCullMask(mask);
 }
 
 bool RenderWidget::eventFilter(QObject* obj, QEvent* event)

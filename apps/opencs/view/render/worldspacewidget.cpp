@@ -27,7 +27,7 @@
 #include "../widget/scenetoolrun.hpp"
 
 #include "object.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 #include "editmode.hpp"
 #include "instancemode.hpp"
 
@@ -160,7 +160,7 @@ CSVWidget::SceneToolToggle2 *CSVRender::WorldspaceWidget::makeSceneVisibilitySel
 
     addVisibilitySelectorButtons (mSceneElements);
 
-    mSceneElements->setSelection (0xffffffff);
+    mSceneElements->setSelectionMask (0xffffffff);
 
     connect (mSceneElements, SIGNAL (selectionChanged()),
         this, SLOT (elementSelectionChanged()));
@@ -275,12 +275,12 @@ bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::Univer
 
 unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 {
-    return mSceneElements->getSelection();
+    return mSceneElements->getSelectionMask();
 }
 
 void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    mInteractionMask = mask | Element_CellMarker | Element_CellArrow;
+    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow;
 }
 
 unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
@@ -296,9 +296,9 @@ void CSVRender::WorldspaceWidget::setEditLock (bool locked)
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (Element_Reference, "Instances");
-    tool->addButton (Element_Water, "Water");
-    tool->addButton (Element_Pathgrid, "Pathgrid");
+    tool->addButton (CSVWidget::SceneToolToggle2::Button_Reference, Mask_Reference, "Instances");
+    tool->addButton (CSVWidget::SceneToolToggle2::Button_Water, Mask_Water, "Water");
+    tool->addButton (CSVWidget::SceneToolToggle2::Button_Pathgrid, Mask_Pathgrid, "Pathgrid");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
@@ -306,7 +306,7 @@ void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneTo
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (new InstanceMode (this, tool), "object");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Pathgrid, "Pathgrid editing"),
         "pathgrid");
 }
 
@@ -404,7 +404,7 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (const Q
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    visitor.setTraversalMask(getInteractionMask() << 1);
+    visitor.setTraversalMask(getInteractionMask());
 
     mView->getCamera()->accept(visitor);
 

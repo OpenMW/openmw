@@ -7,10 +7,10 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
-#include "elements.hpp"
+#include "mask.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
-: TagBase (Element_CellArrow), mArrow (arrow)
+: TagBase (Mask_CellArrow), mArrow (arrow)
 {}
 
 CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
@@ -165,8 +165,7 @@ CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,
 
     mParentNode->addChild (mBaseNode);
 
-    // 0x1 reserved for separating cull and update visitors
-    mBaseNode->setNodeMask (Element_CellArrow<<1);
+    mBaseNode->setNodeMask (Mask_CellArrow);
 
     adjustTransform();
     buildShape();
