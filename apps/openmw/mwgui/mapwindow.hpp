@@ -78,7 +78,6 @@ namespace MWGui
         {
             MarkerUserData(MWRender::LocalMap* map)
                 : mLocalMapRender(map)
-                , interior(false)
                 , cellX(0)
                 , cellY(0)
                 , nX(0.f)
@@ -89,7 +88,6 @@ namespace MWGui
             bool isPositionExplored() const;
 
             MWRender::LocalMap* mLocalMapRender;
-            bool interior;
             int cellX;
             int cellY;
             float nX;

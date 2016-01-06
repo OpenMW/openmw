@@ -478,7 +478,7 @@ osg::Vec2f LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int 
     return pos;
 }
 
-bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
 {
     const MapSegment& segment = mSegments[std::make_pair(x, y)];
     if (!segment.mFogOfWarImage)

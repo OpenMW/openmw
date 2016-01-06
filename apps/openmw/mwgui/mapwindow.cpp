@@ -269,8 +269,6 @@ namespace MWGui
         // normalized cell coordinates
         float nX,nY;
 
-        markerPos.interior = mInterior;
-
         if (!mInterior)
         {
             int cellX, cellY;
@@ -1078,7 +1076,7 @@ namespace MWGui
     {
         if (!mLocalMapRender)
             return true;
-        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY, interior);
+        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY);
     }
 
 }
