@@ -20,6 +20,8 @@ namespace CSVRender
         // used within models
         Mask_ParticleSystem = 0x100,
 
+        Mask_Lighting = 0x200,
+
         // control elements
         Mask_CellMarker = 0x10000,
         Mask_CellArrow = 0x20000,

@@ -39,7 +39,7 @@ namespace SceneUtil
 
     }
 
-    void addLight (osg::Group* node, const ESM::Light* esmLight, int partsysMask, int lightMask, bool isExterior, bool outQuadInLin, bool useQuadratic,
+    void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior, bool outQuadInLin, bool useQuadratic,
                    float quadraticValue, float quadraticRadiusMult, bool useLinear, float linearRadiusMult,
                    float linearValue)
     {

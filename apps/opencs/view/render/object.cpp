@@ -120,7 +120,7 @@ void CSVRender::Object::update()
         static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
         static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, ~0u, isExterior, outQuadInLin, useQuadratic,
+        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior, outQuadInLin, useQuadratic,
                             quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 }

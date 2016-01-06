@@ -67,6 +67,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
     lightMgr->setStartLight(1);
+    lightMgr->setLightingMask(Mask_Lighting);
     mRootNode = lightMgr;
 
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
@@ -96,7 +97,7 @@ void RenderWidget::flagAsModified()
 
 void RenderWidget::setVisibilityMask(int mask)
 {
-    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem);
+    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
 }
 
 bool RenderWidget::eventFilter(QObject* obj, QEvent* event)
