@@ -789,6 +789,7 @@ namespace Compiler
                     stringParser.setOptional (true);
 
                 if (*iter=='c') stringParser.smashCase();
+                if (*iter=='x') stringParser.discard();
                 scanner.scan (stringParser);
 
                 if ((optional || *iter=='x') && stringParser.isEmpty())
@@ -805,7 +806,8 @@ namespace Compiler
                         ++optionalCount;
                 }
                 else
-                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
+                    getErrorHandler().warning ("Ignoring extra argument",
+                        stringParser.getTokenLoc());
             }
             else if (*iter=='X')
             {
