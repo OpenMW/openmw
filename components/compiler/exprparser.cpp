@@ -639,7 +639,8 @@ namespace Compiler
         if (code==Scanner::S_newline)
         {
             // end marker
-            mTokenLoc = loc;
+            if (mTokenLoc.mLiteral.empty())
+                mTokenLoc = loc;
             scanner.putbackSpecial (code, loc);
             return false;
         }
@@ -820,7 +821,7 @@ namespace Compiler
                 if (parser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
+                    getErrorHandler().warning("Ignoring extra argument", parser.getTokenLoc());
             }
             else if (*iter=='z')
             {
@@ -877,5 +878,10 @@ namespace Compiler
         }
 
         return optionalCount;
+    }
+
+    const TokenLoc& ExprParser::getTokenLoc() const
+    {
+        return mTokenLoc;
     }
 }
