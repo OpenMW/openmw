@@ -832,7 +832,7 @@ namespace Compiler
                 if (discardParser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
+                    getErrorHandler().warning("Ignoring extra argument", discardParser.getTokenLoc());
             }
             else if (*iter=='j')
             {
