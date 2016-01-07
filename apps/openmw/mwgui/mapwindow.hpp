@@ -61,7 +61,7 @@ namespace MWGui
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
 
@@ -105,7 +105,8 @@ namespace MWGui
         MyGUI::ImageBox* mCompass;
         std::string mPrefix;
         bool mChanged;
-        bool mFogOfWar;
+        bool mFogOfWarToggled;
+        bool mFogOfWarEnabled;
 
         int mMapWidgetSize;
 

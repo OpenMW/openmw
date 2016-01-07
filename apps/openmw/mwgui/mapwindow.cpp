@@ -156,7 +156,7 @@ namespace MWGui
 
     // ------------------------------------------------------
 
-    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender)
+    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled)
         : mLocalMapRender(localMapRender)
         , mCurX(0)
         , mCurY(0)
@@ -165,7 +165,8 @@ namespace MWGui
         , mCompass(NULL)
         , mPrefix()
         , mChanged(true)
-        , mFogOfWar(true)
+        , mFogOfWarToggled(true)
+        , mFogOfWarEnabled(fogOfWarEnabled)
         , mMapWidgetSize(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
@@ -222,9 +223,9 @@ namespace MWGui
 
     bool LocalMapBase::toggleFogOfWar()
     {
-        mFogOfWar = !mFogOfWar;
+        mFogOfWarToggled = !mFogOfWarToggled;
         applyFogOfWar();
-        return mFogOfWar;
+        return mFogOfWarToggled;
     }
 
     void LocalMapBase::applyFogOfWar()
@@ -238,7 +239,7 @@ namespace MWGui
                 int y = mCurY + (-1*(my-1));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
 
-                if (!mFogOfWar)
+                if (!mFogOfWarToggled || !mFogOfWarEnabled)
                 {
                     fog->setImageTexture("");
                     continue;
