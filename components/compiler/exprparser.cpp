@@ -791,7 +791,7 @@ namespace Compiler
                 if (*iter=='c') stringParser.smashCase();
                 scanner.scan (stringParser);
 
-                if (optional && stringParser.isEmpty())
+                if ((optional || *iter=='x') && stringParser.isEmpty())
                     break;
 
                 if (*iter!='x')
