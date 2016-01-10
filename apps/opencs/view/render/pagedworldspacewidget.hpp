@@ -96,6 +96,8 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask);
 
+            virtual std::string getCellId (const osg::Vec3f& point) const;
+
         protected:
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
