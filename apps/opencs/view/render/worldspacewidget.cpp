@@ -360,7 +360,7 @@ osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& loca
     osg::Vec3d direction = end-start;
     direction.normalize();
 
-    return start+direction * 50;
+    return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 }
 
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)

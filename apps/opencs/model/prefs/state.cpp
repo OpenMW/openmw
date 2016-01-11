@@ -190,6 +190,11 @@ void CSMPrefs::State::declare()
     declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
     declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
         setMin (1);
+
+    declareCategory ("Scene Drops");
+    declareInt ("distance", "Drop Distance", 50).
+        setTooltip ("If an instance drop can not be placed against another object at the "
+            "insert point, it will be placed by this distance from the insert point instead");
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)
