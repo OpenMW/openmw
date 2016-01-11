@@ -237,7 +237,8 @@ namespace MWWorld
 
             if (hit)
             {
-                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, ESM::RT_Target, it->mSpellId, it->mSourceName);
+                MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, result.mHitObject,
+                                                                    ESM::RT_Target, it->mSpellId, it->mSourceName);
 
                 MWBase::Environment::get().getSoundManager()->stopSound(it->mSound);
                 mParent->removeChild(it->mNode);

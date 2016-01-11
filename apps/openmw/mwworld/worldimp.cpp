@@ -3072,8 +3072,8 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const osg::Vec3f &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
-                             const std::string& id, const std::string& sourceName)
+    void World::explodeSpell(const osg::Vec3f &origin, const ESM::EffectList &effects, const Ptr &caster, const Ptr& ignore,
+                             ESM::RangeType rangeType, const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
@@ -3119,6 +3119,9 @@ namespace MWWorld
             // Vanilla-compatible behaviour of never applying the spell to the caster
             // (could be changed by mods later)
             if (apply->first == caster)
+                continue;
+
+            if (apply->first == ignore)
                 continue;
 
             if (source.isEmpty())
