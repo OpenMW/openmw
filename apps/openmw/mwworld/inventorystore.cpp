@@ -523,6 +523,9 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
 {
+    if (slot<0 || slot>=static_cast<int> (mSlots.size()))
+        throw std::runtime_error ("slot number out of range");
+
     ContainerStoreIterator it = mSlots[slot];
 
     if (it != end())
