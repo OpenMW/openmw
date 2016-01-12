@@ -1980,11 +1980,11 @@ bool CharacterController::kill()
 {
     if( isDead() )
     {
-        if( mPtr == getPlayer() && !isAnimPlaying(mCurrentDeath) )
+        /*if( mPtr == getPlayer() && !isAnimPlaying(mCurrentDeath) )
         {
             //player's death animation is over
             MWBase::Environment::get().getStateManager()->askLoadRecent();
-        }
+        }*/
         return false;
     }
 

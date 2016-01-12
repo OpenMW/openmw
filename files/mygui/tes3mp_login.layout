@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<MyGUI type="Layout" version="3.2.0">
+    <Widget type="Window" skin="MW_Dialog" position="0 0 600 600" layer="Windows" name="_Main">
+        <Widget type="TextBox" skin="ProgressText" position="6 6 300 18" align="Left Top" name="LabelName">
+            <Property key="TextAlign" value="Left Top"/>
+            <Property key="Caption" value="Login"/>
+        </Widget>
+        <Widget type="EditBox" skin="MW_TextEdit" position="6 28 300 30" align="Left Top" name="EditLogin"/>
+        <Widget type="TextBox" skin="ProgressText" position="6 58 300 18" align="Left Top" name="LabelServer">
+            <Property key="TextAlign" value="Left Top"/>
+            <Property key="Caption" value="Server address and port"/>
+        </Widget>
+        <Widget type="EditBox" skin="MW_TextEdit" position="6 80 300 30" align="Left Top" name="EditServer"/>
+        <Widget type="EditBox" skin="MW_TextEdit" position="306 80 80 30" align="Left Top" name="EditPort"/>
+
+        <Widget type="AutoSizedButton" skin="MW_Button" position="540 560 42 23" name="ButtonConnect">
+            <Property key="ExpandDirection" value="Left"/>
+            <Property key="Caption" value="Connect"/>
+        </Widget>
+
+    </Widget>
+    <CodeGeneratorSettings/>
+</MyGUI>

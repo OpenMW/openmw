@@ -55,7 +55,7 @@
 
 #include "mwstate/statemanagerimp.hpp"
 
-#include "mwmp/Networking.hpp"
+#include "mwmp/Main.hpp"
 
 namespace
 {
@@ -112,7 +112,7 @@ void OMW::Engine::frame(float frametime)
         // update game state
         mEnvironment.getStateManager()->update (frametime);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+        bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
         if (mEnvironment.getStateManager()->getState()==
@@ -153,9 +153,9 @@ void OMW::Engine::frame(float frametime)
         if (mEnvironment.getStateManager()->getState()==
             MWBase::StateManager::State_Running)
         {
-            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+            /*MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
             if(!guiActive && player.getClass().getCreatureStats(player).isDead())
-                mEnvironment.getStateManager()->endGame();
+                mEnvironment.getStateManager()->endGame();*/
         }
 
         // update world
@@ -688,7 +688,7 @@ void OMW::Engine::go()
         frameTimer.setStartTick();
         dt = std::min(dt, 0.2);
 
-        bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
+        bool guiActive = /*mEnvironment.getWindowManager()->isGuiMode()*/ false;
         if (!guiActive)
             simulationTime += dt;
 

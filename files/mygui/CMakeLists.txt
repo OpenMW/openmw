@@ -89,6 +89,9 @@ set(MYGUI_FILES
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml
     skins.xml
+
+    tes3mp_login.layout
+    tes3mp_login.skin.xml
 )
 
 

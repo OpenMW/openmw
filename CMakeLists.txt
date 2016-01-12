@@ -345,6 +345,12 @@ endif (APPLE)
 
 # Other files
 
+configure_file(${OpenMW_SOURCE_DIR}/files/tes3mp/tes3mp-client-default.cfg
+        "${OpenMW_BINARY_DIR}/tes3mp-client-default.cfg")
+
+configure_file(${OpenMW_SOURCE_DIR}/files/tes3mp/tes3mp-server-default.cfg
+        "${OpenMW_BINARY_DIR}/tes3mp-server-default.cfg")
+
 configure_file(${OpenMW_SOURCE_DIR}/files/settings-default.cfg
     "${OpenMW_BINARY_DIR}/settings-default.cfg")
 
@@ -454,6 +460,11 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-client-default" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-client.install" DESTINATION "${SYSCONFDIR}" RENAME "tes3mp-client.cfg" COMPONENT "openmw")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-server-default" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw-mp")
+    INSTALL(FILES "${OpenMW_BINARY_DIR}/tes3mp-server.install" DESTINATION "${SYSCONFDIR}" RENAME "tes3mp-server.cfg" COMPONENT "openmw-mp")
+
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
     ENDIF(BUILD_OPENCS)
@@ -473,6 +484,7 @@ if(WIN32)
         "${OpenMW_SOURCE_DIR}/Docs/license/GPL3.txt"
         "${OpenMW_SOURCE_DIR}/Docs/license/DejaVu Font License.txt"
         "${OpenMW_BINARY_DIR}/settings-default.cfg"
+        "${OpenMW_BINARY_DIR}/tes3mp-client-default.cfg"
         "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt"
         "${OpenMW_BINARY_DIR}/Release/openmw.exe"
         DESTINATION ".")
