@@ -21,6 +21,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -509,13 +510,38 @@ namespace MWScript
                     if (amount == 0)
                         return;
 
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    // Prefer dropping unequipped items first; re-stack if possible by unequipping items before dropping them.
+                    MWWorld::InventoryStore *invStorePtr = 0;
+                    if (ptr.getClass().hasInventoryStore(ptr)) {
+                        invStorePtr = &ptr.getClass().getInventoryStore(ptr);
 
+                        int numNotEquipped = invStorePtr->count(item);
+                        for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                        {
+                            MWWorld::ContainerStoreIterator it = invStorePtr->getSlot (slot);
+                            if (it != invStorePtr->end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                            {
+                                --numNotEquipped;
+                            }
+                        }
+
+                        for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
+                        {
+                            MWWorld::ContainerStoreIterator it = invStorePtr->getSlot (slot);
+                            if (it != invStorePtr->end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                            {
+                                invStorePtr->unequipSlot(slot, ptr);
+                                ++numNotEquipped;
+                            }
+                        }
+                    }
 
                     int toRemove = amount;
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
                     for (MWWorld::ContainerStoreIterator iter (store.begin()); iter!=store.end(); ++iter)
                     {
-                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
+                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item)
+                                && (!invStorePtr || !invStorePtr->isEquipped(*iter)))
                         {
                             int removed = store.remove(*iter, toRemove, ptr);
                             MWWorld::Ptr dropped = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
