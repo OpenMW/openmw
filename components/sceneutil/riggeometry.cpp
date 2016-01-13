@@ -177,7 +177,7 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
         }
     }
 
-    for (Vertex2BoneMap::iterator it = vertex2BoneMap.begin(); it != vertex2BoneMap.end(); it++)
+    for (Vertex2BoneMap::iterator it = vertex2BoneMap.begin(); it != vertex2BoneMap.end(); ++it)
     {
         mBone2VertexMap[it->second].push_back(it->first);
     }

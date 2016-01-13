@@ -506,6 +506,9 @@ namespace MWPhysics
     private:
         btHeightfieldTerrainShape* mShape;
         btCollisionObject* mCollisionObject;
+
+        void operator=(const HeightField&);
+        HeightField(const HeightField&);
     };
 
     // --------------------------------------------------------------

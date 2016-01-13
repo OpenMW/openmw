@@ -674,8 +674,6 @@ void CSVWorld::EditWidget::remake(int row)
                     {
                         mNestedTableMapper->addMapping (editor, col);
 
-                        std::string disString = tree->nestedHeaderData (i, col,
-                                    Qt::Horizontal, Qt::DisplayRole).toString().toStdString();
                         // Need to use Qt::DisplayRole in order to get the  correct string
                         // from CSMWorld::Columns
                         QLabel* label = new QLabel (tree->nestedHeaderData (i, col,

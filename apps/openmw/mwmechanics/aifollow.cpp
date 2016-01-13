@@ -129,12 +129,14 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     ESM::Pathgrid::Point dest = target.getRefData().getPosition().pos;
 
     float dist = distance(dest, pos.pos[0], pos.pos[1], pos.pos[2]);
-    const float threshold = 10;
 
     if (storage.mMoving)  //Stop when you get close
         storage.mMoving = (dist > followDistance);
     else
+    {
+        const float threshold = 10;
         storage.mMoving = (dist > followDistance + threshold);
+    }
 
     if(!storage.mMoving)
     {

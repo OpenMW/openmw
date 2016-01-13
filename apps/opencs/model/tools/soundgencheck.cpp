@@ -26,7 +26,7 @@ void CSMTools::SoundGenCheckStage::perform(int stage, CSMDoc::Messages &messages
         return;
     }
 
-    const ESM::SoundGenerator soundGen = record.get();
+    const ESM::SoundGenerator& soundGen = record.get();
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_SoundGen, soundGen.mId);
 
     if (!soundGen.mCreature.empty())

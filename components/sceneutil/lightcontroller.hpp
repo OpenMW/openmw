@@ -24,7 +24,7 @@ namespace SceneUtil
 
         void setType(LightType type);
 
-        void setDiffuse(osg::Vec4f color);
+        void setDiffuse(const osg::Vec4f& color);
 
         virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
 

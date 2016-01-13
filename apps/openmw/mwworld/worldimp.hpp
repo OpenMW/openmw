@@ -623,8 +623,8 @@ namespace MWWorld
 
             virtual void spawnEffect (const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos);
 
-            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects,
-                                       const MWWorld::Ptr& caster, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName);
+            virtual void explodeSpell (const osg::Vec3f& origin, const ESM::EffectList& effects, const MWWorld::Ptr& caster,
+                                       const MWWorld::Ptr& ignore, ESM::RangeType rangeType, const std::string& id, const std::string& sourceName);
 
             virtual void activate (const MWWorld::Ptr& object, const MWWorld::Ptr& actor);
 
@@ -645,6 +645,8 @@ namespace MWWorld
 
             /// Return the distance between actor's weapon and target's collision box.
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target);
+
+            virtual bool isPlayerInJail() const;
     };
 }
 

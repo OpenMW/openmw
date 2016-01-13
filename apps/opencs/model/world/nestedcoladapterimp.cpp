@@ -277,7 +277,7 @@ namespace CSMWorld
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::iterator iter = reactions.begin();
         for(int i = 0; i < rowToRemove; ++i)
-            iter++;
+            ++iter;
         reactions.erase(iter);
 
         record.setModified (faction);
@@ -314,7 +314,7 @@ namespace CSMWorld
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::const_iterator iter = reactions.begin();
         for(int i = 0; i < subRowIndex; ++i)
-            iter++;
+            ++iter;
         switch (subColIndex)
         {
             case 0: return QString((*iter).first.c_str());
@@ -337,7 +337,7 @@ namespace CSMWorld
         // WARNING: Assumed that the table view has the same order as std::map
         std::map<std::string, int>::iterator iter = reactions.begin();
         for(int i = 0; i < subRowIndex; ++i)
-            iter++;
+            ++iter;
 
         std::string factionId = (*iter).first;
         int reaction = (*iter).second;
