@@ -432,6 +432,11 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
     emit cellSelectionChanged (mSelection);
 }
 
+const CSMWorld::CellSelection& CSVRender::PagedWorldspaceWidget::getCellSelection() const
+{
+    return mSelection;
+}
+
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
     std::istringstream stream (record.c_str());

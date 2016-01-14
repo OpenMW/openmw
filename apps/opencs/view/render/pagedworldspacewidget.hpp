@@ -80,6 +80,8 @@ namespace CSVRender
 
             void setCellSelection(const CSMWorld::CellSelection& selection);
 
+            const CSMWorld::CellSelection& getCellSelection() const;
+
             /// \return Drop handled?
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
