@@ -321,10 +321,14 @@ void RegionWeather::chooseNewWeather()
     {
         sum += mChances[i];
         if(chance <= sum)
-            break;
+        {
+            mWeather = i;
+            return;
+        }
     }
 
-    mWeather = i;
+    // if we hit this path then the chances don't add to 100, choose a default weather instead
+    mWeather = 0;
 }
 
 MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
