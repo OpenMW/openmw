@@ -6,11 +6,13 @@
 #include "../../model/prefs/state.hpp"
 
 #include "../../model/world/idtable.hpp"
+#include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 
 #include "elements.hpp"
 #include "object.hpp"
 #include "worldspacewidget.hpp"
+#include "pagedworldspacewidget.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
@@ -68,7 +70,6 @@ void CSVRender::InstanceMode::dragEnterEvent (QDragEnterEvent *event)
         if (!mime->fromDocument (getWorldspaceWidget().getDocument()))
             return;
 
-        /// \todo document check
         if (mime->holdsType (CSMWorld::UniversalId::Type_Referenceable))
             event->accept();
     }
@@ -87,15 +88,68 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
 
         std::string cellId = getWorldspaceWidget().getCellId (insertPoint);
 
-        bool dropped = false;
+        CSMWorld::IdTree& cellTable = dynamic_cast<CSMWorld::IdTree&> (
+            *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
 
-        std::vector<CSMWorld::UniversalId> ids = mime->getData();
+        bool noCell = document.getData().getCells().searchId (cellId)==-1;
+
+        if (noCell)
+        {
+            std::string mode = CSMPrefs::get()["Scene Drops"]["outside-drop"].toString();
+
+            // target cell does not exist
+            if (mode=="Discard")
+                return;
+
+            if (mode=="Create cell and insert")
+            {
+                std::auto_ptr<CSMWorld::CreateCommand> createCommand (
+                    new CSMWorld::CreateCommand (cellTable, cellId));
+
+                int parentIndex = cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_Cell);
+                int index = cellTable.findNestedColumnIndex (parentIndex, CSMWorld::Columns::ColumnId_Interior);
+                createCommand->addNestedValue (parentIndex, index, false);
+
+                document.getUndoStack().push (createCommand.release());
+
+                if (CSVRender::PagedWorldspaceWidget *paged =
+                    dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+                {
+                    CSMWorld::CellSelection selection = paged->getCellSelection();
+                    selection.add (CSMWorld::CellCoordinates::fromId (cellId).first);
+                    paged->setCellSelection (selection);
+                }
+
+                noCell = false;
+            }
+        }
+        else if (CSVRender::PagedWorldspaceWidget *paged =
+            dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+        {
+            CSMWorld::CellSelection selection = paged->getCellSelection();
+            if (!selection.has (CSMWorld::CellCoordinates::fromId (cellId).first))
+            {
+                // target cell exists, but is not shown
+                std::string mode =
+                    CSMPrefs::get()["Scene Drops"]["outside-visible-drop"].toString();
+
+                if (mode=="Discard")
+                    return;
+
+                if (mode=="Show cell and insert")
+                {
+                    selection.add (CSMWorld::CellCoordinates::fromId (cellId).first);
+                    paged->setCellSelection (selection);
+                }
+            }
+        }
 
         CSMWorld::IdTable& referencesTable = dynamic_cast<CSMWorld::IdTable&> (
             *document.getData().getTableModel (CSMWorld::UniversalId::Type_References));
 
-        CSMWorld::IdTable& cellTable = dynamic_cast<CSMWorld::IdTable&> (
-            *document.getData().getTableModel (CSMWorld::UniversalId::Type_Cells));
+        bool dropped = false;
+
+        std::vector<CSMWorld::UniversalId> ids = mime->getData();
 
         for (std::vector<CSMWorld::UniversalId>::const_iterator iter (ids.begin());
             iter!=ids.end(); ++iter)
@@ -118,18 +172,24 @@ void CSVRender::InstanceMode::dropEvent (QDropEvent* event)
                      CSMWorld::Columns::ColumnId_ReferenceableId),
                      QString::fromUtf8 (iter->getId().c_str()));
 
-                // increase reference count in cell
-                QModelIndex countIndex = cellTable.getModelIndex (cellId,
-                    cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter));
+                std::auto_ptr<CSMWorld::ModifyCommand> incrementCommand;
 
-                int count = cellTable.data (countIndex).toInt();
+                if (!noCell)
+                {
+                    // increase reference count in cell
+                    QModelIndex countIndex = cellTable.getModelIndex (cellId,
+                        cellTable.findColumnIndex (CSMWorld::Columns::ColumnId_RefNumCounter));
 
-                std::auto_ptr<CSMWorld::ModifyCommand> incrementCommand (
-                    new CSMWorld::ModifyCommand (cellTable, countIndex, count+1));
+                    int count = cellTable.data (countIndex).toInt();
+
+                    incrementCommand.reset (
+                        new CSMWorld::ModifyCommand (cellTable, countIndex, count+1));
+                }
 
                 document.getUndoStack().beginMacro (createCommand->text());
                 document.getUndoStack().push (createCommand.release());
-                document.getUndoStack().push (incrementCommand.release());
+                if (incrementCommand.get())
+                    document.getUndoStack().push (incrementCommand.release());
                 document.getUndoStack().endMacro();
 
                 dropped = true;
