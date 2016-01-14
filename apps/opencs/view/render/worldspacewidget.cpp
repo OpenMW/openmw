@@ -315,6 +315,54 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
     return mDocument;
 }
 
+osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& localPos,
+    unsigned int interactionMask, bool ignoreHidden) const
+{
+    // (0,0) is considered the lower left corner of an OpenGL window
+    int x = localPos.x();
+    int y = height() - localPos.y();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (
+        new osgUtil::LineSegmentIntersector (osgUtil::Intersector::WINDOW, x, y));
+
+    intersector->setIntersectionLimit (osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor (intersector);
+
+    unsigned int mask = interactionMask;
+
+    if (ignoreHidden)
+        mask &= getVisibilityMask();
+
+    visitor.setTraversalMask (mask << 1);
+
+    mView->getCamera()->accept (visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator iter = intersector->getIntersections().begin();
+         iter!=intersector->getIntersections().end(); ++iter)
+    {
+        // reject back-facing polygons
+        osg::Vec3f normal = osg::Matrix::transform3x3 (
+            iter->getWorldIntersectNormal(), mView->getCamera()->getViewMatrix());
+
+        if (normal.z()>=0)
+            return iter->getWorldIntersectPoint();
+    }
+
+    osg::Matrixd matrix;
+    matrix.preMult (mView->getCamera()->getViewport()->computeWindowMatrix());
+    matrix.preMult (mView->getCamera()->getProjectionMatrix());
+    matrix.preMult (mView->getCamera()->getViewMatrix());
+    matrix = osg::Matrixd::inverse (matrix);
+
+    osg::Vec3d start = matrix.preMult (intersector->getStart());
+    osg::Vec3d end = matrix.preMult (intersector->getEnd());
+
+    osg::Vec3d direction = end-start;
+    direction.normalize();
+
+    return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
+}
+
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
 {
     const CSMWorld::TableMimeData* mime = dynamic_cast<const CSMWorld::TableMimeData*> (event->mimeData());
