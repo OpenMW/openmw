@@ -171,8 +171,8 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Terrain, Mask_Terrain, "Terrain", "", true);
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Fog, Mask_Fog, "Fog");
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain", "", true);
+    tool->addButton (Button_Fog, Mask_Fog, "Fog");
 }
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()

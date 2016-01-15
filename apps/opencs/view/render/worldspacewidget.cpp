@@ -296,9 +296,9 @@ void CSVRender::WorldspaceWidget::setEditLock (bool locked)
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Reference, Mask_Reference, "Instances");
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Water, Mask_Water, "Water");
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Pathgrid, Mask_Pathgrid, "Pathgrid");
+    tool->addButton (Button_Reference, Mask_Reference, "Instances");
+    tool->addButton (Button_Water, Mask_Water, "Water");
+    tool->addButton (Button_Pathgrid, Mask_Pathgrid, "Pathgrid");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)

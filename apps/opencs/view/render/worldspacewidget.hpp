@@ -142,6 +142,17 @@ namespace CSVRender
 
         protected:
 
+            /// Visual elements in a scene
+            /// @note do not change the enumeration values, they are used in pre-existing button file names!
+            enum ButtonId
+            {
+                Button_Reference = 0x1,
+                Button_Pathgrid = 0x2,
+                Button_Water = 0x4,
+                Button_Fog = 0x8,
+                Button_Terrain = 0x10
+            };
+
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 
             virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);

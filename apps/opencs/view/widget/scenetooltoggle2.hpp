@@ -54,19 +54,11 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position);
 
-            /// Visual elements in a scene
-            /// @note do not change the enumeration values, they are used in pre-existing button file names!
-            enum ButtonId
-            {
-                Button_Reference = 0x1,
-                Button_Pathgrid = 0x2,
-                Button_Water = 0x4,
-                Button_Fog = 0x8,
-                Button_Terrain = 0x10
-            };
+            /// \param buttonId used to compose the icon filename
+            /// \param mask used for the reported getSelectionMask() / setSelectionMask()
             /// \attention After the last button has been added, setSelection must be called at
             /// least once to finalise the layout.
-            void addButton (ButtonId buttonId, unsigned int mask,
+            void addButton (unsigned int buttonId, unsigned int mask,
                 const QString& name, const QString& tooltip = "", bool disabled = false);
 
             unsigned int getSelectionMask() const;

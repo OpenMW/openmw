@@ -77,11 +77,11 @@ void CSVWidget::SceneToolToggle2::showPanel (const QPoint& position)
         mFirst->setFocus (Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolToggle2::addButton (ButtonId id, unsigned int mask,
+void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     const QString& name, const QString& tooltip, bool disabled)
 {
     std::ostringstream stream;
-    stream << mSingleIcon << static_cast<unsigned int>(id);
+    stream << mSingleIcon << id;
 
     PushButton *button = new PushButton (QIcon (QPixmap (stream.str().c_str())),
         PushButton::Type_Toggle, tooltip.isEmpty() ? name: tooltip, mPanel);

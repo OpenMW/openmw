@@ -126,8 +126,8 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Terrain, Mask_Terrain, "Terrain");
-    tool->addButton (CSVWidget::SceneToolToggle2::Button_Fog, Mask_Fog, "Fog", "", true);
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain");
+    tool->addButton (Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
