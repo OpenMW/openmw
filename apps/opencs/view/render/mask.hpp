@@ -4,7 +4,10 @@
 namespace CSVRender
 {
 
-    /// @note Enumeration values can be changed freely, as long as they do not collide.
+    /// Node masks used on the OSG scene graph in OpenMW-CS.
+    /// @note See the respective file in OpenMW (apps/openmw/mwrender/vismask.hpp)
+    /// for general usage hints about node masks.
+    /// @copydoc MWRender::VisMask
     enum Mask
     {
         // internal use within NifLoader, do not change
