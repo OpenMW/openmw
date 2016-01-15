@@ -3,15 +3,25 @@
 
 #include "editmode.hpp"
 
+namespace CSVWidget
+{
+    class SceneToolMode;
+}
+
 namespace CSVRender
 {
     class InstanceMode : public EditMode
     {
             Q_OBJECT
+            CSVWidget::SceneToolMode *mSubMode;
 
         public:
 
             InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
+
+            virtual void activate (CSVWidget::SceneToolbar *toolbar);
+
+            virtual void deactivate (CSVWidget::SceneToolbar *toolbar);
 
             virtual void primaryEditPressed (osg::ref_ptr<TagBase> tag);
 
