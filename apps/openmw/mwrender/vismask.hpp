@@ -6,7 +6,7 @@ namespace MWRender
 
     /// Node masks used for controlling visibility of game objects.
     /// @par Any node in the OSG scene graph can have a node mask. When traversing the scene graph,
-    /// the node visitor's traversal mask is OR'ed with the node mask. If the result of this test is
+    /// the node visitor's traversal mask is bitwise AND'ed with the node mask. If the result of this test is
     /// 0, then the node <i>and all its child nodes</i> are not processed.
     /// @par Important traversal masks are the camera's cull mask (determines what is visible),
     /// the update visitor mask (what is updated) and the intersection visitor mask (what is
