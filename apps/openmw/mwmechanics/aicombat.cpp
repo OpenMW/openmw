@@ -211,61 +211,13 @@ namespace MWMechanics
             actionCooldown = currentAction->getActionCooldown();
         }
 
-        float rangeFollow;
-        if (currentAction.get())
-            currentAction->getCombatRange(rangeAttack, rangeFollow);
-
-        // FIXME: consider moving this stuff to ActionWeapon::getCombatRange
         const ESM::Weapon *weapon = NULL;
-        MWMechanics::WeaponType weaptype = WeapType_None;
-        float weapRange = 1.0f;
-
-        // Get weapon characteristics
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-        if (actorClass.hasInventoryStore(actor))
+        bool isRangedCombat = false;
+        if (currentAction.get())
         {
-            //Get weapon range
-            MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(actorClass.getCreatureStats(actor), actorClass.getInventoryStore(actor), &weaptype);
-
-            if (weaptype == WeapType_HandToHand)
-            {
-                static float fHandToHandReach =
-                    world->getStore().get<ESM::GameSetting>().find("fHandToHandReach")->getFloat();
-                weapRange = fHandToHandReach;
-            }
-            else if (weaptype != WeapType_PickProbe && weaptype != WeapType_Spell && weaptype != WeapType_None)
-            {
-                // All other WeapTypes are actually weapons, so get<ESM::Weapon> is safe.
-                weapon = weaponSlot->get<ESM::Weapon>()->mBase;
-                weapRange = weapon->mData.mReach;
-            }
-            weapRange *= 100.0f;
-        }
-        else //is creature
-        {
-            weaptype = actorClass.getCreatureStats(actor).getDrawState() == DrawState_Spell ? WeapType_Spell : WeapType_HandToHand;
-            weapRange = 200; //TODO: use true attack range (the same problem in Creature::hit)
-        }
-
-        bool distantCombat = false;
-        if (weaptype != WeapType_Spell)
-        {
-            // TODO: move to ActionWeapon
-            if (weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow || weaptype == WeapType_Thrown)
-            {
-                rangeAttack = 1000;
-                distantCombat = true;
-            }
-            else
-            {
-                rangeAttack = weapRange;
-            }
-        }
-        else
-        {
-            distantCombat = (rangeAttack > 500);
-            weapRange = 200;
+            rangeAttack = currentAction->getCombatRange(isRangedCombat);
+            // Get weapon characteristics
+            weapon = currentAction->getWeapon();
         }
 
         ESM::Position pos = actor.getRefData().getPosition();
@@ -286,15 +238,15 @@ namespace MWMechanics
 
         if (storage.mReadyToAttack)
         {
-            storage.startCombatMove(actorClass.isNpc(), distantCombat, distToTarget, rangeAttack);
+            storage.startCombatMove(actorClass.isNpc(), isRangedCombat, distToTarget, rangeAttack);
             // start new attack
-            storage.startAttackIfReady(actor, characterController, weapon, distantCombat);
+            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
 
-            if (distantCombat)
+            if (isRangedCombat)
             {
                 // rotate actor taking into account target movement direction and projectile speed
                 osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, weaptype, storage.mStrength);
+                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
                 lastTargetPos = vTargetPos;
 
                 MWMechanics::Movement& movement = storage.mMovement;
@@ -302,7 +254,7 @@ namespace MWMechanics
                 movement.mRotation[2] = getZAngleToDir(vAimDir);
             }
 
-            storage.mAdjustAiming = distantCombat;
+            storage.mAdjustAiming = isRangedCombat;
         }
     }
 
