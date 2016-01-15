@@ -75,7 +75,7 @@ namespace MWDialogue
         mTopics.clear();
     }
 
-    void Journal::addEntry (const std::string& id, int index)
+    void Journal::addEntry (const std::string& id, int index, const MWWorld::Ptr& actor)
     {
         // bail out of we already have heard this...
         std::string infoId = JournalEntry::idFromIndex (id, index);
@@ -83,7 +83,7 @@ namespace MWDialogue
             if (i->mTopic == id && i->mInfoId == infoId)
                 return;
 
-        StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index);
+        StampedJournalEntry entry = StampedJournalEntry::makeFromQuest (id, index, actor);
 
         mJournal.push_back (entry);
 

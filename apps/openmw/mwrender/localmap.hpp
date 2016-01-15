@@ -99,7 +99,7 @@ namespace MWRender
         /**
          * Check if a given position is explored by the player (i.e. not obscured by fog of war)
          */
-        bool isPositionExplored (float nX, float nY, int x, int y, bool interior);
+        bool isPositionExplored (float nX, float nY, int x, int y);
 
         osg::Group* getRoot();
 

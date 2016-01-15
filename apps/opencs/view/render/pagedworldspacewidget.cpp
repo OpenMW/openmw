@@ -432,6 +432,11 @@ void CSVRender::PagedWorldspaceWidget::setCellSelection (const CSMWorld::CellSel
     emit cellSelectionChanged (mSelection);
 }
 
+const CSMWorld::CellSelection& CSVRender::PagedWorldspaceWidget::getCellSelection() const
+{
+    return mSelection;
+}
+
 std::pair< int, int > CSVRender::PagedWorldspaceWidget::getCoordinatesFromId (const std::string& record) const
 {
     std::istringstream stream (record.c_str());
@@ -502,6 +507,17 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
         iter->second->setSelection (elementMask, Cell::Selection_Clear);
 
     flagAsModified();
+}
+
+std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
+{
+    const int cellSize = 8192;
+
+    CSMWorld::CellCoordinates cellCoordinates (
+        static_cast<int> (std::floor (point.x()/cellSize)),
+        static_cast<int> (std::floor (point.y()/cellSize)));
+
+    return cellCoordinates.getId (mWorldspace);
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (

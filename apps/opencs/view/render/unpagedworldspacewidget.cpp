@@ -108,6 +108,11 @@ void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
+{
+    return mCellId;
+}
+
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

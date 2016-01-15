@@ -61,6 +61,8 @@
                         <UserString key="SettingValueType" value="Float"/>
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
+                        <UserString key="SettingLabelWidget" value="DifficultyText"/>
+                        <UserString key="SettingLabelCaption" value="#{sDifficulty} (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{sEasy}"/>
@@ -274,7 +276,6 @@
                         </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
-                            <Property key="Caption" value="Field of View"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top" name="FOVSlider">
                             <Property key="Range" value="10000"/>
@@ -285,6 +286,8 @@
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
+                            <UserString key="SettingLabelWidget" value="FovText"/>
+                            <UserString key="SettingLabelCaption" value="Field of View (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
@@ -334,6 +337,8 @@
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingCategory" value="General"/>
                                 <UserString key="SettingName" value="anisotropy"/>
+                                <UserString key="SettingLabelWidget" value="AnisotropyLabel"/>
+                                <UserString key="SettingLabelCaption" value="Anisotropy (%s)"/>
                             </Widget>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
