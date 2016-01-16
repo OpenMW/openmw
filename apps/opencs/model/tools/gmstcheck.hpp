@@ -12,9 +12,8 @@ namespace CSMTools
     /// \brief VerifyStage: make sure that GMSTs are alright
     class GMSTCheckStage : public CSMDoc::Stage
     {
-        const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
-
     public:
+        
         GMSTCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings);
         
         virtual int setup();
@@ -22,6 +21,11 @@ namespace CSMTools
 
         virtual void perform(int stage, CSMDoc::Messages& messages);
         ///< Messages resulting from this stage will be appended to \a messages
+        
+    private:
+        
+        const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
+        
     };
 }
 
