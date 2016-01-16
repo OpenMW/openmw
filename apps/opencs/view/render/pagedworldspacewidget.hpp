@@ -80,6 +80,8 @@ namespace CSVRender
 
             void setCellSelection(const CSMWorld::CellSelection& selection);
 
+            const CSMWorld::CellSelection& getCellSelection() const;
+
             /// \return Drop handled?
             virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
                 DropType type);
@@ -95,6 +97,8 @@ namespace CSVRender
 
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask);
+
+            virtual std::string getCellId (const osg::Vec3f& point) const;
 
         protected:
 

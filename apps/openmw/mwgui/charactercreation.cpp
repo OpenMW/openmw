@@ -1,5 +1,7 @@
 #include "charactercreation.hpp"
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -10,7 +12,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "textinput.hpp"
@@ -32,7 +33,7 @@ namespace
     const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
     Step sGenerateClassSteps(int number) {
         number++;
-        const MWWorld::Fallback* fallback=MWBase::Environment::get().getWorld()->getFallback();
+        const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
         Step step = {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_Question"),
         {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerOne"),
         fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerTwo"),

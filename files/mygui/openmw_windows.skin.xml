@@ -11,41 +11,49 @@
 
     <!-- Define the borders for pin button (up) -->
     <Resource type="ResourceSkin" name="PU_B" size="12 2" texture="textures\menu_rightbuttonup_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_BR" size="2 2" texture="textures\menu_rightbuttonup_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_R" size="2 12" texture="textures\menu_rightbuttonup_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_TR" size="2 2" texture="textures\menu_rightbuttonup_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_T" size="12 2" texture="textures\menu_rightbuttonup_top.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_TL" size="2 2" texture="textures\menu_rightbuttonup_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_L" size="2 12" texture="textures\menu_rightbuttonup_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PU_BL" size="2 2" texture="textures\menu_rightbuttonup_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
@@ -53,41 +61,49 @@
 
     <!-- Define the borders for pin button (down) -->
     <Resource type="ResourceSkin" name="PD_B" size="12 2" texture="textures\menu_rightbuttondown_bottom.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_BR" size="2 2" texture="textures\menu_rightbuttondown_bottom_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_R" size="2 12" texture="textures\menu_rightbuttondown_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_TR" size="2 2" texture="textures\menu_rightbuttondown_top_right.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_T" size="12 2" texture="textures\menu_rightbuttondown_top.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 12 2">
             <State name="normal" offset="0 0 12 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_TL" size="2 2" texture="textures\menu_rightbuttondown_top_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_L" size="2 12" texture="textures\menu_rightbuttondown_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 12">
             <State name="normal" offset="0 0 2 12"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="PD_BL" size="2 2" texture="textures\menu_rightbuttondown_bottom_left.dds">
+        <Property key="NeedMouse" value="false"/>
         <BasisSkin type="MainSkin" offset="0 0 2 2">
             <State name="normal" offset="0 0 2 2"/>
         </BasisSkin>

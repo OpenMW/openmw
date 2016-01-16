@@ -51,10 +51,6 @@ int main(int argc, char *argv[])
         if (result == Launcher::FirstRunDialogResultFailure)
             return 0;
 
-    //    if (!mainWin.setup()) {
-    //        return 0;
-    //    }
-
         if (result == Launcher::FirstRunDialogResultContinue)
             mainWin.show();
 

@@ -4,13 +4,14 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_EditBox.h>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
 

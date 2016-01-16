@@ -45,7 +45,8 @@ add_component_dir (resource
     )
 
 add_component_dir (sceneutil
-    clone attach lightmanager visitor util statesetupdater controller skeleton riggeometry lightcontroller positionattitudetransform
+    clone attach visitor util statesetupdater controller skeleton riggeometry lightcontroller
+    lightmanager lightutil positionattitudetransform
     # not used yet
     #workqueue
     )
@@ -136,6 +137,10 @@ add_component_dir (sdlutil
 
 add_component_dir (version
     version
+    )
+
+add_component_dir (fallback
+    fallback validate
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui

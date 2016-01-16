@@ -1153,8 +1153,6 @@ public:
 
     void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node)
     {
-        //test ();
-
         mNode = node;
 
         for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
@@ -1222,6 +1220,11 @@ public:
 
     void _updateView ()
     {
+        _checkMargin();
+
+        if (mNode != NULL)
+            for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
+                mNode->outOfDate (i->second->mRenderItem);
     }
 
     void _correctView()
