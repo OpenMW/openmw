@@ -156,7 +156,7 @@ namespace MWGui
 
     // ------------------------------------------------------
 
-    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled)
+    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender)
         : mLocalMapRender(localMapRender)
         , mCurX(0)
         , mCurY(0)
@@ -165,8 +165,7 @@ namespace MWGui
         , mCompass(NULL)
         , mPrefix()
         , mChanged(true)
-        , mFogOfWarToggled(true)
-        , mFogOfWarEnabled(fogOfWarEnabled)
+        , mFogOfWar(true)
         , mMapWidgetSize(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
@@ -223,9 +222,9 @@ namespace MWGui
 
     bool LocalMapBase::toggleFogOfWar()
     {
-        mFogOfWarToggled = !mFogOfWarToggled;
+        mFogOfWar = !mFogOfWar;
         applyFogOfWar();
-        return mFogOfWarToggled;
+        return mFogOfWar;
     }
 
     void LocalMapBase::applyFogOfWar()
@@ -239,7 +238,7 @@ namespace MWGui
                 int y = mCurY + (-1*(my-1));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
 
-                if (!mFogOfWarToggled || !mFogOfWarEnabled)
+                if (!mFogOfWar)
                 {
                     fog->setImageTexture("");
                     continue;
@@ -269,6 +268,8 @@ namespace MWGui
         MyGUI::IntPoint widgetPos;
         // normalized cell coordinates
         float nX,nY;
+
+        markerPos.interior = mInterior;
 
         if (!mInterior)
         {
@@ -1077,7 +1078,7 @@ namespace MWGui
     {
         if (!mLocalMapRender)
             return true;
-        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY);
+        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY, interior);
     }
 
 }

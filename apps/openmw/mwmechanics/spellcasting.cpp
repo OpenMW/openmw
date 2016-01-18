@@ -552,7 +552,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, range, mId, mSourceName);
 
         if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true, exploded);

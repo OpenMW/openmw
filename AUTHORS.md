@@ -96,7 +96,6 @@ Programmers
     Pieter van der Kloet (pvdk)
     pkubik
     Radu-Marius Popovici (rpopovici)
-    rcutmore
     rdimesio
     riothamus
     Robert MacGregor (Ragora)

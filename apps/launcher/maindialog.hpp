@@ -50,6 +50,7 @@ namespace Launcher
         explicit MainDialog(QWidget *parent = 0);
         ~MainDialog();
 
+        bool setup();
         FirstRunDialogResult showFirstRunDialog();
 
         bool reloadSettings();
@@ -64,8 +65,6 @@ namespace Launcher
         void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     private:
-        bool setup();
-
         void createIcons();
         void createPages();
 

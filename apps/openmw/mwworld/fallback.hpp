@@ -1,21 +1,18 @@
-#ifndef OPENMW_COMPONENTS_FALLBACK_H
-#define OPENMW_COMPONENTS_FALLBACK_H
+#ifndef GAME_MWWORLD_FALLBACK_H
+#define GAME_MWWORLD_FALLBACK_H
 
 #include <map>
 #include <string>
 
 #include <osg/Vec4f>
 
-namespace Fallback
+namespace MWWorld
 {
-    /// @brief contains settings imported from the Morrowind INI file.
-    class Map
+    class Fallback
     {
-            std::map<std::string,std::string> mFallbackMap;
+            const std::map<std::string,std::string> mFallbackMap;
         public:
-            Map(const std::map<std::string,std::string>& fallback);
-            Map() {}
-
+            Fallback(const std::map<std::string,std::string>& fallback);
             std::string getFallbackString(const std::string& fall) const;
             float getFallbackFloat(const std::string& fall) const;
             int getFallbackInt(const std::string& fall) const;

@@ -6,7 +6,6 @@
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/savedgame.hpp>
 #include <components/esm/weatherstate.hpp>
-#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -21,6 +20,7 @@
 
 #include "player.hpp"
 #include "esmstore.hpp"
+#include "fallback.hpp"
 #include "cellstore.hpp"
 
 #include <cmath>
@@ -100,7 +100,7 @@ template class TimeOfDayInterpolator<float>;
 template class TimeOfDayInterpolator<osg::Vec4f>;
 
 Weather::Weather(const std::string& name,
-                 const Fallback::Map& fallback,
+                 const MWWorld::Fallback& fallback,
                  float stormWindSpeed,
                  float rainSpeed,
                  const std::string& particleEffect)
@@ -321,17 +321,13 @@ void RegionWeather::chooseNewWeather()
     {
         sum += mChances[i];
         if(chance <= sum)
-        {
-            mWeather = i;
-            return;
-        }
+            break;
     }
 
-    // if we hit this path then the chances don't add to 100, choose a default weather instead
-    mWeather = 0;
+    mWeather = i;
 }
 
-MoonModel::MoonModel(const std::string& name, const Fallback::Map& fallback)
+MoonModel::MoonModel(const std::string& name, const MWWorld::Fallback& fallback)
   : mFadeInStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Start"))
   , mFadeInFinish(fallback.getFallbackFloat("Moons_" + name + "_Fade_In_Finish"))
   , mFadeOutStart(fallback.getFallbackFloat("Moons_" + name + "_Fade_Out_Start"))
@@ -500,7 +496,7 @@ inline float MoonModel::earlyMoonShadowAlpha(float angle) const
         return 0.0f;
 }
 
-WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const Fallback::Map& fallback, MWWorld::ESMStore& store)
+WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, const MWWorld::Fallback& fallback, MWWorld::ESMStore& store)
     : mStore(store)
     , mRendering(rendering)
     , mSunriseTime(fallback.getFallbackFloat("Weather_Sunrise_Time"))
@@ -866,7 +862,7 @@ void WeatherManager::clear()
 }
 
 inline void WeatherManager::addWeather(const std::string& name,
-                                       const Fallback::Map& fallback,
+                                       const MWWorld::Fallback& fallback,
                                        const std::string& particleEffect)
 {
     static const float fStromWindSpeed = mStore.get<ESM::GameSetting>().find("fStromWindSpeed")->getFloat();

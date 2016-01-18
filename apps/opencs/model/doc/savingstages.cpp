@@ -394,6 +394,10 @@ void CSMDoc::WriteLandCollectionStage::perform (int stage, Messages& messages)
         CSMWorld::Land record = land.get();
         writer.startRecord (record.sRecordId);
         record.save (writer, land.mState == CSMWorld::RecordBase::State_Deleted);
+
+        if (const ESM::Land::LandData *data = record.getLandData (record.mDataTypes))
+            data->save (mState.getWriter());
+
         writer.endRecord (record.sRecordId);
     }
 }

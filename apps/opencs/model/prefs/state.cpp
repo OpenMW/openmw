@@ -190,24 +190,6 @@ void CSMPrefs::State::declare()
     declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
     declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
         setMin (1);
-
-    EnumValue createAndInsert ("Create cell and insert");
-    EnumValue showAndInsert ("Show cell and insert");
-    EnumValue dontInsert ("Discard");
-    EnumValue insertAnyway ("Insert anyway");
-    EnumValues insertOutsideCell;
-    insertOutsideCell.add (createAndInsert).add (dontInsert).add (insertAnyway);
-    EnumValues insertOutsideVisibleCell;
-    insertOutsideVisibleCell.add (showAndInsert).add (dontInsert).add (insertAnyway);
-
-    declareCategory ("Scene Drops");
-    declareInt ("distance", "Drop Distance", 50).
-        setTooltip ("If an instance drop can not be placed against another object at the "
-            "insert point, it will be placed by this distance from the insert point instead");
-    declareEnum ("outside-drop", "Handling drops outside of cells", createAndInsert).
-        addValues (insertOutsideCell);
-    declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
-        addValues (insertOutsideVisibleCell);
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

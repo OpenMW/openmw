@@ -11,7 +11,7 @@
 #include "../../model/world/tablemimedata.hpp"
 
 #include "scenewidget.hpp"
-#include "mask.hpp"
+#include "elements.hpp"
 
 namespace CSMPrefs
 {
@@ -127,31 +127,7 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask) = 0;
 
-            /// Return the next intersection point with scene elements matched by
-            /// \a interactionMask based on \a localPos and the camera vector.
-            /// If there is no such point, instead a point "in front" of \a localPos will be
-            /// returned.
-            ///
-            /// \param ignoreHidden ignore elements specified in interactionMask that are
-            /// flagged as not visible.
-            osg::Vec3f getIntersectionPoint (const QPoint& localPos,
-                unsigned int interactionMask = Mask_Reference | Mask_Terrain,
-                bool ignoreHidden = false) const;
-
-            virtual std::string getCellId (const osg::Vec3f& point) const = 0;
-
         protected:
-
-            /// Visual elements in a scene
-            /// @note do not change the enumeration values, they are used in pre-existing button file names!
-            enum ButtonId
-            {
-                Button_Reference = 0x1,
-                Button_Pathgrid = 0x2,
-                Button_Water = 0x4,
-                Button_Fog = 0x8,
-                Button_Terrain = 0x10
-            };
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 

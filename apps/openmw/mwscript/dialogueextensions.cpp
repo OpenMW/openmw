@@ -22,17 +22,12 @@ namespace MWScript
 {
     namespace Dialogue
     {
-        template <class R>
         class OpJournal : public Interpreter::Opcode0
         {
             public:
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
-                    MWWorld::Ptr ptr = R()(runtime, false); // required=false
-                    if (ptr.isEmpty())
-                        ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-
                     std::string quest = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
@@ -42,7 +37,7 @@ namespace MWScript
                     // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
                     try
                     {
-                        MWBase::Environment::get().getJournal()->addEntry (quest, index, ptr);
+                        MWBase::Environment::get().getJournal()->addEntry (quest, index);
                     }
                     catch (...)
                     {
@@ -275,7 +270,7 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
-            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSetJournalIndex, new OpSetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeAddTopic, new OpAddTopic);

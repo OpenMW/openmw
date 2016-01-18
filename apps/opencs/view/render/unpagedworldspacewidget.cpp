@@ -17,7 +17,7 @@
 #include "../widget/scenetooltoggle.hpp"
 #include "../widget/scenetooltoggle2.hpp"
 
-#include "mask.hpp"
+#include "elements.hpp"
 
 void CSVRender::UnpagedWorldspaceWidget::update()
 {
@@ -108,11 +108,6 @@ void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
-std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
-{
-    return mCellId;
-}
-
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
@@ -171,8 +166,8 @@ void CSVRender::UnpagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain", "", true);
-    tool->addButton (Button_Fog, Mask_Fog, "Fog");
+    tool->addButton (Element_Terrain, "Terrain", "", true);
+    tool->addButton (Element_Fog, "Fog");
 }
 
 std::string CSVRender::UnpagedWorldspaceWidget::getStartupInstruction()

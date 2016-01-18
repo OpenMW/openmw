@@ -2,12 +2,12 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Fallback
+namespace MWWorld
 {
-    Map::Map(const std::map<std::string,std::string>& fallback):mFallbackMap(fallback)
+    Fallback::Fallback(const std::map<std::string,std::string>& fallback):mFallbackMap(fallback)
     {}
 
-    std::string Map::getFallbackString(const std::string& fall) const
+    std::string Fallback::getFallbackString(const std::string& fall) const
     {
         std::map<std::string,std::string>::const_iterator it;
         if((it = mFallbackMap.find(fall)) == mFallbackMap.end())
@@ -16,7 +16,7 @@ namespace Fallback
         }
         return it->second;
     }
-    float Map::getFallbackFloat(const std::string& fall) const
+    float Fallback::getFallbackFloat(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
         if(fallback.empty())
@@ -24,7 +24,7 @@ namespace Fallback
         else
             return boost::lexical_cast<float>(fallback);
     }
-    int Map::getFallbackInt(const std::string& fall) const
+    int Fallback::getFallbackInt(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
         if(fallback.empty())
@@ -33,7 +33,7 @@ namespace Fallback
             return boost::lexical_cast<int>(fallback);
     }
 
-    bool Map::getFallbackBool(const std::string& fall) const
+    bool Fallback::getFallbackBool(const std::string& fall) const
     {
         std::string fallback=getFallbackString(fall);
         if(fallback.empty())
@@ -41,7 +41,7 @@ namespace Fallback
         else
             return boost::lexical_cast<bool>(fallback);
     }
-    osg::Vec4f Map::getFallbackColour(const std::string& fall) const
+    osg::Vec4f Fallback::getFallbackColour(const std::string& fall) const
     {
         std::string sum=getFallbackString(fall);
         if(sum.empty())

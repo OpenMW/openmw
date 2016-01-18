@@ -14,8 +14,6 @@
 namespace ESMTerrain
 {
 
-    const float defaultHeight = -2048;
-
     Storage::Storage(const VFS::Manager *vfs)
         : mVFS(vfs)
     {
@@ -64,9 +62,7 @@ namespace ESMTerrain
             return true;
         }
 
-        min = defaultHeight;
-        max = defaultHeight;
-        return true;
+        return false;
     }
 
     void Storage::fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row)
@@ -207,7 +203,7 @@ namespace ESMTerrain
                         assert (vertX < numVerts);
                         assert (vertY < numVerts);
 
-                        float height = defaultHeight;
+                        float height = -2048;
                         if (heightData)
                             height = heightData->mHeights[col*ESM::Land::LAND_SIZE + row];
 
@@ -416,7 +412,7 @@ namespace ESMTerrain
 
         const ESM::Land* land = getLand(cellX, cellY);
         if (!land || !(land->mDataTypes&ESM::Land::DATA_VHGT))
-            return defaultHeight;
+            return -2048;
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
 

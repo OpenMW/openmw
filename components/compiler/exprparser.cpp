@@ -639,8 +639,7 @@ namespace Compiler
         if (code==Scanner::S_newline)
         {
             // end marker
-            if (mTokenLoc.mLiteral.empty())
-                mTokenLoc = loc;
+            mTokenLoc = loc;
             scanner.putbackSpecial (code, loc);
             return false;
         }
@@ -790,10 +789,9 @@ namespace Compiler
                     stringParser.setOptional (true);
 
                 if (*iter=='c') stringParser.smashCase();
-                if (*iter=='x') stringParser.discard();
                 scanner.scan (stringParser);
 
-                if ((optional || *iter=='x') && stringParser.isEmpty())
+                if (optional && stringParser.isEmpty())
                     break;
 
                 if (*iter!='x')
@@ -807,8 +805,7 @@ namespace Compiler
                         ++optionalCount;
                 }
                 else
-                    getErrorHandler().warning ("Ignoring extra argument",
-                        stringParser.getTokenLoc());
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='X')
             {
@@ -821,7 +818,7 @@ namespace Compiler
                 if (parser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", parser.getTokenLoc());
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='z')
             {
@@ -833,7 +830,7 @@ namespace Compiler
                 if (discardParser.isEmpty())
                     break;
                 else
-                    getErrorHandler().warning("Ignoring extra argument", discardParser.getTokenLoc());
+                    getErrorHandler().warning("Ignoring extra argument", mTokenLoc);
             }
             else if (*iter=='j')
             {
@@ -878,10 +875,5 @@ namespace Compiler
         }
 
         return optionalCount;
-    }
-
-    const TokenLoc& ExprParser::getTokenLoc() const
-    {
-        return mTokenLoc;
     }
 }

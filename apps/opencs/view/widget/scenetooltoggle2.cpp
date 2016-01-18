@@ -41,15 +41,8 @@ void CSVWidget::SceneToolToggle2::adjustToolTip()
 
 void CSVWidget::SceneToolToggle2::adjustIcon()
 {
-    unsigned int buttonIds = 0;
-
-    for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
-        iter!=mButtons.end(); ++iter)
-        if (iter->first->isChecked())
-            buttonIds |= iter->second.mButtonId;
-
     std::ostringstream stream;
-    stream << mCompositeIcon << buttonIds;
+    stream << mCompositeIcon << getSelection();
     setIcon (QIcon (QString::fromUtf8 (stream.str().c_str())));
 }
 
@@ -77,7 +70,7 @@ void CSVWidget::SceneToolToggle2::showPanel (const QPoint& position)
         mFirst->setFocus (Qt::OtherFocusReason);
 }
 
-void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
+void CSVWidget::SceneToolToggle2::addButton (unsigned int id,
     const QString& name, const QString& tooltip, bool disabled)
 {
     std::ostringstream stream;
@@ -96,8 +89,7 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
     mLayout->addWidget (button);
 
     ButtonDesc desc;
-    desc.mButtonId = id;
-    desc.mMask = mask;
+    desc.mId = id;
     desc.mName = name;
     desc.mIndex = mButtons.size();
 
@@ -109,23 +101,23 @@ void CSVWidget::SceneToolToggle2::addButton (unsigned int id, unsigned int mask,
         mFirst = button;
 }
 
-unsigned int CSVWidget::SceneToolToggle2::getSelectionMask() const
+unsigned int CSVWidget::SceneToolToggle2::getSelection() const
 {
     unsigned int selection = 0;
 
     for (std::map<PushButton *, ButtonDesc>::const_iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
         if (iter->first->isChecked())
-            selection |= iter->second.mMask;
+            selection |= iter->second.mId;
 
     return selection;
 }
 
-void CSVWidget::SceneToolToggle2::setSelectionMask (unsigned int selection)
+void CSVWidget::SceneToolToggle2::setSelection (unsigned int selection)
 {
     for (std::map<PushButton *, ButtonDesc>::iterator iter (mButtons.begin());
         iter!=mButtons.end(); ++iter)
-        iter->first->setChecked (selection & iter->second.mMask);
+        iter->first->setChecked (selection & iter->second.mId);
 
     adjustToolTip();
     adjustIcon();

@@ -6,7 +6,6 @@
 #include <components/interpreter/types.hpp>
 
 #include "parser.hpp"
-#include "tokenloc.hpp"
 
 namespace Compiler
 {
@@ -23,8 +22,6 @@ namespace Compiler
             State mState;
             std::vector<Interpreter::Type_Code> mCode;
             bool mSmashCase;
-            TokenLoc mTokenLoc;
-            bool mDiscard;
 
         public:
 
@@ -51,14 +48,6 @@ namespace Compiler
 
             void reset();
             ///< Reset parser to clean state (this includes the smashCase function).
-
-            /// Returns TokenLoc object for string. If no string has been parsed, the TokenLoc
-            /// object will be default initialised.
-            const TokenLoc& getTokenLoc() const;
-
-            /// If parsing a string, do not add it to the literal table and do not create code
-            /// for it.
-            void discard();
     };
 }
 

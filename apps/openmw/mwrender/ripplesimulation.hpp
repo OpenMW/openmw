@@ -21,9 +21,9 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace Fallback
+namespace MWWorld
 {
-    class Map;
+    class Fallback;
 }
 
 namespace MWRender
@@ -40,7 +40,7 @@ namespace MWRender
     class RippleSimulation
     {
     public:
-        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback);
+        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback);
         ~RippleSimulation();
 
         /// @param dt Time since the last frame
