@@ -14,31 +14,28 @@
 
 void CSMDoc::Document::addGmsts()
 {
-    size_t floatCount = CSMWorld::DefaultGMSTs::getFloatCount();
-    for (size_t i=0; i < floatCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::FloatCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getFloatName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::Floats[i];
         gmst.mValue.setType (ESM::VT_Float);
-        gmst.mValue.setFloat (CSMWorld::DefaultGMSTs::getFloatDefaultValue(i));
+        gmst.mValue.setFloat (CSMWorld::DefaultGMSTs::FloatsDefaultValues[i]);
         getData().getGmsts().add (gmst);
     }
 
-    size_t intCount = CSMWorld::DefaultGMSTs::getIntCount();
-    for (size_t i=0; i < intCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::IntCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getIntName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::Ints[i];
         gmst.mValue.setType (ESM::VT_Int);
-        gmst.mValue.setInteger (CSMWorld::DefaultGMSTs::getIntDefaultValue(i));
+        gmst.mValue.setInteger (CSMWorld::DefaultGMSTs::IntsDefaultValues[i]);
         getData().getGmsts().add (gmst);
     }
 
-    size_t stringCount = CSMWorld::DefaultGMSTs::getStringCount();
-    for (size_t i=0; i < stringCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::StringCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getStringName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::Strings[i];
         gmst.mValue.setType (ESM::VT_String);
         gmst.mValue.setString ("");
         getData().getGmsts().add (gmst);
@@ -47,31 +44,28 @@ void CSMDoc::Document::addGmsts()
 
 void CSMDoc::Document::addOptionalGmsts()
 {
-    size_t floatCount = CSMWorld::DefaultGMSTs::getOptFloatCount();
-    for (size_t i=0; i < floatCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::OptionalFloatCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getOptFloatName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::OptionalFloats[i];
         gmst.blank();
         gmst.mValue.setType (ESM::VT_Float);
         addOptionalGmst (gmst);
     }
 
-    size_t intCount = CSMWorld::DefaultGMSTs::getOptIntCount();
-    for (size_t i=0; i < intCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::OptionalIntCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getOptIntName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::OptionalInts[i];
         gmst.blank();
         gmst.mValue.setType (ESM::VT_Int);
         addOptionalGmst (gmst);
     }
 
-    size_t stringCount = CSMWorld::DefaultGMSTs::getOptStringCount();
-    for (size_t i=0; i < stringCount; ++i)
+    for (size_t i=0; i < CSMWorld::DefaultGMSTs::OptionalStringCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGMSTs::getOptStringName(i);
+        gmst.mId = CSMWorld::DefaultGMSTs::OptionalStrings[i];
         gmst.blank();
         gmst.mValue.setType (ESM::VT_String);
         gmst.mValue.setString ("<no text>");

@@ -8,7 +8,7 @@ const float FEps = std::numeric_limits<float>::epsilon();
 const int IMax = std::numeric_limits<int>::max();
 const int IMin = std::numeric_limits<int>::min();
 
-const char* CSMWorld::DefaultGMSTs::mGMSTFloats[] =
+const char* CSMWorld::DefaultGMSTs::Floats[CSMWorld::DefaultGMSTs::FloatCount] =
 {
     "fAIFleeFleeMult",
     "fAIFleeHealthMult",
@@ -270,7 +270,7 @@ const char* CSMWorld::DefaultGMSTs::mGMSTFloats[] =
     "fWortChanceValue"
 };
 
-const char * CSMWorld::DefaultGMSTs::mGMSTInts[] =
+const char * CSMWorld::DefaultGMSTs::Ints[CSMWorld::DefaultGMSTs::IntCount] =
 {
     "i1stPersonSneakDelta",
     "iAlarmAttack",
@@ -363,7 +363,7 @@ const char * CSMWorld::DefaultGMSTs::mGMSTInts[] =
     "iWereWolfLevelToAttack"
 };
 
-const char * CSMWorld::DefaultGMSTs::mGMSTStrings[] =
+const char * CSMWorld::DefaultGMSTs::Strings[CSMWorld::DefaultGMSTs::StringCount] =
 {
     "s3dAudio",
     "s3dHardware",
@@ -1541,7 +1541,7 @@ const char * CSMWorld::DefaultGMSTs::mGMSTStrings[] =
     "sYourGold"
 };
 
-const char * CSMWorld::DefaultGMSTs::mGMSTOptionalFloats[] =
+const char * CSMWorld::DefaultGMSTs::OptionalFloats[CSMWorld::DefaultGMSTs::OptionalFloatCount] =
 {
     "fCombatDistanceWerewolfMod",
     "fFleeDistance",
@@ -1587,7 +1587,7 @@ const char * CSMWorld::DefaultGMSTs::mGMSTOptionalFloats[] =
     "fWereWolfWillPower"
 };
 
-const char * CSMWorld::DefaultGMSTs::mGMSTOptionalInts[] =
+const char * CSMWorld::DefaultGMSTs::OptionalInts[CSMWorld::DefaultGMSTs::OptionalIntCount] =
 {
     "iWereWolfBounty",
     "iWereWolfFightMod",
@@ -1595,7 +1595,7 @@ const char * CSMWorld::DefaultGMSTs::mGMSTOptionalInts[] =
     "iWereWolfLevelToAttack"
 };
 
-const char * CSMWorld::DefaultGMSTs::mGMSTOptionalStrings[] =
+const char * CSMWorld::DefaultGMSTs::OptionalStrings[CSMWorld::DefaultGMSTs::OptionalStringCount] =
 {
     "sCompanionShare",
     "sCompanionWarningButtonOne",
@@ -1625,7 +1625,7 @@ const char * CSMWorld::DefaultGMSTs::mGMSTOptionalStrings[] =
     "sWerewolfRestMessage"
 };
 
-const float CSMWorld::DefaultGMSTs::mGMSTFloatsDefaultValues[] =
+const float CSMWorld::DefaultGMSTs::FloatsDefaultValues[CSMWorld::DefaultGMSTs::FloatCount] =
 {
     0.3,    // fAIFleeFleeMult
     7.0,    // fAIFleeHealthMult
@@ -1887,7 +1887,7 @@ const float CSMWorld::DefaultGMSTs::mGMSTFloatsDefaultValues[] =
     15.0   // fWortChanceValue
 };
 
-const int CSMWorld::DefaultGMSTs::mGMSTIntsDefaultValues[] =
+const int CSMWorld::DefaultGMSTs::IntsDefaultValues[CSMWorld::DefaultGMSTs::IntCount] =
 {
     10,     // i1stPersonSneakDelta
     50,     // iAlarmAttack
@@ -1980,7 +1980,7 @@ const int CSMWorld::DefaultGMSTs::mGMSTIntsDefaultValues[] =
     20     // iWereWolfLevelToAttack
 };
 
-const float CSMWorld::DefaultGMSTs::mGMSTFloatLimits[] =
+const float CSMWorld::DefaultGMSTs::FloatLimits[CSMWorld::DefaultGMSTs::FloatCount * 2] =
 {
     -FInf,      FInf,       // fAIFleeFleeMult
     -FInf,      FInf,       // fAIFleeHealthMult
@@ -2241,8 +2241,8 @@ const float CSMWorld::DefaultGMSTs::mGMSTFloatLimits[] =
     -FInf,      FInf,       // fWereWolfWillPower
     0,          FInf        // fWortChanceValue
 };
- 
-const int CSMWorld::DefaultGMSTs::mGMSTIntLimits[] =
+
+const int CSMWorld::DefaultGMSTs::IntLimits[CSMWorld::DefaultGMSTs::IntCount * 2] =
 {
     IMin,    IMax,  // i1stPersonSneakDelta
     IMin,    IMax,  // iAlarmAttack
@@ -2334,93 +2334,3 @@ const int CSMWorld::DefaultGMSTs::mGMSTIntLimits[] =
     IMin,    IMax,  // iWereWolfFleeMod
     IMin,    IMax   // iWereWolfLevelToAttack
 };
-
-size_t CSMWorld::DefaultGMSTs::getFloatCount()
-{
-    return sizeof(mGMSTFloats) / sizeof(mGMSTFloats[0]);
-}
-
-size_t CSMWorld::DefaultGMSTs::getIntCount()
-{
-    return sizeof(mGMSTInts) / sizeof(mGMSTInts[0]);
-}
-
-size_t CSMWorld::DefaultGMSTs::getStringCount()
-{
-    return sizeof(mGMSTStrings) / sizeof(mGMSTStrings[0]);
-}
-
-size_t CSMWorld::DefaultGMSTs::getOptFloatCount()
-{
-    return sizeof(mGMSTOptionalFloats) / sizeof(mGMSTOptionalFloats[0]);
-}
-
-size_t CSMWorld::DefaultGMSTs::getOptIntCount()
-{
-    return sizeof(mGMSTOptionalInts) / sizeof(mGMSTOptionalInts[0]);
-}
-
-size_t CSMWorld::DefaultGMSTs::getOptStringCount()
-{
-    return sizeof(mGMSTOptionalStrings) / sizeof(mGMSTOptionalStrings[0]);
-}
-
-const char * CSMWorld::DefaultGMSTs::getFloatName(size_t index)
-{
-    return mGMSTFloats[index];
-}
-
-const char * CSMWorld::DefaultGMSTs::getIntName(size_t index)
-{
-    return mGMSTInts[index];
-}
-
-const char * CSMWorld::DefaultGMSTs::getStringName(size_t index)
-{
-    return mGMSTStrings[index];
-}
-
-const char * CSMWorld::DefaultGMSTs::getOptFloatName(size_t index)
-{
-    return mGMSTOptionalFloats[index];
-}
-
-const char * CSMWorld::DefaultGMSTs::getOptIntName(size_t index)
-{
-    return mGMSTOptionalInts[index];
-}
-
-const char * CSMWorld::DefaultGMSTs::getOptStringName(size_t index)
-{
-    return mGMSTOptionalStrings[index];
-}
-
-float CSMWorld::DefaultGMSTs::getFloatDefaultValue(size_t index)
-{
-    return mGMSTFloatsDefaultValues[index];
-}
-
-int CSMWorld::DefaultGMSTs::getIntDefaultValue(size_t index)
-{
-    return mGMSTIntsDefaultValues[index];
-}
-
-float CSMWorld::DefaultGMSTs::getFloatLowerLimit(size_t index)
-{
-    return mGMSTFloatLimits[index*2];
-}
-
-float CSMWorld::DefaultGMSTs::getFloatUpperLimit(size_t index)
-{
-    return mGMSTFloatLimits[index*2+1];
-}
-
-int CSMWorld::DefaultGMSTs::getIntLowerLimit(size_t index)
-{
-    return mGMSTIntLimits[index*2];
-}
-
-int CSMWorld::DefaultGMSTs::getIntUpperLimit(size_t index)
-{
-    return mGMSTIntLimits[index*2+1];
-}

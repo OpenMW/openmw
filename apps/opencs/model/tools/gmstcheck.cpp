@@ -28,24 +28,21 @@ void CSMTools::GMSTCheckStage::perform(int stage, CSMDoc::Messages& messages)
     
     // Checking type and limits
     // optimization - compare it to lists based on naming convention (f-float,i-int,s-string)
-    if (gmst.mId.empty())
-        messages.add(id, "Game Setting has no name", "", CSMDoc::Message::Severity_SeriousError);
-    else if (gmst.mId[0] == 'f')
+    if (gmst.mId[0] == 'f')
     {
-        size_t floatCount = CSMWorld::DefaultGMSTs::getFloatCount();
-        for (size_t i = 0; i < floatCount; ++i)
+        for (size_t i = 0; i < CSMWorld::DefaultGMSTs::FloatCount; ++i)
         {
-            if (gmst.mId == CSMWorld::DefaultGMSTs::getFloatName(i))
+            if (gmst.mId == CSMWorld::DefaultGMSTs::Floats[i])
             {
                 if (gmst.mValue.getType() != ESM::VT_Float)
-                    messages.add(id, gmst.mId + " has an invalid type; it should be a float", 
+                    messages.add(id, "The type of " + gmst.mId + " is incorrect", 
                                  "Change the GMST type to a float", CSMDoc::Message::Severity_Error);
                 
-                if (gmst.mValue.getFloat() < CSMWorld::DefaultGMSTs::getFloatLowerLimit(i))
+                if (gmst.mValue.getFloat() < CSMWorld::DefaultGMSTs::FloatLimits[i*2])
                     messages.add(id, gmst.mId + " is less than the suggested range", "Change the value",
                                  CSMDoc::Message::Severity_Warning);
                 
-                if (gmst.mValue.getFloat() > CSMWorld::DefaultGMSTs::getFloatUpperLimit(i))
+                if (gmst.mValue.getFloat() > CSMWorld::DefaultGMSTs::FloatLimits[i*2+1])
                     messages.add(id, gmst.mId + " is more than the suggested range", "Change the value",
                                  CSMDoc::Message::Severity_Warning);
                 
@@ -55,20 +52,19 @@ void CSMTools::GMSTCheckStage::perform(int stage, CSMDoc::Messages& messages)
     }
     else if (gmst.mId[0] == 'i')
     {
-        size_t intCount = CSMWorld::DefaultGMSTs::getIntCount();
-        for (size_t i = 0; i < intCount; ++i)
+        for (size_t i = 0; i < CSMWorld::DefaultGMSTs::IntCount; ++i)
         {   
-            if (gmst.mId == CSMWorld::DefaultGMSTs::getIntName(i))
+            if (gmst.mId == CSMWorld::DefaultGMSTs::Ints[i])
             {
                 if (gmst.mValue.getType() != ESM::VT_Int)
-                    messages.add(id, gmst.mId + " has an invalid type; it should be an integer",
+                    messages.add(id, "The type of " + gmst.mId + " is incorrect",
                                  "Change the GMST type to an int", CSMDoc::Message::Severity_Error);
                 
-                if (gmst.mValue.getInteger() < CSMWorld::DefaultGMSTs::getIntLowerLimit(i))
+                if (gmst.mValue.getInteger() < CSMWorld::DefaultGMSTs::IntLimits[i*2])
                     messages.add(id, gmst.mId + " is less than the suggested range", "Change the value",
                                  CSMDoc::Message::Severity_Warning);
                 
-                if (gmst.mValue.getInteger() > CSMWorld::DefaultGMSTs::getIntUpperLimit(i))
+                if (gmst.mValue.getInteger() > CSMWorld::DefaultGMSTs::IntLimits[i*2+1])
                     messages.add(id, gmst.mId + " is more than the suggested range", "Change the value",
                                  CSMDoc::Message::Severity_Warning);
                 
@@ -78,15 +74,14 @@ void CSMTools::GMSTCheckStage::perform(int stage, CSMDoc::Messages& messages)
     }
     else if (gmst.mId[0] == 's')
     {
-        size_t stringCount = CSMWorld::DefaultGMSTs::getStringCount();
-        for (size_t i = 0; i < stringCount; ++i)
+        for (size_t i = 0; i < CSMWorld::DefaultGMSTs::StringCount; ++i)
         {
-            if (gmst.mId == CSMWorld::DefaultGMSTs::getStringName(i))
+            if (gmst.mId == CSMWorld::DefaultGMSTs::Strings[i])
             {
                 ESM::VarType type = gmst.mValue.getType();
                 
                 if (type != ESM::VT_String && type != ESM::VT_None)
-                    messages.add(id, gmst.mId + " has an invalid type; it should be a string", 
+                    messages.add(id, "The type of " + gmst.mId + " is incorrect", 
                                 "Change the GMST type to a string", CSMDoc::Message::Severity_Error);
                 
                 break; // for loop

@@ -4,51 +4,31 @@
 #include <cstddef>
 
 namespace CSMWorld {
-    class DefaultGMSTs {
-    public:
+    namespace DefaultGMSTs {
         
-        static size_t getFloatCount();
-        static size_t getIntCount();
-        static size_t getStringCount();
+        const size_t FloatCount = 258;
+        const size_t IntCount = 89;
+        const size_t StringCount = 1174;
         
-        static size_t getOptFloatCount();
-        static size_t getOptIntCount();
-        static size_t getOptStringCount();
+        const size_t OptionalFloatCount = 42;
+        const size_t OptionalIntCount = 4;
+        const size_t OptionalStringCount = 26;
         
-        static const char * getFloatName(size_t index);
-        static const char * getIntName(size_t index);
-        static const char * getStringName(size_t index);
+        extern const char* Floats[];
+        extern const char * Ints[];
+        extern const char * Strings[];
         
-        // Optional GMSTs appear to be in the large list as well
-        static const char * getOptFloatName(size_t index);
-        static const char * getOptIntName(size_t index);
-        static const char * getOptStringName(size_t index);
-        
-        static float getFloatDefaultValue(size_t index);
-        static int getIntDefaultValue(size_t index);
-        
-        static float getFloatLowerLimit(size_t index);
-        static float getFloatUpperLimit(size_t index);
-        
-        static int getIntLowerLimit(size_t index);
-        static int getIntUpperLimit(size_t index);
-        
-    private:
-        
-        static const char * mGMSTFloats[];
-        static const char * mGMSTInts[];
-        static const char * mGMSTStrings[];
+        extern const char * OptionalFloats[];
+        extern const char * OptionalInts[];
+        extern const char * OptionalStrings[];
 
-        static const char * mGMSTOptionalFloats[];
-        static const char * mGMSTOptionalInts[];
-        static const char * mGMSTOptionalStrings[];
-        
-        static const float mGMSTFloatsDefaultValues[];
-        static const int mGMSTIntsDefaultValues[];
-        
-        static const float mGMSTFloatLimits[];
-        static const int mGMSTIntLimits[];
-    };
+        extern const float FloatsDefaultValues[];
+        extern const int IntsDefaultValues[];
+
+        extern const float FloatLimits[];
+        extern const int IntLimits[];
+
+    }
 }
 
 #endif
