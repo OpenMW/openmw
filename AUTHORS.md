@@ -48,6 +48,7 @@ Programmers
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn
+    hristoast
     Internecine
     Jacob Essex (Yacoby)
     Jannik Heller (scrawl)

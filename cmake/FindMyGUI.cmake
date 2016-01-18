@@ -101,7 +101,7 @@ ELSE (WIN32) #Unix
             SET(MYGUI_LIBRARIES ${MYGUI_LIBRARIES} CACHE STRING "")
         ELSE (MYGUI_INCLUDE_DIRS)
             FIND_PATH(MYGUI_INCLUDE_DIRS MyGUI.h PATHS /usr/local/include /usr/include PATH_SUFFIXES MyGUI MYGUI)
-            FIND_LIBRARY(MYGUI_LIBRARIES mygui PATHS /usr/lib /usr/local/lib)
+            FIND_LIBRARY(MYGUI_LIBRARIES MyGUIEngine PATHS /usr/local/lib /usr/lib)
             SET(MYGUI_LIB_DIR ${MYGUI_LIBRARIES})
             STRING(REGEX REPLACE "(.*)/.*" "\\1" MYGUI_LIB_DIR "${MYGUI_LIB_DIR}")
             STRING(REGEX REPLACE ".*/" "" MYGUI_LIBRARIES "${MYGUI_LIBRARIES}")
