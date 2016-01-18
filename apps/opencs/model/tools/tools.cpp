@@ -112,7 +112,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                     mData.getResources (CSMWorld::UniversalId::Type_Icons),
                                                                     mData.getResources (CSMWorld::UniversalId::Type_Textures)));
         
-        mVerifierOperation->appendStage (new GMSTCheckStage (mData.getGmsts()));
+        mVerifierOperation->appendStage (new GmstCheckStage (mData.getGmsts()));
 
         mVerifier.setOperation (mVerifierOperation);
     }

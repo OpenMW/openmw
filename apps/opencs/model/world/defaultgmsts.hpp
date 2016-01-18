@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace CSMWorld {
-    namespace DefaultGMSTs {
+    namespace DefaultGmsts {
         
         const size_t FloatCount = 258;
         const size_t IntCount = 89;

@@ -10,11 +10,11 @@
 namespace CSMTools
 {
     /// \brief VerifyStage: make sure that GMSTs are alright
-    class GMSTCheckStage : public CSMDoc::Stage
+    class GmstCheckStage : public CSMDoc::Stage
     {
     public:
         
-        GMSTCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings);
+        GmstCheckStage(const CSMWorld::IdCollection<ESM::GameSetting>& gameSettings);
         
         virtual int setup();
         ///< \return number of steps
@@ -25,6 +25,8 @@ namespace CSMTools
     private:
         
         const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
+        
+        std::string varTypeToString(ESM::VarType);
         
     };
 }

@@ -8,7 +8,7 @@ const float FEps = std::numeric_limits<float>::epsilon();
 const int IMax = std::numeric_limits<int>::max();
 const int IMin = std::numeric_limits<int>::min();
 
-const char* CSMWorld::DefaultGMSTs::Floats[CSMWorld::DefaultGMSTs::FloatCount] =
+const char* CSMWorld::DefaultGmsts::Floats[CSMWorld::DefaultGmsts::FloatCount] =
 {
     "fAIFleeFleeMult",
     "fAIFleeHealthMult",
@@ -270,7 +270,7 @@ const char* CSMWorld::DefaultGMSTs::Floats[CSMWorld::DefaultGMSTs::FloatCount] =
     "fWortChanceValue"
 };
 
-const char * CSMWorld::DefaultGMSTs::Ints[CSMWorld::DefaultGMSTs::IntCount] =
+const char * CSMWorld::DefaultGmsts::Ints[CSMWorld::DefaultGmsts::IntCount] =
 {
     "i1stPersonSneakDelta",
     "iAlarmAttack",
@@ -363,7 +363,7 @@ const char * CSMWorld::DefaultGMSTs::Ints[CSMWorld::DefaultGMSTs::IntCount] =
     "iWereWolfLevelToAttack"
 };
 
-const char * CSMWorld::DefaultGMSTs::Strings[CSMWorld::DefaultGMSTs::StringCount] =
+const char * CSMWorld::DefaultGmsts::Strings[CSMWorld::DefaultGmsts::StringCount] =
 {
     "s3dAudio",
     "s3dHardware",
@@ -1541,7 +1541,7 @@ const char * CSMWorld::DefaultGMSTs::Strings[CSMWorld::DefaultGMSTs::StringCount
     "sYourGold"
 };
 
-const char * CSMWorld::DefaultGMSTs::OptionalFloats[CSMWorld::DefaultGMSTs::OptionalFloatCount] =
+const char * CSMWorld::DefaultGmsts::OptionalFloats[CSMWorld::DefaultGmsts::OptionalFloatCount] =
 {
     "fCombatDistanceWerewolfMod",
     "fFleeDistance",
@@ -1587,7 +1587,7 @@ const char * CSMWorld::DefaultGMSTs::OptionalFloats[CSMWorld::DefaultGMSTs::Opti
     "fWereWolfWillPower"
 };
 
-const char * CSMWorld::DefaultGMSTs::OptionalInts[CSMWorld::DefaultGMSTs::OptionalIntCount] =
+const char * CSMWorld::DefaultGmsts::OptionalInts[CSMWorld::DefaultGmsts::OptionalIntCount] =
 {
     "iWereWolfBounty",
     "iWereWolfFightMod",
@@ -1595,7 +1595,7 @@ const char * CSMWorld::DefaultGMSTs::OptionalInts[CSMWorld::DefaultGMSTs::Option
     "iWereWolfLevelToAttack"
 };
 
-const char * CSMWorld::DefaultGMSTs::OptionalStrings[CSMWorld::DefaultGMSTs::OptionalStringCount] =
+const char * CSMWorld::DefaultGmsts::OptionalStrings[CSMWorld::DefaultGmsts::OptionalStringCount] =
 {
     "sCompanionShare",
     "sCompanionWarningButtonOne",
@@ -1625,7 +1625,7 @@ const char * CSMWorld::DefaultGMSTs::OptionalStrings[CSMWorld::DefaultGMSTs::Opt
     "sWerewolfRestMessage"
 };
 
-const float CSMWorld::DefaultGMSTs::FloatsDefaultValues[CSMWorld::DefaultGMSTs::FloatCount] =
+const float CSMWorld::DefaultGmsts::FloatsDefaultValues[CSMWorld::DefaultGmsts::FloatCount] =
 {
     0.3,    // fAIFleeFleeMult
     7.0,    // fAIFleeHealthMult
@@ -1887,7 +1887,7 @@ const float CSMWorld::DefaultGMSTs::FloatsDefaultValues[CSMWorld::DefaultGMSTs::
     15.0   // fWortChanceValue
 };
 
-const int CSMWorld::DefaultGMSTs::IntsDefaultValues[CSMWorld::DefaultGMSTs::IntCount] =
+const int CSMWorld::DefaultGmsts::IntsDefaultValues[CSMWorld::DefaultGmsts::IntCount] =
 {
     10,     // i1stPersonSneakDelta
     50,     // iAlarmAttack
@@ -1980,7 +1980,7 @@ const int CSMWorld::DefaultGMSTs::IntsDefaultValues[CSMWorld::DefaultGMSTs::IntC
     20     // iWereWolfLevelToAttack
 };
 
-const float CSMWorld::DefaultGMSTs::FloatLimits[CSMWorld::DefaultGMSTs::FloatCount * 2] =
+const float CSMWorld::DefaultGmsts::FloatLimits[CSMWorld::DefaultGmsts::FloatCount * 2] =
 {
     -FInf,      FInf,       // fAIFleeFleeMult
     -FInf,      FInf,       // fAIFleeHealthMult
@@ -2242,7 +2242,7 @@ const float CSMWorld::DefaultGMSTs::FloatLimits[CSMWorld::DefaultGMSTs::FloatCou
     0,          FInf        // fWortChanceValue
 };
 
-const int CSMWorld::DefaultGMSTs::IntLimits[CSMWorld::DefaultGMSTs::IntCount * 2] =
+const int CSMWorld::DefaultGmsts::IntLimits[CSMWorld::DefaultGmsts::IntCount * 2] =
 {
     IMin,    IMax,  // i1stPersonSneakDelta
     IMin,    IMax,  // iAlarmAttack
