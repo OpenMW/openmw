@@ -11,7 +11,7 @@
 #include "../../model/world/refcollection.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 
-#include "mask.hpp"
+#include "elements.hpp"
 #include "terrainstorage.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
@@ -80,7 +80,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
             if (esmLand.getLandData (ESM::Land::DATA_VHGT))
             {
-                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Mask_Terrain));
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
                 mTerrain->loadCell(esmLand.mX,
                                    esmLand.mY);
             }
@@ -230,7 +230,7 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
-    if (elementMask & Mask_Reference)
+    if (elementMask & Element_Reference)
     {
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)

@@ -59,10 +59,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
     return number;
 }
 
-CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback)
+CSMWorld::Data::Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mResourcesManager (resourcesManager), mFallbackMap(fallback),
-  mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
+  mResourcesManager (resourcesManager), mReader (0), mDialogue (0), mReaderIndex(0), mResourceSystem(new Resource::ResourceSystem(resourcesManager.getVFS()))
 {
     int index = 0;
 
@@ -1201,9 +1200,4 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
     return mResourcesManager.getVFS();
-}
-
-const Fallback::Map* CSMWorld::Data::getFallbackMap() const
-{
-    return mFallbackMap;
 }

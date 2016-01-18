@@ -58,11 +58,6 @@ namespace VFS
     class Manager;
 }
 
-namespace Fallback
-{
-    class Map;
-}
-
 namespace ESM
 {
     class ESMReader;
@@ -109,7 +104,6 @@ namespace CSMWorld
             IdCollection<ESM::Filter> mFilters;
             Collection<MetaData> mMetaData;
             const ResourcesManager& mResourcesManager;
-            const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             ESM::ESMReader *mReader;
@@ -138,13 +132,11 @@ namespace CSMWorld
 
         public:
 
-            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager, const Fallback::Map* fallback);
+            Data (ToUTF8::FromType encoding, const ResourcesManager& resourcesManager);
 
             virtual ~Data();
 
             const VFS::Manager* getVFS() const;
-
-            const Fallback::Map* getFallbackMap() const;
 
             boost::shared_ptr<Resource::ResourceSystem> getResourceSystem();
 

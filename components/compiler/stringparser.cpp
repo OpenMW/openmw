@@ -13,7 +13,7 @@
 namespace Compiler
 {
     StringParser::StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals)
-    : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false), mDiscard (false)
+    : Parser (errorHandler, context), mLiterals (literals), mState (StartState), mSmashCase (false)
     {
 
     }
@@ -24,15 +24,10 @@ namespace Compiler
         if (mState==StartState || mState==CommaState)
         {
             start();
-            mTokenLoc = loc;
-
-            if (!mDiscard)
-            {
-                if (mSmashCase)
-                    Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
-                else
-                    Generator::pushString (mCode, mLiterals, name);
-            }
+            if (mSmashCase)
+                Generator::pushString (mCode, mLiterals, Misc::StringUtils::lowerCase (name));
+            else
+                Generator::pushString (mCode, mLiterals, name);
 
             return false;
         }
@@ -80,23 +75,11 @@ namespace Compiler
         mState = StartState;
         mCode.clear();
         mSmashCase = false;
-        mTokenLoc = TokenLoc();
-        mDiscard = false;
         Parser::reset();
     }
 
     void StringParser::smashCase()
     {
         mSmashCase = true;
-    }
-
-    const TokenLoc& StringParser::getTokenLoc() const
-    {
-        return mTokenLoc;
-    }
-
-    void StringParser::discard()
-    {
-        mDiscard = true;
     }
 }

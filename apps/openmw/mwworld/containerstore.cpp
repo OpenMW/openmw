@@ -529,10 +529,10 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         {
             std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
 
-            int restockNum = std::abs(it->mCount);
+            int restockNum = it->mCount;
             //If we know we must restock less, take it into account
             if(listInMap != allowedForReplace.end())
-                restockNum -= std::min(restockNum, listInMap->second);
+                restockNum += listInMap->second;//We add, because list items have negative count
             //restock
             addInitialItem(itemOrList, owner, restockNum, true);
         }
@@ -627,7 +627,7 @@ int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
         return Type_Weapon;
 
     throw std::runtime_error (
-        "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
+        "Object of type " + ptr.getTypeName() + " can not be placed into a container");
 }
 
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)

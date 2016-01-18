@@ -1014,7 +1014,7 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime &runtime)
                 {
-                    runtime.push (MWBase::Environment::get().getWorld()->isPlayerInJail());
+                    runtime.push (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail));
                 }
         };
 

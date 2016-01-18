@@ -1,11 +1,11 @@
 
 #include "tagbase.hpp"
 
-CSVRender::TagBase::TagBase (Mask mask) : mMask (mask) {}
+CSVRender::TagBase::TagBase (Elements element) : mElement (element) {}
 
-CSVRender::Mask CSVRender::TagBase::getMask() const
+CSVRender::Elements CSVRender::TagBase::getElement() const
 {
-    return mMask;
+    return mElement;
 }
 
 QString CSVRender::TagBase::getToolTip (bool hideBasics) const

@@ -16,11 +16,6 @@ endif (APPLE)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-if (ANDROID)
-    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
-    set (OSG_PLUGINS_DIR CACHE STRING "")
-endif()
-
 # Version
 message(STATUS "Configuring OpenMW...")
 
@@ -162,6 +157,7 @@ if (WIN32)
 endif()
 
 if (ANDROID)
+    set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
     set(OPENGL_ES TRUE CACHE BOOL "enable opengl es support for android" FORCE)
 endif (ANDROID)
 

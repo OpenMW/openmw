@@ -15,18 +15,19 @@
 #include <components/nifosg/controller.hpp>
 #include <components/resource/texturemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/fallback/fallback.hpp>
 
 #include "vismask.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "../mwworld/fallback.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
 
 namespace
 {
-    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback, osg::Node* node)
+    void createWaterRippleStateSet(Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback, osg::Node* node)
     {
         int rippleFrameCount = fallback->getFallbackInt("Water_RippleFrameCount");
         if (rippleFrameCount <= 0)
@@ -77,7 +78,7 @@ namespace
 namespace MWRender
 {
 
-RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback)
+RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback)
     : mParent(parent)
 {
     osg::ref_ptr<osg::Geode> geode (new osg::Geode);

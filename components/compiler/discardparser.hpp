@@ -2,7 +2,6 @@
 #define COMPILER_DISCARDPARSER_H_INCLUDED
 
 #include "parser.hpp"
-#include "tokenloc.hpp"
 
 namespace Compiler
 {
@@ -15,7 +14,6 @@ namespace Compiler
             };
 
             State mState;
-            TokenLoc mTokenLoc;
 
         public:
 
@@ -40,11 +38,8 @@ namespace Compiler
 
             virtual void reset();
             ///< Reset parser to clean state.
-
-            /// Returns TokenLoc object for value. If no value has been parsed, the TokenLoc
-            /// object will be default initialised.
-            const TokenLoc& getTokenLoc() const;
     };
 }
 
 #endif
+

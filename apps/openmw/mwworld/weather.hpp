@@ -29,13 +29,9 @@ namespace Loading
     class Listener;
 }
 
-namespace Fallback
-{
-    class Map;
-}
-
 namespace MWWorld
 {
+    class Fallback;
     class TimeStamp;
 
 
@@ -70,7 +66,7 @@ namespace MWWorld
     {
     public:
         Weather(const std::string& name,
-                const Fallback::Map& fallback,
+                const MWWorld::Fallback& fallback,
                 float stormWindSpeed,
                 float rainSpeed,
                 const std::string& particleEffect);
@@ -176,7 +172,7 @@ namespace MWWorld
     class MoonModel
     {
     public:
-        MoonModel(const std::string& name, const Fallback::Map& fallback);
+        MoonModel(const std::string& name, const MWWorld::Fallback& fallback);
 
         MWRender::MoonState calculateState(const TimeStamp& gameTime) const;
 
@@ -207,7 +203,7 @@ namespace MWWorld
     public:
         // Have to pass fallback and Store, can't use singleton since World isn't fully constructed yet at the time
         WeatherManager(MWRender::RenderingManager& rendering,
-                       const Fallback::Map& fallback,
+                       const MWWorld::Fallback& fallback,
                        MWWorld::ESMStore& store);
         ~WeatherManager();
 
@@ -292,7 +288,7 @@ namespace MWWorld
         std::string mPlayingSoundID;
 
         void addWeather(const std::string& name,
-                        const Fallback::Map& fallback,
+                        const MWWorld::Fallback& fallback,
                         const std::string& particleEffect = "");
 
         void importRegions();

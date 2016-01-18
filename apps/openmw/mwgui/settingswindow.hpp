@@ -30,7 +30,11 @@ namespace MWGui
             MyGUI::Button* mFullscreenButton;
             MyGUI::Button* mVSyncButton;
             MyGUI::Button* mWindowBorderButton;
+            MyGUI::ScrollBar* mFOVSlider;
+            MyGUI::ScrollBar* mDifficultySlider;
+            MyGUI::ScrollBar* mAnisotropySlider;
             MyGUI::ComboBox* mTextureFilteringButton;
+            MyGUI::TextBox* mAnisotropyLabel;
             MyGUI::Widget* mAnisotropyBox;
             MyGUI::Button* mShadersButton;
 
@@ -72,7 +76,6 @@ namespace MWGui
             void apply();
 
             void configureWidgets(MyGUI::Widget* widget);
-            void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
         
         private:
             void resetScrollbars();

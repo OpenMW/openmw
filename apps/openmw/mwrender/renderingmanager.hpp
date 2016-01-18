@@ -37,9 +37,9 @@ namespace Terrain
     class World;
 }
 
-namespace Fallback
+namespace MWWorld
 {
-    class Map;
+    class Fallback;
 }
 
 namespace MWRender
@@ -58,7 +58,7 @@ namespace MWRender
     {
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
-                         const Fallback::Map* fallback, const std::string& resourcePath);
+                         const MWWorld::Fallback* fallback, const std::string& resourcePath);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();

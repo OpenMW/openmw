@@ -478,7 +478,7 @@ osg::Vec2f LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int 
     return pos;
 }
 
-bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
+bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
 {
     const MapSegment& segment = mSegments[std::make_pair(x, y)];
     if (!segment.mFogOfWarImage)
@@ -526,7 +526,7 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
     }
 
     // explore radius (squared)
-    const float exploreRadius = 0.17f * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
+    const float exploreRadius = (mInterior ? 0.1f : 0.3f) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
     const float sqrExploreRadius = square(exploreRadius);
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 

@@ -20,10 +20,6 @@ namespace CSVRender
             virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
 
             virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
-
-            virtual void dragEnterEvent (QDragEnterEvent *event);
-
-            virtual void dropEvent (QDropEvent* event);
     };
 }
 
