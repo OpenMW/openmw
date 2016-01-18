@@ -34,8 +34,9 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
@@ -457,7 +458,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
-             const MWWorld::Fallback* fallback, const std::string& resourcePath)
+             const Fallback::Map* fallback, const std::string& resourcePath)
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)

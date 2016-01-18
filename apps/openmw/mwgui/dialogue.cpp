@@ -547,7 +547,7 @@ namespace MWGui
 
     void DialogueWindow::onScrollbarMoved(MyGUI::ScrollBar *sender, size_t pos)
     {
-        mHistory->setPosition(0, pos * -1);
+        mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
     void DialogueWindow::addResponse(const std::string &text, const std::string &title)

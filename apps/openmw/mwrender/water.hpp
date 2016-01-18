@@ -28,9 +28,13 @@ namespace Resource
 
 namespace MWWorld
 {
-    class Fallback;
     class CellStore;
     class Ptr;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWRender
@@ -50,7 +54,7 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
         osg::ref_ptr<osg::Geode> mWaterGeode;
         Resource::ResourceSystem* mResourceSystem;
-        const MWWorld::Fallback* mFallback;
+        const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<RippleSimulation> mSimulation;
@@ -77,7 +81,7 @@ namespace MWRender
 
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,
-              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const Fallback::Map* fallback,
               const std::string& resourcePath);
         ~Water();
 

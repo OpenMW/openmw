@@ -511,7 +511,7 @@ namespace MWWorld
         return 0;
     }
 
-    const MWWorld::Fallback *World::getFallback() const
+    const Fallback::Map *World::getFallback() const
     {
         return &mFallback;
     }
@@ -2996,6 +2996,14 @@ namespace MWWorld
         }
     }
 
+    bool World::isPlayerInJail() const
+    {
+        if (mGoToJail)
+            return true;
+
+        return MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Jail);
+    }
+
     void World::spawnRandomCreature(const std::string &creatureList)
     {
         const ESM::CreatureLevList* list = getStore().get<ESM::CreatureLevList>().find(creatureList);
@@ -3064,8 +3072,8 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos);
     }
 
-    void World::explodeSpell(const osg::Vec3f &origin, const ESM::EffectList &effects, const Ptr &caster, ESM::RangeType rangeType,
-                             const std::string& id, const std::string& sourceName)
+    void World::explodeSpell(const osg::Vec3f &origin, const ESM::EffectList &effects, const Ptr &caster, const Ptr& ignore,
+                             ESM::RangeType rangeType, const std::string& id, const std::string& sourceName)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
@@ -3111,6 +3119,9 @@ namespace MWWorld
             // Vanilla-compatible behaviour of never applying the spell to the caster
             // (could be changed by mods later)
             if (apply->first == caster)
+                continue;
+
+            if (apply->first == ignore)
                 continue;
 
             if (source.isEmpty())

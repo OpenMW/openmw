@@ -30,8 +30,8 @@
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm/loadcell.hpp>
+#include <components/fallback/fallback.hpp>
 
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
@@ -126,7 +126,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
-                                       const MWWorld::Fallback* fallback, const std::string& resourcePath)
+                                       const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
