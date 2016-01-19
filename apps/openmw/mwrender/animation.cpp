@@ -6,7 +6,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
-#include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
 #include <osg/BlendFunc>
@@ -30,16 +29,16 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/sceneutil/lightcontroller.hpp>
+#include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+
+#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
@@ -1086,38 +1085,7 @@ namespace MWRender
 
     void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
     {
-        SceneUtil::FindByNameVisitor visitor("AttachLight");
-        parent->accept(visitor);
-
-        osg::Group* attachTo = NULL;
-        if (visitor.mFoundNode)
-        {
-            attachTo = visitor.mFoundNode;
-        }
-        else
-        {
-            osg::ComputeBoundsVisitor computeBound;
-            computeBound.setTraversalMask(~Mask_ParticleSystem);
-            parent->accept(computeBound);
-
-            // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
-            osg::ref_ptr<osg::PositionAttitudeTransform> trans(new osg::PositionAttitudeTransform);
-            trans->setPosition(computeBound.getBoundingBox().center());
-
-            parent->addChild(trans);
-
-            attachTo = trans;
-        }
-
-        osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
-        osg::ref_ptr<osg::Light> light (new osg::Light);
-        lightSource->setNodeMask(Mask_Lighting);
-
-        const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
-
-        float radius = esmLight->mData.mRadius;
-        lightSource->setRadius(radius);
-
+        const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
         static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
         static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
         static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
@@ -1125,38 +1093,10 @@ namespace MWRender
         static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
         static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
         static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
-
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
-        SceneUtil::configureLight(light, radius, exterior, outQuadInLin, useQuadratic, quadraticValue,
-                                  quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
-
-        osg::Vec4f diffuse = SceneUtil::colourFromRGB(esmLight->mData.mColor);
-        if (esmLight->mData.mFlags & ESM::Light::Negative)
-        {
-            diffuse *= -1;
-            diffuse.a() = 1;
-        }
-        light->setDiffuse(diffuse);
-        light->setAmbient(osg::Vec4f(0,0,0,1));
-        light->setSpecular(osg::Vec4f(0,0,0,0));
-
-        lightSource->setLight(light);
-
-        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
-        ctrl->setDiffuse(light->getDiffuse());
-        if (esmLight->mData.mFlags & ESM::Light::Flicker)
-            ctrl->setType(SceneUtil::LightController::LT_Flicker);
-        if (esmLight->mData.mFlags & ESM::Light::FlickerSlow)
-            ctrl->setType(SceneUtil::LightController::LT_FlickerSlow);
-        if (esmLight->mData.mFlags & ESM::Light::Pulse)
-            ctrl->setType(SceneUtil::LightController::LT_Pulse);
-        if (esmLight->mData.mFlags & ESM::Light::PulseSlow)
-            ctrl->setType(SceneUtil::LightController::LT_PulseSlow);
-
-        lightSource->addUpdateCallback(ctrl);
-
-        attachTo->addChild(lightSource);
+        SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior, outQuadInLin,
+                            useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)

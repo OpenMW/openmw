@@ -9,17 +9,19 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 
+
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
+
 #include "object.hpp"
 #include "worldspacewidget.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "instanceselectionmode.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
+: EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
   parent), mSubMode (0), mSelectionMode (0)
 {
 }
@@ -91,7 +93,7 @@ void CSVRender::InstanceMode::secondaryEditPressed (osg::ref_ptr<TagBase> tag)
 
 void CSVRender::InstanceMode::primarySelectPressed (osg::ref_ptr<TagBase> tag)
 {
-    getWorldspaceWidget().clearSelection (Element_Reference);
+    getWorldspaceWidget().clearSelection (Mask_Reference);
 
     if (tag)
     {

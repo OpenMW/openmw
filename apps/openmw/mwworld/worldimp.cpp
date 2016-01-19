@@ -511,7 +511,7 @@ namespace MWWorld
         return 0;
     }
 
-    const MWWorld::Fallback *World::getFallback() const
+    const Fallback::Map *World::getFallback() const
     {
         return &mFallback;
     }

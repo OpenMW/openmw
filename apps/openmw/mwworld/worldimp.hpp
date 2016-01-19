@@ -5,20 +5,19 @@
 
 #include <osg/ref_ptr>
 
+#include <components/settings/settings.hpp>
+#include <components/fallback/fallback.hpp>
+
+#include "../mwbase/world.hpp"
+
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
-#include "fallback.hpp"
 #include "globals.hpp"
-
-#include "../mwbase/world.hpp"
-
 #include "contentloader.hpp"
-
-#include <components/settings/settings.hpp>
 
 namespace osg
 {
@@ -71,7 +70,7 @@ namespace MWWorld
     {
             Resource::ResourceSystem* mResourceSystem;
 
-            MWWorld::Fallback mFallback;
+            Fallback::Map mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -210,7 +209,7 @@ namespace MWWorld
 
             virtual void adjustSky();
 
-            virtual const Fallback *getFallback() const;
+            virtual const Fallback::Map *getFallback() const;
 
             virtual Player& getPlayer();
             virtual MWWorld::Ptr getPlayerPtr();

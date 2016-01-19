@@ -14,9 +14,6 @@ Q_DECLARE_METATYPE (boost::filesystem::path)
 
 #include "ui_filedialog.h"
 
-class DataFilesModel;
-class PluginsProxyModel;
-
 namespace ContentSelectorView
 {
     class ContentSelector;

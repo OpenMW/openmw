@@ -168,10 +168,6 @@ namespace SceneUtil
         LightManager::LightList mLightList;
     };
 
-    /// @brief Configures a light's attenuation according to vanilla Morrowind attenuation settings.
-    void configureLight(osg::Light* light, float radius, bool isExterior, bool outQuadInLin, bool useQuadratic, float quadraticValue,
-                         float quadraticRadiusMult, bool useLinear, float linearRadiusMult, float linearValue);
-
 }
 
 #endif

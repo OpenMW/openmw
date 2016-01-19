@@ -11,7 +11,7 @@
 #include "../../model/world/tablemimedata.hpp"
 
 #include "scenewidget.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 
 namespace CSMPrefs
 {
@@ -135,12 +135,23 @@ namespace CSVRender
             /// \param ignoreHidden ignore elements specified in interactionMask that are
             /// flagged as not visible.
             osg::Vec3f getIntersectionPoint (const QPoint& localPos,
-                unsigned int interactionMask = Element_Reference | Element_Terrain,
+                unsigned int interactionMask = Mask_Reference | Mask_Terrain,
                 bool ignoreHidden = false) const;
 
             virtual std::string getCellId (const osg::Vec3f& point) const = 0;
 
         protected:
+
+            /// Visual elements in a scene
+            /// @note do not change the enumeration values, they are used in pre-existing button file names!
+            enum ButtonId
+            {
+                Button_Reference = 0x1,
+                Button_Pathgrid = 0x2,
+                Button_Water = 0x4,
+                Button_Fog = 0x8,
+                Button_Terrain = 0x10
+            };
 
             virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
 

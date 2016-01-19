@@ -18,7 +18,7 @@
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -126,8 +126,8 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Element_Terrain, "Terrain");
-    tool->addButton (Element_Fog, "Fog", "", true);
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain");
+    tool->addButton (Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
@@ -137,22 +137,22 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
 
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain shape editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain texture editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain texture editing"),
         "terrain-texture");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain vertex paint editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
         "terrain-vertex");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Reference, "Terrain movement"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain movement"),
         "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::handleMouseClick (osg::ref_ptr<TagBase> tag, const std::string& button, bool shift)
 {
-    if (tag && tag->getElement()==Element_CellArrow)
+    if (tag && tag->getMask()==Mask_CellArrow)
     {
         if (button=="p-edit" || button=="s-edit")
         {
@@ -497,7 +497,7 @@ CSVRender::WorldspaceWidget::dropRequirments CSVRender::PagedWorldspaceWidget::g
 
 unsigned int CSVRender::PagedWorldspaceWidget::getVisibilityMask() const
 {
-    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelection();
+    return WorldspaceWidget::getVisibilityMask() | mControlElements->getSelectionMask();
 }
 
 void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
@@ -526,12 +526,12 @@ CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibil
     mControlElements = new CSVWidget::SceneToolToggle (parent,
         "Controls & Guides Visibility", ":placeholder");
 
-    mControlElements->addButton (":placeholder", Element_CellMarker, ":placeholder",
+    mControlElements->addButton (":placeholder", Mask_CellMarker, ":placeholder",
         "Cell marker");
-    mControlElements->addButton (":placeholder", Element_CellArrow, ":placeholder", "Cell arrows");
-    mControlElements->addButton (":placeholder", Element_CellBorder, ":placeholder", "Cell border");
+    mControlElements->addButton (":placeholder", Mask_CellArrow, ":placeholder", "Cell arrows");
+    mControlElements->addButton (":placeholder", Mask_CellBorder, ":placeholder", "Cell border");
 
-    mControlElements->setSelection (0xffffffff);
+    mControlElements->setSelectionMask (0xffffffff);
 
     connect (mControlElements, SIGNAL (selectionChanged()),
         this, SLOT (elementSelectionChanged()));
