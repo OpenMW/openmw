@@ -188,6 +188,15 @@ namespace MWWorld
             /// (it can be re-stacked so its count may be different than when it
             /// was equipped).
 
+            ContainerStoreIterator unequipItemQuantity(const Ptr& item, const Ptr& actor, int count);
+            ///< Unequip a specific quantity of an item identified by its Ptr.
+            /// An exception is thrown if the item is not currently equipped,
+            /// if count <= 0, or if count > the item stack size.
+            ///
+            /// @return an iterator to the unequipped items that were previously
+            /// in the slot (they can be re-stacked so its count may be different
+            /// than the requested count).
+
             void setListener (InventoryStoreListener* listener, const Ptr& actor);
             ///< Set a listener for various events, see \a InventoryStoreListener
 

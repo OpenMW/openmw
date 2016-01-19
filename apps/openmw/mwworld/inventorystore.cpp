@@ -574,6 +574,33 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItem(const MWWor
     throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
 }
 
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(const Ptr& item, const Ptr& actor, int count)
+{
+    if (!isEquipped(item))
+        throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
+    if (count <= 0)
+        throw std::runtime_error ("attempt to unequip nothing (count <= 0)");
+    if (count > item.getRefData().getCount())
+        throw std::runtime_error ("attempt to unequip more items than equipped");
+
+    if (count == item.getRefData().getCount())
+        return unequipItem(item, actor);
+
+    // Move items to an existing stack if possible, otherwise split count items out into a new stack.
+    // Moving counts manually here, since ContainerStore's restack can't target unequipped stacks.
+    for (MWWorld::ContainerStoreIterator iter (begin()); iter != end(); ++iter)
+    {
+        if (stacks(*iter, item) && !isEquipped(*iter))
+        {
+            iter->getRefData().setCount(iter->getRefData().getCount() + count);
+            item.getRefData().setCount(item.getRefData().getCount() - count);
+            return iter;
+        }
+    }
+
+    return unstack(item, actor, item.getRefData().getCount() - count);
+}
+
 MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getListener()
 {
     return mListener;
