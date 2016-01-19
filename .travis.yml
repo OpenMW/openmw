@@ -2,6 +2,8 @@ os:
  - linux
 # - osx
 language: cpp
+sudo: required
+dist: trusty
 branches:
   only:
     - master
