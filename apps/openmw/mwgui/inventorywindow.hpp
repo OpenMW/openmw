@@ -126,8 +126,8 @@ namespace MWGui
 
             void adjustPanes();
 
-            /// Unequips mSelectedItem, if it is equipped, and then updates mSelectedItem in case it was re-stacked
-            void ensureSelectedItemUnequipped();
+            /// Unequips count items from mSelectedItem, if it is equipped, and then updates mSelectedItem in case the items were re-stacked
+            void ensureSelectedItemUnequipped(int count);
     };
 }
 

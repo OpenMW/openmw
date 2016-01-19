@@ -136,16 +136,18 @@ int MWWorld::ContainerStore::count(const std::string &id)
     return total;
 }
 
-void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
-    if (ptr.getRefData().getCount() <= 1)
-        return;
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-1);
+    if (ptr.getRefData().getCount() <= count)
+        return end();
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-count);
     const std::string script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, ptr.getRefData().getCount()-1, container);
+    remove(ptr, ptr.getRefData().getCount()-count, container);
+
+    return it;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
