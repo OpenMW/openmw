@@ -1,8 +1,25 @@
 
 #include "instanceselectionmode.hpp"
 
-CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar *parent)
-: CSVWidget::SceneToolMode (parent, "Selection Mode")
+#include <QMenu>
+#include <QAction>
+
+#include "worldspacewidget.hpp"
+
+bool CSVRender::InstanceSelectionMode::createContextMenu (QMenu *menu)
+{
+    if (menu)
+    {
+        menu->addAction (mSelectAll);
+        menu->addAction (mDeselectAll);
+    }
+
+    return true;
+}
+
+CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar *parent,
+    WorldspaceWidget& worldspaceWidget)
+: CSVWidget::SceneToolMode (parent, "Selection Mode"), mWorldspaceWidget (worldspaceWidget)
 {
     addButton (":placeholder", "cube-centre",
         "Centred cube"
@@ -24,4 +41,20 @@ CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar
         "<li>If context selection mode is enabled, a drag with primary/secondary edit not starting on an instance will have the same effect</li>"
         "</ul>"
         "<font color=Red>Not implemented yet</font color>");
+
+    mSelectAll = new QAction ("Select all Instances", this);
+    mDeselectAll = new QAction ("Clear selection", this);
+
+    connect (mSelectAll, SIGNAL (triggered ()), this, SLOT (selectAll()));
+    connect (mDeselectAll, SIGNAL (triggered ()), this, SLOT (clearSelection()));
+}
+
+void CSVRender::InstanceSelectionMode::selectAll()
+{
+    mWorldspaceWidget.selectAll (Mask_Reference);
+}
+
+void CSVRender::InstanceSelectionMode::clearSelection()
+{
+    mWorldspaceWidget.clearSelection (Mask_Reference);
 }

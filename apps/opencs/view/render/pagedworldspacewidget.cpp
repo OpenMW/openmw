@@ -509,6 +509,15 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::selectAll (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_All);
+
+    flagAsModified();
+}
+
 std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
     const int cellSize = 8192;

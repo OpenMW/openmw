@@ -9,7 +9,6 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 
-
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
@@ -52,7 +51,7 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
     }
 
     if (!mSelectionMode)
-        mSelectionMode = new InstanceSelectionMode (toolbar);
+        mSelectionMode = new InstanceSelectionMode (toolbar, getWorldspaceWidget());
 
     EditMode::activate (toolbar);
 

@@ -127,6 +127,9 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask) = 0;
 
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAll (int elementMask) = 0;
+
             /// Return the next intersection point with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
             /// If there is no such point, instead a point "in front" of \a localPos will be

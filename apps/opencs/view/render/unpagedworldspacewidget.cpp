@@ -108,6 +108,12 @@ void CSVRender::UnpagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::UnpagedWorldspaceWidget::selectAll (int elementMask)
+{
+    mCell->setSelection (elementMask, Cell::Selection_All);
+    flagAsModified();
+}
+
 std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
     return mCellId;
