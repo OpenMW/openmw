@@ -6,6 +6,7 @@
 #include <map>
 
 class QHBoxLayout;
+class QMenu;
 
 namespace CSVWidget
 {
@@ -28,6 +29,16 @@ namespace CSVWidget
             SceneToolbar *mToolbar;
 
             void adjustToolTip (const ModeButton *activeMode);
+
+            virtual void contextMenuEvent (QContextMenuEvent *event);
+
+            /// Add context menu items to \a menu. Default-implementation: return false
+            ///
+            /// \attention menu can be a 0-pointer
+            ///
+            /// \return Have there been any menu items to be added (if menu is 0 and there
+            /// items to be added, the function must return true anyway.
+            virtual bool createContextMenu (QMenu *menu);
 
         public:
 
