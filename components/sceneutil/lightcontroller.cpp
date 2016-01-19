@@ -61,8 +61,10 @@ namespace SceneUtil
     void LightController::operator ()(osg::Node* node, osg::NodeVisitor* nv)
     {
         double time = nv->getFrameStamp()->getSimulationTime();
-        if (time == mLastTime)
-            return;
+
+        // disabled early out, light state needs to be set every frame regardless of change, due to the double buffering
+        //if (time == mLastTime)
+        //    return;
 
         float dt = static_cast<float>(time - mLastTime);
         mLastTime = time;
@@ -76,7 +78,7 @@ namespace SceneUtil
         if(mType == LT_Pulse || mType == LT_PulseSlow)
         {
             cycle_time = 2.0f * pi;
-            time_distortion = 20.0f;
+            time_distortion = mType == LT_Pulse ? 20.0f : 4.f;
         }
         else
         {
@@ -114,14 +116,16 @@ namespace SceneUtil
         else if(mType == LT_FlickerSlow)
             brightness = 0.75f + flickerAmplitude(mDeltaCount*slow)*0.25f;
         else if(mType == LT_Pulse)
-            brightness = 1.0f + pulseAmplitude(mDeltaCount*fast)*0.25f;
+            brightness = 0.7f + pulseAmplitude(mDeltaCount*fast)*0.3f;
         else if(mType == LT_PulseSlow)
-            brightness = 1.0f + pulseAmplitude(mDeltaCount*slow)*0.25f;
+            brightness = 0.7f + pulseAmplitude(mDeltaCount*slow)*0.3f;
 
-        static_cast<SceneUtil::LightSource*>(node)->getLight()->setDiffuse(mDiffuseColor * brightness);
+        static_cast<SceneUtil::LightSource*>(node)->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * brightness);
+
+        traverse(node, nv);
     }
 
-    void LightController::setDiffuse(osg::Vec4f color)
+    void LightController::setDiffuse(const osg::Vec4f& color)
     {
         mDiffuseColor = color;
     }

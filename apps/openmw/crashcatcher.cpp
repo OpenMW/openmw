@@ -387,11 +387,17 @@ static void crash_handler(const char *logfile)
         kill(crash_info.pid, SIGKILL);
     }
 
+    // delay between killing of the crashed process and showing the message box to
+    // work around occasional X server lock-up. this can only be a bug in X11 since
+    // even faulty applications shouldn't be able to freeze the X server.
+    usleep(100000);
+
     if(logfile)
     {
         std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(logfile) + "'.\n Please report this to https://bugs.openmw.org !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), NULL);
     }
+
     exit(0);
 }
 

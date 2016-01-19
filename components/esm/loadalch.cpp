@@ -8,16 +8,23 @@ namespace ESM
 {
     unsigned int Potion::sRecordId = REC_ALCH;
 
-    void Potion::load(ESMReader &esm)
+    void Potion::load(ESMReader &esm, bool &isDeleted)
     {
+        isDeleted = false;
+
         mEffects.mList.clear();
+
+        bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
-            uint32_t name = esm.retSubName().val;
-            switch (name)
+            switch (esm.retSubName().val)
             {
+                case ESM::SREC_NAME:
+                    mId = esm.getHString();
+                    hasName = true;
+                    break;
                 case ESM::FourCC<'M','O','D','L'>::value:
                     mModel = esm.getHString();
                     break;
@@ -37,15 +44,31 @@ namespace ESM
                 case ESM::FourCC<'E','N','A','M'>::value:
                     mEffects.add(esm);
                     break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
+                    break;
             }
         }
-        if (!hasData)
-            esm.fail("Missing ALDT");
+
+        if (!hasName)
+            esm.fail("Missing NAME subrecord");
+        if (!hasData && !isDeleted)
+            esm.fail("Missing ALDT subrecord");
     }
-    void Potion::save(ESMWriter &esm) const
+    void Potion::save(ESMWriter &esm, bool isDeleted) const
     {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("TEXT", mIcon);
         esm.writeHNOCString("SCRI", mScript);

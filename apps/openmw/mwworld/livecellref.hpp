@@ -31,7 +31,7 @@ namespace MWWorld
         /** runtime-data */
         RefData mData;
 
-        LiveCellRefBase(std::string type, const ESM::CellRef &cref=ESM::CellRef());
+        LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() { }
 

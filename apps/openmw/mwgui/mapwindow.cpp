@@ -156,7 +156,7 @@ namespace MWGui
 
     // ------------------------------------------------------
 
-    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender)
+    LocalMapBase::LocalMapBase(CustomMarkerCollection &markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled)
         : mLocalMapRender(localMapRender)
         , mCurX(0)
         , mCurY(0)
@@ -165,7 +165,8 @@ namespace MWGui
         , mCompass(NULL)
         , mPrefix()
         , mChanged(true)
-        , mFogOfWar(true)
+        , mFogOfWarToggled(true)
+        , mFogOfWarEnabled(fogOfWarEnabled)
         , mMapWidgetSize(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
@@ -222,9 +223,9 @@ namespace MWGui
 
     bool LocalMapBase::toggleFogOfWar()
     {
-        mFogOfWar = !mFogOfWar;
+        mFogOfWarToggled = !mFogOfWarToggled;
         applyFogOfWar();
-        return mFogOfWar;
+        return mFogOfWarToggled;
     }
 
     void LocalMapBase::applyFogOfWar()
@@ -238,7 +239,7 @@ namespace MWGui
                 int y = mCurY + (-1*(my-1));
                 MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
 
-                if (!mFogOfWar)
+                if (!mFogOfWarToggled || !mFogOfWarEnabled)
                 {
                     fog->setImageTexture("");
                     continue;
@@ -268,8 +269,6 @@ namespace MWGui
         MyGUI::IntPoint widgetPos;
         // normalized cell coordinates
         float nX,nY;
-
-        markerPos.interior = mInterior;
 
         if (!mInterior)
         {
@@ -746,7 +745,7 @@ namespace MWGui
 
         mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
         mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
-        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
 
         mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
         mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
@@ -1078,7 +1077,7 @@ namespace MWGui
     {
         if (!mLocalMapRender)
             return true;
-        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY, interior);
+        return mLocalMapRender->isPositionExplored(nX, nY, cellX, cellY);
     }
 
 }

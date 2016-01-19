@@ -4,8 +4,11 @@ if (GTEST_FOUND)
     include_directories(${GTEST_INCLUDE_DIRS})
 
     file(GLOB UNITTEST_SRC_FILES
-        components/misc/test_*.cpp
-        mwdialogue/test_*.cpp
+        ../openmw/mwworld/store.cpp
+        ../openmw/mwworld/esmstore.cpp
+        mwworld/test_store.cpp
+
+        mwdialogue/test_keywordsearch.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

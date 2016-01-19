@@ -39,7 +39,7 @@ namespace SceneUtil
         Skeleton();
         Skeleton(const Skeleton& copy, const osg::CopyOp& copyop);
 
-        META_Node(NifOsg, Skeleton)
+        META_Node(SceneUtil, Skeleton)
 
         /// Retrieve a bone by name.
         Bone* getBone(const std::string& name);

@@ -1,5 +1,6 @@
 #include "importer.hpp"
 
+#include <ctime>
 #include <iostream>
 #include <string>
 #include <map>
@@ -20,7 +21,6 @@ MwIniImporter::MwIniImporter()
 {
     const char *map[][2] =
     {
-        { "fps", "General:Show FPS" },
         { "no-sound", "General:Disable Audio" },
         { 0, 0 }
     };
@@ -639,6 +639,9 @@ MwIniImporter::MwIniImporter()
         "Blood:Texture Name 1",
         "Blood:Texture Name 2",
 
+        // werewolf (Bloodmoon)
+        "General:Werewolf FOV",
+
         0
     };
 
@@ -847,7 +850,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
 
         for(std::vector<std::string>::const_iterator entry = it->second.begin(); entry!=it->second.end(); ++entry) {
             std::string filetype(entry->substr(entry->length()-3));
-            Misc::StringUtils::toLower(filetype);
+            Misc::StringUtils::lowerCaseInPlace(filetype);
 
             if(filetype.compare("esm") == 0 || filetype.compare("esp") == 0) {
                 boost::filesystem::path filepath(gameFilesDir);
@@ -895,8 +898,13 @@ std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename
         boost::filesystem::path resolved = filename;
 #endif
         writeTime = boost::filesystem::last_write_time(resolved);
-        std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
-            ") " << asctime(localtime(&writeTime)) << std::endl;
+
+        // print timestamp
+        const int size=1024;
+        char timeStrBuffer[size];
+        if (std::strftime(timeStrBuffer, size, "%x %X", localtime(&writeTime)) > 0)
+            std::cout << "content file: " << resolved << " timestamp = (" << writeTime <<
+                ") " << timeStrBuffer << std::endl;
     }
     else
     {

@@ -22,7 +22,7 @@
 #include "localscripts.hpp"
 #include "esmstore.hpp"
 #include "class.hpp"
-#include "cellfunctors.hpp"
+#include "cellvisitors.hpp"
 #include "cellstore.hpp"
 
 namespace
@@ -32,7 +32,7 @@ namespace
                    MWRender::RenderingManager& rendering)
     {
         std::string model = Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), rendering.getResourceSystem()->getVFS());
-        std::string id = ptr.getClass().getId(ptr);
+        std::string id = ptr.getCellRef().getRefId();
         if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
@@ -42,25 +42,24 @@ namespace
             rendering.addWaterRippleEmitter(ptr);
     }
 
-    void updateObjectLocalRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                                    MWRender::RenderingManager& rendering)
+    void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
+                                    MWRender::RenderingManager& rendering, bool inverseRotationOrder)
     {
         if (ptr.getRefData().getBaseNode() != NULL)
         {
             osg::Quat worldRotQuat(ptr.getRefData().getPosition().rot[2], osg::Vec3(0,0,-1));
             if (!ptr.getClass().isActor())
-                worldRotQuat = worldRotQuat * osg::Quat(ptr.getRefData().getPosition().rot[1], osg::Vec3(0,-1,0)) *
-                    osg::Quat(ptr.getRefData().getPosition().rot[0], osg::Vec3(-1,0,0));
+            {
+                float xr = ptr.getRefData().getPosition().rot[0];
+                float yr = ptr.getRefData().getPosition().rot[1];
+                if (!inverseRotationOrder)
+                    worldRotQuat = worldRotQuat * osg::Quat(yr, osg::Vec3(0,-1,0)) *
+                        osg::Quat(xr, osg::Vec3(-1,0,0));
+                else
+                    worldRotQuat = osg::Quat(xr, osg::Vec3(-1,0,0)) * osg::Quat(yr, osg::Vec3(0,-1,0)) * worldRotQuat;
+            }
 
-            float x = ptr.getRefData().getLocalRotation().rot[0];
-            float y = ptr.getRefData().getLocalRotation().rot[1];
-            float z = ptr.getRefData().getLocalRotation().rot[2];
-
-            osg::Quat rot(z, osg::Vec3(0,0,-1));
-            if (!ptr.getClass().isActor())
-                rot = rot * osg::Quat(y, osg::Vec3(0,-1,0)) * osg::Quat(x, osg::Vec3(-1,0,0));
-
-            rendering.rotateObject(ptr, rot * worldRotQuat);
+            rendering.rotateObject(ptr, worldRotQuat);
             physics.updateRotation(ptr);
         }
     }
@@ -72,12 +71,14 @@ namespace
         {
             float scale = ptr.getCellRef().getScale();
             osg::Vec3f scaleVec (scale, scale, scale);
-            ptr.getClass().adjustScale(ptr, scaleVec);
+            ptr.getClass().adjustScale(ptr, scaleVec, true);
             rendering.scaleObject(ptr, scaleVec);
+
+            physics.updateScale(ptr);
         }
     }
 
-    struct InsertFunctor
+    struct InsertVisitor
     {
         MWWorld::CellStore& mCell;
         bool mRescale;
@@ -85,13 +86,13 @@ namespace
         MWPhysics::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
-        InsertFunctor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
+        InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
             MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
     };
 
-    InsertFunctor::InsertFunctor (MWWorld::CellStore& cell, bool rescale,
+    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale,
         Loading::Listener& loadingListener, MWPhysics::PhysicsSystem& physics,
         MWRender::RenderingManager& rendering)
     : mCell (cell), mRescale (rescale), mLoadingListener (loadingListener),
@@ -99,7 +100,7 @@ namespace
       mRendering (rendering)
     {}
 
-    bool InsertFunctor::operator() (const MWWorld::Ptr& ptr)
+    bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
     {
         if (mRescale)
         {
@@ -114,9 +115,7 @@ namespace
             try
             {
                 addObject(ptr, mPhysics, mRendering);
-                updateObjectLocalRotation(ptr, mPhysics, mRendering);
-                updateObjectScale(ptr, mPhysics, mRendering);
-                ptr.getClass().adjustPosition (ptr, false);
+                updateObjectRotation(ptr, mPhysics, mRendering, false);
             }
             catch (const std::exception& e)
             {
@@ -129,15 +128,26 @@ namespace
 
         return true;
     }
+
+    struct AdjustPositionVisitor
+    {
+        bool operator() (const MWWorld::Ptr& ptr)
+        {
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+                ptr.getClass().adjustPosition (ptr, false);
+            return true;
+        }
+    };
+
 }
 
 
 namespace MWWorld
 {
 
-    void Scene::updateObjectLocalRotation (const Ptr& ptr)
+    void Scene::updateObjectRotation (const Ptr& ptr, bool inverseRotationOrder)
     {
-        ::updateObjectLocalRotation(ptr, *mPhysics, mRendering);
+        ::updateObjectRotation(ptr, *mPhysics, mRendering, inverseRotationOrder);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
@@ -196,11 +206,11 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         std::cout << "Unloading cell\n";
-        ListAndResetObjects functor;
+        ListAndResetObjectsVisitor visitor;
 
-        (*iter)->forEach<ListAndResetObjects>(functor);
-        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (functor.mObjects.begin());
-            iter2!=functor.mObjects.end(); ++iter2)
+        (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
+        for (std::vector<MWWorld::Ptr>::const_iterator iter2 (visitor.mObjects.begin());
+            iter2!=visitor.mObjects.end(); ++iter2)
         {
             mPhysics->remove(*iter2);
         }
@@ -265,7 +275,7 @@ namespace MWWorld
 
             mRendering.addCell(cell);
             bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
-            float waterLevel = cell->isExterior() ? -1.f : cell->getWaterLevel();
+            float waterLevel = cell->getWaterLevel();
             mRendering.setWaterEnabled(waterEnabled);
             if (waterEnabled)
             {
@@ -403,6 +413,8 @@ namespace MWWorld
         // Delay the map update until scripts have been given a chance to run.
         // If we don't do this, objects that should be disabled will still appear on the map.
         mNeedMapUpdate = true;
+
+        mRendering.getResourceSystem()->clearCache();
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -419,9 +431,9 @@ namespace MWWorld
         if (adjustPlayerPos) {
             world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
 
-            float x = osg::RadiansToDegrees(pos.rot[0]);
-            float y = osg::RadiansToDegrees(pos.rot[1]);
-            float z = osg::RadiansToDegrees(pos.rot[2]);
+            float x = pos.rot[0];
+            float y = pos.rot[1];
+            float z = pos.rot[2];
             world->rotateObject(player, x, y, z);
 
             player.getClass().adjustPosition(player, true);
@@ -476,9 +488,9 @@ namespace MWWorld
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
 
-            float x = osg::RadiansToDegrees(position.rot[0]);
-            float y = osg::RadiansToDegrees(position.rot[1]);
-            float z = osg::RadiansToDegrees(position.rot[2]);
+            float x = position.rot[0];
+            float y = position.rot[1];
+            float z = position.rot[2];
             world->rotateObject(world->getPlayerPtr(), x, y, z);
 
             world->getPlayerPtr().getClass().adjustPosition(world->getPlayerPtr(), true);
@@ -518,6 +530,8 @@ namespace MWWorld
         // Delay the map update until scripts have been given a chance to run.
         // If we don't do this, objects that should be disabled will still appear on the map.
         mNeedMapUpdate = true;
+
+        mRendering.getResourceSystem()->clearCache();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos)
@@ -547,8 +561,12 @@ namespace MWWorld
 
     void Scene::insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener)
     {
-        InsertFunctor functor (cell, rescale, *loadingListener, *mPhysics, mRendering);
-        cell.forEach (functor);
+        InsertVisitor insertVisitor (cell, rescale, *loadingListener, *mPhysics, mRendering);
+        cell.forEach (insertVisitor);
+
+        // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
+        AdjustPositionVisitor adjustPosVisitor;
+        cell.forEach (adjustPosVisitor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
@@ -556,7 +574,7 @@ namespace MWWorld
         try
         {
             addObject(ptr, *mPhysics, mRendering);
-            MWBase::Environment::get().getWorld()->rotateObject(ptr, 0, 0, 0, true);
+            updateObjectRotation(ptr, false);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
         }
         catch (std::exception& e)

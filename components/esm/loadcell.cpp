@@ -52,173 +52,215 @@ namespace ESM
         return ref.mRefNum == refNum;
     }
 
-void Cell::load(ESMReader &esm, bool saveContext)
-{
-    loadData(esm);
-    loadCell(esm, saveContext);
-}
-
-void Cell::loadCell(ESMReader &esm, bool saveContext)
-{
-    mRefNumCounter = 0;
-
-    if (mData.mFlags & Interior)
+    void Cell::load(ESMReader &esm, bool &isDeleted, bool saveContext)
     {
-        // Interior cells
-        if (esm.isNextSub("INTV"))
-        {
-            int waterl;
-            esm.getHT(waterl);
-            mWater = (float) waterl;
-            mWaterInt = true;
-        }
-        else if (esm.isNextSub("WHGT"))
-        {
-            esm.getHT(mWater);
-        }
-
-        // Quasi-exterior cells have a region (which determines the
-        // weather), pure interior cells have ambient lighting
-        // instead.
-        if (mData.mFlags & QuasiEx)
-            mRegion = esm.getHNOString("RGNN");
-        else if (esm.isNextSub("AMBI"))
-            esm.getHT(mAmbi);
+        loadNameAndData(esm, isDeleted);
+        loadCell(esm, saveContext);
     }
-    else
+
+    void Cell::loadNameAndData(ESMReader &esm, bool &isDeleted)
     {
-        // Exterior cells
-        mRegion = esm.getHNOString("RGNN");
+        isDeleted = false;
 
-        mMapColor = 0;
-        esm.getHNOT(mMapColor, "NAM5");
-    }
-    if (esm.isNextSub("NAM0")) {
-        esm.getHT(mRefNumCounter);
+        blank();
+
+        bool hasData = false;
+        bool isLoaded = false;
+        while (!isLoaded && esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::SREC_NAME:
+                    mName = esm.getHString();
+                    break;
+                case ESM::FourCC<'D','A','T','A'>::value:
+                    esm.getHT(mData, 12);
+                    hasData = true;
+                    break;
+                case ESM::SREC_DELE:
+                    esm.skipHSub();
+                    isDeleted = true;
+                    break;
+                default:
+                    esm.cacheSubName();
+                    isLoaded = true;
+                    break;
+            }
+        }
+
+        if (!hasData)
+            esm.fail("Missing DATA subrecord");
+
+        mCellId.mPaged = !(mData.mFlags & Interior);
+
+        if (mCellId.mPaged)
+        {
+            mCellId.mWorldspace = "sys::default";
+            mCellId.mIndex.mX = mData.mX;
+            mCellId.mIndex.mY = mData.mY;
+        }
+        else
+        {
+            mCellId.mWorldspace = Misc::StringUtils::lowerCase (mName);
+            mCellId.mIndex.mX = 0;
+            mCellId.mIndex.mY = 0;
+        }
     }
 
-    if (saveContext) {
+    void Cell::loadCell(ESMReader &esm, bool saveContext)
+    {
+        bool isLoaded = false;
+        while (!isLoaded && esm.hasMoreSubs())
+        {
+            esm.getSubName();
+            switch (esm.retSubName().val)
+            {
+                case ESM::FourCC<'I','N','T','V'>::value:
+                    int waterl;
+                    esm.getHT(waterl);
+                    mWater = static_cast<float>(waterl);
+                    mWaterInt = true;
+                    break;
+                case ESM::FourCC<'W','H','G','T'>::value:
+                    esm.getHT(mWater);
+                    mWaterInt = false;
+                    break;
+                case ESM::FourCC<'A','M','B','I'>::value:
+                    esm.getHT(mAmbi);
+                    break;
+                case ESM::FourCC<'R','G','N','N'>::value:
+                    mRegion = esm.getHString();
+                    break;
+                case ESM::FourCC<'N','A','M','5'>::value:
+                    esm.getHT(mMapColor);
+                    break;
+                case ESM::FourCC<'N','A','M','0'>::value:
+                    esm.getHT(mRefNumCounter);
+                    break;
+                default:
+                    esm.cacheSubName();
+                    isLoaded = true;
+                    break;
+            }
+        }
+
+        if (saveContext) 
+        {
+            mContextList.push_back(esm.getContext());
+            esm.skipRecord();
+        }
+    }
+
+    void Cell::postLoad(ESMReader &esm)
+    {
+        // Save position of the cell references and move on
         mContextList.push_back(esm.getContext());
         esm.skipRecord();
     }
-}
 
-void Cell::loadData(ESMReader &esm)
-{
-    // Ignore this for now, it might mean we should delete the entire
-    // cell?
-    // TODO: treat the special case "another plugin moved this ref, but we want to delete it"!
-    if (esm.isNextSub("DELE")) {
-        esm.skipHSub();
-    }
-
-    esm.getHNT(mData, "DATA", 12);
-}
-
-void Cell::postLoad(ESMReader &esm)
-{
-    // Save position of the cell references and move on
-    mContextList.push_back(esm.getContext());
-    esm.skipRecord();
-}
-
-void Cell::save(ESMWriter &esm) const
-{
-    esm.writeHNT("DATA", mData, 12);
-    if (mData.mFlags & Interior)
+    void Cell::save(ESMWriter &esm, bool isDeleted) const
     {
-        if (mWaterInt) {
-            int water =
-                (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
-            esm.writeHNT("INTV", water);
-        } else {
-            esm.writeHNT("WHGT", mWater);
+        esm.writeHNOCString("NAME", mName);
+        esm.writeHNT("DATA", mData, 12);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
         }
 
-        if (mData.mFlags & QuasiEx)
+        if (mData.mFlags & Interior)
+        {
+            if (mWaterInt) {
+                int water =
+                    (mWater >= 0) ? (int) (mWater + 0.5) : (int) (mWater - 0.5);
+                esm.writeHNT("INTV", water);
+            } else {
+                esm.writeHNT("WHGT", mWater);
+            }
+
+            if (mData.mFlags & QuasiEx)
+                esm.writeHNOCString("RGNN", mRegion);
+            else
+                esm.writeHNT("AMBI", mAmbi, 16);
+        }
+        else
+        {
             esm.writeHNOCString("RGNN", mRegion);
-        else
-            esm.writeHNT("AMBI", mAmbi, 16);
-    }
-    else
-    {
-        esm.writeHNOCString("RGNN", mRegion);
-        if (mMapColor != 0)
-            esm.writeHNT("NAM5", mMapColor);
+            if (mMapColor != 0)
+                esm.writeHNT("NAM5", mMapColor);
+        }
+
+        if (mRefNumCounter != 0)
+            esm.writeHNT("NAM0", mRefNumCounter);
     }
 
-    if (mRefNumCounter != 0)
-        esm.writeHNT("NAM0", mRefNumCounter);
-}
-
-void Cell::restore(ESMReader &esm, int iCtx) const
-{
-    esm.restoreContext(mContextList.at (iCtx));
-}
-
-std::string Cell::getDescription() const
-{
-    if (mData.mFlags & Interior)
+    void Cell::restore(ESMReader &esm, int iCtx) const
     {
-        return mName;
+        esm.restoreContext(mContextList.at (iCtx));
     }
-    else
-    {
-        std::ostringstream stream;
-        stream << mData.mX << ", " << mData.mY;
-        return stream.str();
-    }
-}
 
-bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool& deleted, bool ignoreMoves, MovedCellRef *mref)
-{
-    // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
-    if (!esm.hasMoreSubs())
-        return false;
-
-    // NOTE: We should not need this check. It is a safety check until we have checked
-    // more plugins, and how they treat these moved references.
-    if (esm.isNextSub("MVRF"))
+    std::string Cell::getDescription() const
     {
-        if (ignoreMoves)
+        if (mData.mFlags & Interior)
         {
-            esm.getHT (mref->mRefNum.mIndex);
-            esm.getHNOT (mref->mTarget, "CNDT");
-            adjustRefNum (mref->mRefNum, esm);
+            return mName;
         }
         else
         {
-            // skip rest of cell record (moved references), they are handled elsewhere
-            esm.skipRecord(); // skip MVRF, CNDT
+            std::ostringstream stream;
+            stream << mData.mX << ", " << mData.mY;
+            return stream.str();
+        }
+    }
+
+    bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
+    {
+        isDeleted = false;
+
+        // TODO: Try and document reference numbering, I don't think this has been done anywhere else.
+        if (!esm.hasMoreSubs())
             return false;
+
+        // NOTE: We should not need this check. It is a safety check until we have checked
+        // more plugins, and how they treat these moved references.
+        if (esm.isNextSub("MVRF"))
+        {
+            if (ignoreMoves)
+            {
+                esm.getHT (mref->mRefNum.mIndex);
+                esm.getHNOT (mref->mTarget, "CNDT");
+                adjustRefNum (mref->mRefNum, esm);
+            }
+            else
+            {
+                // skip rest of cell record (moved references), they are handled elsewhere
+                esm.skipRecord(); // skip MVRF, CNDT
+                return false;
+            }
         }
+
+        if (esm.peekNextSub("FRMR"))
+        {
+            ref.load (esm, isDeleted);
+
+            // Identify references belonging to a parent file and adapt the ID accordingly.
+            adjustRefNum (ref.mRefNum, esm);
+            return true;
+        }
+        return false;
     }
 
-    ref.load (esm);
-
-    // Identify references belonging to a parent file and adapt the ID accordingly.
-    adjustRefNum (ref.mRefNum, esm);
-
-    if (esm.isNextSub("DELE"))
+    bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
     {
-        esm.skipHSub();
-        deleted = true;
+        esm.getHT(mref.mRefNum.mIndex);
+        esm.getHNOT(mref.mTarget, "CNDT");
+
+        adjustRefNum (mref.mRefNum, esm);
+
+        return true;
     }
-    else
-        deleted = false;
-
-    return true;
-}
-
-bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
-{
-    esm.getHT(mref.mRefNum.mIndex);
-    esm.getHNOT(mref.mTarget, "CNDT");
-
-    adjustRefNum (mref.mRefNum, esm);
-
-    return true;
-}
 
     void Cell::blank()
     {
@@ -239,25 +281,8 @@ bool Cell::getNextMVRF(ESMReader &esm, MovedCellRef &mref)
         mAmbi.mFogDensity = 0;
     }
 
-    CellId Cell::getCellId() const
+    const CellId& Cell::getCellId() const
     {
-        CellId id;
-
-        id.mPaged = !(mData.mFlags & Interior);
-
-        if (id.mPaged)
-        {
-            id.mWorldspace = "sys::default";
-            id.mIndex.mX = mData.mX;
-            id.mIndex.mY = mData.mY;
-        }
-        else
-        {
-            id.mWorldspace = Misc::StringUtils::lowerCase (mName);
-            id.mIndex.mX = 0;
-            id.mIndex.mY = 0;
-        }
-
-        return id;
+        return mCellId;
     }
 }

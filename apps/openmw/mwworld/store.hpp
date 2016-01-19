@@ -19,23 +19,34 @@ namespace Loading
 
 namespace MWWorld
 {
-    struct StoreBase
+    struct RecordId
     {
+        std::string mId;
+        bool mIsDeleted;
+
+        RecordId(const std::string &id = "", bool isDeleted = false);
+    };
+
+    class StoreBase
+    {
+    public:
         virtual ~StoreBase() {}
 
         virtual void setUp() {}
+
+        /// List identifiers of records contained in this Store (case-smashed). No-op for Stores that don't use string IDs.
         virtual void listIdentifier(std::vector<std::string> &list) const {}
 
         virtual size_t getSize() const = 0;
         virtual int getDynamicSize() const { return 0; }
-        virtual void load(ESM::ESMReader &esm, const std::string &id) = 0;
+        virtual RecordId load(ESM::ESMReader &esm) = 0;
 
         virtual bool eraseStatic(const std::string &id) {return false;}
         virtual void clearDynamic() {}
 
         virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual void read (ESM::ESMReader& reader, const std::string& id) {}
+        virtual RecordId read (ESM::ESMReader& reader) { return RecordId(); }
         ///< Read into dynamic storage
     };
 
@@ -180,9 +191,9 @@ namespace MWWorld
         bool erase(const std::string &id);
         bool erase(const T &item);
 
-        void load(ESM::ESMReader &esm, const std::string &id);
+        RecordId load(ESM::ESMReader &esm);
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
-        void read(ESM::ESMReader& reader, const std::string& id);
+        RecordId read(ESM::ESMReader& reader);
     };
 
     template <>
@@ -202,11 +213,14 @@ namespace MWWorld
         const ESM::LandTexture *search(size_t index, size_t plugin) const;
         const ESM::LandTexture *find(size_t index, size_t plugin) const;
 
+        /// Resize the internal store to hold at least \a num plugins.
+        void resize(size_t num);
+
         size_t getSize() const;
         size_t getSize(size_t plugin) const;
 
-        void load(ESM::ESMReader &esm, const std::string &id, size_t plugin);
-        void load(ESM::ESMReader &esm, const std::string &id);
+        RecordId load(ESM::ESMReader &esm, size_t plugin);
+        RecordId load(ESM::ESMReader &esm);
 
         iterator begin(size_t plugin) const;
         iterator end(size_t plugin) const;
@@ -231,7 +245,7 @@ namespace MWWorld
         ESM::Land *search(int x, int y) const;
         ESM::Land *find(int x, int y) const;
 
-        void load(ESM::ESMReader &esm, const std::string &id);
+        RecordId load(ESM::ESMReader &esm);
         void setUp();
     };
 
@@ -281,7 +295,7 @@ namespace MWWorld
 
         void setUp();
 
-        void load(ESM::ESMReader &esm, const std::string &id);
+        RecordId load(ESM::ESMReader &esm);
 
         iterator intBegin() const;
         iterator intEnd() const;
@@ -323,7 +337,7 @@ namespace MWWorld
         Store();
 
         void setCells(Store<ESM::Cell>& cells);
-        void load(ESM::ESMReader &esm, const std::string &id);
+        RecordId load(ESM::ESMReader &esm);
         size_t getSize() const;
 
         void setUp();
@@ -338,14 +352,16 @@ namespace MWWorld
 
 
     template <>
-    struct Store<ESM::Skill> : public IndexedStore<ESM::Skill>
+    class Store<ESM::Skill> : public IndexedStore<ESM::Skill>
     {
+    public:
         Store();
     };
 
     template <>
-    struct Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
+    class Store<ESM::MagicEffect> : public IndexedStore<ESM::MagicEffect>
     {
+    public:
         Store();
     };
 

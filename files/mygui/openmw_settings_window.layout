@@ -61,6 +61,8 @@
                         <UserString key="SettingValueType" value="Float"/>
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
+                        <UserString key="SettingLabelWidget" value="DifficultyText"/>
+                        <UserString key="SettingLabelCaption" value="#{sDifficulty} (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{sEasy}"/>
@@ -255,13 +257,9 @@
                                 <Property key="Caption" value="Window border"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="182 94 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FPSButton"/>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 32 16" align="Left Top">
-                                <Property key="Caption" value="FPS"/>
-                            </Widget>
-                        </Widget>
                         <Widget type="HBox" skin="" position="182 124 300 24">
+                            <Property key="Visible" value="false"/>
+                            <UserString key="Hidden" value="true"/>
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadersButton">
                                 <UserString key="SettingCategory" value="Objects"/>
                                 <UserString key="SettingName" value="shaders"/>
@@ -271,18 +269,25 @@
                                 <Property key="Caption" value="Object shaders"/>
                             </Widget>
                         </Widget>
+
+                        <Widget type="TextBox" skin="SandText" position="182 94 300 32" align="Left Top">
+                            <Property key="MultiLine" value="true"/>
+                            <Property key="Caption" value="Hint: press F3 to show \nthe current frame rate."/>
+                        </Widget>
+
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
-                            <Property key="Caption" value="Field of View"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top" name="FOVSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="General"/>
+                            <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
                             <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
+                            <UserString key="SettingLabelWidget" value="FovText"/>
+                            <UserString key="SettingLabelCaption" value="Field of View (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
@@ -332,6 +337,8 @@
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingCategory" value="General"/>
                                 <UserString key="SettingName" value="anisotropy"/>
+                                <UserString key="SettingLabelWidget" value="AnisotropyLabel"/>
+                                <UserString key="SettingLabelCaption" value="Anisotropy (%s)"/>
                             </Widget>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
@@ -365,53 +372,38 @@
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 75 16" align="Left Top">
-                                <Property key="Caption" value="Reflection"/>
+                                <Property key="Caption" value="Water shader"/>
                             </Widget>
                         </Widget>
                         <Widget type="Widget" skin="" position="24 32 300 230">
                             <Widget type="HBox" skin="" position="4 0 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ReflectActorsButton">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="RefractionButton">
                                     <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect actors"/>
+                                    <UserString key="SettingName" value="refraction"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 104 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect actors"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
+                                    <Property key="Caption" value="Refraction"/>
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 28 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ReflectObjectsButton">
-                                    <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect statics"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 85 24" align="Left Top" name="WaterTextureSize">
+                                    <Property key="AddItem" value="Low"/>
+                                    <Property key="AddItem" value="Medium"/>
+                                    <Property key="AddItem" value="High"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 110 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect objects"/>
-                                </Widget>
-                            </Widget>
-                            <Widget type="HBox" skin="" position="4 56 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ReflectTerrainButton">
-                                    <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect terrain"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
-                                </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 109 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect terrain"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Texture quality"/>
                                 </Widget>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" skin="" position="4 135 350 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="RefractionButton">
-                                <UserString key="SettingCategory" value="Water"/>
-                                <UserString key="SettingName" value="refraction"/>
-                                <UserString key="SettingType" value="CheckButton"/>
-                            </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
-                                <Property key="Caption" value="Refraction"/>
-                            </Widget>
-                        </Widget>
+
                     </Widget>
+                    <!--
                     <Widget type="TabItem" skin="" position="0 28 352 268">
+                    -->
+                    <Widget type="Widget" skin="" position="0 28 352 268">
+                        <Property key="Visible" value="false"/>
                         <Property key="Caption" value="  Shadows  "/>
                         <Widget type="HBox" skin="" position="4 4 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadowsEnabledButton">

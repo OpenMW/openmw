@@ -37,6 +37,9 @@ template<typename T, T (NIFStream::*getValue)()>
 struct KeyMapT {
     typedef std::map< float, KeyT<T> > MapType;
 
+    typedef T ValueType;
+    typedef KeyT<T> KeyType;
+
     static const unsigned int sLinearInterpolation = 1;
     static const unsigned int sQuadraticInterpolation = 2;
     static const unsigned int sTBCInterpolation = 3;
@@ -133,6 +136,11 @@ private:
         readValue(nif, key);
         /*key.mForwardValue = */(nif.*getValue)();
         /*key.mBackwardValue = */(nif.*getValue)();
+    }
+
+    static void readQuadratic(NIFStream &nif, KeyT<osg::Quat> &key)
+    {
+        readValue(nif, key);
     }
 
     static void readTBC(NIFStream &nif, KeyT<T> &key)

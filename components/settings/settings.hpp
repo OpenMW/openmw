@@ -23,6 +23,9 @@ namespace Settings
         static CategorySettingVector mChangedSettings;
         ///< tracks all the settings that were changed since the last apply() call
 
+        void clear();
+        ///< clears all settings and default settings
+
         void loadDefault (const std::string& file);
         ///< load file as the default settings (can be overridden by user settings)
 

@@ -3,11 +3,10 @@
 #include <typeinfo>
 #include <iostream>
 
-#include <osg/PositionAttitudeTransform>
-
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/loadnpc.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
@@ -150,14 +149,20 @@ namespace MWMechanics
     {
         MWWorld::Ptr mCreature;
         MWWorld::Ptr mActor;
+        bool mTrapped;
     public:
         SoulTrap(MWWorld::Ptr trappedCreature)
-            : mCreature(trappedCreature) {}
+            : mCreature(trappedCreature)
+            , mTrapped(false)
+        {
+        }
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1)
         {
+            if (mTrapped)
+                return;
             if (key.mId != ESM::MagicEffect::Soultrap)
                 return;
             if (magnitude <= 0)
@@ -204,6 +209,8 @@ namespace MWMechanics
             gem->getContainerStore()->unstack(*gem, caster);
             gem->getCellRef().setSoul(mCreature.getCellRef().getRefId());
 
+            mTrapped = true;
+
             if (caster == getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sSoultrapSuccess}");
 
@@ -213,8 +220,9 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
                     "", mCreature.getRefData().getPosition().asVec3());
 
-            MWBase::Environment::get().getSoundManager()->playSound3D(mCreature, "conjuration hit", 1.f, 1.f,
-                                                                      MWBase::SoundManager::Play_TypeSfx, MWBase::SoundManager::Play_NoTrack);
+            MWBase::Environment::get().getSoundManager()->playSound3D(
+                mCreature.getRefData().getPosition().asVec3(), "conjuration hit", 1.f, 1.f
+            );
         }
     };
 
@@ -303,7 +311,7 @@ namespace MWMechanics
         if (againstPlayer)
         {
             // followers with high fight should not engage in combat with the player (e.g. bm_bear_black_summon)
-            const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor2);
+            const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor2);
             if (std::find(followers.begin(), followers.end(), actor1) != followers.end())
                 return;
 
@@ -322,7 +330,7 @@ namespace MWMechanics
         }
 
         // start combat if target actor is in combat with one of our followers
-        const std::list<MWWorld::Ptr>& followers = getActorsFollowing(actor1);
+        const std::list<MWWorld::Ptr>& followers = getActorsSidingWith(actor1);
         const CreatureStats& creatureStats2 = actor2.getClass().getCreatureStats(actor2);
         for (std::list<MWWorld::Ptr>::const_iterator it = followers.begin(); it != followers.end(); ++it)
         {
@@ -336,20 +344,21 @@ namespace MWMechanics
         // start combat if target actor is in combat with someone we are following
         for (std::list<MWMechanics::AiPackage*>::const_iterator it = creatureStats.getAiSequence().begin(); it != creatureStats.getAiSequence().end(); ++it)
         {
-            if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
-            {
-                MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
-                if (followTarget.isEmpty())
-                    continue;
+            if (!(*it)->sideWithTarget())
+                continue;
 
-                if (creatureStats.getAiSequence().isInCombat(followTarget))
-                    continue;
+            MWWorld::Ptr followTarget = (*it)->getTarget();
 
-                // need to check both ways since player doesn't use AI packages
-                if (creatureStats2.getAiSequence().isInCombat(followTarget)
-                        || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
-                    aggressive = true;
-            }
+            if (followTarget.isEmpty())
+                continue;
+
+            if (creatureStats.getAiSequence().isInCombat(followTarget))
+                continue;
+
+            // need to check both ways since player doesn't use AI packages
+            if (creatureStats2.getAiSequence().isInCombat(followTarget)
+                    || followTarget.getClass().getCreatureStats(followTarget).getAiSequence().isInCombat(actor2))
+                aggressive = true;
         }
 
         if(aggressive)
@@ -485,11 +494,25 @@ namespace MWMechanics
 
         bool wasDead = creatureStats.isDead();
 
-        // tickable effects (i.e. effects having a lasting impact after expiry)
-        // these effects can be applied as "instant" (handled in spellcasting.cpp) or with a duration, handled here
-        for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+        if (duration > 0)
         {
-            effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
+            for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+            {
+                // tickable effects (i.e. effects having a lasting impact after expiry)
+                effectTick(creatureStats, ptr, it->first, it->second.getMagnitude() * duration);
+
+                // instant effects are already applied on spell impact in spellcasting.cpp, but may also come from permanent abilities
+                if (it->second.getMagnitude() > 0)
+                {
+                    CastSpell cast(ptr, ptr);
+                    if (cast.applyInstantEffect(ptr, ptr, it->first, it->second.getMagnitude()))
+                    {
+                        creatureStats.getActiveSpells().purgeEffect(it->first.mId);
+                        if (ptr.getClass().hasInventoryStore(ptr))
+                            ptr.getClass().getInventoryStore(ptr).purgeEffect(it->first.mId);
+                    }
+                }
+            }
         }
 
         // attributes
@@ -838,7 +861,7 @@ namespace MWMechanics
             if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat())
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
-                int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt();
+                static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->getInt();
                 // Force dialogue on sight if bounty is greater than the cutoff
                 // In vanilla morrowind, the greeting dialogue is scripted to either arrest the player (< 5000 bounty) or attack (>= 5000 bounty)
                 if (   player.getClass().getNpcStats(player).getBounty() >= cutoff
@@ -846,7 +869,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getLOS(ptr, player)
                     && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, ptr))
                 {
-                    static int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt();
+                    static const int iCrimeThresholdMultiplier = esmStore.get<ESM::GameSetting>().find("iCrimeThresholdMultiplier")->getInt();
                     if (player.getClass().getNpcStats(player).getBounty() >= cutoff * iCrimeThresholdMultiplier)
                         MWBase::Environment::get().getMechanicsManager()->startCombat(ptr, player);
                     else
@@ -926,7 +949,7 @@ namespace MWMechanics
         PtrActorMap::iterator iter = mActors.begin();
         while(iter != mActors.end())
         {
-            if(iter->first.getCell()==cellStore && iter->first != ignore)
+            if((iter->first.isInCell() && iter->first.getCell()==cellStore) && iter->first != ignore)
             {
                 delete iter->second;
                 mActors.erase(iter++);
@@ -1290,6 +1313,28 @@ namespace MWMechanics
         }
     }
 
+    std::list<MWWorld::Ptr> Actors::getActorsSidingWith(const MWWorld::Ptr& actor)
+    {
+        std::list<MWWorld::Ptr> list;
+        for(PtrActorMap::iterator iter(mActors.begin());iter != mActors.end();++iter)
+        {
+            const MWWorld::Class &cls = iter->first.getClass();
+            CreatureStats &stats = cls.getCreatureStats(iter->first);
+            if (stats.isDead())
+                continue;
+
+            // An actor counts as following if AiFollow or AiEscort is the current AiPackage, or there are only Combat packages before the AiFollow/AiEscort package
+            for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+            {
+                if ((*it)->sideWithTarget() && (*it)->getTarget() == actor)
+                    list.push_back(iter->first);
+                else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                    break;
+            }
+        }
+        return list;
+    }
+
     std::list<MWWorld::Ptr> Actors::getActorsFollowing(const MWWorld::Ptr& actor)
     {
         std::list<MWWorld::Ptr> list;
@@ -1303,16 +1348,8 @@ namespace MWMechanics
             // An actor counts as following if AiFollow is the current AiPackage, or there are only Combat packages before the AiFollow package
             for (std::list<MWMechanics::AiPackage*>::const_iterator it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
             {
-                if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow)
-                {
-                    MWWorld::Ptr followTarget = static_cast<MWMechanics::AiFollow*>(*it)->getTarget();
-                    if (followTarget.isEmpty())
-                        continue;
-                    if (followTarget == actor)
-                        list.push_back(iter->first);
-                    else
-                        break;
-                }
+                if ((*it)->followTargetThroughDoors() && (*it)->getTarget() == actor)
+                    list.push_back(iter->first);
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;
             }
@@ -1340,8 +1377,7 @@ namespace MWMechanics
                         continue;
                     if (followTarget == actor)
                         list.push_back(static_cast<MWMechanics::AiFollow*>(*it)->getFollowIndex());
-                    else
-                        break;
+                    break;
                 }
                 else if ((*it)->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
                     break;

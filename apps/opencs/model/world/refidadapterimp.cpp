@@ -5,6 +5,8 @@
 #include <utility>
 
 #include <components/esm/loadcont.hpp>
+#include <components/esm/loadmgef.hpp>
+
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
@@ -25,8 +27,9 @@ QVariant CSMWorld::PotionRefIdAdapter::getData (const RefIdColumn *column, const
     if (column==mAutoCalc)
         return record.get().mData.mAutoCalc!=0;
 
+    // to show nested tables in dialogue subview, see IdTree::hasChildren()
     if (column==mColumns.mEffects)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return InventoryRefIdAdapter<ESM::Potion>::getData (column, data, index);
 }
@@ -49,6 +52,156 @@ void CSMWorld::PotionRefIdAdapter::setData (const RefIdColumn *column, RefIdData
     }
 
     record.setModified(potion);
+}
+
+
+CSMWorld::IngredientColumns::IngredientColumns (const InventoryColumns& columns)
+: InventoryColumns (columns) {}
+
+CSMWorld::IngredientRefIdAdapter::IngredientRefIdAdapter (const IngredientColumns& columns)
+: InventoryRefIdAdapter<ESM::Ingredient> (UniversalId::Type_Ingredient, columns),
+  mColumns(columns)
+{}
+
+QVariant CSMWorld::IngredientRefIdAdapter::getData (const RefIdColumn *column, const RefIdData& data,
+    int index) const
+{
+    if (column==mColumns.mEffects)
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
+
+    return InventoryRefIdAdapter<ESM::Ingredient>::getData (column, data, index);
+}
+
+void CSMWorld::IngredientRefIdAdapter::setData (const RefIdColumn *column, RefIdData& data, int index,
+    const QVariant& value) const
+{
+    InventoryRefIdAdapter<ESM::Ingredient>::setData (column, data, index, value);
+
+    return;
+}
+
+
+CSMWorld::IngredEffectRefIdAdapter::IngredEffectRefIdAdapter()
+: mType(UniversalId::Type_Ingredient)
+{}
+
+CSMWorld::IngredEffectRefIdAdapter::~IngredEffectRefIdAdapter()
+{}
+
+void CSMWorld::IngredEffectRefIdAdapter::addNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int position) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::removeNestedRow (const RefIdColumn *column,
+        RefIdData& data, int index, int rowToRemove) const
+{
+    // Do nothing, this table cannot be changed by the user
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::setNestedTable (const RefIdColumn* column,
+        RefIdData& data, int index, const NestedTableWrapperBase& nestedTable) const
+{
+    Record<ESM::Ingredient>& record =
+        static_cast<Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+    ESM::Ingredient ingredient = record.get();
+
+    ingredient.mData =
+        static_cast<const NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >&>(nestedTable).mNestedTable.at(0);
+
+    record.setModified (ingredient);
+}
+
+CSMWorld::NestedTableWrapperBase* CSMWorld::IngredEffectRefIdAdapter::nestedTable (const RefIdColumn* column,
+        const RefIdData& data, int index) const
+{
+    const Record<ESM::Ingredient>& record =
+        static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    // return the whole struct
+    std::vector<typename ESM::Ingredient::IRDTstruct> wrap;
+    wrap.push_back(record.get().mData);
+
+    // deleted by dtor of NestedTableStoring
+    return new NestedTableWrapper<std::vector<typename ESM::Ingredient::IRDTstruct> >(wrap);
+}
+
+QVariant CSMWorld::IngredEffectRefIdAdapter::getNestedData (const RefIdColumn *column,
+        const RefIdData& data, int index, int subRowIndex, int subColIndex) const
+{
+    const Record<ESM::Ingredient>& record =
+        static_cast<const Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (index, mType)));
+
+    if (subRowIndex < 0 || subRowIndex >= 4)
+        throw std::runtime_error ("index out of range");
+
+    switch (subColIndex)
+    {
+        case 0: return record.get().mData.mEffectID[subRowIndex];
+        case 1:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainSkill:
+                case ESM::MagicEffect::DamageSkill:
+                case ESM::MagicEffect::RestoreSkill:
+                case ESM::MagicEffect::FortifySkill:
+                case ESM::MagicEffect::AbsorbSkill:
+                    return record.get().mData.mSkills[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
+        case 2:
+        {
+            switch (record.get().mData.mEffectID[subRowIndex])
+            {
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::AbsorbAttribute:
+                    return record.get().mData.mAttributes[subRowIndex];
+                default:
+                    return QVariant();
+            }
+        }
+        default:
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+}
+
+void CSMWorld::IngredEffectRefIdAdapter::setNestedData (const RefIdColumn *column,
+        RefIdData& data, int row, const QVariant& value, int subRowIndex, int subColIndex) const
+{
+    Record<ESM::Ingredient>& record =
+        static_cast<Record<ESM::Ingredient>&> (data.getRecord (RefIdData::LocalIndex (row, mType)));
+    ESM::Ingredient ingredient = record.get();
+
+    if (subRowIndex < 0 || subRowIndex >= 4)
+        throw std::runtime_error ("index out of range");
+
+    switch(subColIndex)
+    {
+        case 0: ingredient.mData.mEffectID[subRowIndex] = value.toInt(); break;
+        case 1: ingredient.mData.mSkills[subRowIndex] = value.toInt(); break;
+        case 2: ingredient.mData.mAttributes[subRowIndex] = value.toInt(); break;
+        default:
+            throw std::runtime_error("Trying to access non-existing column in the nested table!");
+    }
+
+    record.setModified (ingredient);
+}
+
+int CSMWorld::IngredEffectRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
+{
+    return 3; // effect, skill, attribute
+}
+
+int CSMWorld::IngredEffectRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
+{
+    return 4; // up to 4 effects
 }
 
 
@@ -118,7 +271,7 @@ QVariant CSMWorld::ArmorRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mArmor;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Armor>::getData (column, data, index);
 }
@@ -206,7 +359,7 @@ QVariant CSMWorld::ClothingRefIdAdapter::getData (const RefIdColumn *column,
         return record.get().mData.mType;
 
     if (column==mPartRef)
-        return true; // to show nested tables in dialogue subview, see IdTree::hasChildren()
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return EnchantableRefIdAdapter<ESM::Clothing>::getData (column, data, index);
 }
@@ -254,7 +407,7 @@ QVariant CSMWorld::ContainerRefIdAdapter::getData (const RefIdColumn *column,
         return (record.get().mFlags & ESM::Container::Respawn)!=0;
 
     if (column==mContent)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     return NameRefIdAdapter<ESM::Container>::getData (column, data, index);
 }
@@ -323,13 +476,13 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
         return QString::fromUtf8 (record.get().mOriginal.c_str());
 
     if (column==mColumns.mAttributes)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
 
     if (column==mColumns.mAttacks)
-        return true; // Required to show nested tables in dialogue subview
+        return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
 
     if (column==mColumns.mMisc)
-        return true; // Required to show nested items in dialogue subview
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -569,13 +722,13 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
     if (column==mColumns.mAttributes || column==mColumns.mSkills)
     {
         if ((record.get().mFlags & ESM::NPC::Autocalc) != 0)
-            return QVariant(QVariant::UserType);
+            return QVariant::fromValue(ColumnBase::TableEdit_None);
         else
-            return true;
+            return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
     }
 
     if (column==mColumns.mMisc)
-        return true;
+        return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -1000,7 +1153,7 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData (const RefIdCol
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subColIndex == 0)
         return subRowIndex;
@@ -1106,7 +1259,7 @@ QVariant CSMWorld::CreatureAttackRefIdAdapter::getNestedData (const RefIdColumn 
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     if (subRowIndex < 0 || subRowIndex > 2 || subColIndex < 0 || subColIndex > 2)
         throw std::runtime_error ("index out of range");
@@ -1184,7 +1337,7 @@ QVariant CSMWorld::CreatureMiscRefIdAdapter::getNestedData (const RefIdColumn *c
     const Record<ESM::Creature>& record =
         static_cast<const Record<ESM::Creature>&> (data.getRecord (RefIdData::LocalIndex (index, UniversalId::Type_Creature)));
 
-    const ESM::Creature creature = record.get();
+    const ESM::Creature& creature = record.get();
 
     switch (subColIndex)
     {

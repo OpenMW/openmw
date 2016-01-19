@@ -8,6 +8,7 @@
 namespace osg
 {
     class Group;
+    class PositionAttitudeTransform;
 }
 
 namespace osgParticle
@@ -20,9 +21,9 @@ namespace Resource
     class ResourceSystem;
 }
 
-namespace MWWorld
+namespace Fallback
 {
-    class Fallback;
+    class Map;
 }
 
 namespace MWRender
@@ -30,7 +31,7 @@ namespace MWRender
 
     struct Emitter
     {
-        MWWorld::Ptr mPtr;
+        MWWorld::ConstPtr mPtr;
         osg::Vec3f mLastEmitPosition;
         float mScale;
         float mForce;
@@ -39,17 +40,19 @@ namespace MWRender
     class RippleSimulation
     {
     public:
-        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback);
+        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback);
         ~RippleSimulation();
 
         /// @param dt Time since the last frame
         void update(float dt);
 
         /// adds an emitter, position will be tracked automatically
-        void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
-        void removeEmitter (const MWWorld::Ptr& ptr);
-        void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        void addEmitter (const MWWorld::ConstPtr& ptr, float scale = 1.f, float force = 1.f);
+        void removeEmitter (const MWWorld::ConstPtr& ptr);
+        void updateEmitterPtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& ptr);
         void removeCell(const MWWorld::CellStore* store);
+
+        void emitRipple(const osg::Vec3f& pos);
 
         /// Change the height of the water surface, thus moving all ripples with it
         void setWaterHeight(float height);

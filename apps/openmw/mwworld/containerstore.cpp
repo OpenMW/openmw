@@ -94,7 +94,7 @@ void MWWorld::ContainerStore::storeState (const LiveCellRef<T>& ref, ESM::Object
 }
 
 template<typename T>
-void MWWorld::ContainerStore::storeStates (CellRefList<T>& collection,
+void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     ESM::InventoryState& inventory, int& index, bool equipable) const
 {
     for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
@@ -136,16 +136,18 @@ int MWWorld::ContainerStore::count(const std::string &id)
     return total;
 }
 
-void MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
-    if (ptr.getRefData().getCount() <= 1)
-        return;
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-1);
+    if (ptr.getRefData().getCount() <= count)
+        return end();
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, ptr.getRefData().getCount()-count);
     const std::string script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, ptr.getRefData().getCount()-1, container);
+    remove(ptr, ptr.getRefData().getCount()-count, container);
+
+    return it;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::Ptr& item)
@@ -176,7 +178,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     return retval;
 }
 
-bool MWWorld::ContainerStore::stacks(const Ptr& ptr1, const Ptr& ptr2)
+bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 {
     const MWWorld::Class& cls1 = ptr1.getClass();
     const MWWorld::Class& cls2 = ptr2.getClass();
@@ -336,7 +338,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
     return addNewStack(ptr, count);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Ptr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const ConstPtr& ptr, int count)
 {
     ContainerStoreIterator it = begin();
 
@@ -415,6 +417,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner,
                                               int count, bool topLevel, const std::string& levItem)
 {
+    if (count == 0) return; //Don't restock with nothing.
     try {
         ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
 
@@ -442,9 +445,11 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
             // For a restocking levelled item, remember what we spawned so we can delete it later when the merchant restocks
             if (!levItem.empty() && count < 0)
             {
-                if (mLevelledItemMap.find(id) == mLevelledItemMap.end())
-                    mLevelledItemMap[id] = 0;
-                mLevelledItemMap[id] += std::abs(count);
+                //If there is no item in map, insert it
+                std::map<std::pair<std::string, std::string>, int>::iterator itemInMap =
+                    mLevelledItemMap.insert(std::make_pair(std::make_pair(id, levItem), 0)).first;
+                //Update spawned count
+                itemInMap->second += std::abs(count);
             }
             count = std::abs(count);
 
@@ -461,30 +466,84 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 
 void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)
 {
-    // Remove the items already spawned by levelled items that will restock
-    for (std::map<std::string, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
-    {
-        if (count(it->first) >= it->second)
-            remove(it->first, it->second, ptr);
-    }
-    mLevelledItemMap.clear();
+    //allowedForReplace - Holds information about how many items from the list were not sold;
+    //                    Hence, tells us how many items we don't need to restock.
+    //allowedForReplace[list] <- How many items we should generate(how many of these were sold)
+    std::map<std::string, int> allowedForReplace;
 
+    //Check which lists need restocking:
+    for (std::map<std::pair<std::string, std::string>, int>::iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end();)
+    {
+        int spawnedCount = it->second; //How many items should be in shop originally
+        int itemCount = count(it->first.first); //How many items are there in shop now
+        //If something was not sold
+        if(itemCount >= spawnedCount)
+        {
+            const std::string& parent = it->first.second;
+            // Security check for old saves:
+            //If item is imported from old save(doesn't have an parent) and wasn't sold
+            if(parent == "")
+            {
+                //Remove it, from shop,
+                remove(it->first.first, itemCount, ptr);//ptr is the NPC
+                //And remove it from map, so that when we restock, the new item will have proper parent.
+                mLevelledItemMap.erase(it++);
+                continue;
+            }
+            //Create the entry if it does not exist yet
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
+                std::make_pair(it->first.second, 0)).first;
+            //And signal that we don't need to restock item from this list
+            listInMap->second += std::abs(itemCount);
+        }
+        //If every of the item was sold
+        else if (itemCount == 0)
+        {
+            mLevelledItemMap.erase(it++);
+            continue;
+        }
+        //If some was sold, but some remain
+        else
+        {
+            //Create entry if it does not exist yet
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.insert(
+                std::make_pair(it->first.second, 0)).first;
+            //And signal that we don't need to restock all items from this list
+            listInMap->second += std::abs(itemCount);
+            //And update itemCount so we don't mistake it next time.
+            it->second = itemCount;
+        }
+        ++it;
+    }
+
+    //Restock:
+    //For every item that NPC could have
     for (std::vector<ESM::ContItem>::const_iterator it = items.mList.begin(); it != items.mList.end(); ++it)
     {
+        //If he shouldn't have it restocked, don't restock it.
         if (it->mCount >= 0)
             continue;
 
-        std::string item = Misc::StringUtils::lowerCase(it->mItem.toString());
+        std::string itemOrList = Misc::StringUtils::lowerCase(it->mItem.toString());
 
+        //If it's levelled list, restock if there's need to do so.
         if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
         {
-            addInitialItem(item, owner, it->mCount, true);
+            std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
+
+            int restockNum = std::abs(it->mCount);
+            //If we know we must restock less, take it into account
+            if(listInMap != allowedForReplace.end())
+                restockNum -= std::min(restockNum, listInMap->second);
+            //restock
+            addInitialItem(itemOrList, owner, restockNum, true);
         }
         else
         {
-            int currentCount = count(item);
+            //Restocking static item - just restock to the max count
+            int currentCount = count(itemOrList);
             if (currentCount < std::abs(it->mCount))
-                addInitialItem(item, owner, std::abs(it->mCount) - currentCount, true);
+                addInitialItem(itemOrList, owner, std::abs(it->mCount) - currentCount, true);
         }
     }
     flagAsModified();
@@ -528,7 +587,7 @@ float MWWorld::ContainerStore::getWeight() const
     return mCachedWeight;
 }
 
-int MWWorld::ContainerStore::getType (const Ptr& ptr)
+int MWWorld::ContainerStore::getType (const ConstPtr& ptr)
 {
     if (ptr.isEmpty())
         throw std::runtime_error ("can't put a non-existent object into a container");
@@ -570,7 +629,7 @@ int MWWorld::ContainerStore::getType (const Ptr& ptr)
         return Type_Weapon;
 
     throw std::runtime_error (
-        "Object of type " + ptr.getTypeName() + " can not be placed into a container");
+        "Object '" + ptr.getCellRef().getRefId() + "' of type " + ptr.getTypeName() + " can not be placed into a container");
 }
 
 MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
@@ -650,7 +709,7 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
-void MWWorld::ContainerStore::writeState (ESM::InventoryState& state)
+void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 {
     state.mItems.clear();
 

@@ -12,12 +12,11 @@
 
 #include <components/misc/stringops.hpp>
 
-#include "../nif/niffile.hpp"
-#include "../nif/node.hpp"
-#include "../nif/data.hpp"
-#include "../nif/property.hpp"
-#include "../nif/controller.hpp"
-#include "../nif/extra.hpp"
+#include <components/nif/node.hpp>
+#include <components/nif/data.hpp>
+#include <components/nif/property.hpp>
+#include <components/nif/controller.hpp>
+#include <components/nif/extra.hpp>
 
 
 namespace
@@ -40,21 +39,6 @@ btVector3 getbtVector(const osg::Vec3f &v)
 namespace NifBullet
 {
 
-// Subclass btBhvTriangleMeshShape to auto-delete the meshInterface
-struct TriangleMeshShape : public btBvhTriangleMeshShape
-{
-    TriangleMeshShape(btStridingMeshInterface* meshInterface, bool useQuantizedAabbCompression)
-        : btBvhTriangleMeshShape(meshInterface, useQuantizedAabbCompression)
-    {
-    }
-
-    virtual ~TriangleMeshShape()
-    {
-        delete getTriangleInfoMap();
-        delete m_meshInterface;
-    }
-};
-
 BulletNifLoader::BulletNifLoader()
     : mCompoundShape(NULL)
     , mStaticMesh(NULL)
@@ -65,9 +49,9 @@ BulletNifLoader::~BulletNifLoader()
 {
 }
 
-osg::ref_ptr<BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
+osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
 {
-    mShape = new BulletShape;
+    mShape = new Resource::BulletShape;
 
     mCompoundShape = NULL;
     mStaticMesh = NULL;
@@ -126,11 +110,11 @@ osg::ref_ptr<BulletShape> BulletNifLoader::load(const Nif::NIFFilePtr nif)
             {
                 btTransform trans;
                 trans.setIdentity();
-                mCompoundShape->addChildShape(trans, new TriangleMeshShape(mStaticMesh,true));
+                mCompoundShape->addChildShape(trans, new Resource::TriangleMeshShape(mStaticMesh,true));
             }
         }
         else if (mStaticMesh)
-            mShape->mCollisionShape = new TriangleMeshShape(mStaticMesh,true);
+            mShape->mCollisionShape = new Resource::TriangleMeshShape(mStaticMesh,true);
 
         return mShape;
     }
@@ -306,7 +290,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             childMesh->addTriangle(getbtVector(b1), getbtVector(b2), getbtVector(b3));
         }
 
-        TriangleMeshShape* childShape = new TriangleMeshShape(childMesh,true);
+        Resource::TriangleMeshShape* childShape = new Resource::TriangleMeshShape(childMesh,true);
 
         float scale = shape->trafo.scale;
         const Nif::Node* parent = shape;
@@ -335,6 +319,9 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
         const osg::Vec3Array& vertices = *data->vertices;
         const osg::DrawElementsUShort& triangles = *data->triangles;
 
+        mStaticMesh->preallocateVertices(data->vertices->size());
+        mStaticMesh->preallocateIndices(data->triangles->size());
+
         size_t numtris = data->triangles->size();
         for(size_t i = 0;i < numtris;i+=3)
         {
@@ -344,95 +331,6 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             mStaticMesh->addTriangle(getbtVector(b1), getbtVector(b2), getbtVector(b3));
         }
     }
-}
-
-BulletShape::BulletShape()
-    : mCollisionShape(NULL)
-{
-
-}
-
-BulletShape::~BulletShape()
-{
-    deleteShape(mCollisionShape);
-}
-
-void BulletShape::deleteShape(btCollisionShape* shape)
-{
-    if(shape!=NULL)
-    {
-        if(shape->isCompound())
-        {
-            btCompoundShape* ms = static_cast<btCompoundShape*>(shape);
-            int a = ms->getNumChildShapes();
-            for(int i=0; i <a;i++)
-                deleteShape(ms->getChildShape(i));
-        }
-        delete shape;
-    }
-}
-
-btCollisionShape* BulletShape::duplicateCollisionShape(btCollisionShape *shape) const
-{
-    if(shape->isCompound())
-    {
-        btCompoundShape *comp = static_cast<btCompoundShape*>(shape);
-        btCompoundShape *newShape = new btCompoundShape;
-
-        int numShapes = comp->getNumChildShapes();
-        for(int i = 0;i < numShapes;++i)
-        {
-            btCollisionShape *child = duplicateCollisionShape(comp->getChildShape(i));
-            btTransform trans = comp->getChildTransform(i);
-            newShape->addChildShape(trans, child);
-        }
-
-        return newShape;
-    }
-
-    if(btBvhTriangleMeshShape* trishape = dynamic_cast<btBvhTriangleMeshShape*>(shape))
-    {
-#if BT_BULLET_VERSION >= 283
-        btScaledBvhTriangleMeshShape* newShape = new btScaledBvhTriangleMeshShape(trishape, btVector3(1.f, 1.f, 1.f));
-#else
-        // work around btScaledBvhTriangleMeshShape bug ( https://code.google.com/p/bullet/issues/detail?id=371 ) in older bullet versions
-        btTriangleMesh* oldMesh = static_cast<btTriangleMesh*>(trishape->getMeshInterface());
-        btTriangleMesh* newMesh = new btTriangleMesh(*oldMesh);
-        NifBullet::TriangleMeshShape* newShape = new NifBullet::TriangleMeshShape(newMesh, true);
-#endif
-        return newShape;
-    }
-
-    if (btBoxShape* boxshape = dynamic_cast<btBoxShape*>(shape))
-    {
-        return new btBoxShape(*boxshape);
-    }
-
-    throw std::logic_error(std::string("Unhandled Bullet shape duplication: ")+shape->getName());
-}
-
-btCollisionShape *BulletShape::getCollisionShape()
-{
-    return mCollisionShape;
-}
-
-osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance()
-{
-    osg::ref_ptr<BulletShapeInstance> instance (new BulletShapeInstance(this));
-    return instance;
-}
-
-BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<BulletShape> source)
-    : BulletShape()
-    , mSource(source)
-{
-    mCollisionBoxHalfExtents = source->mCollisionBoxHalfExtents;
-    mCollisionBoxTranslate = source->mCollisionBoxTranslate;
-
-    mAnimatedShapes = source->mAnimatedShapes;
-
-    if (source->mCollisionShape)
-        mCollisionShape = duplicateCollisionShape(source->mCollisionShape);
 }
 
 } // namespace NifBullet

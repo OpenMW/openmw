@@ -310,7 +310,7 @@ namespace Compiler
             extensions.registerFunction ("getpctraveling", 'l', "", opcodeGetPcTraveling);
             extensions.registerInstruction ("betacomment", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
             extensions.registerInstruction ("bc", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
-            extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit);
+            extensions.registerInstruction ("ori", "/S", opcodeBetaComment, opcodeBetaCommentExplicit); // 'ori' stands for 'ObjectReferenceInfo'
             extensions.registerInstruction ("addtolevcreature", "ccl", opcodeAddToLevCreature);
             extensions.registerInstruction ("removefromlevcreature", "ccl", opcodeRemoveFromLevCreature);
             extensions.registerInstruction ("addtolevitem", "ccl", opcodeAddToLevItem);
@@ -341,9 +341,9 @@ namespace Compiler
             extensions.registerInstruction ("say", "SS", opcodeSay, opcodeSayExplicit);
             extensions.registerFunction ("saydone", 'l', "", opcodeSayDone, opcodeSayDoneExplicit);
             extensions.registerInstruction ("streammusic", "S", opcodeStreamMusic);
-            extensions.registerInstruction ("playsound", "c", opcodePlaySound);
+            extensions.registerInstruction ("playsound", "cXX", opcodePlaySound);
             extensions.registerInstruction ("playsoundvp", "cff", opcodePlaySoundVP);
-            extensions.registerInstruction ("playsound3d", "c", opcodePlaySound3D,
+            extensions.registerInstruction ("playsound3d", "cXX", opcodePlaySound3D,
                 opcodePlaySound3DExplicit);
             extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP,
                 opcodePlaySound3DVPExplicit);

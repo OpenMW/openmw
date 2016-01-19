@@ -1,18 +1,14 @@
 #ifndef GAME_SOUND_SOUND_H
 #define GAME_SOUND_SOUND_H
 
-#include "soundmanagerimp.hpp"
+#include "sound_output.hpp"
 
 namespace MWSound
 {
-    class Sound
-    {
-        virtual void update() = 0;
-
+    class Sound {
         Sound& operator=(const Sound &rhs);
         Sound(const Sound &rhs);
 
-    protected:
         osg::Vec3f mPos;
         float mVolume; /* NOTE: Real volume = mVolume*mBaseVolume */
         float mBaseVolume;
@@ -20,43 +16,66 @@ namespace MWSound
         float mMinDistance;
         float mMaxDistance;
         int mFlags;
+
         float mFadeOutTime;
 
-        std::vector<float> mLoudnessVector;
-        float mLoudnessFPS;
+    protected:
+        Sound_Instance mHandle;
+
+        friend class OpenAL_Output;
 
     public:
-        virtual void stop() = 0;
-        virtual bool isPlaying() = 0;
-        virtual double getTimeOffset() = 0;
         void setPosition(const osg::Vec3f &pos) { mPos = pos; }
         void setVolume(float volume) { mVolume = volume; }
-        void setFadeout(float duration) { mFadeOutTime=duration; }
-        void setLoudnessVector(const std::vector<float>& loudnessVector, float loudnessFPS);
+        void setBaseVolume(float volume) { mBaseVolume = volume; }
+        void setFadeout(float duration) { mFadeOutTime = duration; }
+        void updateFade(float duration)
+        {
+            if(mFadeOutTime > 0.0f)
+            {
+                float soundDuration = std::min(duration, mFadeOutTime);
+                mVolume *= (mFadeOutTime-soundDuration) / mFadeOutTime;
+                mFadeOutTime -= soundDuration;
+            }
+        }
 
-        /// Get loudness at the current time position on a [0,1] scale.
-        /// Requires that loudnessVector was filled in by the user.
-        float getCurrentLoudness();
+        const osg::Vec3f &getPosition() const { return mPos; }
+        float getRealVolume() const { return mVolume * mBaseVolume; }
+        float getPitch() const { return mPitch; }
+        float getMinDistance() const { return mMinDistance; }
+        float getMaxDistance() const { return mMaxDistance; }
 
         MWBase::SoundManager::PlayType getPlayType() const
         { return (MWBase::SoundManager::PlayType)(mFlags&MWBase::SoundManager::Play_TypeMask); }
-
+        bool getUseEnv() const { return !(mFlags&MWBase::SoundManager::Play_NoEnv); }
+        bool getIsLooping() const { return mFlags&MWBase::SoundManager::Play_Loop; }
+        bool getDistanceCull() const { return mFlags&MWBase::SoundManager::Play_RemoveAtDistance; }
+        bool getIs3D() const { return mFlags&Play_3D; }
 
         Sound(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
-          : mPos(pos)
-          , mVolume(vol)
-          , mBaseVolume(basevol)
-          , mPitch(pitch)
-          , mMinDistance(mindist)
-          , mMaxDistance(maxdist)
-          , mFlags(flags)
-          , mFadeOutTime(0)
-          , mLoudnessFPS(20)
+          : mPos(pos), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
+          , mMinDistance(mindist), mMaxDistance(maxdist), mFlags(flags)
+          , mFadeOutTime(0.0f), mHandle(0)
         { }
-        virtual ~Sound() { }
+        Sound(float vol, float basevol, float pitch, int flags)
+          : mPos(0.0f, 0.0f, 0.0f), mVolume(vol), mBaseVolume(basevol), mPitch(pitch)
+          , mMinDistance(1.0f), mMaxDistance(1000.0f), mFlags(flags)
+          , mFadeOutTime(0.0f), mHandle(0)
+        { }
+    };
 
-        friend class OpenAL_Output;
-        friend class SoundManager;
+    // Same as above, but it's a different type since the output handles them differently
+    class Stream : public Sound {
+        Stream& operator=(const Stream &rhs);
+        Stream(const Stream &rhs);
+
+    public:
+        Stream(const osg::Vec3f& pos, float vol, float basevol, float pitch, float mindist, float maxdist, int flags)
+          : Sound(pos, vol, basevol, pitch, mindist, maxdist, flags)
+        { }
+        Stream(float vol, float basevol, float pitch, int flags)
+          : Sound(vol, basevol, pitch, flags)
+        { }
     };
 }
 

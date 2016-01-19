@@ -54,7 +54,7 @@ namespace
                 *(image->data(x,y)+2) = *it++;
                 *(image->data(x,y)+1) = *it++;
                 *image->data(x,y) = *it++;
-                it++; // skip alpha
+                ++it; // skip alpha
             }
         }
 
@@ -394,7 +394,7 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_NPC_);
-        writer.writeHNString("NAME", "player");
+        context.mPlayerBase.mId = "player";
         context.mPlayerBase.save(writer);
         writer.endRecord(ESM::REC_NPC_);
 

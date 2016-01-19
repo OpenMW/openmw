@@ -7,15 +7,42 @@
 #include <osg/Geometry>
 #include <osg/PrimitiveSet>
 
-#include "elements.hpp"
+#include "mask.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
-: TagBase (Element_CellArrow), mArrow (arrow)
+: TagBase (Mask_CellArrow), mArrow (arrow)
 {}
 
 CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
 {
     return mArrow;
+}
+
+QString CSVRender::CellArrowTag::getToolTip (bool hideBasics) const
+{
+    QString text ("Direction: ");
+
+    switch (mArrow->getDirection())
+    {
+        case CellArrow::Direction_North: text += "North"; break;
+        case CellArrow::Direction_West: text += "West"; break;
+        case CellArrow::Direction_South: text += "South"; break;
+        case CellArrow::Direction_East: text += "East"; break;
+    }
+
+    if (!hideBasics)
+    {
+        text +=
+            "<p>"
+            "Modify which cells are shown"
+            "<ul><li>Primary-Edit: Add cell in given direction</li>"
+            "<li>Secondary-Edit: Add cell and remove old cell</li>"
+            "<li>Shift Primary-Edit: Add cells in given direction</li>"
+            "<li>Shift Secondary-Edit: Add cells and remove old cells</li>"
+            "</ul>";
+    }
+
+    return text;
 }
 
 
@@ -138,8 +165,7 @@ CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,
 
     mParentNode->addChild (mBaseNode);
 
-    // 0x1 reserved for separating cull and update visitors
-    mBaseNode->setNodeMask (Element_CellArrow<<1);
+    mBaseNode->setNodeMask (Mask_CellArrow);
 
     adjustTransform();
     buildShape();

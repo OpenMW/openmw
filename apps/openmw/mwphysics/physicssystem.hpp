@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <set>
 
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -21,7 +22,7 @@ namespace MWRender
     class DebugDrawer;
 }
 
-namespace NifBullet
+namespace Resource
 {
     class BulletShapeManager;
 }
@@ -56,12 +57,13 @@ namespace MWPhysics
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             void updatePtr (const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
             Actor* getActor(const MWWorld::Ptr& ptr);
+            const Actor* getActor(const MWWorld::ConstPtr& ptr) const;
 
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
@@ -80,13 +82,20 @@ namespace MWPhysics
             void stepSimulation(float dt);
             void debugDraw();
 
-            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::Ptr &ptr, int collisionGroup, int collisionMask); ///< get handles this object collides with
+            std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, float maxHeight);
 
-            std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor,
+            std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
                                                                const osg::Vec3f &origin,
                                                                const osg::Quat &orientation,
                                                                float queryDistance);
+
+
+            /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
+            /// target vector hits the collision shape and then calculates distance from the intersection point.
+            /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be successful.
+            /// \note Only Actor targets are supported at the moment.
+            float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const;
 
             struct RayResult
             {
@@ -97,18 +106,25 @@ namespace MWPhysics
             };
 
             /// @param me Optional, a Ptr to ignore in the list of results
-            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::Ptr ignore = MWWorld::Ptr(), int mask =
-                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor, int group=0xff);
+            RayResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, MWWorld::ConstPtr ignore = MWWorld::ConstPtr(), int mask =
+                    CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
             RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
 
             /// Return true if actor1 can see actor2.
-            bool getLineOfSight(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
+            bool getLineOfSight(const MWWorld::ConstPtr& actor1, const MWWorld::ConstPtr& actor2) const;
 
             bool isOnGround (const MWWorld::Ptr& actor);
 
             /// Get physical half extents (scaled) of the given actor.
-            osg::Vec3f getHalfExtents(const MWWorld::Ptr& actor);
+            osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor) const;
+
+            /// @see MWPhysics::Actor::getRenderingHalfExtents
+            osg::Vec3f getRenderingHalfExtents(const MWWorld::ConstPtr& actor) const;
+
+            /// Get the position of the collision shape for the actor. Use together with getHalfExtents() to get the collision bounds in world space.
+            /// @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
+            osg::Vec3f getPosition(const MWWorld::ConstPtr& actor) const;
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.
@@ -123,19 +139,25 @@ namespace MWPhysics
             /// Return true if \a actor has been standing on \a object in this frame
             /// This will trigger whenever the object is directly below the actor.
             /// It doesn't matter if the actor is stationary or moving.
-            bool isActorStandingOn(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
+            bool isActorStandingOn(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
 
             /// Get the handle of all actors standing on \a object in this frame.
-            void getActorsStandingOn(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
+            void getActorsStandingOn(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
             /// Return true if \a actor has collided with \a object in this frame.
             /// This will detect running into objects, but will not detect climbing stairs, stepping up a small object, etc.
-            bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::Ptr& object) const;
+            bool isActorCollidingWith(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object) const;
 
             /// Get the handle of all actors colliding with \a object in this frame.
-            void getActorsCollidingWith(const MWWorld::Ptr& object, std::vector<MWWorld::Ptr>& out) const;
+            void getActorsCollidingWith(const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr>& out) const;
 
             bool toggleDebugRendering();
+
+            /// Mark the given object as a 'non-solid' object. A non-solid object means that
+            /// \a isOnSolidGround will return false for actors standing on that object.
+            void markAsNonSolid (const MWWorld::ConstPtr& ptr);
+
+            bool isOnSolidGround (const MWWorld::Ptr& actor) const;
 
         private:
 
@@ -146,12 +168,14 @@ namespace MWPhysics
             btCollisionDispatcher* mDispatcher;
             btCollisionWorld* mCollisionWorld;
 
-            std::auto_ptr<NifBullet::BulletShapeManager> mShapeManager;
+            std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
 
-            typedef std::map<MWWorld::Ptr, Object*> ObjectMap;
+            typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
             ObjectMap mObjects;
 
-            typedef std::map<MWWorld::Ptr, Actor*> ActorMap;
+            std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
+
+            typedef std::map<MWWorld::ConstPtr, Actor*> ActorMap;
             ActorMap mActors;
 
             typedef std::map<std::pair<int, int>, HeightField*> HeightFieldMap;
@@ -159,11 +183,9 @@ namespace MWPhysics
 
             bool mDebugDrawEnabled;
 
-            // Tracks all movement collisions happening during a single frame. <actor handle, collided handle>
-            // This will detect e.g. running against a vertical wall. It will not detect climbing up stairs,
-            // stepping up small objects, etc.
+            // Tracks standing collisions happening during a single frame. <actor handle, collided handle>
+            // This will detect standing on an object, but won't detect running e.g. against a wall.
             typedef std::map<MWWorld::Ptr, MWWorld::Ptr> CollisionMap;
-            CollisionMap mCollisions;
             CollisionMap mStandingCollisions;
 
             // replaces all occurences of 'old' in the map by 'updated', no matter if its a key or value

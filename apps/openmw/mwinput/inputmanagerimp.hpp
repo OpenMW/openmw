@@ -25,11 +25,6 @@ namespace MWBase
     class WindowManager;
 }
 
-namespace OMW
-{
-    class Engine;
-}
-
 namespace ICS
 {
     class InputControlSystem;
@@ -54,6 +49,7 @@ namespace SDLUtil
 namespace osgViewer
 {
     class Viewer;
+    class ScreenCaptureHandler;
 }
 
 struct SDL_Window;
@@ -77,7 +73,7 @@ namespace MWInput
         InputManager(
             SDL_Window* window,
             osg::ref_ptr<osgViewer::Viewer> viewer,
-            OMW::Engine& engine,
+            osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             const std::string& userFile, bool userFileExists,
             const std::string& controllerBindingsFile, bool grab);
 
@@ -157,10 +153,10 @@ namespace MWInput
         SDL_Window* mWindow;
         bool mWindowVisible;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
+        osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
 
         bool mJoystickLastUsed;
         MWWorld::Player* mPlayer;
-        OMW::Engine& mEngine;
 
         ICS::InputControlSystem* mInputBinder;
 
@@ -178,7 +174,6 @@ namespace MWInput
         bool mControlsDisabled;
 
         float mCameraSensitivity;
-        float mUISensitivity;
         float mCameraYMultiplier;
         float mPreviewPOVDelay;
         float mTimeIdle;
@@ -217,6 +212,8 @@ namespace MWInput
         void setPlayerControlsEnabled(bool enabled);
 
         void updateCursorMode();
+
+        bool checkAllowedToUseItems() const;
 
     private:
         void toggleMainMenu();

@@ -18,15 +18,6 @@ color_misc=0,205,205 # ????
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="NumFPS" size="16 16">
-        <Property key="FontName" value="MonoFont"/>
-        <Property key="TextAlign" value="HCenter Bottom"/>
-        <Property key="TextColour" value="1 1 1"/>
-        <Property key="TextShadow" value="true"/>
-
-        <BasisSkin type="SimpleText" offset="0 0 16 16" align="Stretch"/>
-    </Resource>
-
     <Resource type="ResourceSkin" name="SandText" size="16 16">
         <Property key="FontName" value="Default"/>
         <Property key="TextAlign" value="Left Bottom"/>

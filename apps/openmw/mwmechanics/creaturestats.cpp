@@ -48,8 +48,10 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting> &gmst =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        return gmst.find ("fFatigueBase")->getFloat()
-            - gmst.find ("fFatigueMult")->getFloat() * (1-normalised);
+        static const float fFatigueBase = gmst.find("fFatigueBase")->getFloat();
+        static const float fFatigueMult = gmst.find("fFatigueMult")->getFloat();
+
+        return fFatigueBase - fFatigueMult * (1-normalised);
     }
 
     const AttributeValue &CreatureStats::getAttribute(int index) const
@@ -265,9 +267,11 @@ namespace MWMechanics
     {
         if (mDead)
         {
+            if (mDynamic[0].getModified() < 1)
+                mDynamic[0].setModified(1, 0);
+
             mDynamic[0].setCurrent(mDynamic[0].getModified());
-            if (mDynamic[0].getCurrent()>=1)
-                mDead = false;
+            mDead = false;
         }
     }
 

@@ -7,7 +7,7 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include "components/esm/esmreader.hpp"
+#include <components/esm/esmreader.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
@@ -110,12 +110,11 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex &index
     bool gamefileChecked = (file->gameFiles().count() == 0);
     foreach (const QString &fileName, file->gameFiles())
     {
-        bool depFound = false;
         foreach (EsmFile *dependency, mFiles)
         {
             //compare filenames only.  Multiple instances
             //of the filename (with different paths) is not relevant here.
-            depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
+            bool depFound = (dependency->fileName().compare(fileName, Qt::CaseInsensitive) == 0);
 
             if (!depFound)
                 continue;

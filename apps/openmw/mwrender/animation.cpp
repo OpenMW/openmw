@@ -6,11 +6,11 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
-#include <osg/ComputeBoundsVisitor>
 #include <osg/MatrixTransform>
 #include <osg/Geode>
 #include <osg/BlendFunc>
 #include <osg/Material>
+#include <osg/Version>
 
 #include <osgParticle/ParticleSystem>
 
@@ -18,6 +18,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/keyframemanager.hpp>
 #include <components/resource/texturemanager.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
@@ -28,15 +29,16 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/util.hpp>
-#include <components/sceneutil/lightcontroller.hpp>
+#include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
+
+#include <components/fallback/fallback.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/class.hpp"
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
@@ -174,72 +176,93 @@ namespace
         return 0.0f;
     }
 
-
-    // Removes all drawables from a graph.
-    class RemoveDrawableVisitor : public osg::NodeVisitor
+    /// @brief Base class for visitors that remove nodes from a scene graph.
+    /// Subclasses need to fill the mToRemove vector.
+    /// To use, node->accept(removeVisitor); removeVisitor.remove();
+    class RemoveVisitor : public osg::NodeVisitor
     {
     public:
-        RemoveDrawableVisitor()
+        RemoveVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
-        }
-
-        virtual void apply(osg::Geode &node)
-        {
-            // Not safe to remove in apply(), since the visitor is still iterating the child list
-            osg::Group* parent = node.getParent(0);
-            // prune nodes that would be empty after the removal
-            if (parent->getNumChildren() == 1 && parent->getDataVariance() == osg::Object::STATIC)
-                mToRemove.push_back(parent);
-            else
-                mToRemove.push_back(&node);
-            traverse(node);
         }
 
         void remove()
         {
-            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                osg::Node* node = *it;
-                if (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-            }
+            for (RemoveVec::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
+                it->second->removeChild(it->first);
         }
 
-    private:
-        std::vector<osg::Node*> mToRemove;
+    protected:
+        // <node to remove, parent node to remove it from>
+        typedef std::vector<std::pair<osg::Node*, osg::Group*> > RemoveVec;
+        std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
     };
 
-    class RemoveTriBipVisitor : public osg::NodeVisitor
+    // Removes all drawables from a graph.
+    class RemoveDrawableVisitor : public RemoveVisitor
     {
     public:
-        RemoveTriBipVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        virtual void apply(osg::Geode &geode)
         {
+            applyImpl(geode);
         }
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            applyImpl(drw);
+        }
+#endif
+
+        void applyImpl(osg::Node& node)
+        {
+            osg::NodePath::iterator parent = getNodePath().end()-2;
+            // We know that the parent is a Group because only Groups can have children.
+            osg::Group* parentGroup = static_cast<osg::Group*>(*parent);
+
+            // Try to prune nodes that would be empty after the removal
+            if (parent != getNodePath().begin())
+            {
+                // This could be extended to remove the parent's parent, and so on if they are empty as well.
+                // But for NIF files, there won't be a benefit since only TriShapes can be set to STATIC dataVariance.
+                osg::Group* parentParent = static_cast<osg::Group*>(*(parent - 1));
+                if (parentGroup->getNumChildren() == 1 && parentGroup->getDataVariance() == osg::Object::STATIC)
+                {
+                    mToRemove.push_back(std::make_pair(parentGroup, parentParent));
+                    return;
+                }
+            }
+
+            mToRemove.push_back(std::make_pair(&node, parentGroup));
+        }
+    };
+
+    class RemoveTriBipVisitor : public RemoveVisitor
+    {
+    public:
         virtual void apply(osg::Geode &node)
+        {
+            applyImpl(node);
+        }
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
+        virtual void apply(osg::Drawable& drw)
+        {
+            applyImpl(drw);
+        }
+#endif
+
+        void applyImpl(osg::Node& node)
         {
             const std::string toFind = "tri bip";
             if (Misc::StringUtils::ciCompareLen(node.getName(), toFind, toFind.size()) == 0)
             {
+                osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
                 // Not safe to remove in apply(), since the visitor is still iterating the child list
-                mToRemove.push_back(&node);
+                mToRemove.push_back(std::make_pair(&node, parent));
             }
         }
-
-        void remove()
-        {
-            for (std::vector<osg::Node*>::iterator it = mToRemove.begin(); it != mToRemove.end(); ++it)
-            {
-                osg::Node* node = *it;
-                if (node->getNumParents())
-                    node->getParent(0)->removeChild(node);
-            }
-        }
-
-    private:
-        std::vector<osg::Node*> mToRemove;
     };
 
 }
@@ -288,6 +311,7 @@ namespace MWRender
 
     Animation::Animation(const MWWorld::Ptr &ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : mInsert(parentNode)
+        , mSkeleton(NULL)
         , mPtr(ptr)
         , mResourceSystem(resourceSystem)
         , mAccumulate(1.f, 1.f, 0.f)
@@ -315,10 +339,8 @@ namespace MWRender
 
     void Animation::setActive(bool active)
     {
-        if (SceneUtil::Skeleton* skel = dynamic_cast<SceneUtil::Skeleton*>(mObjectRoot.get()))
-        {
-            skel->setActive(active);
-        }
+        if (mSkeleton)
+            mSkeleton->setActive(active);
     }
 
     void Animation::updatePtr(const MWWorld::Ptr &ptr)
@@ -368,19 +390,21 @@ namespace MWRender
     void Animation::addAnimSource(const std::string &model)
     {
         std::string kfname = model;
-        Misc::StringUtils::toLower(kfname);
+        Misc::StringUtils::lowerCaseInPlace(kfname);
 
         if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
             kfname.replace(kfname.size()-4, 4, ".kf");
+        else
+            return;
 
         if(!mResourceSystem->getVFS()->exists(kfname))
             return;
 
         boost::shared_ptr<AnimSource> animsrc;
         animsrc.reset(new AnimSource);
-        animsrc->mKeyframes = mResourceSystem->getSceneManager()->getKeyframes(kfname);
+        animsrc->mKeyframes = mResourceSystem->getKeyframeManager()->get(kfname);
 
-        if (animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
+        if (!animsrc->mKeyframes || animsrc->mKeyframes->mTextKeys.empty() || animsrc->mKeyframes->mKeyframeControllers.empty())
             return;
 
         for (NifOsg::KeyframeHolder::KeyframeControllerMap::const_iterator it = animsrc->mKeyframes->mKeyframeControllers.begin();
@@ -493,7 +517,16 @@ namespace MWRender
         }
 
         if (mTextKeyListener)
-            mTextKeyListener->handleTextKey(groupname, key, map);
+        {
+            try
+            {
+                mTextKeyListener->handleTextKey(groupname, key, map);
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "Error handling text key " << evt << ": " << e.what() << std::endl;
+            }
+        }
     }
 
     void Animation::play(const std::string &groupname, const AnimPriority& priority, int blendMask, bool autodisable, float speedmult,
@@ -942,6 +975,7 @@ namespace MWRender
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
         mObjectRoot = NULL;
+        mSkeleton = NULL;
 
         mNodeMap.clear();
         mActiveControllers.clear();
@@ -949,18 +983,29 @@ namespace MWRender
         mAccumCtrl = NULL;
 
         if (!forceskeleton)
-            mObjectRoot = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
+        {
+            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->createInstance(model, mInsert);
+            mObjectRoot = created->asGroup();
+            if (!mObjectRoot)
+            {
+                mInsert->removeChild(created);
+                mObjectRoot = new osg::Group;
+                mObjectRoot->addChild(created);
+                mInsert->addChild(mObjectRoot);
+            }
+        }
         else
         {
-            osg::ref_ptr<osg::Node> newObjectRoot = mResourceSystem->getSceneManager()->createInstance(model);
-            if (!dynamic_cast<SceneUtil::Skeleton*>(newObjectRoot.get()))
+            osg::ref_ptr<osg::Node> created = mResourceSystem->getSceneManager()->createInstance(model);
+            osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
+            if (!skel)
             {
-                osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-                skel->addChild(newObjectRoot);
-                newObjectRoot = skel;
+                skel = new SceneUtil::Skeleton;
+                skel->addChild(created);
             }
-            mInsert->addChild(newObjectRoot);
-            mObjectRoot = newObjectRoot;
+            mSkeleton = skel.get();
+            mObjectRoot = skel;
+            mInsert->addChild(mObjectRoot);
         }
 
         if (previousStateset)
@@ -989,17 +1034,17 @@ namespace MWRender
 
     osg::Group* Animation::getObjectRoot()
     {
-        return static_cast<osg::Group*>(mObjectRoot.get());
+        return mObjectRoot.get();
     }
 
     osg::Group* Animation::getOrCreateObjectRoot()
     {
         if (mObjectRoot)
-            return static_cast<osg::Group*>(mObjectRoot.get());
+            return mObjectRoot.get();
 
         mObjectRoot = new osg::Group;
         mInsert->addChild(mObjectRoot);
-        return static_cast<osg::Group*>(mObjectRoot.get());
+        return mObjectRoot.get();
     }
 
     void Animation::addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor)
@@ -1040,38 +1085,7 @@ namespace MWRender
 
     void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
     {
-        SceneUtil::FindByNameVisitor visitor("AttachLight");
-        parent->accept(visitor);
-
-        osg::Group* attachTo = NULL;
-        if (visitor.mFoundNode)
-        {
-            attachTo = visitor.mFoundNode;
-        }
-        else
-        {
-            osg::ComputeBoundsVisitor computeBound;
-            computeBound.setTraversalMask(~Mask_ParticleSystem);
-            parent->accept(computeBound);
-
-            // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
-            osg::ref_ptr<osg::PositionAttitudeTransform> trans(new osg::PositionAttitudeTransform);
-            trans->setPosition(computeBound.getBoundingBox().center());
-
-            parent->addChild(trans);
-
-            attachTo = trans;
-        }
-
-        osg::ref_ptr<SceneUtil::LightSource> lightSource = new SceneUtil::LightSource;
-        osg::Light* light = new osg::Light;
-        lightSource->setLight(light);
-
-        const MWWorld::Fallback* fallback = MWBase::Environment::get().getWorld()->getFallback();
-
-        float radius = esmLight->mData.mRadius;
-        lightSource->setRadius(radius);
-
+        const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
         static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
         static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
         static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
@@ -1079,56 +1093,11 @@ namespace MWRender
         static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
         static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
         static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
-
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
-        SceneUtil::configureLight(light, radius, exterior, outQuadInLin, useQuadratic, quadraticValue,
-                                  quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
-
-        osg::Vec4f diffuse = SceneUtil::colourFromRGB(esmLight->mData.mColor);
-        if (esmLight->mData.mFlags & ESM::Light::Negative)
-        {
-            diffuse *= -1;
-            diffuse.a() = 1;
-        }
-        light->setDiffuse(diffuse);
-        light->setAmbient(osg::Vec4f(0,0,0,1));
-        light->setSpecular(osg::Vec4f(0,0,0,0));
-
-        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
-        ctrl->setDiffuse(light->getDiffuse());
-        if (esmLight->mData.mFlags & ESM::Light::Flicker)
-            ctrl->setType(SceneUtil::LightController::LT_Flicker);
-        if (esmLight->mData.mFlags & ESM::Light::FlickerSlow)
-            ctrl->setType(SceneUtil::LightController::LT_FlickerSlow);
-        if (esmLight->mData.mFlags & ESM::Light::Pulse)
-            ctrl->setType(SceneUtil::LightController::LT_Pulse);
-        if (esmLight->mData.mFlags & ESM::Light::PulseSlow)
-            ctrl->setType(SceneUtil::LightController::LT_PulseSlow);
-
-        lightSource->addUpdateCallback(ctrl);
-
-        attachTo->addChild(lightSource);
+        SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior, outQuadInLin,
+                            useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);
     }
-
-    class DisableFreezeOnCullVisitor : public osg::NodeVisitor
-    {
-    public:
-        DisableFreezeOnCullVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-
-        virtual void apply(osg::Geode &geode)
-        {
-            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
-            {
-                osg::Drawable* drw = geode.getDrawable(i);
-                if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(drw))
-                    partsys->setFreezeOnCull(false);
-            }
-        }
-    };
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, std::string texture)
     {
@@ -1163,7 +1132,7 @@ namespace MWRender
         node->accept(findMaxLengthVisitor);
 
         // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
-        DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
+        SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         node->accept(disableFreezeOnCullVisitor);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
@@ -1309,21 +1278,31 @@ namespace MWRender
         }
         else
         {
-            if (!mGlowLight)
+            effect += 3;
+            float radius = effect * 66.f;
+            float linearAttenuation = 0.5f / effect;
+
+            if (!mGlowLight || linearAttenuation != mGlowLight->getLight(0)->getLinearAttenuation())
             {
-                mGlowLight = new SceneUtil::LightSource;
-                mGlowLight->setLight(new osg::Light);
-                osg::Light* light = mGlowLight->getLight();
+                if (mGlowLight)
+                {
+                    mInsert->removeChild(mGlowLight);
+                    mGlowLight = NULL;
+                }
+
+                osg::ref_ptr<osg::Light> light (new osg::Light);
                 light->setDiffuse(osg::Vec4f(0,0,0,0));
                 light->setSpecular(osg::Vec4f(0,0,0,0));
                 light->setAmbient(osg::Vec4f(1.5f,1.5f,1.5f,1.f));
+                light->setLinearAttenuation(linearAttenuation);
+
+                mGlowLight = new SceneUtil::LightSource;
+                mGlowLight->setNodeMask(Mask_Lighting);
                 mInsert->addChild(mGlowLight);
+                mGlowLight->setLight(light);
             }
 
-            effect += 3;
-            osg::Light* light = mGlowLight->getLight();
-            mGlowLight->setRadius(effect * 66.f);
-            light->setLinearAttenuation(0.5f/effect);
+            mGlowLight->setRadius(radius);
         }
     }
 

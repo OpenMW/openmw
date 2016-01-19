@@ -37,9 +37,7 @@ namespace CSVRender
                 return ltex;
         }
 
-        std::stringstream error;
-        error << "Can't find LandTexture " << index << " from plugin " << plugin;
-        throw std::runtime_error(error.str());
+        return NULL;
     }
 
     void TerrainStorage::getBounds(float &minX, float &maxX, float &minY, float &maxY)

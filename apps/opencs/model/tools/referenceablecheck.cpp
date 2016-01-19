@@ -397,6 +397,9 @@ void CSMTools::ReferenceableCheckStage::containerCheck(
     //checking for name
     if (container.mName.empty())
         messages.push_back (std::make_pair (id, container.mId + " has an empty name"));
+    
+    //checking contained items
+    inventoryListCheck(container.mInventory.mList, messages, id.toString());
 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Container>(container, messages, id.toString());
@@ -468,6 +471,12 @@ void CSMTools::ReferenceableCheckStage::creatureCheck (
     if (creature.mData.mGold < 0) //It seems that this is for gold in merchant creatures
         messages.push_back (std::make_pair (id, creature.mId + " has negative gold "));
 
+    if (creature.mScale == 0)
+        messages.push_back (std::make_pair (id, creature.mId + " has zero scale value"));
+
+    // Check inventory
+    inventoryListCheck(creature.mInventory.mList, messages, id.toString());
+ 
     // Check that mentioned scripts exist
     scriptCheck<ESM::Creature>(creature, messages, id.toString());
 }
@@ -739,6 +748,9 @@ void CSMTools::ReferenceableCheckStage::npcCheck (
 
     //TODO: reputation, Disposition, rank, everything else
 
+    // Check inventory
+    inventoryListCheck(npc.mInventory.mList, messages, id.toString());
+ 
     // Check that mentioned scripts exist
     scriptCheck<ESM::NPC>(npc, messages, id.toString());
 }
@@ -888,6 +900,45 @@ void CSMTools::ReferenceableCheckStage::finalCheck (CSMDoc::Messages& messages)
             "There is no player record"));
 }
 
+void CSMTools::ReferenceableCheckStage::inventoryListCheck(
+    const std::vector<ESM::ContItem>& itemList, 
+    CSMDoc::Messages& messages, 
+    const std::string& id)
+{
+    for (size_t i = 0; i < itemList.size(); ++i)
+    {
+        std::string itemName = itemList[i].mItem.toString();
+        CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
+
+        if (localIndex.first == -1)
+            messages.push_back (std::make_pair (id,
+                id + " contains non-existing item (" + itemName + ")"));
+        else
+        {
+            // Needs to accomodate Containers, Creatures, and NPCs
+            switch (localIndex.second)
+            {
+            case CSMWorld::UniversalId::Type_Potion:
+            case CSMWorld::UniversalId::Type_Apparatus:
+            case CSMWorld::UniversalId::Type_Armor:
+            case CSMWorld::UniversalId::Type_Book:
+            case CSMWorld::UniversalId::Type_Clothing:
+            case CSMWorld::UniversalId::Type_Ingredient:
+            case CSMWorld::UniversalId::Type_Light:
+            case CSMWorld::UniversalId::Type_Lockpick:
+            case CSMWorld::UniversalId::Type_Miscellaneous:
+            case CSMWorld::UniversalId::Type_Probe:
+            case CSMWorld::UniversalId::Type_Repair:
+            case CSMWorld::UniversalId::Type_Weapon:
+            case CSMWorld::UniversalId::Type_ItemLevelledList:
+                break;
+            default:
+                messages.push_back (std::make_pair(id,
+                    id + " contains item of invalid type (" + itemName + ")"));
+            }
+        }
+    }
+}
 
 //Templates begins here
 

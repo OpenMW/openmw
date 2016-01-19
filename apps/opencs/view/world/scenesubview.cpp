@@ -147,12 +147,6 @@ std::string CSVWorld::SceneSubView::getTitle() const
     return mTitle;
 }
 
-void CSVWorld::SceneSubView::updateUserSetting (const QString& name, const QStringList& value)
-{
-    mScene->updateUserSetting (name, value);
-    CSVDoc::SubView::updateUserSetting (name, value);
-}
-
 void CSVWorld::SceneSubView::cellSelectionChanged (const CSMWorld::UniversalId& id)
 {
     setUniversalId(id);

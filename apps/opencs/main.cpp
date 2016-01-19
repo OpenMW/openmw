@@ -43,6 +43,10 @@ class Application : public QApplication
 
 int main(int argc, char *argv[])
 {
+    #ifdef Q_OS_MAC
+        setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+    #endif
+
     try
     {
         // To allow background thread drawing in OSG
@@ -64,15 +68,6 @@ int main(int argc, char *argv[])
             dir.cdUp();
         }
         QDir::setCurrent(dir.absolutePath());
-
-        // force Qt to load only LOCAL plugins, don't touch system Qt installation
-        QDir pluginsPath(QCoreApplication::applicationDirPath());
-        pluginsPath.cdUp();
-        pluginsPath.cd("Plugins");
-
-        QStringList libraryPaths;
-        libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
-        application.setLibraryPaths(libraryPaths);
     #endif
 
         application.setWindowIcon (QIcon (":./openmw-cs.png"));

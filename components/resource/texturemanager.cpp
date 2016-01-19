@@ -3,6 +3,7 @@
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
 #include <osg/Version>
+#include <osgViewer/Viewer>
 
 #include <stdexcept>
 
@@ -65,6 +66,45 @@ namespace Resource
         mUnRefImageDataAfterApply = unref;
     }
 
+    void TextureManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                                           const std::string &mipmap, int maxAnisotropy,
+                                           osgViewer::Viewer *viewer)
+    {
+        osg::Texture::FilterMode min = osg::Texture::LINEAR;
+        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
+
+        if(magfilter == "nearest")
+            mag = osg::Texture::NEAREST;
+        else if(magfilter != "linear")
+            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+
+        if(minfilter == "nearest")
+            min = osg::Texture::NEAREST;
+        else if(minfilter != "linear")
+            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
+
+        if(mipmap == "nearest")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        }
+        else if(mipmap != "none")
+        {
+            if(mipmap != "linear")
+                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        }
+
+        if(viewer) viewer->stopThreading();
+        setFilterSettings(min, mag, maxAnisotropy);
+        if(viewer) viewer->startThreading();
+    }
+
     void TextureManager::setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
     {
         mMinFilter = minFilter;
@@ -119,7 +159,7 @@ namespace Resource
             case(GL_COMPRESSED_RGBA_S3TC_DXT3_EXT):
             case(GL_COMPRESSED_RGBA_S3TC_DXT5_EXT):
             {
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
                 osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
                 if (exts && !exts->isTextureCompressionS3TCSupported
                         // This one works too. Should it be included in isTextureCompressionS3TCSupported()? Submitted as a patch to OSG.
@@ -141,6 +181,57 @@ namespace Resource
                 return true;
         }
         return true;
+    }
+
+    osg::ref_ptr<osg::Image> TextureManager::getImage(const std::string &filename)
+    {
+        std::string normalized = filename;
+        mVFS->normalizeFilename(normalized);
+        std::map<std::string, osg::ref_ptr<osg::Image> >::iterator found = mImages.find(normalized);
+        if (found != mImages.end())
+            return found->second;
+        else
+        {
+            Files::IStreamPtr stream;
+            try
+            {
+                stream = mVFS->get(normalized.c_str());
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "Failed to open image: " << e.what() << std::endl;
+                return NULL;
+            }
+
+            osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
+            opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
+            size_t extPos = normalized.find_last_of('.');
+            std::string ext;
+            if (extPos != std::string::npos && extPos+1 < normalized.size())
+                ext = normalized.substr(extPos+1);
+            osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
+            if (!reader)
+            {
+                std::cerr << "Error loading " << filename << ": no readerwriter for '" << ext << "' found" << std::endl;
+                return NULL;
+            }
+
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
+            if (!result.success())
+            {
+                std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
+                return NULL;
+            }
+
+            osg::Image* image = result.getImage();
+            if (!checkSupported(image, filename))
+            {
+                return NULL;
+            }
+
+            mImages.insert(std::make_pair(normalized, image));
+            return image;
+        }
     }
 
     osg::ref_ptr<osg::Texture2D> TextureManager::getTexture2D(const std::string &filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT)

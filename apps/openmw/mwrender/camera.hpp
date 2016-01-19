@@ -29,6 +29,7 @@ namespace MWRender
 
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
+        float mHeightScale;
 
         osg::ref_ptr<osg::Camera> mCamera;
 

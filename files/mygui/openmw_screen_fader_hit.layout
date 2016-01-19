@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<MyGUI type="Layout">
+    <Widget type="ImageBox" skin="ImageBox" layer="AdditiveOverlay" position="0 0 300 200" name="_Main" align="Stretch">
+        <Property key="ImageTexture" value="black"/>
+    </Widget>
+</MyGUI>

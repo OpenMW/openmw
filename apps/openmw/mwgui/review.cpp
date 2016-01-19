@@ -154,7 +154,7 @@ namespace MWGui
     {
         mMagicka->setValue(static_cast<int>(value.getCurrent()), static_cast<int>(value.getModified()));
         std::string valStr =  MyGUI::utility::toString(value.getCurrent()) + "/" + MyGUI::utility::toString(value.getModified());
-        mMagicka->setUserString("Caption_HealthDescription", "#{sIntDesc}\n" + valStr);
+        mMagicka->setUserString("Caption_HealthDescription", "#{sMagDesc}\n" + valStr);
     }
 
     void ReviewDialog::setFatigue(const MWMechanics::DynamicStat<float>& value)

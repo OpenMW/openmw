@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdint.h>
 
+#include <osg/Fog>
 #include <osg/LightModel>
 #include <osg/Texture2D>
 #include <osg/ComputeBoundsVisitor>
@@ -30,22 +31,21 @@ namespace
     class CameraLocalUpdateCallback : public osg::NodeCallback
     {
     public:
-        CameraLocalUpdateCallback(osg::Camera* cam, MWRender::LocalMap* parent)
+        CameraLocalUpdateCallback(MWRender::LocalMap* parent)
             : mRendered(false)
-            , mCamera(cam)
             , mParent(parent)
         {
         }
 
-        virtual void operator()(osg::Node*, osg::NodeVisitor*)
+        virtual void operator()(osg::Node* node, osg::NodeVisitor*)
         {
             if (mRendered)
-                mCamera->setNodeMask(0);
+                node->setNodeMask(0);
 
             if (!mRendered)
             {
                 mRendered = true;
-                mParent->markForRemoval(mCamera);
+                mParent->markForRemoval(static_cast<osg::Camera*>(node));
             }
 
             // Note, we intentionally do not traverse children here. The map camera's scene data is the same as the master camera's,
@@ -55,7 +55,6 @@ namespace
 
     private:
         bool mRendered;
-        osg::ref_ptr<osg::Camera> mCamera;
         MWRender::LocalMap* mParent;
     };
 
@@ -173,7 +172,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-    camera->setCullMask(Mask_Scene|Mask_Water|Mask_Terrain);
+    camera->setCullMask(Mask_Scene|Mask_SimpleWater|Mask_Terrain);
     camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
@@ -205,7 +204,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setStateSet(stateset);
     camera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
     camera->setViewport(0, 0, mMapResolution, mMapResolution);
-    camera->setUpdateCallback(new CameraLocalUpdateCallback(camera, this));
+    camera->setUpdateCallback(new CameraLocalUpdateCallback(this));
 
     return camera;
 }
@@ -479,7 +478,7 @@ osg::Vec2f LocalMap::interiorMapToWorldPosition (float nX, float nY, int x, int 
     return pos;
 }
 
-bool LocalMap::isPositionExplored (float nX, float nY, int x, int y, bool interior)
+bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
 {
     const MapSegment& segment = mSegments[std::make_pair(x, y)];
     if (!segment.mFogOfWarImage)
@@ -527,7 +526,7 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
     }
 
     // explore radius (squared)
-    const float exploreRadius = (mInterior ? 0.1f : 0.3f) * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
+    const float exploreRadius = 0.17f * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
     const float sqrExploreRadius = square(exploreRadius);
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 

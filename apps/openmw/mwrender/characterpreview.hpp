@@ -2,6 +2,9 @@
 #define MWRENDER_CHARACTERPREVIEW_H
 
 #include <osg/ref_ptr>
+#include <memory>
+
+#include <osg/PositionAttitudeTransform>
 
 #include <components/esm/loadnpc.hpp>
 
@@ -61,7 +64,7 @@ namespace MWRender
 
         MWWorld::Ptr mCharacter;
 
-        MWRender::NpcAnimation* mAnimation;
+        std::auto_ptr<MWRender::NpcAnimation> mAnimation;
         osg::ref_ptr<osg::PositionAttitudeTransform> mNode;
         std::string mCurrentAnimGroup;
 

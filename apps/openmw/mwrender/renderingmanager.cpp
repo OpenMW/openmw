@@ -8,7 +8,6 @@
 #include <osg/Fog>
 #include <osg/PolygonMode>
 #include <osg/Group>
-#include <osg/PositionAttitudeTransform>
 #include <osg/UserDataContainer>
 #include <osg/ComputeBoundsVisitor>
 
@@ -26,10 +25,14 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm/loadcell.hpp>
+#include <components/fallback/fallback.hpp>
+
+#include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -122,14 +125,24 @@ namespace MWRender
         bool mWireframe;
     };
 
-    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem, const MWWorld::Fallback* fallback)
+    RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+                                       const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
         , mFogDepth(0.f)
+        , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
+        , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
+        , mUnderwaterFog(0.f)
+        , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
+        , mFieldOfViewOverride(0.f)
+        , mFieldOfViewOverridden(false)
     {
+        resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+
         osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
+        lightRoot->setLightingMask(Mask_Lighting);
         mLightRoot = lightRoot;
         lightRoot->setStartLight(1);
 
@@ -145,7 +158,7 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
 
-        mWater.reset(new Water(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback));
+        mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
         mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
                                                 new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain));
@@ -155,7 +168,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(SceneUtil::Mask_Lit);
+        source->setNodeMask(Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -190,13 +203,17 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
-        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor));
+        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
+        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
         updateProjectionMatrix();
         mStateUpdater->setFogEnd(mViewDistance);
+
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
     }
 
     RenderingManager::~RenderingManager()
@@ -211,6 +228,11 @@ namespace MWRender
     Resource::ResourceSystem* RenderingManager::getResourceSystem()
     {
         return mResourceSystem;
+    }
+
+    osg::Group* RenderingManager::getLightRoot()
+    {
+        return mLightRoot.get();
     }
 
     void RenderingManager::setNightEyeFactor(float factor)
@@ -260,6 +282,7 @@ namespace MWRender
     {
         // need to wrap this in a StateUpdater?
         mSunLight->setDiffuse(colour);
+        mSunLight->setSpecular(colour);
     }
 
     void RenderingManager::setSunDirection(const osg::Vec3f &direction)
@@ -344,13 +367,14 @@ namespace MWRender
     {
         osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
 
-        configureFog (cell->mAmbi.mFogDensity, color);
+        configureFog (cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, color);
     }
 
-    void RenderingManager::configureFog(float fogDepth, const osg::Vec4f &color)
+    void RenderingManager::configureFog(float fogDepth, float underwaterFog, const osg::Vec4f &color)
     {
         mFogDepth = fogDepth;
         mFogColor = color;
+        mUnderwaterFog = underwaterFog;
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -371,11 +395,12 @@ namespace MWRender
 
         osg::Vec3f focal, cameraPos;
         mCamera->getPosition(focal, cameraPos);
+        mCurrentCameraPos = cameraPos;
         if (mWater->isUnderwater(cameraPos))
         {
-            setFogColor(osg::Vec4f(0.090195f, 0.115685f, 0.12745f, 1.f));
-            mStateUpdater->setFogStart(0.f);
-            mStateUpdater->setFogEnd(1000);
+            setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
+            mStateUpdater->setFogStart(mViewDistance * (1 - mUnderwaterFog));
+            mStateUpdater->setFogEnd(mViewDistance);
         }
         else
         {
@@ -426,6 +451,9 @@ namespace MWRender
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
     {
         ptr.getRefData().getBaseNode()->setScale(scale);
+
+        if (ptr == mCamera->getTrackingPtr()) // update height of camera
+            mCamera->processViewChange();
     }
 
     void RenderingManager::removeObject(const MWWorld::Ptr &ptr)
@@ -437,11 +465,13 @@ namespace MWRender
     void RenderingManager::setWaterEnabled(bool enabled)
     {
         mWater->setEnabled(enabled);
+        mSky->setWaterEnabled(enabled);
     }
 
     void RenderingManager::setWaterHeight(float height)
     {
         mWater->setHeight(height);
+        mSky->setWaterHeight(height);
     }
 
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
@@ -474,6 +504,15 @@ namespace MWRender
         mutable bool mDone;
     };
 
+
+    class NoTraverseCallback : public osg::NodeCallback
+    {
+    public:
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+        }
+    };
+
     void RenderingManager::screenshot(osg::Image *image, int w, int h)
     {
         osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
@@ -482,12 +521,9 @@ namespace MWRender
         rttCamera->setRenderOrder(osg::Camera::PRE_RENDER);
         rttCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         rttCamera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
-        rttCamera->setClearColor(mViewer->getCamera()->getClearColor());
-        rttCamera->setClearMask(mViewer->getCamera()->getClearMask());
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix());
         rttCamera->setViewport(0, 0, w, h);
-        rttCamera->setGraphicsContext(mViewer->getCamera()->getGraphicsContext());
 
         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D);
         texture->setInternalFormat(GL_RGB);
@@ -500,6 +536,7 @@ namespace MWRender
         image->setDataType(GL_UNSIGNED_BYTE);
         image->setPixelFormat(texture->getInternalFormat());
 
+        rttCamera->setUpdateCallback(new NoTraverseCallback);
         rttCamera->addChild(mLightRoot);
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
@@ -509,9 +546,17 @@ namespace MWRender
         osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
         rttCamera->setFinalDrawCallback(callback);
 
-        mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+        // at the time this function is called we are in the middle of a frame,
+        // so out of order calls are necessary to get a correct frameNumber for the next frame.
+        // refer to the advance() and frame() order in Engine::go()
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
 
         callback->waitTillDone();
+
+        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
         rttCamera->removeChildren(0, rttCamera->getNumChildren());
         rttCamera->setGraphicsContext(NULL);
@@ -586,23 +631,27 @@ namespace MWRender
 
     }
 
+    osg::ref_ptr<osgUtil::IntersectionVisitor> createIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors)
+    {
+        osg::ref_ptr<osgUtil::IntersectionVisitor> intersectionVisitor( new osgUtil::IntersectionVisitor(intersector));
+        int mask = intersectionVisitor->getTraversalMask();
+        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water|Mask_SimpleWater);
+        if (ignorePlayer)
+            mask &= ~(Mask_Player);
+        if (ignoreActors)
+            mask &= ~(Mask_Actor|Mask_Player);
+
+        intersectionVisitor->setTraversalMask(mask);
+        return intersectionVisitor;
+    }
+
     RenderingManager::RayResult RenderingManager::castRay(const osg::Vec3f& origin, const osg::Vec3f& dest, bool ignorePlayer, bool ignoreActors)
     {
         osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::LineSegmentIntersector::MODEL,
             origin, dest));
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
-        osgUtil::IntersectionVisitor intersectionVisitor(intersector);
-        int mask = intersectionVisitor.getTraversalMask();
-        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water);
-        if (ignorePlayer)
-            mask &= ~(Mask_Player);
-        if (ignoreActors)
-            mask &= ~(Mask_Actor|Mask_Player);
-
-        intersectionVisitor.setTraversalMask(mask);
-
-        mRootNode->accept(intersectionVisitor);
+        mRootNode->accept(*createIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
 
         return getIntersectionResult(intersector);
     }
@@ -621,17 +670,7 @@ namespace MWRender
         intersector->setEnd(end);
         intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
 
-        osgUtil::IntersectionVisitor intersectionVisitor(intersector);
-        int mask = intersectionVisitor.getTraversalMask();
-        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water);
-        if (ignorePlayer)
-            mask &= ~(Mask_Player);
-        if (ignoreActors)
-            mask &= ~(Mask_Actor|Mask_Player);
-
-        intersectionVisitor.setTraversalMask(mask);
-
-        mViewer->getCamera()->accept(intersectionVisitor);
+        mViewer->getCamera()->accept(*createIntersectionVisitor(intersector, ignorePlayer, ignoreActors));
 
         return getIntersectionResult(intersector);
     }
@@ -667,16 +706,19 @@ namespace MWRender
         return mObjects->getAnimation(ptr);
     }
 
-    MWRender::Animation* RenderingManager::getPlayerAnimation()
+    const MWRender::Animation* RenderingManager::getAnimation(const MWWorld::ConstPtr &ptr) const
     {
-        return mPlayerAnimation.get();
+        if (mPlayerAnimation.get() && ptr == mPlayerAnimation->getPtr())
+            return mPlayerAnimation.get();
+
+        return mObjects->getAnimation(ptr);
     }
 
     void RenderingManager::setupPlayer(const MWWorld::Ptr &player)
     {
         if (!mPlayerNode)
         {
-            mPlayerNode = new osg::PositionAttitudeTransform;
+            mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
             mLightRoot->addChild(mPlayerNode);
         }
@@ -691,7 +733,8 @@ namespace MWRender
 
     void RenderingManager::renderPlayer(const MWWorld::Ptr &player)
     {
-        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0));
+        mPlayerAnimation.reset(new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, false, NpcAnimation::VM_Normal,
+                                                mFirstPersonFieldOfView));
 
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
@@ -725,25 +768,29 @@ namespace MWRender
         mWater->removeEmitter(ptr);
     }
 
+    void RenderingManager::emitWaterRipple(const osg::Vec3f &pos)
+    {
+        mWater->emitRipple(pos);
+    }
+
     void RenderingManager::updateProjectionMatrix()
     {
         double aspect = mViewer->getCamera()->getViewport()->aspectRatio();
-        mViewer->getCamera()->setProjectionMatrixAsPerspective(mFieldOfView, aspect, mNearClip, mViewDistance);
+        float fov = mFieldOfView;
+        if (mFieldOfViewOverridden)
+            fov = mFieldOfViewOverride;
+        mViewer->getCamera()->setProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance);
     }
 
     void RenderingManager::updateTextureFiltering()
     {
-        osg::Texture::FilterMode min = osg::Texture::LINEAR_MIPMAP_NEAREST;
-        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
-
-        if (Settings::Manager::getString("texture filtering", "General") == "trilinear")
-            min = osg::Texture::LINEAR_MIPMAP_LINEAR;
-
-        int maxAnisotropy = Settings::Manager::getInt("anisotropy", "General");
-
-        mViewer->stopThreading();
-        mResourceSystem->getTextureManager()->setFilterSettings(min, mag, maxAnisotropy);
-        mViewer->startThreading();
+        mResourceSystem->getTextureManager()->setFilterSettings(
+            Settings::Manager::getString("texture mag filter", "General"),
+            Settings::Manager::getString("texture min filter", "General"),
+            Settings::Manager::getString("texture mipmap", "General"),
+            Settings::Manager::getInt("anisotropy", "General"),
+            mViewer
+        );
     }
 
     void RenderingManager::updateAmbient()
@@ -767,9 +814,9 @@ namespace MWRender
     {
         for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
         {
-            if (it->first == "General" && it->second == "field of view")
+            if (it->first == "Camera" && it->second == "field of view")
             {
-                mFieldOfView = Settings::Manager::getFloat("field of view", "General");
+                mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
                 updateProjectionMatrix();
             }
             else if (it->first == "Camera" && it->second == "viewing distance")
@@ -778,8 +825,12 @@ namespace MWRender
                 mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
-            else if (it->first == "General" && (it->second == "texture filtering" || it->second == "anisotropy"))
+            else if (it->first == "General" && (it->second == "texture filter" ||
+                                                it->second == "texture mipmap" ||
+                                                it->second == "anisotropy"))
                 updateTextureFiltering();
+            else if (it->first == "Water")
+                mWater->processChangedSettings(changed);
         }
     }
 
@@ -833,6 +884,11 @@ namespace MWRender
         return mCamera.get();
     }
 
+    const osg::Vec3f &RenderingManager::getCameraPosition() const
+    {
+        return mCurrentCameraPos;
+    }
+
     void RenderingManager::togglePOV()
     {
         mCamera->toggleViewMode();
@@ -862,6 +918,25 @@ namespace MWRender
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
             mCamera->setCameraDistance(-factor/120.f*10, true, true);
+    }
+
+    void RenderingManager::overrideFieldOfView(float val)
+    {
+        if (mFieldOfViewOverridden != true || mFieldOfViewOverride != val)
+        {
+            mFieldOfViewOverridden = true;
+            mFieldOfViewOverride = val;
+            updateProjectionMatrix();
+        }
+    }
+
+    void RenderingManager::resetFieldOfView()
+    {
+        if (mFieldOfViewOverridden == true)
+        {
+            mFieldOfViewOverridden = false;
+            updateProjectionMatrix();
+        }
     }
 
 }

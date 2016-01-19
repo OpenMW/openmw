@@ -1,6 +1,6 @@
 #include "contentselector.hpp"
 
-#include "../model/esmfile.hpp"
+#include <components/contentselector/model/esmfile.hpp>
 
 #include <QSortFilterProxyModel>
 

@@ -1,14 +1,19 @@
 #ifndef OPENMW_MWRENDER_WATER_H
 #define OPENMW_MWRENDER_WATER_H
 
-#include <osg/ref_ptr>
+#include <memory>
 
-#include "../mwworld/cellstore.hpp"
+#include <osg/ref_ptr>
+#include <osg/Vec3f>
+
+#include <components/settings/settings.hpp>
 
 namespace osg
 {
     class Group;
     class PositionAttitudeTransform;
+    class Geode;
+    class Node;
 }
 
 namespace osgUtil
@@ -23,12 +28,20 @@ namespace Resource
 
 namespace MWWorld
 {
-    class Fallback;
+    class CellStore;
+    class Ptr;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWRender
 {
 
+    class Refraction;
+    class Reflection;
     class RippleSimulation;
 
     /// Water rendering
@@ -37,11 +50,19 @@ namespace MWRender
         static const int CELL_SIZE = 8192;
 
         osg::ref_ptr<osg::Group> mParent;
+        osg::ref_ptr<osg::Group> mSceneRoot;
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
+        osg::ref_ptr<osg::Geode> mWaterGeode;
         Resource::ResourceSystem* mResourceSystem;
+        const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::auto_ptr<RippleSimulation> mSimulation;
+
+        osg::ref_ptr<Refraction> mRefraction;
+        osg::ref_ptr<Reflection> mReflection;
+
+        const std::string mResourcePath;
 
         bool mEnabled;
         bool mToggled;
@@ -50,8 +71,18 @@ namespace MWRender
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
 
+        void createSimpleWaterStateSet(osg::Node* node, float alpha);
+
+        /// @param reflection the reflection camera (required)
+        /// @param refraction the refraction camera (optional)
+        void createShaderWaterStateSet(osg::Node* node, Reflection* reflection, Refraction* refraction);
+
+        void updateWaterMaterial();
+
     public:
-        Water(osg::Group* parent, Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const MWWorld::Fallback* fallback);
+        Water(osg::Group* parent, osg::Group* sceneRoot,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const Fallback::Map* fallback,
+              const std::string& resourcePath);
         ~Water();
 
         void setEnabled(bool enabled);
@@ -64,6 +95,8 @@ namespace MWRender
         void addEmitter (const MWWorld::Ptr& ptr, float scale = 1.f, float force = 1.f);
         void removeEmitter (const MWWorld::Ptr& ptr);
         void updateEmitterPtr (const MWWorld::Ptr& old, const MWWorld::Ptr& ptr);
+        void emitRipple(const osg::Vec3f& pos);
+
         void removeCell(const MWWorld::CellStore* store); ///< remove all emitters in this cell
 
         void clearRipples();
@@ -73,6 +106,7 @@ namespace MWRender
 
         void update(float dt);
 
+        void processChangedSettings(const Settings::CategorySettingVector& settings);
     };
 
 }

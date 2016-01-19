@@ -184,8 +184,9 @@ namespace MWBase
             virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects) = 0;
             virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects) = 0;
 
-            ///return the list of actors which are following the given actor
-            /**ie AiFollow is active and the target is the actor**/
+            ///Returns the list of actors which are siding with the given actor in fights
+            /**ie AiFollow or AiEscort is active and the target is the actor **/
+            virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) = 0;
 
@@ -220,6 +221,13 @@ namespace MWBase
             virtual bool isItemStolenFrom(const std::string& itemid, const std::string& ownerid) = 0;
             
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim) = 0;
+
+            /// Turn actor into werewolf or normal form.
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf) = 0;
+
+            /// Sets the NPC's Acrobatics skill to match the fWerewolfAcrobatics GMST.
+            /// It only applies to the current form the NPC is in.
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor) = 0;
     };
 }
 

@@ -65,7 +65,7 @@ namespace SceneUtil
 
     void ControllerVisitor::apply(osg::Node &node)
     {
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
         osg::Callback* callback = node.getUpdateCallback();
 #else
         osg::NodeCallback* callback = node.getUpdateCallback();
@@ -96,7 +96,7 @@ namespace SceneUtil
         {
             osg::Drawable* drw = geode.getDrawable(i);
 
-#if OSG_MIN_VERSION_REQUIRED(3,3,3)
+#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
             osg::Callback* callback = drw->getUpdateCallback();
 #else
             osg::Drawable::UpdateCallback* callback = drw->getUpdateCallback();

@@ -95,8 +95,7 @@ namespace MWGui
 
         for (MWMechanics::Spells::TIterator iter = merchantSpells.begin(); iter!=merchantSpells.end(); ++iter)
         {
-            const ESM::Spell* spell =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (iter->first);
+            const ESM::Spell* spell = iter->first;
 
             if (spell->mData.mType!=ESM::Spell::ST_Spell)
                 continue; // don't try to sell diseases, curses or powers
@@ -110,10 +109,10 @@ namespace MWGui
                     continue;
             }
 
-            if (playerHasSpell(iter->first))
+            if (playerHasSpell(iter->first->mId))
                 continue;
 
-            addSpell (iter->first);
+            addSpell (iter->first->mId);
         }
 
         updateLabels();

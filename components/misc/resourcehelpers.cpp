@@ -51,7 +51,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLev
     std::string prefix2 = topLevelDirectory + '/';
 
     std::string correctedPath = resPath;
-    Misc::StringUtils::toLower(correctedPath);
+    Misc::StringUtils::lowerCaseInPlace(correctedPath);
 
     // Apparently, leading separators are allowed
     while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))

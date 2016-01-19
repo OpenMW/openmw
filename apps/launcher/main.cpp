@@ -41,15 +41,6 @@ int main(int argc, char *argv[])
             dir.cdUp();
             dir.cdUp();
         }
-
-        // force Qt to load only LOCAL plugins, don't touch system Qt installation
-        QDir pluginsPath(QCoreApplication::applicationDirPath());
-        pluginsPath.cdUp();
-        pluginsPath.cd("Plugins");
-
-        QStringList libraryPaths;
-        libraryPaths << pluginsPath.path() << QCoreApplication::applicationDirPath();
-        app.setLibraryPaths(libraryPaths);
         #endif
 
         QDir::setCurrent(dir.absolutePath());
@@ -59,10 +50,6 @@ int main(int argc, char *argv[])
         Launcher::FirstRunDialogResult result = mainWin.showFirstRunDialog();
         if (result == Launcher::FirstRunDialogResultFailure)
             return 0;
-
-    //    if (!mainWin.setup()) {
-    //        return 0;
-    //    }
 
         if (result == Launcher::FirstRunDialogResultContinue)
             mainWin.show();

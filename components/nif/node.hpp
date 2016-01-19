@@ -9,6 +9,8 @@
 #include "controller.hpp"
 #include "base.hpp"
 
+#include <components/misc/stringops.hpp>
+
 namespace Nif
 {
 
@@ -118,10 +120,10 @@ struct NiNode : Node
         children.read(nif);
         effects.read(nif);
 
-        // Discard tranformations for the root node, otherwise some meshes
+        // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
         // can be expanded if needed.
-        if (0 == recIndex)
+        if (0 == recIndex && !Misc::StringUtils::ciEqual(name, "bip01"))
         {
             static_cast<Nif::Node*>(this)->trafo = Nif::Transformation::getIdentity();
         }
@@ -247,6 +249,42 @@ struct NiRotatingParticles : Node
     {
         Node::post(nif);
         data.post(nif);
+    }
+};
+
+// A node used as the base to switch between child nodes, such as for LOD levels.
+struct NiSwitchNode : public NiNode
+{
+    void read(NIFStream *nif)
+    {
+        NiNode::read(nif);
+        nif->getInt(); // unknown
+    }
+};
+
+struct NiLODNode : public NiSwitchNode
+{
+    osg::Vec3f lodCenter;
+
+    struct LODRange
+    {
+        float minRange;
+        float maxRange;
+    };
+    std::vector<LODRange> lodLevels;
+
+    void read(NIFStream *nif)
+    {
+        NiSwitchNode::read(nif);
+        lodCenter = nif->getVector3();
+        unsigned int numLodLevels = nif->getUInt();
+        for (unsigned int i=0; i<numLodLevels; ++i)
+        {
+            LODRange r;
+            r.minRange = nif->getFloat();
+            r.maxRange = nif->getFloat();
+            lodLevels.push_back(r);
+        }
     }
 };
 

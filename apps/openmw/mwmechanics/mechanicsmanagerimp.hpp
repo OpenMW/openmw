@@ -150,6 +150,7 @@ namespace MWMechanics
             virtual void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& objects);
             virtual void getActorsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects);
 
+            virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor);
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor);
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor);
 
@@ -185,6 +186,9 @@ namespace MWMechanics
             
             /// @return is \a ptr allowed to take/use \a cellref or is it a crime?
             virtual bool isAllowedToUse (const MWWorld::Ptr& ptr, const MWWorld::CellRef& cellref, MWWorld::Ptr& victim);
+
+            virtual void setWerewolf(const MWWorld::Ptr& actor, bool werewolf);
+            virtual void applyWerewolfAcrobatics(const MWWorld::Ptr& actor);
 
         private:
             void reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,

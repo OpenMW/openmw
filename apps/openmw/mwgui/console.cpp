@@ -365,7 +365,7 @@ namespace MWGui
 
             /* Is the beginning of the string different from the input string? If yes skip it. */
             for( std::string::iterator iter=tmp.begin(), iter2=(*it).begin(); iter < tmp.end();++iter, ++iter2) {
-                if( tolower(*iter) != tolower(*iter2) ) {
+                if( Misc::StringUtils::toLower(*iter) != Misc::StringUtils::toLower(*iter2) ) {
                     string_different=true;
                     break;
                 }
@@ -405,7 +405,7 @@ namespace MWGui
 
         for(std::string::iterator iter=matches.front().begin()+tmp.length(); iter < matches.front().end(); ++iter, ++i) {
             for(std::vector<std::string>::iterator it=matches.begin(); it < matches.end();++it) {
-                if( tolower((*it)[i]) != tolower(*iter) ) {
+                if( Misc::StringUtils::toLower((*it)[i]) != Misc::StringUtils::toLower(*iter) ) {
                     /* Append the longest match to the end of the output string*/
                     output.append(matches.front().substr( 0, i));
                     return output;

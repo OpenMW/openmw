@@ -31,7 +31,9 @@ namespace MWMechanics
     {
         public:
 
-            typedef std::map<std::string, std::map<const int, float> > TContainer; // ID, <effect index, normalised random magnitude>
+            typedef const ESM::Spell* SpellKey;
+
+            typedef std::map<SpellKey, std::map<const int, float> > TContainer; // ID, <effect index, normalised random magnitude>
             typedef TContainer::const_iterator TIterator;
 
             struct CorprusStats
@@ -47,23 +49,26 @@ namespace MWMechanics
             TContainer mSpells;
 
             // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
-            std::map<std::string, MagicEffects> mPermanentSpellEffects;
+            std::map<SpellKey, MagicEffects> mPermanentSpellEffects;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
-            std::map<std::string, MWWorld::TimeStamp> mUsedPowers;
+            std::map<SpellKey, MWWorld::TimeStamp> mUsedPowers;
 
-            std::map<std::string, CorprusStats> mCorprusSpells;
+            std::map<SpellKey, CorprusStats> mCorprusSpells;
+
+            /// Get spell from ID, throws exception if not found
+            const ESM::Spell* getSpell(const std::string& id) const;
 
         public:
 
-            void worsenCorprus(const std::string &corpSpellId);
+            void worsenCorprus(const ESM::Spell* spell);
             static bool hasCorprusEffect(const ESM::Spell *spell);
-            const std::map<std::string, CorprusStats> & getCorprusSpells() const;
+            const std::map<SpellKey, CorprusStats> & getCorprusSpells() const;
 
-            bool canUsePower (const std::string& power) const;
-            void usePower (const std::string& power);
+            bool canUsePower (const ESM::Spell* spell) const;
+            void usePower (const ESM::Spell* spell);
 
             void purgeCommonDisease();
             void purgeBlightDisease();
@@ -74,7 +79,8 @@ namespace MWMechanics
 
             TIterator end() const;
 
-            bool hasSpell(const std::string& spell) const { return mSpells.find(Misc::StringUtils::lowerCase(spell)) != mSpells.end(); }
+            bool hasSpell(const std::string& spell) const;
+            bool hasSpell(const ESM::Spell* spell) const;
 
             void add (const std::string& spell);
             ///< Adding a spell that is already listed in *this is a no-op.

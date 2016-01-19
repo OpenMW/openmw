@@ -22,7 +22,8 @@ namespace CSVWidget
 
             struct ButtonDesc
             {
-                unsigned int mId;
+                unsigned int mButtonId;
+                unsigned int mMask;
                 QString mName;
                 int mIndex;
             };
@@ -53,15 +54,17 @@ namespace CSVWidget
 
             virtual void showPanel (const QPoint& position);
 
+            /// \param buttonId used to compose the icon filename
+            /// \param mask used for the reported getSelectionMask() / setSelectionMask()
             /// \attention After the last button has been added, setSelection must be called at
             /// least once to finalise the layout.
-            void addButton (unsigned int id,
+            void addButton (unsigned int buttonId, unsigned int mask,
                 const QString& name, const QString& tooltip = "", bool disabled = false);
 
-            unsigned int getSelection() const;
+            unsigned int getSelectionMask() const;
 
-            /// \param or'ed button IDs. IDs that do not exist will be ignored.
-            void setSelection (unsigned int selection);
+            /// \param or'ed button masks. buttons that do not exist will be ignored.
+            void setSelectionMask (unsigned int selection);
 
         signals:
 

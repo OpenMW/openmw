@@ -47,7 +47,9 @@ namespace CSMTools
             //FINAL CHECK
             void finalCheck (CSMDoc::Messages& messages);
 
-            //TEMPLATE CHECKS
+            //Convenience functions
+            void inventoryListCheck(const std::vector<ESM::ContItem>& itemList, CSMDoc::Messages& messages, const std::string& id);
+
             template<typename ITEM> void inventoryItemCheck(const ITEM& someItem,
                                                             CSMDoc::Messages& messages,
                                                             const std::string& someID,

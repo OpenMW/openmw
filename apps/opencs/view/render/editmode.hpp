@@ -5,6 +5,10 @@
 
 #include "../widget/modebutton.hpp"
 
+class QDragEnterEvent;
+class QDropEvent;
+class QDragMoveEvent;
+
 namespace CSVRender
 {
     class WorldspaceWidget;
@@ -30,9 +34,6 @@ namespace CSVRender
 
             virtual void activate (CSVWidget::SceneToolbar *toolbar);
 
-            /// Default-implementation: Do nothing.
-            virtual void updateUserSetting (const QString& name, const QStringList& value);
-
             /// Default-implementation: Ignored.
             virtual void setEditLock (bool locked);
 
@@ -43,7 +44,10 @@ namespace CSVRender
             virtual void secondaryEditPressed (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: Ignored.
-            virtual void selectPressed (osg::ref_ptr<TagBase> tag);
+            virtual void primarySelectPressed (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: Ignored.
+            virtual void secondarySelectPressed (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: ignore and return false
             ///
@@ -58,7 +62,12 @@ namespace CSVRender
             /// Default-implementation: ignore and return false
             ///
             /// \return Drag accepted?
-            virtual bool selectStartDrag (osg::ref_ptr<TagBase> tag);
+            virtual bool primarySelectStartDrag (osg::ref_ptr<TagBase> tag);
+
+            /// Default-implementation: ignore and return false
+            ///
+            /// \return Drag accepted?
+            virtual bool secondarySelectStartDrag (osg::ref_ptr<TagBase> tag);
 
             /// Default-implementation: ignored
             virtual void drag (int diffX, int diffY, double speedFactor);
@@ -74,6 +83,15 @@ namespace CSVRender
 
             /// Default-implementation: ignored
             virtual void dragWheel (int diff, double speedFactor);
+
+            /// Default-implementation: ignored
+            virtual void dragEnterEvent (QDragEnterEvent *event);
+
+            /// Default-implementation: ignored
+            virtual void dropEvent (QDropEvent* event);
+
+            /// Default-implementation: ignored
+            virtual void dragMoveEvent (QDragMoveEvent *event);
     };
 }
 

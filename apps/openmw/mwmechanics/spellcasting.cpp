@@ -124,7 +124,7 @@ namespace MWMechanics
         }
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
-            return stats.getSpells().canUsePower(spell->mId) ? 100 : 0;
+            return stats.getSpells().canUsePower(spell) ? 100 : 0;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
@@ -365,26 +365,6 @@ namespace MWMechanics
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
-        // Try absorbing if it's a spell
-        // NOTE: Vanilla does this once per effect source instead of adding the % from all sources together, not sure
-        // if that is worth replicating.
-        bool absorbed = false;
-        if (spell && caster != target && target.getClass().isActor())
-        {
-            float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
-            absorbed = (Misc::Rng::roll0to99() < absorb);
-            if (absorbed)
-            {
-                const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                            "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
-                // Magicka is increased by cost of spell
-                DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
-                magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                target.getClass().getCreatureStats(target).setMagicka(magicka);
-            }
-        }
-
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
             effectIt!=effects.mList.end(); ++effectIt)
         {
@@ -403,6 +383,26 @@ namespace MWMechanics
                     && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
                     && target.getClass().isActor())
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
+
+            // Try absorbing if it's a spell
+            // NOTE: Vanilla does this once per spell absorption effect source instead of adding the % from all sources together, not sure
+            // if that is worth replicating.
+            bool absorbed = false;
+            if (spell && caster != target && target.getClass().isActor())
+            {
+                float absorb = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude();
+                absorbed = (Misc::Rng::roll0to99() < absorb);
+                if (absorbed)
+                {
+                    const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
+                    MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
+                                "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
+                    // Magicka is increased by cost of spell
+                    DynamicStat<float> magicka = target.getClass().getCreatureStats(target).getMagicka();
+                    magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
+                    target.getClass().getCreatureStats(target).setMagicka(magicka);
+                }
+            }
 
             float magnitudeMult = 1;
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful && target.getClass().isActor())
@@ -452,42 +452,18 @@ namespace MWMechanics
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
                 magnitude *= magnitudeMult;
 
-                bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
-                if (target.getClass().isActor() && hasDuration && effectIt->mDuration > 0)
+                if (!target.getClass().isActor())
                 {
-                    ActiveSpells::ActiveEffect effect;
-                    effect.mEffectId = effectIt->mEffectID;
-                    effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
-                    effect.mDuration = static_cast<float>(effectIt->mDuration);
-                    effect.mMagnitude = magnitude;
-
-                    targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
-
-                    appliedLastingEffects.push_back(effect);
-
-                    // For absorb effects, also apply the effect to the caster - but with a negative
-                    // magnitude, since we're transfering stats from the target to the caster
-                    if (!caster.isEmpty() && caster.getClass().isActor())
-                    {
-                        for (int i=0; i<5; ++i)
-                        {
-                            if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
-                            {
-                                std::vector<ActiveSpells::ActiveEffect> effects;
-                                ActiveSpells::ActiveEffect effect_ = effect;
-                                effect_.mMagnitude *= -1;
-                                effects.push_back(effect_);
-                                // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
-                                caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                            effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
-                            }
-                        }
-                    }
+                    // non-actor objects have no list of active magic effects, so have to apply instantly
+                    if (!applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude))
+                        continue;
                 }
-                else
+                else // target.getClass().isActor() == true
                 {
-                    if (hasDuration && target.getClass().isActor())
+                    bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+                    if (hasDuration && effectIt->mDuration == 0)
                     {
+                        // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
                         effectTick(target.getClass().getCreatureStats(target), target, EffectKey(*effectIt), magnitude);
                         bool isDead = target.getClass().getCreatureStats(target).isDead();
@@ -495,8 +471,38 @@ namespace MWMechanics
                         if (!wasDead && isDead)
                             MWBase::Environment::get().getMechanicsManager()->actorKilled(target, caster);
                     }
-                    else if (!applyInstantEffect(target, caster, EffectKey(*effectIt), magnitude))
-                        continue;
+                    else
+                    {
+                        // add to list of active effects, to apply in next frame
+                        ActiveSpells::ActiveEffect effect;
+                        effect.mEffectId = effectIt->mEffectID;
+                        effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
+                        effect.mDuration = static_cast<float>(effectIt->mDuration);
+                        effect.mMagnitude = magnitude;
+
+                        targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
+
+                        appliedLastingEffects.push_back(effect);
+
+                        // For absorb effects, also apply the effect to the caster - but with a negative
+                        // magnitude, since we're transfering stats from the target to the caster
+                        if (!caster.isEmpty() && caster.getClass().isActor())
+                        {
+                            for (int i=0; i<5; ++i)
+                            {
+                                if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
+                                {
+                                    std::vector<ActiveSpells::ActiveEffect> effects;
+                                    ActiveSpells::ActiveEffect effect_ = effect;
+                                    effect_.mMagnitude *= -1;
+                                    effects.push_back(effect_);
+                                    // Also make sure to set casterActorId = target, so that the effect on the caster gets purged when the target dies
+                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                                effects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Re-casting a summon effect will remove the creature from previous castings of that effect.
@@ -546,7 +552,7 @@ namespace MWMechanics
         }
 
         if (!exploded)
-            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, range, mId, mSourceName);
+            MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName);
 
         if (!reflectedEffects.mList.empty())
             inflict(caster, target, reflectedEffects, range, true, exploded);
@@ -823,7 +829,7 @@ namespace MWMechanics
 
             // A power can be used once per 24h
             if (spell->mData.mType == ESM::Spell::ST_Power)
-                stats.getSpells().usePower(spell->mId);
+                stats.getSpells().usePower(spell);
         }
 
         if (mCaster == getPlayer() && spellIncreasesSkill(spell))

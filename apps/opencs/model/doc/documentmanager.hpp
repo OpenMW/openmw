@@ -10,6 +10,7 @@
 #include <QThread>
 
 #include <components/to_utf8/to_utf8.hpp>
+#include <components/fallback/fallback.hpp>
 
 #include "../world/resourcesmanager.hpp"
 
@@ -67,6 +68,8 @@ namespace CSMDoc
 
             void setResourceDir (const boost::filesystem::path& parResDir);
 
+            void setFallbackMap (const std::map<std::string, std::string>& fallbackMap);
+
             void setEncoding (ToUTF8::FromType encoding);
 
             void setBlacklistedScripts (const std::vector<std::string>& scriptIds);
@@ -78,6 +81,7 @@ namespace CSMDoc
         private:
 
             boost::filesystem::path mResDir;
+            Fallback::Map mFallbackMap;
 
         private slots:
 

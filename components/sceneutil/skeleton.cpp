@@ -3,6 +3,8 @@
 #include <osg/Transform>
 #include <osg/MatrixTransform>
 
+#include <components/misc/stringops.hpp>
+
 #include <iostream>
 
 namespace SceneUtil
@@ -23,7 +25,7 @@ public:
         if (!bone)
             return;
 
-        mCache[bone->getName()] = std::make_pair(getNodePath(), bone);
+        mCache[Misc::StringUtils::lowerCase(bone->getName())] = std::make_pair(getNodePath(), bone);
 
         traverse(node);
     }
@@ -59,7 +61,7 @@ Bone* Skeleton::getBone(const std::string &name)
         mBoneCacheInit = true;
     }
 
-    BoneCache::iterator found = mBoneCache.find(name);
+    BoneCache::iterator found = mBoneCache.find(Misc::StringUtils::lowerCase(name));
     if (found == mBoneCache.end())
         return NULL;
 
@@ -104,10 +106,10 @@ Bone* Skeleton::getBone(const std::string &name)
 
 void Skeleton::updateBoneMatrices(osg::NodeVisitor* nv)
 {
-    if (nv->getFrameStamp()->getFrameNumber() != mLastFrameNumber)
+    if (nv->getTraversalNumber() != mLastFrameNumber)
         mNeedToUpdateBoneMatrices = true;
 
-    mLastFrameNumber = nv->getFrameStamp()->getFrameNumber();
+    mLastFrameNumber = nv->getTraversalNumber();
 
     if (mNeedToUpdateBoneMatrices)
     {
@@ -135,7 +137,10 @@ bool Skeleton::getActive() const
 
 void Skeleton::traverse(osg::NodeVisitor& nv)
 {
-    if (!mActive && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR && mLastFrameNumber != 0)
+    if (!getActive() && nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR
+            // need to process at least 2 frames before shutting off update, since we need to have both frame-alternating RigGeometries initialized
+            // this would be more naturally handled if the double-buffering was implemented in RigGeometry itself rather than in a FrameSwitch decorator node
+            && mLastFrameNumber != 0 && mLastFrameNumber+2 <= nv.getTraversalNumber())
         return;
     osg::Group::traverse(nv);
 }
@@ -157,6 +162,7 @@ void Bone::update(const osg::Matrixf* parentMatrixInSkeletonSpace)
     if (!mNode)
     {
         std::cerr << "Bone without node " << std::endl;
+        return;
     }
     if (parentMatrixInSkeletonSpace)
         mMatrixInSkeletonSpace = mNode->getMatrix() * (*parentMatrixInSkeletonSpace);

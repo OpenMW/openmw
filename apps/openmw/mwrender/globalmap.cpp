@@ -62,9 +62,8 @@ namespace
     class CameraUpdateGlobalCallback : public osg::NodeCallback
     {
     public:
-        CameraUpdateGlobalCallback(osg::Camera* cam, MWRender::GlobalMap* parent)
+        CameraUpdateGlobalCallback(MWRender::GlobalMap* parent)
             : mRendered(false)
-            , mCamera(cam)
             , mParent(parent)
         {
         }
@@ -73,7 +72,7 @@ namespace
         {
             if (mRendered)
             {
-                mCamera->setNodeMask(0);
+                node->setNodeMask(0);
                 return;
             }
 
@@ -82,13 +81,12 @@ namespace
             if (!mRendered)
             {
                 mRendered = true;
-                mParent->markForRemoval(mCamera);
+                mParent->markForRemoval(static_cast<osg::Camera*>(node));
             }
         }
 
     private:
         bool mRendered;
-        osg::ref_ptr<osg::Camera> mCamera;
         MWRender::GlobalMap* mParent;
     };
 
@@ -167,7 +165,7 @@ namespace MWRender
                         int vertexY = static_cast<int>(float(cellY) / float(mCellSize) * 9);
 
                         int texelX = (x-mMinX) * mCellSize + cellX;
-                        int texelY = (mHeight-1) - ((y-mMinY) * mCellSize + cellY);
+                        int texelY = (y-mMinY) * mCellSize + cellY;
 
                         unsigned char r,g,b;
 
@@ -253,6 +251,7 @@ namespace MWRender
         camera->setProjectionMatrix(osg::Matrix::identity());
         camera->setProjectionResizePolicy(osg::Camera::FIXED);
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        y = mHeight - y - height; // convert top-left origin to bottom-left
         camera->setViewport(x, y, width, height);
 
         if (clear)
@@ -263,10 +262,13 @@ namespace MWRender
         else
             camera->setClearMask(GL_NONE);
 
-        camera->setUpdateCallback(new CameraUpdateGlobalCallback(camera, this));
+        camera->setUpdateCallback(new CameraUpdateGlobalCallback(this));
 
         camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
         camera->attach(osg::Camera::COLOR_BUFFER, mOverlayTexture);
+
+        // no need for a depth buffer
+        camera->setImplicitBufferAttachmentMask(osg::DisplaySettings::IMPLICIT_COLOR_BUFFER_ATTACHMENT);
 
         if (cpuCopy)
         {
@@ -288,10 +290,12 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Geometry> geom = createTexturedQuad(srcLeft, srcTop, srcRight, srcBottom);
             osg::ref_ptr<osg::Depth> depth = new osg::Depth;
-            depth->setFunction(osg::Depth::ALWAYS);
-            geom->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
-            geom->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-            geom->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            depth->setWriteMask(0);
+            osg::StateSet* stateset = geom->getOrCreateStateSet();
+            stateset->setAttribute(depth);
+            stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+            stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+            stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
             osg::ref_ptr<osg::Geode> geode = new osg::Geode;
             geode->addDrawable(geom);
             camera->addChild(geode);
@@ -308,12 +312,12 @@ namespace MWRender
             return;
 
         int originX = (cellX - mMinX) * mCellSize;
-        int originY = (cellY - mMinY) * mCellSize;
+        int originY = (cellY - mMinY + 1) * mCellSize; // +1 because we want the top left corner of the cell, not the bottom left
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
 
-        requestOverlayTextureUpdate(originX, originY, mCellSize, mCellSize, localMapTexture, false, true);
+        requestOverlayTextureUpdate(originX, mHeight - originY, mCellSize, mCellSize, localMapTexture, false, true);
     }
 
     void GlobalMap::clear()

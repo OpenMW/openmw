@@ -23,7 +23,7 @@ ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &co
 {
     // For some reason the osgParticle constructor doesn't copy the particles
     for (int i=0;i<copy.numParticles()-copy.numDeadParticles();++i)
-        _particles.push_back(*copy.getParticle(i));
+        createParticle(copy.getParticle(i));
 }
 
 void ParticleSystem::setQuota(int quota)
@@ -49,7 +49,7 @@ void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
 
         osg::Matrix mat = osg::computeLocalToWorld( path );
         mat.orthoNormalize(mat); // don't undo the scale
-        mat = osg::Matrix::inverse(mat);
+        mat.invert(mat);
         trans->setMatrix(mat);
     }
     traverse(node,nv);
@@ -127,7 +127,7 @@ void GrowFadeAffector::operate(osgParticle::Particle* particle, double /* dt */)
 }
 
 ParticleColorAffector::ParticleColorAffector(const Nif::NiColorData *clrdata)
-    : mData(*clrdata)
+    : mData(clrdata->mKeyMap, osg::Vec4f(1,1,1,1))
 {
 }
 
@@ -145,7 +145,7 @@ ParticleColorAffector::ParticleColorAffector(const ParticleColorAffector &copy, 
 void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* dt */)
 {
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
-    osg::Vec4f color = interpKey(mData.mKeyMap->mKeys, time, osg::Vec4f(1,1,1,1));
+    osg::Vec4f color = mData.interpKey(time);
 
     particle->setColorRange(osgParticle::rangev4(color, color));
 }
@@ -276,7 +276,7 @@ void Emitter::emitParticles(double dt)
         int randomRecIndex = mTargets[(std::rand() / (static_cast<double>(RAND_MAX)+1.0)) * mTargets.size()];
 
         // we could use a map here for faster lookup
-        FindRecIndexVisitor visitor(randomRecIndex);
+        FindGroupByRecIndex visitor(randomRecIndex);
         getParent(0)->accept(visitor);
 
         if (!visitor.mFound)
@@ -306,21 +306,25 @@ void Emitter::emitParticles(double dt)
     }
 }
 
-FindRecIndexVisitor::FindRecIndexVisitor(int recIndex)
+FindGroupByRecIndex::FindGroupByRecIndex(int recIndex)
     : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     , mFound(NULL)
     , mRecIndex(recIndex)
 {
 }
 
-void FindRecIndexVisitor::apply(osg::Node &searchNode)
+void FindGroupByRecIndex::apply(osg::Node &searchNode)
 {
     if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
     {
         NodeUserData* holder = dynamic_cast<NodeUserData*>(searchNode.getUserDataContainer()->getUserObject(0));
         if (holder && holder->mIndex == mRecIndex)
         {
-            mFound = static_cast<osg::Group*>(&searchNode);
+            osg::Group* group = searchNode.asGroup();
+            if (!group)
+                group = searchNode.getParent(0);
+
+            mFound = group;
             mFoundPath = getNodePath();
             return;
         }

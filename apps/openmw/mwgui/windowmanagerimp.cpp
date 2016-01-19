@@ -33,6 +33,9 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
+#include <components/myguiplatform/myguirendermanager.hpp>
+#include <components/myguiplatform/additivelayer.hpp>
+#include <components/myguiplatform/scalinglayer.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -114,7 +117,8 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem
             , const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts,
             Translation::Storage& translationDataStorage, ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string, std::string>& fallbackMap, const std::string& versionDescription)
-      : mResourceSystem(resourceSystem)
+      : mStore(NULL)
+      , mResourceSystem(resourceSystem)
       , mViewer(viewer)
       , mConsoleOnlyScripts(consoleOnlyScripts)
       , mCurrentModals()
@@ -185,7 +189,6 @@ namespace MWGui
       , mForceHidden(GW_None)
       , mAllowed(GW_ALL)
       , mRestAllowed(true)
-      , mFPS(0.0f)
       , mFallbackMap(fallbackMap)
       , mShowOwned(0)
       , mVersionDescription(versionDescription)
@@ -216,6 +219,8 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
+        MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::ScalingLayer>("Layer");
         BookPage::registerMyGUIComponents ();
         ItemView::registerComponents();
         ItemWidget::registerComponents();
@@ -246,7 +251,7 @@ namespace MWGui
         MyGUI::PointerManager::getInstance().setVisible(false);
 
         mVideoBackground = MyGUI::Gui::getInstance().createWidgetReal<MyGUI::ImageBox>("ImageBox", 0,0,1,1,
-            MyGUI::Align::Default, "Overlay");
+            MyGUI::Align::Default, "InputBlocker");
         mVideoBackground->setImageTexture("black");
         mVideoBackground->setVisible(false);
         mVideoBackground->setNeedMouseFocus(true);
@@ -284,9 +289,10 @@ namespace MWGui
         trackWindow(mStatsWindow, "stats");
         mConsole = new Console(w,h, mConsoleOnlyScripts);
         trackWindow(mConsole, "console");
-        mJournal = JournalWindow::create(JournalViewModel::create ());
-        mMessageBoxManager = new MessageBoxManager(
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
+
+        bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
+        mJournal = JournalWindow::create(JournalViewModel::create (), questList);
+        mMessageBoxManager = new MessageBoxManager(mStore->get<ESM::GameSetting>().find("fMessageTimePerChar")->getFloat());
         mInventoryWindow = new InventoryWindow(mDragAndDrop, mViewer, mResourceSystem);
         mTradeWindow = new TradeWindow();
         trackWindow(mTradeWindow, "barter");
@@ -296,7 +302,7 @@ namespace MWGui
         trackWindow(mDialogueWindow, "dialogue");
         mContainerWindow = new ContainerWindow(mDragAndDrop);
         trackWindow(mContainerWindow, "container");
-        mHud = new HUD(mCustomMarkers, Settings::Manager::getInt("fps", "HUD"), mDragAndDrop, mLocalMapRender);
+        mHud = new HUD(mCustomMarkers, mDragAndDrop, mLocalMapRender);
         mToolTips = new ToolTips();
         mScrollWindow = new ScrollWindow();
         mBookWindow = new BookWindow();
@@ -320,19 +326,27 @@ namespace MWGui
         trackWindow(mCompanionWindow, "companion");
         mJailScreen = new JailScreen();
 
-        mWerewolfFader = new ScreenFader("textures\\werewolfoverlay.dds");
+        std::string werewolfFaderTex = "textures\\werewolfoverlay.dds";
+        if (mResourceSystem->getVFS()->exists(werewolfFaderTex))
+            mWerewolfFader = new ScreenFader(werewolfFaderTex);
         mBlindnessFader = new ScreenFader("black");
-        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+
         // fall back to player_hit_01.dds if bm_player_hit_01.dds is not available
-        // TODO: check if non-BM versions actually use player_hit_01.dds
+        std::string hitFaderTexture = "textures\\bm_player_hit_01.dds";
+        const std::string hitFaderLayout = "openmw_screen_fader_hit.layout";
+        MyGUI::FloatCoord hitFaderCoord (0,0,1,1);
         if(!mResourceSystem->getVFS()->exists(hitFaderTexture))
+        {
             hitFaderTexture = "textures\\player_hit_01.dds";
-        mHitFader = new ScreenFader(hitFaderTexture);
+            hitFaderCoord = MyGUI::FloatCoord(0.2, 0.25, 0.6, 0.5);
+        }
+        mHitFader = new ScreenFader(hitFaderTexture, hitFaderLayout, hitFaderCoord);
+
         mScreenFader = new ScreenFader("black");
 
         mDebugWindow = new DebugWindow();
 
-        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"Overlay");
+        mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>("",0,0,w,h,MyGUI::Align::Stretch,"InputBlocker");
 
         mHud->setVisible(mHudEnabled);
 
@@ -447,6 +461,11 @@ namespace MWGui
         delete mGuiPlatform;
     }
 
+    void WindowManager::setStore(const MWWorld::ESMStore &store)
+    {
+        mStore = &store;
+    }
+
     void WindowManager::cleanupGarbage()
     {
         // Delete any dialogs which are no longer in use
@@ -463,8 +482,6 @@ namespace MWGui
     void WindowManager::update()
     {
         cleanupGarbage();
-
-        mHud->setFPS(mFPS);
 
         mHud->update();
     }
@@ -859,7 +876,13 @@ namespace MWGui
                 mMessageBoxManager->onFrame(0.f);
                 MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-                mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+                // at the time this function is called we are in the middle of a frame,
+                // so out of order calls are necessary to get a correct frameNumber for the next frame.
+                // refer to the advance() and frame() order in Engine::go()
+                mViewer->eventTraversal();
+                mViewer->updateTraversal();
+                mViewer->renderingTraversals();
+                mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
             }
         }
     }
@@ -890,8 +913,7 @@ namespace MWGui
 
     std::string WindowManager::getGameSettingString(const std::string &id, const std::string &default_)
     {
-        const ESM::GameSetting *setting =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search(id);
+        const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().search(id);
 
         if (setting && setting->mValue.getType()==ESM::VT_String)
             return setting->mValue.getString();
@@ -976,7 +998,8 @@ namespace MWGui
         mCompanionWindow->onFrame();
         mJailScreen->onFrame(frameDuration);
 
-        mWerewolfFader->update(frameDuration);
+        if (mWerewolfFader)
+            mWerewolfFader->update(frameDuration);
         mBlindnessFader->update(frameDuration);
         mHitFader->update(frameDuration);
         mScreenFader->update(frameDuration);
@@ -1120,8 +1143,12 @@ namespace MWGui
         }
         else
         {
-            const ESM::GameSetting *setting =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(tag);
+            if (!mStore)
+            {
+                std::cerr << "WindowManager::onRetrieveTag: no Store set up yet, can not replace '" << tag << "'" << std::endl;
+                return;
+            }
+            const ESM::GameSetting *setting = mStore->get<ESM::GameSetting>().find(tag);
 
             if (setting && setting->mValue.getType()==ESM::VT_String)
                 _result = setting->mValue.getString();
@@ -1132,7 +1159,6 @@ namespace MWGui
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mHud->setFpsVisible(static_cast<bool>(Settings::Manager::getInt("fps", "HUD")));
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
@@ -1245,8 +1271,7 @@ namespace MWGui
         mSelectedSpell = spellId;
         mHud->setSelectedSpell(spellId, successChancePercent);
 
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        const ESM::Spell* spell = mStore->get<ESM::Spell>().find(spellId);
 
         mSpellWindow->setTitle(spell->mName);
     }
@@ -1254,7 +1279,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedSpell = "";
-        const ESM::Enchantment* ench = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>()
+        const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>()
                 .find(item.getClass().getEnchantment(item));
 
         int chargePercent = (item.getCellRef().getEnchantmentCharge() == -1) ? 100
@@ -1314,11 +1339,6 @@ namespace MWGui
     void WindowManager::executeInConsole (const std::string& path)
     {
         mConsole->executeFile (path);
-    }
-
-    void WindowManager::wmUpdateFps(float fps)
-    {
-        mFPS = fps;
     }
 
     MWGui::DialogueWindow* WindowManager::getDialogueWindow() { return mDialogueWindow;  }
@@ -1694,7 +1714,7 @@ namespace MWGui
         {
             reader.getSubNameIs("ID__");
             std::string spell = reader.getHString();
-            if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spell))
+            if (mStore->get<ESM::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
         else if (type == ESM::REC_MARK)
@@ -1741,6 +1761,7 @@ namespace MWGui
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
 
+        MyGUI::Widget* oldKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         setKeyFocusWidget(mVideoWidget);
 
         mVideoBackground->setVisible(true);
@@ -1756,11 +1777,19 @@ namespace MWGui
         {
             MWBase::Environment::get().getInputManager()->update(0, true, false);
 
-            mViewer->frame(mViewer->getFrameStamp()->getSimulationTime());
+            // at the time this function is called we are in the middle of a frame,
+            // so out of order calls are necessary to get a correct frameNumber for the next frame.
+            // refer to the advance() and frame() order in Engine::go()
+            mViewer->eventTraversal();
+            mViewer->updateTraversal();
+            mViewer->renderingTraversals();
+            mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
         }
         mVideoWidget->stop();
 
         MWBase::Environment::get().getSoundManager()->resumeSounds();
+
+        setKeyFocusWidget(oldKeyFocus);
 
         setCursorVisible(cursorWasVisible);
 
@@ -1867,7 +1896,8 @@ namespace MWGui
         if (!mWerewolfOverlayEnabled)
             return;
 
-        mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
+        if (mWerewolfFader)
+            mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
     void WindowManager::onClipboardChanged(const std::string &_type, const std::string &_data)

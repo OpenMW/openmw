@@ -30,6 +30,7 @@ namespace MWRender
     public:
         DrawOnceCallback ()
             : mRendered(false)
+            , mLastRenderedFrame(0)
         {
         }
 
@@ -38,13 +39,14 @@ namespace MWRender
             if (!mRendered)
             {
                 mRendered = true;
+
+                mLastRenderedFrame = nv->getTraversalNumber();
+                traverse(node, nv);
             }
             else
             {
                 node->setNodeMask(0);
             }
-
-            traverse(node, nv);
         }
 
         void redrawNextFrame()
@@ -52,8 +54,14 @@ namespace MWRender
             mRendered = false;
         }
 
+        unsigned int getLastRenderedFrame() const
+        {
+            return mLastRenderedFrame;
+        }
+
     private:
         bool mRendered;
+        unsigned int mLastRenderedFrame;
     };
 
     CharacterPreview::CharacterPreview(osgViewer::Viewer* viewer, Resource::ResourceSystem* resourceSystem,
@@ -157,11 +165,10 @@ namespace MWRender
 
     void CharacterPreview::rebuild()
     {
-        delete mAnimation;
-        mAnimation = NULL;
+        mAnimation.reset(NULL);
 
-        mAnimation = new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
-                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal));
+        mAnimation.reset(new NpcAnimation(mCharacter, mNode, mResourceSystem, true, true,
+                                      (renderHeadOnly() ? NpcAnimation::VM_HeadOnly : NpcAnimation::VM_Normal)));
 
         onSetup();
 
@@ -194,7 +201,7 @@ namespace MWRender
 
     void InventoryPreview::update()
     {
-        if (!mAnimation)
+        if (!mAnimation.get())
             return;
 
         mAnimation->showWeapons(true);
@@ -262,9 +269,19 @@ namespace MWRender
 
     int InventoryPreview::getSlotSelected (int posX, int posY)
     {
-        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::WINDOW, posX, posY));
-        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_ONE);
+        float projX = (posX / mCamera->getViewport()->width()) * 2 - 1.f;
+        float projY = (posY / mCamera->getViewport()->height()) * 2 - 1.f;
+        // With Intersector::WINDOW, the intersection ratios are slightly inaccurate. Seems to be a
+        // precision issue - compiling with OSG_USE_FLOAT_MATRIX=0, Intersector::WINDOW works ok.
+        // Using Intersector::PROJECTION results in better precision because the start/end points and the model matrices
+        // don't go through as many transformations.
+        osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(osgUtil::Intersector::PROJECTION, projX, projY));
+
+        intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::LIMIT_NEAREST);
         osgUtil::IntersectionVisitor visitor(intersector);
+        visitor.setTraversalMode(osg::NodeVisitor::TRAVERSE_ACTIVE_CHILDREN);
+        // Set the traversal number from the last draw, so that the frame switch used for RigGeometry double buffering works correctly
+        visitor.setTraversalNumber(mDrawOnceCallback->getLastRenderedFrame());
 
         osg::Node::NodeMask nodeMask = mCamera->getNodeMask();
         mCamera->setNodeMask(~0);
@@ -287,7 +304,7 @@ namespace MWRender
     void InventoryPreview::onSetup()
     {
         osg::Vec3f scale (1.f, 1.f, 1.f);
-        mCharacter.getClass().adjustScale(mCharacter, scale);
+        mCharacter.getClass().adjustScale(mCharacter, scale, true);
 
         mNode->setScale(scale);
 

@@ -14,7 +14,7 @@ echo "yes" | sudo apt-add-repository ppa:boost-latest/ppa
 sudo apt-get update -qq
 sudo apt-get install -qq libgtest-dev google-mock
 sudo apt-get install -qq libboost-filesystem1.55-dev libboost-program-options1.55-dev libboost-system1.55-dev libboost-thread1.55-dev
-sudo apt-get install -qq libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libavresample-dev
+sudo apt-get install -qq ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
 sudo apt-get install -qq libbullet-dev libopenscenegraph-dev libmygui-dev libsdl2-dev libunshield-dev libtinyxml-dev libopenal-dev libqt4-dev
 sudo apt-get install -qq cmake-data #workaround for broken osgqt cmake script in ubuntu 12.04
 if [ "${ANALYZE}" ]; then sudo apt-get install -qq clang-3.6; fi

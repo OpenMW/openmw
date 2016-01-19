@@ -411,7 +411,12 @@ namespace Compiler
                 }
 
                 case Scanner::K_set: mState = SetState; return true;
-                case Scanner::K_messagebox: mState = MessageState; return true;
+
+                case Scanner::K_messagebox:
+
+                    mState = MessageState;
+                    scanner.enableStrictKeywords();
+                    return true;
 
                 case Scanner::K_return:
 

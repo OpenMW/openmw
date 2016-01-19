@@ -7,8 +7,6 @@ set(LAUNCHER
     textslotmsgbox.cpp
     settingspage.cpp
 
-    settings/graphicssettings.cpp
-
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
@@ -23,8 +21,6 @@ set(LAUNCHER_HEADER
     playpage.hpp
     textslotmsgbox.hpp
     settingspage.hpp
-
-    settings/graphicssettings.hpp
 
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp

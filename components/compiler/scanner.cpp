@@ -26,6 +26,7 @@ namespace Compiler
 
         if (c=='\n')
         {
+            mStrictKeywords = false;
             mLoc.mColumn = 0;
             ++mLoc.mLine;
             mLoc.mLiteral.clear();
@@ -294,8 +295,11 @@ namespace Compiler
             name = name.substr (1, name.size()-2);
 // allow keywords enclosed in ""
 /// \todo optionally disable
-//            cont = parser.parseName (name, loc, *this);
-//            return true;
+            if (mStrictKeywords)
+            {
+                cont = parser.parseName (name, loc, *this);
+                return true;
+            }
         }
 
         int i = 0;
@@ -567,7 +571,8 @@ namespace Compiler
     Scanner::Scanner (ErrorHandler& errorHandler, std::istream& inputStream,
         const Extensions *extensions)
     : mErrorHandler (errorHandler), mStream (inputStream), mExtensions (extensions),
-      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0)
+      mPutback (Putback_None), mPutbackCode(0), mPutbackInteger(0), mPutbackFloat(0),
+      mStrictKeywords (false)
     {
     }
 
@@ -618,5 +623,10 @@ namespace Compiler
 
         if (mExtensions)
             mExtensions->listKeywords (keywords);
+    }
+
+    void Scanner::enableStrictKeywords()
+    {
+        mStrictKeywords = true;
     }
 }

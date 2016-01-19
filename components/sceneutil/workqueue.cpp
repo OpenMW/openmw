@@ -59,7 +59,7 @@ WorkQueue::~WorkQueue()
 {
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-        while (mQueue.size())
+        while (!mQueue.empty())
         {
             WorkItem* item = mQueue.front();
             delete item;
@@ -88,7 +88,7 @@ osg::ref_ptr<WorkTicket> WorkQueue::addWorkItem(WorkItem *item)
 WorkItem *WorkQueue::removeWorkItem()
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
-    while (!mQueue.size() && !mIsReleased)
+    while (mQueue.empty() && !mIsReleased)
     {
         mCondition.wait(&mMutex);
     }

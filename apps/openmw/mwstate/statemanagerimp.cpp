@@ -207,7 +207,9 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         else
             slot = getCurrentCharacter()->updateSlot (slot, profile);
 
-        boost::filesystem::ofstream stream (slot->mPath, std::ios::binary);
+        // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
+        // existing save file we are overwriting.
+        std::stringstream stream;
 
         ESM::ESMWriter writer;
 
@@ -240,7 +242,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         // Using only Cells for progress information, since they typically have the largest records by far
         listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
-        listener.setLabel("#{sNotifyMessage4}");
+        listener.setLabel("#{sNotifyMessage4}", true);
 
         Loading::ScopedLoad load(&listener);
 
@@ -262,7 +264,14 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         writer.close();
 
         if (stream.fail())
-            throw std::runtime_error("Write operation failed");
+            throw std::runtime_error("Write operation failed (memory stream)");
+
+        // All good, write to file
+        boost::filesystem::ofstream filestream (slot->mPath, std::ios::binary);
+        filestream << stream.rdbuf();
+
+        if (filestream.fail())
+            throw std::runtime_error("Write operation failed (file stream)");
 
         Settings::Manager::setString ("character", "Saves",
             slot->mPath.parent_path().filename().string());
@@ -473,9 +482,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         if (firstPersonCam != MWBase::Environment::get().getWorld()->isFirstPerson())
             MWBase::Environment::get().getWorld()->togglePOV();
 
-        MWWorld::Ptr ptr = MWMechanics::getPlayer();
+        MWWorld::ConstPtr ptr = MWMechanics::getPlayer();
 
-        ESM::CellId cellId = ptr.getCell()->getCell()->getCellId();
+        const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
 
         // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
         MWBase::Environment::get().getWorld()->changeToCell (cellId, ptr.getRefData().getPosition(), false);
@@ -520,7 +529,7 @@ void MWState::StateManager::deleteGame(const MWState::Character *character, cons
 
 MWState::Character *MWState::StateManager::getCurrentCharacter (bool create)
 {
-    MWWorld::Ptr player = MWMechanics::getPlayer();
+    MWWorld::ConstPtr player = MWMechanics::getPlayer();
     std::string name = player.get<ESM::NPC>()->mBase->mName;
 
     return mCharacterManager.getCurrentCharacter (create, name);

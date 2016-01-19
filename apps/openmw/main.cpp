@@ -3,6 +3,7 @@
 
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
+#include <components/fallback/validate.hpp>
 
 #include <SDL_messagebox.h>
 #include <SDL_main.h>
@@ -23,7 +24,7 @@
 #endif
 
 
-#if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
+#if (defined(__APPLE__) || (defined(__linux)  &&  !defined(ANDROID)) || (defined(__unix) &&  !defined(ANDROID)) || defined(__posix))
     #define USE_CRASH_CATCHER 1
 #else
     #define USE_CRASH_CATCHER 0
@@ -52,39 +53,8 @@ inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string
 } /* namespace boost */
 #endif /* (BOOST_VERSION <= 104600) */
 
-struct FallbackMap {
-    std::map<std::string,std::string> mMap;
-};
 
-void validate(boost::any &v, std::vector<std::string> const &tokens, FallbackMap*, int)
-{
-    if(v.empty())
-    {
-        v = boost::any(FallbackMap());
-    }
-
-    FallbackMap *map = boost::any_cast<FallbackMap>(&v);
-
-    for(std::vector<std::string>::const_iterator it=tokens.begin(); it != tokens.end(); ++it)
-    {
-        int sep = it->find(",");
-        if(sep < 1 || sep == (int)it->length()-1)
-#if (BOOST_VERSION < 104200)
-            throw boost::program_options::validation_error("invalid value");
-#else
-            throw boost::program_options::validation_error(boost::program_options::validation_error::invalid_option_value);
-#endif
-
-        std::string key(it->substr(0,sep));
-        std::string value(it->substr(sep+1));
-
-        if(map->mMap.find(key) == map->mMap.end())
-        {
-            map->mMap.insert(std::make_pair (key,value));
-        }
-    }
-}
-
+using namespace Fallback;
 
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
@@ -210,6 +180,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     cfgMgr.readConfiguration(variables, desc);
 
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<std::string>());
+    std::cout << v.describe() << std::endl;
+
     engine.setGrabMouse(!variables.count("no-grab"));
 
     // Font encoding settings
@@ -321,6 +294,10 @@ private:
 
 int main(int argc, char**argv)
 {
+#if defined(__APPLE__)
+    setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
+#endif
+
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();

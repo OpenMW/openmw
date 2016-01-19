@@ -24,10 +24,6 @@
 
 namespace MWClass
 {
-    std::string Potion::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Potion>()->mBase->mId;
-    }
 
     void Potion::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
@@ -41,11 +37,9 @@ namespace MWClass
         // TODO: add option somewhere to enable collision for placeable objects
     }
 
-    std::string Potion::getModel(const MWWorld::Ptr &ptr) const
+    std::string Potion::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -54,10 +48,9 @@ namespace MWClass
         return "";
     }
 
-    std::string Potion::getName (const MWWorld::Ptr& ptr) const
+    std::string Potion::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mName;
     }
@@ -68,18 +61,17 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string Potion::getScript (const MWWorld::Ptr& ptr) const
+    std::string Potion::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
+        const MWWorld::LiveCellRef<ESM::Potion> *ref =
             ptr.get<ESM::Potion>();
 
         return ref->mBase->mScript;
     }
 
-    int Potion::getValue (const MWWorld::Ptr& ptr) const
+    int Potion::getValue (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mData.mValue;
     }
@@ -91,39 +83,36 @@ namespace MWClass
         registerClass (typeid (ESM::Potion).name(), instance);
     }
 
-    std::string Potion::getUpSoundId (const MWWorld::Ptr& ptr) const
+    std::string Potion::getUpSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Potion Up");
     }
 
-    std::string Potion::getDownSoundId (const MWWorld::Ptr& ptr) const
+    std::string Potion::getDownSoundId (const MWWorld::ConstPtr& ptr) const
     {
         return std::string("Item Potion Down");
     }
 
-    std::string Potion::getInventoryIcon (const MWWorld::Ptr& ptr) const
+    std::string Potion::getInventoryIcon (const MWWorld::ConstPtr& ptr) const
     {
-          MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return ref->mBase->mIcon;
     }
 
-    bool Potion::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Potion::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(ptr.getRefData().getCount());
+        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
@@ -172,24 +161,21 @@ namespace MWClass
         return action;
     }
 
-    MWWorld::Ptr
-    Potion::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Potion::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Potion>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    bool Potion::canSell (const MWWorld::Ptr& item, int npcServices) const
+    bool Potion::canSell (const MWWorld::ConstPtr& item, int npcServices) const
     {
         return (npcServices & ESM::NPC::Potions) != 0;
     }
 
-    float Potion::getWeight(const MWWorld::Ptr &ptr) const
+    float Potion::getWeight(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Potion> *ref =
-            ptr.get<ESM::Potion>();
+        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
         return ref->mBase->mData.mWeight;
     }
 }

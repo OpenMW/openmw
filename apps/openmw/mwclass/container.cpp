@@ -27,26 +27,24 @@
 
 #include "../mwmechanics/npcstats.hpp"
 
-namespace
+namespace MWClass
 {
-    struct ContainerCustomData : public MWWorld::CustomData
+    class ContainerCustomData : public MWWorld::CustomData
     {
+    public:
         MWWorld::ContainerStore mContainerStore;
 
         virtual MWWorld::CustomData *clone() const;
+
+        virtual ContainerCustomData& asContainerCustomData()
+        {
+            return *this;
+        }
     };
 
     MWWorld::CustomData *ContainerCustomData::clone() const
     {
         return new ContainerCustomData (*this);
-    }
-}
-
-namespace MWClass
-{
-    std::string Container::getId (const MWWorld::Ptr& ptr) const
-    {
-        return ptr.get<ESM::Container>()->mBase->mId;
     }
 
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
@@ -74,6 +72,7 @@ namespace MWClass
             ptr.get<ESM::Container>();
         if (ref->mBase->mFlags & ESM::Container::Respawn)
         {
+            MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
             ptr.getRefData().setCustomData(NULL);
         }
     }
@@ -103,11 +102,9 @@ namespace MWClass
         MWBase::Environment::get().getMechanicsManager()->add(ptr);
     }
 
-    std::string Container::getModel(const MWWorld::Ptr &ptr) const
+    std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
-        assert(ref->mBase != NULL);
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         const std::string &model = ref->mBase->mModel;
         if (!model.empty()) {
@@ -145,11 +142,11 @@ namespace MWClass
 
         // make key id lowercase
         std::string keyId = ptr.getCellRef().getKey();
-        Misc::StringUtils::toLower(keyId);
+        Misc::StringUtils::lowerCaseInPlace(keyId);
         for (MWWorld::ContainerStoreIterator it = invStore.begin(); it != invStore.end(); ++it)
         {
             std::string refId = it->getCellRef().getRefId();
-            Misc::StringUtils::toLower(refId);
+            Misc::StringUtils::lowerCaseInPlace(refId);
             if (refId == keyId)
             {
                 hasKey = true;
@@ -189,10 +186,9 @@ namespace MWClass
         }
     }
 
-    std::string Container::getName (const MWWorld::Ptr& ptr) const
+    std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mName;
     }
@@ -202,13 +198,12 @@ namespace MWClass
     {
         ensureCustomData (ptr);
 
-        return dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore;
+        return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
     }
 
-    std::string Container::getScript (const MWWorld::Ptr& ptr) const
+    std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return ref->mBase->mScript;
     }
@@ -220,18 +215,16 @@ namespace MWClass
         registerClass (typeid (ESM::Container).name(), instance);
     }
 
-    bool Container::hasToolTip (const MWWorld::Ptr& ptr) const
+    bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         return (ref->mBase->mName != "");
     }
 
-    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::Ptr& ptr) const
+    MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName;
@@ -280,21 +273,22 @@ namespace MWClass
         ptr.getCellRef().setLockLevel(-abs(ptr.getCellRef().getLockLevel())); //Makes lockLevel negative
     }
 
-    bool Container::canLock(const MWWorld::Ptr &ptr) const
+    bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
         return true;
     }
 
-    MWWorld::Ptr Container::copyToCellImpl(const MWWorld::Ptr &ptr, MWWorld::CellStore &cell) const
+    MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
-        MWWorld::LiveCellRef<ESM::Container> *ref =
-            ptr.get<ESM::Container>();
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
-        return MWWorld::Ptr(&cell.get<ESM::Container>().insert(*ref), &cell);
+        return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
     void Container::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const
     {
+        if (!state.mHasCustomState)
+            return;
         const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
         if (!ptr.getRefData().getCustomData())
@@ -308,13 +302,17 @@ namespace MWClass
             readState (state2.mInventory);
     }
 
-    void Container::writeAdditionalState (const MWWorld::Ptr& ptr, ESM::ObjectState& state) const
+    void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
         ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
 
-        ensureCustomData (ptr);
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
 
-        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
+        dynamic_cast<const ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
             writeState (state2.mInventory);
     }
 }

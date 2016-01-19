@@ -10,16 +10,12 @@
 namespace Resource
 {
     class TextureManager;
+    class NifFileManager;
 }
 
 namespace VFS
 {
     class Manager;
-}
-
-namespace NifOsg
-{
-    class KeyframeHolder;
 }
 
 namespace osgUtil
@@ -34,7 +30,7 @@ namespace Resource
     class SceneManager
     {
     public:
-        SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager);
+        SceneManager(const VFS::Manager* vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
 
         /// Get a read-only copy of this scene "template"
@@ -56,9 +52,6 @@ namespace Resource
         /// @note Assumes the given instance was not attached to any parents before.
         void attachTo(osg::Node* instance, osg::Group* parentNode) const;
 
-        /// Get a read-only copy of the given keyframe file.
-        osg::ref_ptr<const NifOsg::KeyframeHolder> getKeyframes(const std::string& name);
-
         /// Manually release created OpenGL objects for the given graphics context. This may be required
         /// in cases where multiple contexts are used over the lifetime of the application.
         void releaseGLObjects(osg::State* state);
@@ -66,25 +59,28 @@ namespace Resource
         /// Set up an IncrementalCompileOperation for background compiling of loaded scenes.
         void setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation* ico);
 
-        /// @note If you used SceneManager::attachTo, this was called automatically.
+        /// @note SceneManager::attachTo calls this method automatically, only needs to be called by users if manually attaching
         void notifyAttached(osg::Node* node) const;
 
         const VFS::Manager* getVFS() const;
 
         Resource::TextureManager* getTextureManager();
 
+        /// @param mask The node mask to apply to loaded particle system nodes.
+        void setParticleSystemMask(unsigned int mask);
+
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
+        Resource::NifFileManager* mNifFileManager;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
+
+        unsigned int mParticleSystemMask;
 
         // observer_ptr?
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;
         Index mIndex;
-
-        typedef std::map<std::string, osg::ref_ptr<const NifOsg::KeyframeHolder> > KeyframeIndex;
-        KeyframeIndex mKeyframeIndex;
 
         SceneManager(const SceneManager&);
         void operator = (const SceneManager&);
