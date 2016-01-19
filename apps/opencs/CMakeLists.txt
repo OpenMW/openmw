@@ -85,7 +85,7 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode instancemode
+    previewwidget editmode instancemode instanceselectionmode
     )
 
 opencs_units_noqt (view/render

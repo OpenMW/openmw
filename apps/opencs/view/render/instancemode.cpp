@@ -16,10 +16,11 @@
 #include "object.hpp"
 #include "worldspacewidget.hpp"
 #include "pagedworldspacewidget.hpp"
+#include "instanceselectionmode.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Element_Reference, "Instance editing",
-  parent), mSubMode (0)
+  parent), mSubMode (0), mSelectionMode (0)
 {
 }
 
@@ -48,16 +49,30 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
             "<font color=Red>Not implemented yet</font color>");
     }
 
+    if (!mSelectionMode)
+        mSelectionMode = new InstanceSelectionMode (toolbar);
+
     EditMode::activate (toolbar);
 
     toolbar->addTool (mSubMode);
+    toolbar->addTool (mSelectionMode);
 }
 
 void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
 {
-    toolbar->removeTool (mSubMode);
-    delete mSubMode;
-    mSubMode = 0;
+    if (mSelectionMode)
+    {
+        toolbar->removeTool (mSelectionMode);
+        delete mSelectionMode;
+        mSelectionMode = 0;
+    }
+
+    if (mSubMode)
+    {
+        toolbar->removeTool (mSubMode);
+        delete mSubMode;
+        mSubMode = 0;
+    }
 
     EditMode::deactivate (toolbar);
 }

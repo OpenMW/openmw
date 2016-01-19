@@ -10,10 +10,13 @@ namespace CSVWidget
 
 namespace CSVRender
 {
+    class InstanceSelectionMode;
+
     class InstanceMode : public EditMode
     {
             Q_OBJECT
             CSVWidget::SceneToolMode *mSubMode;
+            InstanceSelectionMode *mSelectionMode;
 
         public:
 
