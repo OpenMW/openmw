@@ -265,18 +265,20 @@ namespace MWGui
         }
     }
 
-    void InventoryWindow::ensureSelectedItemUnequipped()
+    void InventoryWindow::ensureSelectedItemUnequipped(int count)
     {
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
         if (item.mType == ItemStack::Type_Equipped)
         {
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-            MWWorld::Ptr newStack = *invStore.unequipItem(item.mBase, mPtr);
+            MWWorld::Ptr newStack = *invStore.unequipItemQuantity(item.mBase, mPtr, count);
 
             // The unequipped item was re-stacked. We have to update the index
             // since the item pointed does not exist anymore.
             if (item.mBase != newStack)
             {
+                updateItemView();  // Unequipping can produce a new stack, not yet in the window...
+
                 // newIndex will store the index of the ItemStack the item was stacked on
                 int newIndex = -1;
                 for (size_t i=0; i < mTradeModel->getItemCount(); ++i)
@@ -298,14 +300,14 @@ namespace MWGui
 
     void InventoryWindow::dragItem(MyGUI::Widget* sender, int count)
     {
-        ensureSelectedItemUnequipped();
+        ensureSelectedItemUnequipped(count);
         mDragAndDrop->startDrag(mSelectedItem, mSortModel, mTradeModel, mItemView, count);
         notifyContentChanged();
     }
 
     void InventoryWindow::sellItem(MyGUI::Widget* sender, int count)
     {
-        ensureSelectedItemUnequipped();
+        ensureSelectedItemUnequipped(count);
         const ItemStack& item = mTradeModel->getItem(mSelectedItem);
         std::string sound = item.mBase.getClass().getDownSoundId(item.mBase);
         MWBase::Environment::get().getSoundManager()->playSound (sound, 1.0, 1.0);
