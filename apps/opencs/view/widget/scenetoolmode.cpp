@@ -18,6 +18,9 @@ void CSVWidget::SceneToolMode::contextMenuEvent (QContextMenuEvent *event)
 
 bool CSVWidget::SceneToolMode::createContextMenu (QMenu *menu)
 {
+    if (mCurrent)
+        return mCurrent->createContextMenu (menu);
+
     return false;
 }
 

@@ -32,7 +32,8 @@ namespace CSVWidget
 
             virtual void contextMenuEvent (QContextMenuEvent *event);
 
-            /// Add context menu items to \a menu. Default-implementation: return false
+            /// Add context menu items to \a menu. Default-implementation: Pass on request to
+            /// current mode button or return false, if there is no current mode button.
             ///
             /// \attention menu can be a 0-pointer
             ///
