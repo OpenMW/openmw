@@ -75,9 +75,6 @@ namespace MWMechanics
                 return true;
         }
 
-        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
-            return false;
-
         if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
             return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
