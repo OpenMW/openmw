@@ -39,6 +39,8 @@ namespace MWMechanics
                 TypeIdEscort = 2,
                 TypeIdFollow = 3,
                 TypeIdActivate = 4,
+
+                // These 3 are not really handled as Ai Packages in the MW engine
                 TypeIdCombat = 5,
                 TypeIdPursue = 6,
                 TypeIdAvoidDoor = 7
@@ -77,6 +79,12 @@ namespace MWMechanics
 
             /// Return true if the actor should follow the target through teleport doors (default false)
             virtual bool followTargetThroughDoors() const;
+
+            /// Can this Ai package be canceled? (default true)
+            virtual bool canCancel() const;
+
+            /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
+            virtual bool shouldCancelPreviousAi() const;
 
             bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 

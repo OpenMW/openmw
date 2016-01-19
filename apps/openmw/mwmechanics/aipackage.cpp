@@ -35,6 +35,16 @@ bool MWMechanics::AiPackage::followTargetThroughDoors() const
     return false;
 }
 
+bool MWMechanics::AiPackage::canCancel() const
+{
+    return true;
+}
+
+bool MWMechanics::AiPackage::shouldCancelPreviousAi() const
+{
+    return true;
+}
+
 MWMechanics::AiPackage::AiPackage() : mTimer(0.26f) { //mTimer starts at .26 to force initial pathbuild
 
 }
