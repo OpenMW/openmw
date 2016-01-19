@@ -1,33 +1,85 @@
 #!/bin/bash
 
 while [ $# -gt 0 ]; do
-	ARG=$1
+	ARGSTR=$1
 	shift
 
-	case $ARG in
-		-v )
-			VERBOSE=true ;;
+	if [ ${ARGSTR:0:1} != "-" ]; then
+		echo "Unknown argument $ARGSTR"
+		echo "Try '$0 -h'"
+		exit 1
+	fi
 
-		-d )
-			SKIP_DOWNLOAD=true ;;
+	for (( i=1; i<${#ARGSTR}; i++ )); do
+		ARG=${ARGSTR:$i:1}
+		case $ARG in
+			V )
+				VERBOSE=true ;;
 
-		-e )
-			SKIP_EXTRACT=true ;;
+			v )
+				VS_VERSION=$1
+				shift ;;
 
-		-k )
-			KEEP=true ;;
-		
-		-u )
-			UNITY_BUILD=true ;;
+			d )
+				SKIP_DOWNLOAD=true ;;
 
-		* )
-			echo "Unknown arg $ARG."
-			exit 1 ;;
-	esac
+			e )
+				SKIP_EXTRACT=true ;;
+
+			k )
+				KEEP=true ;;
+
+			u )
+				UNITY_BUILD=true ;;
+
+			p )
+				PLATFORM=$1
+				shift ;;
+
+			c )
+				CONFIGURATION=$1
+				shift ;;
+
+			h )
+				cat <<EOF
+Usage: $0 [-cdehkpuvV]
+
+Options:
+	-c <Release/Debug>
+		Set the configuration, can also be set with environment variable CONFIGURATION.
+	-d
+		Skip checking the downloads.
+	-e
+		Skip extracting dependencies.
+	-h
+		Show this message.
+	-k
+		Keep the old build directory, default is to delete it.
+	-p <Win32/Win64>
+		Set the build platform, can also be set with environment variable PLATFORM.
+	-u
+		Configure for unity builds.
+	-v <2013/2015>
+		Choose the Visual Studio version to use.
+	-V
+		Run verbosely
+EOF
+				exit 0
+				;;
+
+			* )
+				echo "Unknown argument $ARG."
+				echo "Try '$0 -h'"
+				exit 1 ;;
+		esac
+	done
 done
 
 if [ -z $VERBOSE ]; then
 	STRIP="> /dev/null 2>&1"
+fi
+if [ -z $VS_VERSION ]; then
+	VS_VERSION="2013"
 fi
 
 if [ -z $APPVEYOR ]; then
@@ -40,7 +92,7 @@ else
 
 	cd $APPVEYOR_BUILD_FOLDER
 	VERSION="$(cat README.md | grep Version: | awk '{ print $3; }')-$(git rev-parse --short HEAD)"
-	appveyor UpdateBuild -Version "$VERSION"
+	appveyor UpdateBuild -Version "$VERSION" > /dev/null &
 fi
 
 run_cmd() {
@@ -140,14 +192,27 @@ if [ -z $CONFIGURATION ]; then
 	CONFIGURATION="Debug"
 fi
 
+case $VS_VERSION in
+	14|2015 )
+		GENERATOR="Visual Studio 14 2015"
+		XP_TOOLSET="v140_xp"
+		;;
+
+#	12|2013|
+	* )
+		GENERATOR="Visual Studio 12 2013"
+		XP_TOOLSET="v120_xp"
+		;;
+esac
+
 case $PLATFORM in
 	x64|x86_64|x86-64|win64|Win64 )
 		ARCHNAME=x86-64
 		ARCHSUFFIX=64
 		BITS=64
 
-		BASE_OPTS="-G\"Visual Studio 12 2013 Win64\""
-		add_cmake_opts "-G\"Visual Studio 12 2013 Win64\""
+		BASE_OPTS="-G\"$GENERATOR Win64\""
+		add_cmake_opts "-G\"$GENERATOR Win64\""
 		;;
 
 	x32|x86|i686|i386|win32|Win32 )
@@ -155,8 +220,8 @@ case $PLATFORM in
 		ARCHSUFFIX=86
 		BITS=32
 
-		BASE_OPTS="-G\"Visual Studio 12 2013\" -Tv120_xp"
-		add_cmake_opts "-G\"Visual Studio 12 2013\"" -Tv120_xp
+		BASE_OPTS="-G\"$GENERATOR\" -T$XP_TOOLSET"
+		add_cmake_opts "-G\"$GENERATOR\"" -T$XP_TOOLSET
 		;;
 
 	* )
@@ -225,7 +290,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OpenAL
 	download "OpenAL-Soft 1.16.0" \
-		http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip \
+		http://kcat.strangesoft.net/openal-binaries/openal-soft-1.16.0-bin.zip \
 		OpenAL-Soft-1.16.0.zip
 
 	# OSG
@@ -472,10 +537,8 @@ fi
 			rm -rf Qt
 			eval 7z x -y $DEPS/qt$BITS-4.8.6.7z $STRIP
 			mv qt-4.8.6-* Qt
-			(
-				cd $QT_SDK
-				eval qtbinpatcher.exe $STRIP
-			)
+			cd Qt
+			eval ./qtbinpatcher.exe $STRIP
 		fi
 
 		cd $QT_SDK

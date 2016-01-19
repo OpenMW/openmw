@@ -2,27 +2,24 @@ version: "{build}"
 
 branches:
     only:
+        - master
+        - /openmw-.*$/
         - appveyor
 
 platform:
     - Win32
-    - x64
+#    - x64
 
 configuration: Debug
-
-#environment:
-#    matrix:
-#        - STEP: misc
-#        - STEP: components # misc builds this too
-# Build takes too long for these, ignore for now
-#        - STEP: openmw
-#        - STEP: opencs
 
 matrix:
     fast_finish: true
 
+# For the Qt, Boost, CMake, etc installs
 os: unstable
 
+# We want the git revision for versioning,
+# so shallow clones don't work.
 clone_depth: 1
 
 cache:
@@ -40,7 +37,7 @@ cache:
 clone_folder: C:\projects\openmw
 
 before_build:
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM%
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=Build_32
@@ -48,3 +45,10 @@ build_script:
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 
 test: off
+
+#notifications:
+#    - provider: Email
+#    to:
+#        -  
+#    on_build_failure: true
+#    on_build_status_changed: true
