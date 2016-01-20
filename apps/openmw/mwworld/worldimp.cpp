@@ -1311,7 +1311,8 @@ namespace MWWorld
         actor.getRefData().setPosition(pos);
 
         osg::Vec3f traced = mPhysics->traceDown(actor, dist*1.1f);
-        moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
+        if (traced != pos.asVec3())
+            moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)

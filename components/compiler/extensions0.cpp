@@ -541,6 +541,7 @@ namespace Compiler
             extensions.registerInstruction("moveworld","cf",opcodeMoveWorld,opcodeMoveWorldExplicit);
             extensions.registerFunction("getstartingangle",'f',"c",opcodeGetStartingAngle,opcodeGetStartingAngleExplicit);
             extensions.registerInstruction("resetactors","",opcodeResetActors);
+            extensions.registerInstruction("fixme","",opcodeFixme, opcodeFixmeExplicit);
             extensions.registerInstruction("ra","",opcodeResetActors);
         }
     }
