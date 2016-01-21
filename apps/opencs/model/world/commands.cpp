@@ -14,7 +14,7 @@
 
 CSMWorld::ModifyCommand::ModifyCommand (QAbstractItemModel& model, const QModelIndex& index,
                                         const QVariant& new_, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false)
+    : QUndoCommand (parent), mModel (&model), mIndex (index), mNew (new_), mHasRecordState(false), mOldRecordState(CSMWorld::RecordBase::State_BaseOnly)
 {
     if (QAbstractProxyModel *proxy = dynamic_cast<QAbstractProxyModel *> (&model))
     {

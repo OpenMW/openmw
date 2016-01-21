@@ -433,7 +433,7 @@ namespace MWWorld
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
         gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
-
+        gmst["iWerewolfFightMod"] = ESM::Variant(1);
 
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
@@ -1745,6 +1745,8 @@ namespace MWWorld
                 {
                     cellid.mWorldspace = ref.mRef.getDestCell();
                     cellid.mPaged = false;
+                    cellid.mIndex.mX = 0;
+                    cellid.mIndex.mY = 0;
                 }
                 else
                 {

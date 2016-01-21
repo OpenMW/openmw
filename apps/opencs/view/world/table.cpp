@@ -231,7 +231,7 @@ void CSVWorld::Table::mouseDoubleClickEvent (QMouseEvent *event)
 CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     bool createAndDelete, bool sorting, CSMDoc::Document& document)
 : DragRecordTable(document), mCreateAction (0),
-  mCloneAction(0),mRecordStatusDisplay (0)
+  mCloneAction(0), mRecordStatusDisplay (0), mJumpToAddedRecord(false), mUnselectAfterJump(false)
 {
     mModel = &dynamic_cast<CSMWorld::IdTableBase&> (*mDocument.getData().getTableModel (id));
 

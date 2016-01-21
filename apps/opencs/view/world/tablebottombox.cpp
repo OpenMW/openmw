@@ -76,7 +76,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
                                           CSMDoc::Document& document, 
                                           const CSMWorld::UniversalId& id, 
                                           QWidget *parent)
-: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None), mHasPosition(false)
+: QWidget (parent), mShowStatusBar (false), mEditMode(EditMode_None), mHasPosition(false), mRow(0), mColumn(0)
 {
     for (int i=0; i<4; ++i)
         mStatusCount[i] = 0;

@@ -1556,7 +1556,7 @@ namespace MWMechanics
                     (target == getPlayer() &&
                      MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
             {
-                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().search("iWerewolfFightMod");
+                const ESM::GameSetting * iWerewolfFightMod = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iWerewolfFightMod");
                 fight += iWerewolfFightMod->getInt();
             }
         }
