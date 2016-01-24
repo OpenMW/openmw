@@ -52,7 +52,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<GenericCreator> >);
 
     manager.add (CSMWorld::UniversalId::Type_StartScripts,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<StartScriptCreator> >);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, StartScriptCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_Cells,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, CreatorFactory<CellCreator> >);
@@ -136,8 +136,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
             CreatorFactory<GenericCreator> > (false));
 
     manager.add (CSMWorld::UniversalId::Type_StartScript,
-        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView,
-        CreatorFactory<StartScriptCreator> > (false));
+        new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, StartScriptCreatorFactory>(false));
 
     manager.add (CSMWorld::UniversalId::Type_Skill,
         new CSVDoc::SubViewFactoryWithCreator<DialogueSubView, NullCreatorFactory > (false));
@@ -177,7 +176,7 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
 
     manager.add (CSMWorld::UniversalId::Type_MetaData,
         new CSVDoc::SubViewFactory<SimpleDialogueSubView >);
-        
+
     //preview
     manager.add (CSMWorld::UniversalId::Type_Preview, new CSVDoc::SubViewFactory<PreviewSubView>);
 }

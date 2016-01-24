@@ -1,20 +1,130 @@
 #include "startscriptcreator.hpp"
 
-CSVWorld::StartScriptCreator::StartScriptCreator(CSMWorld::Data &data, QUndoStack &undoStack, const CSMWorld::UniversalId &id, bool relaxedIdRules):
-    GenericCreator (data, undoStack, id, true)
-{}
+#include <QLabel>
+
+#include "../../model/doc/document.hpp"
+
+#include "../../model/world/columns.hpp"
+#include "../../model/world/commands.hpp"
+#include "../../model/world/data.hpp"
+#include "../../model/world/idcompletionmanager.hpp"
+#include "../../model/world/idtable.hpp"
+
+#include "../widget/droplineedit.hpp"
+
+std::string CSVWorld::StartScriptCreator::getId() const
+{
+    return mScript->text().toUtf8().constData();
+}
+
+CSMWorld::IdTable& CSVWorld::StartScriptCreator::getStartScriptsTable() const
+{
+    return dynamic_cast<CSMWorld::IdTable&> (
+        *getData().getTableModel(getCollectionId())
+    );
+}
+
+void CSVWorld::StartScriptCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
+{
+    CSMWorld::IdTable& table = getStartScriptsTable();
+    int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+
+    // Set script ID to be added to start scripts table.
+    command.addValue(column, mScript->text());
+}
+
+CSVWorld::StartScriptCreator::StartScriptCreator(
+    CSMWorld::Data &data,
+    QUndoStack &undoStack,
+    const CSMWorld::UniversalId &id,
+    CSMWorld::IdCompletionManager& completionManager
+) : GenericCreator(data, undoStack, id, true)
+{
+    setManualEditing(false);
+
+    // Add script ID input label.
+    QLabel *label = new QLabel("Script ID", this);
+    insertBeforeButtons(label, false);
+
+    // Add script ID input with auto-completion.
+    CSMWorld::ColumnBase::Display displayType = CSMWorld::ColumnBase::Display_Script;
+    mScript = new CSVWidget::DropLineEdit(displayType, this);
+    mScript->setCompleter(completionManager.getCompleter(displayType).get());
+    insertBeforeButtons(mScript, true);
+
+    connect(mScript, SIGNAL (textChanged(const QString&)), this, SLOT (scriptChanged()));
+}
+
+void CSVWorld::StartScriptCreator::cloneMode(
+    const std::string& originId,
+    const CSMWorld::UniversalId::Type type)
+{
+    CSVWorld::GenericCreator::cloneMode(originId, type);
+
+    // Look up cloned record in start scripts table and set script ID text.
+    CSMWorld::IdTable& table = getStartScriptsTable();
+    int column = table.findColumnIndex(CSMWorld::Columns::ColumnId_Id);
+    mScript->setText(table.data(table.getModelIndex(originId, column)).toString());
+}
 
 std::string CSVWorld::StartScriptCreator::getErrors() const
 {
-    std::string errors;
+    std::string scriptId = getId();
 
-    errors = getIdValidatorResult();
-    if (errors.length() > 0)
-        return errors;
-    else if (getData().getScripts().searchId(getId()) == -1)
-        errors = "Script ID not found";
-    else if (getData().getStartScripts().searchId(getId()) > -1 )
-        errors = "Script with this ID already registered as Start Script";
+    // Check user input for any errors.
+    std::string errors;
+    if (scriptId.empty())
+    {
+        if (!errors.empty())
+        {
+            errors += "<br>";
+        }
+        errors += "No Script ID entered";
+    }
+    else if (getData().getScripts().searchId(scriptId) == -1)
+    {
+        if (!errors.empty())
+        {
+            errors += "<br>";
+        }
+        errors += "Script ID not found";
+    }
+    else if (getData().getStartScripts().searchId(scriptId) > -1)
+    {
+        if (!errors.empty())
+        {
+            errors += "<br>";
+        }
+        errors += "Script with this ID already registered as Start Script";
+    }
 
     return errors;
+}
+
+void CSVWorld::StartScriptCreator::focus()
+{
+    mScript->setFocus();
+}
+
+void CSVWorld::StartScriptCreator::reset()
+{
+    CSVWorld::GenericCreator::reset();
+    mScript->setText("");
+}
+
+void CSVWorld::StartScriptCreator::scriptChanged()
+{
+    update();
+}
+
+CSVWorld::Creator *CSVWorld::StartScriptCreatorFactory::makeCreator(
+    CSMDoc::Document& document,
+    const CSMWorld::UniversalId& id) const
+{
+    return new StartScriptCreator(
+        document.getData(),
+        document.getUndoStack(),
+        id,
+        document.getIdCompletionManager()
+    );
 }
