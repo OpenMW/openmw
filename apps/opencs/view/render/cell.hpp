@@ -49,6 +49,10 @@ namespace CSVRender
             /// \return Was the object deleted?
             bool removeObject (const std::string& id);
 
+            // Remove object and return iterator to next object.
+            std::map<std::string, Object *>::iterator removeObject (
+                std::map<std::string, Object *>::iterator iter);
+
             /// Add objects from reference table that are within this cell.
             ///
             /// \return Have any objects been added?

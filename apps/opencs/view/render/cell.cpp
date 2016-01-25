@@ -22,9 +22,16 @@ bool CSVRender::Cell::removeObject (const std::string& id)
     if (iter==mObjects.end())
         return false;
 
-    delete iter->second;
-    mObjects.erase (iter);
+    removeObject (iter);
     return true;
+}
+
+std::map<std::string, CSVRender::Object *>::iterator CSVRender::Cell::removeObject (
+    std::map<std::string, Object *>::iterator iter)
+{
+    delete iter->second;
+    mObjects.erase (iter++);
+    return iter;
 }
 
 bool CSVRender::Cell::addObjects (int start, int end)
@@ -161,8 +168,8 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     // perform update and remove where needed
     bool modified = false;
 
-    for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
-        iter!=mObjects.end(); ++iter)
+    std::map<std::string, Object *>::iterator iter = mObjects.begin();
+    while (iter!=mObjects.end())
     {
         if (iter->second->referenceDataChanged (topLeft, bottomRight))
             modified = true;
@@ -171,23 +178,30 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
 
         if (iter2!=ids.end())
         {
-            if (iter2->second)
-            {
-                removeObject (iter->first);
-                modified = true;
-            }
-
+            bool deleted = iter2->second;
             ids.erase (iter2);
+
+            if (deleted)
+            {
+                iter = removeObject (iter);
+                modified = true;
+                continue;
+            }
         }
+
+        ++iter;
     }
 
     // add new objects
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
-        mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false)));
+        if (!iter->second)
+        {
+            mObjects.insert (std::make_pair (
+                iter->first, new Object (mData, mCellNode, iter->first, false)));
 
-        modified = true;
+            modified = true;
+        }
     }
 
     return modified;
