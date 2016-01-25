@@ -374,8 +374,13 @@ public:
             }
             else if (mMeshType == 2)
             {
-                osg::Vec4Array* origColors = static_cast<osg::Vec4Array*>(geom->getColorArray());
-                alpha = ((*origColors)[i].x() == 1.f) ? 1.f : 0.f;
+                if (geom->getColorArray())
+                {
+                    osg::Vec4Array* origColors = static_cast<osg::Vec4Array*>(geom->getColorArray());
+                    alpha = ((*origColors)[i].x() == 1.f) ? 1.f : 0.f;
+                }
+                else
+                    alpha = 1.f;
             }
 
             (*colors)[i] = osg::Vec4f(0.f, 0.f, 0.f, alpha);
