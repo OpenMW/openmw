@@ -114,6 +114,8 @@ namespace CSVRender
             std::string getReferenceId() const;
 
             std::string getReferenceableId() const;
+
+            osg::ref_ptr<TagBase> getTag() const;
     };
 }
 

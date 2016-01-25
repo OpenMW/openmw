@@ -143,6 +143,9 @@ namespace CSVRender
 
             virtual std::string getCellId (const osg::Vec3f& point) const = 0;
 
+            virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
+                const = 0;
+
         protected:
 
             /// Visual elements in a scene

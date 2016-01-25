@@ -119,6 +119,12 @@ std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& poi
     return mCellId;
 }
 
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidget::getSelection (
+    unsigned int elementMask) const
+{
+    return mCell->getSelection (elementMask);
+}
+
 void CSVRender::UnpagedWorldspaceWidget::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

@@ -4,7 +4,11 @@
 #include <QMenu>
 #include <QAction>
 
+#include "../../model/world/idtable.hpp"
+#include "../../model/world/commands.hpp"
+
 #include "worldspacewidget.hpp"
+#include "object.hpp"
 
 bool CSVRender::InstanceSelectionMode::createContextMenu (QMenu *menu)
 {
@@ -12,6 +16,7 @@ bool CSVRender::InstanceSelectionMode::createContextMenu (QMenu *menu)
     {
         menu->addAction (mSelectAll);
         menu->addAction (mDeselectAll);
+        menu->addAction (mDeleteSelection);
     }
 
     return true;
@@ -44,9 +49,11 @@ CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar
 
     mSelectAll = new QAction ("Select all Instances", this);
     mDeselectAll = new QAction ("Clear selection", this);
+    mDeleteSelection = new QAction ("Delete selection", this);
 
     connect (mSelectAll, SIGNAL (triggered ()), this, SLOT (selectAll()));
     connect (mDeselectAll, SIGNAL (triggered ()), this, SLOT (clearSelection()));
+    connect (mDeleteSelection, SIGNAL (triggered ()), this, SLOT (deleteSelection()));
 }
 
 void CSVRender::InstanceSelectionMode::selectAll()
@@ -57,4 +64,23 @@ void CSVRender::InstanceSelectionMode::selectAll()
 void CSVRender::InstanceSelectionMode::clearSelection()
 {
     mWorldspaceWidget.clearSelection (Mask_Reference);
+}
+
+void CSVRender::InstanceSelectionMode::deleteSelection()
+{
+    std::vector<osg::ref_ptr<TagBase> > selection =
+        mWorldspaceWidget.getSelection (Mask_Reference);
+
+    CSMWorld::IdTable& referencesTable =
+            dynamic_cast<CSMWorld::IdTable&> (*mWorldspaceWidget.getDocument().getData().
+            getTableModel (CSMWorld::UniversalId::Type_References));
+
+    for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
+        iter!=selection.end(); ++iter)
+    {
+        CSMWorld::DeleteCommand *command = new CSMWorld::DeleteCommand (referencesTable,
+            static_cast<ObjectTag *> (iter->get())->mObject->getReferenceId());
+
+        mWorldspaceWidget.getDocument().getUndoStack().push (command);
+    }
 }

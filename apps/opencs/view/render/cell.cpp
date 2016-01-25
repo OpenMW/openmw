@@ -276,3 +276,16 @@ bool CSVRender::Cell::isDeleted() const
 {
     return mDeleted;
 }
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<TagBase> > result;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            if (iter->second->getSelected())
+                result.push_back (iter->second->getTag());
+
+    return result;
+}

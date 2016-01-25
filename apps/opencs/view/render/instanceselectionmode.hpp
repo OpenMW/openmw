@@ -16,6 +16,7 @@ namespace CSVRender
             WorldspaceWidget& mWorldspaceWidget;
             QAction *mSelectAll;
             QAction *mDeselectAll;
+            QAction *mDeleteSelection;
 
             /// Add context menu items to \a menu.
             ///
@@ -34,6 +35,8 @@ namespace CSVRender
             void selectAll();
 
             void clearSelection();
+
+            void deleteSelection();
     };
 }
 

@@ -31,6 +31,8 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class TagBase;
+
     class Cell
     {
             CSMWorld::Data& mData;
@@ -99,6 +101,8 @@ namespace CSVRender
             CSMWorld::CellCoordinates getCoordinates() const;
 
             bool isDeleted() const;
+
+            std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
     };
 }
 

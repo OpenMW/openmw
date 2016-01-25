@@ -529,6 +529,23 @@ std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point
     return cellCoordinates.getId (mWorldspace);
 }
 
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (
+    unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<CSVRender::TagBase> > result;
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+    {
+        std::vector<osg::ref_ptr<CSVRender::TagBase> > cellResult =
+            iter->second->getSelection (elementMask);
+
+        result.insert (result.end(), cellResult.begin(), cellResult.end());
+    }
+
+    return result;
+}
+
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (
     CSVWidget::SceneToolbar *parent)
 {

@@ -284,3 +284,8 @@ std::string CSVRender::Object::getReferenceableId() const
 {
     return mReferenceableId;
 }
+
+osg::ref_ptr<CSVRender::TagBase> CSVRender::Object::getTag() const
+{
+    return static_cast<CSVRender::TagBase *> (mBaseNode->getUserData());
+}
