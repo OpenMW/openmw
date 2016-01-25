@@ -50,7 +50,7 @@ namespace CSVWorld
                 const std::string& originId,
                 const CSMWorld::UniversalId::Type type);
 
-            /// \return Formatted error descriptions for current user input.
+            /// \return Error description for current user input.
             virtual std::string getErrors() const;
 
             /// \brief Set focus to script ID input widget.

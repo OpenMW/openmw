@@ -75,27 +75,15 @@ std::string CSVWorld::StartScriptCreator::getErrors() const
     std::string errors;
     if (scriptId.empty())
     {
-        if (!errors.empty())
-        {
-            errors += "<br>";
-        }
-        errors += "No Script ID entered";
+        errors = "No Script ID entered";
     }
     else if (getData().getScripts().searchId(scriptId) == -1)
     {
-        if (!errors.empty())
-        {
-            errors += "<br>";
-        }
-        errors += "Script ID not found";
+        errors = "Script ID not found";
     }
     else if (getData().getStartScripts().searchId(scriptId) > -1)
     {
-        if (!errors.empty())
-        {
-            errors += "<br>";
-        }
-        errors += "Script with this ID already registered as Start Script";
+        errors = "Script with this ID already registered as Start Script";
     }
 
     return errors;
