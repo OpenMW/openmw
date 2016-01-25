@@ -17,6 +17,7 @@
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
+#include <osg/observer_ptr>
 
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>

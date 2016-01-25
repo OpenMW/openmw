@@ -5,6 +5,7 @@
 
 #include <osg/Group>
 #include <osg/NodeVisitor>
+#include <osg/observer_ptr>
 
 namespace SceneUtil
 {
