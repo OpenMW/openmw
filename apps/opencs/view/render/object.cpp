@@ -187,6 +187,7 @@ CSVRender::Object::~Object()
     clear();
 
     mParentNode->removeChild(mBaseNode);
+    mParentNode->removeChild(mOutline);
 }
 
 void CSVRender::Object::setSelected(bool selected)
