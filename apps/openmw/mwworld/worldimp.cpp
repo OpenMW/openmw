@@ -108,7 +108,11 @@ namespace MWWorld
         }
 
         private:
+#ifdef HAVE_UNORDERED_MAP
+          typedef std::unordered_map<std::string, ContentLoader*> LoadersContainer;
+#else
           typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
+#endif
           LoadersContainer mLoaders;
     };
 

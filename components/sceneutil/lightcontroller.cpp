@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <osg/observer_ptr>
 #include <osg/NodeVisitor>
 
 #include <components/sceneutil/lightmanager.hpp>

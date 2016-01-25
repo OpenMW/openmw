@@ -1,6 +1,7 @@
 #include "bulletshape.hpp"
 
 #include <stdexcept>
+#include <string>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
