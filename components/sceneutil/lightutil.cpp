@@ -1,5 +1,6 @@
 #include "lightutil.hpp"
 
+#include <osg/observer_ptr>
 #include <osg/Light>
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
