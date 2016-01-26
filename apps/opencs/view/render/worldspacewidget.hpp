@@ -130,6 +130,12 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the select operation
             virtual void selectAll (int elementMask) = 0;
 
+            // Select everything that references the same ID as at least one of the elements
+            // already selected
+            //
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAllWithSameParentId (int elementMask) = 0;
+
             /// Return the next intersection point with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
             /// If there is no such point, instead a point "in front" of \a localPos will be

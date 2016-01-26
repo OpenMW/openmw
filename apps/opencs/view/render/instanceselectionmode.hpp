@@ -17,6 +17,7 @@ namespace CSVRender
             QAction *mSelectAll;
             QAction *mDeselectAll;
             QAction *mDeleteSelection;
+            QAction *mSelectSame;
 
             /// Add context menu items to \a menu.
             ///
@@ -37,6 +38,8 @@ namespace CSVRender
             void clearSelection();
 
             void deleteSelection();
+
+            void selectSame();
     };
 }
 

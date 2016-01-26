@@ -263,6 +263,28 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
     }
 }
 
+void CSVRender::Cell::selectAllWithSameParentId (int elementMask)
+{
+    std::set<std::string> ids;
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (iter->second->getSelected())
+            ids.insert (iter->second->getReferenceableId());
+    }
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (!iter->second->getSelected() &&
+            ids.find (iter->second->getReferenceableId())!=ids.end())
+        {
+            iter->second->setSelected (true);
+        }
+    }
+}
+
 void CSVRender::Cell::setCellArrows (int mask)
 {
     for (int i=0; i<4; ++i)

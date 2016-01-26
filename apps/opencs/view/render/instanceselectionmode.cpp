@@ -16,6 +16,7 @@ bool CSVRender::InstanceSelectionMode::createContextMenu (QMenu *menu)
     {
         menu->addAction (mSelectAll);
         menu->addAction (mDeselectAll);
+        menu->addAction (mSelectSame);
         menu->addAction (mDeleteSelection);
     }
 
@@ -50,10 +51,11 @@ CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar
     mSelectAll = new QAction ("Select all instances", this);
     mDeselectAll = new QAction ("Clear selection", this);
     mDeleteSelection = new QAction ("Delete selected instances", this);
-
+    mSelectSame = new QAction ("Extend selection to instances with same object ID", this);
     connect (mSelectAll, SIGNAL (triggered ()), this, SLOT (selectAll()));
     connect (mDeselectAll, SIGNAL (triggered ()), this, SLOT (clearSelection()));
     connect (mDeleteSelection, SIGNAL (triggered ()), this, SLOT (deleteSelection()));
+    connect (mSelectSame, SIGNAL (triggered ()), this, SLOT (selectSame()));
 }
 
 void CSVRender::InstanceSelectionMode::selectAll()
@@ -83,4 +85,9 @@ void CSVRender::InstanceSelectionMode::deleteSelection()
 
         mWorldspaceWidget.getDocument().getUndoStack().push (command);
     }
+}
+
+void CSVRender::InstanceSelectionMode::selectSame()
+{
+    mWorldspaceWidget.selectAllWithSameParentId (Mask_Reference);
 }

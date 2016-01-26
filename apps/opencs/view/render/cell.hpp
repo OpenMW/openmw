@@ -99,6 +99,10 @@ namespace CSVRender
 
             void setSelection (int elementMask, Selection mode);
 
+            // Select everything that references the same ID as at least one of the elements
+            // already selected
+            void selectAllWithSameParentId (int elementMask);
+
             void setCellArrows (int mask);
 
             /// Returns 0, 0 in case of an unpaged cell.
