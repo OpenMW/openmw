@@ -140,7 +140,7 @@ void CSMPrefs::State::declare()
     declareEnum ("warnings", "Warning Mode", warningsNormal).
         addValue ("Ignore", "Do not report warning").
         addValue (warningsNormal).
-        addValue ("Strcit", "Promote warning to an error");
+        addValue ("Strict", "Promote warning to an error");
     declareBool ("toolbar", "Show toolbar", true);
     declareInt ("compile-delay", "Delay between updating of source errors", 100).
         setTooltip ("Delay in milliseconds").
