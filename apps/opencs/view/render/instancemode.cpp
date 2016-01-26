@@ -9,16 +9,73 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 
+#include "../widget/scenetoolbar.hpp"
+#include "../widget/scenetoolmode.hpp"
+
 #include "mask.hpp"
+
 #include "object.hpp"
 #include "worldspacewidget.hpp"
 #include "pagedworldspacewidget.hpp"
+#include "instanceselectionmode.hpp"
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":placeholder"), Mask_Reference, "Instance editing",
-  parent)
+  parent), mSubMode (0), mSelectionMode (0)
 {
+}
 
+void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
+{
+    if (!mSubMode)
+    {
+        mSubMode = new CSVWidget::SceneToolMode (toolbar, "Edit Sub-Mode");
+        mSubMode->addButton (":placeholder", "move",
+            "Move selected instances"
+            "<ul><li>Use primary edit to move instances around freely</li>"
+            "<li>Use secondary edit to move instances around within the grid</li>"
+            "</ul>"
+            "<font color=Red>Not implemented yet</font color>");
+        mSubMode->addButton (":placeholder", "rotate",
+            "Rotate selected instances"
+            "<ul><li>Use primary edit to rotate instances freely</li>"
+            "<li>Use secondary edit to rotate instances within the grid</li>"
+            "</ul>"
+            "<font color=Red>Not implemented yet</font color>");
+        mSubMode->addButton (":placeholder", "scale",
+            "Scale selected instances"
+            "<ul><li>Use primary edit to scale instances freely</li>"
+            "<li>Use secondary edit to scale instances along the grid</li>"
+            "</ul>"
+            "<font color=Red>Not implemented yet</font color>");
+    }
+
+    if (!mSelectionMode)
+        mSelectionMode = new InstanceSelectionMode (toolbar, getWorldspaceWidget());
+
+    EditMode::activate (toolbar);
+
+    toolbar->addTool (mSubMode);
+    toolbar->addTool (mSelectionMode);
+}
+
+void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
+{
+    if (mSelectionMode)
+    {
+        toolbar->removeTool (mSelectionMode);
+        delete mSelectionMode;
+        mSelectionMode = 0;
+    }
+
+    if (mSubMode)
+    {
+        toolbar->removeTool (mSubMode);
+        delete mSubMode;
+        mSubMode = 0;
+    }
+
+    EditMode::deactivate (toolbar);
 }
 
 void CSVRender::InstanceMode::primaryEditPressed (osg::ref_ptr<TagBase> tag)

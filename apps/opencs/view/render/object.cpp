@@ -187,6 +187,7 @@ CSVRender::Object::~Object()
     clear();
 
     mParentNode->removeChild(mBaseNode);
+    mParentNode->removeChild(mOutline);
 }
 
 void CSVRender::Object::setSelected(bool selected)
@@ -283,4 +284,9 @@ std::string CSVRender::Object::getReferenceId() const
 std::string CSVRender::Object::getReferenceableId() const
 {
     return mReferenceableId;
+}
+
+osg::ref_ptr<CSVRender::TagBase> CSVRender::Object::getTag() const
+{
+    return static_cast<CSVRender::TagBase *> (mBaseNode->getUserData());
 }
