@@ -2,7 +2,6 @@
 
 #include <QHeaderView>
 #include <QAction>
-#include <QApplication>
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QString>
@@ -12,7 +11,6 @@
 
 #include "../../model/doc/document.hpp"
 
-#include "../../model/world/data.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/infotableproxymodel.hpp"
 #include "../../model/world/idtableproxymodel.hpp"
@@ -20,13 +18,10 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/record.hpp"
 #include "../../model/world/columns.hpp"
-#include "../../model/world/tablemimedata.hpp"
-#include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/commanddispatcher.hpp"
 
 #include "../../model/prefs/state.hpp"
 
-#include "recordstatusdelegate.hpp"
 #include "tableeditidaction.hpp"
 #include "util.hpp"
 
@@ -339,8 +334,6 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
-    //connect (mProxyModel, SIGNAL (rowsInserted (const QModelIndex&, int, int)),
-    //    this, SLOT (rowsInsertedEvent(const QModelIndex&, int, int)));
     connect (mProxyModel, SIGNAL (rowAdded (const std::string &)),
         this, SLOT (rowAdded (const std::string &)));
 
