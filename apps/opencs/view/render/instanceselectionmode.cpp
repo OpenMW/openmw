@@ -47,9 +47,9 @@ CSVRender::InstanceSelectionMode::InstanceSelectionMode (CSVWidget::SceneToolbar
         "</ul>"
         "<font color=Red>Not implemented yet</font color>");
 
-    mSelectAll = new QAction ("Select all Instances", this);
+    mSelectAll = new QAction ("Select all instances", this);
     mDeselectAll = new QAction ("Clear selection", this);
-    mDeleteSelection = new QAction ("Delete selection", this);
+    mDeleteSelection = new QAction ("Delete selected instances", this);
 
     connect (mSelectAll, SIGNAL (triggered ()), this, SLOT (selectAll()));
     connect (mDeselectAll, SIGNAL (triggered ()), this, SLOT (clearSelection()));
