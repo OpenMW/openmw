@@ -30,6 +30,7 @@
 #include "magiceffectcheck.hpp"
 #include "mergeoperation.hpp"
 #include "gmstcheck.hpp"
+#include "journalinfocheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
 {
@@ -114,6 +115,8 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         
         mVerifierOperation->appendStage (new GmstCheckStage (mData.getGmsts()));
 
+        mVerifierOperation->appendStage (new JournalInfoCheckStage (mData.getJournals(), mData.getJournalInfos()));
+        
         mVerifier.setOperation (mVerifierOperation);
     }
 
