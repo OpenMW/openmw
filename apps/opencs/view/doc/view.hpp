@@ -95,7 +95,7 @@ namespace CSVDoc
             void resizeViewHeight (int height);
 
             void updateScrollbar();
-
+            void updateWidth(bool isGrowLimit, int minSubViewWidth);
         public:
 
             View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews);

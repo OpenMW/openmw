@@ -570,32 +570,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     //
     mScrollbarOnly = windows["mainwindow-scrollbar"].toString() == "Scrollbar Only";
 
-    QDesktopWidget *dw = QApplication::desktop();
-    QRect rect;
-    if (windows["grow-limit"].isTrue())
-        rect = dw->screenGeometry(this);
-    else
-        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
-
-    if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
-    {
-        int newWidth = width()+minWidth;
-        int frameWidth = frameGeometry().width() - width();
-        if (newWidth+frameWidth <= rect.width())
-        {
-            resize(newWidth, height());
-            // WARNING: below code assumes that new subviews are added to the right
-            if (x() > rect.width()-(newWidth+frameWidth))
-                move(rect.width()-(newWidth+frameWidth), y()); // shift left to stay within the screen
-        }
-        else
-        {
-            // full width
-            resize(rect.width()-frameWidth, height());
-            mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minWidth);
-            move(0, y());
-        }
-    }
+    updateWidth(windows["grow-limit"].isTrue(), minWidth);
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
@@ -958,4 +933,34 @@ void CSVDoc::View::updateScrollbar()
 void CSVDoc::View::merge()
 {
     emit mergeDocument (mDocument);
+}
+
+void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
+{
+    QDesktopWidget *dw = QApplication::desktop();
+    QRect rect;
+    if (isGrowLimit)
+        rect = dw->screenGeometry(this);
+    else
+        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
+
+    if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
+    {
+        int newWidth = width()+minSubViewWidth;
+        int frameWidth = frameGeometry().width() - width();
+        if (newWidth+frameWidth <= rect.width())
+        {
+            resize(newWidth, height());
+            // WARNING: below code assumes that new subviews are added to the right
+            if (x() > rect.width()-(newWidth+frameWidth))
+                move(rect.width()-(newWidth+frameWidth), y()); // shift left to stay within the screen
+        }
+        else
+        {
+            // full width
+            resize(rect.width()-frameWidth, height());
+            mSubViewWindow.setMinimumWidth(mSubViewWindow.width()+minSubViewWidth);
+            move(0, y());
+        }
+    }
 }
