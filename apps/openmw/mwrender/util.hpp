@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWRENDER_UTIL_H
 #define OPENMW_MWRENDER_UTIL_H
 
+#include <osg/Callback>
 #include <osg/ref_ptr>
 #include <string>
 

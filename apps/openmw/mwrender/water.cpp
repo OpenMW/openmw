@@ -41,6 +41,7 @@
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
+#include "util.hpp"
 
 namespace
 {
