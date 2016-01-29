@@ -42,6 +42,7 @@
 #include "camera.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
+#include "util.hpp"
 
 namespace MWRender
 {
@@ -502,15 +503,6 @@ namespace MWRender
         mutable OpenThreads::Condition mCondition;
         mutable OpenThreads::Mutex mMutex;
         mutable bool mDone;
-    };
-
-
-    class NoTraverseCallback : public osg::NodeCallback
-    {
-    public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-        }
     };
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h)

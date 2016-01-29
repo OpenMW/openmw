@@ -210,16 +210,6 @@ private:
     osg::Plane mPlane;
 };
 
-// Node callback to entirely skip the traversal.
-class NoTraverseCallback : public osg::NodeCallback
-{
-public:
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        // no traverse()
-    }
-};
-
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
 /// The offset works around graphics artifacts that occured with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
 /// Must be added as a Cull callback.

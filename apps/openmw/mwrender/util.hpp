@@ -16,9 +16,17 @@ namespace Resource
 
 namespace MWRender
 {
-
     void overrideTexture(const std::string& texture, Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Node> node);
 
+    // Node callback to entirely skip the traversal.
+    class NoTraverseCallback : public osg::NodeCallback
+    {
+    public:
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            // no traverse()
+        }
+    };
 }
 
 #endif
