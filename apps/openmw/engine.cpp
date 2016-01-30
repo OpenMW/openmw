@@ -3,6 +3,8 @@
 #include <stdexcept>
 #include <iomanip>
 
+#include <sys/stat.h>
+
 #include <boost/filesystem/fstream.hpp>
 
 #include <osgViewer/ViewerEventHandlers>
