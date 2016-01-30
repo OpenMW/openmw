@@ -116,8 +116,37 @@ if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
 
-# We probably support older versions than this.
-cmake_minimum_required(VERSION 2.6)
+if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
+   set(USE_QT FALSE)
+else()
+   set(USE_QT TRUE)
+endif()
+
+# Dependencies
+if (USE_QT)
+    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
+    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
+    message(STATUS "Using Qt${DESIRED_QT_VERSION}")
+
+    if (DESIRED_QT_VERSION MATCHES 4)
+        find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
+    else()
+        find_package(Qt5Widgets REQUIRED)
+        find_package(Qt5Core REQUIRED)
+        find_package(Qt5Network REQUIRED)
+        find_package(Qt5OpenGL REQUIRED)
+    # Instruct CMake to run moc automatically when needed.
+    #set(CMAKE_AUTOMOC ON)
+    endif()
+endif()
+
+if (USE_QT AND DESIRED_QT_VERSION MATCHES 5)
+	# 2.8.11+ is required to make Qt5 happy and allow linking QtMain on Windows.
+	cmake_minimum_required(VERSION 2.8.11)
+else()
+	# We probably support older versions than this.
+	cmake_minimum_required(VERSION 2.6)
+endif()
 
 # Sound setup
 unset(FFMPEG_LIBRARIES CACHE)
@@ -170,30 +199,6 @@ option(OPENGL_ES "enable opengl es support" FALSE )
 if (OPENGL_ES)
     add_definitions(-DOPENGL_ES)
 endif(OPENGL_ES)
-
-if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
-   set(USE_QT FALSE)
-else()
-   set(USE_QT TRUE)
-endif()
- 
-# Dependencies
-if (USE_QT)
-    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
-    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
-    message(STATUS "Using Qt${DESIRED_QT_VERSION}")
-
-    if (DESIRED_QT_VERSION MATCHES 4)
-        find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
-    else()
-        find_package(Qt5Widgets REQUIRED)
-        find_package(Qt5Core REQUIRED)
-        find_package(Qt5Network REQUIRED)
-        find_package(Qt5OpenGL REQUIRED)
-    # Instruct CMake to run moc automatically when needed.
-    #set(CMAKE_AUTOMOC ON)
-    endif()
-endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
