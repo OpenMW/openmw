@@ -182,7 +182,7 @@ int CSMTools::ReportModel::countErrors() const
 {
     int count = 0;
 
-    for (std::vector<CSMDoc::Messages::Message>::const_iterator iter (mRows.begin());
+    for (std::vector<CSMDoc::Message>::const_iterator iter (mRows.begin());
         iter!=mRows.end(); ++iter)
         if (iter->mSeverity==CSMDoc::Message::Severity_Error ||
             iter->mSeverity==CSMDoc::Message::Severity_SeriousError)

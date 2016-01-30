@@ -46,7 +46,19 @@ namespace CSVRender
             /// \param elementMask Elements to be affected by the clear operation
             virtual void clearSelection (int elementMask);
 
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAll (int elementMask);
+
+            // Select everything that references the same ID as at least one of the elements
+            // already selected
+            //
+            /// \param elementMask Elements to be affected by the select operation
+            virtual void selectAllWithSameParentId (int elementMask);
+
             virtual std::string getCellId (const osg::Vec3f& point) const;
+
+            virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
+                const;
 
         private:
 

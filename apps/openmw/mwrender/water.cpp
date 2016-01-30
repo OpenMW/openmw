@@ -41,6 +41,7 @@
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -208,16 +209,6 @@ private:
     osg::ref_ptr<osg::ClipNode> mClipNode;
 
     osg::Plane mPlane;
-};
-
-// Node callback to entirely skip the traversal.
-class NoTraverseCallback : public osg::NodeCallback
-{
-public:
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        // no traverse()
-    }
 };
 
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.

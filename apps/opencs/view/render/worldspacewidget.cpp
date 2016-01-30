@@ -33,8 +33,9 @@
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
-  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false),
-  mToolTipPos (-1, -1)
+  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false), mDragX(0), mDragY(0), mDragFactor(0),
+  mDragWheelFactor(0), mDragShiftFactor(0),
+  mToolTipPos (-1, -1), mShowToolTips(false), mToolTipDelay(0)
 {
     setAcceptDrops(true);
 

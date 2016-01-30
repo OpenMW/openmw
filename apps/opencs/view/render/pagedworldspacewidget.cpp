@@ -509,6 +509,24 @@ void CSVRender::PagedWorldspaceWidget::clearSelection (int elementMask)
     flagAsModified();
 }
 
+void CSVRender::PagedWorldspaceWidget::selectAll (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->setSelection (elementMask, Cell::Selection_All);
+
+    flagAsModified();
+}
+
+void CSVRender::PagedWorldspaceWidget::selectAllWithSameParentId (int elementMask)
+{
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+        iter->second->selectAllWithSameParentId (elementMask);
+
+    flagAsModified();
+}
+
 std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
     const int cellSize = 8192;
@@ -518,6 +536,23 @@ std::string CSVRender::PagedWorldspaceWidget::getCellId (const osg::Vec3f& point
         static_cast<int> (std::floor (point.y()/cellSize)));
 
     return cellCoordinates.getId (mWorldspace);
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (
+    unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<CSVRender::TagBase> > result;
+
+    for (std::map<CSMWorld::CellCoordinates, Cell *>::const_iterator iter = mCells.begin();
+        iter!=mCells.end(); ++iter)
+    {
+        std::vector<osg::ref_ptr<CSVRender::TagBase> > cellResult =
+            iter->second->getSelection (elementMask);
+
+        result.insert (result.end(), cellResult.begin(), cellResult.end());
+    }
+
+    return result;
 }
 
 CSVWidget::SceneToolToggle *CSVRender::PagedWorldspaceWidget::makeControlVisibilitySelector (

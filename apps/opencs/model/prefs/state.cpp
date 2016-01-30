@@ -133,6 +133,8 @@ void CSMPrefs::State::declare()
     declareBool ("show-linenum", "Show Line Numbers", true).
         setTooltip ("Show line numbers to the left of the script editor window."
         "The current row and column numbers of the text cursor are shown at the bottom.");
+    declareBool ("wrap-lines", "Wrap Lines", false).
+        setTooltip ("Wrap lines longer than width of script editor.");
     declareBool ("mono-font", "Use monospace font", true);
     EnumValue warningsNormal ("Normal", "Report warnings as warning");
     declareEnum ("warnings", "Warning Mode", warningsNormal).

@@ -113,6 +113,7 @@ Programmers
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     Sylvain Thesnieres (Garvek)
+    t6
     terrorfisch
     Thomas Luppi (Digmaster)
     Tom Mason (wheybags)

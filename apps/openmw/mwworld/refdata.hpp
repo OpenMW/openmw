@@ -5,6 +5,7 @@
 
 #include "../mwscript/locals.hpp"
 
+#include <string>
 #include <osg/Vec3f>
 
 namespace SceneUtil

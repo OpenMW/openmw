@@ -39,9 +39,6 @@ namespace CSMDoc
     {
         public:
 
-            // \deprecated Use CSMDoc::Message directly instead.
-            typedef CSMDoc::Message Message;
-
             typedef std::vector<Message> Collection;
 
             typedef Collection::const_iterator Iterator;

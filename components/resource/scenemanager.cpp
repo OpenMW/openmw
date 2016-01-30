@@ -201,10 +201,22 @@ namespace Resource
             }
             catch (std::exception& e)
             {
-                std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error.nif instead" << std::endl;
-                Files::IStreamPtr file = mVFS->get("meshes/marker_error.nif");
-                normalized = "meshes/marker_error.nif";
-                loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                static const char * const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2" };
+
+                for (unsigned int i=0; i<sizeof(sMeshTypes)/sizeof(sMeshTypes[0]); ++i)
+                {
+                    normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
+                    if (mVFS->exists(normalized))
+                    {
+                        std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead" << std::endl;
+                        Files::IStreamPtr file = mVFS->get(normalized);
+                        loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                        break;
+                    }
+                }
+
+                if (!loaded)
+                    throw;
             }
 
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
