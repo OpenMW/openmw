@@ -125,16 +125,16 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "First Person"
         "<ul><li>Mouse-Look while holding the left button</li>"
         "<li>WASD movement keys</li>"
-        "<li>Mouse wheel moves the camera forawrd/backward</li>"
-        "<li>Stafing (also vertically) by holding the left mouse button and control</li>"
+        "<li>Mouse wheel moves the camera forward/backward</li>"
+        "<li>Strafing (also vertically) by holding the left mouse button and control</li>"
         "<li>Camera is held upright</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
     tool->addButton (":scenetoolbar/free-camera", "free",
         "Free Camera"
         "<ul><li>Mouse-Look while holding the left button</li>"
-        "<li>Stafing (also vertically) via WASD or by holding the left mouse button and control</li>"
-        "<li>Mouse wheel moves the camera forawrd/backward</li>"
+        "<li>Strafing (also vertically) via WASD or by holding the left mouse button and control</li>"
+        "<li>Mouse wheel moves the camera forward/backward</li>"
         "<li>Roll camera with Q and E keys</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
@@ -144,7 +144,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
         "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
         "<li>Roll camera with Q and E keys</li>"
-        "<li>Stafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
+        "<li>Strafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
 
