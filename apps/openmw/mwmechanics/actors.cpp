@@ -1209,7 +1209,7 @@ namespace MWMechanics
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
-                // Make sure spell effects with CasterLinked flag are removed
+                // Make sure spell effects are removed
                 for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
                 {
                     MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
