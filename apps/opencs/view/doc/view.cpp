@@ -343,7 +343,7 @@ void CSVDoc::View::updateTitle()
     setWindowTitle (QString::fromUtf8(stream.str().c_str()));
 }
 
-void CSVDoc::View::updateSubViewIndicies(SubView *view)
+void CSVDoc::View::updateSubViewIndices(SubView *view)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -574,7 +574,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     mSubViewWindow.addDockWidget (Qt::TopDockWidgetArea, view);
 
-    updateSubViewIndicies();
+    updateSubViewIndices();
 
     connect (view, SIGNAL (focusId (const CSMWorld::UniversalId&, const std::string&)), this,
         SLOT (addSubView (const CSMWorld::UniversalId&, const std::string&)));
@@ -583,8 +583,8 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
 
     connect (view, SIGNAL (updateTitle()), this, SLOT (updateTitle()));
 
-    connect (view, SIGNAL (updateSubViewIndicies (SubView *)),
-        this, SLOT (updateSubViewIndicies (SubView *)));
+    connect (view, SIGNAL (updateSubViewIndices (SubView *)),
+        this, SLOT (updateSubViewIndices (SubView *)));
 
     view->show();
 
@@ -606,7 +606,7 @@ void CSVDoc::View::moveScrollBarToEnd(int min, int max)
 void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
 {
     if (*setting=="Windows/hide-subview")
-        updateSubViewIndicies (0);
+        updateSubViewIndices (NULL);
     else if (*setting=="Windows/mainwindow-scrollbar")
     {
         if (setting->toString()!="Grow Only")

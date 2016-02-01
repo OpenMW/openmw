@@ -47,7 +47,7 @@ void CSVDoc::SubView::setUniversalId (const CSMWorld::UniversalId& id)
 
 void CSVDoc::SubView::closeEvent (QCloseEvent *event)
 {
-    emit updateSubViewIndicies (this);
+    emit updateSubViewIndices (this);
 }
 
 std::string CSVDoc::SubView::getTitle() const
