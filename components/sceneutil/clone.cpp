@@ -81,8 +81,6 @@ namespace SceneUtil
 #endif
 
             osg::Drawable* cloned = osg::clone(drawable, copyop);
-            if (cloned->getUpdateCallback())
-                cloned->setUpdateCallback(osg::clone(cloned->getUpdateCallback(), *this));
             return cloned;
         }
         if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable))
