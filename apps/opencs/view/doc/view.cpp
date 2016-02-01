@@ -419,10 +419,7 @@ CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int to
     }
     else
     {
-        mScroll = new QScrollArea(this);
-        mScroll->setWidgetResizable(true);
-        mScroll->setWidget(&mSubViewWindow);
-        setCentralWidget(mScroll);
+        createScrollArea();
     }
 
     mOperations = new Operations;
@@ -626,10 +623,7 @@ void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
             }
             else
             {
-                mScroll = new QScrollArea(this);
-                mScroll->setWidgetResizable(true);
-                mScroll->setWidget(&mSubViewWindow);
-                setCentralWidget(mScroll);
+                createScrollArea();
             }
         }
         else  if (mScroll)
@@ -963,4 +957,12 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
             move(0, y());
         }
     }
+}
+
+void CSVDoc::View::createScrollArea()
+{
+    mScroll = new QScrollArea(this);
+    mScroll->setWidgetResizable(true);
+    mScroll->setWidget(&mSubViewWindow);
+    setCentralWidget(mScroll);
 }
