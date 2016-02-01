@@ -394,7 +394,10 @@ namespace NifOsg
             if (node->getDataVariance() == osg::Object::STATIC
                     // For TriShapes, we can only collapse the node, but not completely remove it,
                     // if the link to animated collision shapes is supposed to stay intact.
-                    && (nifNode->recType != Nif::RC_NiTriShape || !skipMeshes))
+                    && (nifNode->recType != Nif::RC_NiTriShape || !skipMeshes)
+                    // Don't optimize drawables with controllers, that creates issues when we want to deep copy controllers without deep copying the drawable that holds the controller.
+                    // A deep copy of controllers may be needed to independently animate multiple copies of the same mesh.
+                    && !node->getUpdateCallback())
             {
                 if (node->getNumParents() && nifNode->trafo.isIdentity())
                 {
