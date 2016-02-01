@@ -378,6 +378,11 @@ namespace MWMechanics
             if (!checkEffectTarget(effectIt->mEffectID, target, castByPlayer))
                 continue;
 
+            // caster needs to be an actor for linked effects (e.g. Absorb)
+            if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
+                    && (caster.isEmpty() || !caster.getClass().isActor()))
+                continue;
+
             // If player is healing someone, show the target's HP bar
             if (castByPlayer && target != caster
                     && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
