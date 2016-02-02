@@ -982,11 +982,8 @@ namespace MWMechanics
 
             /// \todo move update logic to Actor class where appropriate
 
-            // make a copy of the map to avoid invalidated iterators when an actor moves during the update
-            PtrActorMap actors = mActors;
-
              // AI and magic effects update
-            for(PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 bool inProcessingRange = (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
                         <= sqrProcessingDistance;
@@ -1011,7 +1008,7 @@ namespace MWMechanics
                             if (iter->first != player)
                                 adjustCommandedActor(iter->first);
 
-                            for(PtrActorMap::iterator it(actors.begin()); it != actors.end(); ++it)
+                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first || iter->first == player) // player is not AI-controlled
                                     continue;
@@ -1023,7 +1020,7 @@ namespace MWMechanics
                             float sqrHeadTrackDistance = std::numeric_limits<float>::max();
                             MWWorld::Ptr headTrackTarget;
 
-                            for(PtrActorMap::iterator it(actors.begin()); it != actors.end(); ++it)
+                            for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                             {
                                 if (it->first == iter->first)
                                     continue;
@@ -1058,12 +1055,12 @@ namespace MWMechanics
             // Reaching the text keys may trigger Hit / Spellcast (and as such, particles),
             // so updating VFX immediately after that would just remove the particle effects instantly.
             // There needs to be a magic effect update in between.
-            for(PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                 iter->second->getCharacterController()->updateContinuousVfx();
 
             // Animation/movement update
             CharacterController* playerCharacter = NULL;
-            for(PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 if (iter->first != player &&
                         (player.getRefData().getPosition().asVec3() - iter->first.getRefData().getPosition().asVec3()).length2()
@@ -1073,10 +1070,20 @@ namespace MWMechanics
                 if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
                     iter->second->getCharacterController()->skipAnim();
 
+                // Handle player last, in case a cell transition occurs by casting a teleportation spell
+                // (would invalidate the iterator)
+                if (iter->first == getPlayer())
+                {
+                    playerCharacter = iter->second->getCharacterController();
+                    continue;
+                }
                 iter->second->getCharacterController()->update(duration);
             }
 
-            for(PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+            if (playerCharacter)
+                playerCharacter->update(duration);
+
+            for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
             {
                 const MWWorld::Class &cls = iter->first.getClass();
                 CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1134,7 +1141,7 @@ namespace MWMechanics
 
                     bool detected = false;
 
-                    for (PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+                    for (PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
                     {
                         if (iter->first == player)  // not the player
                             continue;
@@ -1177,8 +1184,7 @@ namespace MWMechanics
 
     void Actors::killDeadActors()
     {
-        PtrActorMap actors = mActors;
-        for(PtrActorMap::iterator iter(actors.begin()); iter != actors.end(); ++iter)
+        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
             const MWWorld::Class &cls = iter->first.getClass();
             CreatureStats &stats = cls.getCreatureStats(iter->first);
@@ -1209,7 +1215,7 @@ namespace MWMechanics
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
                 // Make sure spell effects are removed
-                for (PtrActorMap::iterator iter2(actors.begin());iter2 != actors.end();++iter2)
+                for (PtrActorMap::iterator iter2(mActors.begin());iter2 != mActors.end();++iter2)
                 {
                     MWMechanics::ActiveSpells& spells = iter2->first.getClass().getCreatureStats(iter2->first).getActiveSpells();
                     spells.purge(stats.getActorId());
