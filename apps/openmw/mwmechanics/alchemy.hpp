@@ -80,6 +80,9 @@ namespace MWMechanics
 
         public:
 
+            static bool knownEffect (unsigned int potionEffectIndex, const MWWorld::Ptr& npc);
+            ///< Does npc have sufficient alchemy skill to know about this potion effect?
+
             void setAlchemist (const MWWorld::Ptr& npc);
             ///< Set alchemist and configure alchemy setup accordingly. \a npc may be empty to indicate that
             /// there is no alchemist (alchemy session has ended).
