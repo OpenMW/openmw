@@ -807,6 +807,10 @@ namespace MWWorld
             }
         }
 
+        // Do another update here to make sure objects referred to by MVRF tags can be found
+        // This update is only needed for old saves that used the old copy&delete way of moving objects
+        updateMergedRefs();
+
         while (reader.isNextSub("MVRF"))
         {
             reader.cacheSubName();
@@ -848,8 +852,6 @@ namespace MWWorld
 
             moveTo(MWWorld::Ptr(movedRef, this), otherCell);
         }
-
-        updateMergedRefs();
     }
 
     bool operator== (const CellStore& left, const CellStore& right)
