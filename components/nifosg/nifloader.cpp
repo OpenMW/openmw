@@ -1100,7 +1100,7 @@ namespace NifOsg
             }
 
             // For the initial bounding box (used for object placement) use the default pose, fire off a bounding compute to set this initial box
-            morphGeom->getBoundingBox();
+            morphGeom->getBound();
 
             // Now set up the callback so that we get properly enlarged bounds if/when the mesh starts animating
             morphGeom->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(box));
