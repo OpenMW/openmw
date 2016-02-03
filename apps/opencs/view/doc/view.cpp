@@ -373,7 +373,7 @@ void CSVDoc::View::updateSubViewIndices(SubView *view)
             else
             {
                 delete subView->titleBarWidget();
-                subView->setTitleBarWidget (0);
+                subView->setTitleBarWidget (NULL);
             }
         }
     }
@@ -402,7 +402,7 @@ void CSVDoc::View::updateActions()
 
 CSVDoc::View::View (ViewManager& viewManager, CSMDoc::Document *document, int totalViews)
     : mViewManager (viewManager), mDocument (document), mViewIndex (totalViews-1),
-      mViewTotal (totalViews), mScroll(0), mScrollbarOnly(false)
+      mViewTotal (totalViews), mScroll(NULL), mScrollbarOnly(false)
 {
     CSMPrefs::Category& windows = CSMPrefs::State::get()["Windows"];
 
@@ -631,7 +631,7 @@ void CSVDoc::View::settingChanged (const CSMPrefs::Setting *setting)
             mScroll->takeWidget();
             setCentralWidget (&mSubViewWindow);
             mScroll->deleteLater();
-            mScroll = 0;
+            mScroll = NULL;
         }
     }
 }
