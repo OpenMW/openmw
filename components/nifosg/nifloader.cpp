@@ -999,7 +999,7 @@ namespace NifOsg
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()));
+                    geometry = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triShape, parentNode, composite, boundTextures, animflags);
 
                     osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
                                 static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
@@ -1010,9 +1010,10 @@ namespace NifOsg
             }
 
             if (!geometry.get())
+            {
                 geometry = new osg::Geometry;
-
-            triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
+                triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
+            }
 
 #if OSG_VERSION_LESS_THAN(3,3,3)
             osg::ref_ptr<osg::Geode> geode (new osg::Geode);
@@ -1046,7 +1047,7 @@ namespace NifOsg
 #endif
         }
 
-        osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher)
+        osg::ref_ptr<osg::Geometry> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osgAnimation::MorphGeometry> morphGeom = new osgAnimation::MorphGeometry;
             morphGeom->setMethod(osgAnimation::MorphGeometry::RELATIVE);
@@ -1055,6 +1056,8 @@ namespace NifOsg
 
             morphGeom->setUpdateCallback(NULL);
             morphGeom->setCullCallback(new UpdateMorphGeometry);
+
+            triShapeToGeometry(triShape, morphGeom, parentNode, composite, boundTextures, animflags);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
             if (!morphs.size())
@@ -1096,6 +1099,10 @@ namespace NifOsg
                 box.expandBy(vertBounds[i]);
             }
 
+            // For the initial bounding box (used for object placement) use the default pose, fire off a bounding compute to set this initial box
+            morphGeom->getBoundingBox();
+
+            // Now set up the callback so that we get properly enlarged bounds if/when the mesh starts animating
             morphGeom->setComputeBoundingBoxCallback(new StaticBoundingBoxCallback(box));
 
             return morphGeom;
