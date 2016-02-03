@@ -578,12 +578,13 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    if (normalMap->getImage())
+        normalMap->getImage()->flipVertical();
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    normalMap->getImage()->flipVertical();
 
     osg::ref_ptr<osg::StateSet> shaderStateset = new osg::StateSet;
     shaderStateset->addUniform(new osg::Uniform("normalMap", 0));
