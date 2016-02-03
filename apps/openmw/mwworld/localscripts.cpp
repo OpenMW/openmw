@@ -76,30 +76,18 @@ void MWWorld::LocalScripts::startIteration()
     mIter = mScripts.begin();
 }
 
-bool MWWorld::LocalScripts::isFinished() const
+bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
 {
-    if (mIter==mScripts.end())
-        return true;
-
-    if (!mIgnore.isEmpty() && mIter->second==mIgnore)
+    while (mIter!=mScripts.end())
     {
-        std::list<std::pair<std::string, Ptr> >::iterator iter = mIter;
-        return ++iter==mScripts.end();
+        std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
+        if (mIgnore.isEmpty() || iter->second!=mIgnore)
+        {
+            script = *iter;
+            return true;
+        }
     }
-
     return false;
-}
-
-std::pair<std::string, MWWorld::Ptr> MWWorld::LocalScripts::getNext()
-{
-    assert (!isFinished());
-
-    std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
-
-    if (mIgnore.isEmpty() || iter->second!=mIgnore)
-        return *iter;
-
-    return getNext();
 }
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)

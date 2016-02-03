@@ -69,11 +69,9 @@ void OMW::Engine::executeLocalScripts()
     MWWorld::LocalScripts& localScripts = mEnvironment.getWorld()->getLocalScripts();
 
     localScripts.startIteration();
-
-    while (!localScripts.isFinished())
+    std::pair<std::string, MWWorld::Ptr> script;
+    while (localScripts.getNext(script))
     {
-        std::pair<std::string, MWWorld::Ptr> script = localScripts.getNext();
-
         MWScript::InterpreterContext interpreterContext (
             &script.second.getRefData().getLocals(), script.second);
         mEnvironment.getScriptManager()->run (script.first, interpreterContext);
