@@ -227,7 +227,7 @@ namespace MWWorld
 
             virtual bool isCellQuasiExterior() const;
 
-            virtual osg::Vec2f getNorthVector (CellStore* cell);
+            virtual osg::Vec2f getNorthVector (const CellStore* cell);
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);

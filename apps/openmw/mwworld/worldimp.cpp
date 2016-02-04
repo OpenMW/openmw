@@ -1710,9 +1710,9 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    osg::Vec2f World::getNorthVector (CellStore* cell)
+    osg::Vec2f World::getNorthVector (const CellStore* cell)
     {
-        MWWorld::Ptr northmarker = cell->search("northmarker");
+        MWWorld::ConstPtr northmarker = cell->searchConst("northmarker");
 
         if (northmarker.isEmpty())
             return osg::Vec2f(0, 1);
