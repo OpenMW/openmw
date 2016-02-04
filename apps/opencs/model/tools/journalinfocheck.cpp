@@ -2,10 +2,9 @@
 
 #include <set>
 
-CSMTools::JournalInfoCheckStage::JournalInfoCheckStage(
-    const CSMWorld::IdCollection<ESM::Dialogue> &journals,
-    const CSMWorld::InfoCollection& journalInfos)
-    : mJournals(journals), mJournalInfos(journalInfos)
+CSMTools::JournalInfoCheckStage::JournalInfoCheckStage(const CSMWorld::IdCollection<ESM::Dialogue> &journals,
+        const CSMWorld::InfoCollection& journalInfos)
+        : mJournals(journals), mJournalInfos(journalInfos)
 {}
 
 int CSMTools::JournalInfoCheckStage::setup()
@@ -21,68 +20,56 @@ void CSMTools::JournalInfoCheckStage::perform(int stage, CSMDoc::Messages& messa
         return;
     
     const ESM::Dialogue &journal = journalRecord.get();
-    
-    CSMWorld::UniversalId journalId (CSMWorld::UniversalId::Type_Journal, journal.mId);
-    
-    bool infoWasModified = journalRecord.isModified();
-    bool indicesAreRepeated = false;
-    int infoCount = 0;
-    int infoNameCount = 0;
-    int infoFinishedCount = 0;
-    std::set<int> infoIndices;
+    int statusNamedCount = 0;
+    int totalInfoCount = 0;
+    std::set<int> questIndices;
     
     CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId);
     
-    for (CSMWorld::InfoCollection::RecordConstIterator it = range.first;
-         it != range.second; ++it)
+    for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
     {
         const CSMWorld::Record<CSMWorld::Info> infoRecord = (*it);
         
         if (infoRecord.isDeleted())
             continue;
-        else if (infoRecord.isModified())
-            infoWasModified = true;
         
-        const CSMWorld::Info& info = infoRecord.get();
+        const CSMWorld::Info& journalInfo = infoRecord.get();
         
-        // Update counters
+        totalInfoCount += 1;
         
-        ++infoCount;
-        
-        if (info.mQuestStatus == ESM::DialInfo::QS_Name)
-            ++infoNameCount;
-        else if (info.mQuestStatus == ESM::DialInfo::QS_Finished)
-            ++infoFinishedCount;
-        
-        // Check for duplicate quest ids
-            
-        std::pair<std::set<int>::iterator, bool> result = 
-            infoIndices.insert(info.mData.mJournalIndex);
-        
-        if (result.second == false)
-            indicesAreRepeated = true;
-    }
-    
-    if (infoWasModified) // Ignore all the base game errors, there's a lot
-    {
-        if (infoCount == 0)
-            messages.add(journalId, journal.mId + " has no infos", 
-                         "", CSMDoc::Message::Severity_Error);
-        
-        if (infoNameCount > 1)
-            messages.add(journalId, journal.mId + " has multiple infos with quest status \"Named\"", 
-                         "", CSMDoc::Message::Severity_Error);
-        else if (infoNameCount == 0)
-            messages.add(journalId, journal.mId + " has no infos with quest status \"Named\"", 
-                         "", CSMDoc::Message::Severity_Error);
+        if (journalInfo.mQuestStatus == ESM::DialInfo::QS_Name)
+        {
+            statusNamedCount += 1;
+        }
 
-        if (infoFinishedCount == 0)
-            messages.add(journalId, journal.mId + " has no infos with quest status \"Finished\"", 
-                         "", CSMDoc::Message::Severity_Error);
+        if (journalInfo.mResponse.empty())
+        {
+            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
             
-        if (indicesAreRepeated)
-            messages.add(journalId, journal.mId + " has quest indices that are repeated",
-                         "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Missing journal description", "", CSMDoc::Message::Severity_Warning);
+        }
+        
+        std::pair<std::set<int>::iterator, bool> result = questIndices.insert(journalInfo.mData.mJournalIndex);
+
+        // Duplicate index
+        if (result.second == false)
+        {
+            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
+            
+            messages.add(id, journalInfo.mTopicId + " has a duplicated quest index", "", CSMDoc::Message::Severity_Error);
+        }
     }
     
+    if (totalInfoCount == 0)
+    {
+        CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Journal, journal.mId);
+        
+        messages.add(id, journal.mId + " has no defined Journal Infos", "", CSMDoc::Message::Severity_Warning);
+    }
+    else if (statusNamedCount > 1)
+    {
+        CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Journal, journal.mId);
+        
+        messages.add(id, journal.mId + " has multiple infos with quest status \"Named\"", "", CSMDoc::Message::Severity_Error);
+    }
 }

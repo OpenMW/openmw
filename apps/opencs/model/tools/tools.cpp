@@ -30,6 +30,7 @@
 #include "magiceffectcheck.hpp"
 #include "mergeoperation.hpp"
 #include "gmstcheck.hpp"
+#include "topicinfocheck.hpp"
 #include "journalinfocheck.hpp"
 
 CSMDoc::OperationHolder *CSMTools::Tools::get (int type)
@@ -114,6 +115,16 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
                                                                     mData.getResources (CSMWorld::UniversalId::Type_Textures)));
         
         mVerifierOperation->appendStage (new GmstCheckStage (mData.getGmsts()));
+        
+        mVerifierOperation->appendStage (new TopicInfoCheckStage( mData.getTopicInfos(), 
+                                                                  mData.getCells(),
+                                                                  mData.getClasses(),
+                                                                  mData.getFactions(),
+                                                                  mData.getRaces(),
+                                                                  mData.getRegions(),
+                                                                  mData.getTopics(),
+                                                                  mData.getReferenceables().getDataSet(),
+                                                                  mData.getResources(CSMWorld::UniversalId::Type_SoundsRes)));
 
         mVerifierOperation->appendStage (new JournalInfoCheckStage (mData.getJournals(), mData.getJournalInfos()));
         

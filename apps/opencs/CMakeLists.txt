@@ -42,7 +42,7 @@ opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages gmstcheck journalinfocheck
+    mergestages gmstcheck topicinfocheck journalinfocheck
     )
 
 opencs_hdrs_noqt (model/tools
