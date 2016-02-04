@@ -2654,7 +2654,7 @@ namespace MWWorld
         }
     }
 
-    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result)
+    bool World::findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result)
     {
         if (cell->isExterior())
             return false;

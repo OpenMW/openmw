@@ -592,7 +592,7 @@ namespace MWWorld
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result);
+            virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result);
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case
