@@ -23,6 +23,11 @@ namespace ESM
     class ESMWriter;
 }
 
+namespace MWWorld
+{
+    class CellStore;
+}
+
 namespace Loading
 {
     class Listener;
@@ -67,6 +72,7 @@ namespace MWGui
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
+        void requestMapRender(const MWWorld::CellStore* cell);
         void setPlayerDir(const float x, const float y);
         void setPlayerPos(int cellX, int cellY, const float nx, const float ny);
 

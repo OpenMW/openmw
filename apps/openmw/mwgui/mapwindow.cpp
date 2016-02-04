@@ -454,6 +454,26 @@ namespace MWGui
         updateCustomMarkers();
     }
 
+    void LocalMapBase::requestMapRender(const MWWorld::CellStore *cell)
+    {
+        std::set<const MWWorld::CellStore*> cells;
+        if (!cell->isExterior())
+            cells.insert(cell);
+        else
+        {
+            for (int dX=-1; dX<2; ++dX)
+            {
+                for (int dY=-1; dY<2; ++dY)
+                {
+                    const MWWorld::CellStore* gridCell = MWBase::Environment::get().getWorld()->getExterior (cell->getCell()->getGridX()+dX, cell->getCell()->getGridY()+dY);
+                    cells.insert(gridCell);
+                }
+            }
+        }
+
+        mLocalMapRender->requestMap(cells);
+    }
+
     void LocalMapBase::redraw()
     {
         // Redraw children in proper order

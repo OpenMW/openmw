@@ -58,8 +58,6 @@ namespace MWWorld
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
 
-            bool mNeedMapUpdate;
-
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center

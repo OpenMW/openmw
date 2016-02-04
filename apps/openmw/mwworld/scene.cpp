@@ -179,27 +179,6 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        if (mNeedMapUpdate)
-        {
-            // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
-            // (and objects in a different cell can "bleed" into another cells map if they cross the border)
-            std::set<MWWorld::CellStore*> cellsToUpdate;
-            for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
-            {
-                cellsToUpdate.insert(*active);
-            }
-            MWBase::Environment::get().getWindowManager()->requestMap(cellsToUpdate);
-
-            mNeedMapUpdate = false;
-
-            if (mCurrentCell->isExterior())
-            {
-                int cellX, cellY;
-                getGridCenter(cellX, cellY);
-                MWBase::Environment::get().getWindowManager()->setActiveMap(cellX,cellY,false);
-            }
-        }
-
         mRendering.update (duration, paused);
     }
 
@@ -410,10 +389,6 @@ namespace MWWorld
 
         mCellChanged = true;
 
-        // Delay the map update until scripts have been given a chance to run.
-        // If we don't do this, objects that should be disabled will still appear on the map.
-        mNeedMapUpdate = true;
-
         mRendering.getResourceSystem()->clearCache();
     }
 
@@ -449,7 +424,7 @@ namespace MWWorld
     }
 
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     {
     }
 
@@ -526,10 +501,6 @@ namespace MWWorld
         mCellChanged = true; MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
-
-        // Delay the map update until scripts have been given a chance to run.
-        // If we don't do this, objects that should be disabled will still appear on the map.
-        mNeedMapUpdate = true;
 
         mRendering.getResourceSystem()->clearCache();
     }

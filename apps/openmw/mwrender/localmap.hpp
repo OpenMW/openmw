@@ -52,7 +52,7 @@ namespace MWRender
         /**
          * Request a map render for the given cells. Render textures will be immediately created and can be retrieved with the getMapTexture function.
          */
-        void requestMap (std::set<MWWorld::CellStore*> cells);
+        void requestMap (std::set<const MWWorld::CellStore*> cells);
 
         /**
          * Remove map and fog textures for the given cell.
@@ -146,8 +146,8 @@ namespace MWRender
         float mAngle;
         const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
 
-        void requestExteriorMap(MWWorld::CellStore* cell);
-        void requestInteriorMap(MWWorld::CellStore* cell);
+        void requestExteriorMap(const MWWorld::CellStore* cell);
+        void requestInteriorMap(const MWWorld::CellStore* cell);
 
         osg::ref_ptr<osg::Camera> createOrthographicCamera(float left, float top, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax);
         void setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int y);
