@@ -134,10 +134,10 @@ private:
 class AtmosphereNightUpdater : public SceneUtil::StateSetUpdater
 {
 public:
-    AtmosphereNightUpdater(Resource::ImageManager* textureManager)
+    AtmosphereNightUpdater(Resource::ImageManager* imageManager)
     {
         // we just need a texture, its contents don't really matter
-        mTexture = new osg::Texture2D(textureManager->getWarningImage());
+        mTexture = new osg::Texture2D(imageManager->getWarningImage());
     }
 
     void setFade(const float fade)
@@ -469,14 +469,14 @@ const float CelestialBody::mDistance = 1000.0f;
 class Sun : public CelestialBody
 {
 public:
-    Sun(osg::Group* parentNode, Resource::ImageManager& textureManager)
+    Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
         : CelestialBody(parentNode, 1.0f, 1)
         , mUpdater(new Updater)
     {
         mTransform->addUpdateCallback(mUpdater);
         mTransform->setNodeMask(Mask_Sun);
 
-        osg::ref_ptr<osg::Texture2D> sunTex (new osg::Texture2D(textureManager.getImage("textures/tx_sun_05.dds")));
+        osg::ref_ptr<osg::Texture2D> sunTex (new osg::Texture2D(imageManager.getImage("textures/tx_sun_05.dds")));
         sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -498,7 +498,7 @@ public:
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
         mOcclusionQueryTotalPixels = createOcclusionQueryNode(queryNode, false);
 
-        createSunFlash(textureManager);
+        createSunFlash(imageManager);
         createSunGlare();
     }
 
@@ -602,9 +602,9 @@ private:
         return oqn;
     }
 
-    void createSunFlash(Resource::ImageManager& textureManager)
+    void createSunFlash(Resource::ImageManager& imageManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(textureManager.getImage("textures/tx_sun_flash_grey_05.dds")));
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(imageManager.getImage("textures/tx_sun_flash_grey_05.dds")));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -932,11 +932,11 @@ public:
         Type_Secunda
     };
 
-    Moon(osg::Group* parentNode, Resource::ImageManager& textureManager, float scaleFactor, Type type)
+    Moon(osg::Group* parentNode, Resource::ImageManager& imageManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, scaleFactor, 2)
         , mType(type)
         , mPhase(MoonState::Phase_Unspecified)
-        , mUpdater(new Updater(textureManager))
+        , mUpdater(new Updater(imageManager))
     {
         setPhase(MoonState::Phase_Full);
         setVisible(true);
@@ -1001,7 +1001,7 @@ public:
 private:
     struct Updater : public SceneUtil::StateSetUpdater
     {
-        Resource::ImageManager& mTextureManager;
+        Resource::ImageManager& mImageManager;
         osg::ref_ptr<osg::Texture2D> mPhaseTex;
         osg::ref_ptr<osg::Texture2D> mCircleTex;
         float mTransparency;
@@ -1009,8 +1009,8 @@ private:
         osg::Vec4f mAtmosphereColor;
         osg::Vec4f mMoonColor;
 
-        Updater(Resource::ImageManager& textureManager)
-            : mTextureManager(textureManager)
+        Updater(Resource::ImageManager& imageManager)
+            : mImageManager(imageManager)
             , mPhaseTex()
             , mCircleTex()
             , mTransparency(1.0f)
@@ -1055,10 +1055,10 @@ private:
 
         void setTextures(const std::string& phaseTex, const std::string& circleTex)
         {
-            mPhaseTex = new osg::Texture2D(mTextureManager.getImage(phaseTex));
+            mPhaseTex = new osg::Texture2D(mImageManager.getImage(phaseTex));
             mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             mPhaseTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            mCircleTex = new osg::Texture2D(mTextureManager.getImage(circleTex));
+            mCircleTex = new osg::Texture2D(mImageManager.getImage(circleTex));
             mCircleTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             mCircleTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -1165,14 +1165,14 @@ void SkyManager::create()
     atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     ModVertexAlphaVisitor modStars(2);
     atmosphereNight->accept(modStars);
-    mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getTextureManager());
+    mAtmosphereNightUpdater = new AtmosphereNightUpdater(mSceneManager->getImageManager());
     atmosphereNight->addUpdateCallback(mAtmosphereNightUpdater);
 
-    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getTextureManager()));
+    mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
 
     const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getTextureManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mEarlyRenderBinRoot->addChild(mCloudNode);
@@ -1347,7 +1347,7 @@ void SkyManager::createRain()
 
     osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
 
-    osg::ref_ptr<osg::Texture2D> raindropTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage("textures/tx_raindrop_01.dds")));
+    osg::ref_ptr<osg::Texture2D> raindropTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds")));
     raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
@@ -1557,7 +1557,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
         std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
-        osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage(texture)));
+        osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture)));
         cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
         cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 
@@ -1572,7 +1572,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
-            osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage(texture)));
+            osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage(texture)));
             cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
             cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
 

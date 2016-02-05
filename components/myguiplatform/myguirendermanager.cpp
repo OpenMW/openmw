@@ -353,10 +353,10 @@ void OSGVertexBuffer::create()
 
 // ---------------------------------------------------------------------------
 
-RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::ImageManager* textureManager, float scalingFactor)
+RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::ImageManager* imageManager, float scalingFactor)
   : mViewer(viewer)
   , mSceneRoot(sceneroot)
-  , mTextureManager(textureManager)
+  , mImageManager(imageManager)
   , mUpdate(false)
   , mIsInitialise(false)
   , mInvScalingFactor(1.f)
@@ -523,7 +523,7 @@ MyGUI::ITexture* RenderManager::createTexture(const std::string &name)
         mTextures.erase(item);
     }
 
-    OSGTexture* texture = new OSGTexture(name, mTextureManager);
+    OSGTexture* texture = new OSGTexture(name, mImageManager);
     mTextures.insert(std::make_pair(name, texture));
     return texture;
 }

@@ -21,7 +21,7 @@ namespace osgMyGUI
 
     class OSGTexture : public MyGUI::ITexture {
         std::string mName;
-        Resource::ImageManager* mTextureManager;
+        Resource::ImageManager* mImageManager;
 
         osg::ref_ptr<osg::Image> mLockedImage;
         osg::ref_ptr<osg::Texture2D> mTexture;
@@ -30,7 +30,7 @@ namespace osgMyGUI
         size_t mNumElemBytes;
 
     public:
-        OSGTexture(const std::string &name, Resource::ImageManager* textureManager);
+        OSGTexture(const std::string &name, Resource::ImageManager* imageManager);
         OSGTexture(osg::Texture2D* texture);
         virtual ~OSGTexture();
 

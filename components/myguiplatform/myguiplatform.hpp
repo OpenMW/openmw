@@ -30,7 +30,7 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* textureManager, float uiScalingFactor);
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* imageManager, float uiScalingFactor);
 
         ~Platform();
 

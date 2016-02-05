@@ -13,8 +13,8 @@ namespace Resource
     {
         mNifFileManager.reset(new NifFileManager(vfs));
         mKeyframeManager.reset(new KeyframeManager(vfs));
-        mTextureManager.reset(new ImageManager(vfs));
-        mSceneManager.reset(new SceneManager(vfs, mTextureManager.get(), mNifFileManager.get()));
+        mImageManager.reset(new ImageManager(vfs));
+        mSceneManager.reset(new SceneManager(vfs, mImageManager.get(), mNifFileManager.get()));
     }
 
     ResourceSystem::~ResourceSystem()
@@ -27,9 +27,9 @@ namespace Resource
         return mSceneManager.get();
     }
 
-    ImageManager* ResourceSystem::getTextureManager()
+    ImageManager* ResourceSystem::getImageManager()
     {
-        return mTextureManager.get();
+        return mImageManager.get();
     }
 
     NifFileManager* ResourceSystem::getNifFileManager()

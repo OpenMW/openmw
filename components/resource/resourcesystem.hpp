@@ -26,7 +26,7 @@ namespace Resource
         ~ResourceSystem();
 
         SceneManager* getSceneManager();
-        ImageManager* getTextureManager();
+        ImageManager* getImageManager();
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
 
@@ -37,7 +37,7 @@ namespace Resource
 
     private:
         std::auto_ptr<SceneManager> mSceneManager;
-        std::auto_ptr<ImageManager> mTextureManager;
+        std::auto_ptr<ImageManager> mImageManager;
         std::auto_ptr<NifFileManager> mNifFileManager;
         std::auto_ptr<KeyframeManager> mKeyframeManager;
 

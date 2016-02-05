@@ -10,9 +10,9 @@
 namespace osgMyGUI
 {
 
-    OSGTexture::OSGTexture(const std::string &name, Resource::ImageManager* textureManager)
+    OSGTexture::OSGTexture(const std::string &name, Resource::ImageManager* imageManager)
       : mName(name)
-      , mTextureManager(textureManager)
+      , mImageManager(imageManager)
       , mFormat(MyGUI::PixelFormat::Unknow)
       , mUsage(MyGUI::TextureUsage::Default)
       , mNumElemBytes(0)
@@ -20,7 +20,7 @@ namespace osgMyGUI
     }
 
     OSGTexture::OSGTexture(osg::Texture2D *texture)
-        : mTextureManager(NULL)
+        : mImageManager(NULL)
         , mTexture(texture)
         , mFormat(MyGUI::PixelFormat::Unknow)
         , mUsage(MyGUI::TextureUsage::Default)
@@ -83,10 +83,10 @@ namespace osgMyGUI
 
     void OSGTexture::loadFromFile(const std::string &fname)
     {
-        if (!mTextureManager)
-            throw std::runtime_error("No texturemanager set");
+        if (!mImageManager)
+            throw std::runtime_error("No imagemanager set");
 
-        mTexture = new osg::Texture2D(mTextureManager->getImage(fname));
+        mTexture = new osg::Texture2D(mImageManager->getImage(fname));
         mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         // disable mip-maps

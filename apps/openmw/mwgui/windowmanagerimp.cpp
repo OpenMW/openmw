@@ -194,7 +194,7 @@ namespace MWGui
       , mVersionDescription(versionDescription)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getTextureManager(), uiScale);
+        mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
         mGuiPlatform->initialise(resourcePath, logpath);
 
         mGui = new MyGUI::Gui;
@@ -2015,7 +2015,7 @@ namespace MWGui
                 continue;
             std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0,0).texture;
 
-            osg::ref_ptr<osg::Image> image = mResourceSystem->getTextureManager()->getImage(tex_name);
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
 
             if(image.valid())
             {

@@ -142,7 +142,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             osg::ref_ptr<osg::Texture2D> tex = mTextureCache[it->mDiffuseMap];
             if (!tex)
             {
-                tex = new osg::Texture2D(mResourceSystem->getTextureManager()->getImage(it->mDiffuseMap));
+                tex = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
                 tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
                 tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
                 mTextureCache[it->mDiffuseMap] = tex;

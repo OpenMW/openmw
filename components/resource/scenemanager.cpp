@@ -227,9 +227,9 @@ namespace Resource
 
 
 
-    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* textureManager, Resource::NifFileManager* nifFileManager)
+    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : mVFS(vfs)
-        , mTextureManager(textureManager)
+        , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
         , mMagFilter(osg::Texture::LINEAR)
@@ -249,8 +249,8 @@ namespace Resource
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
     public:
-        ImageReadCallback(Resource::ImageManager* textureMgr)
-            : mTextureManager(textureMgr)
+        ImageReadCallback(Resource::ImageManager* imageMgr)
+            : mImageManager(imageMgr)
         {
         }
 
@@ -258,7 +258,7 @@ namespace Resource
         {
             try
             {
-                return osgDB::ReaderWriter::ReadResult(mTextureManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
+                return osgDB::ReaderWriter::ReadResult(mImageManager->getImage(filename), osgDB::ReaderWriter::ReadResult::FILE_LOADED);
             }
             catch (std::exception& e)
             {
@@ -267,7 +267,7 @@ namespace Resource
         }
 
     private:
-        Resource::ImageManager* mTextureManager;
+        Resource::ImageManager* mImageManager;
     };
 
     std::string getFileExtension(const std::string& file)
@@ -278,11 +278,11 @@ namespace Resource
         return std::string();
     }
 
-    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::ImageManager* textureMgr, Resource::NifFileManager* nifFileManager)
+    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
     {
         std::string ext = getFileExtension(normalizedFilename);
         if (ext == "nif")
-            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), textureMgr);
+            return NifOsg::Loader::load(nifFileManager->get(normalizedFilename), imageManager);
         else
         {
             osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension(ext);
@@ -297,7 +297,7 @@ namespace Resource
             // Set a ReadFileCallback so that image files referenced in the model are read from our virtual file system instead of the osgDB.
             // Note, for some formats (.obj/.mtl) that reference other (non-image) files a findFileCallback would be necessary.
             // but findFileCallback does not support virtual files, so we can't implement it.
-            options->setReadFileCallback(new ImageReadCallback(textureMgr));
+            options->setReadFileCallback(new ImageReadCallback(imageManager));
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(*file, options);
             if (!result.success())
@@ -323,7 +323,7 @@ namespace Resource
             {
                 Files::IStreamPtr file = mVFS->get(normalized);
 
-                loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                loaded = load(file, normalized, mImageManager, mNifFileManager);
             }
             catch (std::exception& e)
             {
@@ -336,7 +336,7 @@ namespace Resource
                     {
                         std::cerr << "Failed to load '" << name << "': " << e.what() << ", using marker_error." << sMeshTypes[i] << " instead" << std::endl;
                         Files::IStreamPtr file = mVFS->get(normalized);
-                        loaded = load(file, normalized, mTextureManager, mNifFileManager);
+                        loaded = load(file, normalized, mImageManager, mNifFileManager);
                         break;
                     }
                 }
@@ -408,9 +408,9 @@ namespace Resource
         return mVFS;
     }
 
-    Resource::ImageManager* SceneManager::getTextureManager()
+    Resource::ImageManager* SceneManager::getImageManager()
     {
-        return mTextureManager;
+        return mImageManager;
     }
 
     void SceneManager::setParticleSystemMask(unsigned int mask)

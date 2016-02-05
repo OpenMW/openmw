@@ -343,7 +343,7 @@ namespace NifOsg
             }
         }
 
-        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* textureManager)
+        osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
             if (nif->numRoots() < 1)
                 nif->fail("Found no root nodes");
@@ -356,7 +356,7 @@ namespace NifOsg
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, textureManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Node> created = handleNode(nifNode, NULL, imageManager, std::vector<int>(), 0, 0, false, &textkeys->mTextKeys);
 
             if (nif->getUseSkinning())
             {
@@ -369,13 +369,13 @@ namespace NifOsg
             return created;
         }
 
-        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* textureManager, std::vector<int>& boundTextures, int animflags)
+        void applyNodeProperties(const Nif::Node *nifNode, osg::Node *applyTo, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             const Nif::PropertyList& props = nifNode->props;
             for (size_t i = 0; i <props.length();++i)
             {
                 if (!props[i].empty())
-                    handleProperty(props[i].getPtr(), applyTo, composite, textureManager, boundTextures, animflags);
+                    handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
             }
         }
 
@@ -440,7 +440,7 @@ namespace NifOsg
             return lod;
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* textureManager,
+        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
                                 std::vector<int> boundTextures, int animflags, int particleflags, bool skipMeshes, TextKeyMap* textKeys, osg::Node* rootNode=NULL)
         {
             osg::ref_ptr<osg::Group> node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
@@ -542,7 +542,7 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, node, composite, textureManager, boundTextures, animflags);
+            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
 
             if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
             {
@@ -588,7 +588,7 @@ namespace NifOsg
                 {
                     if(!children[i].empty())
                     {
-                        handleNode(children[i].getPtr(), node, textureManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, particleflags, skipMeshes, textKeys, rootNode);
                     }
                 }
             }
@@ -682,7 +682,7 @@ namespace NifOsg
             }
         }
 
-        void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* textureManager, osg::StateSet *stateset, int animflags)
+        void handleTextureControllers(const Nif::Property *texProperty, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, osg::StateSet *stateset, int animflags)
         {
             for (Nif::ControllerPtr ctrl = texProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -708,8 +708,8 @@ namespace NifOsg
                             wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, textureManager->getVFS());
-                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(textureManager->getImage(filename)));
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(imageManager->getImage(filename)));
                         texture->setWrap(osg::Texture::WRAP_S, wrapS);
                         texture->setWrap(osg::Texture::WRAP_T, wrapT);
                         textures.push_back(texture);
@@ -1244,7 +1244,7 @@ namespace NifOsg
         }
 
         void handleProperty(const Nif::Property *property,
-                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* textureManager, std::vector<int>& boundTextures, int animflags)
+                            osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<int>& boundTextures, int animflags)
         {
             switch (property->recType)
             {
@@ -1372,14 +1372,14 @@ namespace NifOsg
                             continue;
                         }
 
-                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, textureManager->getVFS());
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
 
                         unsigned int clamp = static_cast<unsigned int>(tex.clamp);
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
                         // create a new texture, will later attempt to share using the SharedStateManager
-                        osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(textureManager->getImage(filename)));
+                        osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(imageManager->getImage(filename)));
                         texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
                         texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
@@ -1423,7 +1423,7 @@ namespace NifOsg
 
                         boundTextures.push_back(tex.uvSet);
                     }
-                    handleTextureControllers(texprop, composite, textureManager, stateset, animflags);
+                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                 }
                 break;
             }
@@ -1543,10 +1543,10 @@ namespace NifOsg
 
     };
 
-    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* textureManager)
+    osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager)
     {
         LoaderImpl impl(file->getFilename());
-        return impl.load(file, textureManager);
+        return impl.load(file, imageManager);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)

@@ -36,7 +36,7 @@ namespace Resource
     class SceneManager
     {
     public:
-        SceneManager(const VFS::Manager* vfs, Resource::ImageManager* textureManager, Resource::NifFileManager* nifFileManager);
+        SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
         ~SceneManager();
 
         /// Get a read-only copy of this scene "template"
@@ -70,7 +70,7 @@ namespace Resource
 
         const VFS::Manager* getVFS() const;
 
-        Resource::ImageManager* getTextureManager();
+        Resource::ImageManager* getImageManager();
 
         /// @param mask The node mask to apply to loaded particle system nodes.
         void setParticleSystemMask(unsigned int mask);
@@ -89,7 +89,7 @@ namespace Resource
 
     private:
         const VFS::Manager* mVFS;
-        Resource::ImageManager* mTextureManager;
+        Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
 
         osg::Texture::FilterMode mMinFilter;
