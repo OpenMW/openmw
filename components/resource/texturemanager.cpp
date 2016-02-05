@@ -47,8 +47,8 @@ namespace Resource
     TextureManager::TextureManager(const VFS::Manager *vfs)
         : mVFS(vfs)
         , mWarningTexture(createWarningTexture())
+        , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba"))
     {
-
     }
 
     TextureManager::~TextureManager()
@@ -116,8 +116,6 @@ namespace Resource
                 return NULL;
             }
 
-            osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
-            opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
             size_t extPos = normalized.find_last_of('.');
             std::string ext;
             if (extPos != std::string::npos && extPos+1 < normalized.size())
@@ -129,7 +127,7 @@ namespace Resource
                 return NULL;
             }
 
-            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
             if (!result.success())
             {
                 std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
@@ -170,8 +168,6 @@ namespace Resource
                 return mWarningTexture;
             }
 
-            osg::ref_ptr<osgDB::Options> opts (new osgDB::Options);
-            opts->setOptionString("dds_dxt1_detect_rgba"); // tx_creature_werewolf.dds isn't loading in the correct format without this option
             size_t extPos = normalized.find_last_of('.');
             std::string ext;
             if (extPos != std::string::npos && extPos+1 < normalized.size())
@@ -183,7 +179,7 @@ namespace Resource
                 return mWarningTexture;
             }
 
-            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, opts);
+            osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
             if (!result.success())
             {
                 std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
@@ -194,14 +190,6 @@ namespace Resource
             if (!checkSupported(image, filename))
             {
                 return mWarningTexture;
-            }
-
-            // We need to flip images, because the Morrowind texture coordinates use the DirectX convention (top-left image origin),
-            // but OpenGL uses bottom left as the image origin.
-            // For some reason this doesn't concern DDS textures, which are already flipped when loaded.
-            if (ext != "dds")
-            {
-                image->flipVertical();
             }
 
             osg::ref_ptr<osg::Texture2D> texture(new osg::Texture2D);

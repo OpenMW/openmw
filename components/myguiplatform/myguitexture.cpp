@@ -145,6 +145,8 @@ namespace osgMyGUI
         if (!mLockedImage.valid())
             throw std::runtime_error("Texture not locked");
 
+        mLockedImage->flipVertical();
+
         // mTexture might be in use by the draw thread, so create a new texture instead and use that.
         osg::ref_ptr<osg::Texture2D> newTexture = new osg::Texture2D;
         newTexture->setTextureSize(getWidth(), getHeight());

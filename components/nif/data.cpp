@@ -65,8 +65,14 @@ void ShapeData::read(NIFStream *nif)
         uvlist.resize(uvs);
         for(int i = 0;i < uvs;i++)
         {
-            uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
-            nif->getVector2s(uvlist[i], verts);
+            osg::Vec2Array* list = uvlist[i] = new osg::Vec2Array(osg::Array::BIND_PER_VERTEX);
+            nif->getVector2s(list, verts);
+
+            // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
+            for (unsigned int uv=0; uv<list->size(); ++uv)
+            {
+                (*list)[uv] = osg::Vec2((*list)[uv].x(), 1.f - (*list)[uv].y());
+            }
         }
     }
 }

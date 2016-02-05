@@ -194,7 +194,7 @@ namespace MWRender
         sizeX = std::max(sizeX, 0);
         sizeY = std::max(sizeY, 0);
 
-        mCamera->setViewport(0, 0, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
+        mCamera->setViewport(0, mSizeY-sizeY, std::min(mSizeX, sizeX), std::min(mSizeY, sizeY));
 
         redraw();
     }

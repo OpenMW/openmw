@@ -231,7 +231,7 @@ namespace SDLUtil
             return;
         }
 
-        SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, false);
+        SDL_Surface* surf = SDLUtil::imageToSurface(decompressed, true);
 
         //set the cursor and store it for later
         SDL_Cursor* curs = SDL_CreateColorCursor(surf, hotspot_x, hotspot_y);

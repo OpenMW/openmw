@@ -422,6 +422,6 @@ namespace MWGui
         mScreenshotTexture.reset(new osgMyGUI::OSGTexture(texture));
 
         mScreenshot->setRenderItemTexture(mScreenshotTexture.get());
-        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+        mScreenshot->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 }

@@ -18,6 +18,11 @@ namespace VFS
     class Manager;
 }
 
+namespace osgDB
+{
+    class Options;
+}
+
 namespace Resource
 {
 
@@ -49,6 +54,7 @@ namespace Resource
         std::map<MapKey, osg::ref_ptr<osg::Texture2D> > mTextures;
 
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
+        osg::ref_ptr<osgDB::Options> mOptions;
 
         TextureManager(const TextureManager&);
         void operator = (const TextureManager&);

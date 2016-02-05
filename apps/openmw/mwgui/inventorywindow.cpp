@@ -87,7 +87,7 @@ namespace MWGui
 
         mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
         mAvatarImage->setRenderItemTexture(mPreviewTexture.get());
-        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &InventoryWindow::onItemSelected);
@@ -403,8 +403,8 @@ namespace MWGui
         int height = std::min(mPreview->getTextureHeight(), size.height);
         mPreview->setViewport(width, height);
 
-        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, height/float(mPreview->getTextureHeight()),
-                                                                     width/float(mPreview->getTextureWidth()), 0.f));
+        mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f,
+                                                                     width/float(mPreview->getTextureWidth()), height/float(mPreview->getTextureHeight())));
     }
 
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)

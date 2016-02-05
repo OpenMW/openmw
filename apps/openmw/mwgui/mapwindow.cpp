@@ -254,7 +254,7 @@ namespace MWGui
                 {
                     boost::shared_ptr<MyGUI::ITexture> myguitex (new osgMyGUI::OSGTexture(tex));
                     fog->setRenderItemTexture(myguitex.get());
-                    fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+                    fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
                     fogTextures.push_back(myguitex);
                 }
                 else
@@ -391,7 +391,7 @@ namespace MWGui
                     boost::shared_ptr<MyGUI::ITexture> guiTex (new osgMyGUI::OSGTexture(texture));
                     textures.push_back(guiTex);
                     box->setRenderItemTexture(guiTex.get());
-                    box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+                    box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
                 }
                 else
                     box->setRenderItemTexture(NULL);
@@ -770,11 +770,11 @@ namespace MWGui
 
         mGlobalMapTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getBaseTexture()));
         mGlobalMapImage->setRenderItemTexture(mGlobalMapTexture.get());
-        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+        mGlobalMapImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
 
         mGlobalMapOverlayTexture.reset(new osgMyGUI::OSGTexture(mGlobalMapRender->getOverlayTexture()));
         mGlobalMapOverlay->setRenderItemTexture(mGlobalMapOverlayTexture.get());
-        mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+        mGlobalMapOverlay->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
     }
 
     MapWindow::~MapWindow()
