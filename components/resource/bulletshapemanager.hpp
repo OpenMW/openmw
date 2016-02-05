@@ -13,6 +13,11 @@ namespace VFS
     class Manager;
 }
 
+namespace osgDB
+{
+    class ObjectCache;
+}
+
 namespace Resource
 {
     class SceneManager;
@@ -34,8 +39,7 @@ namespace Resource
         SceneManager* mSceneManager;
         NifFileManager* mNifFileManager;
 
-        typedef std::map<std::string, osg::ref_ptr<BulletShape> > Index;
-        Index mIndex;
+        osg::ref_ptr<osgDB::ObjectCache> mCache;
     };
 
 }

@@ -17,6 +17,14 @@ BulletShape::BulletShape()
 
 }
 
+BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
+    : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
+    , mCollisionBoxHalfExtents(copy.mCollisionBoxHalfExtents)
+    , mCollisionBoxTranslate(copy.mCollisionBoxTranslate)
+    , mAnimatedShapes(copy.mAnimatedShapes)
+{
+}
+
 BulletShape::~BulletShape()
 {
     deleteShape(mCollisionShape);

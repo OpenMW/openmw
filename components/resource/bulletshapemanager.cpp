@@ -13,6 +13,7 @@
 #include "bulletshape.hpp"
 #include "scenemanager.hpp"
 #include "niffilemanager.hpp"
+#include "objectcache.hpp"
 
 
 namespace Resource
@@ -99,6 +100,7 @@ BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sc
     : mVFS(vfs)
     , mSceneManager(sceneMgr)
     , mNifFileManager(nifFileManager)
+    , mCache(new osgDB::ObjectCache)
 {
 
 }
@@ -114,8 +116,10 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
     mVFS->normalizeFilename(normalized);
 
     osg::ref_ptr<BulletShape> shape;
-    Index::iterator it = mIndex.find(normalized);
-    if (it == mIndex.end())
+    osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+    if (obj)
+        shape = osg::ref_ptr<BulletShape>(static_cast<BulletShape*>(obj.get()));
+    else
     {
         size_t extPos = normalized.find_last_of('.');
         std::string ext;
@@ -137,16 +141,19 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
             node->accept(visitor);
             shape = visitor.getShape();
             if (!shape)
+            {
+                mCache->addEntryToObjectCache(normalized, NULL);
                 return osg::ref_ptr<BulletShapeInstance>();
+            }
         }
 
-        mIndex[normalized] = shape;
+        mCache->addEntryToObjectCache(normalized, shape);
     }
-    else
-        shape = it->second;
 
-    osg::ref_ptr<BulletShapeInstance> instance = shape->makeInstance();
-    return instance;
+    if (shape)
+        return shape->makeInstance();
+    else
+        return osg::ref_ptr<BulletShapeInstance>();
 }
 
 }

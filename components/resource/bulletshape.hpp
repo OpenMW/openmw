@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include <osg/Referenced>
+#include <osg/Object>
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
 
@@ -15,11 +15,14 @@ namespace Resource
 {
 
     class BulletShapeInstance;
-    class BulletShape : public osg::Referenced
+    class BulletShape : public osg::Object
     {
     public:
         BulletShape();
+        BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
         virtual ~BulletShape();
+
+        META_Object(Resource, BulletShape)
 
         btCollisionShape* mCollisionShape;
 
@@ -42,6 +45,7 @@ namespace Resource
         btCollisionShape* getCollisionShape();
 
     private:
+
         void deleteShape(btCollisionShape* shape);
     };
 
