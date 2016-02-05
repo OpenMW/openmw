@@ -3,7 +3,6 @@
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
 #include <osg/Version>
-#include <osgViewer/Viewer>
 
 #include <stdexcept>
 
@@ -47,11 +46,7 @@ namespace Resource
 
     TextureManager::TextureManager(const VFS::Manager *vfs)
         : mVFS(vfs)
-        , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
-        , mMagFilter(osg::Texture::LINEAR)
-        , mMaxAnisotropy(1)
         , mWarningTexture(createWarningTexture())
-        , mUnRefImageDataAfterApply(false)
     {
 
     }
@@ -59,88 +54,6 @@ namespace Resource
     TextureManager::~TextureManager()
     {
 
-    }
-
-    void TextureManager::setUnRefImageDataAfterApply(bool unref)
-    {
-        mUnRefImageDataAfterApply = unref;
-    }
-
-    void TextureManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
-                                           const std::string &mipmap, int maxAnisotropy,
-                                           osgViewer::Viewer *viewer)
-    {
-        osg::Texture::FilterMode min = osg::Texture::LINEAR;
-        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
-
-        if(magfilter == "nearest")
-            mag = osg::Texture::NEAREST;
-        else if(magfilter != "linear")
-            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
-
-        if(minfilter == "nearest")
-            min = osg::Texture::NEAREST;
-        else if(minfilter != "linear")
-            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
-
-        if(mipmap == "nearest")
-        {
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
-        }
-        else if(mipmap != "none")
-        {
-            if(mipmap != "linear")
-                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
-            if(min == osg::Texture::NEAREST)
-                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
-            else if(min == osg::Texture::LINEAR)
-                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
-        }
-
-        if(viewer) viewer->stopThreading();
-        setFilterSettings(min, mag, maxAnisotropy);
-        if(viewer) viewer->startThreading();
-    }
-
-    void TextureManager::setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
-    {
-        mMinFilter = minFilter;
-        mMagFilter = magFilter;
-        mMaxAnisotropy = std::max(1, maxAnisotropy);
-
-        for (std::map<MapKey, osg::ref_ptr<osg::Texture2D> >::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
-        {
-            osg::ref_ptr<osg::Texture2D> tex = it->second;
-
-            // Keep mip-mapping disabled if the texture creator explicitely requested no mipmapping.
-            osg::Texture::FilterMode oldMin = tex->getFilter(osg::Texture::MIN_FILTER);
-            if (oldMin == osg::Texture::LINEAR || oldMin == osg::Texture::NEAREST)
-            {
-                osg::Texture::FilterMode newMin = osg::Texture::LINEAR;
-                switch (mMinFilter)
-                {
-                case osg::Texture::LINEAR:
-                case osg::Texture::LINEAR_MIPMAP_LINEAR:
-                case osg::Texture::LINEAR_MIPMAP_NEAREST:
-                    newMin = osg::Texture::LINEAR;
-                    break;
-                case osg::Texture::NEAREST:
-                case osg::Texture::NEAREST_MIPMAP_LINEAR:
-                case osg::Texture::NEAREST_MIPMAP_NEAREST:
-                    newMin = osg::Texture::NEAREST;
-                    break;
-                }
-                tex->setFilter(osg::Texture::MIN_FILTER, newMin);
-            }
-            else
-                tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
-
-            tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
-            tex->setMaxAnisotropy(static_cast<float>(mMaxAnisotropy));
-        }
     }
 
     /*
@@ -295,11 +208,6 @@ namespace Resource
             texture->setImage(image);
             texture->setWrap(osg::Texture::WRAP_S, wrapS);
             texture->setWrap(osg::Texture::WRAP_T, wrapT);
-            texture->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
-            texture->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
-            texture->setMaxAnisotropy(mMaxAnisotropy);
-
-            texture->setUnRefImageDataAfterApply(mUnRefImageDataAfterApply);
 
             mTextures.insert(std::make_pair(key, texture));
             return texture;

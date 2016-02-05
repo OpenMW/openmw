@@ -20,7 +20,7 @@
 #include <components/sdlutil/imagetosurface.hpp>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/compiler/extensions0.hpp>
 
@@ -448,8 +448,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
-    mResourceSystem->getTextureManager()->setUnRefImageDataAfterApply(true);
-    mResourceSystem->getTextureManager()->setFilterSettings(
+    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(true);
+    mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
         Settings::Manager::getString("texture min filter", "General"),
         Settings::Manager::getString("texture mipmap", "General"),

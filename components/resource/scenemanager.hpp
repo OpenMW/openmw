@@ -6,6 +6,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Node>
+#include <osg/Texture>
 
 namespace Resource
 {
@@ -21,6 +22,11 @@ namespace VFS
 namespace osgUtil
 {
     class IncrementalCompileOperation;
+}
+
+namespace osgViewer
+{
+    class Viewer;
 }
 
 namespace Resource
@@ -69,10 +75,29 @@ namespace Resource
         /// @param mask The node mask to apply to loaded particle system nodes.
         void setParticleSystemMask(unsigned int mask);
 
+        void setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                               const std::string &mipmap, int maxAnisotropy,
+                               osgViewer::Viewer *viewer);
+
+        /// Apply filter settings to the given texture. Note, when loading an object through this scene manager (i.e. calling getTemplate / createInstance)
+        /// the filter settings are applied automatically. This method is provided for textures that were created outside of the SceneManager.
+        void applyFilterSettings (osg::Texture* tex);
+
+        /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
+        /// otherwise should be disabled to reduce memory usage.
+        void setUnRefImageDataAfterApply(bool unref);
+
+        void clearCache();
+
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
         Resource::NifFileManager* mNifFileManager;
+
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
+        bool mUnRefImageDataAfterApply;
 
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
@@ -82,8 +107,14 @@ namespace Resource
         typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;
         Index mIndex;
 
+        std::set<osg::ref_ptr<osg::Texture> > mTexturesWithFilterSetting;
+
         SceneManager(const SceneManager&);
         void operator = (const SceneManager&);
+
+        /// @warning It is unsafe to call this function when a draw thread is using the textures. Call stopThreading() first!
+        void setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode maxFilter, int maxAnisotropy);
+
     };
 
 }

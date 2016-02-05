@@ -1059,7 +1059,9 @@ namespace MWRender
             stream << i;
             stream << ".dds";
 
-            textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(stream.str(), osg::Texture2D::REPEAT, osg::Texture2D::REPEAT));
+            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(stream.str(), osg::Texture2D::REPEAT, osg::Texture2D::REPEAT);
+            mResourceSystem->getSceneManager()->applyFilterSettings(tex);
+            textures.push_back(tex);
         }
 
         osg::ref_ptr<GlowUpdater> glowupdater (new GlowUpdater(glowColor, textures));

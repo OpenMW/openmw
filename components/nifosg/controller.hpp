@@ -305,6 +305,8 @@ namespace NifOsg
 
         META_Object(NifOsg, FlipController)
 
+        std::vector<osg::ref_ptr<osg::Texture2D> >& getTextures() { return mTextures; }
+
         virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
     };
 

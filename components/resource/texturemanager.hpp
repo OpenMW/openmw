@@ -28,14 +28,6 @@ namespace Resource
         TextureManager(const VFS::Manager* vfs);
         ~TextureManager();
 
-        void setFilterSettings(const std::string &magfilter, const std::string &minfilter,
-                               const std::string &mipmap, int maxAnisotropy,
-                               osgViewer::Viewer *view);
-
-        /// Keep a copy of the texture data around in system memory? This is needed when using multiple graphics contexts,
-        /// otherwise should be disabled to reduce memory usage.
-        void setUnRefImageDataAfterApply(bool unref);
-
         /// Create or retrieve a Texture2D using the specified image filename, and wrap parameters.
         /// Returns the dummy texture if the given texture is not found.
         osg::ref_ptr<osg::Texture2D> getTexture2D(const std::string& filename, osg::Texture::WrapMode wrapS, osg::Texture::WrapMode wrapT);
@@ -50,10 +42,6 @@ namespace Resource
     private:
         const VFS::Manager* mVFS;
 
-        osg::Texture::FilterMode mMinFilter;
-        osg::Texture::FilterMode mMagFilter;
-        int mMaxAnisotropy;
-
         typedef std::pair<std::pair<int, int>, std::string> MapKey;
 
         std::map<std::string, osg::ref_ptr<osg::Image> > mImages;
@@ -61,11 +49,6 @@ namespace Resource
         std::map<MapKey, osg::ref_ptr<osg::Texture2D> > mTextures;
 
         osg::ref_ptr<osg::Texture2D> mWarningTexture;
-
-        bool mUnRefImageDataAfterApply;
-
-        /// @warning It is unsafe to call this function when a draw thread is using the textures. Call stopThreading() first!
-        void setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode maxFilter, int maxAnisotropy);
 
         TextureManager(const TextureManager&);
         void operator = (const TextureManager&);

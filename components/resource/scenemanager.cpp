@@ -9,6 +9,8 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
+#include <osgViewer/Viewer>
+
 #include <osgDB/SharedStateManager>
 #include <osgDB/Registry>
 
@@ -19,6 +21,7 @@
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/controller.hpp>
 
 #include "texturemanager.hpp"
 #include "niffilemanager.hpp"
@@ -105,10 +108,123 @@ namespace
 namespace Resource
 {
 
+    /// Set texture filtering settings on textures contained in a FlipController.
+    class SetFilterSettingsControllerVisitor : public SceneUtil::ControllerVisitor
+    {
+    public:
+        SetFilterSettingsControllerVisitor(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+            : mMinFilter(minFilter)
+            , mMagFilter(magFilter)
+            , mMaxAnisotropy(maxAnisotropy)
+        {
+        }
+
+        virtual void visit(osg::Node& node, SceneUtil::Controller& ctrl)
+        {
+            if (NifOsg::FlipController* flipctrl = dynamic_cast<NifOsg::FlipController*>(&ctrl))
+            {
+                for (std::vector<osg::ref_ptr<osg::Texture2D> >::iterator it = flipctrl->getTextures().begin(); it != flipctrl->getTextures().end(); ++it)
+                {
+                    osg::Texture* tex = *it;
+                    tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+                    tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+                    tex->setMaxAnisotropy(mMaxAnisotropy);
+                    mTexturesProcessed.insert(tex);
+                }
+            }
+        }
+
+        const std::set<osg::ref_ptr<osg::Texture> >& getTexturesProcessed()
+        {
+            return mTexturesProcessed;
+        }
+
+    private:
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
+        std::set<osg::ref_ptr<osg::Texture> > mTexturesProcessed;
+    };
+
+    /// Set texture filtering settings on textures contained in StateSets.
+    class SetFilterSettingsVisitor : public osg::NodeVisitor
+    {
+    public:
+        SetFilterSettingsVisitor(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mMinFilter(minFilter)
+            , mMagFilter(magFilter)
+            , mMaxAnisotropy(maxAnisotropy)
+        {
+        }
+
+        virtual void apply(osg::Node& node)
+        {
+            osg::StateSet* stateset = node.getStateSet();
+            if (stateset)
+                apply(stateset);
+            traverse(node);
+        }
+
+        virtual void apply(osg::Geode& geode)
+        {
+            osg::StateSet* stateset = geode.getStateSet();
+            if (stateset)
+                apply(stateset);
+
+            for (unsigned int i=0; i<geode.getNumDrawables(); ++i)
+            {
+                osg::Drawable* drw = geode.getDrawable(i);
+                stateset = drw->getStateSet();
+                if (stateset)
+                    apply(stateset);
+            }
+        }
+
+        void apply(osg::StateSet* stateset)
+        {
+            const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
+            for(unsigned int unit=0;unit<texAttributes.size();++unit)
+            {
+                osg::StateAttribute *texture = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
+                apply(texture);
+            }
+        }
+
+        void apply(osg::StateAttribute* attr)
+        {
+            osg::Texture* tex = attr->asTexture();
+            if (tex)
+            {
+                tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+                tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+                tex->setMaxAnisotropy(mMaxAnisotropy);
+                mTexturesProcessed.insert(tex);
+            }
+        }
+
+        const std::set<osg::ref_ptr<osg::Texture> >& getTexturesProcessed()
+        {
+            return mTexturesProcessed;
+        }
+
+    private:
+        osg::Texture::FilterMode mMinFilter;
+        osg::Texture::FilterMode mMagFilter;
+        int mMaxAnisotropy;
+        std::set<osg::ref_ptr<osg::Texture> > mTexturesProcessed;
+    };
+
+
+
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager)
         : mVFS(vfs)
         , mTextureManager(textureManager)
         , mNifFileManager(nifFileManager)
+        , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
+        , mMagFilter(osg::Texture::LINEAR)
+        , mMaxAnisotropy(1)
+        , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
     {
     }
@@ -219,6 +335,17 @@ namespace Resource
                     throw;
             }
 
+            // set filtering settings
+            SetFilterSettingsVisitor setFilterSettingsVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
+            loaded->accept(setFilterSettingsVisitor);
+            SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
+            loaded->accept(setFilterSettingsControllerVisitor);
+
+            // remember which textures we set a filtering setting on so we can re-apply it when the setting changes
+            mTexturesWithFilterSetting.insert(setFilterSettingsVisitor.getTexturesProcessed().begin(), setFilterSettingsVisitor.getTexturesProcessed().end());
+            mTexturesWithFilterSetting.insert(setFilterSettingsControllerVisitor.getTexturesProcessed().begin(), setFilterSettingsControllerVisitor.getTexturesProcessed().end());
+
+            // share state
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
 
             if (mIncrementalCompileOperation)
@@ -283,6 +410,86 @@ namespace Resource
     void SceneManager::setParticleSystemMask(unsigned int mask)
     {
         mParticleSystemMask = mask;
+    }
+
+    void SceneManager::setFilterSettings(const std::string &magfilter, const std::string &minfilter,
+                                           const std::string &mipmap, int maxAnisotropy,
+                                           osgViewer::Viewer *viewer)
+    {
+        osg::Texture::FilterMode min = osg::Texture::LINEAR;
+        osg::Texture::FilterMode mag = osg::Texture::LINEAR;
+
+        if(magfilter == "nearest")
+            mag = osg::Texture::NEAREST;
+        else if(magfilter != "linear")
+            std::cerr<< "Invalid texture mag filter: "<<magfilter <<std::endl;
+
+        if(minfilter == "nearest")
+            min = osg::Texture::NEAREST;
+        else if(minfilter != "linear")
+            std::cerr<< "Invalid texture min filter: "<<minfilter <<std::endl;
+
+        if(mipmap == "nearest")
+        {
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_NEAREST;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_NEAREST;
+        }
+        else if(mipmap != "none")
+        {
+            if(mipmap != "linear")
+                std::cerr<< "Invalid texture mipmap: "<<mipmap <<std::endl;
+            if(min == osg::Texture::NEAREST)
+                min = osg::Texture::NEAREST_MIPMAP_LINEAR;
+            else if(min == osg::Texture::LINEAR)
+                min = osg::Texture::LINEAR_MIPMAP_LINEAR;
+        }
+
+        if(viewer) viewer->stopThreading();
+        setFilterSettings(min, mag, maxAnisotropy);
+        if(viewer) viewer->startThreading();
+    }
+
+    void SceneManager::applyFilterSettings(osg::Texture *tex)
+    {
+        tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+        tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+        tex->setMaxAnisotropy(mMaxAnisotropy);
+        mTexturesWithFilterSetting.insert(tex);
+    }
+
+    void SceneManager::setUnRefImageDataAfterApply(bool unref)
+    {
+        mUnRefImageDataAfterApply = unref;
+    }
+
+    void SceneManager::setFilterSettings(osg::Texture::FilterMode minFilter, osg::Texture::FilterMode magFilter, int maxAnisotropy)
+    {
+        mMinFilter = minFilter;
+        mMagFilter = magFilter;
+        mMaxAnisotropy = std::max(1, maxAnisotropy);
+
+        for (std::set<osg::ref_ptr<osg::Texture> >::const_iterator it = mTexturesWithFilterSetting.begin(); it != mTexturesWithFilterSetting.end(); ++it)
+        {
+            (*it)->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
+            (*it)->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
+            (*it)->setMaxAnisotropy(mMaxAnisotropy);
+        }
+    }
+
+    void SceneManager::clearCache()
+    {
+        // clear textures that are no longer referenced
+        for (std::set<osg::ref_ptr<osg::Texture> >::const_iterator it = mTexturesWithFilterSetting.begin(); it != mTexturesWithFilterSetting.end();)
+        {
+            osg::Texture* tex = *it;
+            if (tex->referenceCount() <= 1)
+                mTexturesWithFilterSetting.erase(it++);
+            else
+                ++it;
+        }
+
     }
 
 }
