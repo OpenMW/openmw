@@ -5,6 +5,8 @@
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loaddial.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/loadglob.hpp>
+#include <components/esm/loadgmst.hpp>
 #include <components/esm/loadrace.hpp>
 #include <components/esm/loadregn.hpp>
 
@@ -27,6 +29,9 @@ namespace CSMTools
                             const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
                             const CSMWorld::IdCollection<ESM::Class>& classes,
                             const CSMWorld::IdCollection<ESM::Faction>& factions,
+                            const CSMWorld::IdCollection<ESM::GameSetting>& gmsts,
+                            const CSMWorld::IdCollection<ESM::Global>& globals,
+                            const CSMWorld::IdCollection<ESM::Dialogue>& journals,
                             const CSMWorld::IdCollection<ESM::Race>& races,
                             const CSMWorld::IdCollection<ESM::Region>& regions,
                             const CSMWorld::IdCollection<ESM::Dialogue>& topics,
@@ -46,6 +51,9 @@ namespace CSMTools
         const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
         const CSMWorld::IdCollection<ESM::Class>& mClasses;
         const CSMWorld::IdCollection<ESM::Faction>& mFactions;
+        const CSMWorld::IdCollection<ESM::GameSetting>& mGameSettings;
+        const CSMWorld::IdCollection<ESM::Global>& mGlobals;
+        const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
         const CSMWorld::IdCollection<ESM::Race>& mRaces;
         const CSMWorld::IdCollection<ESM::Region>& mRegions;
         const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
@@ -68,14 +76,27 @@ namespace CSMTools
         void checkFaction(const std::string& factionName, int rank,
                     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         
+        void checkGlobal(const std::string& globalName, const CSMWorld::UniversalId& id,
+                    CSMDoc::Messages& messages);
+        
+        void checkItem(const std::string& itemName, const CSMWorld::UniversalId& id,
+                    CSMDoc::Messages& messages);
+        
+        void checkJournal(const std::string& journalName, const CSMWorld::UniversalId& id,
+                    CSMDoc::Messages& messages);
+        
         void checkRace(const std::string& raceName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
         void checkResponse(const std::string& response, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
+        void checkSelectStruct(const ESM::DialInfo::SelectStruct& selectStruct, 
+                    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        
         void checkSound(const std::string& soundFile, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
+        
     };
 }
 
