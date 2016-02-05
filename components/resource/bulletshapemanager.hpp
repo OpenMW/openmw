@@ -26,6 +26,9 @@ namespace Resource
     class BulletShape;
     class BulletShapeInstance;
 
+    /// Handles loading, caching and "instancing" of bullet shapes.
+    /// A shape 'instance' is a clone of another shape, with the goal of setting a different scale on this instance.
+    /// @note May be used from any thread.
     class BulletShapeManager
     {
     public:

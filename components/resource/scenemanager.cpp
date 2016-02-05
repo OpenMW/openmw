@@ -26,10 +26,12 @@
 
 #include "imagemanager.hpp"
 #include "niffilemanager.hpp"
+#include "objectcache.hpp"
 
 namespace
 {
 
+    /// @todo Do this in updateCallback so that animations are accounted for.
     class InitWorldSpaceParticlesVisitor : public osg::NodeVisitor
     {
     public:
@@ -236,6 +238,7 @@ namespace Resource
         , mMaxAnisotropy(1)
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
+        , mCache(new osgDB::ObjectCache)
     {
     }
 
@@ -315,8 +318,10 @@ namespace Resource
         std::string normalized = name;
         mVFS->normalizeFilename(normalized);
 
-        Index::iterator it = mIndex.find(normalized);
-        if (it == mIndex.end())
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+        if (obj)
+            return osg::ref_ptr<const osg::Node>(static_cast<osg::Node*>(obj.get()));
+        else
         {
             osg::ref_ptr<osg::Node> loaded;
             try
@@ -357,11 +362,9 @@ namespace Resource
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
 
-            mIndex[normalized] = loaded;
+            mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
         }
-        else
-            return it->second;
     }
 
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string &name)
@@ -386,10 +389,7 @@ namespace Resource
 
     void SceneManager::releaseGLObjects(osg::State *state)
     {
-        for (Index::iterator it = mIndex.begin(); it != mIndex.end(); ++it)
-        {
-            it->second->releaseGLObjects(state);
-        }
+        mCache->releaseGLObjects(state);
     }
 
     void SceneManager::setIncrementalCompileOperation(osgUtil::IncrementalCompileOperation *ico)
@@ -458,19 +458,14 @@ namespace Resource
         mMagFilter = mag;
         mMaxAnisotropy = std::max(1, maxAnisotropy);
 
+        mCache->clear();
+
         SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
         SetFilterSettingsVisitor setFilterSettingsVisitor (mMinFilter, mMagFilter, mMaxAnisotropy);
         if (viewer && viewer->getSceneData())
         {
             viewer->getSceneData()->accept(setFilterSettingsControllerVisitor);
             viewer->getSceneData()->accept(setFilterSettingsVisitor);
-        }
-
-        for (Index::iterator it = mIndex.begin(); it != mIndex.end(); ++it)
-        {
-            osg::Node* node = it->second;
-            node->accept(setFilterSettingsControllerVisitor);
-            node->accept(setFilterSettingsVisitor);
         }
 
         if(viewer) viewer->startThreading();

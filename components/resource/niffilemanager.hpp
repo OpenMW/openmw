@@ -19,7 +19,7 @@ namespace Resource
 {
 
     /// @brief Handles caching of NIFFiles.
-    /// @note The NifFileManager is completely thread safe.
+    /// @note May be used from any thread.
     class NifFileManager
     {
     public:

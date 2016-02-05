@@ -23,6 +23,7 @@ namespace Resource
 {
 
     /// @brief Managing of keyframe resources
+    /// @note May be used from any thread.
     class KeyframeManager
     {
     public:
@@ -32,7 +33,6 @@ namespace Resource
         void clearCache();
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
-        /// @note This method is safe to call from any thread.
         /// @note Throws an exception if the resource is not found.
         osg::ref_ptr<const NifOsg::KeyframeHolder> get(const std::string& name);
 
