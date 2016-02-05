@@ -151,6 +151,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
             texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
             texture->setResizeNonPowerOfTwoHint(false);
+            texture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
             blendmapTextures.push_back(texture);
 
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());

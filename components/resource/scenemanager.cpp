@@ -189,6 +189,13 @@ namespace Resource
             osg::Texture* tex = attr->asTexture();
             if (tex)
             {
+                if (tex->getUserDataContainer())
+                {
+                    const std::vector<std::string>& descriptions = tex->getUserDataContainer()->getDescriptions();
+                    if (std::find(descriptions.begin(), descriptions.end(), "dont_override_filter") != descriptions.end())
+                        return;
+                }
+
                 tex->setFilter(osg::Texture::MIN_FILTER, mMinFilter);
                 tex->setFilter(osg::Texture::MAG_FILTER, mMagFilter);
                 tex->setMaxAnisotropy(mMaxAnisotropy);
