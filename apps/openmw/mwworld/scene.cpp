@@ -86,10 +86,13 @@ namespace
         MWPhysics::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
+        std::vector<MWWorld::Ptr> mToInsert;
+
         InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
             MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
+        void insert();
     };
 
     InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale,
@@ -102,31 +105,41 @@ namespace
 
     bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
     {
-        if (mRescale)
-        {
-            if (ptr.getCellRef().getScale()<0.5)
-                ptr.getCellRef().setScale(0.5);
-            else if (ptr.getCellRef().getScale()>2)
-                ptr.getCellRef().setScale(2);
-        }
-
-        if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
-        {
-            try
-            {
-                addObject(ptr, mPhysics, mRendering);
-                updateObjectRotation(ptr, mPhysics, mRendering, false);
-            }
-            catch (const std::exception& e)
-            {
-                std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
-                std::cerr << error + e.what() << std::endl;
-            }
-        }
-
-        mLoadingListener.increaseProgress (1);
-
+        // do not insert directly as we can't modify the cell from within the visitation
+        // CreatureLevList::insertObjectRendering may spawn a new creature
+        mToInsert.push_back(ptr);
         return true;
+    }
+
+    void InsertVisitor::insert()
+    {
+        for (std::vector<MWWorld::Ptr>::iterator it = mToInsert.begin(); it != mToInsert.end(); ++it)
+        {
+            MWWorld::Ptr ptr = *it;
+            if (mRescale)
+            {
+                if (ptr.getCellRef().getScale()<0.5)
+                    ptr.getCellRef().setScale(0.5);
+                else if (ptr.getCellRef().getScale()>2)
+                    ptr.getCellRef().setScale(2);
+            }
+
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            {
+                try
+                {
+                    addObject(ptr, mPhysics, mRendering);
+                    updateObjectRotation(ptr, mPhysics, mRendering, false);
+                }
+                catch (const std::exception& e)
+                {
+                    std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
+                    std::cerr << error + e.what() << std::endl;
+                }
+            }
+
+            mLoadingListener.increaseProgress (1);
+        }
     }
 
     struct AdjustPositionVisitor
@@ -248,6 +261,10 @@ namespace MWWorld
 
             cell->respawn();
 
+            // register local scripts
+            // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
+            MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -267,10 +284,6 @@ namespace MWWorld
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
-
-        // register local scripts
-        // ??? Should this go into the above if block ???
-        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
     void Scene::changeToVoid()
@@ -534,6 +547,7 @@ namespace MWWorld
     {
         InsertVisitor insertVisitor (cell, rescale, *loadingListener, *mPhysics, mRendering);
         cell.forEach (insertVisitor);
+        insertVisitor.insert();
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
         AdjustPositionVisitor adjustPosVisitor;
