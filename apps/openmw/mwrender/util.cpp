@@ -15,8 +15,10 @@ void overrideTexture(const std::string &texture, Resource::ResourceSystem *resou
         return;
     std::string correctedTexture = Misc::ResourceHelpers::correctTexturePath(texture, resourceSystem->getVFS());
     // Not sure if wrap settings should be pulled from the overridden texture?
-    osg::ref_ptr<osg::Texture2D> tex = resourceSystem->getTextureManager()->getTexture2D(correctedTexture, osg::Texture2D::CLAMP,
-                                                                                          osg::Texture2D::CLAMP);
+    osg::ref_ptr<osg::Texture2D> tex = new osg::Texture2D(resourceSystem->getTextureManager()->getImage(correctedTexture));
+    tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
     osg::ref_ptr<osg::StateSet> stateset;
     if (node->getStateSet())
         stateset = static_cast<osg::StateSet*>(node->getStateSet()->clone(osg::CopyOp::SHALLOW_COPY));

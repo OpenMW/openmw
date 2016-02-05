@@ -65,6 +65,8 @@ namespace MWRender
 
         Resource::ResourceSystem* getResourceSystem();
 
+        void clearCache();
+
         osg::Group* getLightRoot();
 
         void setNightEyeFactor(float factor);

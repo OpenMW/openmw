@@ -476,9 +476,9 @@ public:
         mTransform->addUpdateCallback(mUpdater);
         mTransform->setNodeMask(Mask_Sun);
 
-        osg::ref_ptr<osg::Texture2D> sunTex = textureManager.getTexture2D("textures/tx_sun_05.dds",
-                                                                        osg::Texture::CLAMP,
-                                                                        osg::Texture::CLAMP);
+        osg::ref_ptr<osg::Texture2D> sunTex (new osg::Texture2D(textureManager.getImage("textures/tx_sun_05.dds")));
+        sunTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        sunTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         mGeode->getOrCreateStateSet()->setTextureAttributeAndModes(0, sunTex, osg::StateAttribute::ON);
 
@@ -604,9 +604,9 @@ private:
 
     void createSunFlash(Resource::TextureManager& textureManager)
     {
-        osg::ref_ptr<osg::Texture2D> tex = textureManager.getTexture2D("textures/tx_sun_flash_grey_05.dds",
-                                                                        osg::Texture::CLAMP,
-                                                                        osg::Texture::CLAMP);
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(textureManager.getImage("textures/tx_sun_flash_grey_05.dds")));
+        tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         osg::ref_ptr<osg::PositionAttitudeTransform> transform (new osg::PositionAttitudeTransform);
         const float scale = 2.6f;
@@ -1055,8 +1055,12 @@ private:
 
         void setTextures(const std::string& phaseTex, const std::string& circleTex)
         {
-            mPhaseTex = mTextureManager.getTexture2D(phaseTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
-            mCircleTex = mTextureManager.getTexture2D(circleTex, osg::Texture::CLAMP, osg::Texture::CLAMP);
+            mPhaseTex = new osg::Texture2D(mTextureManager.getImage(phaseTex));
+            mPhaseTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mPhaseTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            mCircleTex = new osg::Texture2D(mTextureManager.getImage(circleTex));
+            mCircleTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mCircleTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
             reset();
         }
@@ -1342,8 +1346,12 @@ void SkyManager::createRain()
     mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,-1));
 
     osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
-    stateset->setTextureAttributeAndModes(0, mSceneManager->getTextureManager()->getTexture2D("textures/tx_raindrop_01.dds",
-        osg::Texture::CLAMP, osg::Texture::CLAMP), osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::Texture2D> raindropTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage("textures/tx_raindrop_01.dds")));
+    raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+    raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+
+    stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
     stateset->setNestRenderBins(false);
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -1549,8 +1557,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
         std::string texture = Misc::ResourceHelpers::correctTexturePath(mClouds, mSceneManager->getVFS());
 
-        mCloudUpdater->setTexture(mSceneManager->getTextureManager()->getTexture2D(texture,
-                                                                                   osg::Texture::REPEAT, osg::Texture::REPEAT));
+        osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage(texture)));
+        cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+        mCloudUpdater->setTexture(cloudTex);
     }
 
     if (mNextClouds != weather.mNextCloudTexture)
@@ -1561,8 +1572,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
         {
             std::string texture = Misc::ResourceHelpers::correctTexturePath(mNextClouds, mSceneManager->getVFS());
 
-            mCloudUpdater2->setTexture(mSceneManager->getTextureManager()->getTexture2D(texture,
-                                                                                       osg::Texture::REPEAT, osg::Texture::REPEAT));
+            osg::ref_ptr<osg::Texture2D> cloudTex (new osg::Texture2D(mSceneManager->getTextureManager()->getImage(texture)));
+            cloudTex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+            cloudTex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+
+            mCloudUpdater2->setTexture(cloudTex);
         }
     }
 

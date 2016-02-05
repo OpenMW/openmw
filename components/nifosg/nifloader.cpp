@@ -709,7 +709,9 @@ namespace NifOsg
                         }
 
                         std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, textureManager->getVFS());
-                        osg::ref_ptr<osg::Texture2D> texture = textureManager->getTexture2D(filename, wrapS, wrapT);
+                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(textureManager->getImage(filename)));
+                        texture->setWrap(osg::Texture::WRAP_S, wrapS);
+                        texture->setWrap(osg::Texture::WRAP_T, wrapT);
                         textures.push_back(texture);
                     }
                     osg::ref_ptr<FlipController> callback(new FlipController(flipctrl, textures));
@@ -1376,9 +1378,10 @@ namespace NifOsg
                         int wrapT = (clamp) & 0x1;
                         int wrapS = (clamp >> 1) & 0x1;
 
-                        osg::ref_ptr<osg::Texture2D> texture2d = textureManager->getTexture2D(filename,
-                              wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP,
-                              wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+                        // create a new texture, will later attempt to share using the SharedStateManager
+                        osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(textureManager->getImage(filename)));
+                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
 
                         int texUnit = boundTextures.size();
 

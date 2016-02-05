@@ -4,6 +4,7 @@
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/texturemanager.hpp>
+#include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -134,10 +135,19 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         // For compiling textures, I don't think the osgFX::Effect does it correctly
         osg::ref_ptr<osg::Node> textureCompileDummy (new osg::Node);
         unsigned int dummyTextureCounter = 0;
+
         std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
         for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
         {
-            layerTextures.push_back(mResourceSystem->getTextureManager()->getTexture2D(it->mDiffuseMap, osg::Texture::REPEAT, osg::Texture::REPEAT));
+            osg::ref_ptr<osg::Texture2D> tex = mTextureCache[it->mDiffuseMap];
+            if (!tex)
+            {
+                tex = new osg::Texture2D(mResourceSystem->getTextureManager()->getImage(it->mDiffuseMap));
+                tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                mTextureCache[it->mDiffuseMap] = tex;
+            }
+            layerTextures.push_back(tex);
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
         }
 
@@ -148,14 +158,17 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setImage(*it);
             texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
             texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-            texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
             texture->setResizeNonPowerOfTwoHint(false);
             texture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
             blendmapTextures.push_back(texture);
+            mResourceSystem->getSceneManager()->applyFilterSettings(texture);
 
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
+
+        // SharedStatemanager->share(textureCompileDummy);
+
+        // Remove unrefImageDataAfterApply for better state sharing
 
         // use texture coordinates for both texture units, the layer texture and blend texture
         for (unsigned int i=0; i<2; ++i)
@@ -224,6 +237,17 @@ void TerrainGrid::unloadCell(int x, int y)
     delete element;
 
     mGrid.erase(it);
+}
+
+void TerrainGrid::clearCache()
+{
+    for (TextureCache::iterator it = mTextureCache.begin(); it != mTextureCache.end();)
+    {
+        if (it->second->referenceCount() <= 1)
+            mTextureCache.erase(it++);
+        else
+            ++it;
+    }
 }
 
 }

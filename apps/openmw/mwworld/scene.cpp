@@ -402,7 +402,7 @@ namespace MWWorld
 
         mCellChanged = true;
 
-        mRendering.getResourceSystem()->clearCache();
+        mRendering.clearCache();
     }
 
     void Scene::changePlayerCell(CellStore *cell, const ESM::Position &pos, bool adjustPlayerPos)
@@ -515,7 +515,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
-        mRendering.getResourceSystem()->clearCache();
+        mRendering.clearCache();
     }
 
     void Scene::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos)

@@ -1059,7 +1059,10 @@ namespace MWRender
             stream << i;
             stream << ".dds";
 
-            osg::ref_ptr<osg::Texture2D> tex = mResourceSystem->getTextureManager()->getTexture2D(stream.str(), osg::Texture2D::REPEAT, osg::Texture2D::REPEAT);
+            osg::ref_ptr<osg::Image> image = mResourceSystem->getTextureManager()->getImage(stream.str());
+            osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(image));
+            tex->setWrap(osg::Texture::WRAP_S, osg::Texture2D::REPEAT);
+            tex->setWrap(osg::Texture::WRAP_T, osg::Texture2D::REPEAT);
             mResourceSystem->getSceneManager()->applyFilterSettings(tex);
             textures.push_back(tex);
         }

@@ -231,6 +231,13 @@ namespace MWRender
         return mResourceSystem;
     }
 
+    void RenderingManager::clearCache()
+    {
+        mResourceSystem->clearCache();
+        if (mTerrain.get())
+            mTerrain->clearCache();
+    }
+
     osg::Group* RenderingManager::getLightRoot()
     {
         return mLightRoot.get();

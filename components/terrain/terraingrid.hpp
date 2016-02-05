@@ -27,11 +27,17 @@ namespace Terrain
         virtual void loadCell(int x, int y);
         virtual void unloadCell(int x, int y);
 
+        /// Clear cached textures that are no longer referenced
+        void clearCache();
+
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
 
         // split each ESM::Cell into mNumSplits*mNumSplits terrain chunks
         unsigned int mNumSplits;
+
+        typedef std::map<std::string, osg::ref_ptr<osg::Texture2D> >  TextureCache;
+        TextureCache mTextureCache;
 
         typedef std::map<std::pair<int, int>, GridElement*> Grid;
         Grid mGrid;

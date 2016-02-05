@@ -317,6 +317,7 @@ public:
         mRefractionTexture->setInternalFormat(GL_RGB);
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mRefractionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
@@ -328,6 +329,7 @@ public:
         mRefractionDepthTexture->setSourceType(GL_UNSIGNED_INT);
         mRefractionDepthTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionDepthTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        mRefractionDepthTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
     }
@@ -388,6 +390,7 @@ public:
         mReflectionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        mReflectionTexture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
 
         attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
 
@@ -553,7 +556,10 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     {
         std::ostringstream texname;
         texname << "textures/water/" << texture << std::setw(2) << std::setfill('0') << i << ".dds";
-        textures.push_back(mResourceSystem->getTextureManager()->getTexture2D(texname.str(), osg::Texture::REPEAT, osg::Texture::REPEAT));
+        osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(mResourceSystem->getTextureManager()->getImage(texname.str())));
+        tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+        tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+        textures.push_back(tex);
     }
 
     if (!textures.size())
