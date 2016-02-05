@@ -168,6 +168,8 @@ namespace MWGui
         , mFogOfWarToggled(true)
         , mFogOfWarEnabled(fogOfWarEnabled)
         , mMapWidgetSize(0)
+        , mNumCells(0)
+        , mCellDistance(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
