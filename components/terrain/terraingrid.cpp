@@ -133,12 +133,12 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         // For compiling textures, I don't think the osgFX::Effect does it correctly
         osg::ref_ptr<osg::Node> textureCompileDummy (new osg::Node);
-
+        unsigned int dummyTextureCounter = 0;
         std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
         for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
         {
             layerTextures.push_back(mResourceSystem->getTextureManager()->getTexture2D(it->mDiffuseMap, osg::Texture::REPEAT, osg::Texture::REPEAT));
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(0, layerTextures.back());
+            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
         }
 
         std::vector<osg::ref_ptr<osg::Texture2D> > blendmapTextures;
@@ -153,7 +153,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setResizeNonPowerOfTwoHint(false);
             blendmapTextures.push_back(texture);
 
-            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(0, layerTextures.back());
+            textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
 
         // use texture coordinates for both texture units, the layer texture and blend texture
