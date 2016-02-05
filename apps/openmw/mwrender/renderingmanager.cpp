@@ -783,6 +783,9 @@ namespace MWRender
 
     void RenderingManager::updateTextureFiltering()
     {
+        if (mTerrain.get())
+            mTerrain->clearCache();
+
         mResourceSystem->getSceneManager()->setFilterSettings(
             Settings::Manager::getString("texture mag filter", "General"),
             Settings::Manager::getString("texture min filter", "General"),
