@@ -13,7 +13,7 @@
 
 #include <components/misc/rng.hpp>
 #include <components/nifosg/controller.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/fallback/fallback.hpp>

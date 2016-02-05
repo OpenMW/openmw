@@ -15,7 +15,7 @@ namespace osg
 
 namespace Resource
 {
-    class TextureManager;
+    class ImageManager;
 }
 
 namespace NifOsg
@@ -62,7 +62,7 @@ namespace NifOsg
     {
     public:
         /// Create a scene graph for the given NIF. Auto-detects when skinning is used and wraps the graph in a Skeleton if so.
-        static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, Resource::TextureManager* textureManager);
+        static osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr file, Resource::ImageManager* textureManager);
 
         /// Load keyframe controllers from the given kf file.
         static void loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target);

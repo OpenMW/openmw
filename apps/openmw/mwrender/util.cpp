@@ -3,7 +3,7 @@
 #include <osg/Node>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 namespace MWRender

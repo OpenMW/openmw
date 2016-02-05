@@ -5,12 +5,12 @@
 
 #include <osg/Texture2D>
 
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 namespace osgMyGUI
 {
 
-    OSGTexture::OSGTexture(const std::string &name, Resource::TextureManager* textureManager)
+    OSGTexture::OSGTexture(const std::string &name, Resource::ImageManager* textureManager)
       : mName(name)
       , mTextureManager(textureManager)
       , mFormat(MyGUI::PixelFormat::Unknow)

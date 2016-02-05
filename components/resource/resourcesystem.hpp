@@ -12,7 +12,7 @@ namespace Resource
 {
 
     class SceneManager;
-    class TextureManager;
+    class ImageManager;
     class NifFileManager;
     class KeyframeManager;
 
@@ -26,7 +26,7 @@ namespace Resource
         ~ResourceSystem();
 
         SceneManager* getSceneManager();
-        TextureManager* getTextureManager();
+        ImageManager* getTextureManager();
         NifFileManager* getNifFileManager();
         KeyframeManager* getKeyframeManager();
 
@@ -37,7 +37,7 @@ namespace Resource
 
     private:
         std::auto_ptr<SceneManager> mSceneManager;
-        std::auto_ptr<TextureManager> mTextureManager;
+        std::auto_ptr<ImageManager> mTextureManager;
         std::auto_ptr<NifFileManager> mNifFileManager;
         std::auto_ptr<KeyframeManager> mKeyframeManager;
 

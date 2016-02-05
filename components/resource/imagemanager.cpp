@@ -1,4 +1,4 @@
-#include "texturemanager.hpp"
+#include "imagemanager.hpp"
 
 #include <osgDB/Registry>
 #include <osg/GLExtensions>
@@ -42,7 +42,7 @@ namespace
 namespace Resource
 {
 
-    TextureManager::TextureManager(const VFS::Manager *vfs)
+    ImageManager::ImageManager(const VFS::Manager *vfs)
         : mVFS(vfs)
         , mWarningTexture(createWarningTexture())
         , mWarningImage(mWarningTexture->getImage())
@@ -50,7 +50,7 @@ namespace Resource
     {
     }
 
-    TextureManager::~TextureManager()
+    ImageManager::~ImageManager()
     {
 
     }
@@ -88,7 +88,7 @@ namespace Resource
         return true;
     }
 
-    osg::ref_ptr<osg::Image> TextureManager::getImage(const std::string &filename)
+    osg::ref_ptr<osg::Image> ImageManager::getImage(const std::string &filename)
     {
         std::string normalized = filename;
         mVFS->normalizeFilename(normalized);
@@ -137,7 +137,7 @@ namespace Resource
         }
     }
 
-    osg::Texture2D* TextureManager::getWarningTexture()
+    osg::Texture2D* ImageManager::getWarningTexture()
     {
         return mWarningTexture.get();
     }

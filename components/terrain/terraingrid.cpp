@@ -3,7 +3,7 @@
 #include <memory>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>

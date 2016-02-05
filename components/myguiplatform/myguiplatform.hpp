@@ -13,7 +13,7 @@ namespace osg
 }
 namespace Resource
 {
-    class TextureManager;
+    class ImageManager;
 }
 namespace MyGUI
 {
@@ -30,7 +30,7 @@ namespace osgMyGUI
     class Platform
     {
     public:
-        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::TextureManager* textureManager, float uiScalingFactor);
+        Platform(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ImageManager* textureManager, float uiScalingFactor);
 
         ~Platform();
 

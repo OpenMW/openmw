@@ -27,11 +27,11 @@ namespace Resource
 {
 
     /// @brief Handles loading/caching of Images.
-    class TextureManager
+    class ImageManager
     {
     public:
-        TextureManager(const VFS::Manager* vfs);
-        ~TextureManager();
+        ImageManager(const VFS::Manager* vfs);
+        ~ImageManager();
 
         /// Create or retrieve an Image
         /// Returns the dummy image if the given image is not found.
@@ -51,8 +51,8 @@ namespace Resource
         osg::ref_ptr<osg::Image> mWarningImage;
         osg::ref_ptr<osgDB::Options> mOptions;
 
-        TextureManager(const TextureManager&);
-        void operator = (const TextureManager&);
+        ImageManager(const ImageManager&);
+        void operator = (const ImageManager&);
     };
 
 }

@@ -25,7 +25,7 @@
 #include <osgUtil/CullVisitor>
 
 #include <components/resource/resourcesystem.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/nifosg/controller.hpp>
 #include <components/sceneutil/controller.hpp>

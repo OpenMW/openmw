@@ -15,7 +15,7 @@
 
 #include <osgGA/GUIEventHandler>
 
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include "myguitexture.hpp"
 
@@ -353,7 +353,7 @@ void OSGVertexBuffer::create()
 
 // ---------------------------------------------------------------------------
 
-RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::TextureManager* textureManager, float scalingFactor)
+RenderManager::RenderManager(osgViewer::Viewer *viewer, osg::Group *sceneroot, Resource::ImageManager* textureManager, float scalingFactor)
   : mViewer(viewer)
   , mSceneRoot(sceneroot)
   , mTextureManager(textureManager)

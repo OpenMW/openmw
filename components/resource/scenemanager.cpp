@@ -24,7 +24,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/controller.hpp>
 
-#include "texturemanager.hpp"
+#include "imagemanager.hpp"
 #include "niffilemanager.hpp"
 
 namespace
@@ -227,7 +227,7 @@ namespace Resource
 
 
 
-    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::TextureManager* textureManager, Resource::NifFileManager* nifFileManager)
+    SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* textureManager, Resource::NifFileManager* nifFileManager)
         : mVFS(vfs)
         , mTextureManager(textureManager)
         , mNifFileManager(nifFileManager)
@@ -249,7 +249,7 @@ namespace Resource
     class ImageReadCallback : public osgDB::ReadFileCallback
     {
     public:
-        ImageReadCallback(Resource::TextureManager* textureMgr)
+        ImageReadCallback(Resource::ImageManager* textureMgr)
             : mTextureManager(textureMgr)
         {
         }
@@ -267,7 +267,7 @@ namespace Resource
         }
 
     private:
-        Resource::TextureManager* mTextureManager;
+        Resource::ImageManager* mTextureManager;
     };
 
     std::string getFileExtension(const std::string& file)
@@ -278,7 +278,7 @@ namespace Resource
         return std::string();
     }
 
-    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::TextureManager* textureMgr, Resource::NifFileManager* nifFileManager)
+    osg::ref_ptr<osg::Node> load (Files::IStreamPtr file, const std::string& normalizedFilename, Resource::ImageManager* textureMgr, Resource::NifFileManager* nifFileManager)
     {
         std::string ext = getFileExtension(normalizedFilename);
         if (ext == "nif")
@@ -408,7 +408,7 @@ namespace Resource
         return mVFS;
     }
 
-    Resource::TextureManager* SceneManager::getTextureManager()
+    Resource::ImageManager* SceneManager::getTextureManager()
     {
         return mTextureManager;
     }

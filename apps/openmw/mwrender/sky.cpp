@@ -31,7 +31,7 @@
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/scenemanager.hpp>
-#include <components/resource/texturemanager.hpp>
+#include <components/resource/imagemanager.hpp>
 
 #include <components/vfs/manager.hpp>
 #include <components/fallback/fallback.hpp>
@@ -134,7 +134,7 @@ private:
 class AtmosphereNightUpdater : public SceneUtil::StateSetUpdater
 {
 public:
-    AtmosphereNightUpdater(Resource::TextureManager* textureManager)
+    AtmosphereNightUpdater(Resource::ImageManager* textureManager)
     {
         // we just need a texture, its contents don't really matter
         mTexture = textureManager->getWarningTexture();
@@ -469,7 +469,7 @@ const float CelestialBody::mDistance = 1000.0f;
 class Sun : public CelestialBody
 {
 public:
-    Sun(osg::Group* parentNode, Resource::TextureManager& textureManager)
+    Sun(osg::Group* parentNode, Resource::ImageManager& textureManager)
         : CelestialBody(parentNode, 1.0f, 1)
         , mUpdater(new Updater)
     {
@@ -602,7 +602,7 @@ private:
         return oqn;
     }
 
-    void createSunFlash(Resource::TextureManager& textureManager)
+    void createSunFlash(Resource::ImageManager& textureManager)
     {
         osg::ref_ptr<osg::Texture2D> tex (new osg::Texture2D(textureManager.getImage("textures/tx_sun_flash_grey_05.dds")));
         tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
@@ -932,7 +932,7 @@ public:
         Type_Secunda
     };
 
-    Moon(osg::Group* parentNode, Resource::TextureManager& textureManager, float scaleFactor, Type type)
+    Moon(osg::Group* parentNode, Resource::ImageManager& textureManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, scaleFactor, 2)
         , mType(type)
         , mPhase(MoonState::Phase_Unspecified)
@@ -1001,7 +1001,7 @@ public:
 private:
     struct Updater : public SceneUtil::StateSetUpdater
     {
-        Resource::TextureManager& mTextureManager;
+        Resource::ImageManager& mTextureManager;
         osg::ref_ptr<osg::Texture2D> mPhaseTex;
         osg::ref_ptr<osg::Texture2D> mCircleTex;
         float mTransparency;
@@ -1009,7 +1009,7 @@ private:
         osg::Vec4f mAtmosphereColor;
         osg::Vec4f mMoonColor;
 
-        Updater(Resource::TextureManager& textureManager)
+        Updater(Resource::ImageManager& textureManager)
             : mTextureManager(textureManager)
             , mPhaseTex()
             , mCircleTex()
