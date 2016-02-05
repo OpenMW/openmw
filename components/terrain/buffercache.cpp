@@ -193,7 +193,7 @@ namespace Terrain
             for (unsigned int row = 0; row < mNumVerts; ++row)
             {
                 uvs->push_back(osg::Vec2f(col / static_cast<float>(mNumVerts-1),
-                                          row / static_cast<float>(mNumVerts-1)));
+                                          ((mNumVerts-1) - row) / static_cast<float>(mNumVerts-1)));
             }
         }
 

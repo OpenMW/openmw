@@ -399,9 +399,9 @@ namespace ESMTerrain
                     int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
                     if (blendIndex == i)
-                        pData[y*blendmapSize*channels + x*channels + channel] = 255;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 255;
                     else
-                        pData[y*blendmapSize*channels + x*channels + channel] = 0;
+                        pData[(blendmapSize - y - 1)*blendmapSize*channels + x*channels + channel] = 0;
                 }
             }
 
