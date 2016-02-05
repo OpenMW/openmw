@@ -6,6 +6,8 @@
 
 #include <components/vfs/manager.hpp>
 
+#include "objectcache.hpp"
+
 #ifdef OSG_LIBRARY_STATIC
 // This list of plugins should match with the list in the top-level CMakelists.txt.
 USE_OSGPLUGIN(png)
@@ -41,6 +43,7 @@ namespace Resource
 
     ImageManager::ImageManager(const VFS::Manager *vfs)
         : mVFS(vfs)
+        , mCache(new osgDB::ObjectCache)
         , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba"))
     {
@@ -88,9 +91,10 @@ namespace Resource
     {
         std::string normalized = filename;
         mVFS->normalizeFilename(normalized);
-        std::map<std::string, osg::ref_ptr<osg::Image> >::iterator found = mImages.find(normalized);
-        if (found != mImages.end())
-            return found->second;
+
+        osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
+        if (obj)
+            return osg::ref_ptr<osg::Image>(static_cast<osg::Image*>(obj.get()));
         else
         {
             Files::IStreamPtr stream;
@@ -101,6 +105,7 @@ namespace Resource
             catch (std::exception& e)
             {
                 std::cerr << "Failed to open image: " << e.what() << std::endl;
+                mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
 
@@ -112,6 +117,7 @@ namespace Resource
             if (!reader)
             {
                 std::cerr << "Error loading " << filename << ": no readerwriter for '" << ext << "' found" << std::endl;
+                mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
 
@@ -119,16 +125,18 @@ namespace Resource
             if (!result.success())
             {
                 std::cerr << "Error loading " << filename << ": " << result.message() << " code " << result.status() << std::endl;
+                mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
 
             osg::Image* image = result.getImage();
             if (!checkSupported(image, filename))
             {
+                mCache->addEntryToObjectCache(normalized, mWarningImage);
                 return mWarningImage;
             }
 
-            mImages.insert(std::make_pair(normalized, image));
+            mCache->addEntryToObjectCache(normalized, image);
             return image;
         }
     }

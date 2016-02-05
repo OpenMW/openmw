@@ -21,12 +21,14 @@ namespace VFS
 namespace osgDB
 {
     class Options;
+    class ObjectCache;
 }
 
 namespace Resource
 {
 
     /// @brief Handles loading/caching of Images.
+    /// @note May be used from any thread.
     class ImageManager
     {
     public:
@@ -44,8 +46,7 @@ namespace Resource
     private:
         const VFS::Manager* mVFS;
 
-        // TODO: use ObjectCache
-        std::map<std::string, osg::ref_ptr<osg::Image> > mImages;
+        osg::ref_ptr<osgDB::ObjectCache> mCache;
 
         osg::ref_ptr<osg::Image> mWarningImage;
         osg::ref_ptr<osgDB::Options> mOptions;
