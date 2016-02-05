@@ -87,8 +87,6 @@ namespace Resource
         /// otherwise should be disabled to reduce memory usage.
         void setUnRefImageDataAfterApply(bool unref);
 
-        void clearCache();
-
     private:
         const VFS::Manager* mVFS;
         Resource::TextureManager* mTextureManager;
@@ -104,10 +102,8 @@ namespace Resource
         unsigned int mParticleSystemMask;
 
         // observer_ptr?
-        typedef std::map<std::string, osg::ref_ptr<const osg::Node> > Index;
+        typedef std::map<std::string, osg::ref_ptr<osg::Node> > Index;
         Index mIndex;
-
-        std::set<osg::ref_ptr<osg::Texture> > mTexturesWithFilterSetting;
 
         SceneManager(const SceneManager&);
         void operator = (const SceneManager&);
