@@ -17,7 +17,7 @@ USE_OSGPLUGIN(jpeg)
 namespace
 {
 
-    osg::ref_ptr<osg::Texture2D> createWarningTexture()
+    osg::ref_ptr<osg::Image> createWarningImage()
     {
         osg::ref_ptr<osg::Image> warningImage = new osg::Image;
 
@@ -31,10 +31,7 @@ namespace
             data[3*i+1] = (0);
             data[3*i+2] = (255);
         }
-
-        osg::ref_ptr<osg::Texture2D> warningTexture = new osg::Texture2D;
-        warningTexture->setImage(warningImage);
-        return warningTexture;
+        return warningImage;
     }
 
 }
@@ -44,8 +41,7 @@ namespace Resource
 
     ImageManager::ImageManager(const VFS::Manager *vfs)
         : mVFS(vfs)
-        , mWarningTexture(createWarningTexture())
-        , mWarningImage(mWarningTexture->getImage())
+        , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba"))
     {
     }
@@ -137,9 +133,9 @@ namespace Resource
         }
     }
 
-    osg::Texture2D* ImageManager::getWarningTexture()
+    osg::Image *ImageManager::getWarningImage()
     {
-        return mWarningTexture.get();
+        return mWarningImage;
     }
 
 }

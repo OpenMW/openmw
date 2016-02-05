@@ -39,7 +39,7 @@ namespace Resource
 
         const VFS::Manager* getVFS() { return mVFS; }
 
-        osg::Texture2D* getWarningTexture();
+        osg::Image* getWarningImage();
 
     private:
         const VFS::Manager* mVFS;
@@ -47,7 +47,6 @@ namespace Resource
         // TODO: use ObjectCache
         std::map<std::string, osg::ref_ptr<osg::Image> > mImages;
 
-        osg::ref_ptr<osg::Texture2D> mWarningTexture;
         osg::ref_ptr<osg::Image> mWarningImage;
         osg::ref_ptr<osgDB::Options> mOptions;
 

@@ -137,7 +137,7 @@ public:
     AtmosphereNightUpdater(Resource::ImageManager* textureManager)
     {
         // we just need a texture, its contents don't really matter
-        mTexture = textureManager->getWarningTexture();
+        mTexture = new osg::Texture2D(textureManager->getWarningImage());
     }
 
     void setFade(const float fade)
