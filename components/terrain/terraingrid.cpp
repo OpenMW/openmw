@@ -166,10 +166,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
 
-        // SharedStatemanager->share(textureCompileDummy);
-
-        // Remove unrefImageDataAfterApply for better state sharing
-
         // use texture coordinates for both texture units, the layer texture and blend texture
         for (unsigned int i=0; i<2; ++i)
             geometry->setTexCoordArray(i, mCache.getUVBuffer());

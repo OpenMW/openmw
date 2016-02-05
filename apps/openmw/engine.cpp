@@ -448,7 +448,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
-    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(true);
+    mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(false); // keep to Off for now to allow better state sharing
     mResourceSystem->getSceneManager()->setFilterSettings(
         Settings::Manager::getString("texture mag filter", "General"),
         Settings::Manager::getString("texture min filter", "General"),
