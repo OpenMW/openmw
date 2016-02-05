@@ -68,7 +68,7 @@ namespace MWGui
     public:
         LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize, int cellDistance);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
@@ -115,6 +115,9 @@ namespace MWGui
         bool mFogOfWarEnabled;
 
         int mMapWidgetSize;
+
+        int mNumCells; // for convenience, mCellDistance * 2 + 1
+        int mCellDistance;
 
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;

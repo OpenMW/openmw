@@ -72,6 +72,7 @@ LocalMap::LocalMap(osgViewer::Viewer* viewer)
     : mViewer(viewer)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mMapWorldSize(8192.f)
+    , mCellDistance(Settings::Manager::getInt("local map cell distance", "Map"))
     , mAngle(0.f)
     , mInterior(false)
 {
@@ -533,9 +534,9 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
     const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
     // change the affected fog of war textures (in a 3x3 grid around the player)
-    for (int mx = -1; mx<2; ++mx)
+    for (int mx = -mCellDistance; mx<=mCellDistance; ++mx)
     {
-        for (int my = -1; my<2; ++my)
+        for (int my = -mCellDistance; my<=mCellDistance; ++my)
         {
             // is this texture affected at all?
             bool affected = false;

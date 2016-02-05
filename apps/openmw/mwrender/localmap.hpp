@@ -143,6 +143,8 @@ namespace MWRender
         // size of a map segment (for exteriors, 1 cell)
         float mMapWorldSize;
 
+        int mCellDistance;
+
         float mAngle;
         const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
 
