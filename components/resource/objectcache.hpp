@@ -1,3 +1,6 @@
+// Resource ObjectCache for OpenMW, forked from osgDB ObjectCache by Robert Osfield, see copyright notice below.
+// The main change from the upstream version is that removeExpiredObjectsInCache no longer keeps a lock while the unref happens.
+
 /* -*-c++-*- OpenSceneGraph - Copyright (C) 1998-2006 Robert Osfield
  *
  * This library is open source and may be redistributed and/or modified under
@@ -11,17 +14,8 @@
  * OpenSceneGraph Public License for more details.
 */
 
-// Wrapper for osgDB/ObjectCache. Works around ObjectCache not being available in old OSG 3.2.
-// Use "#include objectcache.hpp" in place of "#include <osgDB/ObjectCache".
-
-#ifndef OSGDB_OBJECTCACHE_WRAPPER
-#define OSGDB_OBJECTCACHE_WRAPPER 1
-
-#include <osg/Version>
-
-#if OSG_VERSION_GREATER_OR_EQUAL(3,3,3)
-#include <osgDB/ObjectCache>
-#else
+#ifndef OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
+#define OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 
 #include <osg/Node>
 
@@ -30,9 +24,9 @@
 
 #include <map>
 
-namespace osgDB {
+namespace Resource {
 
-class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
+class ObjectCache : public osg::Referenced
 {
     public:
 
@@ -70,7 +64,7 @@ class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
         /** Get an ref_ptr<Object> from the object cache*/
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const std::string& fileName);
 
-        /** call rleaseGLObjects on all objects attached to the object cache.*/
+        /** call releaseGLObjects on all objects attached to the object cache.*/
         void releaseGLObjects(osg::State* state);
 
     protected:
@@ -86,7 +80,5 @@ class /*OSGDB_EXPORT*/ ObjectCache : public osg::Referenced
 };
 
 }
-
-#endif
 
 #endif

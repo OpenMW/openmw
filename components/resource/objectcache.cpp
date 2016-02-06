@@ -11,13 +11,10 @@
  * OpenSceneGraph Public License for more details.
 */
 
-#include <osg/Version>
-
-#if OSG_VERSION_LESS_THAN(3,3,3)
-
 #include "objectcache.hpp"
 
-using namespace osgDB;
+namespace Resource
+{
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -95,21 +92,29 @@ void ObjectCache::updateTimeStampOfObjectsInCacheWithExternalReferences(double r
 
 void ObjectCache::removeExpiredObjectsInCache(double expiryTime)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+    std::vector<osg::ref_ptr<osg::Object> > objectsToRemove;
 
-    // Remove expired entries from object cache
-    ObjectCacheMap::iterator oitr = _objectCache.begin();
-    while(oitr != _objectCache.end())
     {
-        if (oitr->second.second<=expiryTime)
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
+
+        // Remove expired entries from object cache
+        ObjectCacheMap::iterator oitr = _objectCache.begin();
+        while(oitr != _objectCache.end())
         {
-            _objectCache.erase(oitr++);
-        }
-        else
-        {
-            ++oitr;
+            if (oitr->second.second<=expiryTime)
+            {
+                objectsToRemove.push_back(oitr->second.first);
+                _objectCache.erase(oitr++);
+            }
+            else
+            {
+                ++oitr;
+            }
         }
     }
+
+    // note, actual unref happens outside of the lock
+    objectsToRemove.clear();
 }
 
 void ObjectCache::removeFromObjectCache(const std::string& fileName)
@@ -138,4 +143,4 @@ void ObjectCache::releaseGLObjects(osg::State* state)
     }
 }
 
-#endif
+}

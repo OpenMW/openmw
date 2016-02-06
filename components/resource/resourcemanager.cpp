@@ -7,7 +7,7 @@ namespace Resource
 
     ResourceManager::ResourceManager(const VFS::Manager *vfs, const double expiryDelay)
         : mVFS(vfs)
-        , mCache(new osgDB::ObjectCache)
+        , mCache(new Resource::ObjectCache)
         , mExpiryDelay(expiryDelay)
     {
 

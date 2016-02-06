@@ -8,13 +8,9 @@ namespace VFS
     class Manager;
 }
 
-namespace osgDB
-{
-    class ObjectCache;
-}
-
 namespace Resource
 {
+    class ObjectCache;
 
     /// @brief Base class for managers that require a virtual file system and object cache.
     /// @par This base class implements clearing of the cache, but populating it and what it's used for is up to the individual sub classes.
@@ -34,7 +30,7 @@ namespace Resource
 
     protected:
         const VFS::Manager* mVFS;
-        osg::ref_ptr<osgDB::ObjectCache> mCache;
+        osg::ref_ptr<Resource::ObjectCache> mCache;
         double mExpiryDelay;
     };
 

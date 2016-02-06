@@ -54,7 +54,6 @@ namespace Resource
 
     void ResourceSystem::updateCache(double referenceTime)
     {
-        // TODO: change ObjectCache to not hold lock while the unref happens
         for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
             (*it)->updateCache(referenceTime);
     }
