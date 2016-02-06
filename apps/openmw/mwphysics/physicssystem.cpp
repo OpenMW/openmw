@@ -690,6 +690,11 @@ namespace MWPhysics
         delete mBroadphase;
     }
 
+    Resource::BulletShapeManager *PhysicsSystem::getShapeManager()
+    {
+        return mShapeManager.get();
+    }
+
     bool PhysicsSystem::toggleDebugRendering()
     {
         mDebugDrawEnabled = !mDebugDrawEnabled;

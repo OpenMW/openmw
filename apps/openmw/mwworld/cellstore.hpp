@@ -204,6 +204,9 @@ namespace MWWorld
 
             State getState() const;
 
+            const std::vector<std::string>& getPreloadedIds() const;
+            ///< Get Ids of objects in this cell, only valid in State_Preloaded
+
             bool hasState() const;
             ///< Does this cell have state that needs to be stored in a saved game file?
 

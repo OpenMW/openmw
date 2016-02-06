@@ -53,6 +53,8 @@ namespace MWPhysics
             PhysicsSystem (Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode);
             ~PhysicsSystem ();
 
+            Resource::BulletShapeManager* getShapeManager();
+
             void enableWater(float height);
             void setWaterHeight(float height);
             void disableWater();

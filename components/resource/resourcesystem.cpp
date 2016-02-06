@@ -54,6 +54,9 @@ namespace Resource
 
     void ResourceSystem::updateCache(double referenceTime)
     {
+        // TODO: call updateCache from the worker thread so the main thread isn't held up by the delete operations
+        // change ObjectCache to not hold lock while the unref happens
+
         osg::Timer timer;
         for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
             (*it)->updateCache(referenceTime);
