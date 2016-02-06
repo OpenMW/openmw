@@ -109,7 +109,7 @@ BulletShapeManager::~BulletShapeManager()
 
 }
 
-osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
+osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &name)
 {
     std::string normalized = name;
     mVFS->normalizeFilename(normalized);
@@ -142,13 +142,18 @@ osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::
             if (!shape)
             {
                 mCache->addEntryToObjectCache(normalized, NULL);
-                return osg::ref_ptr<BulletShapeInstance>();
+                return osg::ref_ptr<BulletShape>();
             }
         }
 
         mCache->addEntryToObjectCache(normalized, shape);
     }
+    return shape;
+}
 
+osg::ref_ptr<BulletShapeInstance> BulletShapeManager::createInstance(const std::string &name)
+{
+    osg::ref_ptr<const BulletShape> shape = getShape(name);
     if (shape)
         return shape->makeInstance();
     else

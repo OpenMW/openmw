@@ -26,6 +26,9 @@ namespace Resource
         BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager);
         ~BulletShapeManager();
 
+        osg::ref_ptr<const BulletShape> getShape(const std::string& name);
+
+        /// Shorthand for getShape(name)->makeInstance();
         osg::ref_ptr<BulletShapeInstance> createInstance(const std::string& name);
 
     private:
