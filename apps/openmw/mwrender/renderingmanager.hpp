@@ -67,6 +67,8 @@ namespace MWRender
 
         void clearCache();
 
+        double getReferenceTime() const;
+
         osg::Group* getLightRoot();
 
         void setNightEyeFactor(float factor);

@@ -24,6 +24,7 @@
 #include "class.hpp"
 #include "cellvisitors.hpp"
 #include "cellstore.hpp"
+#include "cellpreloader.hpp"
 
 namespace
 {
@@ -402,6 +403,7 @@ namespace MWWorld
 
         mCellChanged = true;
 
+        mPreloader->updateCache(mRendering.getReferenceTime());
         mRendering.clearCache();
     }
 
@@ -439,6 +441,7 @@ namespace MWWorld
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     {
+        mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
     }
 
     Scene::~Scene()
@@ -515,6 +518,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
+        mPreloader->updateCache(mRendering.getReferenceTime());
         mRendering.clearCache();
     }
 

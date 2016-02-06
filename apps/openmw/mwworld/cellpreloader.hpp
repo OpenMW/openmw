@@ -7,7 +7,7 @@
 
 namespace Resource
 {
-    class SceneManager;
+    class ResourceSystem;
     class BulletShapeManager;
 }
 
@@ -18,7 +18,7 @@ namespace MWWorld
     class CellPreloader
     {
     public:
-        CellPreloader(Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager);
+        CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager);
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
         /// @note The cell itself must be in State_Loaded or State_Preloaded.
@@ -30,7 +30,7 @@ namespace MWWorld
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
     private:
-        Resource::SceneManager* mSceneManager;
+        Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 

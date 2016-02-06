@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -33,6 +34,7 @@ namespace MWWorld
         std::vector<std::string>& mOut;
     };
 
+    /// Worker thread item: preload models in a cell.
     class PreloadItem : public SceneUtil::WorkItem
     {
     public:
@@ -92,8 +94,30 @@ namespace MWWorld
         std::vector<osg::ref_ptr<const Resource::BulletShape> > mPreloadedShapes;
     };
 
-    CellPreloader::CellPreloader(Resource::SceneManager *sceneManager, Resource::BulletShapeManager* bulletShapeManager)
-        : mSceneManager(sceneManager)
+    /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
+    class UpdateCacheItem : public SceneUtil::WorkItem
+    {
+    public:
+        UpdateCacheItem(Resource::ResourceSystem* resourceSystem, double referenceTime)
+            : mReferenceTime(referenceTime)
+            , mResourceSystem(resourceSystem)
+        {
+        }
+
+        virtual void doWork()
+        {
+            osg::Timer timer;
+            mResourceSystem->updateCache(mReferenceTime);
+            std::cout << "cleared cache in " << timer.time_m() << std::endl;
+        }
+
+    private:
+        double mReferenceTime;
+        Resource::ResourceSystem* mResourceSystem;
+    };
+
+    CellPreloader::CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager)
+        : mResourceSystem(resourceSystem)
         , mBulletShapeManager(bulletShapeManager)
     {
         mWorkQueue = new SceneUtil::WorkQueue;
@@ -120,7 +144,7 @@ namespace MWWorld
             return;
         }
 
-        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mSceneManager, mBulletShapeManager));
+        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager));
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells[cell] = PreloadEntry(timestamp, item);
@@ -129,6 +153,7 @@ namespace MWWorld
     void CellPreloader::updateCache(double timestamp)
     {
         // time (in seconds) to keep a preloaded cell in cache after it's no longer needed
+        // additionally we could support a minimum/maximum size for the cache
         const double expiryTime = 60.0;
 
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
@@ -138,6 +163,9 @@ namespace MWWorld
             else
                 ++it;
         }
+
+        // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
+        mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, timestamp));
     }
 
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)

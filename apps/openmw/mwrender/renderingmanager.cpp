@@ -233,9 +233,13 @@ namespace MWRender
 
     void RenderingManager::clearCache()
     {
-        mResourceSystem->updateCache(mViewer->getFrameStamp()->getReferenceTime());
         if (mTerrain.get())
             mTerrain->clearCache();
+    }
+
+    double RenderingManager::getReferenceTime() const
+    {
+        return mViewer->getFrameStamp()->getReferenceTime();
     }
 
     osg::Group* RenderingManager::getLightRoot()

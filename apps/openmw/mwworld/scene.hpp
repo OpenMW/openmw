@@ -1,12 +1,11 @@
 #ifndef GAME_MWWORLD_SCENE_H
 #define GAME_MWWORLD_SCENE_H
 
-//#include "../mwrender/renderingmanager.hpp"
-
 #include "ptr.hpp"
 #include "globals.hpp"
 
 #include <set>
+#include <memory>
 
 namespace osg
 {
@@ -43,6 +42,7 @@ namespace MWWorld
 {
     class Player;
     class CellStore;
+    class CellPreloader;
 
     class Scene
     {
@@ -57,6 +57,7 @@ namespace MWWorld
             bool mCellChanged;
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
+            std::auto_ptr<CellPreloader> mPreloader;
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
