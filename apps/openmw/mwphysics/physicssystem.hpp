@@ -169,6 +169,7 @@ namespace MWPhysics
             btCollisionWorld* mCollisionWorld;
 
             std::auto_ptr<Resource::BulletShapeManager> mShapeManager;
+            Resource::ResourceSystem* mResourceSystem;
 
             typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
             ObjectMap mObjects;

@@ -7,16 +7,7 @@
 #include <osg/ref_ptr>
 
 #include "bulletshape.hpp"
-
-namespace VFS
-{
-    class Manager;
-}
-
-namespace osgDB
-{
-    class ObjectCache;
-}
+#include "resourcemanager.hpp"
 
 namespace Resource
 {
@@ -29,7 +20,7 @@ namespace Resource
     /// Handles loading, caching and "instancing" of bullet shapes.
     /// A shape 'instance' is a clone of another shape, with the goal of setting a different scale on this instance.
     /// @note May be used from any thread.
-    class BulletShapeManager
+    class BulletShapeManager : public ResourceManager
     {
     public:
         BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager);
@@ -38,11 +29,8 @@ namespace Resource
         osg::ref_ptr<BulletShapeInstance> createInstance(const std::string& name);
 
     private:
-        const VFS::Manager* mVFS;
         SceneManager* mSceneManager;
         NifFileManager* mNifFileManager;
-
-        osg::ref_ptr<osgDB::ObjectCache> mCache;
     };
 
 }

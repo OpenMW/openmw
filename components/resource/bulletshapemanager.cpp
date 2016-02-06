@@ -97,10 +97,9 @@ private:
 };
 
 BulletShapeManager::BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
-    : mVFS(vfs)
+    : ResourceManager(vfs)
     , mSceneManager(sceneMgr)
     , mNifFileManager(nifFileManager)
-    , mCache(new osgDB::ObjectCache)
 {
 
 }

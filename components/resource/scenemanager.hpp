@@ -8,25 +8,17 @@
 #include <osg/Node>
 #include <osg/Texture>
 
+#include "resourcemanager.hpp"
+
 namespace Resource
 {
     class ImageManager;
     class NifFileManager;
 }
 
-namespace VFS
-{
-    class Manager;
-}
-
 namespace osgUtil
 {
     class IncrementalCompileOperation;
-}
-
-namespace osgDB
-{
-    class ObjectCache;
 }
 
 namespace osgViewer
@@ -39,7 +31,7 @@ namespace Resource
 
     /// @brief Handles loading and caching of scenes, e.g. .nif files or .osg files
     /// @note Some methods of the scene manager can be used from any thread, see the methods documentation for more details.
-    class SceneManager
+    class SceneManager : public ResourceManager
     {
     public:
         SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
@@ -78,8 +70,6 @@ namespace Resource
         /// @note SceneManager::attachTo calls this method automatically, only needs to be called by users if manually attaching
         void notifyAttached(osg::Node* node) const;
 
-        const VFS::Manager* getVFS() const;
-
         Resource::ImageManager* getImageManager();
 
         /// @param mask The node mask to apply to loaded particle system nodes.
@@ -99,7 +89,6 @@ namespace Resource
         void setUnRefImageDataAfterApply(bool unref);
 
     private:
-        const VFS::Manager* mVFS;
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
 
@@ -111,8 +100,6 @@ namespace Resource
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         unsigned int mParticleSystemMask;
-
-        osg::ref_ptr<osgDB::ObjectCache> mCache;
 
         SceneManager(const SceneManager&);
         void operator = (const SceneManager&);

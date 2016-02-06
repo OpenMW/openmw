@@ -640,12 +640,15 @@ namespace MWPhysics
 
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
+        , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
     {
+        mResourceSystem->addResourceManager(mShapeManager.get());
+
         mCollisionConfiguration = new btDefaultCollisionConfiguration();
         mDispatcher = new btCollisionDispatcher(mCollisionConfiguration);
         mBroadphase = new btDbvtBroadphase();
@@ -659,6 +662,8 @@ namespace MWPhysics
 
     PhysicsSystem::~PhysicsSystem()
     {
+        mResourceSystem->removeResourceManager(mShapeManager.get());
+
         if (mWaterCollisionObject.get())
             mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
 

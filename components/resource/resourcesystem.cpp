@@ -15,11 +15,21 @@ namespace Resource
         mKeyframeManager.reset(new KeyframeManager(vfs));
         mImageManager.reset(new ImageManager(vfs));
         mSceneManager.reset(new SceneManager(vfs, mImageManager.get(), mNifFileManager.get()));
+
+        addResourceManager(mNifFileManager.get());
+        addResourceManager(mKeyframeManager.get());
+        // note, scene references images so add images afterwards for correct implementation of updateCache()
+        addResourceManager(mSceneManager.get());
+        addResourceManager(mImageManager.get());
     }
 
     ResourceSystem::~ResourceSystem()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
+
+        mResourceManagers.clear();
+
+        // no delete, all handled by auto_ptr
     }
 
     SceneManager* ResourceSystem::getSceneManager()
@@ -42,9 +52,24 @@ namespace Resource
         return mKeyframeManager.get();
     }
 
-    void ResourceSystem::clearCache()
+    void ResourceSystem::updateCache(double referenceTime)
     {
-        mNifFileManager->clearCache();
+        osg::Timer timer;
+        for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->updateCache(referenceTime);
+        std::cout << "updateCache took " << timer.time_m() << " ms" << std::endl;
+    }
+
+    void ResourceSystem::addResourceManager(ResourceManager *resourceMgr)
+    {
+        mResourceManagers.push_back(resourceMgr);
+    }
+
+    void ResourceSystem::removeResourceManager(ResourceManager *resourceMgr)
+    {
+        std::vector<ResourceManager*>::iterator found = std::find(mResourceManagers.begin(), mResourceManagers.end(), resourceMgr);
+        if (found != mResourceManagers.end())
+            mResourceManagers.erase(found);
     }
 
     const VFS::Manager* ResourceSystem::getVFS() const

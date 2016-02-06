@@ -230,7 +230,7 @@ namespace Resource
 
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
-        : mVFS(vfs)
+        : ResourceManager(vfs)
         , mImageManager(imageManager)
         , mNifFileManager(nifFileManager)
         , mMinFilter(osg::Texture::LINEAR_MIPMAP_LINEAR)
@@ -238,7 +238,6 @@ namespace Resource
         , mMaxAnisotropy(1)
         , mUnRefImageDataAfterApply(false)
         , mParticleSystemMask(~0u)
-        , mCache(new osgDB::ObjectCache)
     {
     }
 
@@ -403,11 +402,6 @@ namespace Resource
         node->accept(visitor);
     }
 
-    const VFS::Manager* SceneManager::getVFS() const
-    {
-        return mVFS;
-    }
-
     Resource::ImageManager* SceneManager::getImageManager()
     {
         return mImageManager;
@@ -482,6 +476,5 @@ namespace Resource
     {
         mUnRefImageDataAfterApply = unref;
     }
-
 
 }

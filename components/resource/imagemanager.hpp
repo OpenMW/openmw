@@ -8,20 +8,16 @@
 #include <osg/Image>
 #include <osg/Texture2D>
 
+#include "resourcemanager.hpp"
+
 namespace osgViewer
 {
     class Viewer;
 }
 
-namespace VFS
-{
-    class Manager;
-}
-
 namespace osgDB
 {
     class Options;
-    class ObjectCache;
 }
 
 namespace Resource
@@ -29,7 +25,7 @@ namespace Resource
 
     /// @brief Handles loading/caching of Images.
     /// @note May be used from any thread.
-    class ImageManager
+    class ImageManager : public ResourceManager
     {
     public:
         ImageManager(const VFS::Manager* vfs);
@@ -39,15 +35,9 @@ namespace Resource
         /// Returns the dummy image if the given image is not found.
         osg::ref_ptr<osg::Image> getImage(const std::string& filename);
 
-        const VFS::Manager* getVFS() { return mVFS; }
-
         osg::Image* getWarningImage();
 
     private:
-        const VFS::Manager* mVFS;
-
-        osg::ref_ptr<osgDB::ObjectCache> mCache;
-
         osg::ref_ptr<osg::Image> mWarningImage;
         osg::ref_ptr<osgDB::Options> mOptions;
 

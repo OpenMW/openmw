@@ -233,7 +233,7 @@ namespace MWRender
 
     void RenderingManager::clearCache()
     {
-        mResourceSystem->clearCache();
+        mResourceSystem->updateCache(mViewer->getFrameStamp()->getReferenceTime());
         if (mTerrain.get())
             mTerrain->clearCache();
     }

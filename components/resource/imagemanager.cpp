@@ -42,8 +42,7 @@ namespace Resource
 {
 
     ImageManager::ImageManager(const VFS::Manager *vfs)
-        : mVFS(vfs)
-        , mCache(new osgDB::ObjectCache)
+        : ResourceManager(vfs)
         , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba"))
     {
