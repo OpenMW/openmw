@@ -1305,18 +1305,18 @@ namespace MWClass
     {
         if (ptr.get<ESM::NPC>()->mBase->mFlags & ESM::NPC::Respawn)
         {
-            // Note we do not respawn moved references in the cell they were moved to. Instead they are respawned in the original cell.
-            // This also means we cannot respawn dynamically placed references with no content file connection.
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
                     ptr.getRefData().setCount(1);
 
-                // Reset to original position
-                ptr.getRefData().setPosition(ptr.getCellRef().getPosition());
-
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(NULL);
+
+                // Reset to original position
+                MWBase::Environment::get().getWorld()->moveObject(ptr, ptr.getCellRef().getPosition().pos[0],
+                        ptr.getCellRef().getPosition().pos[1],
+                        ptr.getCellRef().getPosition().pos[2]);
             }
         }
     }
