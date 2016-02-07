@@ -66,6 +66,7 @@ namespace CSMTools
         
         std::set<std::string> mCellNames;
         
+        //  Checks
         
         bool checkActor(const std::string& actorName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
@@ -100,15 +101,23 @@ namespace CSMTools
         void checkSound(const std::string& soundFile, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkFunctionRange(const std::string& functionName, char op, const ESM::Variant& variant,
+        void checkFunctionRange(const std::string& functionIndex, char op, const ESM::Variant& variant,
                     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         
-        int getJournalTopicMaxIndex(const std::string journalName);
-        
-        std::pair<int,int> getRange(char op, int value, bool lower,
+        void checkJournalRange(const std::string& journalName, char op, const ESM::Variant& variant,
                     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        
+        // Misc functions
+        
+        std::string getFunctionName(int code);
+        
+        std::pair<int,int> getRange(char op, int value, bool lower, const CSMWorld::UniversalId& id,
+                    CSMDoc::Messages& messages);
         
         bool rangeIntersects(std::pair<int,int> r1, std::pair<int,int> r2);
+        
+        void testIntRange(const std::pair<int,int>& range, char op, const ESM::Variant& variant,
+                    const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         
     };
 }

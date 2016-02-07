@@ -3,9 +3,6 @@
 #include <limits>
 #include <sstream>
 
-const float FInf = std::numeric_limits<float>::infinity();
-const float FEps = std::numeric_limits<float>::epsilon();
-
 const int IMax = std::numeric_limits<int>::max();
 const int IMin = std::numeric_limits<int>::min();
 
@@ -388,20 +385,19 @@ void CSMTools::TopicInfoCheckStage::checkResponse(const std::string& response, c
 void CSMTools::TopicInfoCheckStage::checkSelectStruct(const ESM::DialInfo::SelectStruct& selectStruct, 
         const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
+    char functionName = selectStruct.mSelectRule[1];
     std::string varName = selectStruct.mSelectRule.substr(5);
-    std::string functionName = selectStruct.mSelectRule.substr(2,2);
+    std::string functionIndex = selectStruct.mSelectRule.substr(2,2);
     char opName = selectStruct.mSelectRule[4];
     
-    int index = 0;
-    
-    switch (selectStruct.mSelectRule[1])
+    switch (functionName)
     {
         case '0': // blank space
             messages.add(id, "Info Condition is empty", "", CSMDoc::Message::Severity_Warning);
             break;
             
         case '1': // Function
-            checkFunctionRange(functionName, opName, selectStruct.mValue, id, messages);
+            checkFunctionRange(functionIndex, opName, selectStruct.mValue, id, messages);
             break;
             
         case '2': // Global
@@ -412,176 +408,59 @@ void CSMTools::TopicInfoCheckStage::checkSelectStruct(const ESM::DialInfo::Selec
             break;
             
         case '4': // Journal
-            if (!checkJournal(varName, id, messages))
+            if (checkJournal(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a Journal Info Condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else
-            {
-                index = getJournalTopicMaxIndex(varName);
-                
-                if (!rangeIntersects(std::pair<int,int>(0, index),
-                        getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                    !rangeIntersects(std::pair<int,int>(0, index),
-                        getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-                {
-                    messages.add(id, "Journal Info Condition for " + varName + " is not attainable",
-                                 "", CSMDoc::Message::Severity_Error);
-                }
+                checkJournalRange(varName, opName, selectStruct.mValue, id, messages);
             }
             
             break;
             
         case '5': // Item
-            if (!checkItem(varName, id, messages))
+            if (checkItem(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for an \"Item\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, IMax),
-                        getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                    !rangeIntersects(std::pair<int,int>(0, IMax),
-                        getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Item\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, IMax), opName, selectStruct.mValue, "Item", id, messages);
             }
             break;
             
         case '6': // Dead
-            if (!checkActor(varName, id, messages))
+            if (checkActor(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Dead\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, IMax), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, IMax),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Dead\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, IMax), opName, selectStruct.mValue, "Dead", id, messages);   
             }
             break;
             
         case '7': // Not ID
-            if (!checkActor(varName, id, messages))
+            if (checkActor(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Not ID\" info condition", 
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, 1), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, 1),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Not ID\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, 1), opName, selectStruct.mValue, "Not ID", id, messages);   
             }
             break;
             
         case '8': // Not Faction
-            if (!checkFaction(varName, -1, id, messages))
+            if (checkFaction(varName, -1, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Not Faction\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, 1), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, 1),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Not Faction\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, 1), opName, selectStruct.mValue, "Not Faction", id, messages);
             }
             break;
             
         case '9': // Not Class
-            if (!checkClass(varName, id, messages))
+            if (checkClass(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Not Class\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, 1), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, 1),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Not Class\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, 1), opName, selectStruct.mValue, "Not Class", id, messages);   
             }
             break;
             
         case 'A': // Not Race
-            if (!checkRace(varName, id, messages))
+            if (checkRace(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Not Race\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, 1), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, 1),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Not Race\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, 1), opName, selectStruct.mValue, "Not Race", id, messages);   
             }
             break;
             
         case 'B': // Not Cell
-            if (!checkCell(varName, id, messages))
+            if (checkCell(varName, id, messages))
             {
-                // Already reported
-            }
-            else if (selectStruct.mValue.getType() != ESM::VT_Int && selectStruct.mValue.getType() != ESM::VT_Short &&
-                     selectStruct.mValue.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for a \"Not Cell\" info condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, 1), 
-                         getRange(opName, selectStruct.mValue.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, 1),
-                         getRange(opName, selectStruct.mValue.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "\"Not Cell\" info condition for " + varName + " is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
+                testIntRange(std::pair<int,int>(0, 1), opName, selectStruct.mValue, "Not Cell", id, messages);            
             }
             break;
             
@@ -602,34 +481,28 @@ void CSMTools::TopicInfoCheckStage::checkSound(const std::string& sound, const C
     }
 }
 
-void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functionName, char op, const ESM::Variant& variant,
+void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functionIndex, char op, const ESM::Variant& variant,
         const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     int functionCode = -1;
     std::stringstream stream;
     
-    stream << functionName;
+    stream << functionIndex;
     stream >> functionCode;
     
     switch (functionCode)
     {
         case 0: // Rank Low
         case 1: // Rank High
-        case 2: // Rank Requirement
-            
+        case 2: // Rank Requirement 
         case 3: // Reputation
-        case 5: // PC Reputation
-            
         case 4: // Health Percent
-        case 7: // PC Health Percent
-            
+        case 5: // PC Reputation
         case 6: // PC Level
+        case 7: // PC Health Percent
         case 8: // PC Magicka
         case 9: // PC Fatigue
         case 10: // PC Strength
-        case 61: // Level
-        case 64: // PC Health
-            
         case 11: // PC Block
         case 12: // PC Armorer
         case 13: // PC Medium Armor
@@ -657,7 +530,8 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
         case 35: // PC Merchantile
         case 36: // PC Speechcraft
         case 37: // PC Hand To Hand
-            
+        case 43: // PC Crime Level
+        case 50: // Choice
         case 51: // PC Intelligence
         case 52: // PC Willpower
         case 53: // PC Agility
@@ -666,44 +540,27 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
         case 56: // PC Personality
         case 57: // PC Luck
         case 58: // PC Corpus
-            
-        case 43: // PC Crime Level
-        case 50: // Choice
         case 59: // Weather
+        case 61: // Level
+        case 64: // PC Health
         case 66: // Friend Hit
         case 73: // PC Werewolf Kills
             
-            if (variant.getType() != ESM::VT_Int && variant.getType() != ESM::VT_Short &&
-                     variant.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for Function Info Condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(0, IMax), 
-                         getRange(op, variant.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(0, IMax),
-                         getRange(op, variant.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "Function Info Condition is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
-            }
+            testIntRange(std::pair<int,int>(0, IMax), op, variant, getFunctionName(functionCode), id, messages);
             break;
             
         case 38: // PC Sex
         case 39: // PC Expelled
         case 40: // PC Common Disease
         case 41: // PC Blight Disease
-        case 60: // PC Vampire
-            
         case 44: // Same Sex
         case 45: // Same Race
         case 46: // Same Faction
-            
         case 48: // Detected
         case 49: // Alarmed
+        case 60: // PC Vampire
         case 62: // Attacked
         case 63: // Talked To PC
-            
         case 67: // Fight
         case 68: // Hello
         case 69: // Alarm
@@ -711,38 +568,12 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
         case 71: // Should Attack
         case 72: // Werewolf
             
-            if (variant.getType() != ESM::VT_Int && variant.getType() != ESM::VT_Short &&
-                     variant.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for Function Info Condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(-1, 1), 
-                         getRange(op, variant.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(-1, 1),
-                         getRange(op, variant.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "Function Info Condition is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
-            }
+            testIntRange(std::pair<int,int>(-1, 1), op, variant, getFunctionName(functionCode), id, messages);
             break;
             
         case 47: // Faction Rank Difference
             
-            if (variant.getType() != ESM::VT_Int && variant.getType() != ESM::VT_Short &&
-                     variant.getType() != ESM::VT_Long)
-            {
-                messages.add(id, "Expected an integer type for Function Faction Rank Difference Info Condition",
-                             "", CSMDoc::Message::Severity_Error);
-            }
-            else if (!rangeIntersects(std::pair<int,int>(-9, 9), 
-                         getRange(op, variant.getInteger(), true, id, messages)) &&
-                     !rangeIntersects(std::pair<int,int>(-9, 9),
-                         getRange(op, variant.getInteger(), false, id, messages)))
-            {
-                messages.add(id, "Function Info Faction Rank Difference Condition is not attainable",
-                             "", CSMDoc::Message::Severity_Error);
-            }
+            testIntRange(std::pair<int,int>(-9, 9), op, variant, getFunctionName(functionCode), id, messages);
             break;
             
         case 42: // PC Clothing Modifier
@@ -750,21 +581,31 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
             break;
             
         default:
-            messages.add(id, "Info condition has unknown function", "", CSMDoc::Message::Severity_SeriousError);
+            messages.add(id, "An unknown Function Info Condition was found",
+                         "", CSMDoc::Message::Severity_SeriousError);
             
     }
 }
 
-int CSMTools::TopicInfoCheckStage::getJournalTopicMaxIndex(const std::string journalName)
+void CSMTools::TopicInfoCheckStage::checkJournalRange(const std::string& journalName, char op,
+        const ESM::Variant& variant, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
+    if (variant.getType() != ESM::VT_Int && variant.getType() != ESM::VT_Short && variant.getType() != ESM::VT_Long)
+    {
+        messages.add(id, "Expected an integer type for Info Condition: Journal " + journalName,
+                     "", CSMDoc::Message::Severity_Error);
+    }
+    
     // Journal is known to be valid
     int index = mJournals.searchId(journalName);
     const ESM::Dialogue &journal = mJournals.getRecord(index).get();
-    int maxJournalQuestIndex = -1;
     
-    CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId);
+    std::pair<int,int> rangeReq1 = getRange(op, variant.getInteger(), true, id, messages);
+    std::pair<int,int> rangeReq2 = getRange(op, variant.getInteger(), false, id, messages);
     
-    for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
+    CSMWorld::InfoCollection::Range journalRange = mJournalInfos.getTopicRange(journal.mId);
+    
+    for (CSMWorld::InfoCollection::RecordConstIterator it = journalRange.first; it != journalRange.second; ++it)
     {
         const CSMWorld::Record<CSMWorld::Info> infoRecord = (*it);
         
@@ -773,11 +614,23 @@ int CSMTools::TopicInfoCheckStage::getJournalTopicMaxIndex(const std::string jou
         
         const CSMWorld::Info& journalInfo = infoRecord.get();
         
-        if (journalInfo.mData.mJournalIndex > maxJournalQuestIndex)
-            maxJournalQuestIndex = journalInfo.mData.mJournalIndex;
+        index = journalInfo.mData.mJournalIndex;
+        
+        if (rangeIntersects(std::pair<int,int>(index, index), rangeReq1) ||
+            rangeIntersects(std::pair<int,int>(index, index), rangeReq2))
+        {
+            // Found a journal index that fits requirements
+            return;
+        }
     }
     
-    return maxJournalQuestIndex;
+    // It appears that journal index of 0 does not have to exist to meet requirements
+    if (!rangeIntersects(std::pair<int,int>(0, 0), rangeReq1) &&
+        !rangeIntersects(std::pair<int,int>(0, 0), rangeReq2))
+    {
+        // No journal index found that meets requirements
+        messages.add(id, "Unattainable Info Condition: Journal " + journalName, "", CSMDoc::Message::Severity_Error);
+    }
 }
 
 std::pair<int,int> CSMTools::TopicInfoCheckStage::getRange(char op, int value, bool lower,
@@ -852,4 +705,100 @@ bool CSMTools::TopicInfoCheckStage::rangeIntersects(std::pair<int,int> r1, std::
 {
     return (r1.first <= r2.first && r2.first <= r1.second) || (r1.first <= r2.second && r2.second <= r1.second) ||
            (r2.first <= r1.first && r1.first <= r2.second) || (r2.first <= r1.second && r1.second <= r2.second);
+}
+
+void CSMTools::TopicInfoCheckStage::testIntRange(const std::pair<int,int>& range, char op, const ESM::Variant& variant,
+        const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+{
+    if (variant.getType() != ESM::VT_Int && variant.getType() != ESM::VT_Short && variant.getType() != ESM::VT_Long)
+    {
+        messages.add(id, "Expected an integer type for Info Condition: " + name, "", CSMDoc::Message::Severity_Error);
+    }
+    else if (!rangeIntersects(range, getRange(op, variant.getInteger(), true, id, messages)) &&
+             !rangeIntersects(range, getRange(op, variant.getInteger(), false, id, messages)))
+    {
+        messages.add(id, "Unattainable Info Condition: " + name, "", CSMDoc::Message::Severity_Error);
+    }
+}
+
+std::string CSMTools::TopicInfoCheckStage::getFunctionName(int code)
+{
+    switch (code)
+    {
+        case 0: return "Rank Low";
+        case 1: return "Rank High";
+        case 2: return "Rank Requirement";
+        case 3: return "Reputation";
+        case 4: return "Health Percent";
+        case 5: return "PC Reputation";
+        case 6: return "PC Level";
+        case 7: return "PC Health Percent";
+        case 8: return "PC Magicka";
+        case 9: return "PC Fatigue";
+        case 10: return "PC Strength";
+        case 11: return "PC Block";
+        case 12: return "PC Armorer";
+        case 13: return "PC Medium Armor";
+        case 14: return "PC Heavy Armor";
+        case 15: return "PC Blunt Weapon";
+        case 16: return "PC Long Blade";
+        case 17: return "PC Axe";
+        case 18: return "PC Spear";
+        case 19: return "PC Athletics";
+        case 20: return "PC Enchant";
+        case 21: return "PC Destruction";
+        case 22: return "PC Alteration";
+        case 23: return "PC Illusion";
+        case 24: return "PC Conjuration";
+        case 25: return "PC Mysticism";
+        case 26: return "PC Restoration";
+        case 27: return "PC Alchemy";
+        case 28: return "PC Unarmored";
+        case 29: return "PC Security";
+        case 30: return "PC Sneak";
+        case 31: return "PC Acrobatics";
+        case 32: return "PC Light Armor";
+        case 33: return "PC Short Blade";
+        case 34: return "PC Marksman";
+        case 35: return "PC Merchantile";
+        case 36: return "PC Speechcraft";
+        case 37: return "PC Hand To Hand";
+        case 38: return "PC Sex";
+        case 39: return "PC Expelled";
+        case 40: return "PC Common Disease";
+        case 41: return "PC Blight Disease";
+        case 42: return "PC Clothing Modifier";
+        case 43: return "PC Crime Level";
+        case 44: return "Same Sex";
+        case 45: return "Same Race";
+        case 46: return "Same Faction";
+        case 47: return "Faction Rank Difference";
+        case 48: return "Detected";
+        case 49: return "Alarmed";
+        case 50: return "Choice";
+        case 51: return "PC Intelligence";
+        case 52: return "PC Willpower";
+        case 53: return "PC Agility";
+        case 54: return "PC Speed";
+        case 55: return "PC Endurance";
+        case 56: return "PC Personality";
+        case 57: return "PC Luck";
+        case 58: return "PC Corpus";
+        case 59: return "Weather";
+        case 60: return "PC Vampire";
+        case 61: return "Level";
+        case 62: return "Attacked";
+        case 63: return "Talked To PC";
+        case 64: return "PC Health";
+        case 65: return "Creature Target";
+        case 66: return "Friend Hit";
+        case 67: return "Fight";
+        case 68: return "Hello";
+        case 69: return "Alarm";
+        case 70: return "Flee";
+        case 71: return "Should Attack";
+        case 72: return "Werewolf";
+        case 73: return "PC Werewolf Kills";
+        default: return "Unknown (Error)";
+    }
 }
