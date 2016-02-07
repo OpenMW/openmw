@@ -1,6 +1,7 @@
 #ifndef CSM_TOOLS_TOPICINFOCHECK_HPP
 
 #include <set>
+#include <utility>
 
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loaddial.hpp>
@@ -26,6 +27,7 @@ namespace CSMTools
     public:
         
         TopicInfoCheckStage(const CSMWorld::InfoCollection& topicInfos,
+                            const CSMWorld::InfoCollection& journalInfos,
                             const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
                             const CSMWorld::IdCollection<ESM::Class>& classes,
                             const CSMWorld::IdCollection<ESM::Faction>& factions,
@@ -47,6 +49,7 @@ namespace CSMTools
     protected:
         
         const CSMWorld::InfoCollection& mTopicInfos;
+        const CSMWorld::InfoCollection& mJournalInfos;
         
         const CSMWorld::IdCollection<CSMWorld::Cell>& mCells;
         const CSMWorld::IdCollection<ESM::Class>& mClasses;
@@ -64,28 +67,28 @@ namespace CSMTools
         std::set<std::string> mCellNames;
         
         
-        void checkActor(const std::string& actorName, const CSMWorld::UniversalId& id,
+        bool checkActor(const std::string& actorName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkCell(const std::string& cellName, const CSMWorld::UniversalId& id,
+        bool checkCell(const std::string& cellName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkClass(const std::string& className, const CSMWorld::UniversalId& id,
+        bool checkClass(const std::string& className, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkFaction(const std::string& factionName, int rank,
+        bool checkFaction(const std::string& factionName, int rank,
                     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         
-        void checkGlobal(const std::string& globalName, const CSMWorld::UniversalId& id,
+        bool checkGlobal(const std::string& globalName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkItem(const std::string& itemName, const CSMWorld::UniversalId& id,
+        bool checkItem(const std::string& itemName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkJournal(const std::string& journalName, const CSMWorld::UniversalId& id,
+        bool checkJournal(const std::string& journalName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
-        void checkRace(const std::string& raceName, const CSMWorld::UniversalId& id,
+        bool checkRace(const std::string& raceName, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
         
         void checkResponse(const std::string& response, const CSMWorld::UniversalId& id,
@@ -96,6 +99,16 @@ namespace CSMTools
         
         void checkSound(const std::string& soundFile, const CSMWorld::UniversalId& id,
                     CSMDoc::Messages& messages);
+        
+        void checkFunctionRange(const std::string& functionName, char op, const ESM::Variant& variant,
+                    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        
+        int getJournalTopicMaxIndex(const std::string journalName);
+        
+        std::pair<int,int> getRange(char op, int value, bool lower,
+                    const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        
+        bool rangeIntersects(std::pair<int,int> r1, std::pair<int,int> r2);
         
     };
 }

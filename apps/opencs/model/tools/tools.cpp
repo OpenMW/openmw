@@ -117,6 +117,7 @@ CSMDoc::OperationHolder *CSMTools::Tools::getVerifier()
         mVerifierOperation->appendStage (new GmstCheckStage (mData.getGmsts()));
         
         mVerifierOperation->appendStage (new TopicInfoCheckStage( mData.getTopicInfos(), 
+                                                                  mData.getJournalInfos(),
                                                                   mData.getCells(),
                                                                   mData.getClasses(),
                                                                   mData.getFactions(),
