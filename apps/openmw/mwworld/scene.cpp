@@ -193,6 +193,13 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
+        mPreloadTimer += duration;
+        if (mPreloadTimer > 1.f)
+        {
+            preloadCells();
+            mPreloadTimer = 0.f;
+        }
+
         mRendering.update (duration, paused);
     }
 
@@ -440,6 +447,7 @@ namespace MWWorld
 
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
+    , mPreloadTimer(0.f)
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
     }
@@ -602,5 +610,55 @@ namespace MWWorld
                 return ptr;
 
         return Ptr();
+    }
+
+    void Scene::preloadCells()
+    {
+        std::vector<MWWorld::ConstPtr> teleportDoors;
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
+            iter!=mActiveCells.end(); ++iter)
+        {
+            const MWWorld::CellStore* cellStore = *iter;
+            typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
+            const DoorList &doors = cellStore->getReadOnlyDoors().mList;
+            for (DoorList::const_iterator doorIt = doors.begin(); doorIt != doors.end(); ++doorIt)
+            {
+                if (!doorIt->mRef.getTeleport()) {
+                    continue;
+                }
+                teleportDoors.push_back(MWWorld::ConstPtr(&*doorIt, cellStore));
+            }
+        }
+
+        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        const float preloadDist = 500.f;
+
+        for (std::vector<MWWorld::ConstPtr>::iterator it = teleportDoors.begin(); it != teleportDoors.end(); ++it)
+        {
+            const MWWorld::ConstPtr& door = *it;
+            float sqrDistToPlayer = (player.getRefData().getPosition().asVec3() - door.getRefData().getPosition().asVec3()).length2();
+
+            if (sqrDistToPlayer < preloadDist*preloadDist)
+            {
+                MWWorld::CellStore* targetCell = NULL;
+                try
+                {
+                    if (!door.getCellRef().getDestCell().empty())
+                        targetCell = MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell());
+                    else
+                    {
+                        int x,y;
+                        MWBase::Environment::get().getWorld()->positionToIndex (door.getCellRef().getDoorDest().pos[0], door.getCellRef().getDoorDest().pos[1], x, y);
+                        targetCell = MWBase::Environment::get().getWorld()->getExterior(x, y);
+                    }
+                }
+                catch (std::exception& e)
+                {
+                    // ignore error for now, would spam the log too much
+                }
+                if (targetCell)
+                    mPreloader->preload(targetCell, mRendering.getReferenceTime());
+            }
+        }
     }
 }

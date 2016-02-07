@@ -66,6 +66,7 @@ namespace MWWorld
         /// Preload work to be called from the worker thread.
         virtual void doWork()
         {
+            osg::Timer preloadTimer;
             for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
             {
                 try
@@ -81,6 +82,7 @@ namespace MWWorld
                     // error will be shown when visiting the cell
                 }
             }
+            std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
         }
 
     private:

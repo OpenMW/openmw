@@ -58,6 +58,7 @@ namespace MWWorld
             MWPhysics::PhysicsSystem *mPhysics;
             MWRender::RenderingManager& mRendering;
             std::auto_ptr<CellPreloader> mPreloader;
+            float mPreloadTimer;
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
@@ -112,6 +113,8 @@ namespace MWWorld
             bool isCellActive(const CellStore &cell);
 
             Ptr searchPtrViaActorId (int actorId);
+
+            void preloadCells();
     };
 }
 
