@@ -34,7 +34,11 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
     std::string::size_type pos = path.rfind('.');
     if(pos != std::string::npos && path.compare(pos, path.length() - pos, ".dds") != 0)
     {
+#ifdef USE_TGA
+        path.replace(pos, path.length(), ".tga");
+#else
         path.replace(pos, path.length(), ".dds");
+#endif
         return true;
     }
     return false;

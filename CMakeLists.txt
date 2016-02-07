@@ -196,6 +196,12 @@ endif (ANDROID)
 
 option(OPENGL_ES "enable opengl es support" FALSE )
 
+option(USE_TGA "enable tga texture support instead dds" FALSE )
+
+if (USE_TGA)
+    add_definitions(-DUSE_TGA)
+endif(USE_TGA)
+
 if (OPENGL_ES)
     add_definitions(-DOPENGL_ES)
 endif(OPENGL_ES)
