@@ -5,9 +5,13 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwworld/inventorystore.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "cellstore.hpp"
 #include "manualref.hpp"
@@ -23,11 +27,54 @@ namespace MWWorld
         {
         }
 
-        virtual bool operator()(const MWWorld::ConstPtr& ptr)
+        virtual bool operator()(const MWWorld::Ptr& ptr)
         {
             std::string model = ptr.getClass().getModel(ptr);
             if (!model.empty())
                 mOut.push_back(model);
+
+            // TODO: preload NPC body parts (mHead / mHair)
+
+            // FIXME: use const version of InventoryStore functions once they are available
+            if (ptr.getClass().hasInventoryStore(ptr))
+            {
+                MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+                for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+                {
+                    MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                    if (equipped != invStore.end())
+                    {
+                        std::vector<ESM::PartReference> parts;
+                        if(equipped->getTypeName() == typeid(ESM::Clothing).name())
+                        {
+                            const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
+                            parts = clothes->mParts.mParts;
+                        }
+                        else if(equipped->getTypeName() == typeid(ESM::Armor).name())
+                        {
+                            const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
+                            parts = armor->mParts.mParts;
+                        }
+                        else
+                        {
+                            model = equipped->getClass().getModel(*equipped);
+                            if (!model.empty())
+                                mOut.push_back(model);
+                        }
+
+                        for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+                        {
+                            const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(it->mMale);
+                            if (part && !part->mModel.empty())
+                                mOut.push_back("meshes/"+part->mModel);
+                            part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(it->mFemale);
+                            if (part && !part->mModel.empty())
+                                mOut.push_back("meshes/"+part->mModel);
+                        }
+                    }
+                }
+            }
+
             return true;
         }
 
@@ -39,14 +86,15 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(const MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager)
+        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager)
             : mSceneManager(sceneManager)
             , mBulletShapeManager(bulletShapeManager)
         {
+            osg::Timer timer;
+            ListModelsVisitor visitor (mMeshes);
             if (cell->getState() == MWWorld::CellStore::State_Loaded)
             {
-                ListModelsVisitor visitor (mMeshes);
-                cell->forEachConst(visitor);
+                cell->forEach(visitor);
             }
             else
             {
@@ -61,6 +109,7 @@ namespace MWWorld
                         mMeshes.push_back(model);
                 }
             }
+            std::cout << "listed models in " << timer.time_m() << std::endl;
         }
 
         /// Preload work to be called from the worker thread.
@@ -73,8 +122,15 @@ namespace MWWorld
             {
                 try
                 {
+                    std::string mesh  = *it;
+                    Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
+
+                    //std::cout << "preloading " << mesh << std::endl;
+
                     mPreloadedNodes.push_back(mSceneManager->getTemplate(*it));
                     mPreloadedShapes.push_back(mBulletShapeManager->getShape(*it));
+
+                    // TODO: load .kf
 
                     // TODO: do a createInstance() and hold on to it since we can make use of it when the cell goes active
                 }
@@ -84,7 +140,7 @@ namespace MWWorld
                     // error will be shown when visiting the cell
                 }
             }
-            std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
+            //std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
         }
 
     private:
@@ -128,7 +184,7 @@ namespace MWWorld
         mWorkQueue = new SceneUtil::WorkQueue;
     }
 
-    void CellPreloader::preload(const CellStore *cell, double timestamp)
+    void CellPreloader::preload(CellStore *cell, double timestamp)
     {
         if (!mWorkQueue)
         {
