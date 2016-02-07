@@ -254,8 +254,27 @@ namespace MWMechanics
         case ESM::MagicEffect::CureCommonDisease:
         case ESM::MagicEffect::CureBlightDisease:
         case ESM::MagicEffect::CureCorprusDisease:
+        case ESM::MagicEffect::ResistBlightDisease:
+        case ESM::MagicEffect::ResistCommonDisease:
+        case ESM::MagicEffect::ResistCorprusDisease:
         case ESM::MagicEffect::Invisibility:
+        case ESM::MagicEffect::Chameleon:
             return 0.f;
+
+        case ESM::MagicEffect::RestoreAttribute:
+            return 0.f; // TODO: implement based on attribute damage
+        case ESM::MagicEffect::RestoreSkill:
+            return 0.f; // TODO: implement based on skill damage
+
+        case ESM::MagicEffect::ResistFire:
+        case ESM::MagicEffect::ResistFrost:
+        case ESM::MagicEffect::ResistMagicka:
+        case ESM::MagicEffect::ResistNormalWeapons:
+        case ESM::MagicEffect::ResistParalysis:
+        case ESM::MagicEffect::ResistPoison:
+        case ESM::MagicEffect::ResistShock:
+            return 0.f; // probably useless since we don't know in advance what the enemy will cast
+
         case ESM::MagicEffect::Feather:
             if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
                 return 100.f;
