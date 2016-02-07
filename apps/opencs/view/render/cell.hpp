@@ -15,6 +15,7 @@
 
 #include "object.hpp"
 #include "cellarrow.hpp"
+#include "cellmarker.hpp"
 
 class QModelIndex;
 
@@ -42,6 +43,7 @@ namespace CSVRender
             std::auto_ptr<Terrain::TerrainGrid> mTerrain;
             CSMWorld::CellCoordinates mCoordinates;
             std::auto_ptr<CellArrow> mCellArrows[4];
+            std::auto_ptr<CellMarker> mCellMarker;
             bool mDeleted;
 
             /// Ignored if cell does not have an object with the given ID.
@@ -104,6 +106,9 @@ namespace CSVRender
             void selectAllWithSameParentId (int elementMask);
 
             void setCellArrows (int mask);
+
+            /// \brief Set marker for this cell.
+            void setCellMarker();
 
             /// Returns 0, 0 in case of an unpaged cell.
             CSMWorld::CellCoordinates getCoordinates() const;

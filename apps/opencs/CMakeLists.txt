@@ -35,7 +35,7 @@ opencs_hdrs_noqt (model/world
 
 
 opencs_units (model/tools
-    tools reportmodel mergeoperation 
+    tools reportmodel mergeoperation
     )
 
 opencs_units_noqt (model/tools
@@ -90,7 +90,7 @@ opencs_units (view/render
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight
-    lightingbright object cell terrainstorage tagbase cellarrow
+    lightingbright object cell terrainstorage tagbase cellarrow cellmarker
     )
 
 opencs_hdrs_noqt (view/render
@@ -192,6 +192,7 @@ endif(APPLE)
 target_link_libraries(openmw-cs
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}
     ${OSGGA_LIBRARIES}

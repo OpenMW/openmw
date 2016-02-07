@@ -70,6 +70,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
     mCellNode = new osg::Group;
     rootNode->addChild(mCellNode);
 
+    setCellMarker();
+
     if (!mDeleted)
     {
         CSMWorld::IdTable& references = dynamic_cast<CSMWorld::IdTable&> (
@@ -301,6 +303,11 @@ void CSVRender::Cell::setCellArrows (int mask)
                 mCellArrows[i].reset (0);
         }
     }
+}
+
+void CSVRender::Cell::setCellMarker()
+{
+    mCellMarker.reset(new CellMarker(mCellNode, mCoordinates));
 }
 
 CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
