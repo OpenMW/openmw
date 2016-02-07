@@ -128,6 +128,7 @@ Manual
 
     Bodillium
     Cramal
+    Alejandro Sanchez (HiPhish)
     sir_herrbatka
 
 Packagers
