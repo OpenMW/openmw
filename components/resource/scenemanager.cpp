@@ -373,6 +373,10 @@ namespace Resource
     {
         osg::ref_ptr<const osg::Node> scene = getTemplate(name);
         osg::ref_ptr<osg::Node> cloned = osg::clone(scene.get(), SceneUtil::CopyOp());
+
+        // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+        cloned->getOrCreateUserDataContainer()->addUserObject(const_cast<osg::Node*>(scene.get()));
+
         return cloned;
     }
 

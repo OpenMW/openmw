@@ -23,12 +23,10 @@ namespace Resource
 ObjectCache::ObjectCache():
     osg::Referenced(true)
 {
-//    OSG_NOTICE<<"Constructed ObjectCache"<<std::endl;
 }
 
 ObjectCache::~ObjectCache()
 {
-//    OSG_NOTICE<<"Destructed ObjectCache"<<std::endl;
 }
 
 void ObjectCache::addEntryToObjectCache(const std::string& filename, osg::Object* object, double timestamp)
