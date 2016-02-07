@@ -123,6 +123,7 @@ namespace MWWorld
     CellPreloader::CellPreloader(Resource::ResourceSystem* resourceSystem, Resource::BulletShapeManager* bulletShapeManager)
         : mResourceSystem(resourceSystem)
         , mBulletShapeManager(bulletShapeManager)
+        , mExpiryDelay(0.0)
     {
         mWorkQueue = new SceneUtil::WorkQueue;
     }
@@ -156,13 +157,11 @@ namespace MWWorld
 
     void CellPreloader::updateCache(double timestamp)
     {
-        // time (in seconds) to keep a preloaded cell in cache after it's no longer needed
-        // additionally we could support a minimum/maximum size for the cache
-        const double expiryTime = 60.0;
+        // TODO: add settings for a minimum/maximum size of the cache
 
         for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end();)
         {
-            if (it->second.mTimeStamp < timestamp - expiryTime)
+            if (it->second.mTimeStamp < timestamp - mExpiryDelay)
                 mPreloadCells.erase(it++);
             else
                 ++it;
@@ -170,6 +169,11 @@ namespace MWWorld
 
         // the resource cache is cleared from the worker thread so that we're not holding up the main thread with delete operations
         mWorkQueue->addWorkItem(new UpdateCacheItem(mResourceSystem, timestamp));
+    }
+
+    void CellPreloader::setExpiryDelay(double expiryDelay)
+    {
+        mExpiryDelay = expiryDelay;
     }
 
     void CellPreloader::setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue)

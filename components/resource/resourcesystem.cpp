@@ -52,6 +52,16 @@ namespace Resource
         return mKeyframeManager.get();
     }
 
+    void ResourceSystem::setExpiryDelay(double expiryDelay)
+    {
+        for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)
+            (*it)->setExpiryDelay(expiryDelay);
+
+        // NIF files aren't needed any more once the converted objects are cached in SceneManager / BulletShapeManager,
+        // so no point in using an expiry delay
+        mNifFileManager->setExpiryDelay(0.0);
+    }
+
     void ResourceSystem::updateCache(double referenceTime)
     {
         for (std::vector<ResourceManager*>::iterator it = mResourceManagers.begin(); it != mResourceManagers.end(); ++it)

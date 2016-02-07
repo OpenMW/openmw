@@ -43,6 +43,9 @@ namespace Resource
         /// @note Does not delete resourceMgr.
         void removeResourceManager(ResourceManager* resourceMgr);
 
+        /// How long to keep objects in cache after no longer being referenced.
+        void setExpiryDelay(double expiryDelay);
+
         /// @note May be called from any thread.
         const VFS::Manager* getVFS() const;
 

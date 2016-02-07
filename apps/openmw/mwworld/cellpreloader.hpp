@@ -27,12 +27,16 @@ namespace MWWorld
         /// Removes preloaded cells that have not had a preload request for a while.
         void updateCache(double timestamp);
 
+        /// How long to keep a preloaded cell in cache after it's no longer requested.
+        void setExpiryDelay(double expiryDelay);
+
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
     private:
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+        double mExpiryDelay;
 
         struct PreloadEntry
         {

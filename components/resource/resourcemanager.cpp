@@ -5,10 +5,10 @@
 namespace Resource
 {
 
-    ResourceManager::ResourceManager(const VFS::Manager *vfs, const double expiryDelay)
+    ResourceManager::ResourceManager(const VFS::Manager *vfs)
         : mVFS(vfs)
         , mCache(new Resource::ObjectCache)
-        , mExpiryDelay(expiryDelay)
+        , mExpiryDelay(0.0)
     {
 
     }
@@ -24,6 +24,11 @@ namespace Resource
     void ResourceManager::clearCache()
     {
         mCache->clear();
+    }
+
+    void ResourceManager::setExpiryDelay(double expiryDelay)
+    {
+        mExpiryDelay = expiryDelay;
     }
 
     const VFS::Manager* ResourceManager::getVFS() const

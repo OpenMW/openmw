@@ -17,14 +17,16 @@ namespace Resource
     class ResourceManager
     {
     public:
-        /// @param expiryDelay how long to keep objects in cache after no longer being referenced.
-        ResourceManager(const VFS::Manager* vfs, const double expiryDelay = 300.0);
+        ResourceManager(const VFS::Manager* vfs);
 
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
         virtual void updateCache(double referenceTime);
 
         /// Clear all cache entries regardless of having external references.
         virtual void clearCache();
+
+        /// How long to keep objects in cache after no longer being referenced.
+        void setExpiryDelay (double expiryDelay);
 
         const VFS::Manager* getVFS() const;
 

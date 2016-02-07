@@ -29,8 +29,7 @@ namespace Resource
     };
 
     NifFileManager::NifFileManager(const VFS::Manager *vfs)
-        : ResourceManager(vfs, 0.0) // NIF files aren't needed any more when the converted objects are cached in SceneManager / BulletShapeManager,
-                                    // so we'll use expiryDelay of 0 to instantly delete NIF files after use.
+        : ResourceManager(vfs)
     {
     }
 
