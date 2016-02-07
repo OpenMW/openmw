@@ -194,7 +194,7 @@ namespace MWWorld
     void Scene::update (float duration, bool paused)
     {
         mPreloadTimer += duration;
-        if (mPreloadTimer > 1.f)
+        if (mPreloadTimer > 0.5f)
         {
             preloadCells();
             mPreloadTimer = 0.f;
@@ -313,7 +313,7 @@ namespace MWWorld
         getGridCenter(cellX, cellY);
         float centerX, centerY;
         MWBase::Environment::get().getWorld()->indexToPosition(cellX, cellY, centerX, centerY, true);
-        const float maxDistance = 8192/2 + 1024; // 1/2 cell size + threshold
+        const float maxDistance = 8192/2 + mCellLoadingThreshold; // 1/2 cell size + threshold
         float distance = std::max(std::abs(centerX-pos.x()), std::abs(centerY-pos.y()));
         if (distance > maxDistance)
         {
@@ -447,6 +447,8 @@ namespace MWWorld
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     , mPreloadTimer(0.f)
     , mHalfGridSize(Settings::Manager::getInt("exterior cell load distance", "Cells"))
+    , mCellLoadingThreshold(1024.f)
+    , mPreloadDistance(1000.f)
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
     }
@@ -613,6 +615,12 @@ namespace MWWorld
 
     void Scene::preloadCells()
     {
+        preloadTeleportDoorDestinations();
+        preloadExteriorGrid();
+    }
+
+    void Scene::preloadTeleportDoorDestinations()
+    {
         std::vector<MWWorld::ConstPtr> teleportDoors;
         for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
             iter!=mActiveCells.end(); ++iter)
@@ -630,14 +638,12 @@ namespace MWWorld
         }
 
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const float preloadDist = 500.f;
-
         for (std::vector<MWWorld::ConstPtr>::iterator it = teleportDoors.begin(); it != teleportDoors.end(); ++it)
         {
             const MWWorld::ConstPtr& door = *it;
             float sqrDistToPlayer = (player.getRefData().getPosition().asVec3() - door.getRefData().getPosition().asVec3()).length2();
 
-            if (sqrDistToPlayer < preloadDist*preloadDist)
+            if (sqrDistToPlayer < mPreloadDistance*mPreloadDistance)
             {
                 try
                 {
@@ -661,6 +667,43 @@ namespace MWWorld
                 {
                     // ignore error for now, would spam the log too much
                 }
+            }
+        }
+    }
+
+    void Scene::preloadExteriorGrid()
+    {
+        if (!MWBase::Environment::get().getWorld()->isCellExterior())
+            return;
+
+        int halfGridSizePlusOne = mHalfGridSize + 1;
+
+        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+
+        int cellX,cellY;
+        getGridCenter(cellX,cellY);
+
+        float centerX, centerY;
+        MWBase::Environment::get().getWorld()->indexToPosition(cellX, cellY, centerX, centerY, true);
+
+        for (int dx = -halfGridSizePlusOne; dx <= halfGridSizePlusOne; ++dx)
+        {
+            for (int dy = -halfGridSizePlusOne; dy <= halfGridSizePlusOne; ++dy)
+            {
+                if (dy != halfGridSizePlusOne && dy != -halfGridSizePlusOne && dx != halfGridSizePlusOne && dx != -halfGridSizePlusOne)
+                    continue; // only care about the outer (not yet loaded) part of the grid
+
+                float thisCellCenterX, thisCellCenterY;
+                MWBase::Environment::get().getWorld()->indexToPosition(cellX+dx, cellY+dy, thisCellCenterX, thisCellCenterY, true);
+
+                float dist = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
+                float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
+
+                std::cout << cellX+dx << " " << cellY+dy << " dist " << dist << " need " << loadDist << std::endl;
+
+                if (dist < loadDist)
+                    mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy), mRendering.getReferenceTime());
             }
         }
     }

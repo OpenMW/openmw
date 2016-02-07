@@ -60,6 +60,8 @@ namespace MWWorld
             std::auto_ptr<CellPreloader> mPreloader;
             float mPreloadTimer;
             int mHalfGridSize;
+            float mCellLoadingThreshold;
+            float mPreloadDistance;
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 
@@ -67,6 +69,10 @@ namespace MWWorld
             void changeCellGrid (int X, int Y);
 
             void getGridCenter(int& cellX, int& cellY);
+
+            void preloadCells();
+            void preloadTeleportDoorDestinations();
+            void preloadExteriorGrid();
 
         public:
 
@@ -114,8 +120,6 @@ namespace MWWorld
             bool isCellActive(const CellStore &cell);
 
             Ptr searchPtrViaActorId (int actorId);
-
-            void preloadCells();
     };
 }
 
