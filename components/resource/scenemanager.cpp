@@ -357,7 +357,9 @@ namespace Resource
             loaded->accept(setFilterSettingsControllerVisitor);
 
             // share state
+            mSharedStateMutex.lock();
             osgDB::Registry::instance()->getOrCreateSharedStateManager()->share(loaded.get());
+            mSharedStateMutex.unlock();
 
             if (mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);

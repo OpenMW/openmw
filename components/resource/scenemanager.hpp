@@ -89,6 +89,8 @@ namespace Resource
         void setUnRefImageDataAfterApply(bool unref);
 
     private:
+        OpenThreads::Mutex mSharedStateMutex;
+
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;
 
