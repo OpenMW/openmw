@@ -200,7 +200,8 @@ namespace Resource
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 osg::StateAttribute *texture = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
-                apply(texture);
+                if (texture)
+                    apply(texture);
             }
         }
 
