@@ -139,15 +139,16 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         std::vector<osg::ref_ptr<osg::Texture2D> > layerTextures;
         for (std::vector<LayerInfo>::const_iterator it = layerList.begin(); it != layerList.end(); ++it)
         {
-            osg::ref_ptr<osg::Texture2D> tex = mTextureCache[it->mDiffuseMap];
-            if (!tex)
+            osg::ref_ptr<osg::Texture2D> texture = mTextureCache[it->mDiffuseMap];
+            if (!texture)
             {
-                tex = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
-                tex->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-                tex->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-                mTextureCache[it->mDiffuseMap] = tex;
+                texture = new osg::Texture2D(mResourceSystem->getImageManager()->getImage(it->mDiffuseMap));
+                texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                mResourceSystem->getSceneManager()->applyFilterSettings(texture);
+                mTextureCache[it->mDiffuseMap] = texture;
             }
-            layerTextures.push_back(tex);
+            layerTextures.push_back(texture);
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, layerTextures.back());
         }
 
@@ -161,7 +162,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             texture->setResizeNonPowerOfTwoHint(false);
             texture->getOrCreateUserDataContainer()->addDescription("dont_override_filter");
             blendmapTextures.push_back(texture);
-            mResourceSystem->getSceneManager()->applyFilterSettings(texture);
 
             textureCompileDummy->getOrCreateStateSet()->setTextureAttributeAndModes(dummyTextureCounter++, blendmapTextures.back());
         }
