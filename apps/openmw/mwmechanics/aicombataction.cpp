@@ -167,7 +167,8 @@ namespace MWMechanics
     {
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (MWMechanics::getSpellSuccessChance(spell, actor) == 0)
+        float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
+        if (successChance == 0.f)
             return 0.f;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
@@ -192,7 +193,7 @@ namespace MWMechanics
         if ( ((types & Touch) || (types & Target)) && target.getClass().getCreatureStats(target).getActiveSpells().isSpellActive(spell->mId))
             return 0.f;
 
-        return rateEffects(spell->mEffects, actor, target);
+        return rateEffects(spell->mEffects, actor, target) * (successChance / 100.f);
     }
 
     float rateMagicItem(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor, const MWWorld::Ptr& target)
