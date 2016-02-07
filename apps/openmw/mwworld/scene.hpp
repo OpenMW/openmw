@@ -62,6 +62,7 @@ namespace MWWorld
             int mHalfGridSize;
             float mCellLoadingThreshold;
             float mPreloadDistance;
+            bool mPreloadEnabled;
 
             void insertCell (CellStore &cell, bool rescale, Loading::Listener* loadingListener);
 

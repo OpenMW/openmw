@@ -193,11 +193,14 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        mPreloadTimer += duration;
-        if (mPreloadTimer > 0.5f)
+        if (mPreloadEnabled)
         {
-            preloadCells();
-            mPreloadTimer = 0.f;
+            mPreloadTimer += duration;
+            if (mPreloadTimer > 0.5f)
+            {
+                preloadCells();
+                mPreloadTimer = 0.f;
+            }
         }
 
         mRendering.update (duration, paused);
@@ -448,7 +451,8 @@ namespace MWWorld
     , mPreloadTimer(0.f)
     , mHalfGridSize(Settings::Manager::getInt("exterior cell load distance", "Cells"))
     , mCellLoadingThreshold(1024.f)
-    , mPreloadDistance(1000.f)
+    , mPreloadDistance(Settings::Manager::getInt("preload distance", "Cells"))
+    , mPreloadEnabled(Settings::Manager::getBool("preload enabled", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
     }
@@ -699,8 +703,6 @@ namespace MWWorld
 
                 float dist = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
                 float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
-
-                std::cout << cellX+dx << " " << cellY+dy << " dist " << dist << " need " << loadDist << std::endl;
 
                 if (dist < loadDist)
                     mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy), mRendering.getReferenceTime());
