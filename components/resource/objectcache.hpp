@@ -49,17 +49,11 @@ class ObjectCache : public osg::Referenced
         /** Remove all objects in the cache regardless of having external references or expiry times.*/
         void clear();
 
-        /** Add contents of specified ObjectCache to this object cache.*/
-        void addObjectCache(ObjectCache* object);
-
         /** Add a filename,object,timestamp triple to the Registry::ObjectCache.*/
         void addEntryToObjectCache(const std::string& filename, osg::Object* object, double timestamp = 0.0);
 
         /** Remove Object from cache.*/
         void removeFromObjectCache(const std::string& fileName);
-
-        /** Get an Object from the object cache*/
-        osg::Object* getFromObjectCache(const std::string& fileName);
 
         /** Get an ref_ptr<Object> from the object cache*/
         osg::ref_ptr<osg::Object> getRefFromObjectCache(const std::string& fileName);
