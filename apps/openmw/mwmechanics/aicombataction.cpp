@@ -275,6 +275,15 @@ namespace MWMechanics
         case ESM::MagicEffect::ResistShock:
             return 0.f; // probably useless since we don't know in advance what the enemy will cast
 
+        // don't cast these for now as they would make the NPC cast the same effect over and over again, especially when they have potions
+        case ESM::MagicEffect::FortifyAttribute:
+        case ESM::MagicEffect::FortifyHealth:
+        case ESM::MagicEffect::FortifyMagicka:
+        case ESM::MagicEffect::FortifyFatigue:
+        case ESM::MagicEffect::FortifySkill:
+        case ESM::MagicEffect::FortifyMaximumMagicka:
+            return 0.f;
+
         case ESM::MagicEffect::Feather:
             if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
                 return 100.f;
