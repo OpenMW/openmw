@@ -334,15 +334,13 @@ namespace MWWorld
         std::string loadingExteriorText = "#{sLoadingMessage3}";
         loadingListener->setLabel(loadingExteriorText);
 
-        const int halfGridSize = Settings::Manager::getInt("exterior cell load distance", "Cells");
-
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
             if ((*active)->getCell()->isExterior())
             {
-                if (std::abs (X-(*active)->getCell()->getGridX())<=halfGridSize &&
-                    std::abs (Y-(*active)->getCell()->getGridY())<=halfGridSize)
+                if (std::abs (X-(*active)->getCell()->getGridX())<=mHalfGridSize &&
+                    std::abs (Y-(*active)->getCell()->getGridY())<=mHalfGridSize)
                 {
                     // keep cells within the new grid
                     ++active;
@@ -354,9 +352,9 @@ namespace MWWorld
 
         int refsToLoad = 0;
         // get the number of refs to load
-        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
+        for (int x=X-mHalfGridSize; x<=X+mHalfGridSize; ++x)
         {
-            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
+            for (int y=Y-mHalfGridSize; y<=Y+mHalfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -379,9 +377,9 @@ namespace MWWorld
         loadingListener->setProgressRange(refsToLoad);
 
         // Load cells
-        for (int x=X-halfGridSize; x<=X+halfGridSize; ++x)
+        for (int x=X-mHalfGridSize; x<=X+mHalfGridSize; ++x)
         {
-            for (int y=Y-halfGridSize; y<=Y+halfGridSize; ++y)
+            for (int y=Y-mHalfGridSize; y<=Y+mHalfGridSize; ++y)
             {
                 CellStoreCollection::iterator iter = mActiveCells.begin();
 
@@ -448,6 +446,7 @@ namespace MWWorld
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     , mPreloadTimer(0.f)
+    , mHalfGridSize(Settings::Manager::getInt("exterior cell load distance", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
     }
@@ -640,24 +639,28 @@ namespace MWWorld
 
             if (sqrDistToPlayer < preloadDist*preloadDist)
             {
-                MWWorld::CellStore* targetCell = NULL;
                 try
                 {
                     if (!door.getCellRef().getDestCell().empty())
-                        targetCell = MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell());
+                        mPreloader->preload(MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell()), mRendering.getReferenceTime());
                     else
                     {
                         int x,y;
                         MWBase::Environment::get().getWorld()->positionToIndex (door.getCellRef().getDoorDest().pos[0], door.getCellRef().getDoorDest().pos[1], x, y);
-                        targetCell = MWBase::Environment::get().getWorld()->getExterior(x, y);
+
+                        for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
+                        {
+                            for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
+                            {
+                                mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(x+dx, y+dy), mRendering.getReferenceTime());
+                            }
+                        }
                     }
                 }
                 catch (std::exception& e)
                 {
                     // ignore error for now, would spam the log too much
                 }
-                if (targetCell)
-                    mPreloader->preload(targetCell, mRendering.getReferenceTime());
             }
         }
     }

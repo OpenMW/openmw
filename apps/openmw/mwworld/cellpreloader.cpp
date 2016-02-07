@@ -66,6 +66,8 @@ namespace MWWorld
         /// Preload work to be called from the worker thread.
         virtual void doWork()
         {
+            // TODO: make CellStore::loadRefs thread safe so we can call it from here
+
             osg::Timer preloadTimer;
             for (MeshList::const_iterator it = mMeshes.begin(); it != mMeshes.end(); ++it)
             {
