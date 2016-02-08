@@ -486,7 +486,9 @@ namespace MWClass
 
                     for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                     {
-                        const std::string& partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mFemale : it->mMale;
+                        std::string partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mFemale : it->mMale;
+                        if (partname.empty())
+                            partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mMale : it->mFemale;
                         const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                         if (part && !part->mModel.empty())
                             models.push_back("meshes/"+part->mModel);
