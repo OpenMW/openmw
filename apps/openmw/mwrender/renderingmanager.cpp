@@ -169,26 +169,26 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
 
-        osg::ref_ptr<SceneUtil::LightManager> lightRoot = new SceneUtil::LightManager;
-        lightRoot->setLightingMask(Mask_Lighting);
-        mLightRoot = lightRoot;
-        lightRoot->setStartLight(1);
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
+        sceneRoot->setLightingMask(Mask_Lighting);
+        mSceneRoot = sceneRoot;
+        sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(lightRoot);
+        mRootNode->addChild(sceneRoot);
 
         mPathgrid.reset(new Pathgrid(mRootNode));
 
-        mObjects.reset(new Objects(mResourceSystem, lightRoot, mUnrefQueue.get()));
+        mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
 
         mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
-        mEffectManager.reset(new EffectManager(lightRoot, mResourceSystem));
+        mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
 
-        mWater.reset(new Water(mRootNode, lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
+        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
 
-        mTerrain.reset(new Terrain::TerrainGrid(lightRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
+        mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(),
                                                 new TerrainStorage(mResourceSystem->getVFS(), false), Mask_Terrain, mUnrefQueue.get()));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
@@ -203,21 +203,21 @@ namespace MWRender
         mSunLight->setAmbient(osg::Vec4f(0,0,0,1));
         mSunLight->setSpecular(osg::Vec4f(0,0,0,0));
         mSunLight->setConstantAttenuation(1.f);
-        lightRoot->addChild(source);
+        sceneRoot->addChild(source);
 
-        lightRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-        lightRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
-        lightRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+        sceneRoot->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
 
-        lightRoot->setNodeMask(Mask_Scene);
-        lightRoot->setName("Scene Root");
+        sceneRoot->setNodeMask(Mask_Scene);
+        sceneRoot->setName("Scene Root");
 
-        mSky.reset(new SkyManager(lightRoot, resourceSystem->getSceneManager()));
+        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
         mStateUpdater = new StateUpdater;
-        lightRoot->addUpdateCallback(mStateUpdater);
+        sceneRoot->addUpdateCallback(mStateUpdater);
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
 
@@ -291,7 +291,7 @@ namespace MWRender
 
     osg::Group* RenderingManager::getLightRoot()
     {
-        return mLightRoot.get();
+        return mSceneRoot.get();
     }
 
     void RenderingManager::setNightEyeFactor(float factor)
@@ -589,7 +589,7 @@ namespace MWRender
         image->setPixelFormat(texture->getInternalFormat());
 
         rttCamera->setUpdateCallback(new NoTraverseCallback);
-        rttCamera->addChild(mLightRoot);
+        rttCamera->addChild(mSceneRoot);
         rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
 
         mRootNode->addChild(rttCamera);
@@ -772,7 +772,7 @@ namespace MWRender
         {
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
-            mLightRoot->addChild(mPlayerNode);
+            mSceneRoot->addChild(mPlayerNode);
         }
 
         mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);
