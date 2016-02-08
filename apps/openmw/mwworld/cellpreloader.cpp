@@ -140,7 +140,7 @@ namespace MWWorld
                     // error will be shown when visiting the cell
                 }
             }
-            //std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
+            std::cout << "preloaded " << mPreloadedNodes.size() << " nodes in " << preloadTimer.time_m() << std::endl;
         }
 
     private:
