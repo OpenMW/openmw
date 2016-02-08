@@ -37,7 +37,6 @@ namespace SceneUtil
         OpenThreads::Condition mCondition;
     };
 
-    class WorkQueue;
     class WorkThread;
 
     /// @brief A work queue that users can push work items onto, to be completed by one or more background threads.
