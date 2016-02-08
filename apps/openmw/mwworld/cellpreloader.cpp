@@ -123,7 +123,7 @@ namespace MWWorld
                 try
                 {
                     std::string mesh  = *it;
-                    Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
+                    mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
                     //std::cout << "preloading " << mesh << std::endl;
 
