@@ -5,7 +5,9 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
+#include <components/resource/keyframemanager.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/nifosg/nifloader.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -86,9 +88,10 @@ namespace MWWorld
     {
     public:
         /// Constructor to be called from the main thread.
-        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager)
+        PreloadItem(MWWorld::CellStore* cell, Resource::SceneManager* sceneManager, Resource::BulletShapeManager* bulletShapeManager, Resource::KeyframeManager* keyframeManager)
             : mSceneManager(sceneManager)
             , mBulletShapeManager(bulletShapeManager)
+            , mKeyframeManager(keyframeManager)
         {
             osg::Timer timer;
             ListModelsVisitor visitor (mMeshes);
@@ -130,7 +133,21 @@ namespace MWWorld
                     mPreloadedNodes.push_back(mSceneManager->getTemplate(*it));
                     mPreloadedShapes.push_back(mBulletShapeManager->getShape(*it));
 
-                    // TODO: load .kf
+                    size_t slashpos = mesh.find_last_of("/\\");
+                    if (slashpos != std::string::npos && slashpos != mesh.size()-1)
+                    {
+                        Misc::StringUtils::lowerCaseInPlace(mesh);
+                        if (mesh[slashpos+1] == 'x')
+                        {
+                            std::string kfname = mesh;
+                            if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+                            {
+                                kfname.replace(kfname.size()-4, 4, ".kf");
+                                mPreloadedKeyframes.push_back(mKeyframeManager->get(kfname));
+                            }
+
+                        }
+                    }
 
                     // TODO: do a createInstance() and hold on to it since we can make use of it when the cell goes active
                 }
@@ -148,10 +165,12 @@ namespace MWWorld
         MeshList mMeshes;
         Resource::SceneManager* mSceneManager;
         Resource::BulletShapeManager* mBulletShapeManager;
+        Resource::KeyframeManager* mKeyframeManager;
 
         // keep a ref to the loaded object to make sure it stays loaded as long as this cell is in the preloaded state
         std::vector<osg::ref_ptr<const osg::Node> > mPreloadedNodes;
         std::vector<osg::ref_ptr<const Resource::BulletShape> > mPreloadedShapes;
+        std::vector<osg::ref_ptr<const NifOsg::KeyframeHolder> > mPreloadedKeyframes;
     };
 
     /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
@@ -205,7 +224,7 @@ namespace MWWorld
             return;
         }
 
-        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager));
+        osg::ref_ptr<PreloadItem> item (new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager, mResourceSystem->getKeyframeManager()));
         mWorkQueue->addWorkItem(item);
 
         mPreloadCells[cell] = PreloadEntry(timestamp, item);
