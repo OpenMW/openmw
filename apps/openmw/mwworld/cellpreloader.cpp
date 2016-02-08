@@ -86,8 +86,8 @@ namespace MWWorld
 
                     //std::cout << "preloading " << mesh << std::endl;
 
-                    mPreloadedNodes.push_back(mSceneManager->getTemplate(*it));
-                    mPreloadedShapes.push_back(mBulletShapeManager->getShape(*it));
+                    mPreloadedNodes.push_back(mSceneManager->getTemplate(mesh));
+                    mPreloadedShapes.push_back(mBulletShapeManager->getShape(mesh));
 
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
