@@ -31,51 +31,7 @@ namespace MWWorld
 
         virtual bool operator()(const MWWorld::Ptr& ptr)
         {
-            std::string model = ptr.getClass().getModel(ptr);
-            if (!model.empty())
-                mOut.push_back(model);
-
-            // TODO: preload NPC body parts (mHead / mHair)
-
-            // FIXME: use const version of InventoryStore functions once they are available
-            if (ptr.getClass().hasInventoryStore(ptr))
-            {
-                MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
-                for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
-                {
-                    MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
-                    if (equipped != invStore.end())
-                    {
-                        std::vector<ESM::PartReference> parts;
-                        if(equipped->getTypeName() == typeid(ESM::Clothing).name())
-                        {
-                            const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
-                            parts = clothes->mParts.mParts;
-                        }
-                        else if(equipped->getTypeName() == typeid(ESM::Armor).name())
-                        {
-                            const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
-                            parts = armor->mParts.mParts;
-                        }
-                        else
-                        {
-                            model = equipped->getClass().getModel(*equipped);
-                            if (!model.empty())
-                                mOut.push_back(model);
-                        }
-
-                        for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
-                        {
-                            const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(it->mMale);
-                            if (part && !part->mModel.empty())
-                                mOut.push_back("meshes/"+part->mModel);
-                            part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(it->mFemale);
-                            if (part && !part->mModel.empty())
-                                mOut.push_back("meshes/"+part->mModel);
-                        }
-                    }
-                }
-            }
+            ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;
         }

@@ -429,6 +429,74 @@ namespace MWClass
         return model;
     }
 
+    void Npc::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        const MWWorld::LiveCellRef<ESM::NPC> *npc = ptr.get<ESM::NPC>();
+        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(npc->mBase->mRace);
+        if(race && race->mData.mFlags & ESM::Race::Beast)
+            models.push_back("meshes\\base_animkna.nif");
+
+        // keep these always loaded just in case
+        models.push_back("meshes/xargonian_swimkna.nif");
+        models.push_back("meshes/xbase_anim_female.nif");
+        models.push_back("meshes/xbase_anim.nif");
+
+        if (!npc->mBase->mModel.empty())
+            models.push_back("meshes/"+npc->mBase->mModel);
+
+        if (!npc->mBase->mHead.empty())
+        {
+            const ESM::BodyPart* head = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHead);
+            if (head)
+                models.push_back("meshes/"+head->mModel);
+        }
+        if (!npc->mBase->mHair.empty())
+        {
+            const ESM::BodyPart* hair = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(npc->mBase->mHair);
+            if (hair)
+                models.push_back("meshes/"+hair->mModel);
+        }
+
+        // FIXME: use const version of InventoryStore functions once they are available
+        if (ptr.getClass().hasInventoryStore(ptr))
+        {
+            MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
+            for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
+            {
+                MWWorld::ContainerStoreIterator equipped = invStore.getSlot(slot);
+                if (equipped != invStore.end())
+                {
+                    std::vector<ESM::PartReference> parts;
+                    if(equipped->getTypeName() == typeid(ESM::Clothing).name())
+                    {
+                        const ESM::Clothing *clothes = equipped->get<ESM::Clothing>()->mBase;
+                        parts = clothes->mParts.mParts;
+                    }
+                    else if(equipped->getTypeName() == typeid(ESM::Armor).name())
+                    {
+                        const ESM::Armor *armor = equipped->get<ESM::Armor>()->mBase;
+                        parts = armor->mParts.mParts;
+                    }
+                    else
+                    {
+                        std::string model = equipped->getClass().getModel(*equipped);
+                        if (!model.empty())
+                            models.push_back(model);
+                    }
+
+                    for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+                    {
+                        const std::string& partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mFemale : it->mMale;
+                        const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
+                        if (part && !part->mModel.empty())
+                            models.push_back("meshes/"+part->mModel);
+                    }
+                }
+            }
+        }
+
+    }
+
     std::string Npc::getName (const MWWorld::ConstPtr& ptr) const
     {
         if(ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
