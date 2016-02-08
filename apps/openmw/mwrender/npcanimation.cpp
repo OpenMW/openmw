@@ -619,116 +619,10 @@ void NpcAnimation::updateParts()
     showWeapons(mShowWeapons);
     showCarriedLeft(mShowCarriedLeft);
 
-    // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
-    static std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > sRaceMapping;
-
     bool isWerewolf = (mNpcType == Type_Werewolf);
-    int flags = (isWerewolf ? -1 : 0);
-    if(!mNpc->isMale())
-    {
-        static const int Flag_Female      = 1<<0;
-        flags |= Flag_Female;
-    }
-    if(mViewMode == VM_FirstPerson)
-    {
-        static const int Flag_FirstPerson = 1<<1;
-        flags |= Flag_FirstPerson;
-    }
-
     std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
-    std::pair<std::string, int> thisCombination = std::make_pair(race, flags);
-    if (sRaceMapping.find(thisCombination) == sRaceMapping.end())
-    {
-        typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
-        static BodyPartMapType sBodyPartMap;
-        if(sBodyPartMap.empty())
-        {
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Groin, ESM::PRT_Groin));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_RHand));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_LHand));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_RFoot));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_LFoot));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_RKnee));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_LKnee));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg));
-            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
-        }
 
-        std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
-        parts.resize(ESM::PRT_Count, NULL);
-
-        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
-        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
-        {
-            if(isWerewolf)
-                break;
-            const ESM::BodyPart& bodypart = *it;
-            if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
-                continue;
-            if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
-                continue;
-
-            if (!Misc::StringUtils::ciEqual(bodypart.mRace, mNpc->mRace))
-                continue;
-
-            bool firstPerson = (bodypart.mId.size() >= 3)
-                    && bodypart.mId[bodypart.mId.size()-3] == '1'
-                    && bodypart.mId[bodypart.mId.size()-2] == 's'
-                    && bodypart.mId[bodypart.mId.size()-1] == 't';
-            if(firstPerson != (mViewMode == VM_FirstPerson))
-            {
-                if(mViewMode == VM_FirstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
-                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
-                {
-                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
-                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
-                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
-                    {
-                        if(!parts[bIt->second])
-                            parts[bIt->second] = &*it;
-                        ++bIt;
-                    }
-                }
-                continue;
-            }
-
-            if ((!mNpc->isMale()) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
-            {
-                // Allow opposite gender's parts as fallback if parts for our gender are missing
-                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
-                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
-                {
-                    if(!parts[bIt->second])
-                        parts[bIt->second] = &*it;
-                    ++bIt;
-                }
-                continue;
-            }
-
-            BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
-            while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
-            {
-                parts[bIt->second] = &*it;
-                ++bIt;
-            }
-        }
-    }
-
-    const std::vector<const ESM::BodyPart*> &parts = sRaceMapping[thisCombination];
+    const std::vector<const ESM::BodyPart*> &parts = getBodyParts(race, !mNpc->isMale(), mViewMode == VM_FirstPerson, isWerewolf);
     for(int part = ESM::PRT_Neck; part < ESM::PRT_Count; ++part)
     {
         if(mPartPriorities[part] < 1)
@@ -1114,6 +1008,118 @@ void NpcAnimation::updatePtr(const MWWorld::Ptr &updated)
 {
     Animation::updatePtr(updated);
     mHeadAnimationTime->updatePtr(updated);
+}
+
+// Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
+typedef std::map< std::pair<std::string,int>,std::vector<const ESM::BodyPart*> > RaceMapping;
+static RaceMapping sRaceMapping;
+
+const std::vector<const ESM::BodyPart *>& NpcAnimation::getBodyParts(const std::string &race, bool female, bool firstPerson, bool werewolf)
+{
+    static const int Flag_FirstPerson = 1<<1;
+    static const int Flag_Female      = 1<<0;
+
+    int flags = (werewolf ? -1 : 0);
+    if(female)
+        flags |= Flag_Female;
+    if(firstPerson)
+        flags |= Flag_FirstPerson;
+
+    RaceMapping::iterator found = sRaceMapping.find(std::make_pair(race, flags));
+    if (found != sRaceMapping.end())
+        return found->second;
+    else
+    {
+        std::vector<const ESM::BodyPart*>& parts = sRaceMapping[std::make_pair(race, flags)];
+
+        typedef std::multimap<ESM::BodyPart::MeshPart,ESM::PartReferenceType> BodyPartMapType;
+        static BodyPartMapType sBodyPartMap;
+        if(sBodyPartMap.empty())
+        {
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Neck, ESM::PRT_Neck));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Chest, ESM::PRT_Cuirass));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Groin, ESM::PRT_Groin));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_RHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Hand, ESM::PRT_LHand));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_RWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Wrist, ESM::PRT_LWrist));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_RForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Forearm, ESM::PRT_LForearm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_RUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperarm, ESM::PRT_LUpperarm));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_RFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Foot, ESM::PRT_LFoot));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_RAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Ankle, ESM::PRT_LAnkle));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_RKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Knee, ESM::PRT_LKnee));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_RLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Upperleg, ESM::PRT_LLeg));
+            sBodyPartMap.insert(std::make_pair(ESM::BodyPart::MP_Tail, ESM::PRT_Tail));
+        }
+
+        parts.resize(ESM::PRT_Count, NULL);
+
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+        for(MWWorld::Store<ESM::BodyPart>::iterator it = partStore.begin(); it != partStore.end(); ++it)
+        {
+            if(werewolf)
+                break;
+            const ESM::BodyPart& bodypart = *it;
+            if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
+                continue;
+            if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
+                continue;
+
+            if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
+                continue;
+
+            bool partFirstPerson = (bodypart.mId.size() >= 3)
+                    && bodypart.mId[bodypart.mId.size()-3] == '1'
+                    && bodypart.mId[bodypart.mId.size()-2] == 's'
+                    && bodypart.mId[bodypart.mId.size()-1] == 't';
+            if(partFirstPerson != (firstPerson))
+            {
+                if(firstPerson && (bodypart.mData.mPart == ESM::BodyPart::MP_Hand ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Wrist ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Forearm ||
+                                                   bodypart.mData.mPart == ESM::BodyPart::MP_Upperarm))
+                {
+                    /* Allow 3rd person skins as a fallback for the arms if 1st person is missing. */
+                    BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                    while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                    {
+                        if(!parts[bIt->second])
+                            parts[bIt->second] = &*it;
+                        ++bIt;
+                    }
+                }
+                continue;
+            }
+
+            if ((female) != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
+            {
+                // Allow opposite gender's parts as fallback if parts for our gender are missing
+                BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+                while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+                {
+                    if(!parts[bIt->second])
+                        parts[bIt->second] = &*it;
+                    ++bIt;
+                }
+                continue;
+            }
+
+            BodyPartMapType::const_iterator bIt = sBodyPartMap.lower_bound(BodyPartMapType::key_type(bodypart.mData.mPart));
+            while(bIt != sBodyPartMap.end() && bIt->first == bodypart.mData.mPart)
+            {
+                parts[bIt->second] = &*it;
+                ++bIt;
+            }
+        }
+        return parts;
+    }
 }
 
 void NpcAnimation::setAccurateAiming(bool enabled)

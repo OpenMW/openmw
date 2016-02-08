@@ -37,6 +37,7 @@
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
+#include "../mwrender/npcanimation.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -457,7 +458,10 @@ namespace MWClass
                 models.push_back("meshes/"+hair->mModel);
         }
 
+        bool female = (npc->mBase->mFlags & ESM::NPC::Female);
+
         // FIXME: use const version of InventoryStore functions once they are available
+        // preload equipped items
         if (ptr.getClass().hasInventoryStore(ptr))
         {
             MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
@@ -486,14 +490,26 @@ namespace MWClass
 
                     for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                     {
-                        std::string partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mFemale : it->mMale;
+                        std::string partname = female ? it->mFemale : it->mMale;
                         if (partname.empty())
-                            partname = (npc->mBase->mFlags & ESM::NPC::Female) ? it->mMale : it->mFemale;
+                            partname = female ? it->mMale : it->mFemale;
                         const ESM::BodyPart* part = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                         if (part && !part->mModel.empty())
                             models.push_back("meshes/"+part->mModel);
                     }
                 }
+            }
+        }
+
+        // preload body parts
+        if (race)
+        {
+            const std::vector<const ESM::BodyPart*>& parts = MWRender::NpcAnimation::getBodyParts(Misc::StringUtils::lowerCase(race->mId), female, false, false);
+            for (std::vector<const ESM::BodyPart*>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+            {
+                const ESM::BodyPart* part = *it;
+                if (part && !part->mModel.empty())
+                    models.push_back("meshes/"+part->mModel);
             }
         }
 
