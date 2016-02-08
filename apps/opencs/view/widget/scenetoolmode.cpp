@@ -3,9 +3,26 @@
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QSignalMapper>
+#include <QMenu>
+#include <QContextMenuEvent>
 
 #include "scenetoolbar.hpp"
 #include "modebutton.hpp"
+
+void CSVWidget::SceneToolMode::contextMenuEvent (QContextMenuEvent *event)
+{
+    QMenu menu (this);
+    if (createContextMenu (&menu))
+        menu.exec (event->globalPos());
+}
+
+bool CSVWidget::SceneToolMode::createContextMenu (QMenu *menu)
+{
+    if (mCurrent)
+        return mCurrent->createContextMenu (menu);
+
+    return false;
+}
 
 void CSVWidget::SceneToolMode::adjustToolTip (const ModeButton *activeMode)
 {
@@ -14,6 +31,9 @@ void CSVWidget::SceneToolMode::adjustToolTip (const ModeButton *activeMode)
     toolTip += "<p>Currently selected: " + activeMode->getBaseToolTip();
 
     toolTip += "<p>(left click to change mode)";
+
+    if (createContextMenu (0))
+        toolTip += "<br>(right click to access context menu)";
 
     setToolTip (toolTip);
 }

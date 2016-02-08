@@ -668,6 +668,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mHasMovedInXY(false)
     , mMovementAnimationControlled(true)
     , mDeathState(CharState_None)
+    , mFloatToSurface(true)
     , mHitState(CharState_None)
     , mUpperBodyState(UpperCharState_Nothing)
     , mJumpState(JumpState_None)
@@ -716,6 +717,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             // Set the death state, but don't play it yet
             // We will play it in the first frame, but only if no script set the skipAnim flag
             mDeathState = static_cast<CharacterState>(CharState_Death1 + mPtr.getClass().getCreatureStats(mPtr).getDeathAnimation());
+            mFloatToSurface = false;
         }
     }
     else
@@ -1864,7 +1866,7 @@ void CharacterController::update(float duration)
         {
             playDeath(1.f, mDeathState);
         }
-
+        // We must always queue movement, even if there is none, to apply gravity.
         world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
@@ -1896,6 +1898,9 @@ void CharacterController::update(float duration)
 
     if (mSkipAnim)
         mAnimation->updateEffects(duration);
+
+    if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead())
+        moved.z() = 1.0;
 
     // Update movement
     if(mMovementAnimationControlled && mPtr.getClass().isActor())

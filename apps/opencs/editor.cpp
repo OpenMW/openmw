@@ -8,6 +8,8 @@
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
+#include <components/fallback/validate.hpp>
+
 #include <components/nifosg/nifloader.hpp>
 
 #include "model/doc/document.hpp"
@@ -16,6 +18,8 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
+using namespace Fallback;
 
 CS::Editor::Editor ()
 : mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
@@ -100,6 +104,8 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     ("resources", boost::program_options::value<std::string>()->default_value("resources"))
     ("fallback-archive", boost::program_options::value<std::vector<std::string> >()->
         default_value(std::vector<std::string>(), "fallback-archive")->multitoken())
+    ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
+        ->multitoken()->composing(), "fallback values")
     ("script-blacklist", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
@@ -113,6 +119,8 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         ToUTF8::calculateEncoding (variables["encoding"].as<std::string>()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<std::string>());
+
+    mDocumentManager.setFallbackMap (variables["fallback"].as<FallbackMap>().mMap);
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (

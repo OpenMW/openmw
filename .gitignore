@@ -10,6 +10,7 @@ prebuilt
 
 ## doxygen
 Doxygen
+!docs/cs-manual/Makefile
 
 ## ides/editors
 *~

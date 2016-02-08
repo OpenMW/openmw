@@ -168,6 +168,8 @@ namespace MWGui
         , mFogOfWarToggled(true)
         , mFogOfWarEnabled(fogOfWarEnabled)
         , mMapWidgetSize(0)
+        , mNumCells(0)
+        , mCellDistance(0)
         , mCustomMarkers(markers)
         , mMarkerUpdateTimer(0.0f)
         , mLastDirectionX(0.0f)
@@ -181,20 +183,22 @@ namespace MWGui
         mCustomMarkers.eventMarkersChanged -= MyGUI::newDelegate(this, &LocalMapBase::updateCustomMarkers);
     }
 
-    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize)
+    void LocalMapBase::init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int mapWidgetSize, int cellDistance)
     {
         mLocalMap = widget;
         mCompass = compass;
         mMapWidgetSize = mapWidgetSize;
+        mCellDistance = cellDistance;
+        mNumCells = cellDistance * 2 + 1;
 
-        mLocalMap->setCanvasSize(mMapWidgetSize*3, mMapWidgetSize*3);
+        mLocalMap->setCanvasSize(mMapWidgetSize*mNumCells, mMapWidgetSize*mNumCells);
 
         mCompass->setDepth(Local_CompassLayer);
         mCompass->setNeedMouseFocus(false);
 
-        for (int mx=0; mx<3; ++mx)
+        for (int mx=0; mx<mNumCells; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mNumCells; ++my)
             {
                 MyGUI::ImageBox* map = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",
                     MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
@@ -231,13 +235,13 @@ namespace MWGui
     void LocalMapBase::applyFogOfWar()
     {
         TextureVector fogTextures;
-        for (int mx=0; mx<3; ++mx)
+        for (int mx=0; mx<mNumCells; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mNumCells; ++my)
             {
-                int x = mCurX + (mx-1);
-                int y = mCurY + (-1*(my-1));
-                MyGUI::ImageBox* fog = mFogWidgets[my + 3*mx];
+                int x = mCurX + (mx - mCellDistance);
+                int y = mCurY + (-1*(my - mCellDistance));
+                MyGUI::ImageBox* fog = mFogWidgets[my + mNumCells*mx];
 
                 if (!mFogOfWarToggled || !mFogOfWarEnabled)
                 {
@@ -284,8 +288,8 @@ namespace MWGui
             markerPos.cellX = cellX;
             markerPos.cellY = cellY;
 
-            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (1 + cellDx) * mMapWidgetSize),
-                                        static_cast<int>(nY * mMapWidgetSize - (cellDy-1) * mMapWidgetSize));
+            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (mCellDistance + cellDx) * mMapWidgetSize),
+                                        static_cast<int>(nY * mMapWidgetSize + (mCellDistance - cellDy) * mMapWidgetSize));
         }
         else
         {
@@ -297,8 +301,8 @@ namespace MWGui
             markerPos.cellY = cellY;
 
             // Image space is -Y up, cells are Y up
-            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (1 + (cellX - mCurX)) * mMapWidgetSize),
-                                        static_cast<int>(nY * mMapWidgetSize + (1-(cellY-mCurY)) * mMapWidgetSize));
+            widgetPos = MyGUI::IntPoint(static_cast<int>(nX * mMapWidgetSize + (mCellDistance + (cellX - mCurX)) * mMapWidgetSize),
+                                        static_cast<int>(nY * mMapWidgetSize + (mCellDistance - (cellY - mCurY)) * mMapWidgetSize));
         }
 
         markerPos.nX = nX;
@@ -312,9 +316,9 @@ namespace MWGui
             MyGUI::Gui::getInstance().destroyWidget(*it);
         mCustomMarkerWidgets.clear();
 
-        for (int dX = -1; dX <= 1; ++dX)
+        for (int dX = -mCellDistance; dX <= mCellDistance; ++dX)
         {
-            for (int dY =-1; dY <= 1; ++dY)
+            for (int dY =-mCellDistance; dY <= mCellDistance; ++dY)
             {
                 ESM::CellId cellId;
                 cellId.mPaged = !mInterior;
@@ -372,14 +376,14 @@ namespace MWGui
 
         // Update the map textures
         TextureVector textures;
-        for (int mx=0; mx<3; ++mx)
+        for (int mx=0; mx<mNumCells; ++mx)
         {
-            for (int my=0; my<3; ++my)
+            for (int my=0; my<mNumCells; ++my)
             {
-                int mapX = x + (mx-1);
-                int mapY = y + (-1*(my-1));
+                int mapX = x + (mx - mCellDistance);
+                int mapY = y + (-1*(my - mCellDistance));
 
-                MyGUI::ImageBox* box = mMapWidgets[my + 3*mx];
+                MyGUI::ImageBox* box = mMapWidgets[my + mNumCells*mx];
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
                 if (texture)
@@ -406,9 +410,9 @@ namespace MWGui
         }
         else
         {
-            for (int dX=-1; dX<2; ++dX)
+            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
             {
-                for (int dY=-1; dY<2; ++dY)
+                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
                 {
                     MWWorld::CellStore* cell = world->getExterior (mCurX+dX, mCurY+dY);
                     world->getDoorMarkers(cell, doors);
@@ -454,6 +458,26 @@ namespace MWGui
         updateCustomMarkers();
     }
 
+    void LocalMapBase::requestMapRender(const MWWorld::CellStore *cell)
+    {
+        std::set<const MWWorld::CellStore*> cells;
+        if (!cell->isExterior())
+            cells.insert(cell);
+        else
+        {
+            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
+            {
+                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
+                {
+                    const MWWorld::CellStore* gridCell = MWBase::Environment::get().getWorld()->getExterior (cell->getCell()->getGridX()+dX, cell->getCell()->getGridY()+dY);
+                    cells.insert(gridCell);
+                }
+            }
+        }
+
+        mLocalMapRender->requestMap(cells);
+    }
+
     void LocalMapBase::redraw()
     {
         // Redraw children in proper order
@@ -462,7 +486,7 @@ namespace MWGui
 
     void LocalMapBase::setPlayerPos(int cellX, int cellY, const float nx, const float ny)
     {
-        MyGUI::IntPoint pos(static_cast<int>(mMapWidgetSize + nx*mMapWidgetSize - 16), static_cast<int>(mMapWidgetSize + ny*mMapWidgetSize - 16));
+        MyGUI::IntPoint pos(static_cast<int>(mMapWidgetSize * mCellDistance + nx*mMapWidgetSize - 16), static_cast<int>(mMapWidgetSize * mCellDistance + ny*mMapWidgetSize - 16));
         pos.left += (cellX - mCurX) * mMapWidgetSize;
         pos.top -= (cellY - mCurY) * mMapWidgetSize;
 
@@ -643,7 +667,8 @@ namespace MWGui
         mEventBoxLocal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
         mEventBoxLocal->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &MapWindow::onMapDoubleClicked);
 
-        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"));    }
+        LocalMapBase::init(mLocalMap, mPlayerArrowLocal, Settings::Manager::getInt("local map widget size", "Map"), Settings::Manager::getInt("local map cell distance", "Map"));
+    }
 
     void MapWindow::onNoteEditOk()
     {
@@ -687,8 +712,8 @@ namespace MWGui
         MyGUI::IntPoint clickedPos = MyGUI::InputManager::getInstance().getMousePosition();
 
         MyGUI::IntPoint widgetPos = clickedPos - mEventBoxLocal->getAbsolutePosition();
-        int x = int(widgetPos.left/float(mMapWidgetSize))-1;
-        int y = (int(widgetPos.top/float(mMapWidgetSize))-1)*-1;
+        int x = int(widgetPos.left/float(mMapWidgetSize))-mCellDistance;
+        int y = (int(widgetPos.top/float(mMapWidgetSize))-mCellDistance)*-1;
         float nX = widgetPos.left/float(mMapWidgetSize) - int(widgetPos.left/float(mMapWidgetSize));
         float nY = widgetPos.top/float(mMapWidgetSize) - int(widgetPos.top/float(mMapWidgetSize));
         x += mCurX;

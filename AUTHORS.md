@@ -48,6 +48,7 @@ Programmers
     Gašper Sedej
     gugus/gus
     Hallfaer Tuilinn
+    hristoast
     Internecine
     Jacob Essex (Yacoby)
     Jannik Heller (scrawl)
@@ -96,6 +97,7 @@ Programmers
     Pieter van der Kloet (pvdk)
     pkubik
     Radu-Marius Popovici (rpopovici)
+    rcutmore
     rdimesio
     riothamus
     Robert MacGregor (Ragora)
@@ -111,6 +113,7 @@ Programmers
     Stefan Galowicz (bogglez)
     Stanislav Bobrov (Jiub)
     Sylvain Thesnieres (Garvek)
+    t6
     terrorfisch
     Thomas Luppi (Digmaster)
     Tom Mason (wheybags)
@@ -125,6 +128,7 @@ Manual
 
     Bodillium
     Cramal
+    Alejandro Sanchez (HiPhish)
     sir_herrbatka
 
 Packagers

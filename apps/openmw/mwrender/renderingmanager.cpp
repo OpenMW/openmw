@@ -30,8 +30,8 @@
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm/loadcell.hpp>
+#include <components/fallback/fallback.hpp>
 
-#include "../mwworld/fallback.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "sky.hpp"
@@ -42,6 +42,7 @@
 #include "camera.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
+#include "util.hpp"
 
 namespace MWRender
 {
@@ -126,7 +127,7 @@ namespace MWRender
     };
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
-                                       const MWWorld::Fallback* fallback, const std::string& resourcePath)
+                                       const Fallback::Map* fallback, const std::string& resourcePath)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -502,15 +503,6 @@ namespace MWRender
         mutable OpenThreads::Condition mCondition;
         mutable OpenThreads::Mutex mMutex;
         mutable bool mDone;
-    };
-
-
-    class NoTraverseCallback : public osg::NodeCallback
-    {
-    public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-        }
     };
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h)

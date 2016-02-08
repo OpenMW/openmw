@@ -133,12 +133,14 @@ void CSMPrefs::State::declare()
     declareBool ("show-linenum", "Show Line Numbers", true).
         setTooltip ("Show line numbers to the left of the script editor window."
         "The current row and column numbers of the text cursor are shown at the bottom.");
+    declareBool ("wrap-lines", "Wrap Lines", false).
+        setTooltip ("Wrap lines longer than width of script editor.");
     declareBool ("mono-font", "Use monospace font", true);
     EnumValue warningsNormal ("Normal", "Report warnings as warning");
     declareEnum ("warnings", "Warning Mode", warningsNormal).
         addValue ("Ignore", "Do not report warning").
         addValue (warningsNormal).
-        addValue ("Strcit", "Promote warning to an error");
+        addValue ("Strict", "Promote warning to an error");
     declareBool ("toolbar", "Show toolbar", true);
     declareInt ("compile-delay", "Delay between updating of source errors", 100).
         setTooltip ("Delay in milliseconds").
@@ -190,6 +192,24 @@ void CSMPrefs::State::declare()
     declareBool ("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
     declareInt ("scene-delay", "Tooltip delay in milliseconds", 500).
         setMin (1);
+
+    EnumValue createAndInsert ("Create cell and insert");
+    EnumValue showAndInsert ("Show cell and insert");
+    EnumValue dontInsert ("Discard");
+    EnumValue insertAnyway ("Insert anyway");
+    EnumValues insertOutsideCell;
+    insertOutsideCell.add (createAndInsert).add (dontInsert).add (insertAnyway);
+    EnumValues insertOutsideVisibleCell;
+    insertOutsideVisibleCell.add (showAndInsert).add (dontInsert).add (insertAnyway);
+
+    declareCategory ("Scene Drops");
+    declareInt ("distance", "Drop Distance", 50).
+        setTooltip ("If an instance drop can not be placed against another object at the "
+            "insert point, it will be placed by this distance from the insert point instead");
+    declareEnum ("outside-drop", "Handling drops outside of cells", createAndInsert).
+        addValues (insertOutsideCell);
+    declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
+        addValues (insertOutsideVisibleCell);
 }
 
 void CSMPrefs::State::declareCategory (const std::string& key)

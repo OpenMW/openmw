@@ -216,6 +216,7 @@ namespace MWGui
 
         std::set<MWMechanics::EffectKey> effectIds = mAlchemy->listEffects();
         Widgets::SpellEffectList list;
+        unsigned int effectIndex=0;
         for (std::set<MWMechanics::EffectKey>::iterator it = effectIds.begin(); it != effectIds.end(); ++it)
         {
             Widgets::SpellEffectParams params;
@@ -228,7 +229,10 @@ namespace MWGui
             params.mIsConstant = true;
             params.mNoTarget = true;
 
+            params.mKnown = mAlchemy->knownEffect(effectIndex, MWBase::Environment::get().getWorld()->getPlayerPtr());
+
             list.push_back(params);
+            ++effectIndex;
         }
 
         while (mEffectsBox->getChildCount())

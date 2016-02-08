@@ -56,7 +56,6 @@ namespace MWMechanics
 
 namespace MWWorld
 {
-    class Fallback;
     class CellStore;
     class Player;
     class LocalScripts;
@@ -65,6 +64,11 @@ namespace MWWorld
     class RefData;
 
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
+}
+
+namespace Fallback
+{
+    class Map;
 }
 
 namespace MWBase
@@ -119,7 +123,7 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual const MWWorld::Fallback *getFallback () const = 0;
+            virtual const Fallback::Map *getFallback () const = 0;
 
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
@@ -137,7 +141,7 @@ namespace MWBase
 
             virtual bool isCellQuasiExterior() const = 0;
 
-            virtual osg::Vec2f getNorthVector (MWWorld::CellStore* cell) = 0;
+            virtual osg::Vec2f getNorthVector (const MWWorld::CellStore* cell) = 0;
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
@@ -485,7 +489,7 @@ namespace MWBase
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const = 0;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
+            virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result) = 0;
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case

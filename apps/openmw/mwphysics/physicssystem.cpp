@@ -289,8 +289,8 @@ namespace MWPhysics
                 }
             }
 
-            // dead actors underwater will float to the surface
-            if (ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
+            // dead actors underwater will float to the surface, if the CharacterController tells us to do so
+            if (movement.z() > 0 && ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
                 velocity = osg::Vec3f(0,0,1) * 25;
 
             ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;

@@ -473,7 +473,7 @@ void NpcAnimation::updateNpcBase()
             else if(!mNpc->isMale() && !isBeast)
                 addAnimSource("meshes\\xbase_anim_female.nif");
             if(mNpc->mModel.length() > 0)
-                addAnimSource("meshes\\x"+mNpc->mModel);
+                addAnimSource(Misc::ResourceHelpers::correctActorModelPath("meshes\\" + mNpc->mModel, mResourceSystem->getVFS()));
         }
     }
     else

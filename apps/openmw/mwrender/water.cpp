@@ -34,12 +34,14 @@
 
 #include <components/esm/loadcell.hpp>
 
+#include <components/fallback/fallback.hpp>
+
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/fallback.hpp"
 
 #include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
+#include "util.hpp"
 
 namespace
 {
@@ -207,16 +209,6 @@ private:
     osg::ref_ptr<osg::ClipNode> mClipNode;
 
     osg::Plane mPlane;
-};
-
-// Node callback to entirely skip the traversal.
-class NoTraverseCallback : public osg::NodeCallback
-{
-public:
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        // no traverse()
-    }
 };
 
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
@@ -457,7 +449,7 @@ public:
 };
 
 Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
-             const MWWorld::Fallback* fallback, const std::string& resourcePath)
+             const Fallback::Map* fallback, const std::string& resourcePath)
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
@@ -586,12 +578,13 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Shader> fragmentShader (readShader(osg::Shader::FRAGMENT, mResourcePath + "/shaders/water_fragment.glsl", defineMap));
 
     osg::ref_ptr<osg::Texture2D> normalMap (new osg::Texture2D(readPngImage(mResourcePath + "/shaders/water_nm.png")));
+    if (normalMap->getImage())
+        normalMap->getImage()->flipVertical();
     normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
     normalMap->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
     normalMap->setMaxAnisotropy(16);
     normalMap->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR_MIPMAP_LINEAR);
     normalMap->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    normalMap->getImage()->flipVertical();
 
     osg::ref_ptr<osg::StateSet> shaderStateset = new osg::StateSet;
     shaderStateset->addUniform(new osg::Uniform("normalMap", 0));

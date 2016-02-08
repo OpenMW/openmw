@@ -926,7 +926,7 @@ namespace MWGui
         if (!mLocalMapRender)
             return;
 
-        MWWorld::Ptr player = MWMechanics::getPlayer();
+        MWWorld::ConstPtr player = MWMechanics::getPlayer();
 
         osg::Vec3f playerPosition = player.getRefData().getPosition().asVec3();
         osg::Quat playerOrientation (-player.getRefData().getPosition().rot[2], osg::Vec3(0,0,1));
@@ -938,10 +938,9 @@ namespace MWGui
 
         if (!player.getCell()->isExterior())
         {
-            mMap->setActiveCell(x, y, true);
-            mHud->setActiveCell(x, y, true);
+            setActiveMap(x, y, true);
         }
-        // else: need to know the current grid center, call setActiveCell from MWWorld::Scene
+        // else: need to know the current grid center, call setActiveMap from changeCell
 
         mMap->setPlayerDir(playerdirection.x(), playerdirection.y());
         mMap->setPlayerPos(x, y, u, v);
@@ -1007,8 +1006,10 @@ namespace MWGui
         mDebugWindow->onFrame(frameDuration);
     }
 
-    void WindowManager::changeCell(MWWorld::CellStore* cell)
+    void WindowManager::changeCell(const MWWorld::CellStore* cell)
     {
+        mMap->requestMapRender(cell);
+
         std::string name = MWBase::Environment::get().getWorld()->getCellName (cell);
 
         mMap->setCellName( name );
@@ -1020,6 +1021,8 @@ namespace MWGui
                 mMap->addVisitedLocation (name, cell->getCell()->getGridX (), cell->getCell()->getGridY ());
 
             mMap->cellExplored (cell->getCell()->getGridX(), cell->getCell()->getGridY());
+
+            setActiveMap(cell->getCell()->getGridX(), cell->getCell()->getGridY(), false);
         }
         else
         {
@@ -1032,6 +1035,8 @@ namespace MWGui
             else
                 MWBase::Environment::get().getWorld()->getPlayer().setLastKnownExteriorPosition(worldPos);
             mMap->setGlobalMapPlayerPosition(worldPos.x(), worldPos.y());
+
+            setActiveMap(0, 0, true);
         }
     }
 
@@ -2076,11 +2081,6 @@ namespace MWGui
                 *(data++) = static_cast<unsigned char>(value*255);
             }
         tex->unlock();
-    }
-
-    void WindowManager::requestMap(std::set<MWWorld::CellStore*> cells)
-    {
-        mLocalMapRender->requestMap(cells);
     }
 
     void WindowManager::removeCell(MWWorld::CellStore *cell)

@@ -31,6 +31,8 @@ namespace CSMWorld
 
 namespace CSVRender
 {
+    class TagBase;
+
     class Cell
     {
             CSMWorld::Data& mData;
@@ -46,6 +48,10 @@ namespace CSVRender
             ///
             /// \return Was the object deleted?
             bool removeObject (const std::string& id);
+
+            // Remove object and return iterator to next object.
+            std::map<std::string, Object *>::iterator removeObject (
+                std::map<std::string, Object *>::iterator iter);
 
             /// Add objects from reference table that are within this cell.
             ///
@@ -93,12 +99,18 @@ namespace CSVRender
 
             void setSelection (int elementMask, Selection mode);
 
+            // Select everything that references the same ID as at least one of the elements
+            // already selected
+            void selectAllWithSameParentId (int elementMask);
+
             void setCellArrows (int mask);
 
             /// Returns 0, 0 in case of an unpaged cell.
             CSMWorld::CellCoordinates getCoordinates() const;
 
             bool isDeleted() const;
+
+            std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask) const;
     };
 }
 

@@ -25,9 +25,13 @@
 
 class QAbstractItemModel;
 
+namespace Fallback
+{
+    class Map;
+}
+
 namespace VFS
 {
-
     class Manager;
 }
 
@@ -66,6 +70,7 @@ namespace CSMDoc
             Saving mSavingOperation;
             OperationHolder mSaving;
             boost::filesystem::path mResDir;
+            const Fallback::Map* mFallbackMap;
             Blacklist mBlacklist;
             Runner mRunner;
             bool mDirty;
@@ -101,6 +106,7 @@ namespace CSMDoc
             Document (const VFS::Manager* vfs, const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
+                const Fallback::Map* fallback,
                 ToUTF8::FromType encoding, const CSMWorld::ResourcesManager& resourcesManager,
                 const std::vector<std::string>& blacklistedScripts);
 

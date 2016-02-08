@@ -309,8 +309,15 @@ namespace SceneUtil
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
             const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix);
 
-            // we do the intersections in view space
-            osg::BoundingSphere nodeBound = node->getBound();
+            // get the node bounds in view space
+            // NB do not node->getBound() * modelView, that would apply the node's transformation twice
+            osg::BoundingSphere nodeBound;
+            osg::Group* group = node->asGroup();
+            if (group)
+            {
+                for (unsigned int i=0; i<group->getNumChildren(); ++i)
+                    nodeBound.expandBy(group->getChild(i)->getBound());
+            }
             osg::Matrixf mat = *cv->getModelViewMatrix();
             transformBoundingSphere(mat, nodeBound);
 
@@ -369,30 +376,6 @@ namespace SceneUtil
         }
         else
             traverse(node, nv);
-    }
-
-    void configureLight(osg::Light *light, float radius, bool isExterior, bool outQuadInLin, bool useQuadratic,
-                        float quadraticValue, float quadraticRadiusMult, bool useLinear, float linearRadiusMult, float linearValue)
-    {
-        bool quadratic = useQuadratic && (!outQuadInLin || isExterior);
-
-        float quadraticAttenuation = 0;
-        float linearAttenuation = 0;
-        if (quadratic)
-        {
-            float r = radius * quadraticRadiusMult;
-            quadraticAttenuation = quadraticValue / std::pow(r, 2);
-        }
-        if (useLinear)
-        {
-            float r = radius * linearRadiusMult;
-            linearAttenuation = linearValue / r;
-        }
-
-        light->setLinearAttenuation(linearAttenuation);
-        light->setQuadraticAttenuation(quadraticAttenuation);
-        light->setConstantAttenuation(0.f);
-
     }
 
 }

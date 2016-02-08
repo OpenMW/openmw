@@ -11,7 +11,7 @@
 #include "../../model/world/refcollection.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 
-#include "elements.hpp"
+#include "mask.hpp"
 #include "terrainstorage.hpp"
 
 bool CSVRender::Cell::removeObject (const std::string& id)
@@ -22,9 +22,16 @@ bool CSVRender::Cell::removeObject (const std::string& id)
     if (iter==mObjects.end())
         return false;
 
-    delete iter->second;
-    mObjects.erase (iter);
+    removeObject (iter);
     return true;
+}
+
+std::map<std::string, CSVRender::Object *>::iterator CSVRender::Cell::removeObject (
+    std::map<std::string, Object *>::iterator iter)
+{
+    delete iter->second;
+    mObjects.erase (iter++);
+    return iter;
 }
 
 bool CSVRender::Cell::addObjects (int start, int end)
@@ -80,7 +87,7 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
 
             if (esmLand.getLandData (ESM::Land::DATA_VHGT))
             {
-                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Element_Terrain<<1));
+                mTerrain.reset(new Terrain::TerrainGrid(mCellNode, data.getResourceSystem().get(), NULL, new TerrainStorage(mData), Mask_Terrain));
                 mTerrain->loadCell(esmLand.mX,
                                    esmLand.mY);
             }
@@ -161,8 +168,8 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
     // perform update and remove where needed
     bool modified = false;
 
-    for (std::map<std::string, Object *>::iterator iter (mObjects.begin());
-        iter!=mObjects.end(); ++iter)
+    std::map<std::string, Object *>::iterator iter = mObjects.begin();
+    while (iter!=mObjects.end())
     {
         if (iter->second->referenceDataChanged (topLeft, bottomRight))
             modified = true;
@@ -171,23 +178,30 @@ bool CSVRender::Cell::referenceDataChanged (const QModelIndex& topLeft,
 
         if (iter2!=ids.end())
         {
-            if (iter2->second)
-            {
-                removeObject (iter->first);
-                modified = true;
-            }
-
+            bool deleted = iter2->second;
             ids.erase (iter2);
+
+            if (deleted)
+            {
+                iter = removeObject (iter);
+                modified = true;
+                continue;
+            }
         }
+
+        ++iter;
     }
 
     // add new objects
     for (std::map<std::string, bool>::iterator iter (ids.begin()); iter!=ids.end(); ++iter)
     {
-        mObjects.insert (std::make_pair (
-            iter->first, new Object (mData, mCellNode, iter->first, false)));
+        if (!iter->second)
+        {
+            mObjects.insert (std::make_pair (
+                iter->first, new Object (mData, mCellNode, iter->first, false)));
 
-        modified = true;
+            modified = true;
+        }
     }
 
     return modified;
@@ -230,7 +244,7 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
-    if (elementMask & Element_Reference)
+    if (elementMask & Mask_Reference)
     {
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
@@ -245,6 +259,28 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
             }
 
             iter->second->setSelected (selected);
+        }
+    }
+}
+
+void CSVRender::Cell::selectAllWithSameParentId (int elementMask)
+{
+    std::set<std::string> ids;
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (iter->second->getSelected())
+            ids.insert (iter->second->getReferenceableId());
+    }
+
+    for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+        iter!=mObjects.end(); ++iter)
+    {
+        if (!iter->second->getSelected() &&
+            ids.find (iter->second->getReferenceableId())!=ids.end())
+        {
+            iter->second->setSelected (true);
         }
     }
 }
@@ -275,4 +311,17 @@ CSMWorld::CellCoordinates CSVRender::Cell::getCoordinates() const
 bool CSVRender::Cell::isDeleted() const
 {
     return mDeleted;
+}
+
+std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (unsigned int elementMask) const
+{
+    std::vector<osg::ref_ptr<TagBase> > result;
+
+    if (elementMask & Mask_Reference)
+        for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
+            iter!=mObjects.end(); ++iter)
+            if (iter->second->getSelected())
+                result.push_back (iter->second->getTag());
+
+    return result;
 }

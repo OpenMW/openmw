@@ -11,7 +11,6 @@
 #include "../../model/world/universalid.hpp"
 #include "dragrecordtable.hpp"
 
-class QUndoStack;
 class QAction;
 
 namespace CSMDoc
@@ -21,7 +20,6 @@ namespace CSMDoc
 
 namespace CSMWorld
 {
-    class Data;
     class IdTableProxyModel;
     class IdTableBase;
     class CommandDispatcher;

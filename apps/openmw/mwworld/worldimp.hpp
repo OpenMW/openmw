@@ -5,20 +5,19 @@
 
 #include <osg/ref_ptr>
 
+#include <components/settings/settings.hpp>
+#include <components/fallback/fallback.hpp>
+
+#include "../mwbase/world.hpp"
+
 #include "ptr.hpp"
 #include "scene.hpp"
 #include "esmstore.hpp"
 #include "cells.hpp"
 #include "localscripts.hpp"
 #include "timestamp.hpp"
-#include "fallback.hpp"
 #include "globals.hpp"
-
-#include "../mwbase/world.hpp"
-
 #include "contentloader.hpp"
-
-#include <components/settings/settings.hpp>
 
 namespace osg
 {
@@ -71,7 +70,7 @@ namespace MWWorld
     {
             Resource::ResourceSystem* mResourceSystem;
 
-            MWWorld::Fallback mFallback;
+            Fallback::Map mFallback;
             MWRender::RenderingManager* mRendering;
 
             MWWorld::WeatherManager* mWeatherManager;
@@ -210,7 +209,7 @@ namespace MWWorld
 
             virtual void adjustSky();
 
-            virtual const Fallback *getFallback() const;
+            virtual const Fallback::Map *getFallback() const;
 
             virtual Player& getPlayer();
             virtual MWWorld::Ptr getPlayerPtr();
@@ -228,7 +227,7 @@ namespace MWWorld
 
             virtual bool isCellQuasiExterior() const;
 
-            virtual osg::Vec2f getNorthVector (CellStore* cell);
+            virtual osg::Vec2f getNorthVector (const CellStore* cell);
             ///< get north vector for given interior cell
 
             virtual void getDoorMarkers (MWWorld::CellStore* cell, std::vector<DoorMarker>& out);
@@ -593,7 +592,7 @@ namespace MWWorld
             // Are we in an exterior or pseudo-exterior cell and it's night?
             virtual bool isDark() const;
 
-            virtual bool findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result);
+            virtual bool findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result);
 
             /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
             /// @note id must be lower case

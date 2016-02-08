@@ -16,7 +16,7 @@ namespace CSMTools
     {
             Q_OBJECT
 
-            std::vector<CSMDoc::Messages::Message> mRows;
+            std::vector<CSMDoc::Message> mRows;
 
             // Fixed columns
             enum Columns

@@ -97,7 +97,7 @@ namespace MWMechanics
         return rateEffects(potion->mEffects, actor, MWWorld::Ptr());
     }
 
-    float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& target, int type,
+    float rateWeapon (const MWWorld::Ptr &item, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, int type,
                       float arrowRating, float boltRating)
     {
         if (item.getTypeName() != typeid(ESM::Weapon).name())
@@ -153,7 +153,7 @@ namespace MWMechanics
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes
                     && (item.getCellRef().getEnchantmentCharge() == -1
                         || item.getCellRef().getEnchantmentCharge() >= enchantment->mData.mCost))
-                rating += rateEffects(enchantment->mEffects, actor, target);
+                rating += rateEffects(enchantment->mEffects, actor, enemy);
         }
 
         int skill = item.getClass().getEquipmentSkill(item);
@@ -163,11 +163,12 @@ namespace MWMechanics
         return rating;
     }
 
-    float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& target)
+    float rateSpell(const ESM::Spell *spell, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
     {
         const CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (MWMechanics::getSpellSuccessChance(spell, actor) == 0)
+        float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
+        if (successChance == 0.f)
             return 0.f;
 
         if (spell->mData.mType != ESM::Spell::ST_Spell)
@@ -189,13 +190,13 @@ namespace MWMechanics
         int types = getRangeTypes(spell->mEffects);
         if ((types & Self) && stats.getActiveSpells().isSpellActive(spell->mId))
             return 0.f;
-        if ( ((types & Touch) || (types & Target)) && target.getClass().getCreatureStats(target).getActiveSpells().isSpellActive(spell->mId))
+        if ( ((types & Touch) || (types & Target)) && enemy.getClass().getCreatureStats(enemy).getActiveSpells().isSpellActive(spell->mId))
             return 0.f;
 
-        return rateEffects(spell->mEffects, actor, target);
+        return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
     }
 
-    float rateMagicItem(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor, const MWWorld::Ptr& target)
+    float rateMagicItem(const MWWorld::Ptr &ptr, const MWWorld::Ptr &actor, const MWWorld::Ptr& enemy)
     {
         if (ptr.getClass().getEnchantment(ptr).empty())
             return 0.f;
@@ -204,7 +205,7 @@ namespace MWMechanics
 
         if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
-            return rateEffects(enchantment->mEffects, actor, target);
+            return rateEffects(enchantment->mEffects, actor, enemy);
         }
         else
         {
@@ -213,9 +214,9 @@ namespace MWMechanics
         }
     }
 
-    float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
+    float rateEffect(const ESM::ENAMstruct &effect, const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
-        // NOTE: target may be empty
+        // NOTE: enemy may be empty
 
         float rating = 1;
         switch (effect.mEffectID)
@@ -253,8 +254,36 @@ namespace MWMechanics
         case ESM::MagicEffect::CureCommonDisease:
         case ESM::MagicEffect::CureBlightDisease:
         case ESM::MagicEffect::CureCorprusDisease:
+        case ESM::MagicEffect::ResistBlightDisease:
+        case ESM::MagicEffect::ResistCommonDisease:
+        case ESM::MagicEffect::ResistCorprusDisease:
         case ESM::MagicEffect::Invisibility:
+        case ESM::MagicEffect::Chameleon:
             return 0.f;
+
+        case ESM::MagicEffect::RestoreAttribute:
+            return 0.f; // TODO: implement based on attribute damage
+        case ESM::MagicEffect::RestoreSkill:
+            return 0.f; // TODO: implement based on skill damage
+
+        case ESM::MagicEffect::ResistFire:
+        case ESM::MagicEffect::ResistFrost:
+        case ESM::MagicEffect::ResistMagicka:
+        case ESM::MagicEffect::ResistNormalWeapons:
+        case ESM::MagicEffect::ResistParalysis:
+        case ESM::MagicEffect::ResistPoison:
+        case ESM::MagicEffect::ResistShock:
+            return 0.f; // probably useless since we don't know in advance what the enemy will cast
+
+        // don't cast these for now as they would make the NPC cast the same effect over and over again, especially when they have potions
+        case ESM::MagicEffect::FortifyAttribute:
+        case ESM::MagicEffect::FortifyHealth:
+        case ESM::MagicEffect::FortifyMagicka:
+        case ESM::MagicEffect::FortifyFatigue:
+        case ESM::MagicEffect::FortifySkill:
+        case ESM::MagicEffect::FortifyMaximumMagicka:
+            return 0.f;
+
         case ESM::MagicEffect::Feather:
             if (actor.getClass().getEncumbrance(actor) - actor.getClass().getCapacity(actor) >= 0)
                 return 100.f;
@@ -317,7 +346,7 @@ namespace MWMechanics
 
         case ESM::MagicEffect::DamageAttribute:
         case ESM::MagicEffect::DrainAttribute:
-            if (!target.isEmpty() && target.getClass().getCreatureStats(target).getAttribute(effect.mAttribute).getModified() <= 0)
+            if (!enemy.isEmpty() && enemy.getClass().getCreatureStats(enemy).getAttribute(effect.mAttribute).getModified() <= 0)
                 return 0.f;
             {
                 if (effect.mAttribute >= 0 && effect.mAttribute < ESM::Attribute::Length)
@@ -339,9 +368,9 @@ namespace MWMechanics
 
         case ESM::MagicEffect::DamageSkill:
         case ESM::MagicEffect::DrainSkill:
-            if (target.isEmpty() || !target.getClass().isNpc())
+            if (enemy.isEmpty() || !enemy.getClass().isNpc())
                 return 0.f;
-            if (target.getClass().getNpcStats(target).getSkill(effect.mSkill).getModified() <= 0)
+            if (enemy.getClass().getNpcStats(enemy).getSkill(effect.mSkill).getModified() <= 0)
                 return 0.f;
             break;
 
@@ -349,9 +378,9 @@ namespace MWMechanics
             break;
         }
 
-        // TODO: for non-cumulative effects (e.g. paralyze), check if the target is already suffering from them
+        // TODO: for non-cumulative effects (e.g. paralyze), check if the enemy is already suffering from them
 
-        // TODO: could take into account target's resistance/weakness against the effect
+        // TODO: could take into account enemy's resistance/weakness against the effect
 
         const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
@@ -372,13 +401,13 @@ namespace MWMechanics
         return rating;
     }
 
-    float rateEffects(const ESM::EffectList &list, const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    float rateEffects(const ESM::EffectList &list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
     {
-        // NOTE: target may be empty
+        // NOTE: enemy may be empty
         float rating = 0.f;
         for (std::vector<ESM::ENAMstruct>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
         {
-            rating += rateEffect(*it, actor, target);
+            rating += rateEffect(*it, actor, enemy);
         }
         return rating;
     }
@@ -454,7 +483,7 @@ namespace MWMechanics
         // Already done in AiCombat itself
     }
 
-    boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &target)
+    boost::shared_ptr<Action> prepareNextAction(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
@@ -483,7 +512,7 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateMagicItem(*it, actor, target);
+                float rating = rateMagicItem(*it, actor, enemy);
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;
@@ -495,7 +524,7 @@ namespace MWMechanics
             MWWorld::Ptr bestArrow;
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateWeapon(*it, actor, target, ESM::Weapon::Arrow);
+                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Arrow);
                 if (rating > bestArrowRating)
                 {
                     bestArrowRating = rating;
@@ -507,7 +536,7 @@ namespace MWMechanics
             MWWorld::Ptr bestBolt;
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateWeapon(*it, actor, target, ESM::Weapon::Bolt);
+                float rating = rateWeapon(*it, actor, enemy, ESM::Weapon::Bolt);
                 if (rating > bestBoltRating)
                 {
                     bestBoltRating = rating;
@@ -522,7 +551,7 @@ namespace MWMechanics
                         == equipmentSlots.end())
                     continue;
 
-                float rating = rateWeapon(*it, actor, target, -1, bestArrowRating, bestBoltRating);
+                float rating = rateWeapon(*it, actor, enemy, -1, bestArrowRating, bestBoltRating);
                 if (rating > bestActionRating)
                 {
                     const ESM::Weapon* weapon = it->get<ESM::Weapon>()->mBase;
@@ -543,7 +572,7 @@ namespace MWMechanics
         {
             const ESM::Spell* spell = it->first;
 
-            float rating = rateSpell(spell, actor, target);
+            float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
                 bestActionRating = rating;

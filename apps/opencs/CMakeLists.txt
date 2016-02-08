@@ -26,7 +26,7 @@ opencs_units_noqt (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
     refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
-    idcompletionmanager metadata
+    idcompletionmanager metadata defaultgmsts
     )
 
 opencs_hdrs_noqt (model/world
@@ -42,7 +42,7 @@ opencs_units_noqt (model/tools
     mandatoryid skillcheck classcheck factioncheck racecheck soundcheck regioncheck
     birthsigncheck spellcheck referencecheck referenceablecheck scriptcheck bodypartcheck
     startscriptcheck search searchoperation searchstage pathgridcheck soundgencheck magiceffectcheck
-    mergestages
+    mergestages gmstcheck
     )
 
 opencs_hdrs_noqt (model/tools
@@ -85,7 +85,7 @@ opencs_units (view/widget
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
-    previewwidget editmode instancemode
+    previewwidget editmode instancemode instanceselectionmode
     )
 
 opencs_units_noqt (view/render
@@ -94,7 +94,7 @@ opencs_units_noqt (view/render
     )
 
 opencs_hdrs_noqt (view/render
-    elements
+    mask
     )
 
 
@@ -215,9 +215,6 @@ if (DESIRED_QT_VERSION MATCHES 4)
     endif()
 else()
     qt5_use_modules(openmw-cs Widgets Core Network OpenGL)
-    if (WIN32)
-        target_link_libraries(Qt5::WinMain)
-    endif()
 endif()
 
 if (WIN32)

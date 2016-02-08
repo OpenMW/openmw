@@ -1,0 +1,54 @@
+version: "{build}"
+
+branches:
+    only:
+        - master
+        - /openmw-.*$/
+        - appveyor
+
+platform:
+    - Win32
+#    - x64
+
+configuration: Debug
+
+matrix:
+    fast_finish: true
+
+# For the Qt, Boost, CMake, etc installs
+os: unstable
+
+# We want the git revision for versioning,
+# so shallow clones don't work.
+clone_depth: 1
+
+cache:
+    - C:\projects\openmw\deps\Bullet-2.83.5-win32.7z
+    - C:\projects\openmw\deps\Bullet-2.83.5-win64.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.2-win32.7z
+    - C:\projects\openmw\deps\MyGUI-3.2.2-win64.7z
+    - C:\projects\openmw\deps\OSG-3.3.8-win32.7z
+    - C:\projects\openmw\deps\OSG-3.3.8-win64.7z
+    - C:\projects\openmw\deps\ffmpeg32-2.5.2.7z
+    - C:\projects\openmw\deps\ffmpeg32-2.5.2-dev.7z
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2.7z
+    - C:\projects\openmw\deps\ffmpeg64-2.5.2-dev.7z
+
+clone_folder: C:\projects\openmw
+
+before_build:
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -u -p %PLATFORM%
+
+build_script:
+    - cmd: if %PLATFORM%==Win32 set build=Build_32
+    - cmd: if %PLATFORM%==x64 set build=Build_64
+    - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+test: off
+
+#notifications:
+#    - provider: Email
+#    to:
+#        -  
+#    on_build_failure: true
+#    on_build_status_changed: true

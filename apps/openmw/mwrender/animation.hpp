@@ -292,9 +292,10 @@ protected:
      */
     void setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature);
 
-    /* Adds the keyframe controllers in the specified model as a new animation source. Note that
-     * the filename portion of the provided model name will be prepended with 'x', and the .nif
-     * extension will be replaced with .kf. */
+    /** Adds the keyframe controllers in the specified model as a new animation source. Note that the .nif
+     * file extension will be replaced with .kf.
+     * @note Later added animation sources have the highest priority when it comes to finding a particular animation.
+    */
     void addAnimSource(const std::string &model);
 
     /** Adds an additional light to the given node using the specified ESM record. */

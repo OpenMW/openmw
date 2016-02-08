@@ -120,16 +120,20 @@ namespace MWMechanics
             MWWorld::TimeStamp mStartTime;
 
             // allowed pathgrid nodes based on mDistance from the spawn point
+            // in local coordinates of mCell
+            // FIXME: move to AiWanderStorage
             std::vector<ESM::Pathgrid::Point> mAllowedNodes;
 
             void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell);
 
+            // FIXME: move to AiWanderStorage
             ESM::Pathgrid::Point mCurrentNode;
             bool mTrimCurrentNode;
             void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
                                   const PathFinder& pathfinder);
 
 
+            // FIXME: move to AiWanderStorage
 //             ObstacleCheck mObstacleCheck;
             float mDoorCheckDuration;
             int mStuckCount;

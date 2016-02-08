@@ -447,5 +447,7 @@ op 0x20002fe: RemoveFromLevItem
 op 0x20002ff: SetFactionReaction
 op 0x2000300: EnableLevelupMenu
 op 0x2000301: ToggleScripts
+op 0x2000302: Fixme
+op 0x2000303: Fixme, explicit
 
-opcodes 0x2000302-0x3ffffff unused
+opcodes 0x2000304-0x3ffffff unused

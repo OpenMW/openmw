@@ -108,7 +108,11 @@ namespace MWWorld
         }
 
         private:
+#ifdef HAVE_UNORDERED_MAP
+          typedef std::unordered_map<std::string, ContentLoader*> LoadersContainer;
+#else
           typedef std::tr1::unordered_map<std::string, ContentLoader*> LoadersContainer;
+#endif
           LoadersContainer mLoaders;
     };
 
@@ -433,7 +437,7 @@ namespace MWWorld
         // Werewolf (BM)
         gmst["fWereWolfRunMult"] = ESM::Variant(1.f);
         gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(1.f);
-
+        gmst["iWerewolfFightMod"] = ESM::Variant(1);
 
         std::map<std::string, ESM::Variant> globals;
         // vanilla Morrowind does not define dayspassed.
@@ -511,7 +515,7 @@ namespace MWWorld
         return 0;
     }
 
-    const MWWorld::Fallback *World::getFallback() const
+    const Fallback::Map *World::getFallback() const
     {
         return &mFallback;
     }
@@ -1311,7 +1315,8 @@ namespace MWWorld
         actor.getRefData().setPosition(pos);
 
         osg::Vec3f traced = mPhysics->traceDown(actor, dist*1.1f);
-        moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
+        if (traced != pos.asVec3())
+            moveObject(actor, actor.getCell(), traced.x(), traced.y(), traced.z());
     }
 
     void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
@@ -1705,9 +1710,9 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    osg::Vec2f World::getNorthVector (CellStore* cell)
+    osg::Vec2f World::getNorthVector (const CellStore* cell)
     {
-        MWWorld::Ptr northmarker = cell->search("northmarker");
+        MWWorld::ConstPtr northmarker = cell->searchConst("northmarker");
 
         if (northmarker.isEmpty())
             return osg::Vec2f(0, 1);
@@ -1744,6 +1749,8 @@ namespace MWWorld
                 {
                     cellid.mWorldspace = ref.mRef.getDestCell();
                     cellid.mPaged = false;
+                    cellid.mIndex.mX = 0;
+                    cellid.mIndex.mY = 0;
                 }
                 else
                 {
@@ -2647,7 +2654,7 @@ namespace MWWorld
         }
     }
 
-    bool World::findInteriorPositionInWorldSpace(MWWorld::CellStore* cell, osg::Vec3f& result)
+    bool World::findInteriorPositionInWorldSpace(const MWWorld::CellStore* cell, osg::Vec3f& result)
     {
         if (cell->isExterior())
             return false;

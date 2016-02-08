@@ -26,6 +26,9 @@ namespace MWMechanics
 
             virtual unsigned int getPriority() const;
 
+            virtual bool canCancel() const { return false; }
+            virtual bool shouldCancelPreviousAi() const { return false; }
+
         private:
             float mDuration;
             MWWorld::ConstPtr mDoorPtr;

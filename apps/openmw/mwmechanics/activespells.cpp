@@ -274,9 +274,7 @@ namespace MWMechanics
             for (std::vector<ActiveEffect>::iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end();)
             {
-                const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectId);
-                if (effect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                        && it->second.mCasterActorId == casterActorId)
+                if (it->second.mCasterActorId == casterActorId)
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
                     ++effectIt;

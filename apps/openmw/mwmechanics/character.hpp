@@ -160,6 +160,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     CharacterState mDeathState;
     std::string mCurrentDeath;
+    bool mFloatToSurface;
 
     CharacterState mHitState;
     std::string mCurrentHit;

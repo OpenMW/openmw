@@ -13,6 +13,18 @@
 #include "movement.hpp"
 #include "creaturestats.hpp"
 
+namespace
+{
+
+bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
+{
+    // Maximum travel distance for vanilla compatibility.
+    // Was likely meant to prevent NPCs walking into non-loaded exterior cells, but for some reason is used in interior cells as well.
+    // We can make this configurable at some point, but the default *must* be the below value. Anything else will break shoddily-written content (*cough* MW *cough*) in bizarre ways.
+    return (pos1 - pos2).length2() <= 7168*7168;
+}
+
+}
 
 namespace MWMechanics
 {

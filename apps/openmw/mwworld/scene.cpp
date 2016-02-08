@@ -86,10 +86,13 @@ namespace
         MWPhysics::PhysicsSystem& mPhysics;
         MWRender::RenderingManager& mRendering;
 
+        std::vector<MWWorld::Ptr> mToInsert;
+
         InsertVisitor (MWWorld::CellStore& cell, bool rescale, Loading::Listener& loadingListener,
             MWPhysics::PhysicsSystem& physics, MWRender::RenderingManager& rendering);
 
         bool operator() (const MWWorld::Ptr& ptr);
+        void insert();
     };
 
     InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, bool rescale,
@@ -102,31 +105,41 @@ namespace
 
     bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
     {
-        if (mRescale)
-        {
-            if (ptr.getCellRef().getScale()<0.5)
-                ptr.getCellRef().setScale(0.5);
-            else if (ptr.getCellRef().getScale()>2)
-                ptr.getCellRef().setScale(2);
-        }
-
-        if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
-        {
-            try
-            {
-                addObject(ptr, mPhysics, mRendering);
-                updateObjectRotation(ptr, mPhysics, mRendering, false);
-            }
-            catch (const std::exception& e)
-            {
-                std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
-                std::cerr << error + e.what() << std::endl;
-            }
-        }
-
-        mLoadingListener.increaseProgress (1);
-
+        // do not insert directly as we can't modify the cell from within the visitation
+        // CreatureLevList::insertObjectRendering may spawn a new creature
+        mToInsert.push_back(ptr);
         return true;
+    }
+
+    void InsertVisitor::insert()
+    {
+        for (std::vector<MWWorld::Ptr>::iterator it = mToInsert.begin(); it != mToInsert.end(); ++it)
+        {
+            MWWorld::Ptr ptr = *it;
+            if (mRescale)
+            {
+                if (ptr.getCellRef().getScale()<0.5)
+                    ptr.getCellRef().setScale(0.5);
+                else if (ptr.getCellRef().getScale()>2)
+                    ptr.getCellRef().setScale(2);
+            }
+
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            {
+                try
+                {
+                    addObject(ptr, mPhysics, mRendering);
+                    updateObjectRotation(ptr, mPhysics, mRendering, false);
+                }
+                catch (const std::exception& e)
+                {
+                    std::string error ("error during rendering '" + ptr.getCellRef().getRefId() + "': ");
+                    std::cerr << error + e.what() << std::endl;
+                }
+            }
+
+            mLoadingListener.increaseProgress (1);
+        }
     }
 
     struct AdjustPositionVisitor
@@ -179,27 +192,6 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        if (mNeedMapUpdate)
-        {
-            // Note: exterior cell maps must be updated, even if they were visited before, because the set of surrounding cells might be different
-            // (and objects in a different cell can "bleed" into another cells map if they cross the border)
-            std::set<MWWorld::CellStore*> cellsToUpdate;
-            for (CellStoreCollection::iterator active = mActiveCells.begin(); active!=mActiveCells.end(); ++active)
-            {
-                cellsToUpdate.insert(*active);
-            }
-            MWBase::Environment::get().getWindowManager()->requestMap(cellsToUpdate);
-
-            mNeedMapUpdate = false;
-
-            if (mCurrentCell->isExterior())
-            {
-                int cellX, cellY;
-                getGridCenter(cellX, cellY);
-                MWBase::Environment::get().getWindowManager()->setActiveMap(cellX,cellY,false);
-            }
-        }
-
         mRendering.update (duration, paused);
     }
 
@@ -269,6 +261,10 @@ namespace MWWorld
 
             cell->respawn();
 
+            // register local scripts
+            // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
+            MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
+
             // ... then references. This is important for adjustPosition to work correctly.
             /// \todo rescale depending on the state of a new GMST
             insertCell (*cell, true, loadingListener);
@@ -288,10 +284,6 @@ namespace MWWorld
             if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 mRendering.configureAmbient(cell->getCell());
         }
-
-        // register local scripts
-        // ??? Should this go into the above if block ???
-        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
     }
 
     void Scene::changeToVoid()
@@ -410,10 +402,6 @@ namespace MWWorld
 
         mCellChanged = true;
 
-        // Delay the map update until scripts have been given a chance to run.
-        // If we don't do this, objects that should be disabled will still appear on the map.
-        mNeedMapUpdate = true;
-
         mRendering.getResourceSystem()->clearCache();
     }
 
@@ -449,7 +437,7 @@ namespace MWWorld
     }
 
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics)
-    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNeedMapUpdate(false)
+    : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering)
     {
     }
 
@@ -527,10 +515,6 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
-        // Delay the map update until scripts have been given a chance to run.
-        // If we don't do this, objects that should be disabled will still appear on the map.
-        mNeedMapUpdate = true;
-
         mRendering.getResourceSystem()->clearCache();
     }
 
@@ -563,6 +547,7 @@ namespace MWWorld
     {
         InsertVisitor insertVisitor (cell, rescale, *loadingListener, *mPhysics, mRendering);
         cell.forEach (insertVisitor);
+        insertVisitor.insert();
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
         AdjustPositionVisitor adjustPosVisitor;

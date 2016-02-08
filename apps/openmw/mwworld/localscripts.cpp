@@ -76,30 +76,18 @@ void MWWorld::LocalScripts::startIteration()
     mIter = mScripts.begin();
 }
 
-bool MWWorld::LocalScripts::isFinished() const
+bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
 {
-    if (mIter==mScripts.end())
-        return true;
-
-    if (!mIgnore.isEmpty() && mIter->second==mIgnore)
+    while (mIter!=mScripts.end())
     {
-        std::list<std::pair<std::string, Ptr> >::iterator iter = mIter;
-        return ++iter==mScripts.end();
+        std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
+        if (mIgnore.isEmpty() || iter->second!=mIgnore)
+        {
+            script = *iter;
+            return true;
+        }
     }
-
     return false;
-}
-
-std::pair<std::string, MWWorld::Ptr> MWWorld::LocalScripts::getNext()
-{
-    assert (!isFinished());
-
-    std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
-
-    if (mIgnore.isEmpty() || iter->second!=mIgnore)
-        return *iter;
-
-    return getNext();
 }
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
@@ -109,6 +97,14 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
         try
         {
             ptr.getRefData().setLocals (*script);
+
+            for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin(); iter!=mScripts.end(); ++iter)
+                if (iter->second==ptr)
+                {
+                    std::cout << "warning, tried to add local script twice for " << ptr.getCellRef().getRefId() << std::endl;
+                    remove(ptr);
+                    break;
+                }
 
             mScripts.push_back (std::make_pair (scriptName, ptr));
         }

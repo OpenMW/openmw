@@ -27,14 +27,15 @@
 #include "../widget/scenetoolrun.hpp"
 
 #include "object.hpp"
-#include "elements.hpp"
+#include "mask.hpp"
 #include "editmode.hpp"
 #include "instancemode.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
 : SceneWidget (document.getData().getResourceSystem(), parent), mSceneElements(0), mRun(0), mDocument(document),
-  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false),
-  mToolTipPos (-1, -1)
+  mInteractionMask (0), mEditMode (0), mLocked (false), mDragging (false), mDragX(0), mDragY(0), mDragFactor(0),
+  mDragWheelFactor(0), mDragShiftFactor(0),
+  mToolTipPos (-1, -1), mShowToolTips(false), mToolTipDelay(0)
 {
     setAcceptDrops(true);
 
@@ -124,16 +125,16 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "First Person"
         "<ul><li>Mouse-Look while holding the left button</li>"
         "<li>WASD movement keys</li>"
-        "<li>Mouse wheel moves the camera forawrd/backward</li>"
-        "<li>Stafing (also vertically) by holding the left mouse button and control</li>"
+        "<li>Mouse wheel moves the camera forward/backward</li>"
+        "<li>Strafing (also vertically) by holding the left mouse button and control</li>"
         "<li>Camera is held upright</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
     tool->addButton (":scenetoolbar/free-camera", "free",
         "Free Camera"
         "<ul><li>Mouse-Look while holding the left button</li>"
-        "<li>Stafing (also vertically) via WASD or by holding the left mouse button and control</li>"
-        "<li>Mouse wheel moves the camera forawrd/backward</li>"
+        "<li>Strafing (also vertically) via WASD or by holding the left mouse button and control</li>"
+        "<li>Mouse wheel moves the camera forward/backward</li>"
         "<li>Roll camera with Q and E keys</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
@@ -143,7 +144,7 @@ CSVWidget::SceneToolMode *CSVRender::WorldspaceWidget::makeNavigationSelector (
         "<li>Rotate around the centre point via WASD or by moving the mouse while holding the left button</li>"
         "<li>Mouse wheel moves camera away or towards centre point but can not pass through it</li>"
         "<li>Roll camera with Q and E keys</li>"
-        "<li>Stafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
+        "<li>Strafing (also vertically) by holding the left mouse button and control (includes relocation of the centre point)</li>"
         "<li>Hold shift to speed up movement</li>"
         "</ul>");
 
@@ -160,7 +161,7 @@ CSVWidget::SceneToolToggle2 *CSVRender::WorldspaceWidget::makeSceneVisibilitySel
 
     addVisibilitySelectorButtons (mSceneElements);
 
-    mSceneElements->setSelection (0xffffffff);
+    mSceneElements->setSelectionMask (0xffffffff);
 
     connect (mSceneElements, SIGNAL (selectionChanged()),
         this, SLOT (elementSelectionChanged()));
@@ -275,12 +276,12 @@ bool CSVRender::WorldspaceWidget::handleDrop (const std::vector<CSMWorld::Univer
 
 unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 {
-    return mSceneElements->getSelection();
+    return mSceneElements->getSelectionMask();
 }
 
 void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    mInteractionMask = mask | Element_CellMarker | Element_CellArrow;
+    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow;
 }
 
 unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
@@ -296,9 +297,9 @@ void CSVRender::WorldspaceWidget::setEditLock (bool locked)
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (Element_Reference, "Instances");
-    tool->addButton (Element_Water, "Water");
-    tool->addButton (Element_Pathgrid, "Pathgrid");
+    tool->addButton (Button_Reference, Mask_Reference, "Instances");
+    tool->addButton (Button_Water, Mask_Water, "Water");
+    tool->addButton (Button_Pathgrid, Mask_Pathgrid, "Pathgrid");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
@@ -306,13 +307,61 @@ void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneTo
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (new InstanceMode (this, tool), "object");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Element_Pathgrid, "Pathgrid editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Pathgrid, "Pathgrid editing"),
         "pathgrid");
 }
 
 CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
 {
     return mDocument;
+}
+
+osg::Vec3f CSVRender::WorldspaceWidget::getIntersectionPoint (const QPoint& localPos,
+    unsigned int interactionMask, bool ignoreHidden) const
+{
+    // (0,0) is considered the lower left corner of an OpenGL window
+    int x = localPos.x();
+    int y = height() - localPos.y();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (
+        new osgUtil::LineSegmentIntersector (osgUtil::Intersector::WINDOW, x, y));
+
+    intersector->setIntersectionLimit (osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor (intersector);
+
+    unsigned int mask = interactionMask;
+
+    if (ignoreHidden)
+        mask &= getVisibilityMask();
+
+    visitor.setTraversalMask (mask);
+
+    mView->getCamera()->accept (visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator iter = intersector->getIntersections().begin();
+         iter!=intersector->getIntersections().end(); ++iter)
+    {
+        // reject back-facing polygons
+        osg::Vec3f normal = osg::Matrix::transform3x3 (
+            iter->getWorldIntersectNormal(), mView->getCamera()->getViewMatrix());
+
+        if (normal.z()>=0)
+            return iter->getWorldIntersectPoint();
+    }
+
+    osg::Matrixd matrix;
+    matrix.preMult (mView->getCamera()->getViewport()->computeWindowMatrix());
+    matrix.preMult (mView->getCamera()->getProjectionMatrix());
+    matrix.preMult (mView->getCamera()->getViewMatrix());
+    matrix = osg::Matrixd::inverse (matrix);
+
+    osg::Vec3d start = matrix.preMult (intersector->getStart());
+    osg::Vec3d end = matrix.preMult (intersector->getEnd());
+
+    osg::Vec3d direction = end-start;
+    direction.normalize();
+
+    return start + direction * CSMPrefs::get()["Scene Drops"]["distance"].toInt();
 }
 
 void CSVRender::WorldspaceWidget::dragEnterEvent (QDragEnterEvent* event)
@@ -404,7 +453,7 @@ osg::ref_ptr<CSVRender::TagBase> CSVRender::WorldspaceWidget::mousePick (const Q
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    visitor.setTraversalMask(getInteractionMask() << 1);
+    visitor.setTraversalMask(getInteractionMask());
 
     mView->getCamera()->accept(visitor);
 

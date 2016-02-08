@@ -5,6 +5,7 @@
 
 #include <osg/Group>
 #include <osg/NodeVisitor>
+#include <osg/observer_ptr>
 
 namespace SceneUtil
 {
@@ -167,10 +168,6 @@ namespace SceneUtil
         unsigned int mLastFrameNumber;
         LightManager::LightList mLightList;
     };
-
-    /// @brief Configures a light's attenuation according to vanilla Morrowind attenuation settings.
-    void configureLight(osg::Light* light, float radius, bool isExterior, bool outQuadInLin, bool useQuadratic, float quadraticValue,
-                         float quadraticRadiusMult, bool useLinear, float linearRadiusMult, float linearValue);
 
 }
 

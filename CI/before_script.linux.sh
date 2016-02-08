@@ -1,5 +1,6 @@
 #!/bin/sh
 
+free -m
 mkdir build
 cd build
 export CODE_COVERAGE=1
