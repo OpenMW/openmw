@@ -530,6 +530,7 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
         case 35: // PC Merchantile
         case 36: // PC Speechcraft
         case 37: // PC Hand To Hand
+        case 42: // PC Clothing Modifier
         case 43: // PC Crime Level
         case 50: // Choice
         case 51: // PC Intelligence
@@ -540,7 +541,6 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
         case 56: // PC Personality
         case 57: // PC Luck
         case 58: // PC Corpus
-        case 59: // Weather
         case 61: // Level
         case 64: // PC Health
         case 66: // Friend Hit
@@ -576,8 +576,15 @@ void CSMTools::TopicInfoCheckStage::checkFunctionRange(const std::string& functi
             testIntRange(std::pair<int,int>(-9, 9), op, variant, getFunctionName(functionCode), id, messages);
             break;
             
-        case 42: // PC Clothing Modifier
+        case 59: // Weather
+        
+            testIntRange(std::pair<int,int>(0, 9), op, variant, getFunctionName(functionCode), id, messages);
+            break;
+            
+            
         case 65: // Creature Target
+            
+            testIntRange(std::pair<int,int>(0, 2), op, variant, getFunctionName(functionCode), id, messages);
             break;
             
         default:
