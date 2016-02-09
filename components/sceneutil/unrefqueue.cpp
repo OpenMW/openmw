@@ -1,5 +1,7 @@
 #include "unrefqueue.hpp"
 
+#include <deque>
+
 #include <osg/Object>
 //#include <osg/Timer>
 //#include <iostream>
@@ -12,7 +14,7 @@ namespace SceneUtil
     class UnrefWorkItem : public SceneUtil::WorkItem
     {
     public:
-        std::vector<osg::ref_ptr<osg::Object> > mObjects;
+        std::deque<osg::ref_ptr<osg::Object> > mObjects;
 
         virtual void doWork()
         {
