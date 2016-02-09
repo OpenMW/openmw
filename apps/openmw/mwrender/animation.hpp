@@ -55,6 +55,9 @@ public:
 
     ~PartHolder();
 
+    /// Unreferences mNode *without* detaching it from the graph. Only use if you know what you are doing.
+    void unlink();
+
     osg::ref_ptr<osg::Node> getNode()
     {
         return mNode;

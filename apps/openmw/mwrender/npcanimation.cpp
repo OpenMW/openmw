@@ -273,6 +273,13 @@ NpcAnimation::~NpcAnimation()
             // all from within this destructor. ouch!
            && mPtr.getRefData().getCustomData() && mPtr.getClass().getInventoryStore(mPtr).getListener() == this)
         mPtr.getClass().getInventoryStore(mPtr).setListener(NULL, mPtr);
+
+    // do not detach (delete) parts yet, this is done so the background thread can handle the deletion
+    for(size_t i = 0;i < ESM::PRT_Count;i++)
+    {
+        if (mObjectParts[i].get())
+            mObjectParts[i]->unlink();
+    }
 }
 
 NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem,

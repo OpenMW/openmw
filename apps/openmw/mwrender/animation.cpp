@@ -1409,8 +1409,13 @@ namespace MWRender
 
     PartHolder::~PartHolder()
     {
-        if (mNode->getNumParents())
+        if (mNode.get() && mNode->getNumParents())
             mNode->getParent(0)->removeChild(mNode);
+    }
+
+    void PartHolder::unlink()
+    {
+        mNode = NULL;
     }
 
 }
