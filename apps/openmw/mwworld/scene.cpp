@@ -197,7 +197,7 @@ namespace MWWorld
         if (mPreloadEnabled)
         {
             mPreloadTimer += duration;
-            if (mPreloadTimer > 0.5f)
+            if (mPreloadTimer > 0.25f)
             {
                 preloadCells();
                 mPreloadTimer = 0.f;

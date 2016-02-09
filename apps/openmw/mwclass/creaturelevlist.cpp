@@ -6,6 +6,7 @@
 #include "../mwmechanics/levelledlist.hpp"
 
 #include "../mwworld/customdata.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace MWClass
 {
@@ -51,6 +52,22 @@ namespace MWClass
         boost::shared_ptr<Class> instance (new CreatureLevList);
 
         registerClass (typeid (ESM::CreatureLevList).name(), instance);
+    }
+
+    void CreatureLevList::getModelsToPreload(const MWWorld::Ptr &ptr, std::vector<std::string> &models) const
+    {
+        const MWWorld::LiveCellRef<ESM::CreatureLevList> *ref = ptr.get<ESM::CreatureLevList>();
+
+        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = ref->mBase->mList.begin(); it != ref->mBase->mList.end(); ++it)
+        {
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (it->mLevel > player.getClass().getCreatureStats(player).getLevel())
+                continue;
+
+            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            MWWorld::ManualRef ref(store, it->mId);
+            ref.getPtr().getClass().getModelsToPreload(ref.getPtr(), models);
+        }
     }
 
     void CreatureLevList::insertObjectRendering(const MWWorld::Ptr &ptr, const std::string& model, MWRender::RenderingInterface &renderingInterface) const
