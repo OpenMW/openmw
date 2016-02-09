@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
+#include <OpenThreads/Mutex>
+
 #include <components/terrain/storage.hpp>
 
 #include <components/esm/loadland.hpp>
@@ -105,6 +107,7 @@ namespace ESMTerrain
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
+        OpenThreads::Mutex mLayerInfoMutex;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
     };
