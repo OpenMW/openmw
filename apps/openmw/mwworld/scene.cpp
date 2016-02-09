@@ -633,6 +633,7 @@ namespace MWWorld
     {
         preloadTeleportDoorDestinations();
         preloadExteriorGrid();
+        preloadFastTravelDestinations();
     }
 
     void Scene::preloadTeleportDoorDestinations()
@@ -664,19 +665,12 @@ namespace MWWorld
                 try
                 {
                     if (!door.getCellRef().getDestCell().empty())
-                        mPreloader->preload(MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell()), mRendering.getReferenceTime());
+                        preloadCell(MWBase::Environment::get().getWorld()->getInterior(door.getCellRef().getDestCell()));
                     else
                     {
                         int x,y;
                         MWBase::Environment::get().getWorld()->positionToIndex (door.getCellRef().getDoorDest().pos[0], door.getCellRef().getDoorDest().pos[1], x, y);
-
-                        for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
-                        {
-                            for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
-                            {
-                                mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(x+dx, y+dy), mRendering.getReferenceTime());
-                            }
-                        }
+                        preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
                     }
                 }
                 catch (std::exception& e)
@@ -717,7 +711,80 @@ namespace MWWorld
                 float loadDist = 8192/2 + 8192 - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
-                    mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy), mRendering.getReferenceTime());
+                    preloadCell(MWBase::Environment::get().getWorld()->getExterior(cellX+dx, cellY+dy));
+            }
+        }
+    }
+
+    void Scene::preloadCell(CellStore *cell, bool preloadSurrounding)
+    {
+        if (preloadSurrounding && cell->isExterior())
+        {
+            int x = cell->getCell()->getGridX();
+            int y = cell->getCell()->getGridY();
+            for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
+            {
+                for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
+                {
+                    mPreloader->preload(MWBase::Environment::get().getWorld()->getExterior(x+dx, y+dy), mRendering.getReferenceTime());
+                }
+            }
+        }
+        else
+            mPreloader->preload(cell, mRendering.getReferenceTime());
+    }
+
+    struct ListFastTravelDestinationsVisitor
+    {
+        ListFastTravelDestinationsVisitor(float preloadDist, const osg::Vec3f& playerPos)
+            : mPreloadDist(preloadDist)
+            , mPlayerPos(playerPos)
+        {
+        }
+
+        bool operator()(const MWWorld::Ptr& ptr)
+        {
+            if ((ptr.getRefData().getPosition().asVec3() - mPlayerPos).length2() > mPreloadDist * mPreloadDist)
+                return true;
+
+            if (ptr.getClass().isNpc())
+            {
+                const std::vector<ESM::Transport::Dest>& transport = ptr.get<ESM::NPC>()->mBase->mTransport.mList;
+                mList.insert(mList.begin(), transport.begin(), transport.end());
+            }
+            else
+            {
+                const std::vector<ESM::Transport::Dest>& transport = ptr.get<ESM::Creature>()->mBase->mTransport.mList;
+                mList.insert(mList.begin(), transport.begin(), transport.end());
+            }
+            return true;
+        }
+        float mPreloadDist;
+        osg::Vec3f mPlayerPos;
+        std::vector<ESM::Transport::Dest> mList;
+    };
+
+    void Scene::preloadFastTravelDestinations()
+    {
+        const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
+
+        for (CellStoreCollection::const_iterator iter (mActiveCells.begin()); iter!=mActiveCells.end(); ++iter)
+        {
+            MWWorld::CellStore* cellStore = *iter;
+            cellStore->forEachType<ESM::NPC>(listVisitor);
+            cellStore->forEachType<ESM::Creature>(listVisitor);
+        }
+
+        for (std::vector<ESM::Transport::Dest>::const_iterator it = listVisitor.mList.begin(); it != listVisitor.mList.end(); ++it)
+        {
+            if (!it->mCellName.empty())
+                preloadCell(MWBase::Environment::get().getWorld()->getInterior(it->mCellName));
+            else
+            {
+                int x,y;
+                MWBase::Environment::get().getWorld()->positionToIndex( it->mPos.pos[0], it->mPos.pos[1], x, y);
+                preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);
             }
         }
     }

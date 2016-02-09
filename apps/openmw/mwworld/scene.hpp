@@ -74,6 +74,9 @@ namespace MWWorld
             void preloadCells();
             void preloadTeleportDoorDestinations();
             void preloadExteriorGrid();
+            void preloadFastTravelDestinations();
+
+            void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
 
         public:
 
