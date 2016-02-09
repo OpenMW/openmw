@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <OpenThreads/Mutex>
+
 #include "esmcommon.hpp"
 
 namespace ESM
@@ -31,7 +33,6 @@ struct Land
 
     // File context. This allows the ESM reader to be 'reset' to this
     // location later when we are ready to load the full data set.
-    ESMReader* mEsm;
     ESM_Context mContext;
 
     int mDataTypes;
@@ -155,7 +156,9 @@ struct Land
         /// Loads data and marks it as loaded
         /// \return true if data is actually loaded from file, false otherwise
         /// including the case when data is already loaded
-        bool condLoad(int flags, int dataFlag, void *ptr, unsigned int size) const;
+        bool condLoad(ESM::ESMReader& reader, int flags, int dataFlag, void *ptr, unsigned int size) const;
+
+        mutable OpenThreads::Mutex mMutex;
 
         mutable int mDataLoaded;
 
