@@ -1234,11 +1234,11 @@ namespace MWPhysics
     }
 
     void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
-        if (!shapeInstance)
+        osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
+        if (!shape)
             return;
 
-        Actor* actor = new Actor(ptr, shapeInstance, mCollisionWorld);
+        Actor* actor = new Actor(ptr, shape, mCollisionWorld);
         mActors.insert(std::make_pair(ptr, actor));
     }
 
