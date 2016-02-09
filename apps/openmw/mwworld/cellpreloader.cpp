@@ -156,7 +156,6 @@ namespace MWWorld
         , mBulletShapeManager(bulletShapeManager)
         , mExpiryDelay(0.0)
     {
-        mWorkQueue = new SceneUtil::WorkQueue;
     }
 
     void CellPreloader::preload(CellStore *cell, double timestamp)

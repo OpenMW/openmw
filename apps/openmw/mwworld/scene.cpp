@@ -459,6 +459,7 @@ namespace MWWorld
     , mPreloadEnabled(Settings::Manager::getBool("preload enabled", "Cells"))
     {
         mPreloader.reset(new CellPreloader(rendering.getResourceSystem(), physics->getShapeManager()));
+        mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
         float cacheExpiryDelay = Settings::Manager::getFloat("cache expiry delay", "Cells");
         rendering.getResourceSystem()->setExpiryDelay(cacheExpiryDelay);

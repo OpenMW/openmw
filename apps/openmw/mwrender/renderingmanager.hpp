@@ -42,6 +42,11 @@ namespace Fallback
     class Map;
 }
 
+namespace SceneUtil
+{
+    class WorkQueue;
+}
+
 namespace MWRender
 {
 
@@ -64,6 +69,8 @@ namespace MWRender
         MWRender::Objects& getObjects();
 
         Resource::ResourceSystem* getResourceSystem();
+
+        SceneUtil::WorkQueue* getWorkQueue();
 
         void clearCache();
 
@@ -189,6 +196,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mLightRoot;
         Resource::ResourceSystem* mResourceSystem;
+
+        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
 
         osg::ref_ptr<osg::Light> mSunLight;
 

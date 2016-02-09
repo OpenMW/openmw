@@ -26,6 +26,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/workqueue.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 
@@ -131,6 +132,7 @@ namespace MWRender
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
+        , mWorkQueue(new SceneUtil::WorkQueue)
         , mFogDepth(0.f)
         , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
@@ -229,6 +231,11 @@ namespace MWRender
     Resource::ResourceSystem* RenderingManager::getResourceSystem()
     {
         return mResourceSystem;
+    }
+
+    SceneUtil::WorkQueue *RenderingManager::getWorkQueue()
+    {
+        return mWorkQueue.get();
     }
 
     void RenderingManager::clearCache()
