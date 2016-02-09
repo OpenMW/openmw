@@ -14,7 +14,7 @@ namespace SceneUtil
     class UnrefWorkItem : public SceneUtil::WorkItem
     {
     public:
-        std::deque<osg::ref_ptr<osg::Object> > mObjects;
+        std::deque<osg::ref_ptr<const osg::Object> > mObjects;
 
         virtual void doWork()
         {
@@ -30,7 +30,7 @@ namespace SceneUtil
         mWorkItem = new UnrefWorkItem;
     }
 
-    void UnrefQueue::push(osg::Object *obj)
+    void UnrefQueue::push(const osg::Object *obj)
     {
         mWorkItem->mObjects.push_back(obj);
     }
