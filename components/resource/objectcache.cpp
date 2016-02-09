@@ -13,6 +13,8 @@
 
 #include "objectcache.hpp"
 
+#include <osg/Object>
+
 namespace Resource
 {
 

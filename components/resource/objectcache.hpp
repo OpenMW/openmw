@@ -17,12 +17,17 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 #define OPENMW_COMPONENTS_RESOURCE_OBJECTCACHE
 
-#include <osg/Node>
+#include <osg/Referenced>
+#include <osg/ref_ptr>
 
-#include <osgDB/ReaderWriter>
-#include <osgDB/DatabaseRevisions>
-
+#include <string>
 #include <map>
+
+namespace osg
+{
+    class Object;
+    class State;
+}
 
 namespace Resource {
 
