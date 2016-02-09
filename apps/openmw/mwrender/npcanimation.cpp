@@ -847,9 +847,9 @@ void NpcAnimation::addControllers()
     if (mViewMode == VM_FirstPerson)
     {
         NodeMap::iterator found = mNodeMap.find("bip01 neck");
-        if (found != mNodeMap.end() && dynamic_cast<osg::MatrixTransform*>(found->second.get()))
+        if (found != mNodeMap.end())
         {
-            osg::Node* node = found->second;
+            osg::MatrixTransform* node = found->second.get();
             mFirstPersonNeckController = new NeckController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
             mActiveControllers.insert(std::make_pair(node, mFirstPersonNeckController));
